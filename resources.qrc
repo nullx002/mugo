@@ -11,7 +11,6 @@
         <file>res/white_64.png</file>
         <file>res/bg.png</file>
         <file>res/remove.png</file>
-        <file>res/bg2.png</file>
         <file>res/mgo.png</file>
     </qresource>
 </RCC>
