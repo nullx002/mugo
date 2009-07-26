@@ -18,12 +18,12 @@ public:
     enum eEditMode{ eAlternateMove, eAddBlack, eAddWhite, eAddEmpty, eLabelMark, eCrossMark, eCircleMark, eSquareMark, eTriangleMark, eDeleteMarker };
 
     struct stoneInfo{
-        stoneInfo() : number(0), color(go::stone::empty){}
-        bool empty() const{ return color == go::stone::empty; }
-        bool black() const{ return color == go::stone::black; }
-        bool white() const{ return color == go::stone::white; }
+        stoneInfo() : number(0), color(go::stone::eEmpty){}
+        bool empty() const{ return color == go::stone::eEmpty; }
+        bool black() const{ return color == go::stone::eBlack; }
+        bool white() const{ return color == go::stone::eWhite; }
         int number;
-        go::stone::color color;
+        go::stone::eColor color;
     };
 
     explicit BoardWidget(QWidget *parent = 0);
@@ -51,7 +51,8 @@ public:
 
     // set option
     void setEditMode(eEditMode editMode){ this->editMode = editMode; }
-    void setShowMoveNumber(int number){ showMoveNumber = number; }
+    void setShowMoveNumber(int number){ showMoveNumber = number; repaint(); }
+    void setAnnotation(int annotation){ currentNode->annotation = (go::node::eAnnotation)annotation; modifyNode(currentNode); }
 
     QString getXString(int x) const;
     QString getYString(int y) const;
@@ -99,7 +100,7 @@ protected:
     void addMark(go::markList& markList, const go::mark& mark);
     void addCharacter(go::markList& markList, const go::point& p);
     void removeMark(go::markList& markList, const go::point& p);
-    void addStone(go::stoneList& stoneList, const go::point& p, go::stone::color color);
+    void addStone(go::stoneList& stoneList, const go::point& p, go::stone::eColor color);
 
 private:
     Ui::BoardWidget *m_ui;

@@ -477,7 +477,7 @@ void BoardWidget::putStone(go::node* n, int moveNumber){
         int x = stoneNode->getX();
         int y = stoneNode->getY();
         if (x >= 0 && x < size && y >= 0 && y < size){
-            board[y][x].color = stoneNode->isBlack() ? go::stone::black : go::stone::white;
+            board[y][x].color = stoneNode->isBlack() ? go::stone::eBlack : go::stone::eWhite;
             board[y][x].number = moveNumber;
             currentMoveNumber  = moveNumber;
             removeDeadStones(x, y);
@@ -499,7 +499,7 @@ void BoardWidget::putStone(go::node* n, int moveNumber){
 /**
 */
 void BoardWidget::removeDeadStones(int x, int y){
-    int c = board[y][x].color == go::stone::black ? go::stone::white : go::stone::black;
+    int c = board[y][x].color == go::stone::eBlack ? go::stone::eWhite : go::stone::eBlack;
 
     int* tmp = new int[size * size];
 
@@ -554,7 +554,7 @@ bool BoardWidget::isDead(int x, int y){
     int* tmp = new int[size * size];
     memset(tmp, 0, sizeof(int)*size*size);
 
-    go::stone::color c = board[y][x].color;
+    go::stone::eColor c = board[y][x].color;
     bool dead = isDead(tmp, c, x, y);
 
     delete[] tmp;
@@ -568,7 +568,7 @@ bool BoardWidget::isKill(int x, int y){
     int* tmp = new int[size * size];
     memset(tmp, 0, sizeof(int)*size*size);
 
-    go::stone::color c = board[y][x].color == go::stone::black ? go::stone::white : go::stone::black;
+    go::stone::eColor c = board[y][x].color == go::stone::eBlack ? go::stone::eWhite : go::stone::eBlack;
     bool dead = (y > 0 && board[y-1][x].color == c && isDead(tmp, c, x, y - 1)) ||
                 (y < size-1 && board[y+1][x].color == c && isDead(tmp, c, x, y + 1)) ||
                 (x > 0 && board[y][x-1].color == c && isDead(tmp, c, x - 1, y)) ||
@@ -585,7 +585,7 @@ void BoardWidget::dead(int* tmp){
     for (int y=0; y<size; ++y){
         for (int x=0; x<size; ++x){
             if (tmp[y*size+x])
-                board[y][x].color = go::stone::empty;
+                board[y][x].color = go::stone::eEmpty;
         }
     }
 }
@@ -605,9 +605,9 @@ void BoardWidget::addStone(int x, int y){
         ++iter;
     }
 
-    board[y][x].color = black ? go::stone::black : go::stone::white;
+    board[y][x].color = black ? go::stone::eBlack : go::stone::eWhite;
     if (isKill(x, y) == false && isDead(x, y) == true){
-        board[y][x].color = go::stone::empty;
+        board[y][x].color = go::stone::eEmpty;
         return;
     }
 
@@ -629,15 +629,15 @@ void BoardWidget::addMark(int x, int y){
             return;
 
         case eAddBlack:
-            addStone(currentNode->stones, go::point(x, y), go::stone::black);
+            addStone(currentNode->stones, go::point(x, y), go::stone::eBlack);
             break;
 
         case eAddWhite:
-            addStone(currentNode->stones, go::point(x, y), go::stone::white);
+            addStone(currentNode->stones, go::point(x, y), go::stone::eWhite);
             break;
 
         case eAddEmpty:
-            addStone(currentNode->stones, go::point(x, y), go::stone::empty);
+            addStone(currentNode->stones, go::point(x, y), go::stone::eEmpty);
             break;
 
         case eLabelMark:{
@@ -757,7 +757,7 @@ void BoardWidget::removeMark(go::markList& markList, const go::point& p){
     }
 }
 
-void BoardWidget::addStone(go::stoneList& stoneList, const go::point& p, go::stone::color c){
+void BoardWidget::addStone(go::stoneList& stoneList, const go::point& p, go::stone::eColor c){
     go::stoneList::iterator iter = stoneList.begin();
     while (iter != stoneList.end()){
         if (iter->p == p){

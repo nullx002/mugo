@@ -11,6 +11,9 @@ Q_DECLARE_METATYPE(go::node*);
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
+    , annotation1(go::node::eNoAnnotation)
+    , annotation2(go::node::eNoAnnotation)
+    , annotation3(go::node::eNoAnnotation)
 {
     ui->setupUi(this);
 
@@ -238,6 +241,54 @@ void MainWindow::on_actionDeleteMarker_triggered(){
     setEditMode(ui->actionDeleteMarker, BoardWidget::eDeleteMarker);
 }
 
+void MainWindow::on_actionGoodMove_triggered(){
+    setAnnotation1(ui->actionGoodMove, go::node::eGoodMove);
+}
+
+void MainWindow::on_actionVeryGoodMove_triggered(){
+    setAnnotation1(ui->actionVeryGoodMove, go::node::eVeryGoodMove);
+}
+
+void MainWindow::on_actionBadMove_triggered(){
+    setAnnotation1(ui->actionBadMove, go::node::eBadMove);
+}
+
+void MainWindow::on_actionVeryBadMove_triggered(){
+    setAnnotation1(ui->actionVeryBadMove, go::node::eVeryBadMove);
+}
+
+void MainWindow::on_actionDoubtfulMove_triggered(){
+    setAnnotation1(ui->actionDoubtfulMove, go::node::eDoubtfulMove);
+}
+
+void MainWindow::on_actionEven_triggered(){
+    setAnnotation2(ui->actionEven, go::node::eEven);
+}
+
+void MainWindow::on_actionGoodForBlack_triggered(){
+    setAnnotation2(ui->actionGoodForBlack, go::node::eGoodForBlack);
+}
+
+void MainWindow::on_actionVeryGoodForBlack_triggered(){
+    setAnnotation2(ui->actionVeryGoodForBlack, go::node::eVeryGoodForBlack);
+}
+
+void MainWindow::on_actionGoodForWhite_triggered(){
+    setAnnotation2(ui->actionGoodForWhite, go::node::eGoodForWhite);
+}
+
+void MainWindow::on_actionVeryGoodForWhite_triggered(){
+    setAnnotation2(ui->actionVeryGoodForWhite, go::node::eVeryGoodForWhite);
+}
+
+void MainWindow::on_actionUnclear_triggered(){
+    setAnnotation2(ui->actionUnclear, go::node::eUnclear);
+}
+
+void MainWindow::on_actionHotspot_triggered(){
+    setAnnotation3(ui->actionHotspot, go::node::eHotspot);
+}
+
 /**
 * Slot
 * Advance -> Encoding -> UTF-8
@@ -453,6 +504,7 @@ void MainWindow::on_boardWidget_nodeModified(go::node* node){
 void MainWindow::on_boardWidget_currentNodeChanged(go::node* node){
     setTreeWidget(node);
     ui->commentWidget->setPlainText(node->comment);
+    setAnnotation(node->annotation);
 }
 
 /**
@@ -848,7 +900,6 @@ void MainWindow::setShowMoveNumber(QAction* action, int moveNumber){
         actions[i]->setChecked(actions[i] == action);
 
     ui->boardWidget->setShowMoveNumber(moveNumber);
-    ui->boardWidget->repaint();
 }
 
 void MainWindow::setEditMode(QAction* action, BoardWidget::eEditMode editMode){
@@ -870,4 +921,67 @@ void MainWindow::setEditMode(QAction* action, BoardWidget::eEditMode editMode){
         actions[i]->setChecked(actions[i] == action);
 
     ui->boardWidget->setEditMode(editMode);
+}
+
+void MainWindow::setAnnotation(int annotation){
+   static QAction* actions[] = {
+        ui->actionGoodMove,
+        ui->actionVeryGoodMove,
+        ui->actionBadMove,
+        ui->actionVeryBadMove,
+        ui->actionDoubtfulMove,
+        ui->actionEven,
+        ui->actionGoodForBlack,
+        ui->actionVeryGoodForBlack,
+        ui->actionGoodForWhite,
+        ui->actionVeryGoodForWhite,
+        ui->actionUnclear,
+        ui->actionEven,
+    };
+    static const int N = sizeof(actions) / sizeof(actions[0]);
+
+    for (int i=0; i<N; ++i)
+        actions[i]->setChecked( (annotation & (1 << i)) != 0 );
+}
+
+void MainWindow::setAnnotation1(QAction* action, int annotation){
+   static QAction* actions[] = {
+        ui->actionGoodMove,
+        ui->actionVeryGoodMove,
+        ui->actionBadMove,
+        ui->actionVeryBadMove,
+        ui->actionDoubtfulMove,
+    };
+    static const int N = sizeof(actions) / sizeof(actions[0]);
+
+    for (int i=0; i<N; ++i)
+        if (actions[i] != action)
+            actions[i]->setChecked( false );
+
+    annotation1 = action->isChecked() ? annotation : 0;
+    ui->boardWidget->setAnnotation(annotation1 | annotation2 | annotation3);
+}
+
+void MainWindow::setAnnotation2(QAction* action, int annotation){
+   static QAction* actions[] = {
+        ui->actionEven,
+        ui->actionGoodForBlack,
+        ui->actionVeryGoodForBlack,
+        ui->actionGoodForWhite,
+        ui->actionVeryGoodForWhite,
+        ui->actionUnclear,
+    };
+    static const int N = sizeof(actions) / sizeof(actions[0]);
+
+    for (int i=0; i<N; ++i)
+        if (actions[i] != action)
+            actions[i]->setChecked( false );
+
+    annotation2 = action->isChecked() ? annotation : 0;
+    ui->boardWidget->setAnnotation(annotation1 | annotation2 | annotation3);
+}
+
+void MainWindow::setAnnotation3(QAction* action, int annotation){
+    annotation3 = action->isChecked() ? annotation : 0;
+    ui->boardWidget->setAnnotation(annotation1 | annotation2 | annotation3);
 }

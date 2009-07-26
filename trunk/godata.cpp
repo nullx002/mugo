@@ -5,10 +5,10 @@
 namespace go{
 
 
-node::node(data* data_) : goData(data_), parent(NULL){
+node::node(data* data_) : goData(data_), parent(NULL), annotation(eNoAnnotation){
 }
 
-node::node(node* parent_) : goData(parent_->goData), parent(parent_){
+node::node(node* parent_) : goData(parent_->goData), parent(parent_), annotation(eNoAnnotation){
 }
 
 void node::clear(){
@@ -39,6 +39,31 @@ QString node::toString() const{
 
     if (!comment.isEmpty())
         str.append(" Comment");
+
+    if (annotation & eGoodMove)
+        str.append(" [Good Move]");
+    if (annotation & eVeryGoodMove)
+        str.append(" [Very Good Move]");
+    if (annotation & eBadMove)
+        str.append(" [Bad Move]");
+    if (annotation & eVeryBadMove)
+        str.append(" [Very Bad Move]");
+    if (annotation & eDoubtfulMove)
+        str.append(" [Doubtful Move]");
+    if (annotation & eEven)
+        str.append(" [Even]");
+    if (annotation & eGoodForBlack)
+        str.append(" [Good for Black]");
+    if (annotation & eVeryGoodForBlack)
+        str.append(" [Very Good for Black]");
+    if (annotation & eGoodForWhite)
+        str.append(" [Good for White]");
+    if (annotation & eVeryGoodForWhite)
+        str.append(" [Very Good for White]");
+    if (annotation & eUnclear)
+        str.append(" [Unclear]");
+    if (annotation & eHotspot)
+        str.append(" [Hotspot]");
 
     if (!str.isEmpty() && str[0] == ' ')
         str.remove(0, 1);
@@ -109,12 +134,19 @@ QString sgf::node::toString() const{
         "GC", "ON", "AN", "CP", "SO", "US",
 
         // stone
-        "B", "W",
+        "B", "BL", "OB", "W", "WL","OW",
 
         // marker
         "AB", "AW", "AE", "MA", "CR", "SQ", "TR", "LB", "TB", "TW",
 
-        "C"
+        // node annotation
+        "C", "DM", "GB", "GW", "UC", "HO", "N",
+
+        // move annotation
+        "TE", "BM", "DO", "IT",
+
+        //
+        // "ST", "PL","MN","KO","V", "AR", "LN", "DD", "SL", "FG", "PM", "VW"
     };
     static const int N = sizeof(keys) / sizeof(keys[0]);
 
@@ -196,7 +228,7 @@ void sgf::node::addMark(go::markList& markList, const QStringList& values, mark:
 }
 
 void sgf::node::addStone(go::stoneList& stoneList, const QString& key, const QStringList& values) const{
-    go::stone::color c = key == "AB" ? go::stone::black : key == "AW" ? go::stone::white : go::stone::empty;
+    go::stone::eColor c = key == "AB" ? go::stone::eBlack : key == "AW" ? go::stone::eWhite : go::stone::eEmpty;
 
     QStringList::const_iterator iter = values.begin();
     while (iter != values.end()){
@@ -279,6 +311,25 @@ bool sgf::node::set(const go::node& n){
     set(n.blackTerritories);
     set(n.whiteTerritories);
     set(n.stones);
+
+    if (n.annotation & go::node::eGoodMove)
+        property["TE"].push_back("");
+    else if (n.annotation & go::node::eBadMove)
+        property["BM"].push_back("");
+    else if (n.annotation & go::node::eDoubtfulMove)
+        property["DO"].push_back("");
+
+    if (n.annotation & go::node::eEven)
+        property["DM"].push_back("");
+    else if (n.annotation & go::node::eGoodForBlack)
+        property["GB"].push_back("");
+    else if (n.annotation & go::node::eGoodForWhite)
+        property["GW"].push_back("");
+    else if (n.annotation & go::node::eUnclear)
+        property["UC"].push_back("");
+
+    if (n.annotation & go::node::eHotspot)
+        property["HO"].push_back("");
 
     return false;
 }

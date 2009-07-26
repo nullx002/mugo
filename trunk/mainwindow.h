@@ -43,6 +43,10 @@ private:
     void setEncoding(QAction* action, const char* codecName);
     void setShowMoveNumber(QAction* action, int moveNumber);
     void setEditMode(QAction* action, BoardWidget::eEditMode editMode);
+    void setAnnotation(int annotation);
+    void setAnnotation1(QAction* action, int annotation);
+    void setAnnotation2(QAction* action, int annotation);
+    void setAnnotation3(QAction* action, int annotation);
 
     void setTreeData();
     QTreeWidgetItem* addTreeWidget(go::node& n);
@@ -63,6 +67,9 @@ private:
     QString documentName;
     QString fileName;
     NodeToTreeWidgetType nodeToTreeWidget;
+    int annotation1;
+    int annotation2;
+    int annotation3;
 
 private slots:
     // File menu
@@ -90,6 +97,20 @@ private slots:
     void on_actionAddSquare_triggered();
     void on_actionAddTriangle_triggered();
     void on_actionDeleteMarker_triggered();
+
+    // Edit menu -> Annotation
+    void on_actionGoodMove_triggered();
+    void on_actionVeryGoodMove_triggered();
+    void on_actionBadMove_triggered();
+    void on_actionVeryBadMove_triggered();
+    void on_actionDoubtfulMove_triggered();
+    void on_actionEven_triggered();
+    void on_actionGoodForBlack_triggered();
+    void on_actionVeryGoodForBlack_triggered();
+    void on_actionGoodForWhite_triggered();
+    void on_actionVeryGoodForWhite_triggered();
+    void on_actionUnclear_triggered();
+    void on_actionHotspot_triggered();
 
     // Edit menu -> Encoding
     void on_actionEncodingUTF8_triggered();

@@ -11,10 +11,6 @@
 namespace go{
 
 
-QString x_str(int size, int x);
-QString y_str(int size, int x);
-
-
 class point{
 public:
     point() : x(-1), y(-1){}
@@ -68,17 +64,17 @@ public:
 
 class stone{
 public:
-    enum color{ empty, black, white };
+    enum eColor{ eEmpty, eBlack, eWhite };
 
-    stone(const point& p_, color c_) : p(p_), c(c_){}
-    stone(int x, int y, color c_) : p(x, y), c(c_){}
+    stone(const point& p_, eColor c_) : p(p_), c(c_){}
+    stone(int x, int y, eColor c_) : p(x, y), c(c_){}
 
-    bool isBlack() const{ return c == black; }
-    bool isWhite() const{ return c == white; }
-    bool isEmpty() const{ return c == empty; }
+    bool isBlack() const{ return c == eBlack; }
+    bool isWhite() const{ return c == eWhite; }
+    bool isEmpty() const{ return c == eEmpty; }
 
-    point p;
-    color c;
+    point  p;
+    eColor c;
 };
 
 typedef QLinkedList<mark>  markList;
@@ -91,6 +87,22 @@ typedef QLinkedList<node*> nodeList;
 
 class node{
 public:
+    enum eAnnotation{
+        eNoAnnotation = 0x0000,
+        eGoodMove = 0x0001,
+        eVeryGoodMove = 0x0002,
+        eBadMove = 0x0004,
+        eVeryBadMove = 0x0008,
+        eDoubtfulMove = 0x0010,
+        eEven = 0x0020,
+        eGoodForBlack = 0x0040,
+        eVeryGoodForBlack = 0x0080,
+        eGoodForWhite = 0x0100,
+        eVeryGoodForWhite = 0x0200,
+        eUnclear = 0x0400,
+        eHotspot = 0x0800,
+    };
+
     explicit node(data* data_);
     explicit node(node* parent);
     virtual ~node(){  clear();  }
@@ -133,6 +145,7 @@ public:
     markList  blackTerritories;
     markList  whiteTerritories;
     stoneList stones;
+    eAnnotation annotation;
     QString comment;
     point position;
 };
