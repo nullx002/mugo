@@ -55,6 +55,16 @@ void MainWindow::on_actionOpen_triggered(){
 
 /**
 * Slot
+* File -> Reload
+*/
+void MainWindow::on_actionReload_triggered(){
+    if (maybeSave() == false)
+        return;
+    fileOpen(fileName);
+}
+
+/**
+* Slot
 * File -> Save
 */
 void MainWindow::on_actionSave_triggered(){
@@ -564,6 +574,8 @@ bool MainWindow::fileOpen(const QString& fname){
     setTreeData();
     setCaption();
 
+    ui->actionReload->setEnabled(true);
+
     return true;
 }
 
@@ -600,6 +612,8 @@ bool MainWindow::fileSaveAs(const QString& fname){
 
     setCaption();
 
+    ui->actionReload->setEnabled(true);
+
     return true;
 }
 
@@ -615,6 +629,8 @@ bool MainWindow::fileClose(){
 
     setTreeData();
     setCaption();
+
+    ui->actionReload->setEnabled(false);
 
     return true;
 }

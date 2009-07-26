@@ -14,7 +14,7 @@
    <string>mgo</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="resources.qrc">
+   <iconset>
     <normaloff>:/res/mgo.png</normaloff>:/res/mgo.png</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
@@ -50,6 +50,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
     </property>
     <addaction name="actionNew"/>
     <addaction name="actionOpen"/>
+    <addaction name="actionReload"/>
     <addaction name="actionSave"/>
     <addaction name="actionSaveAs"/>
     <addaction name="actionSaveBoardAsPicture"/>
@@ -215,7 +216,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
   </widget>
   <action name="actionNew">
    <property name="icon">
-    <iconset resource="resources.qrc">
+    <iconset>
      <normaloff>:/res/filenew.png</normaloff>:/res/filenew.png</iconset>
    </property>
    <property name="text">
@@ -227,7 +228,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
   </action>
   <action name="actionOpen">
    <property name="icon">
-    <iconset resource="resources.qrc">
+    <iconset>
      <normaloff>:/res/fileopen.png</normaloff>:/res/fileopen.png</iconset>
    </property>
    <property name="text">
@@ -242,7 +243,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
   </action>
   <action name="actionSave">
    <property name="icon">
-    <iconset resource="resources.qrc">
+    <iconset>
      <normaloff>:/res/filesave.png</normaloff>:/res/filesave.png</iconset>
    </property>
    <property name="text">
@@ -370,7 +371,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
   </action>
   <action name="actionDelete">
    <property name="icon">
-    <iconset resource="resources.qrc">
+    <iconset>
      <normaloff>:/res/remove.png</normaloff>:/res/remove.png</iconset>
    </property>
    <property name="text">
@@ -550,6 +551,11 @@ alternate-background-color: rgb(255, 255, 127);</string>
     <string>Add Empty</string>
    </property>
   </action>
+  <action name="actionReload">
+   <property name="text">
+    <string>&amp;Reload</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
@@ -560,8 +566,6 @@ alternate-background-color: rgb(255, 255, 127);</string>
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources>
-  <include location="resources.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>
