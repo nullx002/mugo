@@ -50,6 +50,8 @@ QString node::toString() const{
         str.append(" [Very Bad Move]");
     if (annotation & eDoubtfulMove)
         str.append(" [Doubtful Move]");
+    if (annotation & eInterestingMove)
+        str.append(" [Interesting Move]");
     if (annotation & eEven)
         str.append(" [Even]");
     if (annotation & eGoodForBlack)
@@ -139,13 +141,13 @@ QString sgf::node::toString() const{
         // marker
         "AB", "AW", "AE", "MA", "CR", "SQ", "TR", "LB", "TB", "TW",
 
-        // node annotation
-        "C", "DM", "GB", "GW", "UC", "HO", "N",
-
         // move annotation
         "TE", "BM", "DO", "IT",
 
-        //
+        // node annotation
+        "C", "DM", "GB", "GW", "UC", "HO", "N",
+
+        // unsupported property
         // "ST", "PL","MN","KO","V", "AR", "LN", "DD", "SL", "FG", "PM", "VW"
     };
     static const int N = sizeof(keys) / sizeof(keys[0]);
@@ -313,23 +315,33 @@ bool sgf::node::set(const go::node& n){
     set(n.stones);
 
     if (n.annotation & go::node::eGoodMove)
-        property["TE"].push_back("");
+        property["TE"].push_back("1");
+    if (n.annotation & go::node::eVeryGoodMove)
+        property["TE"].push_back("2");
     else if (n.annotation & go::node::eBadMove)
-        property["BM"].push_back("");
+        property["BM"].push_back("1");
+    else if (n.annotation & go::node::eVeryBadMove)
+        property["BM"].push_back("2");
     else if (n.annotation & go::node::eDoubtfulMove)
         property["DO"].push_back("");
+    else if (n.annotation & go::node::eInterestingMove)
+        property["IT"].push_back("");
 
     if (n.annotation & go::node::eEven)
-        property["DM"].push_back("");
+        property["DM"].push_back("1");
     else if (n.annotation & go::node::eGoodForBlack)
-        property["GB"].push_back("");
+        property["GB"].push_back("1");
+    else if (n.annotation & go::node::eVeryGoodForBlack)
+        property["GB"].push_back("2");
     else if (n.annotation & go::node::eGoodForWhite)
-        property["GW"].push_back("");
+        property["GW"].push_back("1");
+    else if (n.annotation & go::node::eVeryGoodForWhite)
+        property["GW"].push_back("2");
     else if (n.annotation & go::node::eUnclear)
-        property["UC"].push_back("");
+        property["UC"].push_back("1");
 
     if (n.annotation & go::node::eHotspot)
-        property["HO"].push_back("");
+        property["HO"].push_back("1");
 
     return false;
 }
@@ -385,57 +397,57 @@ bool sgf::node::get(go::node& n, const QString& key, const QStringList& values) 
     go::informationNode* infoNode = dynamic_cast<go::informationNode*>(&n);
 
     // game information
-    if (infoNode && key == "PW" && !values.empty())
+    if (infoNode && key == "PW")
         infoNode->whitePlayer = values[0];
-    else if (infoNode && key == "WR" && !values.empty())
+    else if (infoNode && key == "WR")
         infoNode->whiteRank = values[0];
-    else if (infoNode && key == "WT" && !values.empty())
+    else if (infoNode && key == "WT")
         infoNode->whiteTeam = values[0];
-    if (infoNode && key == "PB" && !values.empty())
+    if (infoNode && key == "PB")
         infoNode->blackPlayer = values[0];
-    else if (infoNode && key == "BR" && !values.empty())
+    else if (infoNode && key == "BR")
         infoNode->blackRank = values[0];
-    else if (infoNode && key == "BT" && !values.empty())
+    else if (infoNode && key == "BT")
         infoNode->blackTeam = values[0];
-    else if (infoNode && key == "RE" && !values.empty())
+    else if (infoNode && key == "RE")
         infoNode->result = values[0];
-    else if (infoNode && key == "SZ" && !values.empty())
+    else if (infoNode && key == "SZ")
         infoNode->size = values[0].toInt();
-    else if (infoNode && key == "KM" && !values.empty())
+    else if (infoNode && key == "KM")
         infoNode->komi = values[0].toDouble();
-    else if (infoNode && key == "HA" && !values.empty())
+    else if (infoNode && key == "HA")
         infoNode->handicap = values[0].toInt();
-    else if (infoNode && key == "TM" && !values.empty())
+    else if (infoNode && key == "TM")
         infoNode->time = values[0];
-    else if (infoNode && key == "OT" && !values.empty())
+    else if (infoNode && key == "OT")
         infoNode->overTime = values[0];
-    else if (infoNode && key == "DT" && !values.empty())
+    else if (infoNode && key == "DT")
         infoNode->date = values[0];
-    else if (infoNode && key == "GN" && !values.empty())
+    else if (infoNode && key == "GN")
         infoNode->gameName = values[0];
-    else if (infoNode && key == "RO" && !values.empty())
+    else if (infoNode && key == "RO")
         infoNode->round = values[0];
-    else if (infoNode && key == "PC" && !values.empty())
+    else if (infoNode && key == "PC")
         infoNode->place = values[0];
-    else if (infoNode && key == "EV" && !values.empty())
+    else if (infoNode && key == "EV")
         infoNode->event = values[0];
-    else if (infoNode && key == "GC" && !values.empty())
+    else if (infoNode && key == "GC")
         infoNode->gameComment = values[0];
-    else if (infoNode && key == "AN" && !values.empty())
+    else if (infoNode && key == "AN")
         infoNode->annotation = values[0];
-    else if (infoNode && key == "CP" && !values.empty())
+    else if (infoNode && key == "CP")
         infoNode->copyright = values[0];
-    else if (infoNode && key == "ON" && !values.empty())
+    else if (infoNode && key == "ON")
         infoNode->opening = values[0];
-    else if (infoNode && key == "RU" && !values.empty())
+    else if (infoNode && key == "RU")
         infoNode->rule = values[0];
-    else if (infoNode && key == "SO" && !values.empty())
+    else if (infoNode && key == "SO")
         infoNode->source = values[0];
-    else if (infoNode && key == "US" && !values.empty())
+    else if (infoNode && key == "US")
         infoNode->user = values[0];
 
     // comment
-    else if (key == "C" && !values.empty())
+    else if (key == "C")
         n.comment = values[0];
 
     // mark
@@ -455,6 +467,29 @@ bool sgf::node::get(go::node& n, const QString& key, const QStringList& values) 
         addMark(n.whiteTerritories, values, mark::eWhiteTerritory);
     else if (key == "AB" || key == "AW" || key == "AE")
         addStone(n.stones, key, values);
+
+    // annotation
+    else if (key == "TE")
+        n.annotation |= values[0].toInt() > 1 ? go::node::eVeryGoodMove : go::node::eGoodMove;
+    else if (key == "BM")
+        n.annotation |= values[0].toInt() > 1 ? go::node::eVeryBadMove : go::node::eBadMove;
+    else if (key == "DO")
+        n.annotation |= go::node::eDoubtfulMove;
+    else if (key == "IT")
+        n.annotation |= go::node::eInterestingMove;
+
+    else if (key == "DM")
+        n.annotation |= go::node::eEven;
+
+    else if (key == "GB")
+        n.annotation |= values[0].toInt() > 1 ? go::node::eVeryGoodForBlack : go::node::eGoodForBlack;
+    else if (key == "GW")
+        n.annotation |= values[0].toInt() > 1 ? go::node::eVeryGoodForWhite : go::node::eGoodForWhite;
+    else if (key == "UC")
+        n.annotation |= go::node::eUnclear;
+
+    else if (key == "HO")
+        n.annotation |= go::node::eHotspot;
 
     return true;
 }

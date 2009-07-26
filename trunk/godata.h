@@ -94,13 +94,14 @@ public:
         eBadMove = 0x0004,
         eVeryBadMove = 0x0008,
         eDoubtfulMove = 0x0010,
-        eEven = 0x0020,
-        eGoodForBlack = 0x0040,
-        eVeryGoodForBlack = 0x0080,
-        eGoodForWhite = 0x0100,
-        eVeryGoodForWhite = 0x0200,
-        eUnclear = 0x0400,
-        eHotspot = 0x0800,
+        eInterestingMove = 0x0020,
+        eEven = 0x0040,
+        eGoodForBlack = 0x0080,
+        eVeryGoodForBlack = 0x0100,
+        eGoodForWhite = 0x0200,
+        eVeryGoodForWhite = 0x0400,
+        eUnclear = 0x0800,
+        eHotspot = 0x1000,
     };
 
     explicit node(data* data_);
@@ -145,7 +146,7 @@ public:
     markList  blackTerritories;
     markList  whiteTerritories;
     stoneList stones;
-    eAnnotation annotation;
+    int annotation;
     QString comment;
     point position;
 };

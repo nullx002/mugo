@@ -104,6 +104,7 @@ private slots:
     void on_actionBadMove_triggered();
     void on_actionVeryBadMove_triggered();
     void on_actionDoubtfulMove_triggered();
+    void on_actionInterestingMove_triggered();
     void on_actionEven_triggered();
     void on_actionGoodForBlack_triggered();
     void on_actionVeryGoodForBlack_triggered();
