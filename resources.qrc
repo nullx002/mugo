@@ -18,5 +18,10 @@
         <file>res/fastrewind.png</file>
         <file>res/lastmove.png</file>
         <file>res/nextmove.png</file>
+        <file>res/nextbranch.png</file>
+        <file>res/prevbranch.png</file>
+        <file>res/backparent.png</file>
+        <file>res/reload.png</file>
+        <file>res/saveimage.png</file>
     </qresource>
 </RCC>

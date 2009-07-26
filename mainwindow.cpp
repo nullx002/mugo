@@ -521,6 +521,68 @@ void MainWindow::on_actionLastMove_triggered(){
 
 /**
 * Slot
+* Traverse -> Back to parent
+*/
+void MainWindow::on_actionBackToParent_triggered(){
+    go::node* node = ui->boardWidget->getCurrentNode();
+    while(node->parent){
+        node = node->parent;
+        if (node->childNodes.size() > 1)
+            break;
+    }
+    ui->boardWidget->setCurrentNode( node );
+}
+
+/**
+* Slot
+* Traverse -> Previous Branch
+*/
+void MainWindow::on_actionPreviousBranch_triggered(){
+    go::node* node   = ui->boardWidget->getCurrentNode();
+    go::node* parent = node->parent;
+    while(parent){
+        if (parent->childNodes.size() > 1)
+            break;
+        node = parent;
+        parent = parent->parent;
+    }
+
+    if (parent == NULL)
+        return;
+
+    go::nodeList::iterator iter = qFind(parent->childNodes.begin(), parent->childNodes.end(), node);
+    if (iter == parent->childNodes.begin())
+        return;
+
+    ui->boardWidget->setCurrentNode( *--iter );
+}
+
+/**
+* Slot
+* Traverse -> Next Branch
+*/
+void MainWindow::on_actionNextBranch_triggered(){
+    go::node* node   = ui->boardWidget->getCurrentNode();
+    go::node* parent = node->parent;
+    while(parent){
+        if (parent->childNodes.size() > 1)
+            break;
+        node = parent;
+        parent = parent->parent;
+    }
+
+    if (parent == NULL)
+        return;
+
+    go::nodeList::iterator iter = qFind(parent->childNodes.begin(), parent->childNodes.end(), node);
+    if (++iter == parent->childNodes.end())
+        return;
+
+    ui->boardWidget->setCurrentNode( *iter );
+}
+
+/**
+* Slot
 * View -> Move Number-> No Move Number
 */
 void MainWindow::on_actionNoMoveNumber_triggered(){
