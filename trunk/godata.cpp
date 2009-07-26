@@ -301,7 +301,9 @@ bool sgf::node::set(const go::node& n){
         property[key].push_back(str);
     }
 
-    if (!n.comment.isEmpty())
+    if (!n.name.isEmpty())
+        property["N"].push_back(n.name);
+    else if (!n.comment.isEmpty())
         property["C"].push_back(n.comment);
 
     // marker
@@ -449,6 +451,8 @@ bool sgf::node::get(go::node& n, const QString& key, const QStringList& values) 
     // comment
     else if (key == "C")
         n.comment = values[0];
+    else if (key == "N")
+        n.name = values[0];
 
     // mark
     else if (key == "MA" || key == "M")

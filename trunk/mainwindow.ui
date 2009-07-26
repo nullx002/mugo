@@ -220,9 +220,15 @@ alternate-background-color: rgb(255, 255, 127);</string>
     <layout class="QGridLayout" name="gridLayout">
      <item row="0" column="0">
       <widget class="QTreeWidget" name="branchWidget">
+       <property name="indentation">
+        <number>15</number>
+       </property>
        <property name="columnCount">
         <number>1</number>
        </property>
+       <attribute name="headerVisible">
+        <bool>false</bool>
+       </attribute>
        <attribute name="headerVisible">
         <bool>false</bool>
        </attribute>
@@ -675,9 +681,6 @@ alternate-background-color: rgb(255, 255, 127);</string>
    </property>
   </action>
   <action name="actionEditNodeName">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
    <property name="text">
     <string>Edit Node Name</string>
    </property>

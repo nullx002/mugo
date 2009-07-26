@@ -130,14 +130,15 @@ public:
     virtual bool isBlack() const{ return false; }
     virtual bool isWhite() const{ return false; }
 
-    virtual QString nodeName() const{ static const QString str = ""; return str; }
+    virtual QString nodeName() const{ return name; }
     virtual QString toString() const;
 
 //protected:
     // node
     data* goData;
     node* parent;
-    nodeList childNodes;
+    nodeList  childNodes;
+    QString   name;
     markList  crosses;
     markList  triangles;
     markList  circles;
