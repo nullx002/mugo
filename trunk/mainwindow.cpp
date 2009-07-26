@@ -439,6 +439,88 @@ void MainWindow::on_actionEncodingKorean_triggered(){
 
 /**
 * Slot
+* Traverse -> First Move
+*/
+void MainWindow::on_actionFirstMove_triggered(){
+    go::node* node = ui->boardWidget->getCurrentNode();
+    ui->boardWidget->setCurrentNode( &node->goData->root );
+}
+
+/**
+* Slot
+* Traverse -> Fast Rewind
+*/
+void MainWindow::on_actionFastRewind_triggered(){
+    go::node* node = ui->boardWidget->getCurrentNode();
+    if (node->parent == NULL)
+        return;
+
+    for (int i=0; i<5; ++i){
+        if (node->parent)
+            node = node->parent;
+        else
+            break;
+    }
+    ui->boardWidget->setCurrentNode(node);
+}
+
+/**
+* Slot
+* Traverse -> Previous Move
+*/
+void MainWindow::on_actionPreviousMove_triggered(){
+    go::node* node = ui->boardWidget->getCurrentNode();
+    if (node->parent)
+        ui->boardWidget->setCurrentNode(node->parent);
+}
+
+/**
+* Slot
+* Traverse -> Next Move
+*/
+void MainWindow::on_actionNextMove_triggered(){
+    go::node* node = ui->boardWidget->getCurrentNode();
+    const go::nodeList& nodeList = ui->boardWidget->getCurrentNodeList();
+    go::nodeList::const_iterator iter = qFind(nodeList.begin(), nodeList.end(), node);
+    if (iter == nodeList.end())
+        return;
+    if (++iter != nodeList.end())
+        ui->boardWidget->setCurrentNode(*iter);
+}
+
+/**
+* Slot
+* Traverse -> Fast Forward
+*/
+void MainWindow::on_actionFastForward_triggered(){
+    go::node* node = ui->boardWidget->getCurrentNode();
+    const go::nodeList& nodeList = ui->boardWidget->getCurrentNodeList();
+    go::nodeList::const_iterator iter = qFind(nodeList.begin(), nodeList.end(), node);
+    if (iter == nodeList.end())
+        return;
+
+    node = *iter;
+    for (int i=0; i<5; ++i){
+        if (++iter != nodeList.end())
+            node = *iter;
+        else
+            break;
+    }
+
+    ui->boardWidget->setCurrentNode(node);
+}
+
+/**
+* Slot
+* Traverse -> Last Move
+*/
+void MainWindow::on_actionLastMove_triggered(){
+    const go::nodeList& nodeList = ui->boardWidget->getCurrentNodeList();
+    ui->boardWidget->setCurrentNode( nodeList.back() );
+}
+
+/**
+* Slot
 * View -> Move Number-> No Move Number
 */
 void MainWindow::on_actionNoMoveNumber_triggered(){

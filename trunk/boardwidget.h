@@ -44,6 +44,7 @@ public:
     // get node
     go::data& getData(){ return goData; }
     go::node* getCurrentNode(){ return currentNode; }
+    const go::nodeList& getCurrentNodeList() const{ return nodeList; }
 
     // dirty flag
     bool isDirty() const{ return dirty; }

@@ -12,5 +12,11 @@
         <file>res/bg.png</file>
         <file>res/remove.png</file>
         <file>res/mgo.png</file>
+        <file>res/prevmove.png</file>
+        <file>res/fastforward.png</file>
+        <file>res/firstmove.png</file>
+        <file>res/fastrewind.png</file>
+        <file>res/lastmove.png</file>
+        <file>res/nextmove.png</file>
     </qresource>
 </RCC>
