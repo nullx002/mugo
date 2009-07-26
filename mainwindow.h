@@ -73,7 +73,6 @@ private:
 
 private slots:
     // File menu
-    void on_actionEditNodeName_triggered();
     void on_actionPass_triggered();
     void on_actionNew_triggered();
     void on_actionOpen_triggered();
@@ -86,6 +85,7 @@ private slots:
     // Edit menu
     void on_actionGameInformation_triggered();
     void on_actionDelete_triggered();
+    void on_actionEditNodeName_triggered();
 
     // Edit menu -> Stone & Marker
     void on_actionAlternateMove_triggered();
@@ -124,6 +124,14 @@ private slots:
     void on_actionEncodingEucJP_triggered();
     void on_actionEncodingJIS_triggered();
     void on_actionEncodingShiftJIS_triggered();
+
+    // Traverse menu
+    void on_actionFirstMove_triggered();
+    void on_actionFastRewind_triggered();
+    void on_actionPreviousMove_triggered();
+    void on_actionNextMove_triggered();
+    void on_actionFastForward_triggered();
+    void on_actionLastMove_triggered();
 
     // View menu -> Move Number
     void on_actionNoMoveNumber_triggered();

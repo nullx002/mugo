@@ -134,6 +134,13 @@ alternate-background-color: rgb(255, 255, 127);</string>
     <property name="title">
      <string>&amp;Traverse</string>
     </property>
+    <addaction name="actionFirstMove"/>
+    <addaction name="actionFastRewind"/>
+    <addaction name="actionPreviousMove"/>
+    <addaction name="actionNextMove"/>
+    <addaction name="actionFastForward"/>
+    <addaction name="actionLastMove"/>
+    <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menu_View">
     <property name="title">
@@ -183,6 +190,12 @@ alternate-background-color: rgb(255, 255, 127);</string>
    <addaction name="menu_Help"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
+   <property name="iconSize">
+    <size>
+     <width>20</width>
+     <height>20</height>
+    </size>
+   </property>
    <attribute name="toolBarArea">
     <enum>TopToolBarArea</enum>
    </attribute>
@@ -241,6 +254,29 @@ alternate-background-color: rgb(255, 255, 127);</string>
      </item>
     </layout>
    </widget>
+  </widget>
+  <widget class="QToolBar" name="traverseToolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>20</width>
+     <height>20</height>
+    </size>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionFirstMove"/>
+   <addaction name="actionFastRewind"/>
+   <addaction name="actionPreviousMove"/>
+   <addaction name="actionNextMove"/>
+   <addaction name="actionFastForward"/>
+   <addaction name="actionLastMove"/>
   </widget>
   <action name="actionNew">
    <property name="icon">
@@ -691,6 +727,60 @@ alternate-background-color: rgb(255, 255, 127);</string>
    </property>
    <property name="text">
     <string>Interesting Move</string>
+   </property>
+  </action>
+  <action name="actionFirstMove">
+   <property name="icon">
+    <iconset>
+     <normaloff>:/res/firstmove.png</normaloff>:/res/firstmove.png</iconset>
+   </property>
+   <property name="text">
+    <string>First Move</string>
+   </property>
+  </action>
+  <action name="actionFastRewind">
+   <property name="icon">
+    <iconset>
+     <normaloff>:/res/fastrewind.png</normaloff>:/res/fastrewind.png</iconset>
+   </property>
+   <property name="text">
+    <string>Fast Rewind</string>
+   </property>
+  </action>
+  <action name="actionPreviousMove">
+   <property name="icon">
+    <iconset>
+     <normaloff>:/res/prevmove.png</normaloff>:/res/prevmove.png</iconset>
+   </property>
+   <property name="text">
+    <string>Previous Move</string>
+   </property>
+  </action>
+  <action name="actionNextMove">
+   <property name="icon">
+    <iconset>
+     <normaloff>:/res/nextmove.png</normaloff>:/res/nextmove.png</iconset>
+   </property>
+   <property name="text">
+    <string>Next Move</string>
+   </property>
+  </action>
+  <action name="actionFastForward">
+   <property name="icon">
+    <iconset>
+     <normaloff>:/res/fastforward.png</normaloff>:/res/fastforward.png</iconset>
+   </property>
+   <property name="text">
+    <string>Fast Forward</string>
+   </property>
+  </action>
+  <action name="actionLastMove">
+   <property name="icon">
+    <iconset>
+     <normaloff>:/res/lastmove.png</normaloff>:/res/lastmove.png</iconset>
+   </property>
+   <property name="text">
+    <string>Last Move</string>
    </property>
   </action>
  </widget>
