@@ -96,6 +96,25 @@ alternate-background-color: rgb(255, 255, 127);</string>
      <addaction name="actionEncodingJIS"/>
      <addaction name="actionEncodingShiftJIS"/>
     </widget>
+    <widget class="QMenu" name="menu_Annotation">
+     <property name="title">
+      <string>&amp;Annotation</string>
+     </property>
+     <addaction name="actionGoodMove"/>
+     <addaction name="actionVeryGoodMove"/>
+     <addaction name="actionBadMove"/>
+     <addaction name="actionVeryBadMove"/>
+     <addaction name="actionDoubtfulMove"/>
+     <addaction name="separator"/>
+     <addaction name="actionEven"/>
+     <addaction name="actionGoodForBlack"/>
+     <addaction name="actionVeryGoodForBlack"/>
+     <addaction name="actionGoodForWhite"/>
+     <addaction name="actionVeryGoodForWhite"/>
+     <addaction name="actionUnclear"/>
+     <addaction name="separator"/>
+     <addaction name="actionHotspot"/>
+    </widget>
     <addaction name="actionUndo"/>
     <addaction name="actionRedo"/>
     <addaction name="separator"/>
@@ -105,6 +124,8 @@ alternate-background-color: rgb(255, 255, 127);</string>
     <addaction name="actionDelete"/>
     <addaction name="separator"/>
     <addaction name="menuStone_Markers"/>
+    <addaction name="menu_Annotation"/>
+    <addaction name="actionEditNodeName"/>
     <addaction name="separator"/>
     <addaction name="menuEncoding"/>
    </widget>
@@ -554,6 +575,110 @@ alternate-background-color: rgb(255, 255, 127);</string>
   <action name="actionReload">
    <property name="text">
     <string>&amp;Reload</string>
+   </property>
+  </action>
+  <action name="actionGoodMove">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Good Move</string>
+   </property>
+  </action>
+  <action name="actionVeryGoodMove">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Very Good Move</string>
+   </property>
+  </action>
+  <action name="actionBadMove">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Bad Move</string>
+   </property>
+  </action>
+  <action name="actionVeryBadMove">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Very Bad Move</string>
+   </property>
+  </action>
+  <action name="actionDoubtfulMove">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Doubtful Move</string>
+   </property>
+  </action>
+  <action name="actionEven">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Even</string>
+   </property>
+  </action>
+  <action name="actionGoodForBlack">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Good for Black</string>
+   </property>
+  </action>
+  <action name="actionVeryGoodForBlack">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Very Good for Black</string>
+   </property>
+  </action>
+  <action name="actionGoodForWhite">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Good for White</string>
+   </property>
+  </action>
+  <action name="actionVeryGoodForWhite">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Very Good for White</string>
+   </property>
+  </action>
+  <action name="actionUnclear">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Unclear</string>
+   </property>
+  </action>
+  <action name="actionHotspot">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Hotspot</string>
+   </property>
+  </action>
+  <action name="actionEditNodeName">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Edit Node Name</string>
    </property>
   </action>
  </widget>
