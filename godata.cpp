@@ -79,8 +79,8 @@ void informationNode::initialize(){
     handicap = 0;
 }
 
-QString stoneNode::nodeName() const{
-    return "";
+bool stoneNode::isPass() const{
+    return position.x < 0 || position.y < 0 || position.x >= goData->root.size || position.y >= goData->root.size;
 }
 
 

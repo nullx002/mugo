@@ -856,6 +856,9 @@ QString MainWindow::createTreeText(const go::node* node){
         s.push_back(' ');
     s.append( node->toString() );
 
+    if (s.isEmpty())
+        s = "Other";
+
     return s;
 }
 
