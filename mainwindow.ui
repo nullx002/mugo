@@ -41,7 +41,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
      <x>0</x>
      <y>0</y>
      <width>733</width>
-     <height>24</height>
+     <height>18</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -105,6 +105,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
      <addaction name="actionBadMove"/>
      <addaction name="actionVeryBadMove"/>
      <addaction name="actionDoubtfulMove"/>
+     <addaction name="actionInterestingMove"/>
      <addaction name="separator"/>
      <addaction name="actionEven"/>
      <addaction name="actionGoodForBlack"/>
@@ -679,6 +680,14 @@ alternate-background-color: rgb(255, 255, 127);</string>
    </property>
    <property name="text">
     <string>Edit Node Name</string>
+   </property>
+  </action>
+  <action name="actionInterestingMove">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Interesting Move</string>
    </property>
   </action>
  </widget>

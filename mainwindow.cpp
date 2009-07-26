@@ -261,6 +261,10 @@ void MainWindow::on_actionDoubtfulMove_triggered(){
     setAnnotation1(ui->actionDoubtfulMove, go::node::eDoubtfulMove);
 }
 
+void MainWindow::on_actionInterestingMove_triggered(){
+    setAnnotation1(ui->actionInterestingMove, go::node::eInterestingMove);
+}
+
 void MainWindow::on_actionEven_triggered(){
     setAnnotation2(ui->actionEven, go::node::eEven);
 }
@@ -930,13 +934,14 @@ void MainWindow::setAnnotation(int annotation){
         ui->actionBadMove,
         ui->actionVeryBadMove,
         ui->actionDoubtfulMove,
+        ui->actionInterestingMove,
         ui->actionEven,
         ui->actionGoodForBlack,
         ui->actionVeryGoodForBlack,
         ui->actionGoodForWhite,
         ui->actionVeryGoodForWhite,
         ui->actionUnclear,
-        ui->actionEven,
+        ui->actionHotspot,
     };
     static const int N = sizeof(actions) / sizeof(actions[0]);
 
@@ -951,6 +956,7 @@ void MainWindow::setAnnotation1(QAction* action, int annotation){
         ui->actionBadMove,
         ui->actionVeryBadMove,
         ui->actionDoubtfulMove,
+        ui->actionInterestingMove,
     };
     static const int N = sizeof(actions) / sizeof(actions[0]);
 
