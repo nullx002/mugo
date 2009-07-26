@@ -73,6 +73,7 @@ private:
 
 private slots:
     // File menu
+    void on_actionEditNodeName_triggered();
     void on_actionPass_triggered();
     void on_actionNew_triggered();
     void on_actionOpen_triggered();

@@ -1,5 +1,6 @@
 #include <QDebug>
 #include <QFileDialog>
+#include <QInputDialog>
 #include <QMessageBox>
 #include <QtAlgorithms>
 #include "mainwindow.h"
@@ -241,56 +242,127 @@ void MainWindow::on_actionDeleteMarker_triggered(){
     setEditMode(ui->actionDeleteMarker, BoardWidget::eDeleteMarker);
 }
 
+/**
+* Slot
+* Edit -> Annotation -> Good Move
+*/
 void MainWindow::on_actionGoodMove_triggered(){
     setAnnotation1(ui->actionGoodMove, go::node::eGoodMove);
 }
 
+/**
+* Slot
+* Edit -> Annotation -> Very Good Move
+*/
 void MainWindow::on_actionVeryGoodMove_triggered(){
     setAnnotation1(ui->actionVeryGoodMove, go::node::eVeryGoodMove);
 }
 
+/**
+* Slot
+* Edit -> Annotation -> Bad Move
+*/
 void MainWindow::on_actionBadMove_triggered(){
     setAnnotation1(ui->actionBadMove, go::node::eBadMove);
 }
 
+/**
+* Slot
+* Edit -> Annotation -> Very Bad Move
+*/
 void MainWindow::on_actionVeryBadMove_triggered(){
     setAnnotation1(ui->actionVeryBadMove, go::node::eVeryBadMove);
 }
 
+/**
+* Slot
+* Edit -> Annotation -> Doubtful Move
+*/
 void MainWindow::on_actionDoubtfulMove_triggered(){
     setAnnotation1(ui->actionDoubtfulMove, go::node::eDoubtfulMove);
 }
 
+/**
+* Slot
+* Edit -> Annotation -> Interesting Move
+*/
 void MainWindow::on_actionInterestingMove_triggered(){
     setAnnotation1(ui->actionInterestingMove, go::node::eInterestingMove);
 }
 
+/**
+* Slot
+* Edit -> Annotation -> Even
+*/
 void MainWindow::on_actionEven_triggered(){
     setAnnotation2(ui->actionEven, go::node::eEven);
 }
 
+/**
+* Slot
+* Edit -> Annotation -> Good for Black
+*/
 void MainWindow::on_actionGoodForBlack_triggered(){
     setAnnotation2(ui->actionGoodForBlack, go::node::eGoodForBlack);
 }
 
+/**
+* Slot
+* Edit -> Annotation -> Very Good for Black
+*/
 void MainWindow::on_actionVeryGoodForBlack_triggered(){
     setAnnotation2(ui->actionVeryGoodForBlack, go::node::eVeryGoodForBlack);
 }
 
+/**
+* Slot
+* Edit -> Annotation -> Good for White
+*/
 void MainWindow::on_actionGoodForWhite_triggered(){
     setAnnotation2(ui->actionGoodForWhite, go::node::eGoodForWhite);
 }
 
+/**
+* Slot
+* Edit -> Annotation -> Very Good for White
+*/
 void MainWindow::on_actionVeryGoodForWhite_triggered(){
     setAnnotation2(ui->actionVeryGoodForWhite, go::node::eVeryGoodForWhite);
 }
 
+/**
+* Slot
+* Edit -> Annotation -> Unclear
+*/
 void MainWindow::on_actionUnclear_triggered(){
     setAnnotation2(ui->actionUnclear, go::node::eUnclear);
 }
 
+/**
+* Slot
+* Edit -> Annotation -> Hotspot
+*/
 void MainWindow::on_actionHotspot_triggered(){
     setAnnotation3(ui->actionHotspot, go::node::eHotspot);
+}
+
+/**
+* Slot
+* Edit -> Edit Node Name
+*/
+void MainWindow::on_actionEditNodeName_triggered(){
+    go::node* node = ui->boardWidget->getCurrentNode();
+    QInputDialog dlg(this);
+    dlg.setLabelText("Input node name");
+    dlg.setTextValue(node->name);
+    if (dlg.exec() != QDialog::Accepted)
+        return;
+
+    if (dlg.textValue() == node->name)
+        return;
+
+    node->name = dlg.textValue();
+    ui->boardWidget->modifyNode(node);
 }
 
 /**
@@ -774,6 +846,7 @@ QTreeWidgetItem* MainWindow::remakeTreeWidget(QTreeWidgetItem* currentWidget){
 QTreeWidgetItem* MainWindow::createTreeWidget(QTreeWidgetItem* parentWidget, go::node& node){
     // TreeItemを作成
     QTreeWidgetItem* nodeWidget = new QTreeWidgetItem( QStringList(createTreeText(&node)) );
+
     QVariant v;
     v.setValue(&node);
     nodeWidget->setData(0, Qt::UserRole, v);
