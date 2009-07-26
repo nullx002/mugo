@@ -130,7 +130,7 @@ public:
     virtual bool isBlack() const{ return false; }
     virtual bool isWhite() const{ return false; }
 
-    virtual QString nodeName() const{ static const QString str = "Other"; return str; }
+    virtual QString nodeName() const{ static const QString str = ""; return str; }
     virtual QString toString() const;
 
 //protected:
@@ -199,9 +199,7 @@ public:
 
 class stoneNode : public node{
 public:
-    virtual QString nodeName() const;
-
-    bool isPass() const{ return position.x == -1 && position.y == -1; }
+    bool isPass() const;
 
 protected:
     stoneNode(node* parent) : node(parent){}
@@ -234,13 +232,11 @@ class data{
 public:
     enum eRule{eJapanese, eChinese};
 
-    data() : root(this), size(19), komi(6.5){}
+    data() : root(this){}
 
     void clear();
 
     informationNode root;
-    int    size;
-    double komi;
 };
 
 
