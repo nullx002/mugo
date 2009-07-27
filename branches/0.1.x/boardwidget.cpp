@@ -566,13 +566,20 @@ bool BoardWidget::isDead(int x, int y){
 */
 bool BoardWidget::isKill(int x, int y){
     int* tmp = new int[size * size];
-    memset(tmp, 0, sizeof(int)*size*size);
 
     go::stone::color c = board[y][x].color == go::stone::black ? go::stone::white : go::stone::black;
-    bool dead = (y > 0 && board[y-1][x].color == c && isDead(tmp, c, x, y - 1)) ||
-                (y < size-1 && board[y+1][x].color == c && isDead(tmp, c, x, y + 1)) ||
-                (x > 0 && board[y][x-1].color == c && isDead(tmp, c, x - 1, y)) ||
-                (x < size-1 && board[y][x+1].color == c && isDead(tmp, c, x + 1, y));
+
+    memset(tmp, 0, sizeof(int)*size*size);
+    bool dead = (y > 0 && board[y-1][x].color == c && isDead(tmp, c, x, y - 1));
+
+    memset(tmp, 0, sizeof(int)*size*size);
+    dead = !dead ? (y < size-1 && board[y+1][x].color == c && isDead(tmp, c, x, y + 1)) : true;
+
+    memset(tmp, 0, sizeof(int)*size*size);
+    dead = !dead ? (x > 0 && board[y][x-1].color == c && isDead(tmp, c, x - 1, y)) : true;
+
+    memset(tmp, 0, sizeof(int)*size*size);
+    dead = !dead ? (x < size-1 && board[y][x+1].color == c && isDead(tmp, c, x + 1, y)) : true;
 
     delete[] tmp;
 
