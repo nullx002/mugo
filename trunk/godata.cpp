@@ -269,31 +269,32 @@ bool sgf::node::set(const go::node& n){
         else
             property["SZ"].push_back( QString("%1:%2").arg(infoNode->xsize).arg(infoNode->ysize) );
         property["KM"].push_back( QString("%1").arg(infoNode->komi) );
-        property["HA"].push_back( QString("%1").arg(infoNode->handicap) );
-        property["RU"].push_back( infoNode->rule );
 
-        property["PW"].push_back( infoNode->whitePlayer );
-        property["WR"].push_back( infoNode->whiteRank );
-        property["WT"].push_back( infoNode->whiteTeam );
-        property["PB"].push_back( infoNode->blackPlayer );
-        property["BR"].push_back( infoNode->blackRank );
-        property["BT"].push_back( infoNode->blackTeam );
-        property["RE"].push_back( infoNode->result );
-        property["TM"].push_back( infoNode->time );
-        property["OT"].push_back( infoNode->overTime );
+        if (infoNode->handicap != 0)   property["HA"].push_back( QString("%1").arg(infoNode->handicap) );
+        if (!infoNode->rule.isEmpty()) property["RU"].push_back( infoNode->rule );
 
-        property["DT"].push_back( infoNode->date );
-        property["GN"].push_back( infoNode->gameName );
-        property["RO"].push_back( infoNode->round );
-        property["PC"].push_back( infoNode->place );
-        property["EV"].push_back( infoNode->event );
+        if (!infoNode->whitePlayer.isEmpty()) property["PW"].push_back( infoNode->whitePlayer );
+        if (!infoNode->whiteRank.isEmpty())   property["WR"].push_back( infoNode->whiteRank );
+        if (!infoNode->whiteTeam.isEmpty())   property["WT"].push_back( infoNode->whiteTeam );
+        if (!infoNode->blackPlayer.isEmpty()) property["PB"].push_back( infoNode->blackPlayer );
+        if (!infoNode->blackRank.isEmpty())   property["BR"].push_back( infoNode->blackRank );
+        if (!infoNode->blackTeam.isEmpty())   property["BT"].push_back( infoNode->blackTeam );
+        if (!infoNode->result.isEmpty())      property["RE"].push_back( infoNode->result );
+        if (!infoNode->time.isEmpty())        property["TM"].push_back( infoNode->time );
+        if (!infoNode->overTime.isEmpty())    property["OT"].push_back( infoNode->overTime );
 
-        property["GC"].push_back( infoNode->gameComment );
-        property["AN"].push_back( infoNode->annotation );
-        property["CP"].push_back( infoNode->copyright );
-        property["ON"].push_back( infoNode->opening );
-        property["SO"].push_back( infoNode->source );
-        property["US"].push_back( infoNode->user );
+        if (!infoNode->date.isEmpty())        property["DT"].push_back( infoNode->date );
+        if (!infoNode->gameName.isEmpty())    property["GN"].push_back( infoNode->gameName );
+        if (!infoNode->round.isEmpty())       property["RO"].push_back( infoNode->round );
+        if (!infoNode->place.isEmpty())       property["PC"].push_back( infoNode->place );
+        if (!infoNode->event.isEmpty())       property["EV"].push_back( infoNode->event );
+
+        if (!infoNode->gameComment.isEmpty()) property["GC"].push_back( infoNode->gameComment );
+        if (!infoNode->annotation.isEmpty())  property["AN"].push_back( infoNode->annotation );
+        if (!infoNode->copyright.isEmpty())   property["CP"].push_back( infoNode->copyright );
+        if (!infoNode->opening.isEmpty())     property["ON"].push_back( infoNode->opening );
+        if (!infoNode->source.isEmpty())      property["SO"].push_back( infoNode->source );
+        if (!infoNode->user.isEmpty())        property["US"].push_back( infoNode->user );
     }
     else if (stoneNode){
         x = n.position.x;
