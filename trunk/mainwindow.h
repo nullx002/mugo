@@ -150,6 +150,11 @@ private slots:
     void on_actionBranchWindow_triggered();
     void on_actionCommentWindow_triggered();
 
+    // Option menu
+    void on_action19x19Board_triggered();
+    void on_action13x13Board_triggered();
+    void on_action9x9Board_triggered();
+
     // Help menu
     void on_actionAbout_triggered();
     void on_actionAboutQT_triggered();

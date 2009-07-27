@@ -54,6 +54,7 @@ public:
     void setEditMode(eEditMode editMode){ this->editMode = editMode; }
     void setShowMoveNumber(int number){ showMoveNumber = number; repaint(); }
     void setAnnotation(int annotation){ currentNode->annotation = (go::node::eAnnotation)annotation; modifyNode(currentNode); }
+    void setBoardSize(int xsize, int ysize);
 
     QString getXString(int x) const;
     QString getYString(int y) const;
@@ -87,6 +88,7 @@ protected:
     void drawTerritory(QPainter& p, go::markList::iterator first, go::markList::iterator last);
     void drawCurrentMark(QPainter& p, go::node* node);
     void eraseBackground(QPainter& p, int x, int y);
+    void getStartPosition(QList<int>& star, int size);
 
     // buffer
     void putStone(go::node* n, int moveNumber);
@@ -109,7 +111,6 @@ private:
     // data
     bool dirty;
     go::data goData;
-    int size;
     int black;
     go::nodeList nodeList;
     go::node* currentNode;

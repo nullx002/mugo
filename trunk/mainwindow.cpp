@@ -669,6 +669,30 @@ void MainWindow::on_actionBranchWindow_triggered(){
 
 /**
 * Slot
+* Options -> 19 x 19 Board
+*/
+void MainWindow::on_action19x19Board_triggered(){
+    ui->boardWidget->setBoardSize(19, 19);
+}
+
+/**
+* Slot
+* Options -> 13 x 13 Board
+*/
+void MainWindow::on_action13x13Board_triggered(){
+    ui->boardWidget->setBoardSize(13, 13);
+}
+
+/**
+* Slot
+* Options -> 9 x 9 Board
+*/
+void MainWindow::on_action9x9Board_triggered(){
+    ui->boardWidget->setBoardSize(9, 9);
+}
+
+/**
+* Slot
 * Help -> About
 */
 void MainWindow::on_actionAbout_triggered(){

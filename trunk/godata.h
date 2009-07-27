@@ -165,7 +165,8 @@ public:
     void initialize();
 
     // rule
-    int    size;
+    int    xsize;
+    int    ysize;
     double komi;
     int    handicap;
     QString time;

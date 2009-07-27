@@ -74,13 +74,14 @@ QString node::toString() const{
 }
 
 void informationNode::initialize(){
-    size = 19;
+    xsize = 19;
+    ysize = 19;
     komi = 6.5;
     handicap = 0;
 }
 
 bool stoneNode::isPass() const{
-    return position.x < 0 || position.y < 0 || position.x >= goData->root.size || position.y >= goData->root.size;
+    return position.x < 0 || position.y < 0 || position.x >= goData->root.xsize || position.y >= goData->root.ysize;
 }
 
 
@@ -263,7 +264,10 @@ bool sgf::node::set(const go::node& n){
         property["GM"].push_back("1");
         property["FF"].push_back("4");
         property["AP"].push_back(APP_NAME ":" VERSION);
-        property["SZ"].push_back( QString("%1").arg(infoNode->size) );
+        if (infoNode->xsize == infoNode->ysize)
+            property["SZ"].push_back( QString("%1").arg(infoNode->xsize) );
+        else
+            property["SZ"].push_back( QString("%1:%2").arg(infoNode->xsize).arg(infoNode->ysize) );
         property["KM"].push_back( QString("%1").arg(infoNode->komi) );
         property["HA"].push_back( QString("%1").arg(infoNode->handicap) );
         property["RU"].push_back( infoNode->rule );
@@ -413,8 +417,15 @@ bool sgf::node::get(go::node& n, const QString& key, const QStringList& values) 
         infoNode->blackTeam = values[0];
     else if (infoNode && key == "RE")
         infoNode->result = values[0];
-    else if (infoNode && key == "SZ")
-        infoNode->size = values[0].toInt();
+    else if (infoNode && key == "SZ"){
+        int p = values[0].indexOf(":");
+        if (p == -1)
+            infoNode->xsize = infoNode->ysize = values[0].toInt();
+        else{
+            infoNode->xsize = values[0].left(p).toInt();
+            infoNode->ysize = values[0].mid(p+1).toInt();
+        }
+    }
     else if (infoNode && key == "KM")
         infoNode->komi = values[0].toDouble();
     else if (infoNode && key == "HA")
