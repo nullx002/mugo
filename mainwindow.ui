@@ -14,7 +14,7 @@
    <string>mgo</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="resources.qrc">
+   <iconset>
     <normaloff>:/res/mgo.png</normaloff>:/res/mgo.png</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
@@ -41,7 +41,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
      <x>0</x>
      <y>0</y>
      <width>733</width>
-     <height>18</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -176,6 +176,9 @@ alternate-background-color: rgb(255, 255, 127);</string>
     <property name="title">
      <string>&amp;Options</string>
     </property>
+    <addaction name="action19x19Board"/>
+    <addaction name="action13x13Board"/>
+    <addaction name="action9x9Board"/>
    </widget>
    <widget class="QMenu" name="menu_Help">
     <property name="title">
@@ -287,7 +290,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
   </widget>
   <action name="actionNew">
    <property name="icon">
-    <iconset resource="resources.qrc">
+    <iconset>
      <normaloff>:/res/filenew.png</normaloff>:/res/filenew.png</iconset>
    </property>
    <property name="text">
@@ -299,7 +302,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
   </action>
   <action name="actionOpen">
    <property name="icon">
-    <iconset resource="resources.qrc">
+    <iconset>
      <normaloff>:/res/fileopen.png</normaloff>:/res/fileopen.png</iconset>
    </property>
    <property name="text">
@@ -314,7 +317,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
   </action>
   <action name="actionSave">
    <property name="icon">
-    <iconset resource="resources.qrc">
+    <iconset>
      <normaloff>:/res/filesave.png</normaloff>:/res/filesave.png</iconset>
    </property>
    <property name="text">
@@ -417,7 +420,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
   </action>
   <action name="actionSaveBoardAsPicture">
    <property name="icon">
-    <iconset resource="resources.qrc">
+    <iconset>
      <normaloff>:/res/saveimage.png</normaloff>:/res/saveimage.png</iconset>
    </property>
    <property name="text">
@@ -446,7 +449,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
   </action>
   <action name="actionDelete">
    <property name="icon">
-    <iconset resource="resources.qrc">
+    <iconset>
      <normaloff>:/res/remove.png</normaloff>:/res/remove.png</iconset>
    </property>
    <property name="text">
@@ -628,7 +631,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
   </action>
   <action name="actionReload">
    <property name="icon">
-    <iconset resource="resources.qrc">
+    <iconset>
      <normaloff>:/res/reload.png</normaloff>:/res/reload.png</iconset>
    </property>
    <property name="text">
@@ -746,7 +749,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
   </action>
   <action name="actionFirstMove">
    <property name="icon">
-    <iconset resource="resources.qrc">
+    <iconset>
      <normaloff>:/res/firstmove.png</normaloff>:/res/firstmove.png</iconset>
    </property>
    <property name="text">
@@ -755,7 +758,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
   </action>
   <action name="actionFastRewind">
    <property name="icon">
-    <iconset resource="resources.qrc">
+    <iconset>
      <normaloff>:/res/fastrewind.png</normaloff>:/res/fastrewind.png</iconset>
    </property>
    <property name="text">
@@ -764,7 +767,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
   </action>
   <action name="actionPreviousMove">
    <property name="icon">
-    <iconset resource="resources.qrc">
+    <iconset>
      <normaloff>:/res/prevmove.png</normaloff>:/res/prevmove.png</iconset>
    </property>
    <property name="text">
@@ -773,7 +776,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
   </action>
   <action name="actionNextMove">
    <property name="icon">
-    <iconset resource="resources.qrc">
+    <iconset>
      <normaloff>:/res/nextmove.png</normaloff>:/res/nextmove.png</iconset>
    </property>
    <property name="text">
@@ -782,7 +785,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
   </action>
   <action name="actionFastForward">
    <property name="icon">
-    <iconset resource="resources.qrc">
+    <iconset>
      <normaloff>:/res/fastforward.png</normaloff>:/res/fastforward.png</iconset>
    </property>
    <property name="text">
@@ -791,7 +794,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
   </action>
   <action name="actionLastMove">
    <property name="icon">
-    <iconset resource="resources.qrc">
+    <iconset>
      <normaloff>:/res/lastmove.png</normaloff>:/res/lastmove.png</iconset>
    </property>
    <property name="text">
@@ -800,7 +803,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
   </action>
   <action name="actionBackToParent">
    <property name="icon">
-    <iconset resource="resources.qrc">
+    <iconset>
      <normaloff>:/res/backparent.png</normaloff>:/res/backparent.png</iconset>
    </property>
    <property name="text">
@@ -809,7 +812,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
   </action>
   <action name="actionPreviousBranch">
    <property name="icon">
-    <iconset resource="resources.qrc">
+    <iconset>
      <normaloff>:/res/prevbranch.png</normaloff>:/res/prevbranch.png</iconset>
    </property>
    <property name="text">
@@ -818,11 +821,26 @@ alternate-background-color: rgb(255, 255, 127);</string>
   </action>
   <action name="actionNextBranch">
    <property name="icon">
-    <iconset resource="resources.qrc">
+    <iconset>
      <normaloff>:/res/nextbranch.png</normaloff>:/res/nextbranch.png</iconset>
    </property>
    <property name="text">
     <string>Next Branch</string>
+   </property>
+  </action>
+  <action name="action19x19Board">
+   <property name="text">
+    <string>19 x 19 Board</string>
+   </property>
+  </action>
+  <action name="action13x13Board">
+   <property name="text">
+    <string>13 x 13 Board</string>
+   </property>
+  </action>
+  <action name="action9x9Board">
+   <property name="text">
+    <string>9 x 9 Board</string>
    </property>
   </action>
  </widget>
@@ -835,8 +853,6 @@ alternate-background-color: rgb(255, 255, 127);</string>
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources>
-  <include location="resources.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>
