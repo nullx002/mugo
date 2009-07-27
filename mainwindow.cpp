@@ -486,6 +486,8 @@ void MainWindow::on_actionNextMove_triggered(){
         return;
     if (++iter != nodeList.end())
         ui->boardWidget->setCurrentNode(*iter);
+    else if (!node->childNodes.empty())
+        ui->boardWidget->setCurrentNode( node->childNodes.front() );
 }
 
 /**
@@ -672,7 +674,7 @@ void MainWindow::on_actionBranchWindow_triggered(){
 * Options -> 19 x 19 Board
 */
 void MainWindow::on_action19x19Board_triggered(){
-    ui->boardWidget->setBoardSize(19, 19);
+    setBoardSize(19, 19);
 }
 
 /**
@@ -680,7 +682,7 @@ void MainWindow::on_action19x19Board_triggered(){
 * Options -> 13 x 13 Board
 */
 void MainWindow::on_action13x13Board_triggered(){
-    ui->boardWidget->setBoardSize(13, 13);
+    setBoardSize(13, 13);
 }
 
 /**
@@ -688,7 +690,7 @@ void MainWindow::on_action13x13Board_triggered(){
 * Options -> 9 x 9 Board
 */
 void MainWindow::on_action9x9Board_triggered(){
-    ui->boardWidget->setBoardSize(9, 9);
+    setBoardSize(9, 9);
 }
 
 /**
@@ -955,6 +957,7 @@ void MainWindow::setTreeData(){
 
     addTreeWidget(NULL, ui->boardWidget->getData().root);
     ui->boardWidget->setCurrentNode();
+    ui->boardWidget->repaint();
 }
 
 QTreeWidgetItem* MainWindow::addTreeWidget(go::node& node){
@@ -1234,4 +1237,10 @@ void MainWindow::setAnnotation2(QAction* action, int annotation){
 void MainWindow::setAnnotation3(QAction* action, int annotation){
     annotation3 = action->isChecked() ? annotation : 0;
     ui->boardWidget->setAnnotation(annotation1 | annotation2 | annotation3);
+}
+
+void MainWindow::setBoardSize(int xsize, int ysize){
+    if (fileNew() == false)
+        return;
+    ui->boardWidget->setBoardSize(xsize, ysize);
 }
