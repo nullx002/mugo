@@ -41,7 +41,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
      <x>0</x>
      <y>0</y>
      <width>733</width>
-     <height>20</height>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -162,10 +162,18 @@ alternate-background-color: rgb(255, 255, 127);</string>
      <addaction name="actionLast50Moves"/>
      <addaction name="actionAllMoves"/>
     </widget>
+    <widget class="QMenu" name="menuToolbars">
+     <property name="title">
+      <string>Toolbars</string>
+     </property>
+     <addaction name="actionMainToolbar"/>
+     <addaction name="actionTraverseToolbar"/>
+    </widget>
     <addaction name="menuMove_Number"/>
     <addaction name="separator"/>
     <addaction name="actionCommentWindow"/>
     <addaction name="actionBranchWindow"/>
+    <addaction name="menuToolbars"/>
    </widget>
    <widget class="QMenu" name="menuTool_s">
     <property name="title">
@@ -841,6 +849,28 @@ alternate-background-color: rgb(255, 255, 127);</string>
   <action name="action9x9Board">
    <property name="text">
     <string>9 x 9 Board</string>
+   </property>
+  </action>
+  <action name="actionMainToolbar">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Main Toolbar</string>
+   </property>
+  </action>
+  <action name="actionTraverseToolbar">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Traverse Toolbar</string>
    </property>
   </action>
  </widget>

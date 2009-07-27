@@ -75,6 +75,8 @@ private:
 
 private slots:
     // File menu
+    void on_actionTraverseToolbar_triggered();
+    void on_actionMainToolbar_triggered();
     void on_actionNew_triggered();
     void on_actionOpen_triggered();
     void on_actionReload_triggered();
