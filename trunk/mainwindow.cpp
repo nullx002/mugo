@@ -652,10 +652,10 @@ void MainWindow::on_actionAllMoves_triggered(){
 * View -> Comment Window
 */
 void MainWindow::on_actionCommentWindow_triggered(){
-    if (ui->commentDockWidget->isVisible())
-        ui->commentDockWidget->hide();
-    else
+    if (ui->actionCommentWindow->isChecked())
         ui->commentDockWidget->show();
+    else
+        ui->commentDockWidget->hide();
 }
 
 /**
@@ -663,10 +663,25 @@ void MainWindow::on_actionCommentWindow_triggered(){
 * View -> Branch Window
 */
 void MainWindow::on_actionBranchWindow_triggered(){
-    if (ui->branchDockWidget->isVisible())
-        ui->branchDockWidget->hide();
-    else
+    if (ui->actionBranchWindow->isChecked())
         ui->branchDockWidget->show();
+    else
+        ui->branchDockWidget->hide();
+}
+
+
+void MainWindow::on_actionMainToolbar_triggered(){
+    if (ui->actionMainToolbar->isChecked())
+        ui->mainToolBar->show();
+    else
+        ui->mainToolBar->hide();
+}
+
+void MainWindow::on_actionTraverseToolbar_triggered(){
+    if (ui->actionTraverseToolbar->isChecked())
+        ui->traverseToolBar->show();
+    else
+        ui->traverseToolBar->hide();
 }
 
 /**
