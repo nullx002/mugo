@@ -18,12 +18,12 @@ public:
     enum eEditMode{ eAlternateMove, eAddBlack, eAddWhite, eAddEmpty, eLabelMark, eCrossMark, eCircleMark, eSquareMark, eTriangleMark, eDeleteMarker };
 
     struct stoneInfo{
-        stoneInfo() : number(0), color(go::stone::eEmpty){}
-        bool empty() const{ return color == go::stone::eEmpty; }
-        bool black() const{ return color == go::stone::eBlack; }
-        bool white() const{ return color == go::stone::eWhite; }
+        stoneInfo() : number(0), color(go::stone::empty){}
+        bool empty() const{ return color == go::stone::empty; }
+        bool black() const{ return color == go::stone::black; }
+        bool white() const{ return color == go::stone::white; }
         int number;
-        go::stone::eColor color;
+        go::stone::color color;
     };
 
     explicit BoardWidget(QWidget *parent = 0);
@@ -44,7 +44,6 @@ public:
     // get node
     go::data& getData(){ return goData; }
     go::node* getCurrentNode(){ return currentNode; }
-    const go::nodeList& getCurrentNodeList() const{ return nodeList; }
 
     // dirty flag
     bool isDirty() const{ return dirty; }
@@ -52,9 +51,7 @@ public:
 
     // set option
     void setEditMode(eEditMode editMode){ this->editMode = editMode; }
-    void setShowMoveNumber(int number){ showMoveNumber = number; repaint(); }
-    void setAnnotation(int annotation){ currentNode->annotation = (go::node::eAnnotation)annotation; modifyNode(currentNode); }
-    void setBoardSize(int xsize, int ysize);
+    void setShowMoveNumber(int number){ showMoveNumber = number; }
 
     QString getXString(int x) const;
     QString getYString(int y) const;
@@ -88,7 +85,6 @@ protected:
     void drawTerritory(QPainter& p, go::markList::iterator first, go::markList::iterator last);
     void drawCurrentMark(QPainter& p, go::node* node);
     void eraseBackground(QPainter& p, int x, int y);
-    void getStartPosition(QList<int>& star, int size);
 
     // buffer
     void putStone(go::node* n, int moveNumber);
@@ -103,7 +99,7 @@ protected:
     void addMark(go::markList& markList, const go::mark& mark);
     void addCharacter(go::markList& markList, const go::point& p);
     void removeMark(go::markList& markList, const go::point& p);
-    void addStone(go::stoneList& stoneList, const go::point& p, go::stone::eColor color);
+    void addStone(go::stoneList& stoneList, const go::point& p, go::stone::color color);
 
 private:
     Ui::BoardWidget *m_ui;
@@ -111,6 +107,7 @@ private:
     // data
     bool dirty;
     go::data goData;
+    int size;
     int black;
     go::nodeList nodeList;
     go::node* currentNode;

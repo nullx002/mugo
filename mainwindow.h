@@ -43,10 +43,6 @@ private:
     void setEncoding(QAction* action, const char* codecName);
     void setShowMoveNumber(QAction* action, int moveNumber);
     void setEditMode(QAction* action, BoardWidget::eEditMode editMode);
-    void setAnnotation(int annotation);
-    void setAnnotation1(QAction* action, int annotation);
-    void setAnnotation2(QAction* action, int annotation);
-    void setAnnotation3(QAction* action, int annotation);
 
     void setTreeData();
     QTreeWidgetItem* addTreeWidget(go::node& n);
@@ -67,15 +63,12 @@ private:
     QString documentName;
     QString fileName;
     NodeToTreeWidgetType nodeToTreeWidget;
-    int annotation1;
-    int annotation2;
-    int annotation3;
 
 private slots:
     // File menu
+    void on_actionPass_triggered();
     void on_actionNew_triggered();
     void on_actionOpen_triggered();
-    void on_actionReload_triggered();
     void on_actionSave_triggered();
     void on_actionSaveAs_triggered();
     void on_actionSaveBoardAsPicture_triggered();
@@ -84,8 +77,6 @@ private slots:
     // Edit menu
     void on_actionGameInformation_triggered();
     void on_actionDelete_triggered();
-    void on_actionPass_triggered();
-    void on_actionEditNodeName_triggered();
 
     // Edit menu -> Stone & Marker
     void on_actionAlternateMove_triggered();
@@ -99,21 +90,6 @@ private slots:
     void on_actionAddTriangle_triggered();
     void on_actionDeleteMarker_triggered();
 
-    // Edit menu -> Annotation
-    void on_actionGoodMove_triggered();
-    void on_actionVeryGoodMove_triggered();
-    void on_actionBadMove_triggered();
-    void on_actionVeryBadMove_triggered();
-    void on_actionDoubtfulMove_triggered();
-    void on_actionInterestingMove_triggered();
-    void on_actionEven_triggered();
-    void on_actionGoodForBlack_triggered();
-    void on_actionVeryGoodForBlack_triggered();
-    void on_actionGoodForWhite_triggered();
-    void on_actionVeryGoodForWhite_triggered();
-    void on_actionUnclear_triggered();
-    void on_actionHotspot_triggered();
-
     // Edit menu -> Encoding
     void on_actionEncodingUTF8_triggered();
     void on_actionWindows_1252_triggered();
@@ -124,17 +100,6 @@ private slots:
     void on_actionEncodingEucJP_triggered();
     void on_actionEncodingJIS_triggered();
     void on_actionEncodingShiftJIS_triggered();
-
-    // Traverse menu
-    void on_actionFirstMove_triggered();
-    void on_actionFastRewind_triggered();
-    void on_actionPreviousMove_triggered();
-    void on_actionNextMove_triggered();
-    void on_actionFastForward_triggered();
-    void on_actionLastMove_triggered();
-    void on_actionBackToParent_triggered();
-    void on_actionPreviousBranch_triggered();
-    void on_actionNextBranch_triggered();
 
     // View menu -> Move Number
     void on_actionNoMoveNumber_triggered();
@@ -149,11 +114,6 @@ private slots:
     // View menu
     void on_actionBranchWindow_triggered();
     void on_actionCommentWindow_triggered();
-
-    // Option menu
-    void on_action19x19Board_triggered();
-    void on_action13x13Board_triggered();
-    void on_action9x9Board_triggered();
 
     // Help menu
     void on_actionAbout_triggered();

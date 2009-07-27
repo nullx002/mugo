@@ -11,6 +11,10 @@
 namespace go{
 
 
+QString x_str(int size, int x);
+QString y_str(int size, int x);
+
+
 class point{
 public:
     point() : x(-1), y(-1){}
@@ -64,17 +68,17 @@ public:
 
 class stone{
 public:
-    enum eColor{ eEmpty, eBlack, eWhite };
+    enum color{ empty, black, white };
 
-    stone(const point& p_, eColor c_) : p(p_), c(c_){}
-    stone(int x, int y, eColor c_) : p(x, y), c(c_){}
+    stone(const point& p_, color c_) : p(p_), c(c_){}
+    stone(int x, int y, color c_) : p(x, y), c(c_){}
 
-    bool isBlack() const{ return c == eBlack; }
-    bool isWhite() const{ return c == eWhite; }
-    bool isEmpty() const{ return c == eEmpty; }
+    bool isBlack() const{ return c == black; }
+    bool isWhite() const{ return c == white; }
+    bool isEmpty() const{ return c == empty; }
 
-    point  p;
-    eColor c;
+    point p;
+    color c;
 };
 
 typedef QLinkedList<mark>  markList;
@@ -87,23 +91,6 @@ typedef QLinkedList<node*> nodeList;
 
 class node{
 public:
-    enum eAnnotation{
-        eNoAnnotation = 0x0000,
-        eGoodMove = 0x0001,
-        eVeryGoodMove = 0x0002,
-        eBadMove = 0x0004,
-        eVeryBadMove = 0x0008,
-        eDoubtfulMove = 0x0010,
-        eInterestingMove = 0x0020,
-        eEven = 0x0040,
-        eGoodForBlack = 0x0080,
-        eVeryGoodForBlack = 0x0100,
-        eGoodForWhite = 0x0200,
-        eVeryGoodForWhite = 0x0400,
-        eUnclear = 0x0800,
-        eHotspot = 0x1000,
-    };
-
     explicit node(data* data_);
     explicit node(node* parent);
     virtual ~node(){  clear();  }
@@ -130,15 +117,14 @@ public:
     virtual bool isBlack() const{ return false; }
     virtual bool isWhite() const{ return false; }
 
-    virtual QString nodeName() const{ return name; }
+    virtual QString nodeName() const{ static const QString str = "Other"; return str; }
     virtual QString toString() const;
 
 //protected:
     // node
     data* goData;
     node* parent;
-    nodeList  childNodes;
-    QString   name;
+    nodeList childNodes;
     markList  crosses;
     markList  triangles;
     markList  circles;
@@ -147,7 +133,6 @@ public:
     markList  blackTerritories;
     markList  whiteTerritories;
     stoneList stones;
-    int annotation;
     QString comment;
     point position;
 };
@@ -165,8 +150,7 @@ public:
     void initialize();
 
     // rule
-    int    xsize;
-    int    ysize;
+    int    size;
     double komi;
     int    handicap;
     QString time;
@@ -201,7 +185,9 @@ public:
 
 class stoneNode : public node{
 public:
-    bool isPass() const;
+    virtual QString nodeName() const;
+
+    bool isPass() const{ return position.x == -1 && position.y == -1; }
 
 protected:
     stoneNode(node* parent) : node(parent){}
@@ -234,11 +220,13 @@ class data{
 public:
     enum eRule{eJapanese, eChinese};
 
-    data() : root(this){}
+    data() : root(this), size(19), komi(6.5){}
 
     void clear();
 
     informationNode root;
+    int    size;
+    double komi;
 };
 
 
