@@ -1,6 +1,5 @@
 #include <QDebug>
 #include <QFileDialog>
-#include <QInputDialog>
 #include <QMessageBox>
 #include <QtAlgorithms>
 #include "mainwindow.h"
@@ -12,9 +11,6 @@ Q_DECLARE_METATYPE(go::node*);
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
-    , annotation1(go::node::eNoAnnotation)
-    , annotation2(go::node::eNoAnnotation)
-    , annotation3(go::node::eNoAnnotation)
 {
     ui->setupUi(this);
 
@@ -55,16 +51,6 @@ void MainWindow::on_actionNew_triggered(){
 */
 void MainWindow::on_actionOpen_triggered(){
     fileOpen();
-}
-
-/**
-* Slot
-* File -> Reload
-*/
-void MainWindow::on_actionReload_triggered(){
-    if (maybeSave() == false)
-        return;
-    fileOpen(fileName);
 }
 
 /**
@@ -244,129 +230,6 @@ void MainWindow::on_actionDeleteMarker_triggered(){
 
 /**
 * Slot
-* Edit -> Annotation -> Good Move
-*/
-void MainWindow::on_actionGoodMove_triggered(){
-    setAnnotation1(ui->actionGoodMove, go::node::eGoodMove);
-}
-
-/**
-* Slot
-* Edit -> Annotation -> Very Good Move
-*/
-void MainWindow::on_actionVeryGoodMove_triggered(){
-    setAnnotation1(ui->actionVeryGoodMove, go::node::eVeryGoodMove);
-}
-
-/**
-* Slot
-* Edit -> Annotation -> Bad Move
-*/
-void MainWindow::on_actionBadMove_triggered(){
-    setAnnotation1(ui->actionBadMove, go::node::eBadMove);
-}
-
-/**
-* Slot
-* Edit -> Annotation -> Very Bad Move
-*/
-void MainWindow::on_actionVeryBadMove_triggered(){
-    setAnnotation1(ui->actionVeryBadMove, go::node::eVeryBadMove);
-}
-
-/**
-* Slot
-* Edit -> Annotation -> Doubtful Move
-*/
-void MainWindow::on_actionDoubtfulMove_triggered(){
-    setAnnotation1(ui->actionDoubtfulMove, go::node::eDoubtfulMove);
-}
-
-/**
-* Slot
-* Edit -> Annotation -> Interesting Move
-*/
-void MainWindow::on_actionInterestingMove_triggered(){
-    setAnnotation1(ui->actionInterestingMove, go::node::eInterestingMove);
-}
-
-/**
-* Slot
-* Edit -> Annotation -> Even
-*/
-void MainWindow::on_actionEven_triggered(){
-    setAnnotation2(ui->actionEven, go::node::eEven);
-}
-
-/**
-* Slot
-* Edit -> Annotation -> Good for Black
-*/
-void MainWindow::on_actionGoodForBlack_triggered(){
-    setAnnotation2(ui->actionGoodForBlack, go::node::eGoodForBlack);
-}
-
-/**
-* Slot
-* Edit -> Annotation -> Very Good for Black
-*/
-void MainWindow::on_actionVeryGoodForBlack_triggered(){
-    setAnnotation2(ui->actionVeryGoodForBlack, go::node::eVeryGoodForBlack);
-}
-
-/**
-* Slot
-* Edit -> Annotation -> Good for White
-*/
-void MainWindow::on_actionGoodForWhite_triggered(){
-    setAnnotation2(ui->actionGoodForWhite, go::node::eGoodForWhite);
-}
-
-/**
-* Slot
-* Edit -> Annotation -> Very Good for White
-*/
-void MainWindow::on_actionVeryGoodForWhite_triggered(){
-    setAnnotation2(ui->actionVeryGoodForWhite, go::node::eVeryGoodForWhite);
-}
-
-/**
-* Slot
-* Edit -> Annotation -> Unclear
-*/
-void MainWindow::on_actionUnclear_triggered(){
-    setAnnotation2(ui->actionUnclear, go::node::eUnclear);
-}
-
-/**
-* Slot
-* Edit -> Annotation -> Hotspot
-*/
-void MainWindow::on_actionHotspot_triggered(){
-    setAnnotation3(ui->actionHotspot, go::node::eHotspot);
-}
-
-/**
-* Slot
-* Edit -> Edit Node Name
-*/
-void MainWindow::on_actionEditNodeName_triggered(){
-    go::node* node = ui->boardWidget->getCurrentNode();
-    QInputDialog dlg(this);
-    dlg.setLabelText("Input node name");
-    dlg.setTextValue(node->name);
-    if (dlg.exec() != QDialog::Accepted)
-        return;
-
-    if (dlg.textValue() == node->name)
-        return;
-
-    node->name = dlg.textValue();
-    ui->boardWidget->modifyNode(node);
-}
-
-/**
-* Slot
 * Advance -> Encoding -> UTF-8
 */
 void MainWindow::on_actionEncodingUTF8_triggered(){
@@ -435,150 +298,6 @@ void MainWindow::on_actionEncodingEucJP_triggered(){
 */
 void MainWindow::on_actionEncodingKorean_triggered(){
     setEncoding(ui->actionEncodingKorean, "EUC-KR");
-}
-
-/**
-* Slot
-* Traverse -> First Move
-*/
-void MainWindow::on_actionFirstMove_triggered(){
-    go::node* node = ui->boardWidget->getCurrentNode();
-    ui->boardWidget->setCurrentNode( &node->goData->root );
-}
-
-/**
-* Slot
-* Traverse -> Fast Rewind
-*/
-void MainWindow::on_actionFastRewind_triggered(){
-    go::node* node = ui->boardWidget->getCurrentNode();
-    if (node->parent == NULL)
-        return;
-
-    for (int i=0; i<5; ++i){
-        if (node->parent)
-            node = node->parent;
-        else
-            break;
-    }
-    ui->boardWidget->setCurrentNode(node);
-}
-
-/**
-* Slot
-* Traverse -> Previous Move
-*/
-void MainWindow::on_actionPreviousMove_triggered(){
-    go::node* node = ui->boardWidget->getCurrentNode();
-    if (node->parent)
-        ui->boardWidget->setCurrentNode(node->parent);
-}
-
-/**
-* Slot
-* Traverse -> Next Move
-*/
-void MainWindow::on_actionNextMove_triggered(){
-    go::node* node = ui->boardWidget->getCurrentNode();
-    const go::nodeList& nodeList = ui->boardWidget->getCurrentNodeList();
-    go::nodeList::const_iterator iter = qFind(nodeList.begin(), nodeList.end(), node);
-    if (iter == nodeList.end())
-        return;
-    if (++iter != nodeList.end())
-        ui->boardWidget->setCurrentNode(*iter);
-}
-
-/**
-* Slot
-* Traverse -> Fast Forward
-*/
-void MainWindow::on_actionFastForward_triggered(){
-    go::node* node = ui->boardWidget->getCurrentNode();
-    const go::nodeList& nodeList = ui->boardWidget->getCurrentNodeList();
-    go::nodeList::const_iterator iter = qFind(nodeList.begin(), nodeList.end(), node);
-    if (iter == nodeList.end())
-        return;
-
-    node = *iter;
-    for (int i=0; i<5; ++i){
-        if (++iter != nodeList.end())
-            node = *iter;
-        else
-            break;
-    }
-
-    ui->boardWidget->setCurrentNode(node);
-}
-
-/**
-* Slot
-* Traverse -> Last Move
-*/
-void MainWindow::on_actionLastMove_triggered(){
-    const go::nodeList& nodeList = ui->boardWidget->getCurrentNodeList();
-    ui->boardWidget->setCurrentNode( nodeList.back() );
-}
-
-/**
-* Slot
-* Traverse -> Back to parent
-*/
-void MainWindow::on_actionBackToParent_triggered(){
-    go::node* node = ui->boardWidget->getCurrentNode();
-    while(node->parent){
-        node = node->parent;
-        if (node->childNodes.size() > 1)
-            break;
-    }
-    ui->boardWidget->setCurrentNode( node );
-}
-
-/**
-* Slot
-* Traverse -> Previous Branch
-*/
-void MainWindow::on_actionPreviousBranch_triggered(){
-    go::node* node   = ui->boardWidget->getCurrentNode();
-    go::node* parent = node->parent;
-    while(parent){
-        if (parent->childNodes.size() > 1)
-            break;
-        node = parent;
-        parent = parent->parent;
-    }
-
-    if (parent == NULL)
-        return;
-
-    go::nodeList::iterator iter = qFind(parent->childNodes.begin(), parent->childNodes.end(), node);
-    if (iter == parent->childNodes.begin())
-        return;
-
-    ui->boardWidget->setCurrentNode( *--iter );
-}
-
-/**
-* Slot
-* Traverse -> Next Branch
-*/
-void MainWindow::on_actionNextBranch_triggered(){
-    go::node* node   = ui->boardWidget->getCurrentNode();
-    go::node* parent = node->parent;
-    while(parent){
-        if (parent->childNodes.size() > 1)
-            break;
-        node = parent;
-        parent = parent->parent;
-    }
-
-    if (parent == NULL)
-        return;
-
-    go::nodeList::iterator iter = qFind(parent->childNodes.begin(), parent->childNodes.end(), node);
-    if (++iter == parent->childNodes.end())
-        return;
-
-    ui->boardWidget->setCurrentNode( *iter );
 }
 
 /**
@@ -669,30 +388,6 @@ void MainWindow::on_actionBranchWindow_triggered(){
 
 /**
 * Slot
-* Options -> 19 x 19 Board
-*/
-void MainWindow::on_action19x19Board_triggered(){
-    ui->boardWidget->setBoardSize(19, 19);
-}
-
-/**
-* Slot
-* Options -> 13 x 13 Board
-*/
-void MainWindow::on_action13x13Board_triggered(){
-    ui->boardWidget->setBoardSize(13, 13);
-}
-
-/**
-* Slot
-* Options -> 9 x 9 Board
-*/
-void MainWindow::on_action9x9Board_triggered(){
-    ui->boardWidget->setBoardSize(9, 9);
-}
-
-/**
-* Slot
 * Help -> About
 */
 void MainWindow::on_actionAbout_triggered(){
@@ -748,7 +443,6 @@ void MainWindow::on_boardWidget_nodeModified(go::node* node){
 void MainWindow::on_boardWidget_currentNodeChanged(go::node* node){
     setTreeWidget(node);
     ui->commentWidget->setPlainText(node->comment);
-    setAnnotation(node->annotation);
 }
 
 /**
@@ -870,8 +564,6 @@ bool MainWindow::fileOpen(const QString& fname){
     setTreeData();
     setCaption();
 
-    ui->actionReload->setEnabled(true);
-
     return true;
 }
 
@@ -908,8 +600,6 @@ bool MainWindow::fileSaveAs(const QString& fname){
 
     setCaption();
 
-    ui->actionReload->setEnabled(true);
-
     return true;
 }
 
@@ -925,8 +615,6 @@ bool MainWindow::fileClose(){
 
     setTreeData();
     setCaption();
-
-    ui->actionReload->setEnabled(false);
 
     return true;
 }
@@ -1014,7 +702,6 @@ QTreeWidgetItem* MainWindow::remakeTreeWidget(QTreeWidgetItem* currentWidget){
 QTreeWidgetItem* MainWindow::createTreeWidget(QTreeWidgetItem* parentWidget, go::node& node){
     // TreeItemを作成
     QTreeWidgetItem* nodeWidget = new QTreeWidgetItem( QStringList(createTreeText(&node)) );
-
     QVariant v;
     v.setValue(&node);
     nodeWidget->setData(0, Qt::UserRole, v);
@@ -1097,9 +784,6 @@ QString MainWindow::createTreeText(const go::node* node){
         s.push_back(' ');
     s.append( node->toString() );
 
-    if (s.isEmpty())
-        s = "Other";
-
     return s;
 }
 
@@ -1148,6 +832,7 @@ void MainWindow::setShowMoveNumber(QAction* action, int moveNumber){
         actions[i]->setChecked(actions[i] == action);
 
     ui->boardWidget->setShowMoveNumber(moveNumber);
+    ui->boardWidget->repaint();
 }
 
 void MainWindow::setEditMode(QAction* action, BoardWidget::eEditMode editMode){
@@ -1169,69 +854,4 @@ void MainWindow::setEditMode(QAction* action, BoardWidget::eEditMode editMode){
         actions[i]->setChecked(actions[i] == action);
 
     ui->boardWidget->setEditMode(editMode);
-}
-
-void MainWindow::setAnnotation(int annotation){
-   static QAction* actions[] = {
-        ui->actionGoodMove,
-        ui->actionVeryGoodMove,
-        ui->actionBadMove,
-        ui->actionVeryBadMove,
-        ui->actionDoubtfulMove,
-        ui->actionInterestingMove,
-        ui->actionEven,
-        ui->actionGoodForBlack,
-        ui->actionVeryGoodForBlack,
-        ui->actionGoodForWhite,
-        ui->actionVeryGoodForWhite,
-        ui->actionUnclear,
-        ui->actionHotspot,
-    };
-    static const int N = sizeof(actions) / sizeof(actions[0]);
-
-    for (int i=0; i<N; ++i)
-        actions[i]->setChecked( (annotation & (1 << i)) != 0 );
-}
-
-void MainWindow::setAnnotation1(QAction* action, int annotation){
-   static QAction* actions[] = {
-        ui->actionGoodMove,
-        ui->actionVeryGoodMove,
-        ui->actionBadMove,
-        ui->actionVeryBadMove,
-        ui->actionDoubtfulMove,
-        ui->actionInterestingMove,
-    };
-    static const int N = sizeof(actions) / sizeof(actions[0]);
-
-    for (int i=0; i<N; ++i)
-        if (actions[i] != action)
-            actions[i]->setChecked( false );
-
-    annotation1 = action->isChecked() ? annotation : 0;
-    ui->boardWidget->setAnnotation(annotation1 | annotation2 | annotation3);
-}
-
-void MainWindow::setAnnotation2(QAction* action, int annotation){
-   static QAction* actions[] = {
-        ui->actionEven,
-        ui->actionGoodForBlack,
-        ui->actionVeryGoodForBlack,
-        ui->actionGoodForWhite,
-        ui->actionVeryGoodForWhite,
-        ui->actionUnclear,
-    };
-    static const int N = sizeof(actions) / sizeof(actions[0]);
-
-    for (int i=0; i<N; ++i)
-        if (actions[i] != action)
-            actions[i]->setChecked( false );
-
-    annotation2 = action->isChecked() ? annotation : 0;
-    ui->boardWidget->setAnnotation(annotation1 | annotation2 | annotation3);
-}
-
-void MainWindow::setAnnotation3(QAction* action, int annotation){
-    annotation3 = action->isChecked() ? annotation : 0;
-    ui->boardWidget->setAnnotation(annotation1 | annotation2 | annotation3);
 }
