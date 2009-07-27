@@ -114,16 +114,28 @@ void BoardWidget::getData(go::fileBase& data){
 */
 void BoardWidget::setData(const go::fileBase& data){
     data.get(goData);
+    nodeList.clear();
+    setCurrentNode();
 }
 
 void BoardWidget::setBoardSize(int xsize, int ysize){
+    goData.clear();
+    goData.root.xsize = xsize;
+    goData.root.ysize = ysize;
+
+    nodeList.clear();
+    setCurrentNode();
+
+    repaint();
 }
 
 /**
 */
 void BoardWidget::clear(){
-    goData.clear();
     setDirty(false);
+    goData.clear();
+    nodeList.clear();
+    setCurrentNode();
 }
 
 /**
@@ -167,16 +179,15 @@ void BoardWidget::setCurrentNode(go::node* node){
     if (node == NULL)
         node = &goData.root;
 
-    if (currentNode == node)
+    if (currentNode == node && !nodeList.empty())
         return;
-
-    currentNode = node;
 
     board.clear();
     board.resize(goData.root.ysize);
     for (int i=0; i<goData.root.ysize; ++i)
         board[i].resize(goData.root.xsize);
 
+    currentNode = node;
     nodeList.clear();
 
     while ((node = node->parent) != NULL)
@@ -295,7 +306,7 @@ void BoardWidget::drawCoordinates(QPainter& p){
         QString s = getXString(i);
         QRect r = p.boundingRect(xlines[i]-m/2, ylines[0]-m, m, m, Qt::AlignCenter, s);
         p.drawText(r, s);
-        r = p.boundingRect(xlines[i]-m/2, ylines[goData.root.xsize-1], m, m, Qt::AlignCenter, s);
+        r = p.boundingRect(xlines[i]-m/2, ylines[goData.root.ysize-1], m, m, Qt::AlignCenter, s);
         p.drawText(r, s);
     }
 
@@ -303,7 +314,7 @@ void BoardWidget::drawCoordinates(QPainter& p){
         QString s = getYString(i);
         QRect r = p.boundingRect(xlines[0]-m, ylines[i]-m/2, m, m, Qt::AlignCenter, s);
         p.drawText(r, s);
-        r = p.boundingRect(xlines[goData.root.ysize-1], ylines[i]-m/2, m, m, Qt::AlignCenter, s);
+        r = p.boundingRect(xlines[goData.root.xsize-1], ylines[i]-m/2, m, m, Qt::AlignCenter, s);
         p.drawText(r, s);
     }
 

@@ -48,6 +48,8 @@ private:
     void setAnnotation2(QAction* action, int annotation);
     void setAnnotation3(QAction* action, int annotation);
 
+    void setBoardSize(int xsize, int ysize);
+
     void setTreeData();
     QTreeWidgetItem* addTreeWidget(go::node& n);
     QTreeWidgetItem* addTreeWidget(QTreeWidgetItem* parentWidget, go::node& node);
