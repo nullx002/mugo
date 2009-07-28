@@ -514,11 +514,14 @@ void MainWindow::on_actionFastForward_triggered(){
 
 /**
 * Slot
-* Traverse -> Last Move
+* Traverse -> Move Last
 */
-void MainWindow::on_actionLastMove_triggered(){
+void MainWindow::on_actionMoveLast_triggered(){
     const go::nodeList& nodeList = ui->boardWidget->getCurrentNodeList();
-    ui->boardWidget->setCurrentNode( nodeList.back() );
+    go::node* node = nodeList.back();
+    while (!node->childNodes.empty())
+        node = node->childNodes.front();
+    ui->boardWidget->setCurrentNode( node );
 }
 
 /**

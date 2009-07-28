@@ -139,7 +139,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
     <addaction name="actionPreviousMove"/>
     <addaction name="actionNextMove"/>
     <addaction name="actionFastForward"/>
-    <addaction name="actionLastMove"/>
+    <addaction name="actionMoveLast"/>
     <addaction name="separator"/>
     <addaction name="actionBackToParent"/>
     <addaction name="actionPreviousBranch"/>
@@ -296,7 +296,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
    <addaction name="actionPreviousMove"/>
    <addaction name="actionNextMove"/>
    <addaction name="actionFastForward"/>
-   <addaction name="actionLastMove"/>
+   <addaction name="actionMoveLast"/>
    <addaction name="separator"/>
    <addaction name="actionBackToParent"/>
    <addaction name="actionPreviousBranch"/>
@@ -806,13 +806,13 @@ alternate-background-color: rgb(255, 255, 127);</string>
     <string>Fast Forward</string>
    </property>
   </action>
-  <action name="actionLastMove">
+  <action name="actionMoveLast">
    <property name="icon">
     <iconset>
      <normaloff>:/res/lastmove.png</normaloff>:/res/lastmove.png</iconset>
    </property>
    <property name="text">
-    <string>Last Move</string>
+    <string>Move Last</string>
    </property>
   </action>
   <action name="actionBackToParent">
