@@ -302,6 +302,35 @@ alternate-background-color: rgb(255, 255, 127);</string>
    <addaction name="actionPreviousBranch"/>
    <addaction name="actionNextBranch"/>
   </widget>
+  <widget class="QToolBar" name="editToolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>20</width>
+     <height>20</height>
+    </size>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>true</bool>
+   </attribute>
+   <addaction name="actionAlternateMove"/>
+   <addaction name="separator"/>
+   <addaction name="actionAddWhiteStone"/>
+   <addaction name="actionAddBlackStone"/>
+   <addaction name="actionAddEmpty"/>
+   <addaction name="separator"/>
+   <addaction name="actionAddLabel"/>
+   <addaction name="actionAddCircle"/>
+   <addaction name="actionAddCross"/>
+   <addaction name="actionAddSquare"/>
+   <addaction name="actionAddTriangle"/>
+   <addaction name="actionDeleteMarker"/>
+  </widget>
   <action name="actionNew">
    <property name="icon">
     <iconset resource="resources.qrc">
@@ -442,6 +471,10 @@ alternate-background-color: rgb(255, 255, 127);</string>
    </property>
   </action>
   <action name="actionAbout">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/mgo.png</normaloff>:/res/mgo.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;About...</string>
    </property>
@@ -546,6 +579,10 @@ alternate-background-color: rgb(255, 255, 127);</string>
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/text.png</normaloff>:/res/text.png</iconset>
+   </property>
    <property name="text">
     <string>Add Label</string>
    </property>
@@ -553,6 +590,10 @@ alternate-background-color: rgb(255, 255, 127);</string>
   <action name="actionAddCircle">
    <property name="checkable">
     <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/circle.png</normaloff>:/res/circle.png</iconset>
    </property>
    <property name="text">
     <string>Add Circle</string>
@@ -562,6 +603,10 @@ alternate-background-color: rgb(255, 255, 127);</string>
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/cross.png</normaloff>:/res/cross.png</iconset>
+   </property>
    <property name="text">
     <string>Add Cross</string>
    </property>
@@ -569,6 +614,10 @@ alternate-background-color: rgb(255, 255, 127);</string>
   <action name="actionAddSquare">
    <property name="checkable">
     <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/square.png</normaloff>:/res/square.png</iconset>
    </property>
    <property name="text">
     <string>Add Square</string>
@@ -578,6 +627,10 @@ alternate-background-color: rgb(255, 255, 127);</string>
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/triangle.png</normaloff>:/res/triangle.png</iconset>
+   </property>
    <property name="text">
     <string>Add Triangle</string>
    </property>
@@ -585,6 +638,10 @@ alternate-background-color: rgb(255, 255, 127);</string>
   <action name="actionDeleteMarker">
    <property name="checkable">
     <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/rubbereraser.png</normaloff>:/res/rubbereraser.png</iconset>
    </property>
    <property name="text">
     <string>Delete Marker</string>
@@ -603,6 +660,10 @@ alternate-background-color: rgb(255, 255, 127);</string>
    </property>
   </action>
   <action name="actionAboutQT">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/qt.png</normaloff>:/res/qt.png</iconset>
+   </property>
    <property name="text">
     <string>About Qt...</string>
    </property>
@@ -650,6 +711,10 @@ alternate-background-color: rgb(255, 255, 127);</string>
   <action name="actionAddEmpty">
    <property name="checkable">
     <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/empty.png</normaloff>:/res/empty.png</iconset>
    </property>
    <property name="text">
     <string>Add Empty</string>

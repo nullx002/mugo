@@ -74,7 +74,6 @@ private:
 
 private slots:
     // File menu
-    void on_actionShowBranchMoves_triggered();
     void on_actionNew_triggered();
     void on_actionOpen_triggered();
     void on_actionReload_triggered();
@@ -151,11 +150,13 @@ private slots:
     // View menu
     void on_actionShowCoordinates_triggered();
     void on_actionShowMarker_triggered();
+    void on_actionShowBranchMoves_triggered();
     void on_actionBranchWindow_triggered();
     void on_actionCommentWindow_triggered();
 
     // View menu -> Toolbars
     void on_actionMainToolbar_triggered();
+    void on_actionEditToolbar_triggered();
     void on_actionTraverseToolbar_triggered();
 
     // Option menu
