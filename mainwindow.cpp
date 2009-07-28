@@ -685,7 +685,10 @@ void MainWindow::on_actionBranchWindow_triggered(){
         ui->branchDockWidget->hide();
 }
 
-
+/**
+* Slot
+* View -> Toolbars -> Main Toolbar
+*/
 void MainWindow::on_actionMainToolbar_triggered(){
     if (ui->actionMainToolbar->isChecked())
         ui->mainToolBar->show();
@@ -693,6 +696,21 @@ void MainWindow::on_actionMainToolbar_triggered(){
         ui->mainToolBar->hide();
 }
 
+/**
+* Slot
+* View -> Toolbars -> Edit Toolbar
+*/
+void MainWindow::on_actionEditToolbar_triggered(){
+    if (ui->actionEditToolbar->isChecked())
+        ui->editToolBar->show();
+    else
+        ui->editToolBar->hide();
+}
+
+/**
+* Slot
+* View -> Toolbars -> Traverse Toolbar
+*/
 void MainWindow::on_actionTraverseToolbar_triggered(){
     if (ui->actionTraverseToolbar->isChecked())
         ui->traverseToolBar->show();
