@@ -259,9 +259,7 @@ void BoardWidget::drawBoard(QPainter& p){
     if (boardRect.width() != boardImage2.width()){
         boardImage2 = QImage(boardRect.size(), QImage::Format_RGB32);
         QPainter p2(&boardImage2);
-        for (int y=0; y<boardRect.height(); y+=boardImage1.height())
-            for (int x=0; x<boardRect.width(); x+=boardImage1.width())
-                p2.drawImage(x, y, boardImage1);
+        p2.fillRect(0, 0, boardRect.width(), boardRect.height(), QBrush(boardImage1));
         black2 = black1.scaled(boxSize, boxSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
         white2 = white1.scaled(boxSize, boxSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
     }
