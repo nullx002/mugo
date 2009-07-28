@@ -151,6 +151,7 @@ private slots:
     void on_actionAllMoves_triggered();
 
     // View menu
+    void on_actionShowCoordinates_triggered();
     void on_actionBranchWindow_triggered();
     void on_actionCommentWindow_triggered();
 

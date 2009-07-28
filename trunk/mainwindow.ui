@@ -41,7 +41,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
      <x>0</x>
      <y>0</y>
      <width>733</width>
-     <height>24</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -153,6 +153,8 @@ alternate-background-color: rgb(255, 255, 127);</string>
      <property name="title">
       <string>Move Number</string>
      </property>
+     <addaction name="actionShowMoveNumber"/>
+     <addaction name="separator"/>
      <addaction name="actionNoMoveNumber"/>
      <addaction name="actionLast1Move"/>
      <addaction name="actionLast2Moves"/>
@@ -170,6 +172,10 @@ alternate-background-color: rgb(255, 255, 127);</string>
      <addaction name="actionTraverseToolbar"/>
     </widget>
     <addaction name="menuMove_Number"/>
+    <addaction name="separator"/>
+    <addaction name="actionShowCoordinates"/>
+    <addaction name="actionShowMarker"/>
+    <addaction name="actionShow_Branch_Moves"/>
     <addaction name="separator"/>
     <addaction name="actionCommentWindow"/>
     <addaction name="actionBranchWindow"/>
@@ -871,6 +877,47 @@ alternate-background-color: rgb(255, 255, 127);</string>
    </property>
    <property name="text">
     <string>Traverse Toolbar</string>
+   </property>
+  </action>
+  <action name="actionShowMoveNumber">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Move Number</string>
+   </property>
+  </action>
+  <action name="actionShowCoordinates">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Coordinates</string>
+   </property>
+   <property name="toolTip">
+    <string>Show Coordinates</string>
+   </property>
+  </action>
+  <action name="actionShowMarker">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Marker</string>
+   </property>
+  </action>
+  <action name="actionShow_Branch_Moves">
+   <property name="text">
+    <string>Show Branch Moves</string>
    </property>
   </action>
  </widget>

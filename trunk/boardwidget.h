@@ -53,6 +53,7 @@ public:
     // set option
     void setEditMode(eEditMode editMode){ this->editMode = editMode; }
     void setShowMoveNumber(int number){ showMoveNumber = number; repaint(); }
+    void setShowCoordinates(bool visible){ showCoordinates = visible; repaint(); }
     void setAnnotation(int annotation){ currentNode->annotation = (go::node::eAnnotation)annotation; modifyNode(currentNode); }
     void setBoardSize(int xsize, int ysize);
 
@@ -118,6 +119,7 @@ private:
 
     // option
     int showMoveNumber;
+    bool showCoordinates;
     eEditMode editMode;
 
     // draw object

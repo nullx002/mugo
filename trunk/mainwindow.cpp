@@ -649,6 +649,14 @@ void MainWindow::on_actionAllMoves_triggered(){
 
 /**
 * Slot
+* View -> Show Coordinates
+*/
+void MainWindow::on_actionShowCoordinates_triggered(){
+    ui->boardWidget->setShowCoordinates( ui->actionShowCoordinates->isChecked() );
+}
+
+/**
+* Slot
 * View -> Comment Window
 */
 void MainWindow::on_actionCommentWindow_triggered(){

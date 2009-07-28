@@ -13,6 +13,7 @@ BoardWidget::BoardWidget(QWidget *parent) :
     black(true),
     currentMoveNumber(0),
     showMoveNumber(0),
+    showCoordinates(true),
     editMode(eAlternateMove),
     black1(":/res/black_64.png"),
     white1(":/res/white_64.png"),
@@ -221,8 +222,10 @@ void BoardWidget::setCurrentNode(go::node* node){
 void BoardWidget::drawBoard(QPainter& p){
     p.save();
 
-    int w = width_  / (goData.root.xsize + 2);
-    int h = height_ / (goData.root.ysize + 2);
+//    int w = width_  / (goData.root.xsize + 2);
+//    int h = height_ / (goData.root.ysize + 2);
+    int w = width_  / (goData.root.xsize + (showCoordinates ? 2 : 0));
+    int h = height_ / (goData.root.ysize + (showCoordinates ? 2 : 0));
     boxSize = qMin(w, h);
     w = boxSize * (goData.root.xsize - 1);
     h = boxSize * (goData.root.ysize - 1);
@@ -298,6 +301,9 @@ void BoardWidget::getStartPosition(QList<int>& star, int size){
 /**
 */
 void BoardWidget::drawCoordinates(QPainter& p){
+    if (showCoordinates == false)
+        return;
+
     p.save();
 
     int m = int(boxSize * 2.2);
