@@ -101,6 +101,7 @@ protected:
     bool isKill(int x, int y);
     void dead(int* tmp);
 
+    void createNodeList();
     void addStone(int x, int y);
     void addMark(int x, int y);
     void addMark(go::markList& markList, const go::mark& mark);
