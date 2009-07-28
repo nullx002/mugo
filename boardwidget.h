@@ -54,6 +54,8 @@ public:
     void setEditMode(eEditMode editMode){ this->editMode = editMode; }
     void setShowMoveNumber(int number){ showMoveNumber = number; repaint(); }
     void setShowCoordinates(bool visible){ showCoordinates = visible; repaint(); }
+    void setShowMarker(bool visible){ showMarker = visible; repaint(); }
+    void setShowBranchMoves(bool visible){ showBranchMoves = visible; repaint(); }
     void setAnnotation(int annotation){ currentNode->annotation = (go::node::eAnnotation)annotation; modifyNode(currentNode); }
     void setBoardSize(int xsize, int ysize);
 
@@ -84,7 +86,7 @@ protected:
     void drawCoordinates(QPainter& p);
     void drawStones(QPainter& p);
     void drawStones2(QPainter& p);
-    void drawNext(QPainter& p, go::nodeList::iterator first, go::nodeList::iterator last);
+    void drawBranchMoves(QPainter& p, go::nodeList::iterator first, go::nodeList::iterator last);
     void drawMark(QPainter& p, go::markList::iterator first, go::markList::iterator last);
     void drawTerritory(QPainter& p, go::markList::iterator first, go::markList::iterator last);
     void drawCurrentMark(QPainter& p, go::node* node);
@@ -120,6 +122,8 @@ private:
     // option
     int showMoveNumber;
     bool showCoordinates;
+    bool showMarker;
+    bool showBranchMoves;
     eEditMode editMode;
 
     // draw object

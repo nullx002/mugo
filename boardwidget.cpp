@@ -14,6 +14,8 @@ BoardWidget::BoardWidget(QWidget *parent) :
     currentMoveNumber(0),
     showMoveNumber(0),
     showCoordinates(true),
+    showMarker(true),
+    showBranchMoves(true),
     editMode(eAlternateMove),
     black1(":/res/black_64.png"),
     white1(":/res/white_64.png"),
@@ -222,8 +224,6 @@ void BoardWidget::setCurrentNode(go::node* node){
 void BoardWidget::drawBoard(QPainter& p){
     p.save();
 
-//    int w = width_  / (goData.root.xsize + 2);
-//    int h = height_ / (goData.root.ysize + 2);
     int w = width_  / (goData.root.xsize + (showCoordinates ? 2 : 0));
     int h = height_ / (goData.root.ysize + (showCoordinates ? 2 : 0));
     boxSize = qMin(w, h);
@@ -339,7 +339,7 @@ void BoardWidget::drawStones(QPainter& p){
     drawStones2(p);
 
     if (currentNode->childNodes.size() > 1)
-        drawNext(p, currentNode->childNodes.begin(), currentNode->childNodes.end());
+        drawBranchMoves(p, currentNode->childNodes.begin(), currentNode->childNodes.end());
 
     drawMark(p, currentNode->crosses.begin(), currentNode->crosses.end());
     drawMark(p, currentNode->triangles.begin(), currentNode->triangles.end());
@@ -399,7 +399,10 @@ void BoardWidget::drawStones2(QPainter& p){
 
 /**
 */
-void BoardWidget::drawNext(QPainter& p, go::nodeList::iterator first, go::nodeList::iterator last){
+void BoardWidget::drawBranchMoves(QPainter& p, go::nodeList::iterator first, go::nodeList::iterator last){
+    if (showBranchMoves == false)
+        return;
+
     char s[] = "A";
     while (first != last){
         int x = (*first)->getX();
@@ -416,6 +419,9 @@ void BoardWidget::drawNext(QPainter& p, go::nodeList::iterator first, go::nodeLi
 /**
 */
 void BoardWidget::drawMark(QPainter& p, go::markList::iterator first, go::markList::iterator last){
+    if (showMarker == false)
+        return;
+
     p.save();
 
     QFont font( p.font() );

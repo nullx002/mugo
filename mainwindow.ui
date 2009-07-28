@@ -175,7 +175,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
     <addaction name="separator"/>
     <addaction name="actionShowCoordinates"/>
     <addaction name="actionShowMarker"/>
-    <addaction name="actionShow_Branch_Moves"/>
+    <addaction name="actionShowBranchMoves"/>
     <addaction name="separator"/>
     <addaction name="actionCommentWindow"/>
     <addaction name="actionBranchWindow"/>
@@ -915,7 +915,13 @@ alternate-background-color: rgb(255, 255, 127);</string>
     <string>Show Marker</string>
    </property>
   </action>
-  <action name="actionShow_Branch_Moves">
+  <action name="actionShowBranchMoves">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Show Branch Moves</string>
    </property>
