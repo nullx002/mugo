@@ -55,8 +55,7 @@ private:
     QTreeWidgetItem* addTreeWidget(QTreeWidgetItem* parentWidget, go::node& node);
     QTreeWidgetItem* remakeTreeWidget(QTreeWidgetItem* currentWidget);
     QTreeWidgetItem* createTreeWidget(QTreeWidgetItem* parentWidget, go::node& node);
-    void deleteTreeWidget();
-    void deleteTreeWidget(QTreeWidgetItem* treeWidget);
+    void deleteNode();
     void deleteTreeWidget(go::node* node);
     void deleteTreeWidgetForMap(go::node* node);
     void setTreeWidget(go::node* n);

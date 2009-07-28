@@ -155,6 +155,9 @@ void BoardWidget::addNode(go::node* parent, go::node* node){
 * public slot
 */
 void BoardWidget::deleteNode(go::node* node){
+    if( node == &goData.root )
+        return;
+
     go::node* parent = node->parent;
     if (parent){
         go::nodeList::iterator iter = qFind(parent->childNodes.begin(), parent->childNodes.end(), node);
@@ -185,25 +188,18 @@ void BoardWidget::setCurrentNode(go::node* node){
     if (currentNode == node && !nodeList.empty())
         return;
 
+    currentNode  = node;
+    go::nodeList::iterator iter = qFind(nodeList.begin(), nodeList.end(), node);
+    if (iter == nodeList.end())
+        createNodeList();
+
     board.clear();
     board.resize(goData.root.ysize);
     for (int i=0; i<goData.root.ysize; ++i)
         board[i].resize(goData.root.xsize);
 
-    currentNode = node;
-    nodeList.clear();
-
-    while ((node = node->parent) != NULL)
-        nodeList.insert(nodeList.begin(), node);
-
-    nodeList.push_back( node = currentNode );
-    while (node->childNodes.size() == 1){
-        node = node->childNodes.front();
-        nodeList.push_back(node);
-    }
-
     int moveNumber = 1;
-    go::nodeList::iterator iter = nodeList.begin();
+    iter = nodeList.begin();
     while (iter != nodeList.end()){
         putStone(*iter, moveNumber);
         if (dynamic_cast<go::stoneNode*>(*iter))
@@ -217,6 +213,22 @@ void BoardWidget::setCurrentNode(go::node* node){
 
     repaint();
     emit currentNodeChanged(currentNode);
+}
+
+/**
+*/
+void BoardWidget::createNodeList(){
+    nodeList.clear();
+
+    go::node* node = currentNode;
+    while ((node = node->parent) != NULL)
+        nodeList.push_front(node);
+
+    nodeList.push_back( node = currentNode );
+    while (!node->childNodes.empty()){
+        node = node->childNodes.front();
+        nodeList.push_back(node);
+    }
 }
 
 /**

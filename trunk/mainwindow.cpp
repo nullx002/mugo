@@ -38,7 +38,7 @@ void MainWindow::closeEvent(QCloseEvent* e){
 
 void MainWindow::keyPressEvent(QKeyEvent* event){
     if (event->key() == Qt::Key_Delete)
-        deleteTreeWidget();
+        deleteNode();
 }
 
 /**
@@ -159,7 +159,7 @@ void MainWindow::on_actionPass_triggered(){
 * Edit -> Delete
 */
 void MainWindow::on_actionDelete_triggered(){
-    deleteTreeWidget();
+    deleteNode();
 }
 
 /**
@@ -479,15 +479,10 @@ void MainWindow::on_actionPreviousMove_triggered(){
 * Traverse -> Next Move
 */
 void MainWindow::on_actionNextMove_triggered(){
-    go::node* node = ui->boardWidget->getCurrentNode();
     const go::nodeList& nodeList = ui->boardWidget->getCurrentNodeList();
-    go::nodeList::const_iterator iter = qFind(nodeList.begin(), nodeList.end(), node);
-    if (iter == nodeList.end())
-        return;
-    if (++iter != nodeList.end())
-        ui->boardWidget->setCurrentNode(*iter);
-    else if (!node->childNodes.empty())
-        ui->boardWidget->setCurrentNode( node->childNodes.front() );
+    go::nodeList::const_iterator iter = qFind(nodeList.begin(), nodeList.end(), ui->boardWidget->getCurrentNode());
+    if (iter != nodeList.end() && ++iter != nodeList.end())
+        ui->boardWidget->setCurrentNode( *iter );
 }
 
 /**
@@ -496,19 +491,15 @@ void MainWindow::on_actionNextMove_triggered(){
 */
 void MainWindow::on_actionFastForward_triggered(){
     go::node* node = ui->boardWidget->getCurrentNode();
-    const go::nodeList& nodeList = ui->boardWidget->getCurrentNodeList();
-    go::nodeList::const_iterator iter = qFind(nodeList.begin(), nodeList.end(), node);
-    if (iter == nodeList.end())
+    if (node->childNodes.empty())
         return;
 
-    node = *iter;
     for (int i=0; i<5; ++i){
-        if (++iter != nodeList.end())
-            node = *iter;
+        if (!node->childNodes.empty())
+            node = node->childNodes.front();
         else
             break;
     }
-
     ui->boardWidget->setCurrentNode(node);
 }
 
@@ -519,9 +510,7 @@ void MainWindow::on_actionFastForward_triggered(){
 void MainWindow::on_actionMoveLast_triggered(){
     const go::nodeList& nodeList = ui->boardWidget->getCurrentNodeList();
     go::node* node = nodeList.back();
-    while (!node->childNodes.empty())
-        node = node->childNodes.front();
-    ui->boardWidget->setCurrentNode( node );
+    ui->boardWidget->setCurrentNode(node);
 }
 
 /**
@@ -1085,17 +1074,8 @@ QTreeWidgetItem* MainWindow::createTreeWidget(QTreeWidgetItem* parentWidget, go:
     return nodeWidget;
 }
 
-void MainWindow::deleteTreeWidget(){
-    QTreeWidgetItem* currentWidget = ui->branchWidget->currentItem();
-    if (currentWidget == NULL)
-        return;
-
-    deleteTreeWidget(currentWidget);
-}
-
-void MainWindow::deleteTreeWidget(QTreeWidgetItem* treeWidget){
-    go::node* node = getNode(treeWidget);
-    ui->boardWidget->deleteNode(node);
+void MainWindow::deleteNode(){
+    ui->boardWidget->deleteNode( ui->boardWidget->getCurrentNode() );
 }
 
 void MainWindow::deleteTreeWidget(go::node* node){
