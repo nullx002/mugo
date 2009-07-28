@@ -164,8 +164,14 @@ void BoardWidget::deleteNode(go::node* node){
         if (iter != parent->childNodes.end())
             parent->childNodes.erase(iter);
     }
+
     setDirty(true);
     emit nodeDeleted(node);
+
+    go::nodeList::iterator iter = qFind(nodeList.begin(), nodeList.end(), node);
+    nodeList.erase(iter, nodeList.end());
+    setCurrentNode(node->parent);
+
     delete node;
 }
 
@@ -815,11 +821,16 @@ void BoardWidget::removeMark(go::markList& markList, const go::point& p){
 void BoardWidget::addStone(go::stoneList& stoneList, const go::point& p, go::stone::eColor c){
     go::stoneList::iterator iter = stoneList.begin();
     while (iter != stoneList.end()){
-        if (iter->p == p){
+        if (iter->p == p) {
+            go::stone stone = *iter;
             iter = stoneList.erase(iter);
-            board[p.y][p.x].color = c;
+            board[p.y][p.x].color = go::stone::eEmpty;
             board[p.y][p.x].number = 0;
-            return;
+
+            if (stone.c == c || c == go::stone::eEmpty)
+                return;
+            else
+                break;
         }
         ++iter;
     }

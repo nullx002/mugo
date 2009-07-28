@@ -775,8 +775,6 @@ void MainWindow::on_boardWidget_nodeDeleted(go::node* node){
     deleteTreeWidget(node);
     deleteTreeWidgetForMap(node);
 
-    ui->boardWidget->setCurrentNode(node->parent);
-
     setCaption();
 }
 
