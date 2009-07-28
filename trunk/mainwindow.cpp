@@ -657,6 +657,22 @@ void MainWindow::on_actionShowCoordinates_triggered(){
 
 /**
 * Slot
+* View -> Show Marker
+*/
+void MainWindow::on_actionShowMarker_triggered(){
+    ui->boardWidget->setShowMarker( ui->actionShowMarker->isChecked() );
+}
+
+/**
+* Slot
+* View -> Show Branch Moves
+*/
+void MainWindow::on_actionShowBranchMoves_triggered(){
+    ui->boardWidget->setShowBranchMoves( ui->actionShowBranchMoves->isChecked() );
+}
+
+/**
+* Slot
 * View -> Comment Window
 */
 void MainWindow::on_actionCommentWindow_triggered(){
