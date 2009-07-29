@@ -18,6 +18,12 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    // toolbar
+    ui->optionToolBar->addAction( ui->menuMoveNumber->menuAction() );
+    ui->menuMoveNumber->menuAction()->setCheckable(true);
+    ui->menuMoveNumber->menuAction()->setChecked( ui->actionShowMoveNumber->isChecked() );
+    connect( ui->menuMoveNumber->menuAction(), SIGNAL(triggered()), this, SLOT(on_actionShowMoveNumber_parent_triggered()) );
+
     setEncoding(ui->actionEncodingUTF8, "UTF-8");
     setShowMoveNumber(ui->actionNoMoveNumber, 0);
     setEditMode(ui->actionAlternateMove, BoardWidget::eAlternateMove);
@@ -580,7 +586,17 @@ void MainWindow::on_actionNextBranch_triggered(){
 * View -> Move Number-> Show Move Number
 */
 void MainWindow::on_actionShowMoveNumber_triggered(){
+    ui->menuMoveNumber->menuAction()->setChecked( ui->actionShowMoveNumber->isChecked() );
     ui->boardWidget->setShowMoveNumber( ui->actionShowMoveNumber->isChecked() );
+}
+
+/**
+* Slot
+* View -> Move Number-> Show Move Number
+*/
+void MainWindow::on_actionShowMoveNumber_parent_triggered(){
+    ui->actionShowMoveNumber->setChecked( ui->menuMoveNumber->menuAction()->isChecked() );
+    on_actionShowMoveNumber_triggered();
 }
 
 /**
@@ -724,6 +740,18 @@ void MainWindow::on_actionTraverseToolbar_triggered(){
         ui->traverseToolBar->show();
     else
         ui->traverseToolBar->hide();
+}
+
+/**
+* Slot
+* View -> Toolbars -> Option Toolbar
+*/
+void MainWindow::on_actionOptionToolbar_triggered()
+{
+    if (ui->actionOptionToolbar->isChecked())
+        ui->optionToolBar->show();
+    else
+        ui->optionToolBar->hide();
 }
 
 /**

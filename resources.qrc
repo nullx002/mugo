@@ -28,5 +28,6 @@
         <file>res/text.png</file>
         <file>res/empty.png</file>
         <file>res/rubbereraser.png</file>
+        <file>res/showmovenumber.png</file>
     </qresource>
 </RCC>
