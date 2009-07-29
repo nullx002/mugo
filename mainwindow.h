@@ -4,8 +4,6 @@
 #include <QtGui/QMainWindow>
 #include <QTreeWidgetItem>
 #include <QTextCodec>
-#include "appdef.h"
-#include "godata.h"
 #include "boardwidget.h"
 
 namespace Ui
@@ -33,7 +31,7 @@ protected:
 private:
     bool fileNew();
     bool fileOpen();
-    bool fileOpen(const QString& fname);
+    bool fileOpen(const QString& fname, const QString& filter);
     bool fileSave();
     bool fileSaveAs();
     bool fileSaveAs(const QString& fname);
@@ -65,8 +63,8 @@ private:
 
     Ui::MainWindow *ui;
     QTextCodec* codec;
-    QString documentName;
     QString fileName;
+    QString filter;
     NodeToTreeWidgetType nodeToTreeWidget;
     int annotation1;
     int annotation2;
@@ -114,6 +112,11 @@ private slots:
     void on_actionVeryGoodForWhite_triggered();
     void on_actionUnclear_triggered();
     void on_actionHotspot_triggered();
+
+    // Edit menu (rotate/flip)
+    void on_actionRotateSgfClockwise_triggered();
+    void on_actionFlipSgfHorizontally_triggered();
+    void on_actionFlipSgfVertically_triggered();
 
     // Edit menu -> Encoding
     void on_actionEncodingUTF8_triggered();
