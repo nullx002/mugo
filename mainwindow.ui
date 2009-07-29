@@ -41,7 +41,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
      <x>0</x>
      <y>0</y>
      <width>733</width>
-     <height>18</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
