@@ -12,7 +12,7 @@ BoardWidget::BoardWidget(QWidget *parent) :
     dirty(false),
     black(true),
     currentMoveNumber(0),
-    showMoveNumber(false),
+    showMoveNumber(true),
     showMoveNumberCount(0),
     showCoordinates(true),
     showMarker(true),

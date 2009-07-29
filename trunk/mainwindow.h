@@ -74,7 +74,6 @@ private:
 
 private slots:
     // File menu
-    void on_actionShowMoveNumber_triggered();
     void on_actionNew_triggered();
     void on_actionOpen_triggered();
     void on_actionReload_triggered();
@@ -149,6 +148,8 @@ private slots:
     void on_actionAllMoves_triggered();
 
     // View menu
+    void on_actionShowMoveNumber_triggered();
+    void on_actionShowMoveNumber_parent_triggered();
     void on_actionShowCoordinates_triggered();
     void on_actionShowMarker_triggered();
     void on_actionShowBranchMoves_triggered();
@@ -159,6 +160,7 @@ private slots:
     void on_actionMainToolbar_triggered();
     void on_actionEditToolbar_triggered();
     void on_actionTraverseToolbar_triggered();
+    void on_actionOptionToolbar_triggered();
 
     // Option menu
     void on_action19x19Board_triggered();
