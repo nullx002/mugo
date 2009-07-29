@@ -3,6 +3,9 @@
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QtAlgorithms>
+#include "appdef.h"
+#include "sgf.h"
+#include "ugf.h"
 #include "mainwindow.h"
 #include "gameinformationdialog.h"
 #include "ui_mainwindow.h"
@@ -70,7 +73,7 @@ void MainWindow::on_actionOpen_triggered(){
 void MainWindow::on_actionReload_triggered(){
     if (maybeSave() == false)
         return;
-    fileOpen(fileName);
+    fileOpen(fileName, filter);
 }
 
 /**
@@ -369,6 +372,27 @@ void MainWindow::on_actionEditNodeName_triggered(){
 
     node->name = dlg.textValue();
     ui->boardWidget->modifyNode(node);
+}
+
+/**
+* Slot
+* Edit -> Rotate SGF Clockwise
+*/
+void MainWindow::on_actionRotateSgfClockwise_triggered(){
+}
+
+/**
+* Slot
+* Edit -> Flip SGF Holizontally
+*/
+void MainWindow::on_actionFlipSgfHorizontally_triggered(){
+}
+
+/**
+* Slot
+* Edit -> Flip SGF Vertically
+*/
+void MainWindow::on_actionFlipSgfVertically_triggered(){
 }
 
 /**
@@ -934,22 +958,39 @@ bool MainWindow::fileOpen(){
     if (maybeSave() == false)
         return false;
 
-    QString fname = QFileDialog::getOpenFileName(this, QString(), QString(), tr("sgf(*.sgf)"));
+    QString selectedFilter;
+    QString fname = QFileDialog::getOpenFileName(this, QString(), QString(), tr("sgf(*.sgf);;ugf(*.ugf *.ugi)"), &selectedFilter);
     if (fname.isEmpty())
         return  false;
 
-    return fileOpen(fname);
+    if (selectedFilter.indexOf("*.sgf") >= 0)
+        return fileOpen(fname, "sgf");
+    else if (selectedFilter.indexOf("*.ugf") >= 0)
+        return fileOpen(fname, "ugf");
+    else
+        return false;
 }
 
 /**
 * file open.
 */
-bool MainWindow::fileOpen(const QString& fname){
+bool MainWindow::fileOpen(const QString& fname, const QString& filter){
     fileName = fname;
+    this->filter = filter;
 
-    go::sgf sgf;
-    sgf.read(fname, codec);
-    ui->boardWidget->setData(sgf);
+    if (filter == "sgf"){
+        go::sgf sgf;
+        sgf.read(fname, codec);
+        ui->boardWidget->setData(sgf);
+    }
+    else if (filter == "ugf"){
+        go::ugf ugf;
+        ugf.read(fname, codec);
+        ui->boardWidget->setData(ugf);
+    }
+    else
+        return false;
+
     ui->boardWidget->setDirty(false);
 
     setTreeData();
@@ -990,6 +1031,7 @@ bool MainWindow::fileSaveAs(const QString& fname){
     ui->boardWidget->getData(sgf);
     sgf.save(fileName, codec);
     ui->boardWidget->setDirty(false);
+    filter = "sgf";
 
     setCaption();
 
@@ -1006,6 +1048,7 @@ bool MainWindow::fileClose(){
         return false;
 
     fileName.clear();
+    filter = "sgf";
     ui->boardWidget->clear();
 
     setTreeData();

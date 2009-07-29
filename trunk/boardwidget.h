@@ -4,7 +4,6 @@
 #include <QtGui/QWidget>
 #include <QVector>
 #include <QList>
-#include "appdef.h"
 #include "godata.h"
 
 namespace Ui {

@@ -95,7 +95,7 @@ void BoardWidget::paint(QPaintDevice* paintDevice){
 
     QFont font;
     font.setPointSize(8);
-    font.setStyleHint(QFont::TypeWriter);
+    font.setStyleHint(QFont::SansSerif);
     font.setWeight(QFont::Normal);
 
     p.setFont(font);
@@ -473,7 +473,7 @@ void BoardWidget::drawTerritory(QPainter& p, go::markList::iterator first, go::m
 
 
     QFont font( p.font() );
-    font.setPointSize(int(boxSize * 0.37));
+    font.setPointSize(int(boxSize * 0.38));
     p.setFont(font);
 
     while (first != last){
@@ -481,7 +481,7 @@ void BoardWidget::drawTerritory(QPainter& p, go::markList::iterator first, go::m
             int x = xlines[first->p.x];
             int y = ylines[first->p.y];
 
-            QColor color = first->t == go::mark::eWhiteTerritory ? QColor(255, 255, 255, 175) : QColor(0, 0, 0, 125);
+            QColor color = first->t == go::mark::eWhiteTerritory ? QColor(255, 255, 255, 160) : QColor(0, 0, 0, 110);
             p.fillRect(x-boxSize/2, y-boxSize/2, boxSize, boxSize, color);
             p.setPen( first->t == go::mark::eWhiteTerritory ? Qt::white : Qt::black );
             p.drawText(x-boxSize, y-boxSize, boxSize*2, boxSize*2, Qt::AlignCenter, first->s);
