@@ -52,7 +52,8 @@ public:
 
     // set option
     void setEditMode(eEditMode editMode){ this->editMode = editMode; }
-    void setShowMoveNumber(int number){ showMoveNumber = number; repaint(); }
+    void setShowMoveNumber(bool visible){ showMoveNumber = visible; repaint(); }
+    void setShowMoveNumber(int number){ showMoveNumberCount = number; repaint(); }
     void setShowCoordinates(bool visible){ showCoordinates = visible; repaint(); }
     void setShowMarker(bool visible){ showMarker = visible; repaint(); }
     void setShowBranchMoves(bool visible){ showBranchMoves = visible; repaint(); }
@@ -121,7 +122,8 @@ private:
     int currentMoveNumber;
 
     // option
-    int showMoveNumber;
+    bool showMoveNumber;
+    int  showMoveNumberCount;
     bool showCoordinates;
     bool showMarker;
     bool showBranchMoves;

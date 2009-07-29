@@ -577,6 +577,14 @@ void MainWindow::on_actionNextBranch_triggered(){
 
 /**
 * Slot
+* View -> Move Number-> Show Move Number
+*/
+void MainWindow::on_actionShowMoveNumber_triggered(){
+    ui->boardWidget->setShowMoveNumber( ui->actionShowMoveNumber->isChecked() );
+}
+
+/**
+* Slot
 * View -> Move Number-> No Move Number
 */
 void MainWindow::on_actionNoMoveNumber_triggered(){

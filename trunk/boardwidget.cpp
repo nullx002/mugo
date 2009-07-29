@@ -12,7 +12,8 @@ BoardWidget::BoardWidget(QWidget *parent) :
     dirty(false),
     black(true),
     currentMoveNumber(0),
-    showMoveNumber(0),
+    showMoveNumber(false),
+    showMoveNumberCount(0),
     showCoordinates(true),
     showMarker(true),
     showBranchMoves(true),
@@ -365,7 +366,7 @@ void BoardWidget::drawStones(QPainter& p){
     drawTerritory(p, currentNode->blackTerritories.begin(), currentNode->blackTerritories.end());
     drawTerritory(p, currentNode->whiteTerritories.begin(), currentNode->whiteTerritories.end());
 
-    if (showMoveNumber == 0){
+    if (showMoveNumber && showMoveNumberCount == 0){
         go::stoneNode* stoneNode = dynamic_cast<go::stoneNode*>(currentNode);
         if (stoneNode)
             drawCurrentMark(p, stoneNode);
@@ -391,7 +392,7 @@ void BoardWidget::drawStones2(QPainter& p){
                 p.drawImage(xlines[x]-boxSize/2, ylines[y]-boxSize/2, white2);
 
             // draw move number
-            if (board[y][x].number == 0 || showMoveNumber == 0 || (showMoveNumber != -1 && currentMoveNumber - showMoveNumber + 1 > board[y][x].number))
+            if (showMoveNumber == false || showMoveNumberCount == 0 || board[y][x].number == 0 || (showMoveNumberCount != -1 && currentMoveNumber - showMoveNumberCount + 1 > board[y][x].number))
                 continue;
 
             if (board[y][x].number < 10)
