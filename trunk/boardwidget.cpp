@@ -133,6 +133,29 @@ void BoardWidget::setBoardSize(int xsize, int ysize){
     repaint();
 }
 
+void BoardWidget::flipSgf(int xsize, int ysize){
+    flipSgf(&goData.root, xsize, ysize);
+    createBoardBuffer();
+    setDirty(true);
+    repaint();
+}
+
+void BoardWidget::flipSgf(go::node* node, int xsize, int ysize){
+    if (xsize)
+        node->position.x = xsize - node->position.x - 1;
+
+    if (ysize)
+        node->position.y = ysize - node->position.y - 1;
+
+    emit nodeModified(node);
+
+    go::nodeList::iterator iter = node->childNodes.begin();
+    while (iter != node->childNodes.end()){
+        flipSgf(*iter, xsize, ysize);
+        ++iter;
+    }
+}
+
 /**
 */
 void BoardWidget::clear(){
@@ -200,23 +223,7 @@ void BoardWidget::setCurrentNode(go::node* node){
     if (iter == nodeList.end())
         createNodeList();
 
-    board.clear();
-    board.resize(goData.root.ysize);
-    for (int i=0; i<goData.root.ysize; ++i)
-        board[i].resize(goData.root.xsize);
-
-    int moveNumber = 1;
-    iter = nodeList.begin();
-    while (iter != nodeList.end()){
-        putStone(*iter, moveNumber);
-        if (dynamic_cast<go::stoneNode*>(*iter))
-            ++moveNumber;
-
-        if (*iter == currentNode)
-            break;
-
-        ++iter;
-    }
+    createBoardBuffer();
 
     repaint();
     emit currentNodeChanged(currentNode);
@@ -235,6 +242,28 @@ void BoardWidget::createNodeList(){
     while (!node->childNodes.empty()){
         node = node->childNodes.front();
         nodeList.push_back(node);
+    }
+}
+
+/**
+*/
+void BoardWidget::createBoardBuffer(){
+    board.clear();
+    board.resize(goData.root.ysize);
+    for (int i=0; i<goData.root.ysize; ++i)
+        board[i].resize(goData.root.xsize);
+
+    int moveNumber = 1;
+    go::nodeList::iterator iter = nodeList.begin();
+    while (iter != nodeList.end()){
+        putStone(*iter, moveNumber);
+        if (dynamic_cast<go::stoneNode*>(*iter))
+            ++moveNumber;
+
+        if (*iter == currentNode)
+            break;
+
+        ++iter;
     }
 }
 

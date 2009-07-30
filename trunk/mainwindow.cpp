@@ -386,6 +386,8 @@ void MainWindow::on_actionRotateSgfClockwise_triggered(){
 * Edit -> Flip SGF Holizontally
 */
 void MainWindow::on_actionFlipSgfHorizontally_triggered(){
+    int size = ui->boardWidget->getData().root.xsize;
+    ui->boardWidget->flipSgf(size, 0);
 }
 
 /**
@@ -393,6 +395,8 @@ void MainWindow::on_actionFlipSgfHorizontally_triggered(){
 * Edit -> Flip SGF Vertically
 */
 void MainWindow::on_actionFlipSgfVertically_triggered(){
+    int size = ui->boardWidget->getData().root.ysize;
+    ui->boardWidget->flipSgf(0, size);
 }
 
 /**
