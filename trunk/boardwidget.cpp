@@ -133,17 +133,74 @@ void BoardWidget::setBoardSize(int xsize, int ysize){
     repaint();
 }
 
-void BoardWidget::flipSgf(int xsize, int ysize){
-    flipSgf(&goData.root, xsize, ysize);
+void BoardWidget::rotateSgf(){
+    rotateSgf(&goData.root);
     createBoardBuffer();
     setDirty(true);
     repaint();
 }
 
+void BoardWidget::flipSgfHorizontally(){
+    flipSgf(&goData.root, goData.root.xsize, 0);
+    createBoardBuffer();
+    setDirty(true);
+    repaint();
+}
+
+void BoardWidget::flipSgfVertically(){
+    flipSgf(&goData.root, 0, goData.root.ysize);
+    createBoardBuffer();
+    setDirty(true);
+    repaint();
+}
+
+void BoardWidget::rotateSgf(go::node* node){
+    int tmpX = goData.root.ysize - node->position.y - 1;
+    int tmpY = node->position.x;
+    node->position.x = tmpX;
+    node->position.y = tmpY;
+
+    emit nodeModified(node);
+
+    go::nodeList::iterator iter = node->childNodes.begin();
+    while (iter != node->childNodes.end()){
+        rotateSgf(*iter);
+        ++iter;
+    }
+
+    rotateStoneSgf(node->stones);
+    rotateMarkSgf(node->crosses);
+    rotateMarkSgf(node->squares);
+    rotateMarkSgf(node->triangles);
+    rotateMarkSgf(node->circles);
+    rotateMarkSgf(node->characters);
+}
+
+void BoardWidget::rotateStoneSgf(go::stoneList& stoneList){
+    go::stoneList::iterator iter = stoneList.begin();
+    while (iter != stoneList.end()){
+        int tmpX = goData.root.ysize - iter->p.y - 1;
+        int tmpY = iter->p.x;
+        iter->p.x = tmpX;
+        iter->p.y = tmpY;
+        ++iter;
+    }
+}
+
+void BoardWidget::rotateMarkSgf(go::markList& markList){
+    go::markList::iterator iter = markList.begin();
+    while (iter != markList.end()){
+        int tmpX = goData.root.ysize - iter->p.y - 1;
+        int tmpY = iter->p.x;
+        iter->p.x = tmpX;
+        iter->p.y = tmpY;
+        ++iter;
+    }
+}
+
 void BoardWidget::flipSgf(go::node* node, int xsize, int ysize){
     if (xsize)
         node->position.x = xsize - node->position.x - 1;
-
     if (ysize)
         node->position.y = ysize - node->position.y - 1;
 
@@ -152,6 +209,35 @@ void BoardWidget::flipSgf(go::node* node, int xsize, int ysize){
     go::nodeList::iterator iter = node->childNodes.begin();
     while (iter != node->childNodes.end()){
         flipSgf(*iter, xsize, ysize);
+        ++iter;
+    }
+
+    flipStoneSgf(node->stones, xsize, ysize);
+    flipMarkSgf(node->crosses, xsize, ysize);
+    flipMarkSgf(node->squares, xsize, ysize);
+    flipMarkSgf(node->triangles, xsize, ysize);
+    flipMarkSgf(node->circles, xsize, ysize);
+    flipMarkSgf(node->characters, xsize, ysize);
+}
+
+void BoardWidget::flipStoneSgf(go::stoneList& stoneList, int xsize, int ysize){
+    go::stoneList::iterator iter = stoneList.begin();
+    while (iter != stoneList.end()){
+        if (xsize)
+            iter->p.x = xsize - iter->p.x - 1;
+        if (ysize)
+            iter->p.y = ysize - iter->p.y - 1;
+        ++iter;
+    }
+}
+
+void BoardWidget::flipMarkSgf(go::markList& markList, int xsize, int ysize){
+    go::markList::iterator iter = markList.begin();
+    while (iter != markList.end()){
+        if (xsize)
+            iter->p.x = xsize - iter->p.x - 1;
+        if (ysize)
+            iter->p.y = ysize - iter->p.y - 1;
         ++iter;
     }
 }

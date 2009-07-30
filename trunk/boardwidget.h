@@ -58,8 +58,9 @@ public:
     void setShowBranchMoves(bool visible){ showBranchMoves = visible; repaint(); }
     void setAnnotation(int annotation){ currentNode->annotation = (go::node::eAnnotation)annotation; modifyNode(currentNode); }
     void setBoardSize(int xsize, int ysize);
-    void flipSgf(int xsize, int ysize);
-    void flipSgf(go::node* node, int xsize, int ysize);
+    void rotateSgf();
+    void flipSgfHorizontally();
+    void flipSgfVertically();
 
     QString getXString(int x) const;
     QString getYString(int y) const;
@@ -111,6 +112,12 @@ protected:
     void addCharacter(go::markList& markList, const go::point& p);
     void removeMark(go::markList& markList, const go::point& p);
     void addStone(go::stoneList& stoneList, const go::point& p, go::stone::eColor color);
+    void rotateSgf(go::node* node);
+    void rotateStoneSgf(go::stoneList& stoneList);
+    void rotateMarkSgf(go::markList& markList);
+    void flipSgf(go::node* node, int xsize, int ysize);
+    void flipStoneSgf(go::stoneList& stoneList, int xsize, int ysize);
+    void flipMarkSgf(go::markList& markList, int xsize, int ysize);
 
 private:
     Ui::BoardWidget *m_ui;
