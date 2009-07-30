@@ -7,10 +7,33 @@ Add your content here.
 
 = Details =
 
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+== Supported SGF Properties ==
+
+=== Move Properties ===
+B, W
+
+=== Setup Properties ===
+AB, AW, AE
+
+=== Node Annotation Properties ===
+C, N, DM, GB, GW, HO, UC
+
+=== Move Annotation Properties ===
+TE, BM, DO, IT
+
+=== Markup Properties ===
+LB, MA, CR, SQ, TR
+
+=== Root Properties ===
+AP, SZ
+
+=== Game Info Properties ===
+PB, BR, BT, PW, WR, WT, RE, TM, OT, GN, EV, RO, DT, PC, GC, US, SO, ON, AN, CP
+
+=== Timing Properties ===
+
+=== Miscellaneous Properties　===
+
 
 = Screen Shot =
-http://sikusiku.sakura.ne.jp/mugo/0.2.0/mugo.png
+http://sikusiku.sakura.ne.jp/mugo/0.3.0/mugo.png
