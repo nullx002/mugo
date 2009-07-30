@@ -58,6 +58,8 @@ public:
     void setShowBranchMoves(bool visible){ showBranchMoves = visible; repaint(); }
     void setAnnotation(int annotation){ currentNode->annotation = (go::node::eAnnotation)annotation; modifyNode(currentNode); }
     void setBoardSize(int xsize, int ysize);
+    void flipSgf(int xsize, int ysize);
+    void flipSgf(go::node* node, int xsize, int ysize);
 
     QString getXString(int x) const;
     QString getYString(int y) const;
@@ -102,6 +104,7 @@ protected:
     void dead(int* tmp);
 
     void createNodeList();
+    void createBoardBuffer();
     void addStone(int x, int y);
     void addMark(int x, int y);
     void addMark(go::markList& markList, const go::mark& mark);
