@@ -20,6 +20,7 @@ BoardWidget::BoardWidget(QWidget *parent) :
     showMarker(true),
     showBranchMoves(true),
     editMode(eAlternateMove),
+    moveToClicked(false),
     black1(":/res/black_64.png"),
     white1(":/res/white_64.png"),
     boardImage1(":/res/bg.png")
@@ -75,7 +76,9 @@ void BoardWidget::onLButtonDown(QMouseEvent* e){
     if (x < 0 || x >= goData.root.xsize || y < 0 || y >= goData.root.ysize)
         return;
 
-    if (editMode == eAlternateMove)
+    if (moveToClicked && board[y][x].node)
+        setCurrentNode( board[y][x].node );
+    else if (editMode == eAlternateMove)
         addStone(x, y);
     else
         addMark(x, y);
@@ -633,6 +636,9 @@ void BoardWidget::drawTerritory(QPainter& p, go::markList::iterator first, go::m
 void BoardWidget::drawCurrentMark(QPainter& p, go::node* node){
     p.save();
 
+    QFont font(p.font());
+    font.setPointSize(int(boxSize * 0.45));
+    p.setFont(font);
     p.setPen(Qt::red);
     if (node->getX() >= 0 && node->getX() < goData.root.xsize && node->getY() >= 0 && node->getY() < goData.root.ysize){
         int x = xlines[node->getX()];
