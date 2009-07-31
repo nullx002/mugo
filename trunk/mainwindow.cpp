@@ -629,6 +629,7 @@ void MainWindow::on_actionJumpToMoveNumber_triggered(){
 * Traverse -> jump to clicked
 */
 void MainWindow::on_actionJumpToClicked_triggered(){
+    ui->boardWidget->setMoveToClicked( ui->actionJumpToClicked->isChecked() );
 }
 
 /**

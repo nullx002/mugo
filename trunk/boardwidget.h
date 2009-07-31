@@ -61,6 +61,7 @@ public:
     void setShowBranchMoves(bool visible){ showBranchMoves = visible; repaint(); }
     void setAnnotation(int annotation){ currentNode->annotation = (go::node::eAnnotation)annotation; modifyNode(currentNode); }
     void setBoardSize(int xsize, int ysize);
+    void setMoveToClicked(bool moveMode = true){ moveToClicked = moveMode; }
     void rotateSgf();
     void flipSgfHorizontally();
     void flipSgfVertically();
@@ -142,6 +143,7 @@ private:
     bool showMarker;
     bool showBranchMoves;
     eEditMode editMode;
+    bool moveToClicked;
 
     // draw object
     QImage black1, black2;

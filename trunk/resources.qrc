@@ -33,5 +33,7 @@
         <file>res/flipvertically.png</file>
         <file>res/rotateright.png</file>
         <file>res/pass.png</file>
+        <file>res/jumptoclicked.png</file>
+        <file>res/jumptonumber.png</file>
     </qresource>
 </RCC>

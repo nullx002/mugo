@@ -14,7 +14,7 @@
    <string>mgo</string>
   </property>
   <property name="windowIcon">
-   <iconset>
+   <iconset resource="resources.qrc">
     <normaloff>:/res/mgo.png</normaloff>:/res/mgo.png</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
@@ -41,7 +41,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
      <x>0</x>
      <y>0</y>
      <width>733</width>
-     <height>20</height>
+     <height>18</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -161,7 +161,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
       <string>Move Number</string>
      </property>
      <property name="icon">
-      <iconset>
+      <iconset resource="resources.qrc">
        <normaloff>:/res/showmovenumber.png</normaloff>:/res/showmovenumber.png</iconset>
      </property>
      <addaction name="actionShowMoveNumber"/>
@@ -314,6 +314,9 @@ alternate-background-color: rgb(255, 255, 127);</string>
    <addaction name="actionBackToParent"/>
    <addaction name="actionPreviousBranch"/>
    <addaction name="actionNextBranch"/>
+   <addaction name="separator"/>
+   <addaction name="actionJumpToMoveNumber"/>
+   <addaction name="actionJumpToClicked"/>
   </widget>
   <widget class="QToolBar" name="editToolBar">
    <property name="windowTitle">
@@ -366,7 +369,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
   </widget>
   <action name="actionNew">
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/filenew.png</normaloff>:/res/filenew.png</iconset>
    </property>
    <property name="text">
@@ -378,7 +381,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
   </action>
   <action name="actionOpen">
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/fileopen.png</normaloff>:/res/fileopen.png</iconset>
    </property>
    <property name="text">
@@ -393,7 +396,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
   </action>
   <action name="actionSave">
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/filesave.png</normaloff>:/res/filesave.png</iconset>
    </property>
    <property name="text">
@@ -496,7 +499,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
   </action>
   <action name="actionSaveBoardAsPicture">
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/saveimage.png</normaloff>:/res/saveimage.png</iconset>
    </property>
    <property name="text">
@@ -505,7 +508,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
   </action>
   <action name="actionAbout">
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/mgo.png</normaloff>:/res/mgo.png</iconset>
    </property>
    <property name="text">
@@ -529,7 +532,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
   </action>
   <action name="actionDelete">
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/remove.png</normaloff>:/res/remove.png</iconset>
    </property>
    <property name="text">
@@ -538,7 +541,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
   </action>
   <action name="actionPass">
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/pass.png</normaloff>:/res/pass.png</iconset>
    </property>
    <property name="text">
@@ -617,7 +620,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/text.png</normaloff>:/res/text.png</iconset>
    </property>
    <property name="text">
@@ -629,7 +632,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/circle.png</normaloff>:/res/circle.png</iconset>
    </property>
    <property name="text">
@@ -641,7 +644,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/cross.png</normaloff>:/res/cross.png</iconset>
    </property>
    <property name="text">
@@ -653,7 +656,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/square.png</normaloff>:/res/square.png</iconset>
    </property>
    <property name="text">
@@ -665,7 +668,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/triangle.png</normaloff>:/res/triangle.png</iconset>
    </property>
    <property name="text">
@@ -677,7 +680,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/rubbereraser.png</normaloff>:/res/rubbereraser.png</iconset>
    </property>
    <property name="text">
@@ -689,7 +692,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/mgo.png</normaloff>:/res/mgo.png</iconset>
    </property>
    <property name="text">
@@ -698,7 +701,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
   </action>
   <action name="actionAboutQT">
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/qt.png</normaloff>:/res/qt.png</iconset>
    </property>
    <property name="text">
@@ -726,7 +729,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/black_64.png</normaloff>:/res/black_64.png</iconset>
    </property>
    <property name="text">
@@ -738,7 +741,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/white_64.png</normaloff>:/res/white_64.png</iconset>
    </property>
    <property name="text">
@@ -750,7 +753,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/empty.png</normaloff>:/res/empty.png</iconset>
    </property>
    <property name="text">
@@ -759,7 +762,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
   </action>
   <action name="actionReload">
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/reload.png</normaloff>:/res/reload.png</iconset>
    </property>
    <property name="text">
@@ -877,7 +880,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
   </action>
   <action name="actionFirstMove">
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/firstmove.png</normaloff>:/res/firstmove.png</iconset>
    </property>
    <property name="text">
@@ -886,7 +889,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
   </action>
   <action name="actionFastRewind">
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/fastrewind.png</normaloff>:/res/fastrewind.png</iconset>
    </property>
    <property name="text">
@@ -895,7 +898,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
   </action>
   <action name="actionPreviousMove">
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/prevmove.png</normaloff>:/res/prevmove.png</iconset>
    </property>
    <property name="text">
@@ -904,7 +907,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
   </action>
   <action name="actionNextMove">
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/nextmove.png</normaloff>:/res/nextmove.png</iconset>
    </property>
    <property name="text">
@@ -913,7 +916,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
   </action>
   <action name="actionFastForward">
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/fastforward.png</normaloff>:/res/fastforward.png</iconset>
    </property>
    <property name="text">
@@ -922,7 +925,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
   </action>
   <action name="actionMoveLast">
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/lastmove.png</normaloff>:/res/lastmove.png</iconset>
    </property>
    <property name="text">
@@ -931,7 +934,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
   </action>
   <action name="actionBackToParent">
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/backparent.png</normaloff>:/res/backparent.png</iconset>
    </property>
    <property name="text">
@@ -940,7 +943,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
   </action>
   <action name="actionPreviousBranch">
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/prevbranch.png</normaloff>:/res/prevbranch.png</iconset>
    </property>
    <property name="text">
@@ -949,7 +952,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
   </action>
   <action name="actionNextBranch">
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/nextbranch.png</normaloff>:/res/nextbranch.png</iconset>
    </property>
    <property name="text">
@@ -1001,7 +1004,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/showmovenumber.png</normaloff>:/res/showmovenumber.png</iconset>
    </property>
    <property name="text">
@@ -1068,7 +1071,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
   </action>
   <action name="actionRotateSgfClockwise">
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/rotateright.png</normaloff>:/res/rotateright.png</iconset>
    </property>
    <property name="text">
@@ -1077,7 +1080,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
   </action>
   <action name="actionFlipSgfHorizontally">
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/fliphorizontally.png</normaloff>:/res/fliphorizontally.png</iconset>
    </property>
    <property name="text">
@@ -1086,7 +1089,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
   </action>
   <action name="actionFlipSgfVertically">
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/flipvertically.png</normaloff>:/res/flipvertically.png</iconset>
    </property>
    <property name="text">
@@ -1094,11 +1097,22 @@ alternate-background-color: rgb(255, 255, 127);</string>
    </property>
   </action>
   <action name="actionJumpToMoveNumber">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/jumptonumber.png</normaloff>:/res/jumptonumber.png</iconset>
+   </property>
    <property name="text">
     <string>Jump To Move Number</string>
    </property>
   </action>
   <action name="actionJumpToClicked">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/jumptoclicked.png</normaloff>:/res/jumptoclicked.png</iconset>
+   </property>
    <property name="text">
     <string>Jump To Clicked</string>
    </property>
@@ -1113,6 +1127,8 @@ alternate-background-color: rgb(255, 255, 127);</string>
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
  <connections/>
 </ui>
