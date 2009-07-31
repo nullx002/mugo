@@ -17,12 +17,14 @@ public:
     enum eEditMode{ eAlternateMove, eAddBlack, eAddWhite, eAddEmpty, eLabelMark, eCrossMark, eCircleMark, eSquareMark, eTriangleMark, eDeleteMarker };
 
     struct stoneInfo{
-        stoneInfo() : number(0), color(go::stone::eEmpty){}
+        stoneInfo() : number(0), color(go::stone::eEmpty), node(NULL){}
         bool empty() const{ return color == go::stone::eEmpty; }
         bool black() const{ return color == go::stone::eBlack; }
         bool white() const{ return color == go::stone::eWhite; }
+
         int number;
         go::stone::eColor color;
+        go::node* node;
     };
 
     explicit BoardWidget(QWidget *parent = 0);
@@ -39,6 +41,7 @@ public:
     void getData(go::fileBase& data);
     void setData(const go::fileBase& data);
     void clear();
+    go::node* findNodeFromMoveNumber(int moveNumber);
 
     // get node
     go::data& getData(){ return goData; }
@@ -125,6 +128,8 @@ private:
     // data
     bool dirty;
     go::data goData;
+    int capturedBlack;
+    int capturedWhite;
     int black;
     go::nodeList nodeList;
     go::node* currentNode;

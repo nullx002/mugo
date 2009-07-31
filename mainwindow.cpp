@@ -610,6 +610,29 @@ void MainWindow::on_actionNextBranch_triggered(){
 
 /**
 * Slot
+* Traverse -> junp to move number
+*/
+void MainWindow::on_actionJumpToMoveNumber_triggered(){
+    QInputDialog dlg(this);
+    dlg.setInputMode( QInputDialog::IntInput );
+    dlg.setLabelText("Input move number");
+    if (dlg.exec() != QDialog::Accepted)
+        return;
+
+    go::node* node = ui->boardWidget->findNodeFromMoveNumber( dlg.intValue() );
+    if (node)
+        ui->boardWidget->setCurrentNode(node);
+}
+
+/**
+* Slot
+* Traverse -> jump to clicked
+*/
+void MainWindow::on_actionJumpToClicked_triggered(){
+}
+
+/**
+* Slot
 * View -> Move Number-> Show Move Number
 */
 void MainWindow::on_actionShowMoveNumber_triggered(){

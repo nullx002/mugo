@@ -139,6 +139,8 @@ private slots:
     void on_actionBackToParent_triggered();
     void on_actionPreviousBranch_triggered();
     void on_actionNextBranch_triggered();
+    void on_actionJumpToClicked_triggered();
+    void on_actionJumpToMoveNumber_triggered();
 
     // View menu -> Move Number
     void on_actionNoMoveNumber_triggered();
