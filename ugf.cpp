@@ -186,7 +186,7 @@ bool ugf::readFigure(QString::iterator& first, QString::iterator& last){
     while (first != last && *first != '['){
         QString str = readLine(first, last);
         QStringList list =  str.split(',');
-        if (list.size() < 4)
+        if (list.size() < 2)
             continue;
 
         if (list[0] == ".Text")
