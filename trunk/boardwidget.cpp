@@ -10,6 +10,8 @@ BoardWidget::BoardWidget(QWidget *parent) :
     QWidget(parent),
     m_ui(new Ui::BoardWidget),
     dirty(false),
+    capturedBlack(0),
+    capturedWhite(0),
     black(true),
     currentMoveNumber(0),
     showMoveNumber(true),
@@ -252,6 +254,22 @@ void BoardWidget::clear(){
 }
 
 /**
+*/
+go::node* BoardWidget::findNodeFromMoveNumber(int moveNumber){
+    go::nodeList::iterator iter = nodeList.begin();
+
+    int number = 0;
+    while (iter != nodeList.end()){
+        if (dynamic_cast<go::stoneNode*>(*iter))
+            if (++number == moveNumber)
+                return *iter;
+        ++iter;
+    }
+
+    return NULL;
+}
+
+/**
 * public slot
 */
 void BoardWidget::addNode(go::node* parent, go::node* node){
@@ -334,6 +352,9 @@ void BoardWidget::createNodeList(){
 /**
 */
 void BoardWidget::createBoardBuffer(){
+    capturedBlack = 0;
+    capturedWhite = 0;
+
     board.clear();
     board.resize(goData.root.ysize);
     for (int i=0; i<goData.root.ysize; ++i)
@@ -640,8 +661,9 @@ void BoardWidget::putStone(go::node* n, int moveNumber){
         int x = stoneNode->getX();
         int y = stoneNode->getY();
         if (x >= 0 && x < goData.root.xsize && y >= 0 && y < goData.root.ysize){
-            board[y][x].color = stoneNode->isBlack() ? go::stone::eBlack : go::stone::eWhite;
+            board[y][x].color  = stoneNode->isBlack() ? go::stone::eBlack : go::stone::eWhite;
             board[y][x].number = moveNumber;
+            board[y][x].node   = n;
             currentMoveNumber  = moveNumber;
             removeDeadStones(x, y);
         }
@@ -652,7 +674,9 @@ void BoardWidget::putStone(go::node* n, int moveNumber){
         int  x = iter->p.x;
         int  y = iter->p.y;
         if (x >= 0 && x < goData.root.xsize && y >= 0 && y < goData.root.ysize){
-            board[y][x].color = iter->c;
+            board[y][x].color  = iter->c;
+            board[y][x].number = 0;
+            board[y][x].node   = n;
             removeDeadStones(x, y);
         }
         ++iter;
@@ -759,8 +783,16 @@ bool BoardWidget::isKill(int x, int y){
 void BoardWidget::dead(int* tmp){
     for (int y=0; y<goData.root.ysize; ++y){
         for (int x=0; x<goData.root.xsize; ++x){
-            if (tmp[y*goData.root.ysize+x])
+            if (tmp[y*goData.root.ysize+x]){
+                if (board[y][x].color == go::stone::eBlack)
+                    ++capturedBlack;
+
+                if (board[y][x].color == go::stone::eWhite)
+                    ++capturedWhite;
+
                 board[y][x].color = go::stone::eEmpty;
+                board[y][x].node  = NULL;
+            }
         }
     }
 }

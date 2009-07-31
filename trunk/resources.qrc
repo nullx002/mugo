@@ -32,5 +32,6 @@
         <file>res/fliphorizontally.png</file>
         <file>res/flipvertically.png</file>
         <file>res/rotateright.png</file>
+        <file>res/pass.png</file>
     </qresource>
 </RCC>
