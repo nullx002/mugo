@@ -310,7 +310,9 @@ void BoardWidget::deleteNode(go::node* node){
 /**
 * public slot
 */
-void BoardWidget::modifyNode(go::node* node){
+void BoardWidget::modifyNode(go::node* node, bool recreateBoardBuffer){
+    if (recreateBoardBuffer)
+        createBoardBuffer();
     repaint();
     setDirty(true);
     emit nodeModified(node);
@@ -370,6 +372,8 @@ void BoardWidget::createBoardBuffer(){
     int moveNumber = 1;
     go::nodeList::iterator iter = nodeList.begin();
     while (iter != nodeList.end()){
+        if ((*iter)->moveNumber > 0)
+            moveNumber = (*iter)->moveNumber;
         putStone(*iter, moveNumber);
         if ((*iter)->isStone())
             ++moveNumber;

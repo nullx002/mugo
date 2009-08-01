@@ -157,6 +157,7 @@ public:
     point position;
     bool  black;
     bool  white;
+    int   moveNumber;
 };
 
 

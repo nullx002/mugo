@@ -33,10 +33,10 @@ node* createWhiteNode(node* parent, int x, int y){
 
 
 
-node::node(data* data_) : goData(data_), parent(NULL), annotation(eNoAnnotation), black(false), white(false){
+node::node(data* data_) : goData(data_), parent(NULL), annotation(eNoAnnotation), black(false), white(false), moveNumber(-1){
 }
 
-node::node(node* parent_) : goData(parent_->goData), parent(parent_), annotation(eNoAnnotation), black(false), white(false){
+node::node(node* parent_) : goData(parent_->goData), parent(parent_), annotation(eNoAnnotation), black(false), white(false), moveNumber(-1){
 }
 
 void node::clear(){
@@ -56,6 +56,9 @@ bool node::isPass() const{
 
 QString node::toString() const{
     QString str = nodeName();
+
+    if (moveNumber > 0)
+        str += QString(" (%1)").arg(moveNumber);
 
     if (!stones.empty())
         str.append(" Add");
