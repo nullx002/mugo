@@ -25,7 +25,7 @@ bool ugf::readStream(QString::iterator& first, QString::iterator last){
     return false;
 }
 
-bool ugf::saveStream(QTextStream& stream){
+bool ugf::saveStream(QTextStream& /*stream*/){
     return false;
 }
 
@@ -59,7 +59,7 @@ bool ugf::get(go::data& data) const{
     return get(++first, dataList_.end(), &data.root);
 }
 
-bool ugf::set(const go::data& data){
+bool ugf::set(const go::data& /*data*/){
     return false;
 }
 

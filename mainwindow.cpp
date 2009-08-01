@@ -377,6 +377,40 @@ void MainWindow::on_actionHotspot_triggered(){
 
 /**
 * Slot
+* Edit -> Move Number -> Set
+*/
+void MainWindow::on_actionSetMoveNumber_triggered(){
+    go::node* node = ui->boardWidget->getCurrentNode();
+    if (!node->isStone())
+        return;
+
+    QInputDialog dlg(this);
+    dlg.setInputMode(QInputDialog::IntInput);
+    dlg.setLabelText("Input move number");
+
+    if (node->moveNumber > 0)
+        dlg.setIntValue(node->moveNumber);
+
+    if (dlg.exec() != QDialog::Accepted)
+        return;
+
+    node->moveNumber = dlg.intValue();
+
+    ui->boardWidget->modifyNode(node, true);
+}
+
+/**
+* Slot
+* Edit -> Move Number -> Unset
+*/
+void MainWindow::on_actionUnsetMoveNumber_triggered(){
+    go::node* node = ui->boardWidget->getCurrentNode();
+    node->moveNumber = -1;
+    ui->boardWidget->modifyNode(node, true);
+}
+
+/**
+* Slot
 * Edit -> Edit Node Name
 */
 void MainWindow::on_actionEditNodeName_triggered(){

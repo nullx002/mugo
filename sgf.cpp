@@ -23,7 +23,7 @@ QString sgf::node::toString() const{
         "GC", "ON", "AN", "CP", "SO", "US",
 
         // stone
-        "B", "BL", "OB", "W", "WL","OW",
+        "B", "BL", "OB", "W", "WL","OW", "MN",
 
         // marker
         "AB", "AW", "AE", "MA", "CR", "SQ", "TR", "LB", "TB", "TW",
@@ -35,7 +35,7 @@ QString sgf::node::toString() const{
         "C", "DM", "GB", "GW", "UC", "HO", "N",
 
         // unsupported property
-        // "ST", "PL","MN","KO","V", "AR", "LN", "DD", "SL", "FG", "PM", "VW"
+        // "ST", "PL","KO","V", "AR", "LN", "DD", "SL", "FG", "PM", "VW"
     };
     static const int N = sizeof(keys) / sizeof(keys[0]);
 
@@ -190,6 +190,9 @@ bool sgf::node::set(const go::node& n){
         }
         propertyType::key_type key = n.isBlack() ? "B" : "W";
         property[key].push_back(str);
+
+        if (n.moveNumber > 0)
+            property["MN"].push_back( QString("%1").arg(n.moveNumber) );
     }
 
     if (!n.name.isEmpty())
@@ -351,6 +354,8 @@ bool sgf::node::get(go::node& n, const QString& key, const QStringList& values) 
         n.comment = values[0];
     else if (key == "N")
         n.name = values[0];
+    else if (key == "MN")
+        n.moveNumber = values[0].toInt();
 
     // mark
     else if (key == "MA" || key == "M")

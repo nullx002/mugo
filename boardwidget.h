@@ -75,7 +75,7 @@ public:
 public slots:
     void addNode(go::node* parent, go::node* node);
     void deleteNode(go::node* node);
-    void modifyNode(go::node* node);
+    void modifyNode(go::node* node, bool recreateBoardBuffer=false);
     void setCurrentNode(go::node* node=NULL);
 
 signals:

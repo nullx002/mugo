@@ -71,7 +71,6 @@ private:
 
 private slots:
     // File menu
-    void on_actionPlaySound_triggered();
     void on_actionNew_triggered();
     void on_actionOpen_triggered();
     void on_actionReload_triggered();
@@ -112,6 +111,10 @@ private slots:
     void on_actionVeryGoodForWhite_triggered();
     void on_actionUnclear_triggered();
     void on_actionHotspot_triggered();
+
+    // Edit menu -> Move Number
+    void on_actionSetMoveNumber_triggered();
+    void on_actionUnsetMoveNumber_triggered();
 
     // Edit menu (rotate/flip)
     void on_actionRotateSgfClockwise_triggered();
@@ -171,6 +174,7 @@ private slots:
     void on_action19x19Board_triggered();
     void on_action13x13Board_triggered();
     void on_action9x9Board_triggered();
+    void on_actionPlaySound_triggered();
 
     // Help menu
     void on_actionAbout_triggered();
