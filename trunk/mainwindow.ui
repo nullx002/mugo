@@ -41,7 +41,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
      <x>0</x>
      <y>0</y>
      <width>733</width>
-     <height>18</height>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -206,6 +206,8 @@ alternate-background-color: rgb(255, 255, 127);</string>
     <addaction name="action19x19Board"/>
     <addaction name="action13x13Board"/>
     <addaction name="action9x9Board"/>
+    <addaction name="separator"/>
+    <addaction name="actionPlaySound"/>
    </widget>
    <widget class="QMenu" name="menu_Help">
     <property name="title">
@@ -1115,6 +1117,21 @@ alternate-background-color: rgb(255, 255, 127);</string>
    </property>
    <property name="text">
     <string>Jump To Clicked</string>
+   </property>
+  </action>
+  <action name="actionPlaySound">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/sound.png</normaloff>:/res/sound.png</iconset>
+   </property>
+   <property name="text">
+    <string>Play Sound</string>
    </property>
   </action>
  </widget>
