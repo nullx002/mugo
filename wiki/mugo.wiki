@@ -36,4 +36,4 @@ PB, BR, BT, PW, WR, WT, RE, TM, OT, GN, EV, RO, DT, PC, GC, US, SO, ON, AN, CP
 
 
 = Screen Shot =
-http://sikusiku.sakura.ne.jp/mugo/0.3.0/mugo.png
+http://sikusiku.sakura.ne.jp/mugo/0.4.0/mugo.png
