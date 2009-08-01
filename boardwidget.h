@@ -65,6 +65,8 @@ public:
     void rotateSgf();
     void flipSgfHorizontally();
     void flipSgfVertically();
+    void setPlaySound(bool play){ playSound = play; }
+    void setStoneSoundPath(const QString& path){ stoneSoundPath = path; }
 
     QString getXString(int x) const;
     QString getYString(int y) const;
@@ -144,6 +146,9 @@ private:
     bool showBranchMoves;
     eEditMode editMode;
     bool moveToClicked;
+
+    bool playSound;
+    QString stoneSoundPath;
 
     // draw object
     QImage black1, black2;

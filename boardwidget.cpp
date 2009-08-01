@@ -1,6 +1,7 @@
 #include <QDebug>
 #include <QPainter>
 #include <QMouseEvent>
+#include <QSound>
 #include <QList>
 #include "boardwidget.h"
 #include "mainwindow.h"
@@ -21,6 +22,7 @@ BoardWidget::BoardWidget(QWidget *parent) :
     showBranchMoves(true),
     editMode(eAlternateMove),
     moveToClicked(false),
+    playSound(false),
     black1(":/res/black_64.png"),
     white1(":/res/white_64.png"),
     boardImage1(":/res/bg.png")
@@ -331,6 +333,9 @@ void BoardWidget::setCurrentNode(go::node* node){
         createNodeList();
 
     createBoardBuffer();
+
+    if (playSound && dynamic_cast<go::stoneNode*>(node))
+        QSound::play(stoneSoundPath);
 
     repaint();
     emit currentNodeChanged(currentNode);

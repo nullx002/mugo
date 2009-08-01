@@ -35,5 +35,6 @@
         <file>res/pass.png</file>
         <file>res/jumptoclicked.png</file>
         <file>res/jumptonumber.png</file>
+        <file>res/sound.png</file>
     </qresource>
 </RCC>

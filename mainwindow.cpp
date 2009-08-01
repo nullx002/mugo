@@ -21,6 +21,27 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+// set sound files
+//#ifdef Q_WS_WIN
+    QStringList soundPathList;
+    soundPathList.push_back(qApp->applicationDirPath() + "/sounds/");
+//#elif defined(Q_WS_MAC)
+//#elif defined(Q_WS_X11)
+//    QStringList soundPathList;
+    soundPathList.push_back("/usr/share/mugo/sounds/");
+    soundPathList.push_back("/usr/local/share/mugo/sounds/");
+//#endif
+    QStringList::iterator iter = soundPathList.begin();
+    while (iter != soundPathList.end()){
+        QFileInfo finfo( *iter + "stone.wav" );
+        if (finfo.exists()){
+            ui->boardWidget->setStoneSoundPath(finfo.filePath());
+            ui->boardWidget->setPlaySound(true);
+            break;
+        }
+        ++iter;
+    }
+
     // toolbar
     ui->optionToolBar->addAction( ui->menuMoveNumber->menuAction() );
     ui->menuMoveNumber->menuAction()->setCheckable(true);
@@ -827,6 +848,14 @@ void MainWindow::on_action13x13Board_triggered(){
 */
 void MainWindow::on_action9x9Board_triggered(){
     setBoardSize(9, 9);
+}
+
+/**
+* Slot
+* Options -> Play Sound
+*/
+void MainWindow::on_actionPlaySound_triggered(){
+    ui->boardWidget->setPlaySound( ui->actionPlaySound->isChecked() );
 }
 
 /**
