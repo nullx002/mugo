@@ -265,9 +265,8 @@ go::node* BoardWidget::findNodeFromMoveNumber(int moveNumber){
 
     int number = 0;
     while (iter != nodeList.end()){
-        if (dynamic_cast<go::stoneNode*>(*iter))
-            if (++number == moveNumber)
-                return *iter;
+        if ((*iter)->isStone() && ++number == moveNumber)
+            return *iter;
         ++iter;
     }
 
@@ -334,7 +333,7 @@ void BoardWidget::setCurrentNode(go::node* node){
 
     createBoardBuffer();
 
-    if (playSound && dynamic_cast<go::stoneNode*>(node))
+    if (playSound && node->isStone())
         QSound::play(stoneSoundPath);
 
     repaint();
@@ -372,7 +371,7 @@ void BoardWidget::createBoardBuffer(){
     go::nodeList::iterator iter = nodeList.begin();
     while (iter != nodeList.end()){
         putStone(*iter, moveNumber);
-        if (dynamic_cast<go::stoneNode*>(*iter))
+        if ((*iter)->isStone())
             ++moveNumber;
 
         if (*iter == currentNode)
@@ -510,11 +509,9 @@ void BoardWidget::drawStones(QPainter& p){
     drawTerritory(p, currentNode->blackTerritories.begin(), currentNode->blackTerritories.end());
     drawTerritory(p, currentNode->whiteTerritories.begin(), currentNode->whiteTerritories.end());
 
-    if (showMoveNumber && showMoveNumberCount == 0){
-        go::stoneNode* stoneNode = dynamic_cast<go::stoneNode*>(currentNode);
-        if (stoneNode)
-            drawCurrentMark(p, stoneNode);
-    }
+    if (showMoveNumber && showMoveNumberCount == 0)
+        if (currentNode->isStone())
+            drawCurrentMark(p, currentNode);
 
     p.restore();
 }
@@ -645,7 +642,7 @@ void BoardWidget::drawCurrentMark(QPainter& p, go::node* node){
     font.setPointSize(int(boxSize * 0.45));
     p.setFont(font);
     p.setPen(Qt::red);
-    if (node->getX() >= 0 && node->getX() < goData.root.xsize && node->getY() >= 0 && node->getY() < goData.root.ysize){
+    if (!node->isPass()){
         int x = xlines[node->getX()];
         int y = ylines[node->getY()];
         p.drawText(x-boxSize, y-boxSize, boxSize*2, boxSize*2, Qt::AlignCenter, "▲");
@@ -667,12 +664,11 @@ void BoardWidget::eraseBackground(QPainter& p, int x, int y){
 void BoardWidget::putStone(go::node* n, int moveNumber){
     black = n->isWhite();
 
-    go::stoneNode* stoneNode = dynamic_cast<go::stoneNode*>(n);
-    if (stoneNode){
-        int x = stoneNode->getX();
-        int y = stoneNode->getY();
+    if (n->isStone()){
+        int x = n->getX();
+        int y = n->getY();
         if (x >= 0 && x < goData.root.xsize && y >= 0 && y < goData.root.ysize){
-            board[y][x].color  = stoneNode->isBlack() ? go::stone::eBlack : go::stone::eWhite;
+            board[y][x].color  = n->isBlack() ? go::black : go::white;
             board[y][x].number = moveNumber;
             board[y][x].node   = n;
             currentMoveNumber  = moveNumber;
@@ -697,7 +693,7 @@ void BoardWidget::putStone(go::node* n, int moveNumber){
 /**
 */
 void BoardWidget::removeDeadStones(int x, int y){
-    int c = board[y][x].color == go::stone::eBlack ? go::stone::eWhite : go::stone::eBlack;
+    int c = board[y][x].color == go::black ? go::white : go::black;
 
     int xsize = goData.root.xsize;
     int ysize = goData.root.ysize;
@@ -755,7 +751,7 @@ bool BoardWidget::isDead(int x, int y){
     int* tmp = new int[size];
     memset(tmp, 0, sizeof(int)*size);
 
-    go::stone::eColor c = board[y][x].color;
+    go::color c = board[y][x].color;
     bool dead = isDead(tmp, c, x, y);
 
     delete[] tmp;
@@ -770,7 +766,7 @@ bool BoardWidget::isKill(int x, int y){
     int ysize = goData.root.ysize;
     int* tmp = new int[xsize * ysize];
 
-    go::stone::eColor c = board[y][x].color == go::stone::eBlack ? go::stone::eWhite : go::stone::eBlack;
+    go::color c = board[y][x].color == go::black ? go::white : go::black;
 
     memset(tmp, 0, sizeof(int)* xsize * ysize);
     bool dead = (y > 0 && board[y-1][x].color == c && isDead(tmp, c, x, y - 1));
@@ -795,13 +791,13 @@ void BoardWidget::dead(int* tmp){
     for (int y=0; y<goData.root.ysize; ++y){
         for (int x=0; x<goData.root.xsize; ++x){
             if (tmp[y*goData.root.ysize+x]){
-                if (board[y][x].color == go::stone::eBlack)
+                if (board[y][x].color == go::black)
                     ++capturedBlack;
 
-                if (board[y][x].color == go::stone::eWhite)
+                if (board[y][x].color == go::white)
                     ++capturedWhite;
 
-                board[y][x].color = go::stone::eEmpty;
+                board[y][x].color = go::empty;
                 board[y][x].node  = NULL;
             }
         }
@@ -823,17 +819,17 @@ void BoardWidget::addStone(int x, int y){
         ++iter;
     }
 
-    board[y][x].color = black ? go::stone::eBlack : go::stone::eWhite;
+    board[y][x].color = black ? go::black : go::white;
     if (isKill(x, y) == false && isDead(x, y) == true){
-        board[y][x].color = go::stone::eEmpty;
+        board[y][x].color = go::empty;
         return;
     }
 
-    go::stoneNode* n;
+    go::node* n;
     if (black)
-        n = new go::blackNode(currentNode, x, y);
+        n = go::createBlackNode(currentNode, x, y);
     else
-        n = new go::whiteNode(currentNode, x, y);
+        n = go::createWhiteNode(currentNode, x, y);
 
     addNode(currentNode, n);
     setCurrentNode(n);
@@ -847,15 +843,15 @@ void BoardWidget::addMark(int x, int y){
             return;
 
         case eAddBlack:
-            addStone(currentNode->stones, go::point(x, y), go::stone::eBlack);
+            addStone(currentNode->stones, go::point(x, y), go::black);
             break;
 
         case eAddWhite:
-            addStone(currentNode->stones, go::point(x, y), go::stone::eWhite);
+            addStone(currentNode->stones, go::point(x, y), go::white);
             break;
 
         case eAddEmpty:
-            addStone(currentNode->stones, go::point(x, y), go::stone::eEmpty);
+            addStone(currentNode->stones, go::point(x, y), go::empty);
             break;
 
         case eLabelMark:{
@@ -975,16 +971,16 @@ void BoardWidget::removeMark(go::markList& markList, const go::point& p){
     }
 }
 
-void BoardWidget::addStone(go::stoneList& stoneList, const go::point& p, go::stone::eColor c){
+void BoardWidget::addStone(go::stoneList& stoneList, const go::point& p, go::color c){
     go::stoneList::iterator iter = stoneList.begin();
     while (iter != stoneList.end()){
         if (iter->p == p) {
             go::stone stone = *iter;
             iter = stoneList.erase(iter);
-            board[p.y][p.x].color = go::stone::eEmpty;
+            board[p.y][p.x].color = go::empty;
             board[p.y][p.x].number = 0;
 
-            if (stone.c == c || c == go::stone::eEmpty)
+            if (stone.c == c || c == go::empty)
                 return;
             else
                 break;

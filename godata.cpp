@@ -5,10 +5,38 @@
 namespace go{
 
 
-node::node(data* data_) : goData(data_), parent(NULL), annotation(eNoAnnotation){
+node* createBlackNode(node* parent){
+    node* newNode = new node(parent);
+    newNode->setBlack();
+    return newNode;
 }
 
-node::node(node* parent_) : goData(parent_->goData), parent(parent_), annotation(eNoAnnotation){
+node* createBlackNode(node* parent, int x, int y){
+    node* newNode = createBlackNode(parent);
+    newNode->setX(x);
+    newNode->setY(y);
+    return newNode;
+}
+
+node* createWhiteNode(node* parent){
+    node* newNode = new node(parent);
+    newNode->setWhite();
+    return newNode;
+}
+
+node* createWhiteNode(node* parent, int x, int y){
+    node* newNode = createWhiteNode(parent);
+    newNode->setX(x);
+    newNode->setY(y);
+    return newNode;
+}
+
+
+
+node::node(data* data_) : goData(data_), parent(NULL), annotation(eNoAnnotation), black(false), white(false){
+}
+
+node::node(node* parent_) : goData(parent_->goData), parent(parent_), annotation(eNoAnnotation), black(false), white(false){
 }
 
 void node::clear(){
@@ -20,6 +48,10 @@ void node::clear(){
             ++iter;
     }
     childNodes.clear();
+}
+
+bool node::isPass() const{
+    return position.x < 0 || position.y < 0 || position.x >= goData->root.xsize || position.y >= goData->root.ysize;
 }
 
 QString node::toString() const{
@@ -78,10 +110,6 @@ void informationNode::initialize(){
     ysize = 19;
     komi = 6.5;
     handicap = 0;
-}
-
-bool stoneNode::isPass() const{
-    return position.x < 0 || position.y < 0 || position.x >= goData->root.xsize || position.y >= goData->root.ysize;
 }
 
 

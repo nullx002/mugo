@@ -176,9 +176,9 @@ void MainWindow::on_actionPass_triggered(){
     go::node* currentNode = ui->boardWidget->getCurrentNode();
     go::node* node;
     if (currentNode->isBlack())
-        node = new go::whiteNode(currentNode);
+        node = go::createWhiteNode(currentNode);
     else
-        node = new go::blackNode(currentNode);
+        node = go::createBlackNode(currentNode);
     ui->boardWidget->addNode(currentNode, node);
     ui->boardWidget->setCurrentNode(node);
 }
@@ -878,7 +878,7 @@ void MainWindow::on_actionAboutQT_triggered(){
 * new node was created by BoardWidget.
 */
 void MainWindow::on_boardWidget_nodeAdded(go::node* /*parent*/, go::node* node){
-    addTreeWidget(*node);
+    addTreeWidget(node, true);
     setCaption();
 }
 
@@ -887,6 +887,8 @@ void MainWindow::on_boardWidget_nodeAdded(go::node* /*parent*/, go::node* node){
 * node was deleted by BoardWidget.
 */
 void MainWindow::on_boardWidget_nodeDeleted(go::node* node){
+    if (node->parent)
+        remakeTreeWidget( nodeToTreeWidget[node->parent] );
     deleteTreeWidget(node);
     deleteTreeWidgetForMap(node);
 
@@ -1035,7 +1037,9 @@ bool MainWindow::fileOpen(const QString& fname, const QString& filter){
 
     if (filter == "sgf"){
         go::sgf sgf;
+qDebug() << "read";
         sgf.read(fname, codec);
+qDebug() << "setData";
         ui->boardWidget->setData(sgf);
     }
     else if (filter == "ugf"){
@@ -1048,7 +1052,9 @@ bool MainWindow::fileOpen(const QString& fname, const QString& filter){
 
     ui->boardWidget->setDirty(false);
 
+qDebug() << "setTree";
     setTreeData();
+qDebug() << "setCaption";
     setCaption();
 
     ui->actionReload->setEnabled(true);
@@ -1135,93 +1141,85 @@ bool MainWindow::maybeSave(){
 */
 void MainWindow::setTreeData(){
     ui->branchWidget->clear();
+    nodeToTreeWidget.clear();
 
-    addTreeWidget(NULL, ui->boardWidget->getData().root);
+    addTreeWidget(&ui->boardWidget->getData().root);
     ui->boardWidget->setCurrentNode();
     ui->boardWidget->repaint();
 }
 
-QTreeWidgetItem* MainWindow::addTreeWidget(go::node& node){
-    QTreeWidgetItem* currentWidget = ui->branchWidget->currentItem();
-    if (currentWidget == NULL)
-        currentWidget = ui->branchWidget->topLevelItem(0);
-
-    remakeTreeWidget(currentWidget);
-    return addTreeWidget(currentWidget, node);
-}
-
-QTreeWidgetItem* MainWindow::addTreeWidget(QTreeWidgetItem* parentWidget, go::node& node){
-    QTreeWidgetItem* parentWidget2 = parentWidget ? parentWidget->parent() : NULL;
-    go::node* parentNode  = getNode(parentWidget);
+QTreeWidgetItem* MainWindow::addTreeWidget(go::node* node, bool needRemake){
+    QTreeWidgetItem* treeWidget = nodeToTreeWidget[node];
+    QTreeWidgetItem* newWidget  = NULL;
+    if (treeWidget == NULL)
+        newWidget = createTreeWidget(node);
+    QTreeWidgetItem* parentWidget  = (node->parent && nodeToTreeWidget[node->parent]) ? nodeToTreeWidget[node->parent] : ui->branchWidget->invisibleRootItem();
+    QTreeWidgetItem* parentWidget2 = parentWidget->parent() ? parentWidget->parent() : ui->branchWidget->invisibleRootItem();
+    go::node* parentNode  = node->parent;
     go::node* parentNode2 = getNode(parentWidget2);
 
-    QTreeWidgetItem* newWidget = NULL;
-    if ((parentNode && parentNode->childNodes.front() != &node) || (parentNode2 && parentNode2->childNodes.size() > 1)){
-        newWidget = createTreeWidget(parentWidget, node);
+    if ((parentNode && parentNode->childNodes.front() != node) || (parentNode2 && parentNode2->childNodes.size() > 1)){
+        if (newWidget){
+            parentWidget->addChild(newWidget);
+            if (needRemake)
+                remakeTreeWidget(parentWidget);
+        }
+        else if(parentWidget->indexOfChild(treeWidget) < 0){
+            treeWidget->parent()->removeChild(treeWidget);
+            parentWidget->addChild(treeWidget);
+        }
     }
-    else
-        newWidget = createTreeWidget(parentWidget2, node);
+    else{
+        if (newWidget){
+            parentWidget2->addChild(newWidget);
+            if (needRemake)
+                remakeTreeWidget(parentWidget2);
+        }
+        else if(parentWidget2->indexOfChild(treeWidget) < 0){
+            treeWidget->parent()->removeChild(treeWidget);
+            parentWidget2->addChild(treeWidget);
+        }
+    }
 
-    go::nodeList::const_iterator iter = node.childNodes.begin();
-    while (iter != node.childNodes.end()){
-        addTreeWidget(newWidget, **iter);
+    go::nodeList::iterator iter = node->childNodes.begin();
+    while (iter != node->childNodes.end()){
+        addTreeWidget(*iter);
         ++iter;
     }
 
-    return newWidget;
+    return treeWidget;
 }
 
-QTreeWidgetItem* MainWindow::remakeTreeWidget(QTreeWidgetItem* currentWidget){
-    QTreeWidgetItem* child1 = NULL;
-    go::node* node1 = NULL;
-    for (int i=0; i<currentWidget->childCount();){
-        QTreeWidgetItem* child2 = currentWidget->child(i);
-        if (child1 == NULL){
-            child1 = child2;
-            node1  = getNode(child1);
-            ++i;
-        }
-        else{
-            go::node* node2 = getNode(child2);
-            if (node1 == node2->parent){
-                child1->addChild( child2->clone() );
-                delete child2;
-                node1 = node2;
-            }
-            else
-                ++i;
-        }
-    }
-    return NULL;
-}
-
-QTreeWidgetItem* MainWindow::createTreeWidget(QTreeWidgetItem* parentWidget, go::node& node){
+QTreeWidgetItem* MainWindow::createTreeWidget(go::node* node){
     // TreeItemを作成
-    QTreeWidgetItem* nodeWidget = new QTreeWidgetItem( QStringList(createTreeText(&node)) );
+    QTreeWidgetItem* nodeWidget = new QTreeWidgetItem( QStringList(createTreeText(node)) );
 
     QVariant v;
-    v.setValue(&node);
+    v.setValue(node);
     nodeWidget->setData(0, Qt::UserRole, v);
-    nodeToTreeWidget[&node] = nodeWidget;
+    nodeToTreeWidget[node] = nodeWidget;
 
     // TreeItemにIconを設定
-    const go::stoneNode* stoneNode = dynamic_cast<const go::stoneNode*>(&node);
-    if (stoneNode){
-        if (stoneNode->isBlack())
-            nodeWidget->setIcon(0, QIcon(":/res/black_64.png"));
-        else
-            nodeWidget->setIcon(0, QIcon(":/res/white_64.png"));
-    }
+    if (node->isBlack())
+        nodeWidget->setIcon(0, QIcon(":/res/black_64.png"));
+    else if (node->isWhite())
+        nodeWidget->setIcon(0, QIcon(":/res/white_64.png"));
     else
         nodeWidget->setIcon(0, QIcon(":/res/green_64.png"));
 
-    // TreeにItemを追加
-    if (parentWidget)
-        parentWidget->addChild(nodeWidget);
-    else
-        ui->branchWidget->addTopLevelItem(nodeWidget);
-
     return nodeWidget;
+}
+
+QTreeWidgetItem* MainWindow::remakeTreeWidget(QTreeWidgetItem* treeWidget){
+    go::node* node = getNode(treeWidget);
+    if (node == NULL)
+        return NULL;
+    go::nodeList::iterator iter = node->childNodes.begin();
+    while (iter != node->childNodes.end()){
+        addTreeWidget(*iter);
+        ++iter;
+    }
+    return NULL;
 }
 
 void MainWindow::deleteNode(){
@@ -1259,10 +1257,9 @@ void MainWindow::setTreeWidget(go::node* n){
 }
 
 QString MainWindow::createTreeText(const go::node* node){
-    const go::stoneNode* stoneNode = dynamic_cast<const go::stoneNode*>(node);
     QString s;
-    if (stoneNode){
-        if (stoneNode->isPass())
+    if (node->isStone()){
+        if (node->isPass())
             s.append("Pass");
         else
             s.append( ui->boardWidget->getXYString(node->getX(), node->getY()) );

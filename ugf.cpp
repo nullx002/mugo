@@ -174,7 +174,7 @@ bool ugf::readData(QString::iterator& first, QString::iterator& last){
 
         if (list[1].size() < 2)
             continue;
-        d.color = list[1][0] == 'B' ? go::stone::eBlack : go::stone::eWhite;
+        d.color = list[1][0] == 'B' ? go::black : go::white;
 
         dataList_.push_back(d);
     }
@@ -227,10 +227,10 @@ bool ugf::get(dataList::const_iterator first, dataList::const_iterator last, go:
         return true;
 
     node* node;
-    if (first->color == go::stone::eBlack)
-        node = new go::blackNode(parent, first->x, first->y);
+    if (first->color == go::black)
+        node = go::createBlackNode(parent, first->x, first->y);
     else
-        node = new go::whiteNode(parent, first->x, first->y);
+        node = go::createWhiteNode(parent, first->x, first->y);
 
     node->comment = first->comment;
 

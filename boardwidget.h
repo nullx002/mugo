@@ -17,13 +17,13 @@ public:
     enum eEditMode{ eAlternateMove, eAddBlack, eAddWhite, eAddEmpty, eLabelMark, eCrossMark, eCircleMark, eSquareMark, eTriangleMark, eDeleteMarker };
 
     struct stoneInfo{
-        stoneInfo() : number(0), color(go::stone::eEmpty), node(NULL){}
-        bool empty() const{ return color == go::stone::eEmpty; }
-        bool black() const{ return color == go::stone::eBlack; }
-        bool white() const{ return color == go::stone::eWhite; }
+        stoneInfo() : number(0), color(go::empty), node(NULL){}
+        bool empty() const{ return color == go::empty; }
+        bool black() const{ return color == go::black; }
+        bool white() const{ return color == go::white; }
 
         int number;
-        go::stone::eColor color;
+        go::color color;
         go::node* node;
     };
 
@@ -117,7 +117,7 @@ protected:
     void addMark(go::markList& markList, const go::mark& mark);
     void addCharacter(go::markList& markList, const go::point& p);
     void removeMark(go::markList& markList, const go::point& p);
-    void addStone(go::stoneList& stoneList, const go::point& p, go::stone::eColor color);
+    void addStone(go::stoneList& stoneList, const go::point& p, go::color color);
     void rotateSgf(go::node* node);
     void rotateStoneSgf(go::stoneList& stoneList);
     void rotateMarkSgf(go::markList& markList);
