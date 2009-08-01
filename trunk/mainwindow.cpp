@@ -36,7 +36,6 @@ MainWindow::MainWindow(QWidget *parent)
         QFileInfo finfo( *iter + "stone.wav" );
         if (finfo.exists()){
             ui->boardWidget->setStoneSoundPath(finfo.filePath());
-            ui->boardWidget->setPlaySound(true);
             break;
         }
         ++iter;
