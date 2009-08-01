@@ -117,7 +117,7 @@ void sgf::node::addMark(go::markList& markList, const QStringList& values, mark:
 }
 
 void sgf::node::addStone(go::stoneList& stoneList, const QString& key, const QStringList& values) const{
-    go::stone::eColor c = key == "AB" ? go::stone::eBlack : key == "AW" ? go::stone::eWhite : go::stone::eEmpty;
+    go::color c = key == "AB" ? go::black : key == "AW" ? go::white : go::empty;
 
     QStringList::const_iterator iter = values.begin();
     while (iter != values.end()){
@@ -145,7 +145,6 @@ bool sgf::node::get(go::node& n) const{
 
 bool sgf::node::set(const go::node& n){
     const go::informationNode* infoNode = dynamic_cast<const go::informationNode*>(&n);
-    const go::stoneNode* stoneNode = dynamic_cast<const go::stoneNode*>(&n);
     if (infoNode){
         property["GM"].push_back("1");
         property["FF"].push_back("4");
@@ -182,13 +181,14 @@ bool sgf::node::set(const go::node& n){
         if (!infoNode->source.isEmpty())      property["SO"].push_back( infoNode->source );
         if (!infoNode->user.isEmpty())        property["US"].push_back( infoNode->user );
     }
-    else if (stoneNode){
-        x = n.position.x;
-        y = n.position.y;
+    else if (n.isStone()){
         QString str;
-        if (x != -1 && y != -1)
+        if (!n.isPass()){
+            x = n.position.x;
+            y = n.position.y;
             str.sprintf("%c%c", 'a' + x, 'a' + y);
-        propertyType::key_type key = stoneNode->isBlack() ? "B" : "W";
+        }
+        propertyType::key_type key = n.isBlack() ? "B" : "W";
         property[key].push_back(str);
     }
 
@@ -555,11 +555,11 @@ go::node* sgf::get(const node& sgfNode, go::node* outNode) const{
     go::node* newNode = NULL;
     switch(sgfNode.getNodeType()){
         case eBlack:
-            newNode = new go::blackNode(outNode);
+            newNode = go::createBlackNode(outNode);
             break;
 
         case eWhite:
-            newNode = new go::whiteNode(outNode);
+            newNode = go::createWhiteNode(outNode);
             break;
 
         case eBranch:

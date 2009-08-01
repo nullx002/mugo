@@ -49,10 +49,9 @@ private:
     void setBoardSize(int xsize, int ysize);
 
     void setTreeData();
-    QTreeWidgetItem* addTreeWidget(go::node& n);
-    QTreeWidgetItem* addTreeWidget(QTreeWidgetItem* parentWidget, go::node& node);
+    QTreeWidgetItem* addTreeWidget(go::node* node, bool needRemake = false);
+    QTreeWidgetItem* createTreeWidget(go::node* node);
     QTreeWidgetItem* remakeTreeWidget(QTreeWidgetItem* currentWidget);
-    QTreeWidgetItem* createTreeWidget(QTreeWidgetItem* parentWidget, go::node& node);
     void deleteNode();
     void deleteTreeWidget(go::node* node);
     void deleteTreeWidgetForMap(go::node* node);

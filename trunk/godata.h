@@ -11,6 +11,8 @@
 namespace go{
 
 
+enum color{ empty, black, white };
+
 class point{
 public:
     point() : x(-1), y(-1){}
@@ -64,17 +66,15 @@ public:
 
 class stone{
 public:
-    enum eColor{ eEmpty, eBlack, eWhite };
+    stone(const point& p_, color c_) : p(p_), c(c_){}
+    stone(int x, int y, color c_) : p(x, y), c(c_){}
 
-    stone(const point& p_, eColor c_) : p(p_), c(c_){}
-    stone(int x, int y, eColor c_) : p(x, y), c(c_){}
+    bool isBlack() const{ return c == black; }
+    bool isWhite() const{ return c == white; }
+    bool isEmpty() const{ return c == empty; }
 
-    bool isBlack() const{ return c == eBlack; }
-    bool isWhite() const{ return c == eWhite; }
-    bool isEmpty() const{ return c == eEmpty; }
-
-    point  p;
-    eColor c;
+    point p;
+    color c;
 };
 
 typedef QLinkedList<mark>  markList;
@@ -127,8 +127,13 @@ public:
     void setX(int x){ position.x = x; }
     void setY(int y){ position.y = y; }
 
-    virtual bool isBlack() const{ return false; }
-    virtual bool isWhite() const{ return false; }
+    bool isStone() const{ return black || white; }
+    bool isBlack() const{ return black; }
+    bool isWhite() const{ return white; }
+    bool isPass() const;
+
+    void setBlack(bool b = true){ black = b; }
+    void setWhite(bool w = true){ white = w; }
 
     virtual QString nodeName() const{ return name; }
     virtual QString toString() const;
@@ -150,6 +155,8 @@ public:
     int annotation;
     QString comment;
     point position;
+    bool  black;
+    bool  white;
 };
 
 
@@ -199,37 +206,6 @@ public:
 };
 
 
-class stoneNode : public node{
-public:
-    bool isPass() const;
-
-protected:
-    stoneNode(node* parent) : node(parent){}
-};
-
-class blackNode : public stoneNode{
-public:
-    explicit blackNode(node* parent) : stoneNode(parent){}
-    explicit blackNode(node* parent, int x, int y) : stoneNode(parent){
-        setX(x);
-        setY(y);
-    }
-
-    virtual bool isBlack() const { return true; }
-};
-
-class whiteNode : public stoneNode{
-public:
-    explicit whiteNode(node* parent) : stoneNode(parent){}
-    explicit whiteNode(node* parent, int x, int y) : stoneNode(parent){
-        setX(x);
-        setY(y);
-    }
-
-    virtual bool isWhite() const{ return true; }
-};
-
-
 class data{
 public:
     enum eRule{eJapanese, eChinese};
@@ -257,6 +233,13 @@ public:
     virtual bool get(go::data& data) const = 0;
     virtual bool set(const go::data& data) = 0;
 };
+
+
+
+node* createBlackNode(node* parent);
+node* createBlackNode(node* parent, int x, int y);
+node* createWhiteNode(node* parent);
+node* createWhiteNode(node* parent, int x, int y);
 
 
 
