@@ -15,7 +15,7 @@
   </property>
   <property name="windowIcon">
    <iconset resource="resources.qrc">
-    <normaloff>:/res/mgo.png</normaloff>:/res/mgo.png</iconset>
+    <normaloff>:/res/mugo.png</normaloff>:/res/mugo.png</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
    <property name="styleSheet">
@@ -519,7 +519,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
   <action name="actionAbout">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/res/mgo.png</normaloff>:/res/mgo.png</iconset>
+     <normaloff>:/res/mugo.png</normaloff>:/res/mugo.png</iconset>
    </property>
    <property name="text">
     <string>&amp;About...</string>
@@ -703,7 +703,7 @@ alternate-background-color: rgb(255, 255, 127);</string>
    </property>
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/res/mgo.png</normaloff>:/res/mgo.png</iconset>
+     <normaloff>:/res/mugo.png</normaloff>:/res/mugo.png</iconset>
    </property>
    <property name="text">
     <string>Alternate Move</string>

@@ -1234,9 +1234,9 @@ QTreeWidgetItem* MainWindow::createTreeWidget(go::node* node){
     nodeToTreeWidget[node] = nodeWidget;
 
     // TreeItemにIconを設定
-    if (node->isBlack())
+    if (node->isStone() && node->isBlack())
         nodeWidget->setIcon(0, QIcon(":/res/black_64.png"));
-    else if (node->isWhite())
+    else if (node->isStone() && node->isWhite())
         nodeWidget->setIcon(0, QIcon(":/res/white_64.png"));
     else
         nodeWidget->setIcon(0, QIcon(":/res/green_64.png"));
