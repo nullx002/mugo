@@ -68,10 +68,10 @@ private:
     int annotation1;
     int annotation2;
     int annotation3;
+    bool branchMode;
 
 private slots:
     // File menu
-    void on_actionShowCoordinatesI_triggered();
     void on_actionNew_triggered();
     void on_actionOpen_triggered();
     void on_actionReload_triggered();
@@ -160,8 +160,10 @@ private slots:
     void on_actionShowMoveNumber_triggered();
     void on_actionShowMoveNumber_parent_triggered();
     void on_actionShowCoordinates_triggered();
+    void on_actionShowCoordinatesI_triggered();
     void on_actionShowMarker_triggered();
     void on_actionShowBranchMoves_triggered();
+    void on_actionBranchMode_triggered();
     void on_actionBranchWindow_triggered();
     void on_actionCommentWindow_triggered();
 
