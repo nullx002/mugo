@@ -36,5 +36,6 @@
         <file>res/jumptoclicked.png</file>
         <file>res/jumptonumber.png</file>
         <file>res/sound.png</file>
+        <file>res/branchmode.png</file>
     </qresource>
 </RCC>

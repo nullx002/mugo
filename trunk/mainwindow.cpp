@@ -18,6 +18,7 @@ MainWindow::MainWindow(QWidget *parent)
     , annotation1(go::node::eNoAnnotation)
     , annotation2(go::node::eNoAnnotation)
     , annotation3(go::node::eNoAnnotation)
+    , branchMode(false)
 {
     ui->setupUi(this);
 
@@ -42,7 +43,7 @@ MainWindow::MainWindow(QWidget *parent)
     }
 
     // toolbar
-    ui->optionToolBar->addAction( ui->menuMoveNumber->menuAction() );
+    ui->optionToolBar->insertAction( ui->actionBranchMode, ui->menuMoveNumber->menuAction() );
     ui->menuMoveNumber->menuAction()->setCheckable(true);
     ui->menuMoveNumber->menuAction()->setChecked( ui->actionShowMoveNumber->isChecked() );
     connect( ui->menuMoveNumber->menuAction(), SIGNAL(triggered()), this, SLOT(on_actionShowMoveNumber_parent_triggered()) );
@@ -803,6 +804,16 @@ void MainWindow::on_actionShowBranchMoves_triggered(){
 
 /**
 * Slot
+* View -> Branch Mode
+*/
+void MainWindow::on_actionBranchMode_triggered(){
+    branchMode = ui->actionShowBranchMoves->isChecked();
+
+    setTreeData();
+}
+
+/**
+* Slot
 * View -> Comment Window
 */
 void MainWindow::on_actionCommentWindow_triggered(){
@@ -1201,14 +1212,18 @@ QTreeWidgetItem* MainWindow::addTreeWidget(go::node* node, bool needRemake){
     go::node* parentNode  = node->parent;
     go::node* parentNode2 = getNode(parentWidget2);
 
-    if ((parentNode && parentNode->childNodes.front() != node) || (parentNode2 && parentNode2->childNodes.size() > 1)){
+    bool newBranch = (parentNode2 && parentNode2->childNodes.size() > 1) ||
+                     (branchMode && parentNode && parentNode->childNodes.size() > 1) ||
+                     (!branchMode && parentNode && parentNode->childNodes.front() != node);
+    if (newBranch){
         if (newWidget){
             parentWidget->addChild(newWidget);
             if (needRemake)
                 remakeTreeWidget(parentWidget);
         }
         else if(parentWidget->indexOfChild(treeWidget) < 0){
-            treeWidget->parent()->removeChild(treeWidget);
+            QTreeWidgetItem* p = treeWidget->parent() ? treeWidget->parent() : ui->branchWidget->invisibleRootItem();
+            p->removeChild(treeWidget);
             parentWidget->addChild(treeWidget);
         }
     }
@@ -1219,7 +1234,8 @@ QTreeWidgetItem* MainWindow::addTreeWidget(go::node* node, bool needRemake){
                 remakeTreeWidget(parentWidget2);
         }
         else if(parentWidget2->indexOfChild(treeWidget) < 0){
-            treeWidget->parent()->removeChild(treeWidget);
+            QTreeWidgetItem* p = treeWidget->parent() ? treeWidget->parent() : ui->branchWidget->invisibleRootItem();
+            p->removeChild(treeWidget);
             parentWidget2->addChild(treeWidget);
         }
     }
@@ -1406,6 +1422,10 @@ void MainWindow::setAnnotation(int annotation){
 
     for (int i=0; i<N; ++i)
         actions[i]->setChecked( (annotation & (1 << i)) != 0 );
+
+    annotation1 = annotation & 0x0000003f;
+    annotation2 = annotation & 0x00000fc0;
+    annotation3 = annotation & 0x00001000;
 }
 
 void MainWindow::setAnnotation1(QAction* action, int annotation){
