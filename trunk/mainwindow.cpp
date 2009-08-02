@@ -778,6 +778,15 @@ void MainWindow::on_actionShowCoordinates_triggered(){
 
 /**
 * Slot
+* View -> Show Coordinates with I
+*/
+void MainWindow::on_actionShowCoordinatesI_triggered(){
+    ui->boardWidget->setShowCoordinatesWithI( ui->actionShowCoordinatesI->isChecked() );
+    setTreeData();
+}
+
+/**
+* Slot
 * View -> Show Marker
 */
 void MainWindow::on_actionShowMarker_triggered(){

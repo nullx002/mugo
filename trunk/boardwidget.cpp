@@ -18,6 +18,7 @@ BoardWidget::BoardWidget(QWidget *parent) :
     showMoveNumber(true),
     showMoveNumberCount(0),
     showCoordinates(true),
+    showCoordinatesI(false),
     showMarker(true),
     showBranchMoves(true),
     editMode(eAlternateMove),
@@ -998,7 +999,7 @@ void BoardWidget::addStone(go::stoneList& stoneList, const go::point& p, go::col
 
 QString BoardWidget::getXString(int x) const{
     int a = x % 25;
-    if (a > 7)
+    if (showCoordinatesI == false && a > 7)
         ++a;
 
     return QString("%1").arg(QChar('A' + a));
