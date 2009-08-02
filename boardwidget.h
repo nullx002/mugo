@@ -57,6 +57,7 @@ public:
     void setShowMoveNumber(bool visible){ showMoveNumber = visible; repaint(); }
     void setShowMoveNumber(int number){ showMoveNumberCount = number; repaint(); }
     void setShowCoordinates(bool visible){ showCoordinates = visible; repaint(); }
+    void setShowCoordinatesWithI(bool withI){ showCoordinatesI = withI; repaint(); }
     void setShowMarker(bool visible){ showMarker = visible; repaint(); }
     void setShowBranchMoves(bool visible){ showBranchMoves = visible; repaint(); }
     void setAnnotation(int annotation){ currentNode->annotation = (go::node::eAnnotation)annotation; modifyNode(currentNode); }
@@ -142,6 +143,7 @@ private:
     bool showMoveNumber;
     int  showMoveNumberCount;
     bool showCoordinates;
+    bool showCoordinatesI;
     bool showMarker;
     bool showBranchMoves;
     eEditMode editMode;

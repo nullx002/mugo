@@ -71,6 +71,7 @@ private:
 
 private slots:
     // File menu
+    void on_actionShowCoordinatesI_triggered();
     void on_actionNew_triggered();
     void on_actionOpen_triggered();
     void on_actionReload_triggered();
