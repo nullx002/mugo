@@ -113,6 +113,7 @@ void informationNode::initialize(){
     ysize = 19;
     komi = 6.5;
     handicap = 0;
+    white = true;
 }
 
 

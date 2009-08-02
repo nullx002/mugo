@@ -127,7 +127,7 @@ public:
     void setX(int x){ position.x = x; }
     void setY(int y){ position.y = y; }
 
-    bool isStone() const{ return black || white; }
+    virtual bool isStone() const{ return black || white; }
     bool isBlack() const{ return black; }
     bool isWhite() const{ return white; }
     bool isPass() const;
@@ -166,7 +166,7 @@ public:
     explicit informationNode(data* data_) : node(data_){ initialize(); }
     explicit informationNode(node* parent) : node(parent){ initialize(); }
 
-    virtual bool isWhite() const{ return true; }
+    virtual bool isStone() const{ return false; }
 
     virtual QString nodeName() const{ static const QString str = "GameInfo"; return str; }
 
