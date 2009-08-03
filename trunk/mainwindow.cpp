@@ -43,7 +43,8 @@ MainWindow::MainWindow(QWidget *parent)
     }
 
     // toolbar
-    ui->optionToolBar->insertAction( ui->actionBranchMode, ui->menuMoveNumber->menuAction() );
+    ui->optionToolBar->insertAction( ui->actionShowMoveNumber, ui->menuMoveNumber->menuAction() );
+    ui->optionToolBar->removeAction( ui->actionShowMoveNumber );
     ui->menuMoveNumber->menuAction()->setCheckable(true);
     ui->menuMoveNumber->menuAction()->setChecked( ui->actionShowMoveNumber->isChecked() );
     connect( ui->menuMoveNumber->menuAction(), SIGNAL(triggered()), this, SLOT(on_actionShowMoveNumber_parent_triggered()) );
@@ -810,6 +811,38 @@ void MainWindow::on_actionBranchMode_triggered(){
     branchMode = ui->actionShowBranchMoves->isChecked();
 
     setTreeData();
+}
+
+/**
+* Slot
+* View -> Rotate Clockwise
+*/
+void MainWindow::on_actionRotateClockwise_triggered(){
+    ui->boardWidget->rotateBoard( ui->actionRotateBoardClockwise->isChecked() );
+}
+
+/**
+* Slot
+* View -> Flip Horizontally
+*/
+void MainWindow::on_actionFlipHorizontally_triggered(){
+    ui->boardWidget->flipBoardHorizontally( ui->actionFlipBoardHorizontally->isChecked() );
+}
+
+/**
+* Slot
+* View -> Flip Vertically
+*/
+void MainWindow::on_actionFlipVertically_triggered(){
+    ui->boardWidget->flipBoardVertically( ui->actionFlipBoardVertically->isChecked() );
+}
+
+/**
+* Slot
+* View -> Reset Board
+*/
+void MainWindow::on_actionResetBoard_triggered(){
+    ui->boardWidget->resetBoard();
 }
 
 /**

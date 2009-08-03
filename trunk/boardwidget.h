@@ -66,6 +66,10 @@ public:
     void rotateSgf();
     void flipSgfHorizontally();
     void flipSgfVertically();
+    void rotateBoard(bool rotate){ rotateBoard_ = rotate; repaint(); }
+    void flipBoardHorizontally(bool flip){ flipBoardHorizontally_ = flip; repaint(); }
+    void flipBoardVertically(bool flip){ flipBoardVertically_ = flip; repaint(); }
+    void resetBoard(){ rotateBoard_ = false; flipBoardHorizontally_ = false; flipBoardVertically_ = false; repaint(); }
     void setPlaySound(bool play){ playSound = play; }
     void setStoneSoundPath(const QString& path){ stoneSoundPath = path; }
 
@@ -148,6 +152,9 @@ private:
     bool showBranchMoves;
     eEditMode editMode;
     bool moveToClicked;
+    bool rotateBoard_;
+    bool flipBoardHorizontally_;
+    bool flipBoardVertically_;
 
     bool playSound;
     QString stoneSoundPath;
