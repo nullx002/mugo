@@ -21,3 +21,4 @@ FORMS += mainwindow.ui \
     boardwidget.ui \
     gameinformationdialog.ui
 RESOURCES += resources.qrc
+RC_FILE = mugo.rc

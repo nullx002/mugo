@@ -109,8 +109,8 @@ QString node::toString() const{
 }
 
 void informationNode::initialize(){
-    xsize = 19;
-    ysize = 19;
+    xsize = 5;
+    ysize = 7;
     komi = 6.5;
     handicap = 0;
     white = true;
