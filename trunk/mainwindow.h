@@ -164,9 +164,9 @@ private slots:
     void on_actionShowMarker_triggered();
     void on_actionShowBranchMoves_triggered();
     void on_actionBranchMode_triggered();
-    void on_actionRotateClockwise_triggered();
-    void on_actionFlipHorizontally_triggered();
-    void on_actionFlipVertically_triggered();
+    void on_actionRotateBoardClockwise_triggered();
+    void on_actionFlipBoardHorizontally_triggered();
+    void on_actionFlipBoardVertically_triggered();
     void on_actionResetBoard_triggered();
     void on_actionBranchWindow_triggered();
     void on_actionCommentWindow_triggered();

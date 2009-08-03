@@ -817,15 +817,15 @@ void MainWindow::on_actionBranchMode_triggered(){
 * Slot
 * View -> Rotate Clockwise
 */
-void MainWindow::on_actionRotateClockwise_triggered(){
-    ui->boardWidget->rotateBoard( ui->actionRotateBoardClockwise->isChecked() );
+void MainWindow::on_actionRotateBoardClockwise_triggered(){
+    ui->actionRotateBoardClockwise->setChecked( ui->boardWidget->rotateBoard() != 0 );
 }
 
 /**
 * Slot
 * View -> Flip Horizontally
 */
-void MainWindow::on_actionFlipHorizontally_triggered(){
+void MainWindow::on_actionFlipBoardHorizontally_triggered(){
     ui->boardWidget->flipBoardHorizontally( ui->actionFlipBoardHorizontally->isChecked() );
 }
 
@@ -833,7 +833,7 @@ void MainWindow::on_actionFlipHorizontally_triggered(){
 * Slot
 * View -> Flip Vertically
 */
-void MainWindow::on_actionFlipVertically_triggered(){
+void MainWindow::on_actionFlipBoardVertically_triggered(){
     ui->boardWidget->flipBoardVertically( ui->actionFlipBoardVertically->isChecked() );
 }
 

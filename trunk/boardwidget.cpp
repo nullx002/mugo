@@ -13,7 +13,7 @@ BoardWidget::BoardWidget(QWidget *parent) :
     dirty(false),
     capturedBlack(0),
     capturedWhite(0),
-    black(true),
+    isBlack(true),
     currentMoveNumber(0),
     showMoveNumber(true),
     showMoveNumberCount(0),
@@ -23,6 +23,9 @@ BoardWidget::BoardWidget(QWidget *parent) :
     showBranchMoves(true),
     editMode(eAlternateMove),
     moveToClicked(false),
+    rotateBoard_(0),
+    flipBoardHorizontally_(false),
+    flipBoardVertically_(false),
     playSound(false),
     black1(":/res/black_64.png"),
     white1(":/res/white_64.png"),
@@ -250,6 +253,39 @@ void BoardWidget::flipMarkSgf(go::markList& markList, int xsize, int ysize){
     }
 }
 
+int  BoardWidget::rotateBoard(){
+    if (++rotateBoard_ > 3)
+        rotateBoard_ = 0;
+
+    createBoardBuffer();
+    repaint();
+
+    return rotateBoard_;
+}
+
+void BoardWidget::flipBoardHorizontally(bool flip){
+    flipBoardHorizontally_ = flip;
+
+    createBoardBuffer();
+    repaint();
+}
+
+void BoardWidget::flipBoardVertically(bool flip){
+    flipBoardVertically_ = flip;
+
+    createBoardBuffer();
+    repaint();
+}
+
+void BoardWidget::resetBoard(){
+    rotateBoard_ = false;
+    flipBoardHorizontally_ = false;
+    flipBoardVertically_ = false;
+
+    createBoardBuffer();
+    repaint();
+}
+
 /**
 */
 void BoardWidget::clear(){
@@ -334,6 +370,7 @@ void BoardWidget::setCurrentNode(go::node* node){
     if (iter == nodeList.end())
         createNodeList();
 
+qDebug() << "createBoardBuffer";
     createBoardBuffer();
 
     if (playSound && node->isStone())
@@ -362,13 +399,16 @@ void BoardWidget::createNodeList(){
 /**
 */
 void BoardWidget::createBoardBuffer(){
+    xsize = (rotateBoard_ == 0 || rotateBoard_ == 2) ? goData.root.xsize : goData.root.ysize;
+    ysize = (rotateBoard_ == 0 || rotateBoard_ == 2) ? goData.root.ysize : goData.root.xsize;
+
     capturedBlack = 0;
     capturedWhite = 0;
 
     board.clear();
-    board.resize(goData.root.ysize);
-    for (int i=0; i<goData.root.ysize; ++i)
-        board[i].resize(goData.root.xsize);
+    board.resize(ysize);
+    for (int i=0; i<ysize; ++i)
+        board[i].resize(xsize);
 
     int moveNumber = 1;
     go::nodeList::iterator iter = nodeList.begin();
@@ -391,17 +431,17 @@ void BoardWidget::createBoardBuffer(){
 void BoardWidget::drawBoard(QPainter& p){
     p.save();
 
-    int w = width_  / (goData.root.xsize + (showCoordinates ? 2 : 0));
-    int h = height_ / (goData.root.ysize + (showCoordinates ? 2 : 0));
+    int w = width_  / (xsize + (showCoordinates ? 2 : 0));
+    int h = height_ / (ysize + (showCoordinates ? 2 : 0));
     boxSize = qMin(w, h);
-    w = boxSize * (goData.root.xsize - 1);
-    h = boxSize * (goData.root.ysize - 1);
+    w = boxSize * (xsize - 1);
+    h = boxSize * (ysize - 1);
     int margin = int(boxSize * 0.6);
 
     int l = (width_ - w) / 2;
-    int r = l + boxSize * (goData.root.xsize - 1);
+    int r = l + boxSize * (xsize - 1);
     int t = (height_ - h) / 2;
-    int b = t + boxSize * (goData.root.ysize - 1);
+    int b = t + boxSize * (ysize - 1);
 
     // create board and stone image
     boardRect.setRect(l - margin, t - margin, w + margin * 2, h + margin * 2);
@@ -418,7 +458,7 @@ void BoardWidget::drawBoard(QPainter& p){
 
     // 横線を引く
     ylines.clear();
-    for (int i=0; i<goData.root.ysize; ++i){
+    for (int i=0; i<ysize; ++i){
         int y = t + i * boxSize;
         p.drawLine(l, y, r, y);
         ylines.push_back(y);
@@ -426,7 +466,7 @@ void BoardWidget::drawBoard(QPainter& p){
 
     // 縦線を引く
     xlines.clear();
-    for (int i=0; i<goData.root.xsize; ++i){
+    for (int i=0; i<xsize; ++i){
         int x = l + i * boxSize;
         p.drawLine(x, t, x, b);
         xlines.push_back(x);
@@ -434,8 +474,8 @@ void BoardWidget::drawBoard(QPainter& p){
 
     // 星に黒丸を描画する
     QList<int> xstar, ystar;
-    getStartPosition(xstar, goData.root.xsize);
-    getStartPosition(ystar, goData.root.ysize);
+    getStartPosition(xstar, xsize);
+    getStartPosition(ystar, ysize);
     for (int y=0; y<ystar.size(); ++y){
         for (int x=0; x<xstar.size(); ++x){
             int cx = xlines[ xstar[x] ];
@@ -473,19 +513,37 @@ void BoardWidget::drawCoordinates(QPainter& p){
 
     int m = int(boxSize * 2.2);
 
-    for (int i=0; i<goData.root.xsize; ++i){
-        QString s = getXString(i);
+    for (int i=0; i<xsize; ++i){
+        QString s;
+        if (rotateBoard_ == 0)
+            s = getXString(i);
+        else if (rotateBoard_ == 1)
+            s = getYString(xsize-i-1);
+        else if (rotateBoard_ == 2)
+            s = getXString(xsize-i-1);
+        else if (rotateBoard_ == 3)
+            s = getYString(i);
+
         QRect r = p.boundingRect(xlines[i]-m/2, ylines[0]-m, m, m, Qt::AlignCenter, s);
         p.drawText(r, s);
-        r = p.boundingRect(xlines[i]-m/2, ylines[goData.root.ysize-1], m, m, Qt::AlignCenter, s);
+        r = p.boundingRect(xlines[i]-m/2, ylines[ysize-1], m, m, Qt::AlignCenter, s);
         p.drawText(r, s);
     }
 
-    for (int i=0; i<goData.root.ysize; ++i){
-        QString s = getYString(i);
+    for (int i=0; i<ysize; ++i){
+        QString s;
+        if (rotateBoard_ == 0)
+            s = getYString(i);
+        else if (rotateBoard_ == 1)
+            s = getXString(i);
+        else if (rotateBoard_ == 2)
+            s = getYString(ysize-i-1);
+        else if (rotateBoard_ == 3)
+            s = getXString(ysize-i-1);
+
         QRect r = p.boundingRect(xlines[0]-m, ylines[i]-m/2, m, m, Qt::AlignCenter, s);
         p.drawText(r, s);
-        r = p.boundingRect(xlines[goData.root.xsize-1], ylines[i]-m/2, m, m, Qt::AlignCenter, s);
+        r = p.boundingRect(xlines[xsize-1], ylines[i]-m/2, m, m, Qt::AlignCenter, s);
         p.drawText(r, s);
     }
 
@@ -592,14 +650,17 @@ void BoardWidget::drawMark(QPainter& p, go::markList::iterator first, go::markLi
     p.setFont(font);
 
     while (first != last){
-        if (first->p.x >= 0 && first->p.x < goData.root.xsize && first->p.y >= 0 && first->p.y < goData.root.ysize){
-            int x = xlines[first->p.x];
-            int y = ylines[first->p.y];
+        int px = getBoardX(first->p.x, first->p.y);
+        int py = getBoardY(first->p.x, first->p.y);
 
-            stoneInfo& info = board[first->p.y][first->p.x];
+        if (px >= 0 && px < xsize && py >= 0 && py < ysize){
+            int x = xlines[px];
+            int y = ylines[py];
+
+            stoneInfo& info = board[py][px];
             if (info.empty()){
                 p.setPen( Qt::black );
-                eraseBackground(p, first->p.x, first->p.y);
+                eraseBackground(p, px, py);
             }
             else
                 p.setPen( info.black() ? Qt::white : Qt::black );
@@ -623,9 +684,12 @@ void BoardWidget::drawTerritory(QPainter& p, go::markList::iterator first, go::m
     p.setFont(font);
 
     while (first != last){
-        if (first->p.x >= 0 && first->p.x < goData.root.xsize && first->p.y >= 0 && first->p.y < goData.root.ysize){
-            int x = xlines[first->p.x];
-            int y = ylines[first->p.y];
+        int px = getBoardX(first->p.x, first->p.y);
+        int py = getBoardY(first->p.x, first->p.y);
+
+        if (px >= 0 && px < xsize && py >= 0 && py < ysize){
+            int x = xlines[px];
+            int y = ylines[py];
 
             QColor color = first->t == go::mark::eWhiteTerritory ? QColor(255, 255, 255, 160) : QColor(0, 0, 0, 110);
             p.fillRect(x-boxSize/2, y-boxSize/2, boxSize, boxSize, color);
@@ -648,8 +712,10 @@ void BoardWidget::drawCurrentMark(QPainter& p, go::node* node){
     p.setFont(font);
     p.setPen(Qt::red);
     if (!node->isPass()){
-        int x = xlines[node->getX()];
-        int y = ylines[node->getY()];
+        int boardX = getBoardX(node->getX(), node->getY());
+        int boardY = getBoardY(node->getX(), node->getY());
+        int x = xlines[boardX];
+        int y = ylines[boardY];
         p.drawText(x-boxSize, y-boxSize, boxSize*2, boxSize*2, Qt::AlignCenter, "▲");
     }
 
@@ -667,12 +733,14 @@ void BoardWidget::eraseBackground(QPainter& p, int x, int y){
 /**
 */
 void BoardWidget::putStone(go::node* n, int moveNumber){
-    black = n->isWhite();
+    isBlack = n->isWhite();
 
     if (n->isStone()){
-        int x = n->getX();
-        int y = n->getY();
-        if (x >= 0 && x < goData.root.xsize && y >= 0 && y < goData.root.ysize){
+        int x = getBoardX( n->getX(), n->getY() );
+        int y = getBoardY( n->getX(), n->getY() );
+qDebug() << "putStone " << x << ", " << y;
+
+        if (x >= 0 && x < xsize && y >= 0 && y < ysize){
             board[y][x].color  = n->isBlack() ? go::black : go::white;
             board[y][x].number = moveNumber;
             board[y][x].node   = n;
@@ -681,11 +749,12 @@ void BoardWidget::putStone(go::node* n, int moveNumber){
         }
     }
 
+qDebug() << "putStone2";
     go::stoneList::iterator iter = n->stones.begin();
     while (iter != n->stones.end()){
-        int  x = iter->p.x;
-        int  y = iter->p.y;
-        if (x >= 0 && x < goData.root.xsize && y >= 0 && y < goData.root.ysize){
+        int  x = getBoardX( iter->p.x, iter->p.y );
+        int  y = getBoardY( iter->p.x, iter->p.y );
+        if (x >= 0 && x < xsize && y >= 0 && y < ysize){
             board[y][x].color  = iter->c;
             board[y][x].number = 0;
             board[y][x].node   = n;
@@ -693,6 +762,7 @@ void BoardWidget::putStone(go::node* n, int moveNumber){
         }
         ++iter;
     }
+qDebug() << "putStone3";
 }
 
 /**
@@ -700,8 +770,6 @@ void BoardWidget::putStone(go::node* n, int moveNumber){
 void BoardWidget::removeDeadStones(int x, int y){
     int c = board[y][x].color == go::black ? go::white : go::black;
 
-    int xsize = goData.root.xsize;
-    int ysize = goData.root.ysize;
     int* tmp = new int[xsize * ysize];
 
     memset(tmp, 0, sizeof(int) * xsize * ysize);
@@ -767,8 +835,6 @@ bool BoardWidget::isDead(int x, int y){
 /**
 */
 bool BoardWidget::isKill(int x, int y){
-    int xsize = goData.root.xsize;
-    int ysize = goData.root.ysize;
     int* tmp = new int[xsize * ysize];
 
     go::color c = board[y][x].color == go::black ? go::white : go::black;
@@ -824,14 +890,14 @@ void BoardWidget::addStone(int x, int y){
         ++iter;
     }
 
-    board[y][x].color = black ? go::black : go::white;
+    board[y][x].color = isBlack ? go::black : go::white;
     if (isKill(x, y) == false && isDead(x, y) == true){
         board[y][x].color = go::empty;
         return;
     }
 
     go::node* n;
-    if (black)
+    if (isBlack)
         n = go::createBlackNode(currentNode, x, y);
     else
         n = go::createWhiteNode(currentNode, x, y);
@@ -1013,4 +1079,26 @@ QString  BoardWidget::getXYString(int x, int y) const{
     QString s = getXString(x);
     s.append( getYString(y) );
     return s;
+}
+
+int BoardWidget::getBoardX(int x, int y){
+    if (rotateBoard_ == 0)
+        return x;
+    else if (rotateBoard_ == 1)
+        return xsize - y - 1;
+    else if (rotateBoard_ == 2)
+        return xsize - x - 1;
+    else
+        return y;
+}
+
+int BoardWidget::getBoardY(int x, int y){
+    if (rotateBoard_ == 0)
+        return y;
+    else if (rotateBoard_ == 1)
+        return x;
+    else if (rotateBoard_ == 2)
+        return ysize - y - 1;
+    else
+        return ysize - x - 1;
 }

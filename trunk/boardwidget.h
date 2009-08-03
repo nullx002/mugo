@@ -66,10 +66,10 @@ public:
     void rotateSgf();
     void flipSgfHorizontally();
     void flipSgfVertically();
-    void rotateBoard(bool rotate){ rotateBoard_ = rotate; repaint(); }
-    void flipBoardHorizontally(bool flip){ flipBoardHorizontally_ = flip; repaint(); }
-    void flipBoardVertically(bool flip){ flipBoardVertically_ = flip; repaint(); }
-    void resetBoard(){ rotateBoard_ = false; flipBoardHorizontally_ = false; flipBoardVertically_ = false; repaint(); }
+    int  rotateBoard();
+    void flipBoardHorizontally(bool flip);
+    void flipBoardVertically(bool flip);
+    void resetBoard();
     void setPlaySound(bool play){ playSound = play; }
     void setStoneSoundPath(const QString& path){ stoneSoundPath = path; }
 
@@ -130,6 +130,9 @@ protected:
     void flipStoneSgf(go::stoneList& stoneList, int xsize, int ysize);
     void flipMarkSgf(go::markList& markList, int xsize, int ysize);
 
+    int getBoardX(int x, int y);
+    int getBoardY(int x, int y);
+
 private:
     Ui::BoardWidget *m_ui;
 
@@ -138,7 +141,7 @@ private:
     go::data goData;
     int capturedBlack;
     int capturedWhite;
-    int black;
+    bool isBlack;
     go::nodeList nodeList;
     go::node* currentNode;
     int currentMoveNumber;
@@ -152,7 +155,7 @@ private:
     bool showBranchMoves;
     eEditMode editMode;
     bool moveToClicked;
-    bool rotateBoard_;
+    int  rotateBoard_;
     bool flipBoardHorizontally_;
     bool flipBoardVertically_;
 
@@ -167,6 +170,9 @@ private:
     int width_;
     int height_;
     int boxSize;
+    int xsize;
+    int ysize;
+
     QRect boardRect;
     QList<int> xlines;
     QList<int> ylines;
