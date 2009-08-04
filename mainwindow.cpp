@@ -843,6 +843,9 @@ void MainWindow::on_actionFlipBoardVertically_triggered(){
 */
 void MainWindow::on_actionResetBoard_triggered(){
     ui->boardWidget->resetBoard();
+    ui->actionRotateBoardClockwise->setChecked(false);
+    ui->actionFlipBoardHorizontally->setChecked(false);
+    ui->actionFlipBoardVertically->setChecked(false);
 }
 
 /**

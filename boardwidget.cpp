@@ -522,13 +522,13 @@ void BoardWidget::drawCoordinates(QPainter& p){
     for (int i=0; i<xsize; ++i){
         QString s;
         if (rotateBoard_ == 0)
-            s = getXString(i);
+            s = getXString(flipBoardVertically_ ? xsize-i-1 : i);
         else if (rotateBoard_ == 1)
-            s = getYString(xsize-i-1);
+            s = getYString(flipBoardHorizontally_ ? i : xsize-i-1);
         else if (rotateBoard_ == 2)
-            s = getXString(xsize-i-1);
+            s = getXString(flipBoardVertically_ ? i : xsize-i-1);
         else if (rotateBoard_ == 3)
-            s = getYString(i);
+            s = getYString(flipBoardHorizontally_ ? xsize-i-1 : i);
 
         QRect r = p.boundingRect(xlines[i]-m/2, ylines[0]-m, m, m, Qt::AlignCenter, s);
         p.drawText(r, s);
@@ -1108,22 +1108,22 @@ int BoardWidget::getSgfY(int x, int y){
 
 int BoardWidget::getBoardX(int x, int y){
     if (rotateBoard_ == 0)
-        return x;
+        return flipBoardHorizontally_ ? xsize - x - 1 : x;
     else if (rotateBoard_ == 1)
-        return xsize - y - 1;
+        return flipBoardVertically_ ? y : xsize - y - 1;
     else if (rotateBoard_ == 2)
-        return xsize - x - 1;
+        return flipBoardHorizontally_ ? x : xsize - x - 1;
     else
-        return y;
+        return flipBoardVertically_  ? xsize - y - 1 : y;
 }
 
 int BoardWidget::getBoardY(int x, int y){
     if (rotateBoard_ == 0)
-        return y;
+        return flipBoardVertically_ ? ysize - y - 1 : y;
     else if (rotateBoard_ == 1)
-        return x;
+        return flipBoardHorizontally_ ? ysize - x - 1 : x;
     else if (rotateBoard_ == 2)
-        return ysize - y - 1;
+        return flipBoardVertically_ ? y : ysize - y - 1;
     else
-        return ysize - x - 1;
+        return flipBoardHorizontally_ ? x : ysize - x - 1;
 }
