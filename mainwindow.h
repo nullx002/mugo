@@ -181,6 +181,7 @@ private slots:
     void on_action19x19Board_triggered();
     void on_action13x13Board_triggered();
     void on_action9x9Board_triggered();
+    void on_actionCustomBoardSize_triggered();
     void on_actionPlaySound_triggered();
 
     // Help menu
