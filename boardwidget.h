@@ -130,12 +130,8 @@ protected:
     void flipStoneSgf(go::stoneList& stoneList, int xsize, int ysize);
     void flipMarkSgf(go::markList& markList, int xsize, int ysize);
 
-//    void sgfToBoardCoordinate(int sgfX, int sgfY, int& boardX, int& boardY);
-//    void boardToSgfCoordinate(int boardX, int boardY, int& sgfX, int& sgfY,);
-    int getSgfX(int x, int y);
-    int getSgfY(int x, int y);
-    int getBoardX(int x, int y);
-    int getBoardY(int x, int y);
+    void boardToSgfCoordinate(int boardX, int boardY, int& sgfX, int& sgfY);
+    void sgfToBoardCoordinate(int sgfX, int sgfY, int& boardX, int& boardY);
 
 private:
     Ui::BoardWidget *m_ui;
