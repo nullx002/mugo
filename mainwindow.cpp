@@ -1106,13 +1106,18 @@ bool MainWindow::fileOpen(){
         return false;
 
     QString selectedFilter;
-    QString fname = QFileDialog::getOpenFileName(this, QString(), QString(), tr("sgf(*.sgf);;ugf(*.ugf *.ugi)"), &selectedFilter);
+    QString fname = QFileDialog::getOpenFileName(this, QString(), QString(), tr("All Go Format(*.sgf *.ugf *.ugi);;sgf(*.sgf);;ugf(*.ugf *.ugi)"), &selectedFilter);
     if (fname.isEmpty())
         return  false;
 
-    if (selectedFilter.indexOf("*.sgf") >= 0)
+    if (selectedFilter.indexOf("All Go Format") >= 0){
+        QFileInfo info(fname);
+        selectedFilter = info.suffix();
+    }
+
+    if (selectedFilter.indexOf("sgf") >= 0)
         return fileOpen(fname, "sgf");
-    else if (selectedFilter.indexOf("*.ugf") >= 0)
+    else if (selectedFilter.indexOf("ugf") >= 0 || selectedFilter.indexOf("ugi") >= 0)
         return fileOpen(fname, "ugf");
     else
         return false;
