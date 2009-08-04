@@ -82,8 +82,8 @@ void BoardWidget::onLButtonDown(QMouseEvent* e){
     if (boardX < 0 || boardX >= xsize || boardY < 0 || boardY >= ysize)
         return;
 
-    int sgfX = getSgfX(boardX, boardY);
-    int sgfY = getSgfY(boardX, boardY);
+    int sgfX, sgfY;
+    boardToSgfCoordinate(boardX, boardY, sgfX, sgfY);
 
     if (moveToClicked && board[boardY][boardX].node)
         setCurrentNode( board[boardY][boardX].node );
@@ -522,11 +522,11 @@ void BoardWidget::drawCoordinates(QPainter& p){
     for (int i=0; i<xsize; ++i){
         QString s;
         if (rotateBoard_ == 0)
-            s = getXString(flipBoardVertically_ ? xsize-i-1 : i);
+            s = getXString(flipBoardHorizontally_ ? xsize-i-1 : i);
         else if (rotateBoard_ == 1)
             s = getYString(flipBoardHorizontally_ ? i : xsize-i-1);
         else if (rotateBoard_ == 2)
-            s = getXString(flipBoardVertically_ ? i : xsize-i-1);
+            s = getXString(flipBoardHorizontally_ ? i : xsize-i-1);
         else if (rotateBoard_ == 3)
             s = getYString(flipBoardHorizontally_ ? xsize-i-1 : i);
 
@@ -539,13 +539,13 @@ void BoardWidget::drawCoordinates(QPainter& p){
     for (int i=0; i<ysize; ++i){
         QString s;
         if (rotateBoard_ == 0)
-            s = getYString(i);
+            s = getYString(flipBoardVertically_ ? ysize-i-1 : i);
         else if (rotateBoard_ == 1)
-            s = getXString(i);
+            s = getXString(flipBoardVertically_ ? ysize-i-1 : i);
         else if (rotateBoard_ == 2)
-            s = getYString(ysize-i-1);
+            s = getYString(flipBoardVertically_ ? i : ysize-i-1);
         else if (rotateBoard_ == 3)
-            s = getXString(ysize-i-1);
+            s = getXString(flipBoardVertically_ ? i : ysize-i-1);
 
         QRect r = p.boundingRect(xlines[0]-m, ylines[i]-m/2, m, m, Qt::AlignCenter, s);
         p.drawText(r, s);
@@ -656,17 +656,17 @@ void BoardWidget::drawMark(QPainter& p, go::markList::iterator first, go::markLi
     p.setFont(font);
 
     while (first != last){
-        int px = getBoardX(first->p.x, first->p.y);
-        int py = getBoardY(first->p.x, first->p.y);
+        int boardX, boardY;
+        sgfToBoardCoordinate(first->p.x, first->p.y, boardX, boardY);
 
-        if (px >= 0 && px < xsize && py >= 0 && py < ysize){
-            int x = xlines[px];
-            int y = ylines[py];
+        if (boardX >= 0 && boardX < xsize && boardY >= 0 && boardY < ysize){
+            int x = xlines[boardX];
+            int y = ylines[boardY];
 
-            stoneInfo& info = board[py][px];
+            stoneInfo& info = board[boardY][boardX];
             if (info.empty()){
                 p.setPen( Qt::black );
-                eraseBackground(p, px, py);
+                eraseBackground(p, boardX, boardY);
             }
             else
                 p.setPen( info.black() ? Qt::white : Qt::black );
@@ -690,12 +690,12 @@ void BoardWidget::drawTerritory(QPainter& p, go::markList::iterator first, go::m
     p.setFont(font);
 
     while (first != last){
-        int px = getBoardX(first->p.x, first->p.y);
-        int py = getBoardY(first->p.x, first->p.y);
+        int boardX, boardY;
+        sgfToBoardCoordinate(first->p.x, first->p.y, boardX, boardY);
 
-        if (px >= 0 && px < xsize && py >= 0 && py < ysize){
-            int x = xlines[px];
-            int y = ylines[py];
+        if (boardX >= 0 && boardX < xsize && boardY >= 0 && boardY < ysize){
+            int x = xlines[boardX];
+            int y = ylines[boardY];
 
             QColor color = first->t == go::mark::eWhiteTerritory ? QColor(255, 255, 255, 160) : QColor(0, 0, 0, 110);
             p.fillRect(x-boxSize/2, y-boxSize/2, boxSize, boxSize, color);
@@ -718,8 +718,8 @@ void BoardWidget::drawCurrentMark(QPainter& p, go::node* node){
     p.setFont(font);
     p.setPen(Qt::red);
     if (!node->isPass()){
-        int boardX = getBoardX(node->getX(), node->getY());
-        int boardY = getBoardY(node->getX(), node->getY());
+        int boardX, boardY;
+        sgfToBoardCoordinate(node->getX(), node->getY(), boardX, boardY);
         int x = xlines[boardX];
         int y = ylines[boardY];
         p.drawText(x-boxSize, y-boxSize, boxSize*2, boxSize*2, Qt::AlignCenter, "▲");
@@ -738,31 +738,31 @@ void BoardWidget::eraseBackground(QPainter& p, int x, int y){
 
 /**
 */
-void BoardWidget::putStone(go::node* n, int moveNumber){
-    isBlack = n->isWhite();
+void BoardWidget::putStone(go::node* node, int moveNumber){
+    isBlack = node->isWhite();
 
-    if (n->isStone()){
-        int x = getBoardX( n->getX(), n->getY() );
-        int y = getBoardY( n->getX(), n->getY() );
+    if (node->isStone()){
+        int boardX, boardY;
+        sgfToBoardCoordinate(node->getX(), node->getY(), boardX, boardY);
 
-        if (x >= 0 && x < xsize && y >= 0 && y < ysize){
-            board[y][x].color  = n->isBlack() ? go::black : go::white;
-            board[y][x].number = moveNumber;
-            board[y][x].node   = n;
+        if (boardX >= 0 && boardX < xsize && boardY >= 0 && boardY < ysize){
+            board[boardY][boardX].color  = node->isBlack() ? go::black : go::white;
+            board[boardY][boardX].number = moveNumber;
+            board[boardY][boardX].node   = node;
             currentMoveNumber  = moveNumber;
-            removeDeadStones(x, y);
+            removeDeadStones(boardX, boardY);
         }
     }
 
-    go::stoneList::iterator iter = n->stones.begin();
-    while (iter != n->stones.end()){
-        int  x = getBoardX( iter->p.x, iter->p.y );
-        int  y = getBoardY( iter->p.x, iter->p.y );
-        if (x >= 0 && x < xsize && y >= 0 && y < ysize){
-            board[y][x].color  = iter->c;
-            board[y][x].number = 0;
-            board[y][x].node   = n;
-            removeDeadStones(x, y);
+    go::stoneList::iterator iter = node->stones.begin();
+    while (iter != node->stones.end()){
+        int boardX, boardY;
+        sgfToBoardCoordinate(iter->p.x, iter->p.y, boardX, boardY);
+        if (boardX >= 0 && boardX < xsize && boardY >= 0 && boardY < ysize){
+            board[boardY][boardX].color  = iter->c;
+            board[boardY][boardX].number = 0;
+            board[boardY][boardX].node   = node;
+            removeDeadStones(boardX, boardY);
         }
         ++iter;
     }
@@ -1084,46 +1084,60 @@ QString  BoardWidget::getXYString(int x, int y) const{
     return s;
 }
 
-int BoardWidget::getSgfX(int x, int y){
-    if (rotateBoard_ == 0)
-        return x;
-    else if (rotateBoard_ == 1)
-        return y;
-    else if (rotateBoard_ == 2)
-        return xsize - x - 1;
-    else
-        return ysize - y - 1;
+void BoardWidget::boardToSgfCoordinate(int boardX, int boardY, int& sgfX, int& sgfY){
+    if (rotateBoard_ == 0){
+        sgfX = boardX;
+        sgfY = boardY;
+    }
+    else if (rotateBoard_ == 1){
+        sgfX = boardY;
+        sgfY = xsize - boardX - 1;
+    }
+    else if (rotateBoard_ == 2){
+        sgfX = xsize - boardX - 1;
+        sgfY = ysize - boardY - 1;
+    }
+    else{
+        sgfX = ysize - boardY - 1;
+        sgfY = boardX;
+    }
+
+    if (flipBoardHorizontally_){
+        if (rotateBoard_ == 0 || rotateBoard_ == 2)
+            sgfX = goData.root.xsize - sgfX - 1;
+        else
+            sgfY = goData.root.ysize - sgfY - 1;
+    }
+
+    if (flipBoardVertically_){
+        if (rotateBoard_ == 0 || rotateBoard_ == 2)
+            sgfY = goData.root.ysize - sgfY - 1;
+        else
+            sgfX = goData.root.xsize - sgfX - 1;
+    }
 }
 
-int BoardWidget::getSgfY(int x, int y){
-    if (rotateBoard_ == 0)
-        return y;
-    else if (rotateBoard_ == 1)
-        return ysize - x - 1;
-    else if (rotateBoard_ == 2)
-        return ysize - y - 1;
-    else
-        return x;
-}
+void BoardWidget::sgfToBoardCoordinate(int sgfX, int sgfY, int& boardX, int& boardY){
+    if (rotateBoard_ == 0){
+        boardX = sgfX;
+        boardY = sgfY;
+    }
+    else if (rotateBoard_ == 1){
+        boardX = xsize - sgfY - 1;
+        boardY = sgfX;
+    }
+    else if (rotateBoard_ == 2){
+        boardX = xsize - sgfX - 1;
+        boardY = ysize - sgfY - 1;
+    }
+    else{
+        boardX = sgfY;
+        boardY = ysize - sgfX - 1;
+    }
 
-int BoardWidget::getBoardX(int x, int y){
-    if (rotateBoard_ == 0)
-        return flipBoardHorizontally_ ? xsize - x - 1 : x;
-    else if (rotateBoard_ == 1)
-        return flipBoardVertically_ ? y : xsize - y - 1;
-    else if (rotateBoard_ == 2)
-        return flipBoardHorizontally_ ? x : xsize - x - 1;
-    else
-        return flipBoardVertically_  ? xsize - y - 1 : y;
-}
+    if (flipBoardHorizontally_)
+        boardX = xsize - boardX - 1;
 
-int BoardWidget::getBoardY(int x, int y){
-    if (rotateBoard_ == 0)
-        return flipBoardVertically_ ? ysize - y - 1 : y;
-    else if (rotateBoard_ == 1)
-        return flipBoardHorizontally_ ? ysize - x - 1 : x;
-    else if (rotateBoard_ == 2)
-        return flipBoardVertically_ ? y : ysize - y - 1;
-    else
-        return flipBoardHorizontally_ ? x : ysize - x - 1;
+    if (flipBoardVertically_)
+        boardY = ysize - boardY - 1;
 }
