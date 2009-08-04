@@ -33,6 +33,8 @@ BoardWidget::BoardWidget(QWidget *parent) :
 {
     m_ui->setupUi(this);
 
+//    mediaObject = new Phonon::MediaObject(this);
+
     setCurrentNode(&goData.root);
 }
 
@@ -632,11 +634,11 @@ void BoardWidget::drawBranchMoves(QPainter& p, go::nodeList::iterator first, go:
 
     char s[] = "A";
     while (first != last){
-        int x = (*first)->getX();
-        int y = (*first)->getY();
-        if (x >= 0 && x < goData.root.xsize && y >= 0 && y < goData.root.ysize){
-            eraseBackground(p, x, y);
-            p.drawText(xlines[x] - boxSize, ylines[y] - boxSize, boxSize * 2, boxSize * 2, Qt::AlignCenter, s);
+        int boardX, boardY;
+        sgfToBoardCoordinate((*first)->getX(), (*first)->getY(), boardX, boardY);
+        if (boardX >= 0 && boardX < xsize && boardY >= 0 && boardY < ysize){
+            eraseBackground(p, boardX, boardY);
+            p.drawText(xlines[boardX] - boxSize, ylines[boardY] - boxSize, boxSize * 2, boxSize * 2, Qt::AlignCenter, s);
             ++s[0];
         }
         ++first;
@@ -797,24 +799,24 @@ void BoardWidget::removeDeadStones(int x, int y){
 /**
 */
 bool BoardWidget::isDead(int* tmp, int c, int x, int y){
-    if (tmp[y*goData.root.ysize+x])
+    if (tmp[y*xsize+x])
         return true;
     else if (board[y][x].color == 0)
         return false;
     else if (board[y][x].color != c)
         return true;
-    tmp[y*goData.root.ysize+x] = board[y][x].color;
+    tmp[y*xsize+x] = board[y][x].color;
 
     if (y > 0 && !isDead(tmp, c, x, y - 1))
         return false;
 
-    if (y < goData.root.ysize-1 && !isDead(tmp, c, x, y + 1))
+    if (y < ysize-1 && !isDead(tmp, c, x, y + 1))
         return false;
 
     if (x > 0 && !isDead(tmp, c, x - 1, y))
         return false;
 
-    if (x < goData.root.xsize-1 && !isDead(tmp, c, x + 1, y))
+    if (x < xsize-1 && !isDead(tmp, c, x + 1, y))
         return false;
 
     return true;
@@ -823,7 +825,7 @@ bool BoardWidget::isDead(int* tmp, int c, int x, int y){
 /**
 */
 bool BoardWidget::isDead(int x, int y){
-    int size = goData.root.xsize * goData.root.ysize;
+    int size = xsize * ysize;
     int* tmp = new int[size];
     memset(tmp, 0, sizeof(int)*size);
 
@@ -862,9 +864,9 @@ bool BoardWidget::isKill(int x, int y){
 /**
 */
 void BoardWidget::dead(int* tmp){
-    for (int y=0; y<goData.root.ysize; ++y){
-        for (int x=0; x<goData.root.xsize; ++x){
-            if (tmp[y*goData.root.ysize+x]){
+    for (int y=0; y<ysize; ++y){
+        for (int x=0; x<xsize; ++x){
+            if (tmp[y*xsize+x]){
                 if (board[y][x].color == go::black)
                     ++capturedBlack;
 

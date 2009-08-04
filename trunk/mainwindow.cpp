@@ -941,6 +941,42 @@ void MainWindow::on_action9x9Board_triggered(){
 
 /**
 * Slot
+* Options -> Custom Board Size
+*/
+void MainWindow::on_actionCustomBoardSize_triggered(){
+    QInputDialog dlg(this);
+    dlg.setLabelText("Input new board size. board size must be between 2-52.");
+
+    if (dlg.exec() != QDialog::Accepted)
+        return;
+
+    QString s = dlg.textValue();
+    QString w, h;
+    QString::iterator iter=s.begin();
+    for(; iter!= s.end(); ++iter){
+        if (iter->isDigit())
+            w.push_back(*iter);
+        else{
+            ++iter;
+            break;
+        }
+    }
+    for(; iter!= s.end(); ++iter){
+        if (iter->isDigit())
+            h.push_back(*iter);
+        else
+            break;
+    }
+
+    int iW = w.toInt();
+    int iH = h.toInt();
+    if (iW >= 2 && iW <= 52)
+        if (iH == 0 || (iH >= 2 && iH <= 52))
+            setBoardSize(iW, iH == 0 ? iW : iH);
+}
+
+/**
+* Slot
 * Options -> Play Sound
 */
 void MainWindow::on_actionPlaySound_triggered(){

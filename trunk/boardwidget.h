@@ -4,6 +4,7 @@
 #include <QtGui/QWidget>
 #include <QVector>
 #include <QList>
+//#include <Phonon/phonon>
 #include "godata.h"
 
 namespace Ui {
@@ -177,6 +178,9 @@ private:
     QList<int> xlines;
     QList<int> ylines;
     QVector< QVector<stoneInfo> > board;
+
+    // Phonon
+//    Phonon::MediaObject* mediaObject;
 };
 
 #endif // BOARDWIDGET_H
