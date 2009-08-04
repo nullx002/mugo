@@ -117,12 +117,12 @@ protected:
 
     void createNodeList();
     void createBoardBuffer();
-    void addStone(int x, int y);
-    void addMark(int x, int y);
+    void addStone(int sgfX, int sgfY, int boardX, int boardY);
+    void addMark(int sgfX, int sgfY, int boardX, int boardY);
     void addMark(go::markList& markList, const go::mark& mark);
     void addCharacter(go::markList& markList, const go::point& p);
     void removeMark(go::markList& markList, const go::point& p);
-    void addStone(go::stoneList& stoneList, const go::point& p, go::color color);
+    void addStone(go::stoneList& stoneList, const go::point& sgfP, const go::point& boardP, go::color color);
     void rotateSgf(go::node* node);
     void rotateStoneSgf(go::stoneList& stoneList);
     void rotateMarkSgf(go::markList& markList);
@@ -130,6 +130,10 @@ protected:
     void flipStoneSgf(go::stoneList& stoneList, int xsize, int ysize);
     void flipMarkSgf(go::markList& markList, int xsize, int ysize);
 
+//    void sgfToBoardCoordinate(int sgfX, int sgfY, int& boardX, int& boardY);
+//    void boardToSgfCoordinate(int boardX, int boardY, int& sgfX, int& sgfY,);
+    int getSgfX(int x, int y);
+    int getSgfY(int x, int y);
     int getBoardX(int x, int y);
     int getBoardY(int x, int y);
 
