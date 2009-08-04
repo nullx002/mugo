@@ -76,18 +76,21 @@ void BoardWidget::mouseReleaseEvent(QMouseEvent* e){
 /**
 */
 void BoardWidget::onLButtonDown(QMouseEvent* e){
-    int x = (e->x() - xlines[0] + boxSize / 2) / boxSize;
-    int y = (e->y() - ylines[0] + boxSize / 2) / boxSize;
+    int boardX = (e->x() - xlines[0] + boxSize / 2) / boxSize;
+    int boardY = (e->y() - ylines[0] + boxSize / 2) / boxSize;
 
-    if (x < 0 || x >= goData.root.xsize || y < 0 || y >= goData.root.ysize)
+    if (boardX < 0 || boardX >= xsize || boardY < 0 || boardY >= ysize)
         return;
 
-    if (moveToClicked && board[y][x].node)
-        setCurrentNode( board[y][x].node );
+    int sgfX = getSgfX(boardX, boardY);
+    int sgfY = getSgfY(boardX, boardY);
+
+    if (moveToClicked && board[boardY][boardX].node)
+        setCurrentNode( board[boardY][boardX].node );
     else if (editMode == eAlternateMove)
-        addStone(x, y);
+        addStone(sgfX, sgfY, boardX, boardY);
     else
-        addMark(x, y);
+        addMark(sgfX, sgfY, boardX, boardY);
 }
 
 /**
@@ -185,6 +188,8 @@ void BoardWidget::rotateSgf(go::node* node){
     rotateMarkSgf(node->triangles);
     rotateMarkSgf(node->circles);
     rotateMarkSgf(node->characters);
+    rotateMarkSgf(node->blackTerritories);
+    rotateMarkSgf(node->whiteTerritories);
 }
 
 void BoardWidget::rotateStoneSgf(go::stoneList& stoneList){
@@ -229,6 +234,8 @@ void BoardWidget::flipSgf(go::node* node, int xsize, int ysize){
     flipMarkSgf(node->triangles, xsize, ysize);
     flipMarkSgf(node->circles, xsize, ysize);
     flipMarkSgf(node->characters, xsize, ysize);
+    flipMarkSgf(node->blackTerritories, xsize, ysize);
+    flipMarkSgf(node->whiteTerritories, xsize, ysize);
 }
 
 void BoardWidget::flipStoneSgf(go::stoneList& stoneList, int xsize, int ysize){
@@ -278,7 +285,7 @@ void BoardWidget::flipBoardVertically(bool flip){
 }
 
 void BoardWidget::resetBoard(){
-    rotateBoard_ = false;
+    rotateBoard_ = 0;
     flipBoardHorizontally_ = false;
     flipBoardVertically_ = false;
 
@@ -370,7 +377,6 @@ void BoardWidget::setCurrentNode(go::node* node){
     if (iter == nodeList.end())
         createNodeList();
 
-qDebug() << "createBoardBuffer";
     createBoardBuffer();
 
     if (playSound && node->isStone())
@@ -738,7 +744,6 @@ void BoardWidget::putStone(go::node* n, int moveNumber){
     if (n->isStone()){
         int x = getBoardX( n->getX(), n->getY() );
         int y = getBoardY( n->getX(), n->getY() );
-qDebug() << "putStone " << x << ", " << y;
 
         if (x >= 0 && x < xsize && y >= 0 && y < ysize){
             board[y][x].color  = n->isBlack() ? go::black : go::white;
@@ -749,7 +754,6 @@ qDebug() << "putStone " << x << ", " << y;
         }
     }
 
-qDebug() << "putStone2";
     go::stoneList::iterator iter = n->stones.begin();
     while (iter != n->stones.end()){
         int  x = getBoardX( iter->p.x, iter->p.y );
@@ -762,7 +766,6 @@ qDebug() << "putStone2";
         }
         ++iter;
     }
-qDebug() << "putStone3";
 }
 
 /**
@@ -877,30 +880,30 @@ void BoardWidget::dead(int* tmp){
 
 /**
 */
-void BoardWidget::addStone(int x, int y){
-    if (board[y][x].empty() == false)
+void BoardWidget::addStone(int sgfX, int sgfY, int boardX, int boardY){
+    if (board[boardY][boardX].empty() == false)
         return;
 
     go::nodeList::iterator iter = currentNode->childNodes.begin();
     while (iter != currentNode->childNodes.end()){
-        if ((*iter)->getX() == x && (*iter)->getY() == y){
+        if ((*iter)->getX() == sgfX && (*iter)->getY() == sgfY){
             setCurrentNode(*iter);
             return;
         }
         ++iter;
     }
 
-    board[y][x].color = isBlack ? go::black : go::white;
-    if (isKill(x, y) == false && isDead(x, y) == true){
-        board[y][x].color = go::empty;
+    board[boardY][boardX].color = isBlack ? go::black : go::white;
+    if (isKill(boardX, boardY) == false && isDead(boardX, boardY) == true){
+        board[boardY][boardX].color = go::empty;
         return;
     }
 
     go::node* n;
     if (isBlack)
-        n = go::createBlackNode(currentNode, x, y);
+        n = go::createBlackNode(currentNode, sgfX, sgfY);
     else
-        n = go::createWhiteNode(currentNode, x, y);
+        n = go::createWhiteNode(currentNode, sgfX, sgfY);
 
     addNode(currentNode, n);
     setCurrentNode(n);
@@ -908,25 +911,25 @@ void BoardWidget::addStone(int x, int y){
 
 /**
 */
-void BoardWidget::addMark(int x, int y){
+void BoardWidget::addMark(int sgfX, int sgfY, int boardX, int boardY){
     switch (editMode){
         case eAlternateMove:
             return;
 
         case eAddBlack:
-            addStone(currentNode->stones, go::point(x, y), go::black);
+            addStone(currentNode->stones, go::point(sgfX, sgfY), go::point(boardX, boardY), go::black);
             break;
 
         case eAddWhite:
-            addStone(currentNode->stones, go::point(x, y), go::white);
+            addStone(currentNode->stones, go::point(sgfX, sgfY), go::point(boardX, boardY), go::white);
             break;
 
         case eAddEmpty:
-            addStone(currentNode->stones, go::point(x, y), go::empty);
+            addStone(currentNode->stones, go::point(sgfX, sgfY), go::point(boardX, boardY), go::empty);
             break;
 
         case eLabelMark:{
-            go::point p(x, y);
+            go::point p(sgfX, sgfY);
             removeMark(currentNode->circles, p);
             removeMark(currentNode->crosses, p);
             removeMark(currentNode->squares, p);
@@ -936,7 +939,7 @@ void BoardWidget::addMark(int x, int y){
         }
 
         case eCircleMark:{
-            go::mark mark(x, y, go::mark::eCircle);
+            go::mark mark(sgfX, sgfY, go::mark::eCircle);
             addMark(currentNode->circles, mark);
             removeMark(currentNode->crosses, mark.p);
             removeMark(currentNode->squares, mark.p);
@@ -946,7 +949,7 @@ void BoardWidget::addMark(int x, int y){
         }
 
         case eCrossMark:{
-            go::mark mark(x, y, go::mark::eCross);
+            go::mark mark(sgfX, sgfY, go::mark::eCross);
             removeMark(currentNode->circles, mark.p);
             addMark(currentNode->crosses, mark);
             removeMark(currentNode->squares, mark.p);
@@ -956,7 +959,7 @@ void BoardWidget::addMark(int x, int y){
         }
 
         case eSquareMark:{
-            go::mark mark(x, y, go::mark::eSquare);
+            go::mark mark(sgfX, sgfY, go::mark::eSquare);
             removeMark(currentNode->circles, mark.p);
             removeMark(currentNode->crosses, mark.p);
             addMark(currentNode->squares, mark);
@@ -966,7 +969,7 @@ void BoardWidget::addMark(int x, int y){
         }
 
         case eTriangleMark:{
-            go::mark mark(x, y, go::mark::eTriangle);
+            go::mark mark(sgfX, sgfY, go::mark::eTriangle);
             removeMark(currentNode->circles, mark.p);
             removeMark(currentNode->crosses, mark.p);
             removeMark(currentNode->squares, mark.p);
@@ -976,7 +979,7 @@ void BoardWidget::addMark(int x, int y){
         }
 
         case eDeleteMarker:{
-            go::point p(x, y);
+            go::point p(sgfX, sgfY);
             removeMark(currentNode->circles, p);
             removeMark(currentNode->crosses, p);
             removeMark(currentNode->squares, p);
@@ -1042,14 +1045,14 @@ void BoardWidget::removeMark(go::markList& markList, const go::point& p){
     }
 }
 
-void BoardWidget::addStone(go::stoneList& stoneList, const go::point& p, go::color c){
+void BoardWidget::addStone(go::stoneList& stoneList, const go::point& sp, const go::point& bp, go::color c){
     go::stoneList::iterator iter = stoneList.begin();
     while (iter != stoneList.end()){
-        if (iter->p == p) {
+        if (iter->p == sp) {
             go::stone stone = *iter;
             iter = stoneList.erase(iter);
-            board[p.y][p.x].color = go::empty;
-            board[p.y][p.x].number = 0;
+            board[bp.y][bp.x].color = go::empty;
+            board[bp.y][bp.x].number = 0;
 
             if (stone.c == c || c == go::empty)
                 return;
@@ -1058,9 +1061,9 @@ void BoardWidget::addStone(go::stoneList& stoneList, const go::point& p, go::col
         }
         ++iter;
     }
-    currentNode->stones.push_back( go::stone(p, c) );
-    board[p.y][p.x].color = c;
-    board[p.y][p.x].number = 0;
+    currentNode->stones.push_back( go::stone(sp, c) );
+    board[bp.y][bp.x].color = c;
+    board[bp.y][bp.x].number = 0;
 }
 
 QString BoardWidget::getXString(int x) const{
@@ -1079,6 +1082,28 @@ QString  BoardWidget::getXYString(int x, int y) const{
     QString s = getXString(x);
     s.append( getYString(y) );
     return s;
+}
+
+int BoardWidget::getSgfX(int x, int y){
+    if (rotateBoard_ == 0)
+        return x;
+    else if (rotateBoard_ == 1)
+        return y;
+    else if (rotateBoard_ == 2)
+        return xsize - x - 1;
+    else
+        return ysize - y - 1;
+}
+
+int BoardWidget::getSgfY(int x, int y){
+    if (rotateBoard_ == 0)
+        return y;
+    else if (rotateBoard_ == 1)
+        return ysize - x - 1;
+    else if (rotateBoard_ == 2)
+        return ysize - y - 1;
+    else
+        return x;
 }
 
 int BoardWidget::getBoardX(int x, int y){
