@@ -95,6 +95,7 @@ protected:
     virtual void changeEvent(QEvent* e);
     virtual void paintEvent(QPaintEvent* e);
     virtual void mouseReleaseEvent(QMouseEvent* e);
+    virtual void wheelEvent(QWheelEvent* e);
 
     // draw
     void drawBoard(QPainter& p);
