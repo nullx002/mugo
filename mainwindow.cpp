@@ -1405,9 +1405,6 @@ QString MainWindow::createTreeText(const go::node* node){
         s.push_back(' ');
     s.append( node->toString() );
 
-    s.append( tr("GameInfo") );
-    s.append( tr("Pass") );
-
     if (s.isEmpty())
         s = tr("Other");
 

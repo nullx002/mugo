@@ -77,6 +77,23 @@ void BoardWidget::mouseReleaseEvent(QMouseEvent* e){
 
 /**
 */
+void BoardWidget::wheelEvent(QWheelEvent* e){
+    QWidget::wheelEvent(e);
+
+    go::nodeList::iterator iter = qFind(nodeList.begin(), nodeList.end(), currentNode);
+
+    if (e->delta() > 0){
+        if (iter != nodeList.begin() && iter != nodeList.end())
+            setCurrentNode( *--iter );
+    }
+    else{
+        if (iter != nodeList.end() && ++iter != nodeList.end())
+            setCurrentNode( *iter );
+    }
+}
+
+/**
+*/
 void BoardWidget::onLButtonDown(QMouseEvent* e){
     int boardX = (e->x() - xlines[0] + boxSize / 2) / boxSize;
     int boardY = (e->y() - ylines[0] + boxSize / 2) / boxSize;
