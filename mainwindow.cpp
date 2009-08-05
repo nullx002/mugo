@@ -774,16 +774,16 @@ void MainWindow::on_actionAllMoves_triggered(){
 * Slot
 * View -> Show Coordinates
 */
-void MainWindow::on_actionShowCoordinates_triggered(){
-    ui->boardWidget->setShowCoordinates( ui->actionShowCoordinates->isChecked() );
+void MainWindow::on_actionShowCoordinate_triggered(){
+    ui->boardWidget->setShowCoordinates( ui->actionShowCoordinate->isChecked() );
 }
 
 /**
 * Slot
 * View -> Show Coordinates with I
 */
-void MainWindow::on_actionShowCoordinatesI_triggered(){
-    ui->boardWidget->setShowCoordinatesWithI( ui->actionShowCoordinatesI->isChecked() );
+void MainWindow::on_actionShowCoordinateI_triggered(){
+    ui->boardWidget->setShowCoordinatesWithI( ui->actionShowCoordinateI->isChecked() );
     setTreeData();
 }
 
@@ -1404,6 +1404,9 @@ QString MainWindow::createTreeText(const go::node* node){
     if (!s.isEmpty())
         s.push_back(' ');
     s.append( node->toString() );
+
+    s.append( tr("GameInfo") );
+    s.append( tr("Pass") );
 
     if (s.isEmpty())
         s = tr("Other");

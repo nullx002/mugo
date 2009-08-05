@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
     a.installTranslator(&qtTranslator);
 
     QTranslator myappTranslator;
-    bool aa = myappTranslator.load("mugo." + QLocale::system().name());
+    myappTranslator.load("mugo." + QLocale::system().name());
     a.installTranslator(&myappTranslator);
 
     QTextCodec::setCodecForCStrings( QTextCodec::codecForName("UTF-8") );

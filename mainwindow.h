@@ -159,8 +159,8 @@ private slots:
     // View menu
     void on_actionShowMoveNumber_triggered();
     void on_actionShowMoveNumber_parent_triggered();
-    void on_actionShowCoordinates_triggered();
-    void on_actionShowCoordinatesI_triggered();
+    void on_actionShowCoordinate_triggered();
+    void on_actionShowCoordinateI_triggered();
     void on_actionShowMarker_triggered();
     void on_actionShowBranchMoves_triggered();
     void on_actionBranchMode_triggered();
