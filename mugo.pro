@@ -22,3 +22,5 @@ FORMS += mainwindow.ui \
     gameinformationdialog.ui
 RESOURCES += resources.qrc
 RC_FILE = mugo.rc
+TRANSLATIONS = mugo.ja_JP.ts
+

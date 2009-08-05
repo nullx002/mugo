@@ -388,7 +388,7 @@ void MainWindow::on_actionSetMoveNumber_triggered(){
 
     QInputDialog dlg(this);
     dlg.setInputMode(QInputDialog::IntInput);
-    dlg.setLabelText("Input move number");
+    dlg.setLabelText( tr("Input move number") );
 
     if (node->moveNumber > 0)
         dlg.setIntValue(node->moveNumber);
@@ -418,7 +418,7 @@ void MainWindow::on_actionUnsetMoveNumber_triggered(){
 void MainWindow::on_actionEditNodeName_triggered(){
     go::node* node = ui->boardWidget->getCurrentNode();
     QInputDialog dlg(this);
-    dlg.setLabelText("Input node name");
+    dlg.setLabelText( tr("Input node name") );
     dlg.setTextValue(node->name);
     if (dlg.exec() != QDialog::Accepted)
         return;
@@ -671,7 +671,7 @@ void MainWindow::on_actionNextBranch_triggered(){
 void MainWindow::on_actionJumpToMoveNumber_triggered(){
     QInputDialog dlg(this);
     dlg.setInputMode( QInputDialog::IntInput );
-    dlg.setLabelText("Input move number");
+    dlg.setLabelText( tr("Input move number") );
     if (dlg.exec() != QDialog::Accepted)
         return;
 
@@ -945,7 +945,7 @@ void MainWindow::on_action9x9Board_triggered(){
 */
 void MainWindow::on_actionCustomBoardSize_triggered(){
     QInputDialog dlg(this);
-    dlg.setLabelText("Input new board size. board size must be between 2-52.");
+    dlg.setLabelText( tr("Input new board size. board size must be between 2-52.") );
 
     if (dlg.exec() != QDialog::Accepted)
         return;
@@ -1396,7 +1396,7 @@ QString MainWindow::createTreeText(const go::node* node){
     QString s;
     if (node->isStone()){
         if (node->isPass())
-            s.append("Pass");
+            s.append( tr("Pass") );
         else
             s.append( ui->boardWidget->getXYString(node->getX(), node->getY()) );
     }
@@ -1406,7 +1406,7 @@ QString MainWindow::createTreeText(const go::node* node){
     s.append( node->toString() );
 
     if (s.isEmpty())
-        s = "Other";
+        s = tr("Other");
 
     return s;
 }
