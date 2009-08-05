@@ -168,7 +168,7 @@ public:
 
     virtual bool isStone() const{ return false; }
 
-    virtual QString nodeName() const{ static const QString str = "GameInfo"; return str; }
+    virtual QString nodeName() const;
 
     void initialize();
 

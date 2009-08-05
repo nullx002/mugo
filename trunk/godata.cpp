@@ -2,6 +2,8 @@
 #include "appdef.h"
 #include "godata.h"
 
+#define tr QObject::tr
+
 namespace go{
 
 
@@ -61,46 +63,46 @@ QString node::toString() const{
         str += QString(" (%1)").arg(moveNumber);
 
     if (!stones.empty())
-        str.append(" Add");
+        str += QString(" %1").arg( tr("Add") );
 
     if (!crosses.empty() || !triangles.empty() || !squares.empty() || !circles.empty() || !characters.empty())
-        str.append(" Mark");
+        str += QString(" %1").arg( tr("Mark") );
 
     if (!blackTerritories.empty())
-        str.append(" BlackTerritories");
+        str += QString(" %1").arg( tr("BlackTerritories") );
 
     if (!whiteTerritories.empty())
-        str.append(" WhiteTerritories");
+        str += QString(" %1").arg( tr("WhiteTerritories") );
 
     if (!comment.isEmpty())
-        str.append(" Comment");
+        str += QString(" %1").arg( tr("Comment") );
 
     if (annotation & eGoodMove)
-        str.append(" [Good Move]");
+        str += QString(" [%1]").arg( tr("Good Move") );
     if (annotation & eVeryGoodMove)
-        str.append(" [Very Good Move]");
+        str += QString(" [%1]").arg( tr("Very Good Move") );
     if (annotation & eBadMove)
-        str.append(" [Bad Move]");
+        str += QString(" [%1]").arg( tr("Bad Move") );
     if (annotation & eVeryBadMove)
-        str.append(" [Very Bad Move]");
+        str += QString(" [%1]").arg( tr("Very Bad Move") );
     if (annotation & eDoubtfulMove)
-        str.append(" [Doubtful Move]");
+        str += QString(" [%1]").arg( tr("Doubtful Move") );
     if (annotation & eInterestingMove)
-        str.append(" [Interesting Move]");
+        str += QString(" [%1]").arg( tr("Interesting Move") );
     if (annotation & eEven)
-        str.append(" [Even]");
+        str += QString(" [%1]").arg( tr("Even") );
     if (annotation & eGoodForBlack)
-        str.append(" [Good for Black]");
+        str += QString(" [%1]").arg( tr("Good for Black") );
     if (annotation & eVeryGoodForBlack)
-        str.append(" [Very Good for Black]");
+        str += QString(" [%1]").arg( tr("Very Good for Black") );
     if (annotation & eGoodForWhite)
-        str.append(" [Good for White]");
+        str += QString(" [%1]").arg( tr("Good for White") );
     if (annotation & eVeryGoodForWhite)
-        str.append(" [Very Good for White]");
+        str += QString(" [%1]").arg( tr("Very Good for White") );
     if (annotation & eUnclear)
-        str.append(" [Unclear]");
+        str += QString(" [%1]").arg( tr("Unclear") );
     if (annotation & eHotspot)
-        str.append(" [Hotspot]");
+        str += QString(" [%1]").arg( tr("Hotspot") );
 
     if (!str.isEmpty() && str[0] == ' ')
         str.remove(0, 1);
@@ -114,6 +116,11 @@ void informationNode::initialize(){
     komi = 6.5;
     handicap = 0;
     white = true;
+}
+
+QString informationNode::nodeName() const{
+    static const QString str = tr("GameInfo");
+    return str;
 }
 
 
