@@ -766,7 +766,7 @@ Do you want to save your changes?</source>
 <context>
     <name>go::informationNode</name>
     <message>
-        <location filename="godata.cpp" line="122"/>
+        <location filename="godata.cpp" line="121"/>
         <source>GameInfo</source>
         <translation type="unfinished">ゲーム情報</translation>
     </message>
@@ -774,92 +774,92 @@ Do you want to save your changes?</source>
 <context>
     <name>go::node</name>
     <message>
-        <location filename="godata.cpp" line="66"/>
+        <location filename="godata.cpp" line="65"/>
         <source>Add</source>
         <translation type="unfinished">追加</translation>
     </message>
     <message>
-        <location filename="godata.cpp" line="69"/>
+        <location filename="godata.cpp" line="68"/>
         <source>Mark</source>
         <translation type="unfinished">マーク</translation>
     </message>
     <message>
-        <location filename="godata.cpp" line="72"/>
+        <location filename="godata.cpp" line="71"/>
         <source>BlackTerritories</source>
         <translation type="unfinished">黒地</translation>
     </message>
     <message>
-        <location filename="godata.cpp" line="75"/>
+        <location filename="godata.cpp" line="74"/>
         <source>WhiteTerritories</source>
         <translation type="unfinished">白地</translation>
     </message>
     <message>
-        <location filename="godata.cpp" line="78"/>
+        <location filename="godata.cpp" line="77"/>
         <source>Comment</source>
         <translation type="unfinished">コメント</translation>
     </message>
     <message>
-        <location filename="godata.cpp" line="81"/>
+        <location filename="godata.cpp" line="80"/>
         <source>Good Move</source>
         <translation type="unfinished">好手</translation>
     </message>
     <message>
-        <location filename="godata.cpp" line="83"/>
+        <location filename="godata.cpp" line="82"/>
         <source>Very Good Move</source>
         <translation type="unfinished">手筋</translation>
     </message>
     <message>
-        <location filename="godata.cpp" line="85"/>
+        <location filename="godata.cpp" line="84"/>
         <source>Bad Move</source>
         <translation type="unfinished">悪手</translation>
     </message>
     <message>
-        <location filename="godata.cpp" line="87"/>
+        <location filename="godata.cpp" line="86"/>
         <source>Very Bad Move</source>
         <translation type="unfinished">大悪手</translation>
     </message>
     <message>
-        <location filename="godata.cpp" line="89"/>
+        <location filename="godata.cpp" line="88"/>
         <source>Doubtful Move</source>
         <translation type="unfinished">疑問手</translation>
     </message>
     <message>
-        <location filename="godata.cpp" line="91"/>
+        <location filename="godata.cpp" line="90"/>
         <source>Interesting Move</source>
         <translation type="unfinished">面白い手</translation>
     </message>
     <message>
-        <location filename="godata.cpp" line="93"/>
+        <location filename="godata.cpp" line="92"/>
         <source>Even</source>
         <translation type="unfinished">互角</translation>
     </message>
     <message>
-        <location filename="godata.cpp" line="95"/>
+        <location filename="godata.cpp" line="94"/>
         <source>Good for Black</source>
         <translation type="unfinished">黒やや良し</translation>
     </message>
     <message>
-        <location filename="godata.cpp" line="97"/>
+        <location filename="godata.cpp" line="96"/>
         <source>Very Good for Black</source>
         <translation type="unfinished">黒良し</translation>
     </message>
     <message>
-        <location filename="godata.cpp" line="99"/>
+        <location filename="godata.cpp" line="98"/>
         <source>Good for White</source>
         <translation type="unfinished">白やや良し</translation>
     </message>
     <message>
-        <location filename="godata.cpp" line="101"/>
+        <location filename="godata.cpp" line="100"/>
         <source>Very Good for White</source>
         <translation type="unfinished">白良し</translation>
     </message>
     <message>
-        <location filename="godata.cpp" line="103"/>
+        <location filename="godata.cpp" line="102"/>
         <source>Unclear</source>
         <translation type="unfinished">形勢不明</translation>
     </message>
     <message>
-        <location filename="godata.cpp" line="105"/>
+        <location filename="godata.cpp" line="104"/>
         <source>Hotspot</source>
         <translation type="unfinished">急場</translation>
     </message>

@@ -165,7 +165,7 @@ public:
 
 
 class informationNode : public node{
-    Q_DECLARE_TR_FUNCTIONS(node)
+    Q_DECLARE_TR_FUNCTIONS(informationNode)
 
 public:
     explicit informationNode(data* data_) : node(data_){ initialize(); }
