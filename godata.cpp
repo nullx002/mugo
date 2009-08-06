@@ -2,7 +2,6 @@
 #include "appdef.h"
 #include "godata.h"
 
-#define tr QObject::tr
 
 namespace go{
 
