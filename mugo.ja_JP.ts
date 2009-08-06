@@ -70,7 +70,7 @@ alternate-background-color: rgb(255, 255, 255);</source>
     <message>
         <location filename="gameinformationdialog.ui" line="144"/>
         <source>Handicap</source>
-        <translation type="unfinished">置石</translation>
+        <translation type="unfinished">手合割</translation>
     </message>
     <message>
         <location filename="gameinformationdialog.ui" line="164"/>

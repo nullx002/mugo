@@ -87,7 +87,7 @@ typedef QLinkedList<node*> nodeList;
 
 
 class node{
-    Q_DECLARE_TR_FUNCTIONS(node)
+    Q_DECLARE_TR_FUNCTIONS(go::node)
 
 public:
     enum eAnnotation{
@@ -165,7 +165,10 @@ public:
 
 
 class informationNode : public node{
-    Q_DECLARE_TR_FUNCTIONS(informationNode)
+    Q_DECLARE_TR_FUNCTIONS(go::informationNode)
+//    static QString tr(const char* source, const char* disam, int n){
+//        QCoreApplication::translate("informationNodesource
+//    }
 
 public:
     explicit informationNode(data* data_) : node(data_){ initialize(); }

@@ -14,15 +14,19 @@ QString getTranslationPath(){
 #ifdef Q_WS_WIN
     pathList << appPath + "/translations";
 #elif defined(Q_WS_X11)
-    pathList << "/usr/share/" APP_NAME "/translations"
+    pathList << appPath + "/translations"
+             << "/usr/share/" APP_NAME "/translations"
              << "/usr/local/share/" APP_NAME "/translations";
 #endif
 
     QStringList::iterator iter = pathList.begin();
     while (iter != pathList.end()){
         QDir dir(*iter);
-        if (dir.exists())
+            qDebug() << "check: " << dir;
+        if (dir.exists()){
+            qDebug() << "translation directory: " << dir;
             return *iter;
+        }
         ++iter;
     }
 
