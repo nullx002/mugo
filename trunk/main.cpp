@@ -22,11 +22,8 @@ QString getTranslationPath(){
     QStringList::iterator iter = pathList.begin();
     while (iter != pathList.end()){
         QDir dir(*iter);
-            qDebug() << "check: " << dir;
-        if (dir.exists()){
-            qDebug() << "translation directory: " << dir;
+        if (dir.exists())
             return *iter;
-        }
         ++iter;
     }
 
