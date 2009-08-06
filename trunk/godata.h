@@ -1,6 +1,7 @@
 #ifndef __godata_h__
 #define __godata_h__
 
+#include <QCoreApplication>
 #include <QFile>
 #include <QTextStream>
 #include <QStringList>
@@ -86,6 +87,8 @@ typedef QLinkedList<node*> nodeList;
 
 
 class node{
+    Q_DECLARE_TR_FUNCTIONS(node)
+
 public:
     enum eAnnotation{
         eNoAnnotation = 0x0000,
@@ -162,6 +165,8 @@ public:
 
 
 class informationNode : public node{
+    Q_DECLARE_TR_FUNCTIONS(node)
+
 public:
     explicit informationNode(data* data_) : node(data_){ initialize(); }
     explicit informationNode(node* parent) : node(parent){ initialize(); }
