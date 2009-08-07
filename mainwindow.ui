@@ -33,7 +33,7 @@
      <x>0</x>
      <y>0</y>
      <width>733</width>
-     <height>20</height>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -343,6 +343,9 @@
    <attribute name="toolBarBreak">
     <bool>true</bool>
    </attribute>
+   <addaction name="actionUndo"/>
+   <addaction name="actionRedo"/>
+   <addaction name="separator"/>
    <addaction name="actionAlternateMove"/>
    <addaction name="separator"/>
    <addaction name="actionAddWhiteStone"/>
@@ -522,19 +525,33 @@
   </action>
   <action name="actionAbout">
    <property name="icon">
-    <iconset>
-     <normaloff>:/res/mugo.png</normaloff>:/res/mugo.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/pics/mugo.png</normaloff>:/pics/mugo.png</iconset>
    </property>
    <property name="text">
     <string>&amp;About...</string>
    </property>
   </action>
   <action name="actionUndo">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/undo.png</normaloff>:/res/undo.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Undo</string>
    </property>
   </action>
   <action name="actionRedo">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/redo.png</normaloff>:/res/redo.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Redo</string>
    </property>
