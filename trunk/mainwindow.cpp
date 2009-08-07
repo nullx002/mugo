@@ -988,7 +988,7 @@ void MainWindow::on_actionPlaySound_triggered(){
 * Help -> About
 */
 void MainWindow::on_actionAbout_triggered(){
-    QMessageBox::about(this, tr(APP_NAME), tr(APP_NAME " version " VERSION "\n\nCopyright 2009 Naoya Sase. All rights reserved."));
+    QMessageBox::about(this, tr(APP_NAME), tr(APP_NAME " version " VERSION "\n\nCopyright 2009 Naoya Sase."));
 }
 
 /**
