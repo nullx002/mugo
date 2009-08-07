@@ -8,7 +8,6 @@
         <file>res/white_64.png</file>
         <file>res/bg.png</file>
         <file>res/remove.png</file>
-        <file>res/mugo.png</file>
         <file>res/prevmove.png</file>
         <file>res/fastforward.png</file>
         <file>res/firstmove.png</file>
@@ -37,5 +36,8 @@
         <file>res/jumptonumber.png</file>
         <file>res/sound.png</file>
         <file>res/branchmode.png</file>
+        <file>res/resetboard.png</file>
+        <file>pics/mugo.png</file>
+        <file>res/movealternate.png</file>
     </qresource>
 </RCC>
