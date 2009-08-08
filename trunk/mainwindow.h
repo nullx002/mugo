@@ -48,6 +48,8 @@ private:
     void setAnnotation3(QAction* action, int annotation);
 
     void setBoardSize(int xsize, int ysize);
+    void setCurrentFile(const QString& fname);
+    void updateRecentFileActions();
 
     void setTreeData();
     QTreeWidgetItem* addTreeWidget(go::node* node, bool needRemake = false);
@@ -71,6 +73,10 @@ private:
     int annotation3;
     bool branchMode;
 
+    enum { MaxRecentFiles = 5 };
+    QAction *recentFileActs[MaxRecentFiles];
+    QAction *recentSeparator;
+
 private slots:
     // File menu
     void on_actionNew_triggered();
@@ -80,6 +86,7 @@ private slots:
     void on_actionSaveAs_triggered();
     void on_actionSaveBoardAsPicture_triggered();
     void on_actionExit_triggered();
+    void openRecentFile();
 
     // Edit menu
     void on_actionGameInformation_triggered();

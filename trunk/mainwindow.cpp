@@ -1,3 +1,4 @@
+#include <QSettings>
 #include <QDebug>
 #include <QFileDialog>
 #include <QInputDialog>
@@ -41,6 +42,16 @@ MainWindow::MainWindow(QWidget *parent)
         }
         ++iter;
     }
+
+    // recent files
+    for (int i=0; i<MaxRecentFiles; ++i){
+        recentFileActs[i] = new QAction(this);
+        recentFileActs[i]->setVisible(false);
+        ui->menu_File->insertAction(ui->actionExit, recentFileActs[i]);
+        connect( recentFileActs[i], SIGNAL(triggered()), this, SLOT(openRecentFile()) );
+    }
+    recentSeparator = ui->menu_File->insertSeparator(ui->actionExit);
+    updateRecentFileActions();
 
     // toolbar
     ui->optionToolBar->insertAction( ui->actionShowMoveNumber, ui->menuMoveNumber->menuAction() );
@@ -158,6 +169,16 @@ void MainWindow::on_actionSaveBoardAsPicture_triggered()
 */
 void MainWindow::on_actionExit_triggered(){
     close();
+}
+
+/**
+* Slot
+* File -> Recent Files
+*/
+void MainWindow::openRecentFile(){
+    QAction *action = qobject_cast<QAction*>(sender());
+    if (action && maybeSave())
+        fileOpen(action->data().toString());
 }
 
 /**
@@ -1173,7 +1194,7 @@ bool MainWindow::fileOpen(const QString& fname){
 * file open.
 */
 bool MainWindow::fileOpen(const QString& fname, const QString& filter){
-    fileName = fname;
+    setCurrentFile(fname);
     this->filter = filter;
 
     if (filter == "sgf"){
@@ -1559,4 +1580,38 @@ void MainWindow::setBoardSize(int xsize, int ysize){
     if (fileNew() == false)
         return;
     ui->boardWidget->setBoardSize(xsize, ysize);
+}
+
+void MainWindow::setCurrentFile(const QString& fname){
+    fileName = fname;
+
+    QSettings settings("nsase", "mugo");
+    QStringList files = settings.value("recentFileList").toStringList();
+    files.removeAll(fileName);
+    files.prepend(fileName);
+    while (files.size() > MaxRecentFiles)
+        files.removeLast();
+    settings.setValue("recentFileList", files);
+
+    updateRecentFileActions();
+}
+
+void MainWindow::updateRecentFileActions()
+{
+    QSettings settings("nsase", "mugo");
+    QStringList files = settings.value("recentFileList").toStringList();
+
+    int numRecentFiles = qMin(files.size(), (int)MaxRecentFiles);
+
+    for (int i = 0; i < numRecentFiles; ++i) {
+        QString text = QFileInfo(files[i]).fileName();
+        recentFileActs[i]->setText(text);
+        recentFileActs[i]->setData(files[i]);
+        recentFileActs[i]->setVisible(true);
+    }
+
+    for (int j = numRecentFiles; j < MaxRecentFiles; ++j)
+        recentFileActs[j]->setVisible(false);
+
+    recentSeparator->setVisible(numRecentFiles > 0);
 }
