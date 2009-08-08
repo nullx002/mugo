@@ -140,6 +140,8 @@ void BoardWidget::onLButtonDown(QMouseEvent* e){
         setCurrentNode( board[boardY][boardX].node );
     else if (editMode == eAlternateMove)
         addStone(sgfX, sgfY, boardX, boardY);
+    else if (editMode == eCountTerritory)
+        addTerritory(boardX, boardY);
     else
         addMark(sgfX, sgfY, boardX, boardY);
 }
@@ -161,6 +163,7 @@ void BoardWidget::repaintBoard(bool board, bool stones){
     if (stones){
         offscreenBuffer2 = offscreenBuffer1.copy();
         paintStones(&offscreenBuffer2);
+        paintTerritories(&offscreenBuffer2);
     }
 
     offscreenBuffer3 = offscreenBuffer2.copy();
@@ -213,6 +216,18 @@ void BoardWidget::paintStones(QPaintDevice* pd){
 
 /**
 */
+void BoardWidget::paintTerritories(QPaintDevice* pd){
+    QPainter p(pd);
+    p.setRenderHints(QPainter::Antialiasing|QPainter::TextAntialiasing|QPainter::SmoothPixmapTransform);
+
+    width_  = pd->width();
+    height_ = pd->height();
+
+    drawTerritories(p);
+}
+
+/**
+*/
 void BoardWidget::getData(go::fileBase& data){
     data.set(goData);
 }
@@ -220,17 +235,15 @@ void BoardWidget::getData(go::fileBase& data){
 /**
 */
 void BoardWidget::setData(const go::fileBase& data){
+    clear();
     data.get(goData);
-    nodeList.clear();
     setCurrentNode();
 }
 
 void BoardWidget::setBoardSize(int xsize, int ysize){
-    goData.clear();
+    clear();
     goData.root.xsize = xsize;
     goData.root.ysize = ysize;
-
-    nodeList.clear();
     setCurrentNode();
 
     repaintBoard();
@@ -388,6 +401,8 @@ void BoardWidget::clear(){
     setDirty(false);
     goData.clear();
     nodeList.clear();
+    capturedBlack = 0;
+    capturedWhite = 0;
     setCurrentNode();
 }
 
@@ -458,6 +473,9 @@ void BoardWidget::modifyNode(go::node* node, bool recreateBoardBuffer){
 * public slot
 */
 void BoardWidget::setCurrentNode(go::node* node){
+    if (editMode == eCountTerritory)
+        return;
+
     if (node == NULL)
         node = &goData.root;
 
@@ -667,8 +685,8 @@ void BoardWidget::drawStones(QPainter& p){
     drawMark(p, currentNode->circles.begin(), currentNode->circles.end());
     drawMark(p, currentNode->squares.begin(), currentNode->squares.end());
     drawMark(p, currentNode->characters.begin(), currentNode->characters.end());
-    drawTerritory(p, currentNode->blackTerritories.begin(), currentNode->blackTerritories.end());
-    drawTerritory(p, currentNode->whiteTerritories.begin(), currentNode->whiteTerritories.end());
+//    drawTerritories(p, currentNode->blackTerritories.begin(), currentNode->blackTerritories.end());
+//    drawTerritories(p, currentNode->whiteTerritories.begin(), currentNode->whiteTerritories.end());
 
     if (showMoveNumber && showMoveNumberCount == 0)
         if (currentNode->isStone())
@@ -773,9 +791,36 @@ void BoardWidget::drawMark(QPainter& p, go::markList::iterator first, go::markLi
 
 /**
 */
-void BoardWidget::drawTerritory(QPainter& p, go::markList::iterator first, go::markList::iterator last){
+void BoardWidget::drawTerritories(QPainter& p){
     p.save();
 
+    QFont font( p.font() );
+    font.setPointSize(int(boxSize * 0.38));
+    p.setFont(font);
+
+    for (int y=0; y<ysize; ++y){
+        for (int x=0; x<xsize; ++x){
+            if (!board[y][x].blackTerritory() && !board[y][x].whiteTerritory())
+                continue;
+
+            int bx = xlines[x];
+            int by = ylines[y];
+
+            QColor color = board[y][x].whiteTerritory() ? QColor(255, 255, 255, 160) : QColor(0, 0, 0, 110);
+            p.fillRect(bx-boxSize/2, by-boxSize/2, boxSize, boxSize, color);
+            p.setPen( board[y][x].whiteTerritory() ? Qt::white : Qt::black );
+            p.drawText(bx-boxSize, by-boxSize, boxSize*2, boxSize*2, Qt::AlignCenter, "■");
+        }
+    }
+
+    p.restore();
+}
+
+/**
+*/
+/*
+void BoardWidget::drawTerritories(QPainter& p, go::markList::iterator first, go::markList::iterator last){
+    p.save();
 
     QFont font( p.font() );
     font.setPointSize(int(boxSize * 0.38));
@@ -799,6 +844,7 @@ void BoardWidget::drawTerritory(QPainter& p, go::markList::iterator first, go::m
 
     p.restore();
 }
+*/
 
 /**
 */
@@ -864,6 +910,26 @@ void BoardWidget::putStone(go::node* node, int moveNumber){
         }
         ++iter;
     }
+
+    go::markList::iterator iter2 = node->blackTerritories.begin();
+    while (iter2 != node->blackTerritories.end()){
+        int boardX, boardY;
+        sgfToBoardCoordinate(iter2->p.x, iter2->p.y, boardX, boardY);
+        if (boardX >= 0 && boardX < xsize && boardY >= 0 && boardY < ysize){
+            board[boardY][boardX].color |= go::blackTerritory;
+        }
+        ++iter2;
+    }
+
+    iter2 = node->whiteTerritories.begin();
+    while (iter2 != node->whiteTerritories.end()){
+        int boardX, boardY;
+        sgfToBoardCoordinate(iter2->p.x, iter2->p.y, boardX, boardY);
+        if (boardX >= 0 && boardX < xsize && boardY >= 0 && boardY < ysize){
+            board[boardY][boardX].color |= go::whiteTerritory;
+        }
+        ++iter2;
+    }
 }
 
 /**
@@ -925,7 +991,7 @@ bool BoardWidget::isDead(int x, int y){
     int* tmp = new int[size];
     memset(tmp, 0, sizeof(int)*size);
 
-    go::color c = board[y][x].color;
+    int c = board[y][x].color;
     bool dead = isDead(tmp, c, x, y);
 
     delete[] tmp;
@@ -1259,4 +1325,121 @@ void BoardWidget::sgfToBoardCoordinate(int sgfX, int sgfY, int& boardX, int& boa
 
     if (flipBoardVertically_)
         boardY = ysize - boardY - 1;
+}
+
+void BoardWidget::setCountTerritoryMode(bool countMode){
+    if (countMode){
+        editMode = eCountTerritory;
+        countTerritory();
+    }
+    else{
+        editMode = eAlternateMove;
+        createBoardBuffer();
+    }
+
+    repaintBoard();
+}
+
+void BoardWidget::countTerritory(){
+    char* tmp = new char[xsize * ysize];
+
+    for (int y=0; y<ysize; ++y){
+        for (int x=0; x<xsize; ++x){
+            memset(tmp, 0, xsize*ysize);
+            int c = go::empty;
+            whichTerritory(x, y, tmp, c);
+            if (board[y][x].empty() && (c & go::blackTerritory || c & go::whiteTerritory))
+                board[y][x].color |= c;
+//            if (c != go::empty)
+//                updateTerritory(x, y);
+        }
+    }
+
+    delete[] tmp;
+}
+
+void BoardWidget::whichTerritory(int x, int y, char* tmp, int& c){
+    if (tmp[y*xsize+x] != 0)
+        return;
+    tmp[y*xsize+x] = 1;
+
+    if (c == go::dame)
+        return;
+    else if (board[y][x].whiteTerritory()){
+        c = go::whiteTerritory;
+        return;
+    }
+    else if (board[y][x].blackTerritory()){
+        c = go::blackTerritory;
+        return;
+    }
+    else if ((board[y][x].black() && c == go::whiteTerritory) || (board[y][x].white() && c == go::blackTerritory)){
+        c = go::dame;
+        return;
+    }
+    else if (board[y][x].black()){
+        c = go::blackTerritory;
+        return;
+    }
+    else if (board[y][x].white()){
+        c = go::whiteTerritory;
+        return;
+    }
+
+    if (y > 0)
+        whichTerritory(x, y-1, tmp, c);
+    if (y < ysize-1)
+        whichTerritory(x, y+1, tmp, c);
+    if (x > 0)
+        whichTerritory(x-1, y, tmp, c);
+    if (x < xsize-1)
+        whichTerritory(x+1, y, tmp, c);
+}
+
+void BoardWidget::updateTerritory(int, int){
+}
+
+void BoardWidget::addTerritory(int x, int y){
+    if (board[y][x].white() && !board[y][x].blackTerritory())
+        setTerritory(x, y, go::blackTerritory);
+    else if (board[y][x].black() && !board[y][x].whiteTerritory())
+        setTerritory(x, y, go::whiteTerritory);
+    else if ( (board[y][x].white() || board[y][x].black()) && (board[y][x].blackTerritory() || board[y][x].whiteTerritory()) )
+        unsetTerritory(x, y);
+
+    repaintBoard(false);
+}
+
+void BoardWidget::setTerritory(int x, int y, int c){
+    if ( (c & go::blackTerritory && board[y][x].black()) || (c & go::whiteTerritory && board[y][x].white()) )
+        return;
+    else if(board[y][x].blackTerritory() || board[y][x].whiteTerritory())
+        return;
+
+    board[y][x].color |= c;
+
+    if (y > 0)
+        setTerritory(x, y-1, c);
+    if (y < ysize-1)
+        setTerritory(x, y+1, c);
+    if (x > 0)
+        setTerritory(x-1, y, c);
+    if (x < xsize-1)
+        setTerritory(x+1, y, c);
+}
+
+void BoardWidget::unsetTerritory(int x, int y){
+    if ( !board[y][x].blackTerritory() && !board[y][x].whiteTerritory() )
+        return;
+
+    board[y][x].color &= go::black | go::white;
+
+    if (y > 0)
+        unsetTerritory(x, y-1);
+    if (y < ysize-1)
+        unsetTerritory(x, y+1);
+    if (x > 0)
+        unsetTerritory(x-1, y);
+    if (x < xsize-1)
+        unsetTerritory(x+1, y);
 }

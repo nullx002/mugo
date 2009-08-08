@@ -9,18 +9,20 @@ SOURCES += main.cpp \
     godata.cpp \
     gameinformationdialog.cpp \
     sgf.cpp \
-    ugf.cpp
+    ugf.cpp \
+    countterritorydialog.cpp
 HEADERS += mainwindow.h \
     boardwidget.h \
     godata.h \
     gameinformationdialog.h \
     appdef.h \
     sgf.h \
-    ugf.h
+    ugf.h \
+    countterritorydialog.h
 FORMS += mainwindow.ui \
     boardwidget.ui \
-    gameinformationdialog.ui
+    gameinformationdialog.ui \
+    countterritorydialog.ui
 RESOURCES += resources.qrc
 RC_FILE = mugo.rc
 TRANSLATIONS = mugo.ja_JP.ts
-

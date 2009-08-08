@@ -948,6 +948,7 @@ void MainWindow::on_actionOptionToolbar_triggered()
 * Tools -> Count Territoy
 */
 void MainWindow::on_actionCountTerritory_triggered(){
+    ui->boardWidget->setCountTerritoryMode(ui->actionCountTerritory->isChecked());
 }
 
 /**
