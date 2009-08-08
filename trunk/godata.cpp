@@ -130,6 +130,8 @@ void data::clear(){
 
 
 bool fileBase::read(const QString& fname, QTextCodec* codec){
+    this->codec = codec;
+
     QFile f(fname);
     if (!f.open(QIODevice::ReadOnly))
         return false;
@@ -141,6 +143,8 @@ bool fileBase::read(const QString& fname, QTextCodec* codec){
 }
 
 bool fileBase::save(const QString& fname, QTextCodec* codec){
+    this->codec = codec;
+
     QFile f(fname);
     if (!f.open(QIODevice::WriteOnly))
         return false;
