@@ -53,7 +53,10 @@ MainWindow::MainWindow(QWidget *parent)
     setShowMoveNumber(ui->actionNoMoveNumber, 0);
     setEditMode(ui->actionAlternateMove, BoardWidget::eAlternateMove);
 
-    fileNew();
+    if (qApp->argc() > 1)
+        fileOpen(qApp->argv()[1]);
+    else
+        fileNew();
 }
 
 MainWindow::~MainWindow(){
@@ -1162,15 +1165,20 @@ bool MainWindow::fileOpen(){
 /**
 * file open.
 */
+bool MainWindow::fileOpen(const QString& fname){
+    return fileOpen(fname, QFileInfo(fname).suffix());
+}
+
+/**
+* file open.
+*/
 bool MainWindow::fileOpen(const QString& fname, const QString& filter){
     fileName = fname;
     this->filter = filter;
 
     if (filter == "sgf"){
         go::sgf sgf;
-qDebug() << "read";
         sgf.read(fname, codec);
-qDebug() << "setData";
         ui->boardWidget->setData(sgf);
     }
     else if (filter == "ugf"){
@@ -1183,9 +1191,7 @@ qDebug() << "setData";
 
     ui->boardWidget->setDirty(false);
 
-qDebug() << "setTree";
     setTreeData();
-qDebug() << "setCaption";
     setCaption();
 
     ui->actionReload->setEnabled(true);
