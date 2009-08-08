@@ -339,11 +339,14 @@ go::node* BoardWidget::findNodeFromMoveNumber(int moveNumber){
 /**
 * public slot
 */
-void BoardWidget::addNode(go::node* parent, go::node* node){
+void BoardWidget::addNode(go::node* parent, go::node* node, bool select){
     parent->childNodes.push_back(node);
     node->parent = parent;
     setDirty(true);
-    emit nodeAdded(parent, node);
+    emit nodeAdded(parent, node, select);
+
+    if (select)
+        setCurrentNode(node);
 }
 
 /**
@@ -925,7 +928,6 @@ void BoardWidget::addStone(int sgfX, int sgfY, int boardX, int boardY){
         n = go::createWhiteNode(currentNode, sgfX, sgfY);
 
     addNode(currentNode, n);
-    setCurrentNode(n);
 }
 
 /**
@@ -936,15 +938,15 @@ void BoardWidget::addMark(int sgfX, int sgfY, int boardX, int boardY){
             return;
 
         case eAddBlack:
-            addStone(currentNode->stones, go::point(sgfX, sgfY), go::point(boardX, boardY), go::black);
+            addStone(currentNode, go::point(sgfX, sgfY), go::point(boardX, boardY), go::black);
             break;
 
         case eAddWhite:
-            addStone(currentNode->stones, go::point(sgfX, sgfY), go::point(boardX, boardY), go::white);
+            addStone(currentNode, go::point(sgfX, sgfY), go::point(boardX, boardY), go::white);
             break;
 
         case eAddEmpty:
-            addStone(currentNode->stones, go::point(sgfX, sgfY), go::point(boardX, boardY), go::empty);
+            addStone(currentNode, go::point(sgfX, sgfY), go::point(boardX, boardY), go::empty);
             break;
 
         case eLabelMark:{
@@ -954,6 +956,7 @@ void BoardWidget::addMark(int sgfX, int sgfY, int boardX, int boardY){
             removeMark(currentNode->squares, p);
             removeMark(currentNode->triangles, p);
             addCharacter(currentNode->characters, p);
+            modifyNode(currentNode);
             break;
         }
 
@@ -964,6 +967,7 @@ void BoardWidget::addMark(int sgfX, int sgfY, int boardX, int boardY){
             removeMark(currentNode->squares, mark.p);
             removeMark(currentNode->triangles, mark.p);
             removeMark(currentNode->characters, mark.p);
+            modifyNode(currentNode);
             break;
         }
 
@@ -974,6 +978,7 @@ void BoardWidget::addMark(int sgfX, int sgfY, int boardX, int boardY){
             removeMark(currentNode->squares, mark.p);
             removeMark(currentNode->triangles, mark.p);
             removeMark(currentNode->characters, mark.p);
+            modifyNode(currentNode);
             break;
         }
 
@@ -984,6 +989,7 @@ void BoardWidget::addMark(int sgfX, int sgfY, int boardX, int boardY){
             addMark(currentNode->squares, mark);
             removeMark(currentNode->triangles, mark.p);
             removeMark(currentNode->characters, mark.p);
+            modifyNode(currentNode);
             break;
         }
 
@@ -994,6 +1000,7 @@ void BoardWidget::addMark(int sgfX, int sgfY, int boardX, int boardY){
             removeMark(currentNode->squares, mark.p);
             addMark(currentNode->triangles, mark);
             removeMark(currentNode->characters, mark.p);
+            modifyNode(currentNode);
             break;
         }
 
@@ -1003,14 +1010,13 @@ void BoardWidget::addMark(int sgfX, int sgfY, int boardX, int boardY){
             removeMark(currentNode->crosses, p);
             removeMark(currentNode->squares, p);
             removeMark(currentNode->triangles, p);
+            modifyNode(currentNode);
             break;
         }
 
         default:
             return;
     };
-
-    modifyNode(currentNode);
 }
 
 void BoardWidget::addMark(go::markList& markList, const go::mark& mark){
@@ -1064,12 +1070,13 @@ void BoardWidget::removeMark(go::markList& markList, const go::point& p){
     }
 }
 
-void BoardWidget::addStone(go::stoneList& stoneList, const go::point& sp, const go::point& bp, go::color c){
-    go::stoneList::iterator iter = stoneList.begin();
-    while (iter != stoneList.end()){
+void BoardWidget::addStone(go::node* node, const go::point& sp, const go::point& bp, go::color c){
+    go::node* stoneNode = node->isStone() ? new go::node(node) : node;
+    go::stoneList::iterator iter = stoneNode->stones.begin();
+    while (iter != stoneNode->stones.end()){
         if (iter->p == sp) {
             go::stone stone = *iter;
-            iter = stoneList.erase(iter);
+            iter = stoneNode->stones.erase(iter);
             board[bp.y][bp.x].color = go::empty;
             board[bp.y][bp.x].number = 0;
 
@@ -1080,9 +1087,26 @@ void BoardWidget::addStone(go::stoneList& stoneList, const go::point& sp, const 
         }
         ++iter;
     }
-    currentNode->stones.push_back( go::stone(sp, c) );
+
+    stoneNode->stones.push_back( go::stone(sp, c) );
     board[bp.y][bp.x].color = c;
     board[bp.y][bp.x].number = 0;
+
+    if (stoneNode == node)
+        modifyNode(node);
+    else{
+        stoneNode->childNodes += node->childNodes;
+        node->childNodes.erase(node->childNodes.begin(), node->childNodes.end());
+
+        go::nodeList::iterator iter = stoneNode->childNodes.begin();
+        while (iter != stoneNode->childNodes.end()){
+            (*iter)->parent = stoneNode;
+            ++iter;
+        }
+
+        addNode(node, stoneNode);
+    }
+
 }
 
 QString BoardWidget::getXString(int x) const{

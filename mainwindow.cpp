@@ -808,7 +808,7 @@ void MainWindow::on_actionShowBranchMoves_triggered(){
 * View -> Branch Mode
 */
 void MainWindow::on_actionBranchMode_triggered(){
-    branchMode = ui->actionShowBranchMoves->isChecked();
+    branchMode = ui->actionBranchMode->isChecked();
 
     setTreeData();
 }
@@ -1003,7 +1003,7 @@ void MainWindow::on_actionAboutQT_triggered(){
 * Slot
 * new node was created by BoardWidget.
 */
-void MainWindow::on_boardWidget_nodeAdded(go::node* /*parent*/, go::node* node){
+void MainWindow::on_boardWidget_nodeAdded(go::node* /*parent*/, go::node* node, bool /*select*/){
     addTreeWidget(node, true);
     setCaption();
 }
@@ -1306,7 +1306,8 @@ QTreeWidgetItem* MainWindow::addTreeWidget(go::node* node, bool needRemake){
     }
     else{
         if (newWidget){
-            parentWidget2->addChild(newWidget);
+            int index = parentWidget2->indexOfChild(parentWidget);
+            parentWidget2->insertChild(index+1, newWidget);
             if (needRemake)
                 remakeTreeWidget(parentWidget2);
         }
