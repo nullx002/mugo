@@ -79,13 +79,13 @@ public:
     QString getXYString(int x, int y) const;
 
 public slots:
-    void addNode(go::node* parent, go::node* node);
+    void addNode(go::node* parent, go::node* node, bool select=true);
     void deleteNode(go::node* node);
     void modifyNode(go::node* node, bool recreateBoardBuffer=false);
     void setCurrentNode(go::node* node=NULL);
 
 signals:
-    void nodeAdded(go::node* parent, go::node* node);
+    void nodeAdded(go::node* parent, go::node* node, bool select=false);
     void nodeDeleted(go::node* node);
     void nodeModified(go::node* node);
     void currentNodeChanged(go::node* node);
@@ -124,7 +124,7 @@ protected:
     void addMark(go::markList& markList, const go::mark& mark);
     void addCharacter(go::markList& markList, const go::point& p);
     void removeMark(go::markList& markList, const go::point& p);
-    void addStone(go::stoneList& stoneList, const go::point& sgfP, const go::point& boardP, go::color color);
+    void addStone(go::node* node, const go::point& sgfP, const go::point& boardP, go::color color);
     void rotateSgf(go::node* node);
     void rotateStoneSgf(go::stoneList& stoneList);
     void rotateMarkSgf(go::markList& markList);

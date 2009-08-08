@@ -189,7 +189,7 @@ private slots:
     void on_actionAboutQT_triggered();
 
     // Board widget
-    void on_boardWidget_nodeAdded(go::node* parent, go::node* node);
+    void on_boardWidget_nodeAdded(go::node* parent, go::node* node, bool select);
     void on_boardWidget_nodeDeleted(go::node* node);
     void on_boardWidget_nodeModified(go::node* node);
     void on_boardWidget_currentNodeChanged(go::node* node);

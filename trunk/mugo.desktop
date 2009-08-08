@@ -7,7 +7,7 @@ GenericName=Go
 Comment=mugo
 Exec=mugo
 Icon=/usr/share/mugo/pics/mugo.png
-MimeType=text/sfg;Application
+MimeType=text/plain;text/sfg;Application
 Terminal=false
 Categories=Qt;KDE;Game;BoardGame;
 
