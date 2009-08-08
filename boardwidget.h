@@ -32,11 +32,9 @@ public:
     virtual ~BoardWidget();
 
     // draw
-    void paint(QPaintDevice* paintDevice);
-
-    // mouse event
-    void onLButtonDown(QMouseEvent* e);
-    void onRButtonDown(QMouseEvent* e);
+    void repaintBoard(bool board=true, bool stones=true);
+    void paintBoard(QPaintDevice* pd);
+    void paintStones(QPaintDevice* pd);
 
     // set/get data
     void getData(go::fileBase& data);
@@ -55,12 +53,12 @@ public:
 
     // set option
     void setEditMode(eEditMode editMode){ this->editMode = editMode; }
-    void setShowMoveNumber(bool visible){ showMoveNumber = visible; repaint(); }
-    void setShowMoveNumber(int number){ showMoveNumberCount = number; repaint(); }
-    void setShowCoordinates(bool visible){ showCoordinates = visible; repaint(); }
-    void setShowCoordinatesWithI(bool withI){ showCoordinatesI = withI; repaint(); }
-    void setShowMarker(bool visible){ showMarker = visible; repaint(); }
-    void setShowBranchMoves(bool visible){ showBranchMoves = visible; repaint(); }
+    void setShowMoveNumber(bool visible){ showMoveNumber = visible; repaintBoard(); }
+    void setShowMoveNumber(int number){ showMoveNumberCount = number; repaintBoard(); }
+    void setShowCoordinates(bool visible){ showCoordinates = visible; repaintBoard(); }
+    void setShowCoordinatesWithI(bool withI){ showCoordinatesI = withI; repaintBoard(); }
+    void setShowMarker(bool visible){ showMarker = visible; repaintBoard(); }
+    void setShowBranchMoves(bool visible){ showBranchMoves = visible; repaintBoard(); }
     void setAnnotation(int annotation){ currentNode->annotation = (go::node::eAnnotation)annotation; modifyNode(currentNode); }
     void setBoardSize(int xsize, int ysize);
     void setMoveToClicked(bool moveMode = true){ moveToClicked = moveMode; }
@@ -95,7 +93,13 @@ protected:
     virtual void changeEvent(QEvent* e);
     virtual void paintEvent(QPaintEvent* e);
     virtual void mouseReleaseEvent(QMouseEvent* e);
+    virtual void mouseMoveEvent(QMouseEvent* e);
     virtual void wheelEvent(QWheelEvent* e);
+    virtual void resizeEvent( QResizeEvent* e);
+
+    // mouse event
+    void onLButtonDown(QMouseEvent* e);
+    void onRButtonDown(QMouseEvent* e);
 
     // draw
     void drawBoard(QPainter& p);
@@ -106,6 +110,7 @@ protected:
     void drawMark(QPainter& p, go::markList::iterator first, go::markList::iterator last);
     void drawTerritory(QPainter& p, go::markList::iterator first, go::markList::iterator last);
     void drawCurrentMark(QPainter& p, go::node* node);
+    void drawImage(QPainter& p, int x, int y, const QImage& image);
     void eraseBackground(QPainter& p, int x, int y);
     void getStartPosition(QList<int>& star, int size);
 
@@ -165,9 +170,10 @@ private:
     QString stoneSoundPath;
 
     // draw object
-    QImage black1, black2;
-    QImage white1, white2;
-    QImage boardImage1, boardImage2;
+    QPixmap offscreenBuffer1, offscreenBuffer2, offscreenBuffer3;
+    QImage  black1, black2;
+    QImage  white1, white2;
+    QImage  boardImage1, boardImage2;
 
     int width_;
     int height_;
