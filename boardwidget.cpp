@@ -3,6 +3,7 @@
 #include <QMouseEvent>
 #include <QSound>
 #include <QList>
+#include <math.h>
 #include "boardwidget.h"
 #include "mainwindow.h"
 #include "ui_boardwidget.h"
@@ -36,7 +37,6 @@ BoardWidget::BoardWidget(QWidget *parent) :
 //    mediaObject = new Phonon::MediaObject(this);
 
     setCurrentNode(&goData.root);
-    setMouseTracking(true);
 }
 
 BoardWidget::~BoardWidget()
@@ -86,8 +86,8 @@ void BoardWidget::mouseMoveEvent(QMouseEvent* e){
     if (editMode != this->eAlternateMove)
         return;
 
-    int bx = (e->x() - xlines[0] + boxSize / 2) / boxSize;
-    int by = (e->y() - ylines[0] + boxSize / 2) / boxSize;
+    int bx = floor( double(e->x() - xlines[0] + boxSize / 2) / boxSize );
+    int by = floor( double(e->y() - ylines[0] + boxSize / 2) / boxSize );
 
     offscreenBuffer3 = offscreenBuffer2.copy();
     QPainter p(&offscreenBuffer3);
@@ -526,14 +526,14 @@ void BoardWidget::createBoardBuffer(){
     for (int i=0; i<ysize; ++i)
         board[i].resize(xsize);
 
-    int moveNumber = 1;
+    currentMoveNumber = 0;
     go::nodeList::iterator iter = nodeList.begin();
     while (iter != nodeList.end()){
         if ((*iter)->moveNumber > 0)
-            moveNumber = (*iter)->moveNumber;
-        putStone(*iter, moveNumber);
-        if ((*iter)->isStone())
-            ++moveNumber;
+            currentMoveNumber = (*iter)->moveNumber;
+        else if ((*iter)->isStone())
+            ++currentMoveNumber;
+        putStone(*iter, currentMoveNumber);
 
         if (*iter == currentNode)
             break;
@@ -893,7 +893,6 @@ void BoardWidget::putStone(go::node* node, int moveNumber){
             board[boardY][boardX].color  = node->isBlack() ? go::black : go::white;
             board[boardY][boardX].number = moveNumber;
             board[boardY][boardX].node   = node;
-            currentMoveNumber  = moveNumber;
             removeDeadStones(boardX, boardY);
         }
     }
@@ -1264,6 +1263,9 @@ QString  BoardWidget::getYString(int y) const{
 }
 
 QString  BoardWidget::getXYString(int x, int y) const{
+    if (x < 0 || x >= goData.root.xsize || y < 0 || y >= goData.root.ysize)
+        return "";
+
     QString s = getXString(x);
     s.append( getYString(y) );
     return s;
