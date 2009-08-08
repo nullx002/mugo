@@ -53,7 +53,7 @@ MainWindow::MainWindow(QWidget *parent)
     recentSeparator = ui->menu_File->insertSeparator(ui->actionExit);
     updateRecentFileActions();
 
-    // toolbar
+    // tool bar
     ui->optionToolBar->insertAction( ui->actionShowMoveNumber, ui->menuMoveNumber->menuAction() );
     ui->optionToolBar->removeAction( ui->actionShowMoveNumber );
     ui->menuMoveNumber->menuAction()->setCheckable(true);
@@ -64,6 +64,18 @@ MainWindow::MainWindow(QWidget *parent)
     setShowMoveNumber(ui->actionNoMoveNumber, 0);
     setEditMode(ui->actionAlternateMove, BoardWidget::eAlternateMove);
 
+    // status bar
+    moveNumberLabel = new QLabel;
+    moveNumberLabel->setFrameStyle(QFrame::StyledPanel);
+    moveNumberLabel->setToolTip(tr("Move Number"));
+    ui->statusBar->addPermanentWidget(moveNumberLabel, 0);
+
+    capturedLabel = new QLabel;
+    capturedLabel->setFrameStyle(QFrame::StyledPanel);
+    capturedLabel->setToolTip(tr("Captured"));
+    ui->statusBar->addPermanentWidget(capturedLabel, 0);
+
+    // command line
     if (qApp->argc() > 1)
         fileOpen(qApp->argv()[1]);
     else
@@ -1077,6 +1089,14 @@ void MainWindow::on_boardWidget_currentNodeChanged(go::node* node){
     setTreeWidget(node);
     ui->commentWidget->setPlainText(node->comment);
     setAnnotation(node->annotation);
+
+    int b, w;
+    ui->boardWidget->getCaptured(b, w);
+    capturedLabel->setText(tr("B:%1 W:%2").arg(b).arg(w));
+
+    int num = ui->boardWidget->getMoveNumber();
+    QString coord = ui->boardWidget->getXYString(node->getX(), node->getY());
+    moveNumberLabel->setText(tr("%1(%2)").arg(num).arg(coord));
 }
 
 /**

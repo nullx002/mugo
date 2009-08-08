@@ -2,6 +2,7 @@
 #define BOARDWIDGET_H
 
 #include <QtGui/QWidget>
+#include <QLabel>
 #include <QVector>
 #include <QList>
 //#include <Phonon/phonon>
@@ -50,7 +51,8 @@ public:
     go::node* getCurrentNode(){ return currentNode; }
     const go::nodeList& getCurrentNodeList() const{ return nodeList; }
 
-    void getCaptured(int& black, int& white){ black = capturedBlack; white = capturedWhite; }
+    void getCaptured(int& black, int& white) const{ black = capturedBlack; white = capturedWhite; }
+    int  getMoveNumber() const{ return currentMoveNumber; }
 
     // dirty flag
     bool isDirty() const{ return dirty; }

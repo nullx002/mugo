@@ -76,6 +76,8 @@ private:
     enum { MaxRecentFiles = 5 };
     QAction *recentFileActs[MaxRecentFiles];
     QAction *recentSeparator;
+    QLabel* moveNumberLabel;
+    QLabel* capturedLabel;
 
 private slots:
     // File menu
