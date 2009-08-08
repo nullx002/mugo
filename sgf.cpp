@@ -420,6 +420,13 @@ bool sgf::readStream(QString::iterator& first, QString::iterator last){
 }
 
 bool sgf::saveStream(QTextStream& stream){
+    nodeList::iterator iter = root.getChildNodes().begin();
+    if (codec){
+        while (iter != root.getChildNodes().end()){
+            (*iter)->setProperty("CA", QStringList(codec->name()));
+            ++iter;
+        }
+    }
     return writeNode(stream, root);
 }
 
@@ -568,11 +575,9 @@ go::node* sgf::get(const node& sgfNode, go::node* outNode) const{
             break;
 
         case eBranch:
-//            newNode = new go::branchNode(outNode.getChildNodes().empty() ? &outNode : outNode.getChildNodes().back());
             break;
 
         case eGameInformation:
-//            newNode = new go::informationNode(&outNode);
             sgfNode.get(*outNode);
             break;
 
