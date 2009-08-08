@@ -244,9 +244,10 @@ void BoardWidget::setBoardSize(int xsize, int ysize){
     clear();
     goData.root.xsize = xsize;
     goData.root.ysize = ysize;
+    createBoardBuffer();
     setCurrentNode();
 
-    repaintBoard();
+    repaintBoard(true, true);
 }
 
 void BoardWidget::rotateSgf(){
