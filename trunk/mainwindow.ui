@@ -204,6 +204,7 @@
     <property name="title">
      <string>Tool&amp;s</string>
     </property>
+    <addaction name="actionCountTerritory"/>
    </widget>
    <widget class="QMenu" name="menu_Options">
     <property name="title">
@@ -1241,6 +1242,11 @@
   <action name="actionCustomBoardSize">
    <property name="text">
     <string>Custom Board Size</string>
+   </property>
+  </action>
+  <action name="actionCountTerritory">
+   <property name="text">
+    <string>Count Territory</string>
    </property>
   </action>
  </widget>

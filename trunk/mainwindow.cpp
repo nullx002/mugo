@@ -159,8 +159,12 @@ void MainWindow::on_actionSaveBoardAsPicture_triggered()
     int h = ui->boardWidget->height();
     w = h = std::min(w, h);
     QImage image(w, h, QImage::Format_RGB32);
-    ui->boardWidget->paint(&image);
+    ui->boardWidget->paintBoard(&image);
+    ui->boardWidget->paintStones(&image);
     image.save(fname, format[n]);
+
+    // change image coordinate to display
+    ui->boardWidget->repaintBoard();
 }
 
 /**
@@ -937,6 +941,13 @@ void MainWindow::on_actionOptionToolbar_triggered()
         ui->optionToolBar->show();
     else
         ui->optionToolBar->hide();
+}
+
+/**
+* Slot
+* Tools -> Count Territoy
+*/
+void MainWindow::on_actionCountTerritory_triggered(){
 }
 
 /**

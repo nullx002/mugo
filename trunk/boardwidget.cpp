@@ -36,6 +36,7 @@ BoardWidget::BoardWidget(QWidget *parent) :
 //    mediaObject = new Phonon::MediaObject(this);
 
     setCurrentNode(&goData.root);
+    setMouseTracking(true);
 }
 
 BoardWidget::~BoardWidget()
@@ -61,7 +62,9 @@ void BoardWidget::changeEvent(QEvent *e)
 */
 void BoardWidget::paintEvent(QPaintEvent* e){
     QWidget::paintEvent(e);
-    paint(this);
+
+    QPainter p(this);
+    p.drawPixmap(0, 0, width(), height(), offscreenBuffer3);
 }
 
 /**
@@ -73,6 +76,28 @@ void BoardWidget::mouseReleaseEvent(QMouseEvent* e){
         onLButtonDown(e);
     else if (e->button() & Qt::RightButton)
         onRButtonDown(e);
+}
+
+/**
+*/
+void BoardWidget::mouseMoveEvent(QMouseEvent* e){
+    QWidget::mouseMoveEvent(e);
+
+    if (editMode != this->eAlternateMove)
+        return;
+
+    int bx = (e->x() - xlines[0] + boxSize / 2) / boxSize;
+    int by = (e->y() - ylines[0] + boxSize / 2) / boxSize;
+
+    offscreenBuffer3 = offscreenBuffer2.copy();
+    QPainter p(&offscreenBuffer3);
+
+    if (! (bx < 0 || bx >= xlines.size() || by < 0 || by >= ylines.size() || board[by][bx].color != go::empty) ){
+        p.setOpacity(0.5);
+        drawImage(p, bx, by, isBlack ? black2 : white2);
+    }
+
+    repaint();
 }
 
 /**
@@ -90,6 +115,13 @@ void BoardWidget::wheelEvent(QWheelEvent* e){
         if (iter != nodeList.end() && ++iter != nodeList.end())
             setCurrentNode( *iter );
     }
+}
+
+void BoardWidget::resizeEvent(QResizeEvent* e){
+    QWidget::resizeEvent(e);
+
+    offscreenBuffer1 = QPixmap(e->size());
+    repaintBoard();
 }
 
 /**
@@ -119,12 +151,31 @@ void BoardWidget::onRButtonDown(QMouseEvent*){
 
 /**
 */
-void BoardWidget::paint(QPaintDevice* paintDevice){
-    QPainter p(paintDevice);
+void BoardWidget::repaintBoard(bool board, bool stones){
+    if (offscreenBuffer1.isNull())
+        return;
+
+    if (board)
+        paintBoard(&offscreenBuffer1);
+
+    if (stones){
+        offscreenBuffer2 = offscreenBuffer1.copy();
+        paintStones(&offscreenBuffer2);
+    }
+
+    offscreenBuffer3 = offscreenBuffer2.copy();
+
+    repaint();
+}
+
+/**
+*/
+void BoardWidget::paintBoard(QPaintDevice* pd){
+    QPainter p(pd);
     p.setRenderHints(QPainter::Antialiasing|QPainter::TextAntialiasing|QPainter::SmoothPixmapTransform);
 
-    width_  = paintDevice->width();
-    height_ = paintDevice->height();
+    width_  = pd->width();
+    height_ = pd->height();
 
     QFont font;
     font.setPointSize(8);
@@ -138,6 +189,25 @@ void BoardWidget::paint(QPaintDevice* paintDevice){
 
     drawBoard(p);
     drawCoordinates(p);
+}
+
+/**
+*/
+void BoardWidget::paintStones(QPaintDevice* pd){
+    QPainter p(pd);
+    p.setRenderHints(QPainter::Antialiasing|QPainter::TextAntialiasing|QPainter::SmoothPixmapTransform);
+
+    width_  = pd->width();
+    height_ = pd->height();
+
+    QFont font;
+    font.setPointSize(8);
+    font.setStyleHint(QFont::SansSerif);
+    font.setWeight(QFont::Normal);
+
+    p.setFont(font);
+    p.setPen(Qt::black);
+
     drawStones(p);
 }
 
@@ -163,28 +233,28 @@ void BoardWidget::setBoardSize(int xsize, int ysize){
     nodeList.clear();
     setCurrentNode();
 
-    repaint();
+    repaintBoard();
 }
 
 void BoardWidget::rotateSgf(){
     rotateSgf(&goData.root);
     createBoardBuffer();
     setDirty(true);
-    repaint();
+    repaintBoard();
 }
 
 void BoardWidget::flipSgfHorizontally(){
     flipSgf(&goData.root, goData.root.xsize, 0);
     createBoardBuffer();
     setDirty(true);
-    repaint();
+    repaintBoard();
 }
 
 void BoardWidget::flipSgfVertically(){
     flipSgf(&goData.root, 0, goData.root.ysize);
     createBoardBuffer();
     setDirty(true);
-    repaint();
+    repaintBoard();
 }
 
 void BoardWidget::rotateSgf(go::node* node){
@@ -284,7 +354,7 @@ int  BoardWidget::rotateBoard(){
         rotateBoard_ = 0;
 
     createBoardBuffer();
-    repaint();
+    repaintBoard();
 
     return rotateBoard_;
 }
@@ -293,14 +363,14 @@ void BoardWidget::flipBoardHorizontally(bool flip){
     flipBoardHorizontally_ = flip;
 
     createBoardBuffer();
-    repaint();
+    repaintBoard();
 }
 
 void BoardWidget::flipBoardVertically(bool flip){
     flipBoardVertically_ = flip;
 
     createBoardBuffer();
-    repaint();
+    repaintBoard();
 }
 
 void BoardWidget::resetBoard(){
@@ -309,7 +379,7 @@ void BoardWidget::resetBoard(){
     flipBoardVertically_ = false;
 
     createBoardBuffer();
-    repaint();
+    repaintBoard();
 }
 
 /**
@@ -379,7 +449,7 @@ void BoardWidget::deleteNode(go::node* node){
 void BoardWidget::modifyNode(go::node* node, bool recreateBoardBuffer){
     if (recreateBoardBuffer)
         createBoardBuffer();
-    repaint();
+    repaintBoard(false);
     setDirty(true);
     emit nodeModified(node);
 }
@@ -404,7 +474,7 @@ void BoardWidget::setCurrentNode(go::node* node){
     if (playSound && node->isStone())
         QSound::play(stoneSoundPath);
 
-    repaint();
+    repaintBoard(false);
     emit currentNodeChanged(currentNode);
 }
 
@@ -619,9 +689,9 @@ void BoardWidget::drawStones2(QPainter& p){
 
             // draw stone
             if (board[y][x].black())
-                p.drawImage(xlines[x]-boxSize/2, ylines[y]-boxSize/2, black2);
+                drawImage(p, x, y, black2);
             else if (board[y][x].white())
-                p.drawImage(xlines[x]-boxSize/2, ylines[y]-boxSize/2, white2);
+                drawImage(p, x, y, white2);
 
             // draw move number
             if (showMoveNumber == false || showMoveNumberCount == 0 || board[y][x].number == 0 || (showMoveNumberCount != -1 && currentMoveNumber - showMoveNumberCount + 1 > board[y][x].number))
@@ -748,6 +818,12 @@ void BoardWidget::drawCurrentMark(QPainter& p, go::node* node){
     }
 
     p.restore();
+}
+
+/**
+*/
+void BoardWidget::drawImage(QPainter& p, int x, int y, const QImage& image){
+    p.drawImage(xlines[x]-boxSize/2, ylines[y]-boxSize/2, image);
 }
 
 /**
