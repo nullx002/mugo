@@ -31,6 +31,7 @@ protected:
 private:
     bool fileNew();
     bool fileOpen();
+    bool fileOpen(const QString& fname);
     bool fileOpen(const QString& fname, const QString& filter);
     bool fileSave();
     bool fileSaveAs();
