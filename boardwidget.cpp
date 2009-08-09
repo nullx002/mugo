@@ -241,6 +241,7 @@ void BoardWidget::getData(go::fileBase& data){
 void BoardWidget::setData(const go::fileBase& data){
     clear();
     data.get(goData);
+    nodeList.clear();
     setCurrentNode();
 }
 
@@ -484,6 +485,9 @@ void BoardWidget::setCurrentNode(go::node* node){
     if (node == NULL)
         node = &goData.root;
 
+    qDebug() << "---------------";
+    qDebug() << (bool)(currentNode == node);
+    qDebug() << (bool)(!nodeList.empty());
     if (currentNode == node && !nodeList.empty())
         return;
 
