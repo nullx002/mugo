@@ -545,6 +545,26 @@ void BoardWidget::createBoardBuffer(){
 
         ++iter;
     }
+
+    go::markList::iterator iter2 = currentNode->blackTerritories.begin();
+    while (iter2 != currentNode->blackTerritories.end()){
+        int boardX, boardY;
+        sgfToBoardCoordinate(iter2->p.x, iter2->p.y, boardX, boardY);
+        if (boardX >= 0 && boardX < xsize && boardY >= 0 && boardY < ysize){
+            board[boardY][boardX].color |= go::blackTerritory;
+        }
+        ++iter2;
+    }
+
+    iter2 = currentNode->whiteTerritories.begin();
+    while (iter2 != currentNode->whiteTerritories.end()){
+        int boardX, boardY;
+        sgfToBoardCoordinate(iter2->p.x, iter2->p.y, boardX, boardY);
+        if (boardX >= 0 && boardX < xsize && boardY >= 0 && boardY < ysize){
+            board[boardY][boardX].color |= go::whiteTerritory;
+        }
+        ++iter2;
+    }
 }
 
 /**
@@ -811,7 +831,7 @@ void BoardWidget::drawTerritories(QPainter& p){
             int bx = xlines[x];
             int by = ylines[y];
 
-            QColor color = board[y][x].whiteTerritory() ? QColor(255, 255, 255, 160) : QColor(0, 0, 0, 110);
+            QColor color = board[y][x].whiteTerritory() ? QColor(255, 255, 255, 110) : QColor(0, 0, 0, 80);
             p.fillRect(bx-boxSize/2, by-boxSize/2, boxSize, boxSize, color);
             p.setPen( board[y][x].whiteTerritory() ? Qt::white : Qt::black );
             p.drawText(bx-boxSize, by-boxSize, boxSize*2, boxSize*2, Qt::AlignCenter, "■");
@@ -913,26 +933,6 @@ void BoardWidget::putStone(go::node* node, int moveNumber){
             removeDeadStones(boardX, boardY);
         }
         ++iter;
-    }
-
-    go::markList::iterator iter2 = node->blackTerritories.begin();
-    while (iter2 != node->blackTerritories.end()){
-        int boardX, boardY;
-        sgfToBoardCoordinate(iter2->p.x, iter2->p.y, boardX, boardY);
-        if (boardX >= 0 && boardX < xsize && boardY >= 0 && boardY < ysize){
-            board[boardY][boardX].color |= go::blackTerritory;
-        }
-        ++iter2;
-    }
-
-    iter2 = node->whiteTerritories.begin();
-    while (iter2 != node->whiteTerritories.end()){
-        int boardX, boardY;
-        sgfToBoardCoordinate(iter2->p.x, iter2->p.y, boardX, boardY);
-        if (boardX >= 0 && boardX < xsize && boardY >= 0 && boardY < ysize){
-            board[boardY][boardX].color |= go::whiteTerritory;
-        }
-        ++iter2;
     }
 }
 
