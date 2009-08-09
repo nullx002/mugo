@@ -15,14 +15,12 @@ public:
     ~GameInformationDialog();
 
 protected:
-    void changeEvent(QEvent *e);
+    virtual void changeEvent(QEvent* e);
+    virtual void accept();
 
 private:
     Ui::GameInformationDialog *m_ui;
     go::informationNode* gameInfo;
-
-private slots:
-    void onAccepted();
 };
 
 #endif // GAMEINFORMATIONDIALOG_H

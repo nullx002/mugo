@@ -2,6 +2,7 @@
 #define COUNTTERRITORYDIALOG_H
 
 #include <QtGui/QDialog>
+#include <QDebug>
 
 namespace Ui {
     class CountTerritoryDialog;
@@ -13,8 +14,14 @@ public:
     CountTerritoryDialog(QWidget *parent = 0);
     ~CountTerritoryDialog();
 
+    void setScoreText(const QString& s);
+
+signals:
+    void dialogClosed();
+
 protected:
-    void changeEvent(QEvent *e);
+    virtual void changeEvent(QEvent *e);
+    virtual void done( int r );
 
 private:
     Ui::CountTerritoryDialog *m_ui;

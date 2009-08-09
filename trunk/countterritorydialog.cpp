@@ -24,3 +24,13 @@ void CountTerritoryDialog::changeEvent(QEvent *e)
         break;
     }
 }
+
+void CountTerritoryDialog::done(int r){
+    QDialog::done(r);
+    emit dialogClosed();
+}
+
+void CountTerritoryDialog::setScoreText(const QString& text)
+{
+    m_ui->scoreTextEdit->setPlainText(text);
+}

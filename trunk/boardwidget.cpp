@@ -140,8 +140,12 @@ void BoardWidget::onLButtonDown(QMouseEvent* e){
         setCurrentNode( board[boardY][boardX].node );
     else if (editMode == eAlternateMove)
         addStone(sgfX, sgfY, boardX, boardY);
-    else if (editMode == eCountTerritory)
+    else if (editMode == eCountTerritory){
         addTerritory(boardX, boardY);
+        int alive_b=0, alive_w=0, dead_b=0, dead_w=0, bt=0, wt=0;
+        getCountTerritory(alive_b, alive_w, dead_b, dead_w, bt, wt);
+        emit updateTerritory(alive_b, alive_w, dead_b, dead_w, capturedBlack, capturedWhite, bt, wt, goData.root.komi);
+    }
     else
         addMark(sgfX, sgfY, boardX, boardY);
 }
@@ -1334,6 +1338,9 @@ void BoardWidget::setCountTerritoryMode(bool countMode){
     if (countMode){
         editMode = eCountTerritory;
         countTerritory();
+        int alive_b=0, alive_w=0, dead_b=0, dead_w=0, bt=0, wt=0;
+        getCountTerritory(alive_b, alive_w, dead_b, dead_w, bt, wt);
+        emit updateTerritory(alive_b, alive_w, dead_b, dead_w, capturedBlack, capturedWhite, bt, wt, goData.root.komi);
     }
     else{
         editMode = eAlternateMove;
@@ -1445,4 +1452,25 @@ void BoardWidget::unsetTerritory(int x, int y){
         unsetTerritory(x-1, y);
     if (x < xsize-1)
         unsetTerritory(x+1, y);
+}
+
+void BoardWidget::getCountTerritory(int& alive_b, int& alive_w, int& dead_b, int& dead_w, int& bt, int& wt){
+    for (int y=0; y<ysize; ++y){
+        for (int x=0; x<xsize; ++x){
+            if (board[y][x].blackTerritory()){
+                ++bt;
+                if (board[y][x].white())
+                    ++dead_w;
+            }
+            else if (board[y][x].whiteTerritory()){
+                ++wt;
+                if (board[y][x].black())
+                    ++dead_b;
+            }
+            else if (board[y][x].black())
+                ++alive_b;
+            else if (board[y][x].white())
+                ++alive_w;
+        }
+    }
 }

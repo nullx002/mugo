@@ -95,6 +95,7 @@ signals:
     void nodeDeleted(go::node* node);
     void nodeModified(go::node* node);
     void currentNodeChanged(go::node* node);
+    void updateTerritory(int alive_b, int alive_w, int dead_b, int dead_w, int capturedBlack, int capturedWhite, int blackTerritory, int whiteTerritory, double komi);
 
 protected:
     // event
@@ -138,6 +139,7 @@ protected:
     void addTerritory(int x, int y);
     void setTerritory(int x, int y, int c);
     void unsetTerritory(int x, int y);
+    void getCountTerritory(int& alive_b, int& alive_w, int& dead_b, int& dead_w, int& bt, int& wt);
 
     void createNodeList();
     void createBoardBuffer();

@@ -9,8 +9,6 @@ GameInformationDialog::GameInformationDialog(QWidget *parent, go::informationNod
 {
     m_ui->setupUi(this);
 
-    connect(this, SIGNAL(accepted()), this, SLOT(onAccepted()));
-
     // white player
     m_ui->whitePlayer->setText( gameInfo->whitePlayer );
     m_ui->whiteRank->setText( gameInfo->whiteRank);
@@ -62,8 +60,10 @@ void GameInformationDialog::changeEvent(QEvent *e)
     }
 }
 
-void GameInformationDialog::onAccepted()
+void GameInformationDialog::accept()
 {
+    QDialog::accept();
+
     // white player
     gameInfo->whitePlayer = m_ui->whitePlayer->text();
     gameInfo->whiteRank   = m_ui->whiteRank->text();

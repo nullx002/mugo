@@ -20,6 +20,7 @@ MainWindow::MainWindow(QWidget *parent)
     , annotation2(go::node::eNoAnnotation)
     , annotation3(go::node::eNoAnnotation)
     , branchMode(false)
+    , countTerritoryDialog(NULL)
 {
     ui->setupUi(this);
 
@@ -52,6 +53,10 @@ MainWindow::MainWindow(QWidget *parent)
     }
     recentSeparator = ui->menu_File->insertSeparator(ui->actionExit);
     updateRecentFileActions();
+
+    // window menu
+    ui->menu_Window->addAction( ui->commentDockWidget->toggleViewAction() );
+    ui->menu_Window->addAction( ui->branchDockWidget->toggleViewAction() );
 
     // tool bar
     ui->optionToolBar->insertAction( ui->actionShowMoveNumber, ui->menuMoveNumber->menuAction() );
@@ -890,28 +895,6 @@ void MainWindow::on_actionResetBoard_triggered(){
 
 /**
 * Slot
-* View -> Comment Window
-*/
-void MainWindow::on_actionCommentWindow_triggered(){
-    if (ui->actionCommentWindow->isChecked())
-        ui->commentDockWidget->show();
-    else
-        ui->commentDockWidget->hide();
-}
-
-/**
-* Slot
-* View -> Branch Window
-*/
-void MainWindow::on_actionBranchWindow_triggered(){
-    if (ui->actionBranchWindow->isChecked())
-        ui->branchDockWidget->show();
-    else
-        ui->branchDockWidget->hide();
-}
-
-/**
-* Slot
 * View -> Toolbars -> Main Toolbar
 */
 void MainWindow::on_actionMainToolbar_triggered(){
@@ -936,11 +919,11 @@ void MainWindow::on_actionEditToolbar_triggered(){
 * Slot
 * View -> Toolbars -> Traverse Toolbar
 */
-void MainWindow::on_actionTraverseToolbar_triggered(){
-    if (ui->actionTraverseToolbar->isChecked())
-        ui->traverseToolBar->show();
+void MainWindow::on_actionNavigationToolbar_triggered(){
+    if (ui->actionNavigationToolbar->isChecked())
+        ui->navigationToolBar->show();
     else
-        ui->traverseToolBar->hide();
+        ui->navigationToolBar->hide();
 }
 
 /**
@@ -960,6 +943,16 @@ void MainWindow::on_actionOptionToolbar_triggered()
 * Tools -> Count Territoy
 */
 void MainWindow::on_actionCountTerritory_triggered(){
+    if (ui->actionCountTerritory->isChecked()){
+        countTerritoryDialog = new CountTerritoryDialog(this);
+        connect(countTerritoryDialog, SIGNAL(dialogClosed()), this, SLOT(scoreDialogClosed()));
+        countTerritoryDialog->show();
+    }
+    else{
+        delete countTerritoryDialog;
+        countTerritoryDialog = NULL;
+    }
+
     ui->boardWidget->setCountTerritoryMode(ui->actionCountTerritory->isChecked());
 }
 
@@ -1127,6 +1120,33 @@ void MainWindow::on_branchWidget_currentItemChanged(QTreeWidgetItem* current, QT
 * Slot
 * comment dock widget was showed or hid.
 */
+void MainWindow::on_boardWidget_updateTerritory(int alive_b, int alive_w, int dead_b, int dead_w, int capturedBlack, int capturedWhite, int blackTerritory, int whiteTerritory, double komi){
+    double bscore = blackTerritory + dead_w + capturedWhite;
+    double wscore = whiteTerritory + dead_b + capturedBlack + komi;
+
+    QString b( tr("Black score = %1 (territories = %2 + captured = %3)").arg(bscore).arg(blackTerritory).arg(dead_w + capturedWhite) );
+    QString w;
+    if (komi != 0.0)
+        w = tr("White score = %1 (territories = %2 + captured = %3 + komi = %4)").arg(wscore).arg(whiteTerritory).arg(dead_b + capturedBlack).arg(komi);
+    else
+        w = tr("White score = %1 (territories = %2 + captured = %3)").arg(wscore).arg(whiteTerritory).arg(dead_b + capturedBlack);
+
+    QString result;
+    if (wscore > bscore)
+        result = QString(tr("W+%1")).arg(wscore - bscore);
+    else if (bscore > wscore)
+        result = QString(tr("B+%1")).arg(bscore - wscore);
+    else
+        result = tr("Draw");
+
+    QString s = b + "\n" + w + "\n" + result;
+    countTerritoryDialog->setScoreText(s);
+}
+
+/**
+* Slot
+* comment dock widget was showed or hid.
+*/
 void MainWindow::on_commentDockWidget_visibilityChanged(bool visible){
     ui->actionCommentWindow->setChecked(visible);
 }
@@ -1142,6 +1162,15 @@ void MainWindow::on_commentWidget_textChanged()
         return;
     currentNode->comment = ui->commentWidget->toPlainText();
     ui->boardWidget->modifyNode(currentNode);
+}
+
+/**
+* Slot
+* score dialog was closed
+*/
+void MainWindow::scoreDialogClosed(){
+    ui->actionCountTerritory->setChecked(false);
+    on_actionCountTerritory_triggered();
 }
 
 /**
