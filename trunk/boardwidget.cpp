@@ -967,9 +967,9 @@ void BoardWidget::removeDeadStones(int x, int y){
 bool BoardWidget::isDead(int* tmp, int c, int x, int y){
     if (tmp[y*xsize+x])
         return true;
-    else if (board[y][x].color == 0)
+    else if (board[y][x].empty())
         return false;
-    else if (board[y][x].color != c)
+    else if ((board[y][x].color & c) == 0)
         return true;
     tmp[y*xsize+x] = board[y][x].color;
 

@@ -20,7 +20,7 @@ public:
 
     struct stoneInfo{
         stoneInfo() : number(0), color(go::empty), node(NULL){}
-        bool empty() const{ return color == go::empty; }
+        bool empty() const{ return (color & (go::black | go::white)) == 0; }
         bool black() const{ return color & go::black; }
         bool white() const{ return color & go::white; }
         bool blackTerritory() const{ return color & go::blackTerritory; }
