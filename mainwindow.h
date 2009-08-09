@@ -5,6 +5,7 @@
 #include <QTreeWidgetItem>
 #include <QTextCodec>
 #include "boardwidget.h"
+#include "countterritorydialog.h"
 
 namespace Ui
 {
@@ -78,6 +79,7 @@ private:
     QAction *recentSeparator;
     QLabel* moveNumberLabel;
     QLabel* capturedLabel;
+    CountTerritoryDialog* countTerritoryDialog;
 
 private slots:
     // File menu
@@ -179,13 +181,11 @@ private slots:
     void on_actionFlipBoardHorizontally_triggered();
     void on_actionFlipBoardVertically_triggered();
     void on_actionResetBoard_triggered();
-    void on_actionBranchWindow_triggered();
-    void on_actionCommentWindow_triggered();
 
     // View menu -> Toolbars
     void on_actionMainToolbar_triggered();
     void on_actionEditToolbar_triggered();
-    void on_actionTraverseToolbar_triggered();
+    void on_actionNavigationToolbar_triggered();
     void on_actionOptionToolbar_triggered();
 
     // Option menu
@@ -204,6 +204,7 @@ private slots:
     void on_boardWidget_nodeDeleted(go::node* node);
     void on_boardWidget_nodeModified(go::node* node);
     void on_boardWidget_currentNodeChanged(go::node* node);
+    void on_boardWidget_updateTerritory(int alive_b, int alive_w, int dead_b, int dead_w, int capturedBlack, int capturedWhite, int blackTerritory, int whiteTerritory, double komi);
 
     // Branch widget
     void on_branchDockWidget_visibilityChanged(bool visible);
@@ -212,6 +213,9 @@ private slots:
     // Comment widget
     void on_commentDockWidget_visibilityChanged(bool visible);
     void on_commentWidget_textChanged();
+
+    // Score Dialog
+    void scoreDialogClosed();
 };
 
 #endif // MAINWINDOW_H
