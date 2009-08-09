@@ -71,12 +71,12 @@ MainWindow::MainWindow(QWidget *parent)
 
     // status bar
     moveNumberLabel = new QLabel;
-    moveNumberLabel->setFrameStyle(QFrame::StyledPanel);
+    moveNumberLabel->setFrameStyle(QFrame::Plain);
     moveNumberLabel->setToolTip(tr("Move Number"));
     ui->statusBar->addPermanentWidget(moveNumberLabel, 0);
 
     capturedLabel = new QLabel;
-    capturedLabel->setFrameStyle(QFrame::StyledPanel);
+    capturedLabel->setFrameStyle(QFrame::Plain);
     capturedLabel->setToolTip(tr("Captured"));
     ui->statusBar->addPermanentWidget(capturedLabel, 0);
 
@@ -1085,11 +1085,11 @@ void MainWindow::on_boardWidget_currentNodeChanged(go::node* node){
 
     int b, w;
     ui->boardWidget->getCaptured(b, w);
-    capturedLabel->setText(tr("B:%1 W:%2").arg(b).arg(w));
+    capturedLabel->setText(tr("Dead: Black %1 White %2").arg(b).arg(w));
 
     int num = ui->boardWidget->getMoveNumber();
     QString coord = ui->boardWidget->getXYString(node->getX(), node->getY());
-    moveNumberLabel->setText(tr("%1(%2)").arg(num).arg(coord));
+    moveNumberLabel->setText(tr("LastMove: %1(%2)").arg(num).arg(coord));
 }
 
 /**
@@ -1121,25 +1121,52 @@ void MainWindow::on_branchWidget_currentItemChanged(QTreeWidgetItem* current, QT
 * comment dock widget was showed or hid.
 */
 void MainWindow::on_boardWidget_updateTerritory(int alive_b, int alive_w, int dead_b, int dead_w, int capturedBlack, int capturedWhite, int blackTerritory, int whiteTerritory, double komi){
-    double bscore = blackTerritory + dead_w + capturedWhite;
-    double wscore = whiteTerritory + dead_b + capturedBlack + komi;
+    double bscorej = blackTerritory + dead_w + capturedWhite;
+    double wscorej = whiteTerritory + dead_b + capturedBlack + komi;
 
-    QString b( tr("Black score = %1 (territories = %2 + captured = %3)").arg(bscore).arg(blackTerritory).arg(dead_w + capturedWhite) );
-    QString w;
+    // japanese rule
+    QString bj( tr("Black: %1 = %2(territories) + %3(captured)").arg(bscorej).arg(blackTerritory).arg(dead_w + capturedWhite) );
+    QString wj;
     if (komi != 0.0)
-        w = tr("White score = %1 (territories = %2 + captured = %3 + komi = %4)").arg(wscore).arg(whiteTerritory).arg(dead_b + capturedBlack).arg(komi);
+        wj = tr("White: %1 = %2(territories) + %3(captured) + %4(komi)").arg(wscorej).arg(whiteTerritory).arg(dead_b + capturedBlack).arg(komi);
     else
-        w = tr("White score = %1 (territories = %2 + captured = %3)").arg(wscore).arg(whiteTerritory).arg(dead_b + capturedBlack);
+        wj = tr("White: %1 = %2(territories) + %3(captured)").arg(wscorej).arg(whiteTerritory).arg(dead_b + capturedBlack);
 
     QString result;
-    if (wscore > bscore)
-        result = QString(tr("W+%1")).arg(wscore - bscore);
-    else if (bscore > wscore)
-        result = QString(tr("B+%1")).arg(bscore - wscore);
+    if (wscorej > bscorej)
+        result = QString(tr("W+%1")).arg(wscorej - bscorej);
+    else if (bscorej > wscorej)
+        result = QString(tr("B+%1")).arg(bscorej - wscorej);
     else
         result = tr("Draw");
 
-    QString s = b + "\n" + w + "\n" + result;
+    QString s = tr("Japanese Rule") + ":\n" + wj + "\n" + bj + "\n" + result + "\n\n";
+
+
+    // chinese rule
+    double half = (blackTerritory + alive_b + whiteTerritory + alive_w) / 2.0;
+    double bscorec = blackTerritory + alive_b - komi / 2.0;
+    double wscorec = whiteTerritory + alive_w + komi / 2.0;
+
+    QString bc, wc;
+    if (komi > 0){
+        bc = tr("Black: %1 = %2(point) - %3(komi) / 2").arg(bscorec).arg(blackTerritory + alive_b).arg(komi);
+        wc = tr("White: %1 = %2(point) + %3(komi) / 2").arg(wscorec).arg(whiteTerritory + alive_w).arg(komi);
+    }
+    else{
+        bc = tr("Black: %1 = %2(point) + %3(komi) / 2").arg(bscorec).arg(blackTerritory + alive_b).arg(komi);
+        wc = tr("White: %1 = %2(point) - %3(komi) / 2").arg(wscorec).arg(whiteTerritory + alive_w).arg(komi);
+    }
+
+    if (wscorec > bscorec)
+        result = QString(tr("W+%1")).arg(wscorec - half);
+    else if (bscorej > wscorej)
+        result = QString(tr("B+%1")).arg(bscorec - half);
+    else
+        result = tr("Draw");
+
+    s += tr("Chinese Rule") + ":\n" + wc + "\n" + bc + "\n" + result;
+
     countTerritoryDialog->setScoreText(s);
 }
 
