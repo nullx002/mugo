@@ -58,6 +58,16 @@ MainWindow::MainWindow(QWidget *parent)
     ui->menu_Window->addAction( ui->commentDockWidget->toggleViewAction() );
     ui->menu_Window->addAction( ui->branchDockWidget->toggleViewAction() );
 
+    // language menu
+    QSettings settings(AUTHOR, APPNAME);
+    QString language = settings.value("language").toString();
+    if (language.isEmpty())
+        ui->actionLanguageSystemDefault->setChecked(true);
+    else if (language == "en")
+        ui->actionLanguageEnglish->setChecked(true);
+    else if (language == "ja_JP")
+        ui->actionLanguageJapanese->setChecked(true);
+
     // tool bar
     ui->optionToolBar->insertAction( ui->actionShowMoveNumber, ui->menuMoveNumber->menuAction() );
     ui->optionToolBar->removeAction( ui->actionShowMoveNumber );
@@ -71,12 +81,12 @@ MainWindow::MainWindow(QWidget *parent)
 
     // status bar
     moveNumberLabel = new QLabel;
-    moveNumberLabel->setFrameStyle(QFrame::Plain);
+    moveNumberLabel->setFrameStyle(QFrame::StyledPanel|QFrame::Plain);
     moveNumberLabel->setToolTip(tr("Move Number"));
     ui->statusBar->addPermanentWidget(moveNumberLabel, 0);
 
     capturedLabel = new QLabel;
-    capturedLabel->setFrameStyle(QFrame::Plain);
+    capturedLabel->setFrameStyle(QFrame::StyledPanel|QFrame::Plain);
     capturedLabel->setToolTip(tr("Captured"));
     ui->statusBar->addPermanentWidget(capturedLabel, 0);
 
@@ -1029,7 +1039,7 @@ void MainWindow::on_actionPlaySound_triggered(){
 * Options -> Language -> System Default
 */
 void MainWindow::on_actionLanguageSystemDefault_triggered(){
-    setLanguage( QString() );
+    setLanguage( QString(), ui->actionLanguageSystemDefault );
 }
 
 /**
@@ -1037,7 +1047,7 @@ void MainWindow::on_actionLanguageSystemDefault_triggered(){
 * Options -> Language -> English
 */
 void MainWindow::on_actionLanguageEnglish_triggered(){
-    setLanguage("en");
+    setLanguage("en", ui->actionLanguageEnglish);
 }
 
 /**
@@ -1045,7 +1055,7 @@ void MainWindow::on_actionLanguageEnglish_triggered(){
 * Options -> Language -> Japanese
 */
 void MainWindow::on_actionLanguageJapanese_triggered(){
-    setLanguage("ja_JP");
+    setLanguage("ja_JP", ui->actionLanguageJapanese);
 }
 
 /**
@@ -1728,7 +1738,18 @@ void MainWindow::updateRecentFileActions()
     recentSeparator->setVisible(numRecentFiles > 0);
 }
 
-void MainWindow::setLanguage(const QString& locale){
+void MainWindow::setLanguage(const QString& locale, QAction* act){
     QSettings settings(AUTHOR, APPNAME);
     settings.setValue("language", locale);
+
+    QAction* actions[] = {
+        ui->actionLanguageSystemDefault,
+        ui->actionLanguageEnglish,
+        ui->actionLanguageJapanese,
+    };
+    const int N = sizeof(actions) / sizeof(actions[0]);
+
+    for (int i=0; i<N; ++i){
+        actions[i]->setChecked( actions[i] == act );
+    }
 }

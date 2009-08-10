@@ -487,9 +487,6 @@ void BoardWidget::setCurrentNode(go::node* node){
     if (node == NULL)
         node = &goData.root;
 
-    qDebug() << "---------------";
-    qDebug() << (bool)(currentNode == node);
-    qDebug() << (bool)(!nodeList.empty());
     if (currentNode == node && !nodeList.empty())
         return;
 
