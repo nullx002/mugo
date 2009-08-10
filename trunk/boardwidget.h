@@ -5,7 +5,7 @@
 #include <QLabel>
 #include <QVector>
 #include <QList>
-//#include <Phonon/phonon>
+#include <phonon>
 #include "godata.h"
 
 namespace Ui {
@@ -77,7 +77,7 @@ public:
     void flipBoardVertically(bool flip);
     void resetBoard();
     void setPlaySound(bool play){ playSound = play; }
-    void setStoneSoundPath(const QString& path){ stoneSoundPath = path; }
+    void setStoneSoundPath(const QString& path){ stoneSoundPath = path; stoneSound->setCurrentSource(path); }
     void setCountTerritoryMode(bool countMode);
 
     QString getXString(int x) const;
@@ -206,7 +206,7 @@ private:
     QVector< QVector<stoneInfo> > board;
 
     // Phonon
-//    Phonon::MediaObject* mediaObject;
+    Phonon::MediaObject* stoneSound;
 };
 
 #endif // BOARDWIDGET_H

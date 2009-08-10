@@ -31,8 +31,8 @@ MainWindow::MainWindow(QWidget *parent)
 //#elif defined(Q_WS_MAC)
 //#elif defined(Q_WS_X11)
 //    QStringList soundPathList;
-    soundPathList.push_back("/usr/share/mugo/sounds/");
-    soundPathList.push_back("/usr/local/share/mugo/sounds/");
+    soundPathList.push_back("/usr/share/" APPNAME "/sounds/");
+    soundPathList.push_back("/usr/local/share/" APPNAME "/sounds/");
 //#endif
     QStringList::iterator iter = soundPathList.begin();
     while (iter != soundPathList.end()){
@@ -43,6 +43,7 @@ MainWindow::MainWindow(QWidget *parent)
         }
         ++iter;
     }
+    ui->boardWidget->setPlaySound(true);
 
     // recent files
     for (int i=0; i<MaxRecentFiles; ++i){
