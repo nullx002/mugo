@@ -243,6 +243,7 @@ void BoardWidget::setData(const go::fileBase& data){
     data.get(goData);
     nodeList.clear();
     setCurrentNode();
+    repaintBoard();
 }
 
 void BoardWidget::setBoardSize(int xsize, int ysize){
@@ -410,6 +411,7 @@ void BoardWidget::clear(){
     capturedBlack = 0;
     capturedWhite = 0;
     setCurrentNode();
+    repaintBoard();
 }
 
 /**
