@@ -36,7 +36,7 @@
      <x>0</x>
      <y>0</y>
      <width>733</width>
-     <height>18</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -200,12 +200,23 @@
     <property name="title">
      <string>&amp;Options</string>
     </property>
+    <widget class="QMenu" name="menuLanguage_2">
+     <property name="title">
+      <string>Language</string>
+     </property>
+     <addaction name="actionLanguageSystemDefault"/>
+     <addaction name="separator"/>
+     <addaction name="actionLanguageEnglish"/>
+     <addaction name="actionLanguageJapanese"/>
+    </widget>
     <addaction name="action19x19Board"/>
     <addaction name="action13x13Board"/>
     <addaction name="action9x9Board"/>
     <addaction name="actionCustomBoardSize"/>
     <addaction name="separator"/>
     <addaction name="actionPlaySound"/>
+    <addaction name="separator"/>
+    <addaction name="menuLanguage_2"/>
    </widget>
    <widget class="QMenu" name="menu_Help">
     <property name="title">
@@ -1256,6 +1267,30 @@
    </property>
    <property name="text">
     <string>Count Territory</string>
+   </property>
+  </action>
+  <action name="actionLanguageSystemDefault">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>System Default</string>
+   </property>
+  </action>
+  <action name="actionLanguageEnglish">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>English</string>
+   </property>
+  </action>
+  <action name="actionLanguageJapanese">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Japanese</string>
    </property>
   </action>
  </widget>

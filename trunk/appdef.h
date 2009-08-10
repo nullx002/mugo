@@ -2,8 +2,8 @@
 #define APPDEF_H
 
 
-#define APP_NAME "mugo"
-#define VERSION  "0.6.0"
-
+#define APPNAME "mugo"
+#define VERSION "0.6.0"
+#define AUTHOR   "nsase"
 
 #endif // APPDEF_H

@@ -1026,10 +1026,34 @@ void MainWindow::on_actionPlaySound_triggered(){
 
 /**
 * Slot
+* Options -> Language -> System Default
+*/
+void MainWindow::on_actionLanguageSystemDefault_triggered(){
+    setLanguage( QString() );
+}
+
+/**
+* Slot
+* Options -> Language -> English
+*/
+void MainWindow::on_actionLanguageEnglish_triggered(){
+    setLanguage("en");
+}
+
+/**
+* Slot
+* Options -> Language -> Japanese
+*/
+void MainWindow::on_actionLanguageJapanese_triggered(){
+    setLanguage("ja_JP");
+}
+
+/**
+* Slot
 * Help -> About
 */
 void MainWindow::on_actionAbout_triggered(){
-    QMessageBox::about(this, tr(APP_NAME), tr(APP_NAME " version " VERSION "\n\nCopyright 2009 Naoya Sase."));
+    QMessageBox::about(this, tr(APPNAME), tr(APPNAME " version " VERSION "\n\nCopyright 2009 Naoya Sase."));
 }
 
 /**
@@ -1234,7 +1258,7 @@ void MainWindow::setCaption(){
         caption.append(ui->boardWidget->getData().root.result);
         caption.append(") - ");
     }
-    caption.append(APP_NAME);
+    caption.append(APPNAME);
 
     setWindowTitle(caption);
 }
@@ -1372,7 +1396,7 @@ bool MainWindow::maybeSave(){
     if (!ui->boardWidget->isDirty())
         return true;
     QMessageBox::StandardButton ret =
-    QMessageBox::warning(this, tr(APP_NAME),
+    QMessageBox::warning(this, tr(APPNAME),
                                tr("The document has been modified.\n"
                                   "Do you want to save your changes?"),
                                QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
@@ -1673,7 +1697,7 @@ void MainWindow::setBoardSize(int xsize, int ysize){
 void MainWindow::setCurrentFile(const QString& fname){
     fileName = fname;
 
-    QSettings settings("nsase", "mugo");
+    QSettings settings(AUTHOR, APPNAME);
     QStringList files = settings.value("recentFileList").toStringList();
     files.removeAll(fileName);
     files.prepend(fileName);
@@ -1686,7 +1710,7 @@ void MainWindow::setCurrentFile(const QString& fname){
 
 void MainWindow::updateRecentFileActions()
 {
-    QSettings settings("nsase", "mugo");
+    QSettings settings(AUTHOR, APPNAME);
     QStringList files = settings.value("recentFileList").toStringList();
 
     int numRecentFiles = qMin(files.size(), (int)MaxRecentFiles);
@@ -1702,4 +1726,9 @@ void MainWindow::updateRecentFileActions()
         recentFileActs[j]->setVisible(false);
 
     recentSeparator->setVisible(numRecentFiles > 0);
+}
+
+void MainWindow::setLanguage(const QString& locale){
+    QSettings settings(AUTHOR, APPNAME);
+    settings.setValue("language", locale);
 }
