@@ -1,5 +1,6 @@
 #include <QtGui/QApplication>
 #include <QDebug>
+#include <QSettings>
 #include <QTranslator>
 #include <QLibraryInfo>
 #include <QTextCodec>
@@ -39,8 +40,12 @@ int main(int argc, char *argv[])
     a.installTranslator(&qtTranslator);
 
     // Load translation
+    QSettings settings(AUTHOR, APPNAME);
+    QString locale = settings.value("language").toString();
+    if (locale.isEmpty())
+        locale = QLocale::system().name();
     QTranslator myappTranslator;
-    myappTranslator.load("mugo." + QLocale::system().name(), getTranslationPath());
+    myappTranslator.load("mugo." + locale, getTranslationPath());
     a.installTranslator(&myappTranslator);
 
     QTextCodec::setCodecForCStrings( QTextCodec::codecForName("UTF-8") );

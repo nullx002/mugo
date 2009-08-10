@@ -148,7 +148,7 @@ bool sgf::node::set(const go::node& n){
     if (infoNode){
         property["GM"].push_back("1");
         property["FF"].push_back("4");
-        property["AP"].push_back(APP_NAME ":" VERSION);
+        property["AP"].push_back(APPNAME ":" VERSION);
         if (infoNode->xsize == infoNode->ysize)
             property["SZ"].push_back( QString("%1").arg(infoNode->xsize) );
         else

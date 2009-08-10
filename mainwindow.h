@@ -64,6 +64,8 @@ private:
 
     go::node* getNode(QTreeWidgetItem* treeWidget);
 
+    void setLanguage(const QString& locale);
+
     Ui::MainWindow *ui;
     QTextCodec* codec;
     QString fileName;
@@ -83,6 +85,9 @@ private:
 
 private slots:
     // File menu
+    void on_actionLanguageJapanese_triggered();
+    void on_actionLanguageEnglish_triggered();
+    void on_actionLanguageSystemDefault_triggered();
     void on_actionCountTerritory_triggered();
     void on_actionNew_triggered();
     void on_actionOpen_triggered();
