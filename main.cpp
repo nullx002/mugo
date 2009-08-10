@@ -16,8 +16,8 @@ QString getTranslationPath(){
     pathList << appPath + "/translations";
 #elif defined(Q_WS_X11)
     pathList << appPath + "/translations"
-             << "/usr/share/" APP_NAME "/translations"
-             << "/usr/local/share/" APP_NAME "/translations";
+             << "/usr/share/" APPNAME "/translations"
+             << "/usr/local/share/" APPNAME "/translations";
 #endif
 
     QStringList::iterator iter = pathList.begin();

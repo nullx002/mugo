@@ -64,7 +64,7 @@ private:
 
     go::node* getNode(QTreeWidgetItem* treeWidget);
 
-    void setLanguage(const QString& locale);
+    void setLanguage(const QString& locale, QAction* act);
 
     Ui::MainWindow *ui;
     QTextCodec* codec;
