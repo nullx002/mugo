@@ -34,6 +34,7 @@ QString getTranslationPath(){
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+    a.setApplicationName(APPNAME);
 
     QTranslator qtTranslator;
     qtTranslator.load("qt_" + QLocale::system().name(), QLibraryInfo::location(QLibraryInfo::TranslationsPath));

@@ -1,3 +1,4 @@
+#include <QColorDialog>
 #include "setupdialog.h"
 #include "ui_setupdialog.h"
 
@@ -6,6 +7,9 @@ SetupDialog::SetupDialog(QWidget *parent) :
     m_ui(new Ui::SetupDialog)
 {
     m_ui->setupUi(this);
+
+    boardColor = QColor(255, 200, 100);
+    m_ui->boardColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(boardColor.red()).arg(boardColor.green()).arg(boardColor.blue()) );
 }
 
 SetupDialog::~SetupDialog()
@@ -23,4 +27,11 @@ void SetupDialog::changeEvent(QEvent *e)
     default:
         break;
     }
+}
+
+// slot
+// board color button clicked
+void SetupDialog::on_boardColorButton_clicked(){
+    QColorDialog dlg(boardColor, this);
+    dlg.exec();
 }

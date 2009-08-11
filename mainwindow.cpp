@@ -1310,7 +1310,7 @@ bool MainWindow::fileOpen(){
 
     if (selectedFilter.indexOf("sgf") >= 0)
         return fileOpen(fname, "sgf");
-    else if (selectedFilter.indexOf("ugf") >= 0 || selectedFilter.indexOf("ugi") >= 0)
+    else if (selectedFilter.indexOf("ugf") >= 0)
         return fileOpen(fname, "ugf");
     else
         return false;
@@ -1335,7 +1335,7 @@ bool MainWindow::fileOpen(const QString& fname, const QString& filter){
         sgf.read(fname, codec);
         ui->boardWidget->setData(sgf);
     }
-    else if (filter == "ugf"){
+    else if (filter == "ugf" || filter == "ugi"){
         go::ugf ugf;
         ugf.read(fname, codec);
         ui->boardWidget->setData(ugf);
