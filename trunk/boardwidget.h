@@ -20,12 +20,12 @@ namespace Ui {
 
 class Sound{
 public:
-    Sound(QWidget* parent) : media(NULL){
+    Sound(QWidget* /*parent*/) : media(NULL){
 #ifdef Q_WS_X11
-//        media = Phonon::createPlayer(Phonon::NotificationCategory);
-        media = new Phonon::MediaObject(parent);
-        audioOutput = new Phonon::AudioOutput(Phonon::NotificationCategory, parent);
-        Phonon::createPath(media, audioOutput);
+        media = Phonon::createPlayer(Phonon::NotificationCategory);
+//        media = new Phonon::MediaObject(parent);
+//        audioOutput = new Phonon::AudioOutput(Phonon::NotificationCategory, parent);
+//        Phonon::createPath(media, audioOutput);
 #endif
     }
     ~Sound(){
@@ -52,7 +52,7 @@ public:
 
 #ifdef Q_WS_X11
     Phonon::MediaObject* media;
-    Phonon::AudioOutput* audioOutput;
+//    Phonon::AudioOutput* audioOutput;
 #else
     QSound* media;
 #endif
@@ -220,6 +220,9 @@ private:
     int currentMoveNumber;
 
     // option
+    bool bitmapBoard;
+    bool bitmapBlack;
+    bool bitmapWhite;
     bool showMoveNumber;
     int  showMoveNumberCount;
     bool showCoordinates;
@@ -240,6 +243,7 @@ private:
     QImage  black1, black2;
     QImage  white1, white2;
     QImage  boardImage1, boardImage2;
+    QColor  boardColor, blackColor, whiteColor;
 
     int width_;
     int height_;
