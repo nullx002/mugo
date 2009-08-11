@@ -30,7 +30,8 @@ BoardWidget::BoardWidget(QWidget *parent) :
     playSound(false),
     black1(":/res/black_64.png"),
     white1(":/res/white_64.png"),
-    boardImage1(":/res/bg.png")
+    boardImage1(":/res/bg.png"),
+    stoneSound(this)
 {
     m_ui->setupUi(this);
 
@@ -253,7 +254,7 @@ void BoardWidget::setBoardSize(int xsize, int ysize){
     createBoardBuffer();
     setCurrentNode();
 
-    repaintBoard(true, true);
+    repaintBoard();
 }
 
 void BoardWidget::rotateSgf(){

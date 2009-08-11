@@ -18,6 +18,10 @@ protected:
 
 private:
     Ui::SetupDialog *m_ui;
+    QColor boardColor;
+
+private slots:
+    void on_boardColorButton_clicked();
 };
 
 #endif // SETUPDIALOG_H

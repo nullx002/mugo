@@ -20,16 +20,19 @@ namespace Ui {
 
 class Sound{
 public:
-    Sound() : media(NULL){
+    Sound(QWidget* parent) : media(NULL){
 #ifdef Q_WS_X11
-        media = Phonon::createPlayer(Phonon::NotificationCategory);
+//        media = Phonon::createPlayer(Phonon::NotificationCategory);
+        media = new Phonon::MediaObject(parent);
+        audioOutput = new Phonon::AudioOutput(Phonon::NotificationCategory, parent);
+        Phonon::createPath(media, audioOutput);
 #endif
     }
     ~Sound(){
         delete media;
     }
     void setCurrentSource(const QString& source){
-        this->source = source;
+        media->setCurrentSource(source);
 #ifndef Q_WS_X11
         delete media;
         media = new QSound(source, NULL);
@@ -47,10 +50,9 @@ public:
             media->play();
     }
 
-    QString source;
-
 #ifdef Q_WS_X11
     Phonon::MediaObject* media;
+    Phonon::AudioOutput* audioOutput;
 #else
     QSound* media;
 #endif
