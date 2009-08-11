@@ -5,12 +5,57 @@
 #include <QLabel>
 #include <QVector>
 #include <QList>
-#include <phonon>
+#ifdef Q_WS_X11
+#   include <phonon>
+#else
+#   include <QSound>
+#endif
+
 #include "godata.h"
 
 namespace Ui {
     class BoardWidget;
 }
+
+
+class Sound{
+public:
+    Sound() : media(NULL){
+#ifdef Q_WS_X11
+        media = Phonon::createPlayer(Phonon::NotificationCategory);
+#endif
+    }
+    ~Sound(){
+        delete media;
+    }
+    void setCurrentSource(const QString& source){
+        this->source = source;
+#ifndef Q_WS_X11
+        delete media;
+        media = new QSound(source, NULL);
+#endif
+    }
+
+    void play(){
+#ifdef Q_WS_X11
+        if (media->currentTime() == media->totalTime()){
+            media->stop();
+            media->seek(0);
+        }
+#endif
+        if (media)
+            media->play();
+    }
+
+    QString source;
+
+#ifdef Q_WS_X11
+    Phonon::MediaObject* media;
+#else
+    QSound* media;
+#endif
+};
+
 
 class BoardWidget : public QWidget {
     Q_OBJECT
@@ -77,7 +122,7 @@ public:
     void flipBoardVertically(bool flip);
     void resetBoard();
     void setPlaySound(bool play){ playSound = play; }
-    void setStoneSoundPath(const QString& path){ stoneSoundPath = path; stoneSound->setCurrentSource(path); }
+    void setStoneSoundPath(const QString& path){ stoneSoundPath = path; stoneSound.setCurrentSource(path); }
     void setCountTerritoryMode(bool countMode);
 
     QString getXString(int x) const;
@@ -205,8 +250,10 @@ private:
     QList<int> ylines;
     QVector< QVector<stoneInfo> > board;
 
+    // sound
+    Sound stoneSound;
     // Phonon
-    Phonon::MediaObject* stoneSound;
+//    Phonon::MediaObject* stoneSound;
 };
 
 #endif // BOARDWIDGET_H
