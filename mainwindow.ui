@@ -36,7 +36,7 @@
      <x>0</x>
      <y>0</y>
      <width>733</width>
-     <height>24</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -209,6 +209,8 @@
      <addaction name="actionLanguageEnglish"/>
      <addaction name="actionLanguageJapanese"/>
     </widget>
+    <addaction name="actionSetup"/>
+    <addaction name="separator"/>
     <addaction name="action19x19Board"/>
     <addaction name="action13x13Board"/>
     <addaction name="action9x9Board"/>
@@ -1291,6 +1293,11 @@
    </property>
    <property name="text">
     <string>Japanese</string>
+   </property>
+  </action>
+  <action name="actionSetup">
+   <property name="text">
+    <string>&amp;Setup</string>
    </property>
   </action>
  </widget>

@@ -9,6 +9,7 @@
 #include "ugf.h"
 #include "mainwindow.h"
 #include "gameinformationdialog.h"
+#include "setupdialog.h"
 #include "ui_mainwindow.h"
 
 Q_DECLARE_METATYPE(go::node*);
@@ -965,6 +966,15 @@ void MainWindow::on_actionCountTerritory_triggered(){
     }
 
     ui->boardWidget->setCountTerritoryMode(ui->actionCountTerritory->isChecked());
+}
+
+/**
+* Slot
+* Options -> Setup
+*/
+void MainWindow::on_actionSetup_triggered(){
+    SetupDialog dlg(this);
+    dlg.exec();
 }
 
 /**

@@ -3,7 +3,6 @@
 # -------------------------------------------------
 TARGET = mugo
 TEMPLATE = app
-QT += phonon
 SOURCES += main.cpp \
     mainwindow.cpp \
     boardwidget.cpp \

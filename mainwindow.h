@@ -85,6 +85,7 @@ private:
 
 private slots:
     // File menu
+    void on_actionSetup_triggered();
     void on_actionLanguageJapanese_triggered();
     void on_actionLanguageEnglish_triggered();
     void on_actionLanguageSystemDefault_triggered();

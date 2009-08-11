@@ -34,7 +34,7 @@ BoardWidget::BoardWidget(QWidget *parent) :
 {
     m_ui->setupUi(this);
 
-    stoneSound = Phonon::createPlayer(Phonon::NotificationCategory);
+//    stoneSound = Phonon::createPlayer(Phonon::NotificationCategory);
 
     setCurrentNode(&goData.root);
 }
@@ -497,13 +497,8 @@ void BoardWidget::setCurrentNode(go::node* node){
 
     createBoardBuffer();
 
-    if (playSound && node->isStone()){
-        if (stoneSound->currentTime() == stoneSound->totalTime()){
-            stoneSound->stop();
-            stoneSound->seek(0);
-        }
-        stoneSound->play();
-    }
+    if (playSound && node->isStone())
+        stoneSound.play();
 
     repaintBoard(false);
     emit currentNodeChanged(currentNode);
