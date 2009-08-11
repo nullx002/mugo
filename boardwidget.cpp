@@ -16,6 +16,9 @@ BoardWidget::BoardWidget(QWidget *parent) :
     capturedWhite(0),
     isBlack(true),
     currentMoveNumber(0),
+    bitmapBoard(true),
+    bitmapBlack(true),
+    bitmapWhite(true),
     showMoveNumber(true),
     showMoveNumberCount(0),
     showCoordinates(true),
@@ -36,6 +39,13 @@ BoardWidget::BoardWidget(QWidget *parent) :
     m_ui->setupUi(this);
 
 //    stoneSound = Phonon::createPlayer(Phonon::NotificationCategory);
+
+//    bitmapBoard = false;
+//    bitmapBlack = false;
+//    bitmapWhite = false;
+    boardColor = QColor(230, 190, 100);
+    whiteColor = QColor(255, 255, 255);
+    blackColor = QColor(0, 0, 0);
 
     setCurrentNode(&goData.root);
 }
@@ -590,13 +600,38 @@ void BoardWidget::drawBoard(QPainter& p){
 
     // create board and stone image
     boardRect.setRect(l - margin, t - margin, w + margin * 2, h + margin * 2);
-    if (boardRect.width() != boardImage2.width()){
+//    if (boardRect.width() != boardImage2.width()){
         boardImage2 = QImage(boardRect.size(), QImage::Format_RGB32);
-        QPainter p2(&boardImage2);
-        p2.fillRect(0, 0, boardRect.width(), boardRect.height(), QBrush(boardImage1));
-        black2 = black1.scaled(boxSize, boxSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-        white2 = white1.scaled(boxSize, boxSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-    }
+        QPainter board(&boardImage2);
+        if (bitmapBoard)
+            board.fillRect(0, 0, boardRect.width(), boardRect.height(), QBrush(boardImage1));
+        else
+            board.fillRect(0, 0, boardRect.width(), boardRect.height(), boardColor);
+
+        if (bitmapBlack)
+            black2 = black1.scaled(boxSize, boxSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        else{
+            black2 = QImage(boxSize, boxSize, QImage::Format_ARGB32);
+            black2.fill(0);
+            QPainter p2(&black2);
+            p2.setRenderHints(QPainter::Antialiasing|QPainter::TextAntialiasing|QPainter::SmoothPixmapTransform);
+            p2.setPen(Qt::black);
+            p2.setBrush(blackColor);
+            p2.drawEllipse(1, 1, boxSize-2, boxSize-2);
+        }
+
+        if (bitmapWhite)
+            white2 = white1.scaled(boxSize, boxSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        else{
+            white2 = QImage(boxSize, boxSize, QImage::Format_ARGB32);
+            white2.fill(0);
+            QPainter p2(&white2);
+            p2.setRenderHints(QPainter::Antialiasing|QPainter::TextAntialiasing|QPainter::SmoothPixmapTransform);
+            p2.setPen(Qt::black);
+            p2.setBrush(whiteColor);
+            p2.drawEllipse(1, 1, boxSize-2, boxSize-2);
+        }
+//    }
 
     p.fillRect(boardRect.left()+3, boardRect.top()+3, boardRect.width(), boardRect.height(), Qt::gray);
     p.drawImage(boardRect.topLeft(), boardImage2);
