@@ -32,8 +32,9 @@ public:
         delete media;
     }
     void setCurrentSource(const QString& source){
+#ifdef Q_WS_X11
         media->setCurrentSource(source);
-#ifndef Q_WS_X11
+#else
         delete media;
         media = new QSound(source, NULL);
 #endif
