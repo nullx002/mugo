@@ -1,6 +1,9 @@
+#include <QDebug>
 #include <QColorDialog>
+#include <QSettings>
 #include "setupdialog.h"
 #include "ui_setupdialog.h"
+#include "appdef.h"
 
 SetupDialog::SetupDialog(QWidget *parent) :
     QDialog(parent),
@@ -8,19 +11,27 @@ SetupDialog::SetupDialog(QWidget *parent) :
 {
     m_ui->setupUi(this);
 
-    // board
-    m_ui->boardTypeComboBox->addItem( tr("Default Board") );
-    m_ui->boardTypeComboBox->addItem( tr("Fill Color") );
+    QSettings settings(AUTHOR, APPNAME);
 
-    boardColor = QColor(255, 200, 100);
+    // board
+    m_ui->boardTypeComboBox->addItem( tr("Bitmap") );
+    m_ui->boardTypeComboBox->addItem( tr("Fill Color") );
+    m_ui->boardTypeComboBox->setCurrentIndex( settings.value("boardType").toInt() );
+    boardColor = settings.value("boardColor").value<QColor>();
     m_ui->boardColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(boardColor.red()).arg(boardColor.green()).arg(boardColor.blue()) );
 
     // white
-    whiteColor = QColor(255, 255, 255);
+    m_ui->whiteTypeComboBox->addItem( tr("Bitmap") );
+    m_ui->whiteTypeComboBox->addItem( tr("Fill Color") );
+    m_ui->whiteTypeComboBox->setCurrentIndex( settings.value("whiteType").toInt() );
+    whiteColor = settings.value("whiteColor").value<QColor>();
     m_ui->whiteColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(whiteColor.red()).arg(whiteColor.green()).arg(whiteColor.blue()) );
 
     // black
-    blackColor = QColor(0, 0, 0);
+    m_ui->blackTypeComboBox->addItem( tr("Bitmap") );
+    m_ui->blackTypeComboBox->addItem( tr("Fill Color") );
+    m_ui->blackTypeComboBox->setCurrentIndex( settings.value("blackType").toInt() );
+    blackColor = settings.value("blackColor").value<QColor>();
     m_ui->blackColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(blackColor.red()).arg(blackColor.green()).arg(blackColor.blue()) );
 }
 
@@ -41,13 +52,29 @@ void SetupDialog::changeEvent(QEvent *e)
     }
 }
 
+void SetupDialog::accept(){
+    QDialog::accept();
+
+    QSettings settings(AUTHOR, APPNAME);
+    settings.setValue("boardType", m_ui->boardTypeComboBox->currentIndex());
+    settings.setValue("whiteType", m_ui->whiteTypeComboBox->currentIndex());
+    settings.setValue("blackType", m_ui->blackTypeComboBox->currentIndex());
+    settings.setValue("boardColor", boardColor);
+    settings.setValue("whiteColor", whiteColor);
+    settings.setValue("blackColor", blackColor);
+}
+
 /**
 * slot
 * board color button clicked
 */
 void SetupDialog::on_boardColorButton_clicked(){
     QColorDialog dlg(boardColor, this);
-    dlg.exec();
+    dlg.setCurrentColor(boardColor);
+    if (dlg.exec() != QDialog::Accepted)
+        return;
+    boardColor = dlg.selectedColor();
+    m_ui->boardColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(boardColor.red()).arg(boardColor.green()).arg(boardColor.blue()) );
 }
 
 /**
@@ -56,7 +83,11 @@ void SetupDialog::on_boardColorButton_clicked(){
 */
 void SetupDialog::on_whiteColorButton_clicked(){
     QColorDialog dlg(whiteColor, this);
-    dlg.exec();
+    dlg.setCurrentColor(whiteColor);
+    if (dlg.exec() != QDialog::Accepted)
+        return;
+    whiteColor = dlg.selectedColor();
+    m_ui->whiteColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(whiteColor.red()).arg(whiteColor.green()).arg(whiteColor.blue()) );
 }
 
 /**
@@ -65,5 +96,9 @@ void SetupDialog::on_whiteColorButton_clicked(){
 */
 void SetupDialog::on_blackColorButton_clicked(){
     QColorDialog dlg(blackColor, this);
-    dlg.exec();
+    dlg.setCurrentColor(blackColor);
+    if (dlg.exec() != QDialog::Accepted)
+        return;
+    blackColor = dlg.selectedColor();
+    m_ui->blackColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(blackColor.red()).arg(blackColor.green()).arg(blackColor.blue()) );
 }
