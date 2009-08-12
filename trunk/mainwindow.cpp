@@ -1314,7 +1314,7 @@ bool MainWindow::fileOpen(){
 
     if (selectedFilter.indexOf("sgf") >= 0)
         return fileOpen(fname, "sgf");
-    else if (selectedFilter.indexOf("ugf") >= 0)
+    else if (selectedFilter.indexOf("ugf") >= 0 || selectedFilter.indexOf("ugi") >= 0)
         return fileOpen(fname, "ugf");
     else
         return false;
