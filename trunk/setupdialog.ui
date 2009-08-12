@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Setup</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -83,24 +83,27 @@
          </item>
          <item>
           <widget class="QGroupBox" name="whiteGroupBox">
+           <property name="focusPolicy">
+            <enum>Qt::NoFocus</enum>
+           </property>
            <property name="title">
-            <string>White</string>
+            <string>White Settings</string>
            </property>
            <layout class="QFormLayout" name="formLayout_2">
             <item row="0" column="0">
-             <widget class="QLabel" name="label">
+             <widget class="QLabel" name="whiteLabel">
               <property name="text">
-               <string>TextLabel</string>
+               <string>Stone Type</string>
               </property>
              </widget>
             </item>
             <item row="0" column="1">
-             <widget class="QComboBox" name="comboBox"/>
+             <widget class="QComboBox" name="whiteTypeComboBox"/>
             </item>
             <item row="1" column="0">
              <widget class="QLabel" name="whiteColorLabel">
               <property name="text">
-               <string>TextLabel</string>
+               <string>Stone Color</string>
               </property>
              </widget>
             </item>
@@ -123,23 +126,26 @@
          <item>
           <widget class="QGroupBox" name="blackGroupBox">
            <property name="title">
-            <string>Black</string>
+            <string>Black Settings</string>
            </property>
            <layout class="QFormLayout" name="formLayout_3">
             <item row="0" column="0">
-             <widget class="QLabel" name="label_2">
+             <widget class="QLabel" name="blackTypeLabel">
+              <property name="midLineWidth">
+               <number>0</number>
+              </property>
               <property name="text">
-               <string>TextLabel</string>
+               <string>Stone Type</string>
               </property>
              </widget>
             </item>
             <item row="0" column="1">
-             <widget class="QComboBox" name="comboBox_2"/>
+             <widget class="QComboBox" name="blackTypeComboBox"/>
             </item>
             <item row="1" column="0">
              <widget class="QLabel" name="blackColorLabel">
               <property name="text">
-               <string>TextLabel</string>
+               <string>Stone Color</string>
               </property>
              </widget>
             </item>

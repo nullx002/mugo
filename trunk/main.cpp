@@ -8,6 +8,21 @@
 #include "appdef.h"
 #include "mainwindow.h"
 
+void setDefaultSettings(){
+#define setvalue(K, V) if (!settings.contains(K)) settings.setValue(K, V);
+
+    QSettings settings(AUTHOR, APPNAME);
+
+    setvalue("boardType", 0);
+    setvalue("boardColor", QColor(255, 200, 100));
+    setvalue("whiteType", 0);
+    setvalue("whiteColor", QColor(255, 255, 255));
+    setvalue("blackType", 0);
+    setvalue("blackColor", QColor(0, 0, 0));
+
+#undef setvalue
+}
+
 QString getTranslationPath(){
     QString appPath = qApp->applicationDirPath();
     QStringList pathList;
@@ -36,11 +51,14 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     a.setApplicationName(APPNAME);
 
+    // set default settings
+    setDefaultSettings();
+
+    // Load translation
     QTranslator qtTranslator;
     qtTranslator.load("qt_" + QLocale::system().name(), QLibraryInfo::location(QLibraryInfo::TranslationsPath));
     a.installTranslator(&qtTranslator);
 
-    // Load translation
     QSettings settings(AUTHOR, APPNAME);
     QString locale = settings.value("language").toString();
     if (locale.isEmpty())

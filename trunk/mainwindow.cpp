@@ -974,7 +974,11 @@ void MainWindow::on_actionCountTerritory_triggered(){
 */
 void MainWindow::on_actionSetup_triggered(){
     SetupDialog dlg(this);
-    dlg.exec();
+    if (dlg.exec() != QDialog::Accepted)
+        return;
+
+    ui->boardWidget->readSettings();
+    ui->boardWidget->repaintBoard();
 }
 
 /**

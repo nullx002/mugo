@@ -1,9 +1,11 @@
 #include <QDebug>
+#include <QSettings>
 #include <QPainter>
 #include <QMouseEvent>
 #include <QSound>
 #include <QList>
 #include <math.h>
+#include "appdef.h"
 #include "boardwidget.h"
 #include "mainwindow.h"
 #include "ui_boardwidget.h"
@@ -16,9 +18,6 @@ BoardWidget::BoardWidget(QWidget *parent) :
     capturedWhite(0),
     isBlack(true),
     currentMoveNumber(0),
-    bitmapBoard(true),
-    bitmapBlack(true),
-    bitmapWhite(true),
     showMoveNumber(true),
     showMoveNumberCount(0),
     showCoordinates(true),
@@ -40,12 +39,7 @@ BoardWidget::BoardWidget(QWidget *parent) :
 
 //    stoneSound = Phonon::createPlayer(Phonon::NotificationCategory);
 
-//    bitmapBoard = false;
-//    bitmapBlack = false;
-//    bitmapWhite = false;
-    boardColor = QColor(230, 190, 100);
-    whiteColor = QColor(255, 255, 255);
-    blackColor = QColor(0, 0, 0);
+    readSettings();
 
     setCurrentNode(&goData.root);
 }
@@ -53,6 +47,18 @@ BoardWidget::BoardWidget(QWidget *parent) :
 BoardWidget::~BoardWidget()
 {
     delete m_ui;
+}
+
+void BoardWidget::readSettings(){
+    QSettings settings(AUTHOR, APPNAME);
+
+    boardType = settings.value("boardType").toInt();
+    whiteType = settings.value("whiteType").toInt();
+    blackType = settings.value("blackType").toInt();
+
+    boardColor = settings.value("boardColor").value<QColor>();
+    whiteColor = settings.value("whiteColor").value<QColor>();
+    blackColor = settings.value("blackColor").value<QColor>();
 }
 
 /**
@@ -603,12 +609,12 @@ void BoardWidget::drawBoard(QPainter& p){
 //    if (boardRect.width() != boardImage2.width()){
         boardImage2 = QImage(boardRect.size(), QImage::Format_RGB32);
         QPainter board(&boardImage2);
-        if (bitmapBoard)
+        if (boardType == 0)
             board.fillRect(0, 0, boardRect.width(), boardRect.height(), QBrush(boardImage1));
         else
             board.fillRect(0, 0, boardRect.width(), boardRect.height(), boardColor);
 
-        if (bitmapBlack)
+        if (blackType == 0)
             black2 = black1.scaled(boxSize, boxSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
         else{
             black2 = QImage(boxSize, boxSize, QImage::Format_ARGB32);
@@ -620,7 +626,7 @@ void BoardWidget::drawBoard(QPainter& p){
             p2.drawEllipse(1, 1, boxSize-2, boxSize-2);
         }
 
-        if (bitmapWhite)
+        if (whiteType == 0)
             white2 = white1.scaled(boxSize, boxSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
         else{
             white2 = QImage(boxSize, boxSize, QImage::Format_ARGB32);

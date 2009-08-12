@@ -82,6 +82,8 @@ public:
     explicit BoardWidget(QWidget *parent = 0);
     virtual ~BoardWidget();
 
+    void readSettings();
+
     // draw
     void repaintBoard(bool board=true, bool stones=true);
     void paintBoard(QPaintDevice* pd);
@@ -221,9 +223,7 @@ private:
     int currentMoveNumber;
 
     // option
-    bool bitmapBoard;
-    bool bitmapBlack;
-    bool bitmapWhite;
+    int boardType, whiteType, blackType;
     bool showMoveNumber;
     int  showMoveNumberCount;
     bool showCoordinates;

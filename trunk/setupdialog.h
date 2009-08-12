@@ -15,6 +15,7 @@ public:
 
 protected:
     void changeEvent(QEvent *e);
+    void accept();
 
 private:
     Ui::SetupDialog *m_ui;
