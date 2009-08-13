@@ -1,0 +1,45 @@
+<RCC>
+    <qresource prefix="/" >
+        <file>res/filenew.png</file>
+        <file>res/fileopen.png</file>
+        <file>res/filesave.png</file>
+        <file>res/green_64.png</file>
+        <file>res/black_64.png</file>
+        <file>res/white_64.png</file>
+        <file>res/bg.png</file>
+        <file>res/remove.png</file>
+        <file>res/prevmove.png</file>
+        <file>res/fastforward.png</file>
+        <file>res/firstmove.png</file>
+        <file>res/fastrewind.png</file>
+        <file>res/lastmove.png</file>
+        <file>res/nextmove.png</file>
+        <file>res/nextbranch.png</file>
+        <file>res/prevbranch.png</file>
+        <file>res/backparent.png</file>
+        <file>res/reload.png</file>
+        <file>res/saveimage.png</file>
+        <file>res/circle.png</file>
+        <file>res/square.png</file>
+        <file>res/qt.png</file>
+        <file>res/cross.png</file>
+        <file>res/triangle.png</file>
+        <file>res/text.png</file>
+        <file>res/empty.png</file>
+        <file>res/rubbereraser.png</file>
+        <file>res/showmovenumber.png</file>
+        <file>res/fliphorizontally.png</file>
+        <file>res/flipvertically.png</file>
+        <file>res/rotateright.png</file>
+        <file>res/pass.png</file>
+        <file>res/jumptoclicked.png</file>
+        <file>res/jumptonumber.png</file>
+        <file>res/sound.png</file>
+        <file>res/branchmode.png</file>
+        <file>res/resetboard.png</file>
+        <file>pics/mugo.png</file>
+        <file>res/movealternate.png</file>
+        <file>res/redo.png</file>
+        <file>res/undo.png</file>
+    </qresource>
+</RCC>
