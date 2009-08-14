@@ -2,9 +2,12 @@
 #define BOARDWIDGET_H
 
 #include <QtGui/QWidget>
+#include <QUndoStack>
 #include <QLabel>
 #include <QVector>
 #include <QList>
+#include <QUndoCommand>
+
 #ifdef Q_WS_X11
 #   include <phonon>
 #else
@@ -209,6 +212,9 @@ protected:
     void boardToSgfCoordinate(int boardX, int boardY, int& sgfX, int& sgfY);
     void sgfToBoardCoordinate(int sgfX, int sgfY, int& boardX, int& boardY);
 
+public:
+    QUndoStack undoStack;
+
 private:
     Ui::BoardWidget *m_ui;
 
@@ -262,5 +268,30 @@ private:
     // Phonon
 //    Phonon::MediaObject* stoneSound;
 };
+
+
+class AddNodeCommand : public QUndoCommand{
+public:
+    AddNodeCommand(BoardWidget* boardWidget, go::node* parentNode, go::node* childNode, QUndoCommand *parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+private:
+    BoardWidget* boardWidget;
+    go::node* parentNode;
+    go::node* childNode;
+};
+
+class DeleteNodeCommand : public QUndoCommand{
+public:
+    DeleteNodeCommand(BoardWidget* boardWidget, go::node* node, QUndoCommand *parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+private:
+    BoardWidget* boardWidget;
+    go::node* node;
+};
+
 
 #endif // BOARDWIDGET_H

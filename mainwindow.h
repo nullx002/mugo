@@ -4,6 +4,7 @@
 #include <QtGui/QMainWindow>
 #include <QTreeWidgetItem>
 #include <QTextCodec>
+#include <QUndoGroup>
 #include "boardwidget.h"
 #include "countterritorydialog.h"
 
@@ -83,13 +84,10 @@ private:
     QLabel* capturedLabel;
     CountTerritoryDialog* countTerritoryDialog;
 
+    QUndoGroup undoGroup;
+
 private slots:
     // File menu
-    void on_actionSetup_triggered();
-    void on_actionLanguageJapanese_triggered();
-    void on_actionLanguageEnglish_triggered();
-    void on_actionLanguageSystemDefault_triggered();
-    void on_actionCountTerritory_triggered();
     void on_actionNew_triggered();
     void on_actionOpen_triggered();
     void on_actionReload_triggered();
@@ -194,12 +192,19 @@ private slots:
     void on_actionNavigationToolbar_triggered();
     void on_actionOptionToolbar_triggered();
 
+    // Tools menu -> Count Territory
+    void on_actionCountTerritory_triggered();
+
     // Option menu
+    void on_actionSetup_triggered();
     void on_action19x19Board_triggered();
     void on_action13x13Board_triggered();
     void on_action9x9Board_triggered();
     void on_actionCustomBoardSize_triggered();
     void on_actionPlaySound_triggered();
+    void on_actionLanguageSystemDefault_triggered();
+    void on_actionLanguageEnglish_triggered();
+    void on_actionLanguageJapanese_triggered();
 
     // Help menu
     void on_actionAbout_triggered();

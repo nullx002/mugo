@@ -274,21 +274,36 @@ void BoardWidget::setBoardSize(int xsize, int ysize){
 }
 
 void BoardWidget::rotateSgf(){
+    undoStack.beginMacro( tr("Rotate SGF") );
+
     rotateSgf(&goData.root);
+
+    undoStack.endMacro();
+
     createBoardBuffer();
     setDirty(true);
     repaintBoard();
 }
 
 void BoardWidget::flipSgfHorizontally(){
+    undoStack.beginMacro( tr("Flip SGF Horizontally") );
+
     flipSgf(&goData.root, goData.root.xsize, 0);
+
+    undoStack.endMacro();
+
     createBoardBuffer();
     setDirty(true);
     repaintBoard();
 }
 
 void BoardWidget::flipSgfVertically(){
+    undoStack.beginMacro( tr("Flip SGF Vertically") );
+
     flipSgf(&goData.root, 0, goData.root.ysize);
+
+    undoStack.endMacro();
+
     createBoardBuffer();
     setDirty(true);
     repaintBoard();
@@ -452,6 +467,7 @@ go::node* BoardWidget::findNodeFromMoveNumber(int moveNumber){
 void BoardWidget::addNode(go::node* parent, go::node* node, bool select){
     parent->childNodes.push_back(node);
     node->parent = parent;
+
     setDirty(true);
     emit nodeAdded(parent, node, select);
 
@@ -1518,4 +1534,32 @@ void BoardWidget::getCountTerritory(int& alive_b, int& alive_w, int& dead_b, int
                 ++alive_w;
         }
     }
+}
+
+
+AddNodeCommand::AddNodeCommand(BoardWidget* boardWidget, go::node* parentNode, go::node* childNode, QUndoCommand* parent) : QUndoCommand(parent){
+    this->parentNode = parentNode;
+    this->childNode  = childNode;
+}
+
+void AddNodeCommand::redo(){
+    setText( QObject::tr("add") );
+    parentNode->childNodes.push_back(childNode);
+    childNode->parent = parentNode;
+}
+
+void AddNodeCommand::undo(){
+    go::nodeList::iterator iter = qFind(parentNode->childNodes.begin(),parentNode->childNodes.end(), childNode);
+    parentNode->childNodes.erase(iter);
+}
+
+DeleteNodeCommand::DeleteNodeCommand(BoardWidget* boardWidget, go::node* node, QUndoCommand* parent) : QUndoCommand(parent){
+    this->node = node;
+}
+
+void DeleteNodeCommand::redo(){
+    setText( QObject::tr("delete") );
+}
+
+void DeleteNodeCommand::undo(){
 }
