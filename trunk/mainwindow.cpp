@@ -22,8 +22,11 @@ MainWindow::MainWindow(QWidget *parent)
     , annotation3(go::node::eNoAnnotation)
     , branchMode(false)
     , countTerritoryDialog(NULL)
+    , undoGroup(this)
 {
     ui->setupUi(this);
+
+    undoGroup.setActiveStack(&ui->boardWidget->undoStack);
 
 // set sound files
 //#ifdef Q_WS_WIN
@@ -56,6 +59,16 @@ MainWindow::MainWindow(QWidget *parent)
     recentSeparator = ui->menu_File->insertSeparator(ui->actionExit);
     updateRecentFileActions();
 
+    // undo, redo action
+    QAction* undoAction = undoGroup.createUndoAction(this);
+    QAction* redoAction = undoGroup.createRedoAction(this);
+    undoAction->setIcon( QIcon(":/res/undo.png") );
+    redoAction->setIcon( QIcon(":/res/redo.png") );
+    ui->menu_Edit->insertAction(ui->menu_Edit->actions().at(0), redoAction);
+    ui->menu_Edit->insertAction(redoAction, undoAction);
+    ui->editToolBar->insertAction(ui->editToolBar->actions().at(0), redoAction);
+    ui->editToolBar->insertAction(redoAction, undoAction);
+
     // window menu
     ui->menu_Window->addAction( ui->commentDockWidget->toggleViewAction() );
     ui->menu_Window->addAction( ui->branchDockWidget->toggleViewAction() );
@@ -71,8 +84,7 @@ MainWindow::MainWindow(QWidget *parent)
         ui->actionLanguageJapanese->setChecked(true);
 
     // tool bar
-    ui->optionToolBar->insertAction( ui->actionShowMoveNumber, ui->menuMoveNumber->menuAction() );
-    ui->optionToolBar->removeAction( ui->actionShowMoveNumber );
+    ui->optionToolBar->insertAction( ui->optionToolBar->actions().at(0), ui->menuMoveNumber->menuAction() );
     ui->menuMoveNumber->menuAction()->setCheckable(true);
     ui->menuMoveNumber->menuAction()->setChecked( ui->actionShowMoveNumber->isChecked() );
     connect( ui->menuMoveNumber->menuAction(), SIGNAL(triggered()), this, SLOT(on_actionShowMoveNumber_parent_triggered()) );
