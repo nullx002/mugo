@@ -445,6 +445,7 @@ void BoardWidget::clear(){
     capturedWhite = 0;
     setCurrentNode();
     repaintBoard();
+    undoStack.clear();
 }
 
 /**
@@ -542,8 +543,6 @@ void BoardWidget::deleteNode(go::nodePtr node, bool deleteChildren){
         return;
 
     go::nodePtr parent = node->parent;
-    setCurrentNode(parent);
-
     if (parent){
         go::nodeList::iterator iter = qFind(parent->childNodes.begin(), parent->childNodes.end(), node);
 
@@ -558,6 +557,8 @@ void BoardWidget::deleteNode(go::nodePtr node, bool deleteChildren){
         if (iter != parent->childNodes.end())
             parent->childNodes.erase(iter);
     }
+
+    setCurrentNode(parent);
 
     setDirty(true);
     emit nodeDeleted(node, deleteChildren);
@@ -1380,7 +1381,6 @@ void BoardWidget::addStone(go::nodePtr node, const go::point& sp, const go::poin
 
         addNodeCommand(node, stoneNode);
     }
-
 }
 
 QString BoardWidget::toString(go::nodePtr node) const{
