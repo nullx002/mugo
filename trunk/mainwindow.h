@@ -18,7 +18,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-	typedef QMap<go::node*, QTreeWidgetItem*> NodeToTreeWidgetType;
+        typedef QMap<go::nodePtr, QTreeWidgetItem*> NodeToTreeWidgetType;
 
 
     MainWindow(QWidget *parent = 0);
@@ -54,16 +54,16 @@ private:
     void updateRecentFileActions();
 
     void setTreeData();
-    QTreeWidgetItem* addTreeWidget(go::node* node, bool needRemake = false);
-    QTreeWidgetItem* createTreeWidget(go::node* node);
+    QTreeWidgetItem* addTreeWidget(go::nodePtr node, bool needRemake = false);
+    QTreeWidgetItem* createTreeWidget(go::nodePtr node);
     QTreeWidgetItem* remakeTreeWidget(QTreeWidgetItem* currentWidget);
     void deleteNode();
-    void deleteTreeWidget(go::node* node);
-    void deleteTreeWidgetForMap(go::node* node);
-    void setTreeWidget(go::node* n);
-    QString createTreeText(const go::node* node);
+    void deleteTreeWidget(go::nodePtr node);
+    void deleteTreeWidgetForMap(go::nodePtr node);
+    void setTreeWidget(go::nodePtr n);
+    QString createTreeText(const go::nodePtr node);
 
-    go::node* getNode(QTreeWidgetItem* treeWidget);
+    go::nodePtr getNode(QTreeWidgetItem* treeWidget);
 
     void setLanguage(const QString& locale, QAction* act);
 
@@ -211,10 +211,10 @@ private slots:
     void on_actionAboutQT_triggered();
 
     // Board widget
-    void on_boardWidget_nodeAdded(go::node* parent, go::node* node, bool select);
-    void on_boardWidget_nodeDeleted(go::node* node);
-    void on_boardWidget_nodeModified(go::node* node);
-    void on_boardWidget_currentNodeChanged(go::node* node);
+    void on_boardWidget_nodeAdded(go::nodePtr parent, go::nodePtr node, bool select);
+    void on_boardWidget_nodeDeleted(go::nodePtr node, bool deleteChildren);
+    void on_boardWidget_nodeModified(go::nodePtr node);
+    void on_boardWidget_currentNodeChanged(go::nodePtr node);
     void on_boardWidget_updateTerritory(int alive_b, int alive_w, int dead_b, int dead_w, int capturedBlack, int capturedWhite, int blackTerritory, int whiteTerritory, double komi);
 
     // Branch widget

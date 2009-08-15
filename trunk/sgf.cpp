@@ -128,10 +128,10 @@ void sgf::node::addStone(go::stoneList& stoneList, const QString& key, const QSt
     }
 }
 
-bool sgf::node::get(go::node& n) const{
+bool sgf::node::get(go::nodePtr n) const{
     if (nodeType == eBlack || nodeType == eWhite){
-        n.setX(x);
-        n.setY(y);
+        n->setX(x);
+        n->setY(y);
     }
 
     propertyType::const_iterator iter = property.begin();
@@ -143,8 +143,8 @@ bool sgf::node::get(go::node& n) const{
     return true;
 }
 
-bool sgf::node::set(const go::node& n){
-    const go::informationNode* infoNode = dynamic_cast<const go::informationNode*>(&n);
+bool sgf::node::set(const go::nodePtr n){
+    const go::informationNode* infoNode = dynamic_cast<const go::informationNode*>(n.get());
     if (infoNode){
         property["GM"].push_back("1");
         property["FF"].push_back("4");
@@ -181,62 +181,62 @@ bool sgf::node::set(const go::node& n){
         if (!infoNode->source.isEmpty())      property["SO"].push_back( infoNode->source );
         if (!infoNode->user.isEmpty())        property["US"].push_back( infoNode->user );
     }
-    else if (n.isStone()){
+    else if (n->isStone()){
         QString str;
-        if (!n.isPass()){
-            x = n.position.x;
-            y = n.position.y;
+        if (!n->isPass()){
+            x = n->position.x;
+            y = n->position.y;
             str.sprintf("%c%c", 'a' + x, 'a' + y);
         }
-        propertyType::key_type key = n.isBlack() ? "B" : "W";
+        propertyType::key_type key = n->isBlack() ? "B" : "W";
         property[key].push_back(str);
 
-        if (n.moveNumber > 0)
-            property["MN"].push_back( QString("%1").arg(n.moveNumber) );
+        if (n->moveNumber > 0)
+            property["MN"].push_back( QString("%1").arg(n->moveNumber) );
     }
 
-    if (!n.name.isEmpty())
-        property["N"].push_back(n.name);
-    else if (!n.comment.isEmpty())
-        property["C"].push_back(n.comment);
+    if (!n->name.isEmpty())
+        property["N"].push_back(n->name);
+    else if (!n->comment.isEmpty())
+        property["C"].push_back(n->comment);
 
     // marker
-    set(n.crosses);
-    set(n.circles);
-    set(n.triangles);
-    set(n.squares);
-    set(n.characters);
-    set(n.blackTerritories);
-    set(n.whiteTerritories);
-    set(n.stones);
+    set(n->crosses);
+    set(n->circles);
+    set(n->triangles);
+    set(n->squares);
+    set(n->characters);
+    set(n->blackTerritories);
+    set(n->whiteTerritories);
+    set(n->stones);
 
-    if (n.annotation & go::node::eGoodMove)
+    if (n->annotation & go::node::eGoodMove)
         property["TE"].push_back("1");
-    if (n.annotation & go::node::eVeryGoodMove)
+    if (n->annotation & go::node::eVeryGoodMove)
         property["TE"].push_back("2");
-    else if (n.annotation & go::node::eBadMove)
+    else if (n->annotation & go::node::eBadMove)
         property["BM"].push_back("1");
-    else if (n.annotation & go::node::eVeryBadMove)
+    else if (n->annotation & go::node::eVeryBadMove)
         property["BM"].push_back("2");
-    else if (n.annotation & go::node::eDoubtfulMove)
+    else if (n->annotation & go::node::eDoubtfulMove)
         property["DO"].push_back("");
-    else if (n.annotation & go::node::eInterestingMove)
+    else if (n->annotation & go::node::eInterestingMove)
         property["IT"].push_back("");
 
-    if (n.annotation & go::node::eEven)
+    if (n->annotation & go::node::eEven)
         property["DM"].push_back("1");
-    else if (n.annotation & go::node::eGoodForBlack)
+    else if (n->annotation & go::node::eGoodForBlack)
         property["GB"].push_back("1");
-    else if (n.annotation & go::node::eVeryGoodForBlack)
+    else if (n->annotation & go::node::eVeryGoodForBlack)
         property["GB"].push_back("2");
-    else if (n.annotation & go::node::eGoodForWhite)
+    else if (n->annotation & go::node::eGoodForWhite)
         property["GW"].push_back("1");
-    else if (n.annotation & go::node::eVeryGoodForWhite)
+    else if (n->annotation & go::node::eVeryGoodForWhite)
         property["GW"].push_back("2");
-    else if (n.annotation & go::node::eUnclear)
+    else if (n->annotation & go::node::eUnclear)
         property["UC"].push_back("1");
 
-    if (n.annotation & go::node::eHotspot)
+    if (n->annotation & go::node::eHotspot)
         property["HO"].push_back("1");
 
     return false;
@@ -289,8 +289,8 @@ bool sgf::node::set(const go::stoneList& stoneList){
     return true;
 }
 
-bool sgf::node::get(go::node& n, const QString& key, const QStringList& values) const{
-    go::informationNode* infoNode = dynamic_cast<go::informationNode*>(&n);
+bool sgf::node::get(go::nodePtr n, const QString& key, const QStringList& values) const{
+    go::informationNode* infoNode = dynamic_cast<go::informationNode*>(n.get());
 
     // game information
     if (infoNode && key == "PW")
@@ -351,52 +351,52 @@ bool sgf::node::get(go::node& n, const QString& key, const QStringList& values) 
 
     // comment
     else if (key == "C")
-        n.comment = values[0];
+        n->comment = values[0];
     else if (key == "N")
-        n.name = values[0];
+        n->name = values[0];
     else if (key == "MN")
-        n.moveNumber = values[0].toInt();
+        n->moveNumber = values[0].toInt();
 
     // mark
     else if (key == "MA" || key == "M")
-        addMark(n.crosses, values, mark::eCross);
+        addMark(n->crosses, values, mark::eCross);
     else if (key == "TR")
-        addMark(n.triangles, values, mark::eTriangle);
+        addMark(n->triangles, values, mark::eTriangle);
     else if (key == "CR")
-        addMark(n.circles, values, mark::eCircle);
+        addMark(n->circles, values, mark::eCircle);
     else if (key == "SQ")
-        addMark(n.squares, values, mark::eSquare);
+        addMark(n->squares, values, mark::eSquare);
     else if (key == "LB")
-        addMark(n.characters, values);
+        addMark(n->characters, values);
     else if (key == "TB")
-        addMark(n.blackTerritories, values, mark::eBlackTerritory);
+        addMark(n->blackTerritories, values, mark::eBlackTerritory);
     else if (key == "TW")
-        addMark(n.whiteTerritories, values, mark::eWhiteTerritory);
+        addMark(n->whiteTerritories, values, mark::eWhiteTerritory);
     else if (key == "AB" || key == "AW" || key == "AE")
-        addStone(n.stones, key, values);
+        addStone(n->stones, key, values);
 
     // annotation
     else if (key == "TE")
-        n.annotation |= values[0].toInt() > 1 ? go::node::eVeryGoodMove : go::node::eGoodMove;
+        n->annotation |= values[0].toInt() > 1 ? go::node::eVeryGoodMove : go::node::eGoodMove;
     else if (key == "BM")
-        n.annotation |= values[0].toInt() > 1 ? go::node::eVeryBadMove : go::node::eBadMove;
+        n->annotation |= values[0].toInt() > 1 ? go::node::eVeryBadMove : go::node::eBadMove;
     else if (key == "DO")
-        n.annotation |= go::node::eDoubtfulMove;
+        n->annotation |= go::node::eDoubtfulMove;
     else if (key == "IT")
-        n.annotation |= go::node::eInterestingMove;
+        n->annotation |= go::node::eInterestingMove;
 
     else if (key == "DM")
-        n.annotation |= go::node::eEven;
+        n->annotation |= go::node::eEven;
 
     else if (key == "GB")
-        n.annotation |= values[0].toInt() > 1 ? go::node::eVeryGoodForBlack : go::node::eGoodForBlack;
+        n->annotation |= values[0].toInt() > 1 ? go::node::eVeryGoodForBlack : go::node::eGoodForBlack;
     else if (key == "GW")
-        n.annotation |= values[0].toInt() > 1 ? go::node::eVeryGoodForWhite : go::node::eGoodForWhite;
+        n->annotation |= values[0].toInt() > 1 ? go::node::eVeryGoodForWhite : go::node::eGoodForWhite;
     else if (key == "UC")
-        n.annotation |= go::node::eUnclear;
+        n->annotation |= go::node::eUnclear;
 
     else if (key == "HO")
-        n.annotation |= go::node::eHotspot;
+        n->annotation |= go::node::eHotspot;
 
     return true;
 }
@@ -557,14 +557,14 @@ bool sgf::writeNode(QTextStream& stream, const node& n){
 
 bool sgf::get(go::data& data) const{
     data.clear();
-    get(root, &data.root);
+    get(root, data.root);
 
     return true;
 }
 
-go::node* sgf::get(const node& sgfNode, go::node* outNode) const{
+go::nodePtr sgf::get(const node& sgfNode, go::nodePtr outNode) const{
     // ノードを処理
-    go::node* newNode = NULL;
+    go::nodePtr newNode;
     switch(sgfNode.getNodeType()){
         case eBlack:
             newNode = go::createBlackNode(outNode);
@@ -578,26 +578,26 @@ go::node* sgf::get(const node& sgfNode, go::node* outNode) const{
             break;
 
         case eGameInformation:
-            sgfNode.get(*outNode);
+            sgfNode.get(outNode);
             break;
 
         case eRoot:
             break;
 
         default:
-            newNode = new go::node(outNode);
+            newNode.reset( new go::node(outNode) );
             break;
     }
 
     if (newNode){
         outNode->childNodes.push_back(newNode);
-        sgfNode.get(*newNode);
+        sgfNode.get(newNode);
     }
     else
         newNode = outNode;
 
     // 子要素を処理
-    go::node* childNode = newNode;
+    go::nodePtr childNode = newNode;
     nodeList::const_iterator iter = sgfNode.getChildNodes().begin();
     while (iter != sgfNode.getChildNodes().end()){
         childNode = get(**iter, childNode);
@@ -615,10 +615,10 @@ bool sgf::set(const go::data& data){
     gameInfo->set(data.root);
     root.getChildNodes().push_back(gameInfo);
 
-    return set(gameInfo, &data.root);
+    return set(gameInfo, data.root);
 }
 
-bool sgf::set(node* sgfNode, const go::node* goNode){
+bool sgf::set(node* sgfNode, const go::nodePtr goNode){
     if (goNode->childNodes.size() > 1){
         go::nodeList::const_iterator iter = goNode->childNodes.begin();
         while (iter != goNode->childNodes.end()){
@@ -627,7 +627,7 @@ bool sgf::set(node* sgfNode, const go::node* goNode){
             sgfNode->getChildNodes().push_back(branchNode);
 
             node* newNode = new node;
-            newNode->set( **iter );
+            newNode->set( *iter );
             branchNode->getChildNodes().push_back(newNode);
             set(newNode, *iter);
             ++iter;
@@ -635,7 +635,7 @@ bool sgf::set(node* sgfNode, const go::node* goNode){
     }
     else if (goNode->childNodes.size() == 1){
         node* newNode = new node;
-        newNode->set( *goNode->childNodes.front() );
+        newNode->set( goNode->childNodes.front() );
         sgfNode->getChildNodes().push_back(newNode);
         set(sgfNode, goNode->childNodes.front());
     }

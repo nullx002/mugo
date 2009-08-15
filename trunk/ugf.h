@@ -44,7 +44,7 @@ private:
     bool    readFigure(QString::iterator& first, QString::iterator& last);
     bool    readFigureText(QString::iterator& first, QString::iterator& last, int index);
 
-    bool get(dataList::const_iterator first, dataList::const_iterator last, go::node* parent) const;
+    bool get(dataList::const_iterator first, dataList::const_iterator last, go::nodePtr parent) const;
 
     dataList dataList_;
     QString title;

@@ -32,10 +32,10 @@ public:
 
             bool setProperty(const QString& key, const QStringList& values);
 
-            bool get(go::node& n) const;
-            bool get(go::node& n, const QString& key, const QStringList& values) const;
+            bool get(go::nodePtr n) const;
+            bool get(go::nodePtr n, const QString& key, const QStringList& values) const;
 
-            bool set(const go::node& n);
+            bool set(const go::nodePtr n);
             bool set(const go::markList& markList);
             bool set(const go::stoneList& markList);
 
@@ -80,8 +80,8 @@ protected:
 
     bool writeNode(QTextStream& stream, const node& n);
 
-    go::node* get(const node& sgfNode, go::node* outNode) const;
-    bool set(sgf::node* node, const go::node* node2);
+    go::nodePtr get(const node& sgfNode, go::nodePtr outNode) const;
+    bool set(sgf::node* node, const go::nodePtr node2);
 
     node root;
 };

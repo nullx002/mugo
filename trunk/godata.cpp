@@ -6,27 +6,27 @@
 namespace go{
 
 
-node* createBlackNode(node* parent){
-    node* newNode = new node(parent);
+nodePtr createBlackNode(nodePtr parent){
+    nodePtr newNode( new node(parent) );
     newNode->setBlack();
     return newNode;
 }
 
-node* createBlackNode(node* parent, int x, int y){
-    node* newNode = createBlackNode(parent);
+nodePtr createBlackNode(nodePtr parent, int x, int y){
+    nodePtr newNode( createBlackNode(parent) );
     newNode->setX(x);
     newNode->setY(y);
     return newNode;
 }
 
-node* createWhiteNode(node* parent){
-    node* newNode = new node(parent);
+nodePtr createWhiteNode(nodePtr parent){
+    nodePtr newNode( new node(parent) );
     newNode->setWhite();
     return newNode;
 }
 
-node* createWhiteNode(node* parent, int x, int y){
-    node* newNode = createWhiteNode(parent);
+nodePtr createWhiteNode(nodePtr parent, int x, int y){
+    nodePtr newNode( createWhiteNode(parent) );
     newNode->setX(x);
     newNode->setY(y);
     return newNode;
@@ -34,25 +34,19 @@ node* createWhiteNode(node* parent, int x, int y){
 
 
 
-node::node(data* data_) : goData(data_), parent(NULL), annotation(eNoAnnotation), black(false), white(false), moveNumber(-1){
+node::node(data* data_) : goData(data_), annotation(eNoAnnotation), black(false), white(false), moveNumber(-1){
 }
 
-node::node(node* parent_) : goData(parent_->goData), parent(parent_), annotation(eNoAnnotation), black(false), white(false), moveNumber(-1){
+node::node(nodePtr parent_) : goData(parent_->goData), parent(parent_), annotation(eNoAnnotation), black(false), white(false), moveNumber(-1){
 }
 
 void node::clear(){
-    parent = NULL;
-
-    nodeList::iterator iter = childNodes.begin();
-    while (iter != childNodes.end()){
-            delete *iter;
-            ++iter;
-    }
+    parent.reset();
     childNodes.clear();
 }
 
 bool node::isPass() const{
-    return position.x < 0 || position.y < 0 || position.x >= goData->root.xsize || position.y >= goData->root.ysize;
+    return position.x < 0 || position.y < 0 || position.x >= goData->root->xsize || position.y >= goData->root->ysize;
 }
 
 QString node::toString() const{
@@ -124,8 +118,7 @@ QString informationNode::nodeName() const{
 
 
 void data::clear(){
-    root.clear();
-    root = informationNode(this);
+    root.reset( new informationNode(this) );
 }
 
 

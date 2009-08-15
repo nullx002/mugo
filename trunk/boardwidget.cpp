@@ -41,7 +41,7 @@ BoardWidget::BoardWidget(QWidget *parent) :
 
     readSettings();
 
-    setCurrentNode(&goData.root);
+    setCurrentNode(goData.root);
 }
 
 BoardWidget::~BoardWidget()
@@ -161,7 +161,7 @@ void BoardWidget::onLButtonDown(QMouseEvent* e){
         addTerritory(boardX, boardY);
         int alive_b=0, alive_w=0, dead_b=0, dead_w=0, bt=0, wt=0;
         getCountTerritory(alive_b, alive_w, dead_b, dead_w, bt, wt);
-        emit updateTerritory(alive_b, alive_w, dead_b, dead_w, capturedBlack, capturedWhite, bt, wt, goData.root.komi);
+        emit updateTerritory(alive_b, alive_w, dead_b, dead_w, capturedBlack, capturedWhite, bt, wt, goData.root->komi);
     }
     else
         addMark(sgfX, sgfY, boardX, boardY);
@@ -170,6 +170,7 @@ void BoardWidget::onLButtonDown(QMouseEvent* e){
 /**
 */
 void BoardWidget::onRButtonDown(QMouseEvent*){
+    undoStack.undo();
 }
 
 /**
@@ -265,8 +266,8 @@ void BoardWidget::setData(const go::fileBase& data){
 
 void BoardWidget::setBoardSize(int xsize, int ysize){
     clear();
-    goData.root.xsize = xsize;
-    goData.root.ysize = ysize;
+    goData.root->xsize = xsize;
+    goData.root->ysize = ysize;
     createBoardBuffer();
     setCurrentNode();
 
@@ -276,7 +277,7 @@ void BoardWidget::setBoardSize(int xsize, int ysize){
 void BoardWidget::rotateSgf(){
     undoStack.beginMacro( tr("Rotate SGF") );
 
-    rotateSgf(&goData.root);
+    rotateSgf(goData.root);
 
     undoStack.endMacro();
 
@@ -286,31 +287,23 @@ void BoardWidget::rotateSgf(){
 }
 
 void BoardWidget::flipSgfHorizontally(){
-    undoStack.beginMacro( tr("Flip SGF Horizontally") );
+    FlipSGFHorizontallyCommand* command = new FlipSGFHorizontallyCommand(this);
+    flipSgf(goData.root, goData.root->xsize, 0, command);
+    undoStack.push(command);
 
-    flipSgf(&goData.root, goData.root.xsize, 0);
-
-    undoStack.endMacro();
-
-    createBoardBuffer();
     setDirty(true);
-    repaintBoard();
 }
 
 void BoardWidget::flipSgfVertically(){
-    undoStack.beginMacro( tr("Flip SGF Vertically") );
+    FlipSGFVerticallyCommand* command = new FlipSGFVerticallyCommand(this);
+    flipSgf(goData.root, 0, goData.root->ysize, command);
+    undoStack.push(command);
 
-    flipSgf(&goData.root, 0, goData.root.ysize);
-
-    undoStack.endMacro();
-
-    createBoardBuffer();
     setDirty(true);
-    repaintBoard();
 }
 
-void BoardWidget::rotateSgf(go::node* node){
-    int tmpX = goData.root.ysize - node->position.y - 1;
+void BoardWidget::rotateSgf(go::nodePtr node){
+    int tmpX = goData.root->ysize - node->position.y - 1;
     int tmpY = node->position.x;
     node->position.x = tmpX;
     node->position.y = tmpY;
@@ -336,7 +329,7 @@ void BoardWidget::rotateSgf(go::node* node){
 void BoardWidget::rotateStoneSgf(go::stoneList& stoneList){
     go::stoneList::iterator iter = stoneList.begin();
     while (iter != stoneList.end()){
-        int tmpX = goData.root.ysize - iter->p.y - 1;
+        int tmpX = goData.root->ysize - iter->p.y - 1;
         int tmpY = iter->p.x;
         iter->p.x = tmpX;
         iter->p.y = tmpY;
@@ -347,7 +340,7 @@ void BoardWidget::rotateStoneSgf(go::stoneList& stoneList){
 void BoardWidget::rotateMarkSgf(go::markList& markList){
     go::markList::iterator iter = markList.begin();
     while (iter != markList.end()){
-        int tmpX = goData.root.ysize - iter->p.y - 1;
+        int tmpX = goData.root->ysize - iter->p.y - 1;
         int tmpY = iter->p.x;
         iter->p.x = tmpX;
         iter->p.y = tmpY;
@@ -355,48 +348,56 @@ void BoardWidget::rotateMarkSgf(go::markList& markList){
     }
 }
 
-void BoardWidget::flipSgf(go::node* node, int xsize, int ysize){
+void BoardWidget::flipSgf(go::nodePtr node, int xsize, int ysize, QUndoCommand* command){
+    go::point p = node->position;
     if (xsize)
-        node->position.x = xsize - node->position.x - 1;
+        p.x = xsize - p.x - 1;
     if (ysize)
-        node->position.y = ysize - node->position.y - 1;
-
-    emit nodeModified(node);
+        p.y = ysize - p.y - 1;
+    new MovePositionCommand(this, node, p, command);
 
     go::nodeList::iterator iter = node->childNodes.begin();
     while (iter != node->childNodes.end()){
-        flipSgf(*iter, xsize, ysize);
+        flipSgf(*iter, xsize, ysize, command);
         ++iter;
     }
 
-    flipStoneSgf(node->stones, xsize, ysize);
-    flipMarkSgf(node->crosses, xsize, ysize);
-    flipMarkSgf(node->squares, xsize, ysize);
-    flipMarkSgf(node->triangles, xsize, ysize);
-    flipMarkSgf(node->circles, xsize, ysize);
-    flipMarkSgf(node->characters, xsize, ysize);
-    flipMarkSgf(node->blackTerritories, xsize, ysize);
-    flipMarkSgf(node->whiteTerritories, xsize, ysize);
+    flipStoneSgf(node, node->stones, xsize, ysize, command);
+    flipMarkSgf(node, node->crosses, xsize, ysize, command);
+    flipMarkSgf(node, node->squares, xsize, ysize, command);
+    flipMarkSgf(node, node->triangles, xsize, ysize, command);
+    flipMarkSgf(node, node->circles, xsize, ysize, command);
+    flipMarkSgf(node, node->characters, xsize, ysize, command);
+    flipMarkSgf(node, node->blackTerritories, xsize, ysize, command);
+    flipMarkSgf(node, node->whiteTerritories, xsize, ysize, command);
 }
 
-void BoardWidget::flipStoneSgf(go::stoneList& stoneList, int xsize, int ysize){
+void BoardWidget::flipStoneSgf(go::nodePtr node, go::stoneList& stoneList, int xsize, int ysize, QUndoCommand* command){
     go::stoneList::iterator iter = stoneList.begin();
     while (iter != stoneList.end()){
+        go::point pos = iter->p;
         if (xsize)
-            iter->p.x = xsize - iter->p.x - 1;
+            pos.x = xsize - pos.x - 1;
         if (ysize)
-            iter->p.y = ysize - iter->p.y - 1;
+            pos.y = ysize - pos.y - 1;
+
+        new MoveStoneCommand(this, node, &(*iter), pos, command);
+
         ++iter;
     }
 }
 
-void BoardWidget::flipMarkSgf(go::markList& markList, int xsize, int ysize){
+void BoardWidget::flipMarkSgf(go::nodePtr node, go::markList& markList, int xsize, int ysize, QUndoCommand* command){
     go::markList::iterator iter = markList.begin();
     while (iter != markList.end()){
+        go::point pos = iter->p;
         if (xsize)
-            iter->p.x = xsize - iter->p.x - 1;
+            pos.x = xsize - pos.x - 1;
         if (ysize)
-            iter->p.y = ysize - iter->p.y - 1;
+            pos.y = ysize - pos.y - 1;
+
+        new MoveMarkCommand(this, node, &(*iter), pos, command);
+
         ++iter;
     }
 }
@@ -448,7 +449,7 @@ void BoardWidget::clear(){
 
 /**
 */
-go::node* BoardWidget::findNodeFromMoveNumber(int moveNumber){
+go::nodePtr BoardWidget::findNodeFromMoveNumber(int moveNumber){
     go::nodeList::iterator iter = nodeList.begin();
 
     int number = 0;
@@ -458,13 +459,71 @@ go::node* BoardWidget::findNodeFromMoveNumber(int moveNumber){
         ++iter;
     }
 
-    return NULL;
+    return go::nodePtr();
 }
 
 /**
 * public slot
 */
-void BoardWidget::addNode(go::node* parent, go::node* node, bool select){
+void BoardWidget::addNodeCommand(go::nodePtr parentNode, go::nodePtr childNode, bool select){
+    undoStack.push( new AddNodeCommand(this, parentNode, childNode, select) );
+}
+
+/**
+* public slot
+*/
+void BoardWidget::deleteNodeCommand(go::nodePtr node, bool deleteChildren){
+    if( node == goData.root )
+        return;
+
+    undoStack.push( new DeleteNodeCommand(this, node, deleteChildren) );
+}
+
+/**
+* public slot
+*/
+void BoardWidget::setMoveNumberCommand(go::nodePtr node, int moveNumber){
+    if( node->moveNumber == moveNumber )
+        return;
+
+    undoStack.push( new SetMoveNumberCommand(this, node, moveNumber) );
+}
+
+/**
+* public slot
+*/
+void BoardWidget::unsetMoveNumberCommand(go::nodePtr node){
+    if( node->moveNumber == -1 )
+        return;
+
+    undoStack.push( new UnsetMoveNumberCommand(this, node) );
+}
+
+/**
+* public slot
+*/
+void BoardWidget::setNodeNameCommand(go::nodePtr node, const QString& nodeName){
+    if( node->name == nodeName)
+        return;
+
+    undoStack.push( new SetNodeNameCommand(this, node, nodeName) );
+}
+
+/**
+* public slot
+*/
+void BoardWidget::setCommentCommand(go::nodePtr node, const QString& comment){
+    if( node->comment == comment)
+        return;
+
+//    undoStack.push( new SetCommentCommand(this, node, comment) );
+    node->comment = comment;
+}
+
+/**
+* public slot
+*/
+void BoardWidget::addNode(go::nodePtr parent, go::nodePtr node, bool select){
     parent->childNodes.push_back(node);
     node->parent = parent;
 
@@ -478,31 +537,39 @@ void BoardWidget::addNode(go::node* parent, go::node* node, bool select){
 /**
 * public slot
 */
-void BoardWidget::deleteNode(go::node* node){
-    if( node == &goData.root )
+void BoardWidget::deleteNode(go::nodePtr node, bool deleteChildren){
+    if( node == goData.root )
         return;
 
-    go::node* parent = node->parent;
+    go::nodePtr parent = node->parent;
+    setCurrentNode(parent);
+
     if (parent){
         go::nodeList::iterator iter = qFind(parent->childNodes.begin(), parent->childNodes.end(), node);
+
+        if (deleteChildren == false){
+            go::nodeList::iterator iter2 = node->childNodes.begin();
+            while (iter2 != node->childNodes.end()){
+                parent->childNodes.insert(iter, *iter2);
+                ++iter2;
+            }
+        }
+
         if (iter != parent->childNodes.end())
             parent->childNodes.erase(iter);
     }
 
     setDirty(true);
-    emit nodeDeleted(node);
+    emit nodeDeleted(node, deleteChildren);
 
     go::nodeList::iterator iter = qFind(nodeList.begin(), nodeList.end(), node);
     nodeList.erase(iter, nodeList.end());
-    setCurrentNode(node->parent);
-
-    delete node;
 }
 
 /**
 * public slot
 */
-void BoardWidget::modifyNode(go::node* node, bool recreateBoardBuffer){
+void BoardWidget::modifyNode(go::nodePtr node, bool recreateBoardBuffer){
     if (recreateBoardBuffer)
         createBoardBuffer();
     repaintBoard(false);
@@ -513,12 +580,12 @@ void BoardWidget::modifyNode(go::node* node, bool recreateBoardBuffer){
 /**
 * public slot
 */
-void BoardWidget::setCurrentNode(go::node* node){
+void BoardWidget::setCurrentNode(go::nodePtr node){
     if (editMode == eCountTerritory)
         return;
 
     if (node == NULL)
-        node = &goData.root;
+        node = goData.root;
 
     if (currentNode == node && !nodeList.empty())
         return;
@@ -542,7 +609,7 @@ void BoardWidget::setCurrentNode(go::node* node){
 void BoardWidget::createNodeList(){
     nodeList.clear();
 
-    go::node* node = currentNode;
+    go::nodePtr node = currentNode;
     while ((node = node->parent) != NULL)
         nodeList.push_front(node);
 
@@ -556,8 +623,8 @@ void BoardWidget::createNodeList(){
 /**
 */
 void BoardWidget::createBoardBuffer(){
-    xsize = (rotateBoard_ == 0 || rotateBoard_ == 2) ? goData.root.xsize : goData.root.ysize;
-    ysize = (rotateBoard_ == 0 || rotateBoard_ == 2) ? goData.root.ysize : goData.root.xsize;
+    xsize = (rotateBoard_ == 0 || rotateBoard_ == 2) ? goData.root->xsize : goData.root->ysize;
+    ysize = (rotateBoard_ == 0 || rotateBoard_ == 2) ? goData.root->ysize : goData.root->xsize;
 
     capturedBlack = 0;
     capturedWhite = 0;
@@ -934,7 +1001,7 @@ void BoardWidget::drawTerritories(QPainter& p, go::markList::iterator first, go:
 
 /**
 */
-void BoardWidget::drawCurrentMark(QPainter& p, go::node* node){
+void BoardWidget::drawCurrentMark(QPainter& p, go::nodePtr node){
     p.save();
 
     QFont font(p.font());
@@ -968,7 +1035,7 @@ void BoardWidget::eraseBackground(QPainter& p, int x, int y){
 
 /**
 */
-void BoardWidget::putStone(go::node* node, int moveNumber){
+void BoardWidget::putStone(go::nodePtr node, int moveNumber){
     isBlack = node->isWhite();
 
     if (node->isStone()){
@@ -1101,7 +1168,7 @@ void BoardWidget::dead(int* tmp){
                     ++capturedWhite;
 
                 board[y][x].color = go::empty;
-                board[y][x].node  = NULL;
+                board[y][x].node.reset();
             }
         }
     }
@@ -1128,13 +1195,13 @@ void BoardWidget::addStone(int sgfX, int sgfY, int boardX, int boardY){
         return;
     }
 
-    go::node* n;
+    go::nodePtr n;
     if (isBlack)
         n = go::createBlackNode(currentNode, sgfX, sgfY);
     else
         n = go::createWhiteNode(currentNode, sgfX, sgfY);
 
-    addNode(currentNode, n);
+    addNodeCommand(currentNode, n);
 }
 
 /**
@@ -1277,8 +1344,8 @@ void BoardWidget::removeMark(go::markList& markList, const go::point& p){
     }
 }
 
-void BoardWidget::addStone(go::node* node, const go::point& sp, const go::point& bp, go::color c){
-    go::node* stoneNode = node->isStone() ? new go::node(node) : node;
+void BoardWidget::addStone(go::nodePtr node, const go::point& sp, const go::point& bp, go::color c){
+    go::nodePtr stoneNode( node->isStone() ? go::nodePtr(new go::node(node)) : node );
     go::stoneList::iterator iter = stoneNode->stones.begin();
     while (iter != stoneNode->stones.end()){
         if (iter->p == sp) {
@@ -1311,9 +1378,16 @@ void BoardWidget::addStone(go::node* node, const go::point& sp, const go::point&
             ++iter;
         }
 
-        addNode(node, stoneNode);
+        addNodeCommand(node, stoneNode);
     }
 
+}
+
+QString BoardWidget::toString(go::nodePtr node) const{
+    if (node->isPass())
+        return "Pass";
+    else
+        return getXYString(node->position.x, node->position.y);
 }
 
 QString BoardWidget::getXString(int x) const{
@@ -1325,11 +1399,11 @@ QString BoardWidget::getXString(int x) const{
 }
 
 QString  BoardWidget::getYString(int y) const{
-    return QString("%1").arg(goData.root.ysize - y);
+    return QString("%1").arg(goData.root->ysize - y);
 }
 
 QString  BoardWidget::getXYString(int x, int y) const{
-    if (x < 0 || x >= goData.root.xsize || y < 0 || y >= goData.root.ysize)
+    if (x < 0 || x >= goData.root->xsize || y < 0 || y >= goData.root->ysize)
         return "";
 
     QString s = getXString(x);
@@ -1357,16 +1431,16 @@ void BoardWidget::boardToSgfCoordinate(int boardX, int boardY, int& sgfX, int& s
 
     if (flipBoardHorizontally_){
         if (rotateBoard_ == 0 || rotateBoard_ == 2)
-            sgfX = goData.root.xsize - sgfX - 1;
+            sgfX = goData.root->xsize - sgfX - 1;
         else
-            sgfY = goData.root.ysize - sgfY - 1;
+            sgfY = goData.root->ysize - sgfY - 1;
     }
 
     if (flipBoardVertically_){
         if (rotateBoard_ == 0 || rotateBoard_ == 2)
-            sgfY = goData.root.ysize - sgfY - 1;
+            sgfY = goData.root->ysize - sgfY - 1;
         else
-            sgfX = goData.root.xsize - sgfX - 1;
+            sgfX = goData.root->xsize - sgfX - 1;
     }
 }
 
@@ -1401,7 +1475,7 @@ void BoardWidget::setCountTerritoryMode(bool countMode){
         countTerritory();
         int alive_b=0, alive_w=0, dead_b=0, dead_w=0, bt=0, wt=0;
         getCountTerritory(alive_b, alive_w, dead_b, dead_w, bt, wt);
-        emit updateTerritory(alive_b, alive_w, dead_b, dead_w, capturedBlack, capturedWhite, bt, wt, goData.root.komi);
+        emit updateTerritory(alive_b, alive_w, dead_b, dead_w, capturedBlack, capturedWhite, bt, wt, goData.root->komi);
     }
     else{
         editMode = eAlternateMove;
@@ -1537,29 +1611,214 @@ void BoardWidget::getCountTerritory(int& alive_b, int& alive_w, int& dead_b, int
 }
 
 
-AddNodeCommand::AddNodeCommand(BoardWidget* boardWidget, go::node* parentNode, go::node* childNode, QUndoCommand* parent) : QUndoCommand(parent){
-    this->parentNode = parentNode;
-    this->childNode  = childNode;
+AddNodeCommand::AddNodeCommand(BoardWidget* _boardWidget, go::nodePtr _parentNode, go::nodePtr _childNode, bool _select, QUndoCommand* parent)
+    : QUndoCommand(parent)
+    , boardWidget(_boardWidget)
+    , parentNode(_parentNode)
+    , childNode(_childNode)
+    , select(_select)
+{
 }
 
 void AddNodeCommand::redo(){
-    setText( QObject::tr("add") );
-    parentNode->childNodes.push_back(childNode);
-    childNode->parent = parentNode;
+    setText( QString(tr("Add %1")).arg( boardWidget->toString(childNode) ) );
+    boardWidget->addNode(parentNode, childNode, select);
 }
 
 void AddNodeCommand::undo(){
-    go::nodeList::iterator iter = qFind(parentNode->childNodes.begin(),parentNode->childNodes.end(), childNode);
-    parentNode->childNodes.erase(iter);
+    boardWidget->deleteNode(childNode);
 }
 
-DeleteNodeCommand::DeleteNodeCommand(BoardWidget* boardWidget, go::node* node, QUndoCommand* parent) : QUndoCommand(parent){
-    this->node = node;
+DeleteNodeCommand::DeleteNodeCommand(BoardWidget* _boardWidget, go::nodePtr _node, bool _deleteChildren, QUndoCommand* parent)
+    : QUndoCommand(parent)
+    , boardWidget(_boardWidget)
+    , node(_node)
+    , deleteChildren(_deleteChildren)
+{
 }
 
 void DeleteNodeCommand::redo(){
-    setText( QObject::tr("delete") );
+    setText( QString(tr("Delete %1")).arg( boardWidget->toString(node) ) );
+    boardWidget->deleteNode(node, deleteChildren);
 }
 
 void DeleteNodeCommand::undo(){
+    boardWidget->addNode(node->parent, node);
+}
+
+SetMoveNumberCommand::SetMoveNumberCommand(BoardWidget* _boardWidget, go::nodePtr _node, int _moveNumber, QUndoCommand* parent)
+    : QUndoCommand(parent)
+    , boardWidget(_boardWidget)
+    , node(_node)
+    , moveNumber(_moveNumber)
+{
+    oldMoveNumber = node->moveNumber;
+}
+
+void SetMoveNumberCommand::redo(){
+    setText( QString(tr("Set Move Number %1")).arg( boardWidget->toString(node) ) );
+    node->moveNumber = moveNumber;
+    boardWidget->modifyNode(node);
+}
+
+void SetMoveNumberCommand::undo(){
+    node->moveNumber = oldMoveNumber;
+    boardWidget->modifyNode(node);
+}
+
+UnsetMoveNumberCommand::UnsetMoveNumberCommand(BoardWidget* _boardWidget, go::nodePtr _node, QUndoCommand* parent)
+    : QUndoCommand(parent)
+    , boardWidget(_boardWidget)
+    , node(_node)
+{
+    oldMoveNumber = node->moveNumber;
+}
+
+void UnsetMoveNumberCommand::redo(){
+    setText( QString(tr("Unset Move Number %1")).arg( boardWidget->toString(node) ) );
+    node->moveNumber = -1;
+    boardWidget->modifyNode(node);
+}
+
+void UnsetMoveNumberCommand::undo(){
+    node->moveNumber = oldMoveNumber;
+    boardWidget->modifyNode(node);
+}
+
+SetNodeNameCommand::SetNodeNameCommand(BoardWidget* _boardWidget, go::nodePtr _node, const QString& _nodeName, QUndoCommand* parent)
+    : QUndoCommand(parent)
+    , boardWidget(_boardWidget)
+    , node(_node)
+    , nodeName(_nodeName)
+{
+    oldNodeName = node->name;
+}
+
+void SetNodeNameCommand::redo(){
+    setText( QString(tr("Set Node Name %1")).arg( boardWidget->toString(node) ) );
+    node->name = nodeName;
+    boardWidget->modifyNode(node);
+}
+
+void SetNodeNameCommand::undo(){
+    node->name = oldNodeName;
+    boardWidget->modifyNode(node);
+}
+
+SetCommentCommand::SetCommentCommand(BoardWidget* _boardWidget, go::nodePtr _node, const QString& _comment, QUndoCommand* parent)
+    : QUndoCommand(parent)
+    , boardWidget(_boardWidget)
+    , node(_node)
+    , comment(_comment)
+{
+    oldComment = node->comment;
+}
+
+void SetCommentCommand::redo(){
+    setText( QString(tr("Set Comment %1")).arg( boardWidget->toString(node) ) );
+    node->comment = comment;
+    boardWidget->modifyNode(node);
+}
+
+void SetCommentCommand::undo(){
+    node->comment = oldComment;
+    boardWidget->modifyNode(node);
+}
+
+MovePositionCommand::MovePositionCommand(BoardWidget* _boardWidget, go::nodePtr _node, const go::point& _pos, QUndoCommand* parent)
+    : QUndoCommand(parent)
+    , boardWidget(_boardWidget)
+    , node(_node)
+    , pos(_pos)
+{
+    oldPos = node->position;
+}
+
+void MovePositionCommand::redo(){
+    setText( QString(tr("Move Position %1")).arg( boardWidget->toString(node) ) );
+    node->position.x = pos.x;
+    node->position.y = pos.y;
+}
+
+void MovePositionCommand::undo(){
+    node->position.x = oldPos.x;
+    node->position.y = oldPos.y;
+}
+
+MoveStoneCommand::MoveStoneCommand(BoardWidget* _boardWidget, go::nodePtr _node, go::stone* _stone, const go::point& _pos, QUndoCommand* parent)
+    : QUndoCommand(parent)
+    , boardWidget(_boardWidget)
+    , node(_node)
+    , stone(_stone)
+    , pos(_pos)
+{
+    oldPos = stone->p;
+}
+
+void MoveStoneCommand::redo(){
+    setText( QString(tr("Move Stone %1")).arg( boardWidget->toString(node) ) );
+    stone->p = pos;
+}
+
+void MoveStoneCommand::undo(){
+    stone->p = oldPos;
+}
+
+MoveMarkCommand::MoveMarkCommand(BoardWidget* _boardWidget, go::nodePtr _node, go::mark* _mark, const go::point& _pos, QUndoCommand* parent)
+    : QUndoCommand(parent)
+    , boardWidget(_boardWidget)
+    , node(_node)
+    , mark(_mark)
+    , pos(_pos)
+{
+    oldPos = mark->p;
+}
+
+void MoveMarkCommand::redo(){
+    setText( QString(tr("Move Mark %1")).arg( boardWidget->toString(node) ) );
+    mark->p = pos;
+}
+
+void MoveMarkCommand::undo(){
+    mark->p = oldPos;
+}
+
+FlipSGFHorizontallyCommand::FlipSGFHorizontallyCommand(BoardWidget* _boardWidget, QUndoCommand* parent)
+    : QUndoCommand(parent)
+    , boardWidget(_boardWidget)
+{
+}
+
+void FlipSGFHorizontallyCommand::redo(){
+    QUndoCommand::redo();
+    setText( tr("Flip SGF Horizontally") );
+
+    boardWidget->createBoardBuffer();
+    boardWidget->repaintBoard();
+}
+
+void FlipSGFHorizontallyCommand::undo(){
+    QUndoCommand::undo();
+    boardWidget->createBoardBuffer();
+    boardWidget->repaintBoard();
+}
+
+FlipSGFVerticallyCommand::FlipSGFVerticallyCommand(BoardWidget* _boardWidget, QUndoCommand* parent)
+    : QUndoCommand(parent)
+    , boardWidget(_boardWidget)
+{
+}
+
+void FlipSGFVerticallyCommand::redo(){
+    QUndoCommand::redo();
+    setText( tr("Flip SGF Vertically") );
+
+    boardWidget->createBoardBuffer();
+    boardWidget->repaintBoard();
+}
+
+void FlipSGFVerticallyCommand::undo(){
+    QUndoCommand::undo();
+    boardWidget->createBoardBuffer();
+    boardWidget->repaintBoard();
 }
