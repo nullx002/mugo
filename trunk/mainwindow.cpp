@@ -29,6 +29,7 @@ MainWindow::MainWindow(QWidget *parent)
     // undo
     undoGroup.setActiveStack(&ui->boardWidget->undoStack);
     ui->undoView->setGroup(&undoGroup);
+    ui->undoDockWidget->setVisible(false);
 
 // set sound files
 //#ifdef Q_WS_WIN
@@ -74,6 +75,7 @@ MainWindow::MainWindow(QWidget *parent)
     // window menu
     ui->menu_Window->addAction( ui->commentDockWidget->toggleViewAction() );
     ui->menu_Window->addAction( ui->branchDockWidget->toggleViewAction() );
+    ui->menu_Window->addAction( ui->undoDockWidget->toggleViewAction() );
 
     // language menu
     QSettings settings(AUTHOR, APPNAME);
@@ -1414,8 +1416,6 @@ bool MainWindow::fileClose(){
     setCaption();
 
     ui->actionReload->setEnabled(false);
-
-    undoGroup.activeStack()->clear();
 
     return true;
 }
