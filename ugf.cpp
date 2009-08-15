@@ -32,31 +32,31 @@ bool ugf::saveStream(QTextStream& /*stream*/){
 bool ugf::get(go::data& data) const{
     data.clear();
 
-    data.root.gameName = title;
-    data.root.place = place;
-    data.root.date = date;
-    data.root.rule = rule;
-    data.root.xsize = size;
-    data.root.ysize = size;
-    data.root.handicap = handicap;
-    data.root.komi = komi;
-    data.root.result = winner;
-    data.root.user = writer;
-    data.root.copyright = copyright;
-    data.root.whitePlayer = whitePlayer;
-    data.root.whiteRank = whiteRank;
-    data.root.blackPlayer = blackPlayer;
-    data.root.blackRank = blackRank;
+    data.root->gameName = title;
+    data.root->place = place;
+    data.root->date = date;
+    data.root->rule = rule;
+    data.root->xsize = size;
+    data.root->ysize = size;
+    data.root->handicap = handicap;
+    data.root->komi = komi;
+    data.root->result = winner;
+    data.root->user = writer;
+    data.root->copyright = copyright;
+    data.root->whitePlayer = whitePlayer;
+    data.root->whiteRank = whiteRank;
+    data.root->blackPlayer = blackPlayer;
+    data.root->blackRank = blackRank;
 
     dataList::const_iterator first = dataList_.begin();
-    data.root.comment = first->comment;
+    data.root->comment = first->comment;
     markerList::const_iterator marker = first->markers.begin();
     while (marker != first->markers.end()){
-        data.root.characters.push_back( go::mark(marker->x, marker->y, marker->str) );
+        data.root->characters.push_back( go::mark(marker->x, marker->y, marker->str) );
         ++marker;
     }
 
-    return get(++first, dataList_.end(), &data.root);
+    return get(++first, dataList_.end(), data.root);
 }
 
 bool ugf::set(const go::data& /*data*/){
@@ -222,11 +222,11 @@ bool ugf::readFigureText(QString::iterator& first, QString::iterator& last, int 
     return true;
 }
 
-bool ugf::get(dataList::const_iterator first, dataList::const_iterator last, go::node* parent) const{
+bool ugf::get(dataList::const_iterator first, dataList::const_iterator last, go::nodePtr parent) const{
     if (first == last)
         return true;
 
-    node* node;
+    nodePtr node;
     if (first->color == go::black)
         node = go::createBlackNode(parent, first->x, first->y);
     else

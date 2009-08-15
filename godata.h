@@ -8,6 +8,7 @@
 #include <QLinkedList>
 #include <QMap>
 #include <QTextCodec>
+#include <boost/shared_ptr.hpp>
 
 namespace go{
 
@@ -80,16 +81,16 @@ public:
 
 typedef QLinkedList<mark>  markList;
 typedef QLinkedList<stone> stoneList;
-
 class data;
-class node;
-typedef QLinkedList<node*> nodeList;
 
 
 class node{
     Q_DECLARE_TR_FUNCTIONS(go::node)
 
 public:
+    typedef boost::shared_ptr<node> nodePtr;
+    typedef QLinkedList<nodePtr> nodeList;
+
     enum eAnnotation{
         eNoAnnotation = 0x0000,
         eGoodMove = 0x0001,
@@ -108,7 +109,7 @@ public:
     };
 
     explicit node(data* data_);
-    explicit node(node* parent);
+    explicit node(nodePtr parent);
     virtual ~node(){  clear();  }
 
     void clear();
@@ -144,7 +145,7 @@ public:
 //protected:
     // node
     data* goData;
-    node* parent;
+    nodePtr parent;
     nodeList  childNodes;
     QString   name;
     markList  crosses;
@@ -172,7 +173,7 @@ class informationNode : public node{
 
 public:
     explicit informationNode(data* data_) : node(data_){ initialize(); }
-    explicit informationNode(node* parent) : node(parent){ initialize(); }
+    explicit informationNode(nodePtr parent) : node(parent){ initialize(); }
 
     virtual bool isStone() const{ return false; }
 
@@ -219,11 +220,11 @@ class data{
 public:
     enum eRule{eJapanese, eChinese};
 
-    data() : root(this){}
+    data() : root(new informationNode(this)){}
 
     void clear();
 
-    informationNode root;
+    boost::shared_ptr<informationNode> root;
 };
 
 
@@ -247,11 +248,16 @@ public:
 
 
 
-node* createBlackNode(node* parent);
-node* createBlackNode(node* parent, int x, int y);
-node* createWhiteNode(node* parent);
-node* createWhiteNode(node* parent, int x, int y);
+typedef boost::shared_ptr<node> nodePtr;
+typedef boost::shared_ptr<informationNode> informationPtr;
+typedef node::nodeList nodeList;
 
+
+
+nodePtr createBlackNode(nodePtr parent);
+nodePtr createBlackNode(nodePtr parent, int x, int y);
+nodePtr createWhiteNode(nodePtr parent);
+nodePtr createWhiteNode(nodePtr parent, int x, int y);
 
 
 }

@@ -12,7 +12,7 @@
 #include "setupdialog.h"
 #include "ui_mainwindow.h"
 
-Q_DECLARE_METATYPE(go::node*);
+Q_DECLARE_METATYPE(go::nodePtr);
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -26,7 +26,9 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    // undo
     undoGroup.setActiveStack(&ui->boardWidget->undoStack);
+    ui->undoView->setGroup(&undoGroup);
 
 // set sound files
 //#ifdef Q_WS_WIN
@@ -231,7 +233,7 @@ void MainWindow::openRecentFile(){
 * Edit -> Game Information
 */
 void MainWindow::on_actionGameInformation_triggered(){
-    GameInformationDialog dlg(this, &ui->boardWidget->getData().root);
+    GameInformationDialog dlg(this, ui->boardWidget->getData().root.get());
     if (dlg.exec() != QDialog::Accepted)
         return;
 
@@ -244,8 +246,8 @@ void MainWindow::on_actionGameInformation_triggered(){
 * Edit -> Pass
 */
 void MainWindow::on_actionPass_triggered(){
-    go::node* currentNode = ui->boardWidget->getCurrentNode();
-    go::node* node;
+    go::nodePtr currentNode = ui->boardWidget->getCurrentNode();
+    go::nodePtr node;
     if (currentNode->isBlack())
         node = go::createWhiteNode(currentNode);
     else
@@ -451,7 +453,7 @@ void MainWindow::on_actionHotspot_triggered(){
 * Edit -> Move Number -> Set
 */
 void MainWindow::on_actionSetMoveNumber_triggered(){
-    go::node* node = ui->boardWidget->getCurrentNode();
+    go::nodePtr node = ui->boardWidget->getCurrentNode();
     if (!node->isStone())
         return;
 
@@ -465,9 +467,7 @@ void MainWindow::on_actionSetMoveNumber_triggered(){
     if (dlg.exec() != QDialog::Accepted)
         return;
 
-    node->moveNumber = dlg.intValue();
-
-    ui->boardWidget->modifyNode(node, true);
+    ui->boardWidget->setMoveNumberCommand(node, dlg.intValue());
 }
 
 /**
@@ -475,9 +475,8 @@ void MainWindow::on_actionSetMoveNumber_triggered(){
 * Edit -> Move Number -> Unset
 */
 void MainWindow::on_actionUnsetMoveNumber_triggered(){
-    go::node* node = ui->boardWidget->getCurrentNode();
-    node->moveNumber = -1;
-    ui->boardWidget->modifyNode(node, true);
+    go::nodePtr node = ui->boardWidget->getCurrentNode();
+    ui->boardWidget->unsetMoveNumberCommand(node);
 }
 
 /**
@@ -485,18 +484,13 @@ void MainWindow::on_actionUnsetMoveNumber_triggered(){
 * Edit -> Edit Node Name
 */
 void MainWindow::on_actionEditNodeName_triggered(){
-    go::node* node = ui->boardWidget->getCurrentNode();
+    go::nodePtr node = ui->boardWidget->getCurrentNode();
     QInputDialog dlg(this);
     dlg.setLabelText( tr("Input node name") );
     dlg.setTextValue(node->name);
     if (dlg.exec() != QDialog::Accepted)
         return;
-
-    if (dlg.textValue() == node->name)
-        return;
-
-    node->name = dlg.textValue();
-    ui->boardWidget->modifyNode(node);
+    ui->boardWidget->setNodeNameCommand(node, dlg.textValue());
 }
 
 /**
@@ -600,8 +594,8 @@ void MainWindow::on_actionEncodingKorean_triggered(){
 * Traverse -> First Move
 */
 void MainWindow::on_actionFirstMove_triggered(){
-    go::node* node = ui->boardWidget->getCurrentNode();
-    ui->boardWidget->setCurrentNode( &node->goData->root );
+    go::nodePtr node = ui->boardWidget->getCurrentNode();
+    ui->boardWidget->setCurrentNode( node->goData->root );
 }
 
 /**
@@ -609,7 +603,7 @@ void MainWindow::on_actionFirstMove_triggered(){
 * Traverse -> Fast Rewind
 */
 void MainWindow::on_actionFastRewind_triggered(){
-    go::node* node = ui->boardWidget->getCurrentNode();
+    go::nodePtr node = ui->boardWidget->getCurrentNode();
     if (node->parent == NULL)
         return;
 
@@ -627,7 +621,7 @@ void MainWindow::on_actionFastRewind_triggered(){
 * Traverse -> Previous Move
 */
 void MainWindow::on_actionPreviousMove_triggered(){
-    go::node* node = ui->boardWidget->getCurrentNode();
+    go::nodePtr node = ui->boardWidget->getCurrentNode();
     if (node->parent)
         ui->boardWidget->setCurrentNode(node->parent);
 }
@@ -648,7 +642,7 @@ void MainWindow::on_actionNextMove_triggered(){
 * Traverse -> Fast Forward
 */
 void MainWindow::on_actionFastForward_triggered(){
-    go::node* node = ui->boardWidget->getCurrentNode();
+    go::nodePtr node = ui->boardWidget->getCurrentNode();
     if (node->childNodes.empty())
         return;
 
@@ -667,7 +661,7 @@ void MainWindow::on_actionFastForward_triggered(){
 */
 void MainWindow::on_actionMoveLast_triggered(){
     const go::nodeList& nodeList = ui->boardWidget->getCurrentNodeList();
-    go::node* node = nodeList.back();
+    go::nodePtr node = nodeList.back();
     ui->boardWidget->setCurrentNode(node);
 }
 
@@ -676,7 +670,7 @@ void MainWindow::on_actionMoveLast_triggered(){
 * Traverse -> Back to parent
 */
 void MainWindow::on_actionBackToParent_triggered(){
-    go::node* node = ui->boardWidget->getCurrentNode();
+    go::nodePtr node = ui->boardWidget->getCurrentNode();
     while(node->parent){
         node = node->parent;
         if (node->childNodes.size() > 1)
@@ -690,8 +684,8 @@ void MainWindow::on_actionBackToParent_triggered(){
 * Traverse -> Previous Branch
 */
 void MainWindow::on_actionPreviousBranch_triggered(){
-    go::node* node   = ui->boardWidget->getCurrentNode();
-    go::node* parent = node->parent;
+    go::nodePtr node   = ui->boardWidget->getCurrentNode();
+    go::nodePtr parent = node->parent;
     while(parent){
         if (parent->childNodes.size() > 1)
             break;
@@ -714,8 +708,8 @@ void MainWindow::on_actionPreviousBranch_triggered(){
 * Traverse -> Next Branch
 */
 void MainWindow::on_actionNextBranch_triggered(){
-    go::node* node   = ui->boardWidget->getCurrentNode();
-    go::node* parent = node->parent;
+    go::nodePtr node   = ui->boardWidget->getCurrentNode();
+    go::nodePtr parent = node->parent;
     while(parent){
         if (parent->childNodes.size() > 1)
             break;
@@ -744,7 +738,7 @@ void MainWindow::on_actionJumpToMoveNumber_triggered(){
     if (dlg.exec() != QDialog::Accepted)
         return;
 
-    go::node* node = ui->boardWidget->findNodeFromMoveNumber( dlg.intValue() );
+    go::nodePtr node = ui->boardWidget->findNodeFromMoveNumber( dlg.intValue() );
     if (node)
         ui->boardWidget->setCurrentNode(node);
 }
@@ -1105,7 +1099,7 @@ void MainWindow::on_actionAboutQT_triggered(){
 * Slot
 * new node was created by BoardWidget.
 */
-void MainWindow::on_boardWidget_nodeAdded(go::node* /*parent*/, go::node* node, bool /*select*/){
+void MainWindow::on_boardWidget_nodeAdded(go::nodePtr /*parent*/, go::nodePtr node, bool /*select*/){
     addTreeWidget(node, true);
     setCaption();
 }
@@ -1114,7 +1108,7 @@ void MainWindow::on_boardWidget_nodeAdded(go::node* /*parent*/, go::node* node, 
 * Slot
 * node was deleted by BoardWidget.
 */
-void MainWindow::on_boardWidget_nodeDeleted(go::node* node){
+void MainWindow::on_boardWidget_nodeDeleted(go::nodePtr node, bool /*deleteChildren*/){
     if (node->parent)
         remakeTreeWidget( nodeToTreeWidget[node->parent] );
     deleteTreeWidget(node);
@@ -1126,7 +1120,7 @@ void MainWindow::on_boardWidget_nodeDeleted(go::node* node){
 /**
 * Slot
 */
-void MainWindow::on_boardWidget_nodeModified(go::node* node){
+void MainWindow::on_boardWidget_nodeModified(go::nodePtr node){
     setCaption();
 
     QTreeWidgetItem* treeWidget = nodeToTreeWidget[node];
@@ -1139,7 +1133,7 @@ void MainWindow::on_boardWidget_nodeModified(go::node* node){
 * Slot
 * current node was changed by BoardWidget.
 */
-void MainWindow::on_boardWidget_currentNodeChanged(go::node* node){
+void MainWindow::on_boardWidget_currentNodeChanged(go::nodePtr node){
     setTreeWidget(node);
     ui->commentWidget->setPlainText(node->comment);
     setAnnotation(node->annotation);
@@ -1172,7 +1166,7 @@ void MainWindow::on_branchWidget_currentItemChanged(QTreeWidgetItem* current, QT
     }
 
     QVariant v = current->data(0, Qt::UserRole);
-    go::node* n = v.value<go::node*>();
+    go::nodePtr n = v.value<go::nodePtr>();
 
     ui->boardWidget->setCurrentNode(n);
 }
@@ -1245,11 +1239,8 @@ void MainWindow::on_commentDockWidget_visibilityChanged(bool visible){
 */
 void MainWindow::on_commentWidget_textChanged()
 {
-    go::node* currentNode = ui->boardWidget->getCurrentNode();
-    if (currentNode->comment == ui->commentWidget->toPlainText())
-        return;
-    currentNode->comment = ui->commentWidget->toPlainText();
-    ui->boardWidget->modifyNode(currentNode);
+    go::nodePtr currentNode = ui->boardWidget->getCurrentNode();
+    ui->boardWidget->setCommentCommand(currentNode, ui->commentWidget->toPlainText());
 }
 
 /**
@@ -1280,19 +1271,19 @@ void MainWindow::setCaption(){
 
     caption.append(" - ");
 
-    go::informationNode& gameInfo = ui->boardWidget->getData().root;
-    bool hasPlayerInfo = !gameInfo.whitePlayer.isEmpty() || !gameInfo.whiteRank.isEmpty() ||
-                            !gameInfo.blackPlayer.isEmpty() || !gameInfo.blackRank.isEmpty();
+    go::informationPtr gameInfo = ui->boardWidget->getData().root;
+    bool hasPlayerInfo = !gameInfo->whitePlayer.isEmpty() || !gameInfo->whiteRank.isEmpty() ||
+                            !gameInfo->blackPlayer.isEmpty() || !gameInfo->blackRank.isEmpty();
     if (hasPlayerInfo){
-        caption.append(ui->boardWidget->getData().root.whitePlayer);
+        caption.append(gameInfo->whitePlayer);
         caption.push_back(' ');
-        caption.append(ui->boardWidget->getData().root.whiteRank);
+        caption.append(gameInfo->whiteRank);
         caption.append(" (W) vs ");
-        caption.append(ui->boardWidget->getData().root.blackPlayer);
+        caption.append(gameInfo->blackPlayer);
         caption.push_back(' ');
-        caption.append(ui->boardWidget->getData().root.blackRank);
+        caption.append(gameInfo->blackRank);
         caption.append(" (B) (Result:");
-        caption.append(ui->boardWidget->getData().root.result);
+        caption.append(gameInfo->result);
         caption.append(") - ");
     }
     caption.append(APPNAME);
@@ -1424,6 +1415,8 @@ bool MainWindow::fileClose(){
 
     ui->actionReload->setEnabled(false);
 
+    undoGroup.activeStack()->clear();
+
     return true;
 }
 
@@ -1450,20 +1443,20 @@ void MainWindow::setTreeData(){
     ui->branchWidget->clear();
     nodeToTreeWidget.clear();
 
-    addTreeWidget(&ui->boardWidget->getData().root);
+    addTreeWidget(ui->boardWidget->getData().root);
     ui->boardWidget->setCurrentNode();
     ui->boardWidget->repaint();
 }
 
-QTreeWidgetItem* MainWindow::addTreeWidget(go::node* node, bool needRemake){
+QTreeWidgetItem* MainWindow::addTreeWidget(go::nodePtr node, bool needRemake){
     QTreeWidgetItem* treeWidget = nodeToTreeWidget[node];
     QTreeWidgetItem* newWidget  = NULL;
     if (treeWidget == NULL)
         newWidget = createTreeWidget(node);
     QTreeWidgetItem* parentWidget  = (node->parent && nodeToTreeWidget[node->parent]) ? nodeToTreeWidget[node->parent] : ui->branchWidget->invisibleRootItem();
     QTreeWidgetItem* parentWidget2 = parentWidget->parent() ? parentWidget->parent() : ui->branchWidget->invisibleRootItem();
-    go::node* parentNode  = node->parent;
-    go::node* parentNode2 = getNode(parentWidget2);
+    go::nodePtr parentNode  = node->parent;
+    go::nodePtr parentNode2 = getNode(parentWidget2);
 
     bool newBranch = (parentNode2 && parentNode2->childNodes.size() > 1) ||
                      (branchMode && parentNode && parentNode->childNodes.size() > 1) ||
@@ -1503,7 +1496,7 @@ QTreeWidgetItem* MainWindow::addTreeWidget(go::node* node, bool needRemake){
     return treeWidget;
 }
 
-QTreeWidgetItem* MainWindow::createTreeWidget(go::node* node){
+QTreeWidgetItem* MainWindow::createTreeWidget(go::nodePtr node){
     // TreeItemを作成
     QTreeWidgetItem* nodeWidget = new QTreeWidgetItem( QStringList(createTreeText(node)) );
 
@@ -1524,7 +1517,7 @@ QTreeWidgetItem* MainWindow::createTreeWidget(go::node* node){
 }
 
 QTreeWidgetItem* MainWindow::remakeTreeWidget(QTreeWidgetItem* treeWidget){
-    go::node* node = getNode(treeWidget);
+    go::nodePtr node = getNode(treeWidget);
     if (node == NULL)
         return NULL;
     go::nodeList::iterator iter = node->childNodes.begin();
@@ -1536,10 +1529,10 @@ QTreeWidgetItem* MainWindow::remakeTreeWidget(QTreeWidgetItem* treeWidget){
 }
 
 void MainWindow::deleteNode(){
-    ui->boardWidget->deleteNode( ui->boardWidget->getCurrentNode() );
+    ui->boardWidget->deleteNodeCommand( ui->boardWidget->getCurrentNode() );
 }
 
-void MainWindow::deleteTreeWidget(go::node* node){
+void MainWindow::deleteTreeWidget(go::nodePtr node){
     QTreeWidgetItem* treeWidget = nodeToTreeWidget[node];
     go::nodeList::iterator iter = node->childNodes.begin();
     while (iter != node->childNodes.end()){
@@ -1551,7 +1544,7 @@ void MainWindow::deleteTreeWidget(go::node* node){
     delete treeWidget;
 }
 
-void MainWindow::deleteTreeWidgetForMap(go::node* node){
+void MainWindow::deleteTreeWidgetForMap(go::nodePtr node){
     NodeToTreeWidgetType::iterator iter = nodeToTreeWidget.find(node);
     if (iter != nodeToTreeWidget.end())
         nodeToTreeWidget.erase(iter);
@@ -1563,13 +1556,13 @@ void MainWindow::deleteTreeWidgetForMap(go::node* node){
     }
 }
 
-void MainWindow::setTreeWidget(go::node* n){
+void MainWindow::setTreeWidget(go::nodePtr n){
     NodeToTreeWidgetType::iterator iter = nodeToTreeWidget.find(n);
     if (iter != nodeToTreeWidget.end())
         ui->branchWidget->setCurrentItem( iter.value() );
 }
 
-QString MainWindow::createTreeText(const go::node* node){
+QString MainWindow::createTreeText(const go::nodePtr node){
     QString s;
     if (node->isStone()){
         if (node->isPass())
@@ -1588,12 +1581,12 @@ QString MainWindow::createTreeText(const go::node* node){
     return s;
 }
 
-go::node* MainWindow::getNode(QTreeWidgetItem* treeWidget){
+go::nodePtr MainWindow::getNode(QTreeWidgetItem* treeWidget){
     if (treeWidget == NULL)
-        return NULL;
+        return go::nodePtr();
 
     QVariant v = treeWidget->data(0, Qt::UserRole);
-    return v.value<go::node*>();
+    return v.value<go::nodePtr>();
 }
 
 void MainWindow::setEncoding(QAction* action, const char* codecName){
