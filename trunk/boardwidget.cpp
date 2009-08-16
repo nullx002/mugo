@@ -473,6 +473,13 @@ void BoardWidget::addNodeCommand(go::nodePtr parentNode, go::nodePtr childNode, 
 /**
 * public slot
 */
+void BoardWidget::insertNodeCommand(go::nodePtr parentNode, go::nodePtr childNode, bool select){
+    undoStack.push( new InsertNodeCommand(this, parentNode, childNode, select) );
+}
+
+/**
+* public slot
+*/
 void BoardWidget::deleteNodeCommand(go::nodePtr node, bool deleteChildren){
     if( node == goData.root )
         return;
@@ -545,17 +552,18 @@ void BoardWidget::deleteNode(go::nodePtr node, bool deleteChildren){
     go::nodePtr parent = node->parent;
     if (parent){
         go::nodeList::iterator iter = qFind(parent->childNodes.begin(), parent->childNodes.end(), node);
-
-        if (deleteChildren == false){
-            go::nodeList::iterator iter2 = node->childNodes.begin();
-            while (iter2 != node->childNodes.end()){
-                parent->childNodes.insert(iter, *iter2);
-                ++iter2;
-            }
-        }
-
         if (iter != parent->childNodes.end())
             parent->childNodes.erase(iter);
+
+        if (deleteChildren == false){
+            parent->childNodes += node->childNodes;
+            go::nodeList::iterator iter = node->childNodes.begin();
+            while (iter != node->childNodes.end()){
+                (*iter)->parent = parent;
+                ++iter;
+            }
+            node->childNodes.clear();
+        }
     }
 
     setCurrentNode(parent);
@@ -564,7 +572,10 @@ void BoardWidget::deleteNode(go::nodePtr node, bool deleteChildren){
     emit nodeDeleted(node, deleteChildren);
 
     go::nodeList::iterator iter = qFind(nodeList.begin(), nodeList.end(), node);
-    nodeList.erase(iter, nodeList.end());
+    if (deleteChildren)
+        nodeList.erase(iter, nodeList.end());
+    else
+        nodeList.erase(iter);
 }
 
 /**
@@ -1369,18 +1380,8 @@ void BoardWidget::addStone(go::nodePtr node, const go::point& sp, const go::poin
 
     if (stoneNode == node)
         modifyNode(node);
-    else{
-        stoneNode->childNodes += node->childNodes;
-        node->childNodes.erase(node->childNodes.begin(), node->childNodes.end());
-
-        go::nodeList::iterator iter = stoneNode->childNodes.begin();
-        while (iter != stoneNode->childNodes.end()){
-            (*iter)->parent = stoneNode;
-            ++iter;
-        }
-
-        addNodeCommand(node, stoneNode);
-    }
+    else
+        insertNodeCommand(node, stoneNode);
 }
 
 QString BoardWidget::toString(go::nodePtr node) const{
@@ -1611,6 +1612,9 @@ void BoardWidget::getCountTerritory(int& alive_b, int& alive_w, int& dead_b, int
 }
 
 
+/**
+* Add Node Command
+*/
 AddNodeCommand::AddNodeCommand(BoardWidget* _boardWidget, go::nodePtr _parentNode, go::nodePtr _childNode, bool _select, QUndoCommand* parent)
     : QUndoCommand(parent)
     , boardWidget(_boardWidget)
@@ -1629,6 +1633,39 @@ void AddNodeCommand::undo(){
     boardWidget->deleteNode(childNode);
 }
 
+/**
+* Insert Node Command
+*/
+InsertNodeCommand::InsertNodeCommand(BoardWidget* _boardWidget, go::nodePtr _parentNode, go::nodePtr _childNode, bool _select, QUndoCommand* parent)
+    : QUndoCommand(parent)
+    , boardWidget(_boardWidget)
+    , parentNode(_parentNode)
+    , childNode(_childNode)
+    , select(_select)
+{
+}
+
+void InsertNodeCommand::redo(){
+    setText( QString(tr("Insert %1")).arg( boardWidget->toString(childNode) ) );
+    childNode->childNodes += parentNode->childNodes;
+    parentNode->childNodes.clear();
+
+    go::nodeList::iterator iter = childNode->childNodes.begin();
+    while (iter != childNode->childNodes.end()){
+        (*iter)->parent = childNode;
+        ++iter;
+    }
+
+    boardWidget->addNode(parentNode, childNode, select);
+}
+
+void InsertNodeCommand::undo(){
+    boardWidget->deleteNode(childNode, false);
+}
+
+/**
+* Delete Node Command
+*/
 DeleteNodeCommand::DeleteNodeCommand(BoardWidget* _boardWidget, go::nodePtr _node, bool _deleteChildren, QUndoCommand* parent)
     : QUndoCommand(parent)
     , boardWidget(_boardWidget)

@@ -141,6 +141,7 @@ public:
 
 public slots:
     void addNodeCommand(go::nodePtr parent, go::nodePtr node, bool select=true);
+    void insertNodeCommand(go::nodePtr parent, go::nodePtr node, bool select=true);
     void deleteNodeCommand(go::nodePtr node, bool deleteChildren=true);
     void setMoveNumberCommand(go::nodePtr node, int moveNumber);
     void unsetMoveNumberCommand(go::nodePtr node);
@@ -202,6 +203,7 @@ protected:
     void unsetTerritory(int x, int y);
     void getCountTerritory(int& alive_b, int& alive_w, int& dead_b, int& dead_w, int& bt, int& wt);
 
+    void setParent(go::nodePtr& parent, go::nodeList& childNodes);
     void createNodeList();
     void addStone(int sgfX, int sgfY, int boardX, int boardY);
     void addMark(int sgfX, int sgfY, int boardX, int boardY);
@@ -282,6 +284,21 @@ class AddNodeCommand : public QUndoCommand{
 
 public:
     AddNodeCommand(BoardWidget* boardWidget, go::nodePtr parentNode, go::nodePtr childNode, bool select, QUndoCommand *parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+private:
+    BoardWidget* boardWidget;
+    go::nodePtr parentNode;
+    go::nodePtr childNode;
+    bool select;
+};
+
+class InsertNodeCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(InsertNodeCommand)
+
+public:
+    InsertNodeCommand(BoardWidget* boardWidget, go::nodePtr parentNode, go::nodePtr childNode, bool select, QUndoCommand *parent = 0);
     virtual void redo();
     virtual void undo();
 
