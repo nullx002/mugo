@@ -1110,11 +1110,10 @@ void MainWindow::on_boardWidget_nodeAdded(go::nodePtr /*parent*/, go::nodePtr no
 * Slot
 * node was deleted by BoardWidget.
 */
-void MainWindow::on_boardWidget_nodeDeleted(go::nodePtr node, bool /*deleteChildren*/){
+void MainWindow::on_boardWidget_nodeDeleted(go::nodePtr node, bool deleteChildren){
     if (node->parent)
         remakeTreeWidget( nodeToTreeWidget[node->parent] );
-    deleteTreeWidget(node);
-    deleteTreeWidgetForMap(node);
+    deleteTreeWidget(node, deleteChildren);
 
     setCaption();
 }
@@ -1532,28 +1531,38 @@ void MainWindow::deleteNode(){
     ui->boardWidget->deleteNodeCommand( ui->boardWidget->getCurrentNode() );
 }
 
-void MainWindow::deleteTreeWidget(go::nodePtr node){
+void MainWindow::deleteTreeWidget(go::nodePtr node, bool deleteChildren){
     QTreeWidgetItem* treeWidget = nodeToTreeWidget[node];
     go::nodeList::iterator iter = node->childNodes.begin();
-    while (iter != node->childNodes.end()){
+    while (deleteChildren && iter != node->childNodes.end()){
         QTreeWidgetItem* treeWidget2 = nodeToTreeWidget[*iter];
         if (treeWidget2->parent() != treeWidget)
-            deleteTreeWidget(*iter);
+            deleteTreeWidget(*iter, deleteChildren);
         ++iter;
     }
+
+    deleteTreeWidgetForMap(node);
     delete treeWidget;
 }
 
 void MainWindow::deleteTreeWidgetForMap(go::nodePtr node){
     NodeToTreeWidgetType::iterator iter = nodeToTreeWidget.find(node);
-    if (iter != nodeToTreeWidget.end())
-        nodeToTreeWidget.erase(iter);
+    if(iter == nodeToTreeWidget.end())
+        return;
 
     go::nodeList::iterator iter2 = node->childNodes.begin();
     while (iter2 != node->childNodes.end()){
-        deleteTreeWidgetForMap(*iter2);
+        NodeToTreeWidgetType::iterator iter3 = nodeToTreeWidget.find(*iter2);
+        if(iter3 == nodeToTreeWidget.end())
+            continue;
+
+        if ((*iter3)->parent() == *iter)
+            deleteTreeWidgetForMap(*iter2);
+
         ++iter2;
     }
+
+    nodeToTreeWidget.erase(iter);
 }
 
 void MainWindow::setTreeWidget(go::nodePtr n){

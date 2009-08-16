@@ -58,7 +58,7 @@ private:
     QTreeWidgetItem* createTreeWidget(go::nodePtr node);
     QTreeWidgetItem* remakeTreeWidget(QTreeWidgetItem* currentWidget);
     void deleteNode();
-    void deleteTreeWidget(go::nodePtr node);
+    void deleteTreeWidget(go::nodePtr node, bool deleteChildren);
     void deleteTreeWidgetForMap(go::nodePtr node);
     void setTreeWidget(go::nodePtr n);
     QString createTreeText(const go::nodePtr node);
