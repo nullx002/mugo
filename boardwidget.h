@@ -6,7 +6,7 @@
 #include <QLabel>
 #include <QVector>
 #include <QList>
-#include <QUndoCommand>
+#include <QProcess>
 
 #ifdef Q_WS_X11
 #   include <phonon>
@@ -15,6 +15,7 @@
 #endif
 
 #include "godata.h"
+
 
 namespace Ui {
     class BoardWidget;
@@ -67,7 +68,8 @@ class BoardWidget : public QWidget {
     Q_OBJECT
     Q_DISABLE_COPY(BoardWidget)
 public:
-    enum eEditMode{ eAlternateMove, eAddBlack, eAddWhite, eAddEmpty, eLabelMark, eCrossMark, eCircleMark, eSquareMark, eTriangleMark, eDeleteMarker, eCountTerritory };
+    enum eEditMode{ eAlternateMove, eAddBlack, eAddWhite, eAddEmpty, eLabelMark, eCrossMark, eCircleMark, eSquareMark, eTriangleMark, eDeleteMarker, eCountTerritory, eGtp };
+    enum eGtpStatus{ eGtpNone, eGtpPut, eGtpGen };
 
     struct stoneInfo{
         stoneInfo() : number(0), color(go::empty){}
@@ -107,6 +109,9 @@ public:
     void getCaptured(int& black, int& white) const{ black = capturedBlack; white = capturedWhite; }
     int  getMoveNumber() const{ return currentMoveNumber; }
 
+    void addStoneCommand(int sgfX, int sgfY);
+    void addStoneCommand(int sgfX, int sgfY, int boardX, int boardY);
+
     // dirty flag
     bool isDirty() const{ return dirty; }
     void setDirty(bool dirty){ this->dirty = dirty; }
@@ -138,6 +143,8 @@ public:
     QString getXString(int x) const;
     QString getYString(int y) const;
     QString getXYString(int x, int y) const;
+
+    void playWithComputer(QProcess* proc);
 
 public slots:
     void addNodeCommand(go::nodePtr parent, go::nodePtr node, bool select=true);
@@ -205,7 +212,6 @@ protected:
 
     void setParent(go::nodePtr& parent, go::nodeList& childNodes);
     void createNodeList();
-    void addStone(int sgfX, int sgfY, int boardX, int boardY);
     void addMark(int sgfX, int sgfY, int boardX, int boardY);
     void addMark(go::markList& markList, const go::mark& mark);
     void addCharacter(go::markList& markList, const go::point& p);
@@ -220,6 +226,13 @@ protected:
 
     void boardToSgfCoordinate(int boardX, int boardY, int& sgfX, int& sgfY);
     void sgfToBoardCoordinate(int sgfX, int sgfY, int& boardX, int& boardY);
+
+    void gtpWrite(const QString& buf);
+    void gtpPut(int x, int y);
+    bool getCoordinate(const QString& buf, int& x, int& y);
+
+private slots:
+    void comProcessReadReady();
 
 public:
     QUndoStack undoStack;
@@ -274,186 +287,14 @@ private:
 
     // sound
     Sound stoneSound;
-    // Phonon
-//    Phonon::MediaObject* stoneSound;
+
+    // play with computer
+    QProcess* comProcess;
+    QString   gtpBuf;
+    int gtpStatus;
 };
 
 
-class AddNodeCommand : public QUndoCommand{
-    Q_DECLARE_TR_FUNCTIONS(AddNodeCommand)
-
-public:
-    AddNodeCommand(BoardWidget* boardWidget, go::nodePtr parentNode, go::nodePtr childNode, bool select, QUndoCommand *parent = 0);
-    virtual void redo();
-    virtual void undo();
-
-private:
-    BoardWidget* boardWidget;
-    go::nodePtr parentNode;
-    go::nodePtr childNode;
-    bool select;
-};
-
-class InsertNodeCommand : public QUndoCommand{
-    Q_DECLARE_TR_FUNCTIONS(InsertNodeCommand)
-
-public:
-    InsertNodeCommand(BoardWidget* boardWidget, go::nodePtr parentNode, go::nodePtr childNode, bool select, QUndoCommand *parent = 0);
-    virtual void redo();
-    virtual void undo();
-
-private:
-    BoardWidget* boardWidget;
-    go::nodePtr parentNode;
-    go::nodePtr childNode;
-    bool select;
-};
-
-class DeleteNodeCommand : public QUndoCommand{
-    Q_DECLARE_TR_FUNCTIONS(DeleteNodeCommand)
-
-public:
-    DeleteNodeCommand(BoardWidget* boardWidget, go::nodePtr node, bool deleteChildren, QUndoCommand *parent = 0);
-    virtual void redo();
-    virtual void undo();
-
-private:
-    BoardWidget* boardWidget;
-    go::nodePtr node;
-    bool deleteChildren;
-};
-
-class SetMoveNumberCommand : public QUndoCommand{
-    Q_DECLARE_TR_FUNCTIONS(SetMoveNumberCommand)
-
-public:
-    SetMoveNumberCommand(BoardWidget* boardWidget, go::nodePtr node, int moveNumber, QUndoCommand *parent = 0);
-    virtual void redo();
-    virtual void undo();
-
-private:
-    BoardWidget* boardWidget;
-    go::nodePtr node;
-    int moveNumber;
-    int oldMoveNumber;
-};
-
-class UnsetMoveNumberCommand : public QUndoCommand{
-    Q_DECLARE_TR_FUNCTIONS(UnsetMoveNumberCommand)
-
-public:
-    UnsetMoveNumberCommand(BoardWidget* boardWidget, go::nodePtr node, QUndoCommand *parent = 0);
-    virtual void redo();
-    virtual void undo();
-
-private:
-    BoardWidget* boardWidget;
-    go::nodePtr node;
-    int oldMoveNumber;
-};
-
-class SetNodeNameCommand : public QUndoCommand{
-    Q_DECLARE_TR_FUNCTIONS(SetNodeNameCommand)
-
-public:
-    SetNodeNameCommand(BoardWidget* boardWidget, go::nodePtr node, const QString& nodeName, QUndoCommand *parent = 0);
-    virtual void redo();
-    virtual void undo();
-
-private:
-    BoardWidget* boardWidget;
-    go::nodePtr node;
-    QString nodeName;
-    QString oldNodeName;
-};
-
-class SetCommentCommand : public QUndoCommand{
-    Q_DECLARE_TR_FUNCTIONS(SetCommentCommand)
-
-public:
-    SetCommentCommand(BoardWidget* boardWidget, go::nodePtr node, const QString& comment, QUndoCommand *parent = 0);
-    virtual void redo();
-    virtual void undo();
-
-private:
-    BoardWidget* boardWidget;
-    go::nodePtr node;
-    QString comment;
-    QString oldComment;
-};
-
-class MovePositionCommand : public QUndoCommand{
-    Q_DECLARE_TR_FUNCTIONS(MovePositionCommand)
-
-public:
-    MovePositionCommand(BoardWidget* boardWidget, go::nodePtr node, const go::point& pos, QUndoCommand *parent = 0);
-    virtual void redo();
-    virtual void undo();
-
-private:
-    BoardWidget* boardWidget;
-    go::nodePtr  node;
-    go::point    pos;
-    go::point    oldPos;
-};
-
-class MoveStoneCommand : public QUndoCommand{
-    Q_DECLARE_TR_FUNCTIONS(MoveStoneCommand)
-
-public:
-    MoveStoneCommand(BoardWidget* boardWidget, go::nodePtr node, go::stone* stone, const go::point& pos, QUndoCommand *parent = 0);
-    virtual void redo();
-    virtual void undo();
-
-private:
-    BoardWidget* boardWidget;
-    go::nodePtr  node;
-    go::stone*   stone;
-    go::point    pos;
-    go::point    oldPos;
-};
-
-class MoveMarkCommand : public QUndoCommand{
-    Q_DECLARE_TR_FUNCTIONS(MoveMarkCommand)
-
-public:
-    MoveMarkCommand(BoardWidget* boardWidget, go::nodePtr node, go::mark* mark, const go::point& pos, QUndoCommand *parent = 0);
-    virtual void redo();
-    virtual void undo();
-
-private:
-    BoardWidget* boardWidget;
-    go::nodePtr  node;
-    go::mark*    mark;
-    go::point    pos;
-    go::point    oldPos;
-};
-
-class FlipSGFVerticallyCommand : public QUndoCommand{
-    Q_DECLARE_TR_FUNCTIONS(FlipSGFVerticallyCommand)
-
-public:
-    FlipSGFVerticallyCommand(BoardWidget* boardWidget, QUndoCommand *parent = 0);
-    virtual void redo();
-    virtual void undo();
-
-private:
-    BoardWidget* boardWidget;
-    go::nodePtr node;
-};
-
-class FlipSGFHorizontallyCommand : public QUndoCommand{
-    Q_DECLARE_TR_FUNCTIONS(FlipSGFHorizontallyCommand)
-
-public:
-    FlipSGFHorizontallyCommand(BoardWidget* boardWidget, QUndoCommand *parent = 0);
-    virtual void redo();
-    virtual void undo();
-
-private:
-    BoardWidget* boardWidget;
-    go::nodePtr node;
-};
 
 
 #endif // BOARDWIDGET_H

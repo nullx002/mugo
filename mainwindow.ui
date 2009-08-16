@@ -199,6 +199,7 @@
      <string>&amp;Tools</string>
     </property>
     <addaction name="actionCountTerritory"/>
+    <addaction name="actionPlayWithGnugo"/>
    </widget>
    <widget class="QMenu" name="menu_Options">
     <property name="title">
@@ -1299,6 +1300,14 @@
   <action name="actionSetup">
    <property name="text">
     <string>&amp;Setup</string>
+   </property>
+  </action>
+  <action name="actionPlayWithGnugo">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Play with gnugo</string>
    </property>
   </action>
  </widget>

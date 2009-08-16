@@ -248,14 +248,7 @@ void MainWindow::on_actionGameInformation_triggered(){
 * Edit -> Pass
 */
 void MainWindow::on_actionPass_triggered(){
-    go::nodePtr currentNode = ui->boardWidget->getCurrentNode();
-    go::nodePtr node;
-    if (currentNode->isBlack())
-        node = go::createWhiteNode(currentNode);
-    else
-        node = go::createBlackNode(currentNode);
-    ui->boardWidget->addNode(currentNode, node);
-    ui->boardWidget->setCurrentNode(node);
+    ui->boardWidget->addStoneCommand(-1, -1);
 }
 
 /**
@@ -978,6 +971,21 @@ void MainWindow::on_actionCountTerritory_triggered(){
 
 /**
 * Slot
+* Tools -> Count Territoy
+*/
+void MainWindow::on_actionPlayWithGnugo_triggered(){
+    if (ui->actionPlayWithGnugo->isChecked()){
+        comProcess.start("gnugo --mode gtp");
+        ui->boardWidget->playWithComputer(&comProcess);
+    }
+    else{
+        comProcess.close();
+        ui->boardWidget->playWithComputer(NULL);
+    }
+}
+
+/**
+* Slot
 * Options -> Setup
 */
 void MainWindow::on_actionSetup_triggered(){
@@ -1553,11 +1561,9 @@ void MainWindow::deleteTreeWidgetForMap(go::nodePtr node){
     go::nodeList::iterator iter2 = node->childNodes.begin();
     while (iter2 != node->childNodes.end()){
         NodeToTreeWidgetType::iterator iter3 = nodeToTreeWidget.find(*iter2);
-        if(iter3 == nodeToTreeWidget.end())
-            continue;
-
-        if ((*iter3)->parent() == *iter)
-            deleteTreeWidgetForMap(*iter2);
+        if(iter3 != nodeToTreeWidget.end())
+            if ((*iter3)->parent() == *iter)
+                deleteTreeWidgetForMap(*iter2);
 
         ++iter2;
     }

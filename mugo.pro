@@ -12,7 +12,8 @@ SOURCES += main.cpp \
     sgf.cpp \
     ugf.cpp \
     countterritorydialog.cpp \
-    setupdialog.cpp
+    setupdialog.cpp \
+    command.cpp
 HEADERS += mainwindow.h \
     boardwidget.h \
     godata.h \
@@ -21,7 +22,8 @@ HEADERS += mainwindow.h \
     sgf.h \
     ugf.h \
     countterritorydialog.h \
-    setupdialog.h
+    setupdialog.h \
+    command.h
 FORMS += mainwindow.ui \
     boardwidget.ui \
     gameinformationdialog.ui \
