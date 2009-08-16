@@ -8,6 +8,7 @@
 #include "appdef.h"
 #include "boardwidget.h"
 #include "mainwindow.h"
+#include "command.h"
 #include "ui_boardwidget.h"
 
 BoardWidget::BoardWidget(QWidget *parent) :
@@ -100,7 +101,7 @@ void BoardWidget::mouseReleaseEvent(QMouseEvent* e){
 void BoardWidget::mouseMoveEvent(QMouseEvent* e){
     QWidget::mouseMoveEvent(e);
 
-    if (editMode != this->eAlternateMove)
+    if (editMode != this->eAlternateMove && editMode != this->eGtp)
         return;
 
     int bx = floor( double(e->x() - xlines[0] + boxSize / 2) / boxSize );
@@ -155,8 +156,8 @@ void BoardWidget::onLButtonDown(QMouseEvent* e){
 
     if (moveToClicked && board[boardY][boardX].node)
         setCurrentNode( board[boardY][boardX].node );
-    else if (editMode == eAlternateMove)
-        addStone(sgfX, sgfY, boardX, boardY);
+    else if (editMode == eAlternateMove || editMode == eGtp)
+        addStoneCommand(sgfX, sgfY, boardX, boardY);
     else if (editMode == eCountTerritory){
         addTerritory(boardX, boardY);
         int alive_b=0, alive_w=0, dead_b=0, dead_w=0, bt=0, wt=0;
@@ -1188,7 +1189,29 @@ void BoardWidget::dead(int* tmp){
 
 /**
 */
-void BoardWidget::addStone(int sgfX, int sgfY, int boardX, int boardY){
+void BoardWidget::addStoneCommand(int sgfX, int sgfY){
+    if (sgfX == -1 && sgfY == -1){
+        go::nodePtr node;
+        if (currentNode->isBlack())
+            node = go::createWhiteNode(currentNode);
+        else
+            node = go::createBlackNode(currentNode);
+
+        if (editMode == eGtp)
+            gtpPut(sgfX, sgfY);
+
+        addNodeCommand(currentNode, node);
+    }
+    else{
+        int boardX, boardY;
+        sgfToBoardCoordinate(sgfX, sgfY, boardX, boardY);
+        addStoneCommand(sgfX, sgfY, boardX, boardY);
+    }
+}
+
+/**
+*/
+void BoardWidget::addStoneCommand(int sgfX, int sgfY, int boardX, int boardY){
     if (board[boardY][boardX].empty() == false)
         return;
 
@@ -1212,6 +1235,9 @@ void BoardWidget::addStone(int sgfX, int sgfY, int boardX, int boardY){
         n = go::createBlackNode(currentNode, sgfX, sgfY);
     else
         n = go::createWhiteNode(currentNode, sgfX, sgfY);
+
+    if (editMode == eGtp)
+        gtpPut(sgfX, sgfY);
 
     addNodeCommand(currentNode, n);
 }
@@ -1611,251 +1637,83 @@ void BoardWidget::getCountTerritory(int& alive_b, int& alive_w, int& dead_b, int
     }
 }
 
-
-/**
-* Add Node Command
-*/
-AddNodeCommand::AddNodeCommand(BoardWidget* _boardWidget, go::nodePtr _parentNode, go::nodePtr _childNode, bool _select, QUndoCommand* parent)
-    : QUndoCommand(parent)
-    , boardWidget(_boardWidget)
-    , parentNode(_parentNode)
-    , childNode(_childNode)
-    , select(_select)
-{
+void BoardWidget::playWithComputer(QProcess* proc){
+    comProcess = proc;
+    if (comProcess){
+        editMode = eGtp;
+        moveToClicked = false;
+        connect(comProcess, SIGNAL(readyRead()), this, SLOT(comProcessReadReady()));
+    }
+    else{
+        editMode = eAlternateMove;
+    }
 }
 
-void AddNodeCommand::redo(){
-    setText( QString(tr("Add %1")).arg( boardWidget->toString(childNode) ) );
-    boardWidget->addNode(parentNode, childNode, select);
+void BoardWidget::gtpWrite(const QString& buf){
+    if (comProcess == NULL)
+        return;
+
+    qDebug() << buf;
+    QByteArray ba = buf.toAscii();
+    comProcess->write( ba );
 }
 
-void AddNodeCommand::undo(){
-    boardWidget->deleteNode(childNode);
+void BoardWidget::gtpPut(int x, int y){
+    if (comProcess == NULL)
+        return;
+
+    QString xy;
+    if (x == -1 && y == -1)
+        xy = "PASS";
+    else
+        xy =getXYString(x, y);
+
+    if (isBlack){
+        gtpWrite( QString("black %1\n").arg(xy) );
+        gtpStatus = eGtpPut;
+    }
+    else{
+    }
 }
 
-/**
-* Insert Node Command
-*/
-InsertNodeCommand::InsertNodeCommand(BoardWidget* _boardWidget, go::nodePtr _parentNode, go::nodePtr _childNode, bool _select, QUndoCommand* parent)
-    : QUndoCommand(parent)
-    , boardWidget(_boardWidget)
-    , parentNode(_parentNode)
-    , childNode(_childNode)
-    , select(_select)
-{
+void BoardWidget::comProcessReadReady(){
+    if (comProcess == NULL)
+        return;
+
+    gtpBuf += comProcess->readAll();
+    qDebug() << gtpBuf;
+
+    if (gtpBuf.size() < 3 || gtpBuf.right(2) != "\n\n")
+        return;
+    QString buf =gtpBuf.mid(2, gtpBuf.size()-4);
+    gtpBuf.clear();
+
+    if (gtpStatus == eGtpPut){
+        gtpWrite("genmove white\n");
+        gtpStatus = eGtpGen;
+    }
+    else if (gtpStatus == eGtpGen){
+        int x, y;
+        if (getCoordinate(buf, x, y)){
+            addStoneCommand(x, y);
+            gtpStatus = eGtpNone;
+        }
+    }
 }
 
-void InsertNodeCommand::redo(){
-    setText( QString(tr("Insert %1")).arg( boardWidget->toString(childNode) ) );
-    childNode->childNodes += parentNode->childNodes;
-    parentNode->childNodes.clear();
+bool BoardWidget::getCoordinate(const QString& buf, int& x, int& y){
+    if (buf.size() < 2)
+        return false;
 
-    go::nodeList::iterator iter = childNode->childNodes.begin();
-    while (iter != childNode->childNodes.end()){
-        (*iter)->parent = childNode;
-        ++iter;
+    if (buf == "PASS"){
+        x = y = -1;
+        return true;
     }
 
-    boardWidget->addNode(parentNode, childNode, select);
-}
+    x = buf[0].toAscii() - 'A';
+    if (x > 7)
+        --x;
+    y = goData.root->ysize - buf.mid(1).toInt();
 
-void InsertNodeCommand::undo(){
-    boardWidget->deleteNode(childNode, false);
-}
-
-/**
-* Delete Node Command
-*/
-DeleteNodeCommand::DeleteNodeCommand(BoardWidget* _boardWidget, go::nodePtr _node, bool _deleteChildren, QUndoCommand* parent)
-    : QUndoCommand(parent)
-    , boardWidget(_boardWidget)
-    , node(_node)
-    , deleteChildren(_deleteChildren)
-{
-}
-
-void DeleteNodeCommand::redo(){
-    setText( QString(tr("Delete %1")).arg( boardWidget->toString(node) ) );
-    boardWidget->deleteNode(node, deleteChildren);
-}
-
-void DeleteNodeCommand::undo(){
-    boardWidget->addNode(node->parent, node);
-}
-
-SetMoveNumberCommand::SetMoveNumberCommand(BoardWidget* _boardWidget, go::nodePtr _node, int _moveNumber, QUndoCommand* parent)
-    : QUndoCommand(parent)
-    , boardWidget(_boardWidget)
-    , node(_node)
-    , moveNumber(_moveNumber)
-{
-    oldMoveNumber = node->moveNumber;
-}
-
-void SetMoveNumberCommand::redo(){
-    setText( QString(tr("Set Move Number %1")).arg( boardWidget->toString(node) ) );
-    node->moveNumber = moveNumber;
-    boardWidget->modifyNode(node);
-}
-
-void SetMoveNumberCommand::undo(){
-    node->moveNumber = oldMoveNumber;
-    boardWidget->modifyNode(node);
-}
-
-UnsetMoveNumberCommand::UnsetMoveNumberCommand(BoardWidget* _boardWidget, go::nodePtr _node, QUndoCommand* parent)
-    : QUndoCommand(parent)
-    , boardWidget(_boardWidget)
-    , node(_node)
-{
-    oldMoveNumber = node->moveNumber;
-}
-
-void UnsetMoveNumberCommand::redo(){
-    setText( QString(tr("Unset Move Number %1")).arg( boardWidget->toString(node) ) );
-    node->moveNumber = -1;
-    boardWidget->modifyNode(node);
-}
-
-void UnsetMoveNumberCommand::undo(){
-    node->moveNumber = oldMoveNumber;
-    boardWidget->modifyNode(node);
-}
-
-SetNodeNameCommand::SetNodeNameCommand(BoardWidget* _boardWidget, go::nodePtr _node, const QString& _nodeName, QUndoCommand* parent)
-    : QUndoCommand(parent)
-    , boardWidget(_boardWidget)
-    , node(_node)
-    , nodeName(_nodeName)
-{
-    oldNodeName = node->name;
-}
-
-void SetNodeNameCommand::redo(){
-    setText( QString(tr("Set Node Name %1")).arg( boardWidget->toString(node) ) );
-    node->name = nodeName;
-    boardWidget->modifyNode(node);
-}
-
-void SetNodeNameCommand::undo(){
-    node->name = oldNodeName;
-    boardWidget->modifyNode(node);
-}
-
-SetCommentCommand::SetCommentCommand(BoardWidget* _boardWidget, go::nodePtr _node, const QString& _comment, QUndoCommand* parent)
-    : QUndoCommand(parent)
-    , boardWidget(_boardWidget)
-    , node(_node)
-    , comment(_comment)
-{
-    oldComment = node->comment;
-}
-
-void SetCommentCommand::redo(){
-    setText( QString(tr("Set Comment %1")).arg( boardWidget->toString(node) ) );
-    node->comment = comment;
-    boardWidget->modifyNode(node);
-}
-
-void SetCommentCommand::undo(){
-    node->comment = oldComment;
-    boardWidget->modifyNode(node);
-}
-
-MovePositionCommand::MovePositionCommand(BoardWidget* _boardWidget, go::nodePtr _node, const go::point& _pos, QUndoCommand* parent)
-    : QUndoCommand(parent)
-    , boardWidget(_boardWidget)
-    , node(_node)
-    , pos(_pos)
-{
-    oldPos = node->position;
-}
-
-void MovePositionCommand::redo(){
-    setText( QString(tr("Move Position %1")).arg( boardWidget->toString(node) ) );
-    node->position.x = pos.x;
-    node->position.y = pos.y;
-}
-
-void MovePositionCommand::undo(){
-    node->position.x = oldPos.x;
-    node->position.y = oldPos.y;
-}
-
-MoveStoneCommand::MoveStoneCommand(BoardWidget* _boardWidget, go::nodePtr _node, go::stone* _stone, const go::point& _pos, QUndoCommand* parent)
-    : QUndoCommand(parent)
-    , boardWidget(_boardWidget)
-    , node(_node)
-    , stone(_stone)
-    , pos(_pos)
-{
-    oldPos = stone->p;
-}
-
-void MoveStoneCommand::redo(){
-    setText( QString(tr("Move Stone %1")).arg( boardWidget->toString(node) ) );
-    stone->p = pos;
-}
-
-void MoveStoneCommand::undo(){
-    stone->p = oldPos;
-}
-
-MoveMarkCommand::MoveMarkCommand(BoardWidget* _boardWidget, go::nodePtr _node, go::mark* _mark, const go::point& _pos, QUndoCommand* parent)
-    : QUndoCommand(parent)
-    , boardWidget(_boardWidget)
-    , node(_node)
-    , mark(_mark)
-    , pos(_pos)
-{
-    oldPos = mark->p;
-}
-
-void MoveMarkCommand::redo(){
-    setText( QString(tr("Move Mark %1")).arg( boardWidget->toString(node) ) );
-    mark->p = pos;
-}
-
-void MoveMarkCommand::undo(){
-    mark->p = oldPos;
-}
-
-FlipSGFHorizontallyCommand::FlipSGFHorizontallyCommand(BoardWidget* _boardWidget, QUndoCommand* parent)
-    : QUndoCommand(parent)
-    , boardWidget(_boardWidget)
-{
-}
-
-void FlipSGFHorizontallyCommand::redo(){
-    QUndoCommand::redo();
-    setText( tr("Flip SGF Horizontally") );
-
-    boardWidget->createBoardBuffer();
-    boardWidget->repaintBoard();
-}
-
-void FlipSGFHorizontallyCommand::undo(){
-    QUndoCommand::undo();
-    boardWidget->createBoardBuffer();
-    boardWidget->repaintBoard();
-}
-
-FlipSGFVerticallyCommand::FlipSGFVerticallyCommand(BoardWidget* _boardWidget, QUndoCommand* parent)
-    : QUndoCommand(parent)
-    , boardWidget(_boardWidget)
-{
-}
-
-void FlipSGFVerticallyCommand::redo(){
-    QUndoCommand::redo();
-    setText( tr("Flip SGF Vertically") );
-
-    boardWidget->createBoardBuffer();
-    boardWidget->repaintBoard();
-}
-
-void FlipSGFVerticallyCommand::undo(){
-    QUndoCommand::undo();
-    boardWidget->createBoardBuffer();
-    boardWidget->repaintBoard();
+    return x >= 0 && x < goData.root->xsize && y >= 0 && y < goData.root->ysize;
 }

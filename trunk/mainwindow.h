@@ -5,6 +5,7 @@
 #include <QTreeWidgetItem>
 #include <QTextCodec>
 #include <QUndoGroup>
+#include <QProcess>
 #include "boardwidget.h"
 #include "countterritorydialog.h"
 
@@ -78,16 +79,18 @@ private:
     bool branchMode;
 
     enum { MaxRecentFiles = 5 };
-    QAction *recentFileActs[MaxRecentFiles];
-    QAction *recentSeparator;
+    QAction* recentFileActs[MaxRecentFiles];
+    QAction* recentSeparator;
     QLabel* moveNumberLabel;
     QLabel* capturedLabel;
     CountTerritoryDialog* countTerritoryDialog;
 
     QUndoGroup undoGroup;
+    QProcess comProcess;
 
 private slots:
     // File menu
+    void on_actionPlayWithGnugo_triggered();
     void on_actionNew_triggered();
     void on_actionOpen_triggered();
     void on_actionReload_triggered();
