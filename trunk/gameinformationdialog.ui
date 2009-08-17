@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>448</width>
-    <height>359</height>
+    <height>424</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -346,15 +346,27 @@
   <tabstop>whitePlayer</tabstop>
   <tabstop>whiteRank</tabstop>
   <tabstop>whiteTeam</tabstop>
+  <tabstop>blackPlayer</tabstop>
   <tabstop>blackRank</tabstop>
   <tabstop>blackTeam</tabstop>
+  <tabstop>buttonBox</tabstop>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>komi</tabstop>
+  <tabstop>handicap</tabstop>
+  <tabstop>result</tabstop>
+  <tabstop>time</tabstop>
+  <tabstop>overTime</tabstop>
+  <tabstop>gameName</tabstop>
+  <tabstop>round</tabstop>
+  <tabstop>date</tabstop>
+  <tabstop>place</tabstop>
+  <tabstop>event</tabstop>
   <tabstop>user</tabstop>
   <tabstop>source</tabstop>
   <tabstop>opening</tabstop>
   <tabstop>gameComment</tabstop>
   <tabstop>copyright</tabstop>
   <tabstop>annotation</tabstop>
-  <tabstop>buttonBox</tabstop>
  </tabstops>
  <resources/>
  <connections>
@@ -365,8 +377,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>248</x>
-     <y>254</y>
+     <x>257</x>
+     <y>414</y>
     </hint>
     <hint type="destinationlabel">
      <x>157</x>
@@ -381,8 +393,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>316</x>
-     <y>260</y>
+     <x>325</x>
+     <y>414</y>
     </hint>
     <hint type="destinationlabel">
      <x>286</x>

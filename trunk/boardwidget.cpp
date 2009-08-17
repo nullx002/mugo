@@ -154,9 +154,11 @@ void BoardWidget::onLButtonDown(QMouseEvent* e){
     int sgfX, sgfY;
     boardToSgfCoordinate(boardX, boardY, sgfX, sgfY);
 
-    if (moveToClicked && board[boardY][boardX].node)
+    if (editMode == eGtp)
+        gtpLButtonDown(sgfX, sgfY);
+    else if (moveToClicked && board[boardY][boardX].node)
         setCurrentNode( board[boardY][boardX].node );
-    else if (editMode == eAlternateMove || editMode == eGtp)
+    else if (editMode == eAlternateMove)
         addStoneCommand(sgfX, sgfY, boardX, boardY);
     else if (editMode == eCountTerritory){
         addTerritory(boardX, boardY);
@@ -172,6 +174,13 @@ void BoardWidget::onLButtonDown(QMouseEvent* e){
 */
 void BoardWidget::onRButtonDown(QMouseEvent*){
     undoStack.undo();
+}
+
+/**
+*/
+void BoardWidget::gtpLButtonDown(int sgfX, int sgfY){
+    if (isBlack == isYourColorBlack)
+        gtpPut(sgfX, sgfY);
 }
 
 /**
@@ -588,6 +597,16 @@ void BoardWidget::modifyNode(go::nodePtr node, bool recreateBoardBuffer){
     repaintBoard(false);
     setDirty(true);
     emit nodeModified(node);
+}
+
+/**
+* public slot
+*/
+void BoardWidget::pass(){
+    if (editMode == eGtp)
+        gtpPut(-1, -1);
+    else
+        addStoneCommand(-1, -1);
 }
 
 /**
@@ -1192,13 +1211,10 @@ void BoardWidget::dead(int* tmp){
 void BoardWidget::addStoneCommand(int sgfX, int sgfY){
     if (sgfX == -1 && sgfY == -1){
         go::nodePtr node;
-        if (currentNode->isBlack())
-            node = go::createWhiteNode(currentNode);
-        else
+        if (isBlack)
             node = go::createBlackNode(currentNode);
-
-        if (editMode == eGtp)
-            gtpPut(sgfX, sgfY);
+        else
+            node = go::createWhiteNode(currentNode);
 
         addNodeCommand(currentNode, node);
     }
@@ -1235,9 +1251,6 @@ void BoardWidget::addStoneCommand(int sgfX, int sgfY, int boardX, int boardY){
         n = go::createBlackNode(currentNode, sgfX, sgfY);
     else
         n = go::createWhiteNode(currentNode, sgfX, sgfY);
-
-    if (editMode == eGtp)
-        gtpPut(sgfX, sgfY);
 
     addNodeCommand(currentNode, n);
 }
@@ -1637,12 +1650,24 @@ void BoardWidget::getCountTerritory(int& alive_b, int& alive_w, int& dead_b, int
     }
 }
 
-void BoardWidget::playWithComputer(QProcess* proc){
+void BoardWidget::playWithComputer(QProcess* proc, bool isYourColorBlack){
+    this->isYourColorBlack = isYourColorBlack;
     comProcess = proc;
     if (comProcess){
         editMode = eGtp;
         moveToClicked = false;
-        connect(comProcess, SIGNAL(readyRead()), this, SLOT(comProcessReadReady()));
+        connect(comProcess, SIGNAL(readyRead()), this, SLOT(gtpReadReady()));
+
+        if (isYourColorBlack == false){
+            gtpStatus = eGtpGen;
+            gtpWrite("genmove black\n");
+        }
+/*
+        if (isYourColorBlack == false && handicap == 0)
+            gtpWrite("genmove black\n");
+        else if (isYourColorBlack && handicap > 0)
+            gtpWrite("genmove white\n");
+*/
     }
     else{
         editMode = eAlternateMove;
@@ -1662,6 +1687,9 @@ void BoardWidget::gtpPut(int x, int y){
     if (comProcess == NULL)
         return;
 
+    gtpX = x;
+    gtpY = y;
+
     QString xy;
     if (x == -1 && y == -1)
         xy = "PASS";
@@ -1673,23 +1701,32 @@ void BoardWidget::gtpPut(int x, int y){
         gtpStatus = eGtpPut;
     }
     else{
+        gtpWrite( QString("white %1\n").arg(xy) );
+        gtpStatus = eGtpPut;
     }
 }
 
-void BoardWidget::comProcessReadReady(){
+void BoardWidget::gtpReadReady(){
     if (comProcess == NULL)
         return;
 
     gtpBuf += comProcess->readAll();
-    qDebug() << gtpBuf;
-
     if (gtpBuf.size() < 3 || gtpBuf.right(2) != "\n\n")
         return;
+
     QString buf =gtpBuf.mid(2, gtpBuf.size()-4);
     gtpBuf.clear();
+    qDebug() << buf;
 
     if (gtpStatus == eGtpPut){
-        gtpWrite("genmove white\n");
+        if (buf == "illegal move")
+            return;
+        addStoneCommand(gtpX, gtpY);
+
+        if (isBlack)
+            gtpWrite("genmove black\n");
+        else
+            gtpWrite("genmove white\n");
         gtpStatus = eGtpGen;
     }
     else if (gtpStatus == eGtpGen){
