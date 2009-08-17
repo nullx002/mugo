@@ -1737,6 +1737,7 @@ void MainWindow::setBoardSize(int xsize, int ysize){
     if (fileNew() == false)
         return;
     ui->boardWidget->setBoardSize(xsize, ysize);
+    setTreeData();
 }
 
 void MainWindow::setCurrentFile(const QString& fname){
