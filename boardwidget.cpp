@@ -793,7 +793,7 @@ void BoardWidget::drawCoordinates(QPainter& p){
 
     p.save();
 
-    int m = int(boxSize * 2.2);
+    int ps = p.font().pointSize();
 
     for (int i=0; i<xsize; ++i){
         QString s;
@@ -806,9 +806,9 @@ void BoardWidget::drawCoordinates(QPainter& p){
         else if (rotateBoard_ == 3)
             s = getYString(flipBoardHorizontally_ ? xsize-i-1 : i);
 
-        QRect r = p.boundingRect(xlines[i]-m/2, ylines[0]-m, m, m, Qt::AlignCenter, s);
+        QRect r = p.boundingRect(xlines[i]-ps, boardRect.top()-ps-2, ps*2, ps, Qt::AlignCenter, s);
         p.drawText(r, s);
-        r = p.boundingRect(xlines[i]-m/2, ylines[ysize-1], m, m, Qt::AlignCenter, s);
+        r = p.boundingRect(xlines[i]-ps, boardRect.bottom()+7, ps*2, ps, Qt::AlignCenter, s);
         p.drawText(r, s);
     }
 
@@ -823,9 +823,9 @@ void BoardWidget::drawCoordinates(QPainter& p){
         else if (rotateBoard_ == 3)
             s = getXString(flipBoardVertically_ ? i : ysize-i-1);
 
-        QRect r = p.boundingRect(xlines[0]-m, ylines[i]-m/2, m, m, Qt::AlignCenter, s);
+        QRect r = p.boundingRect(boardRect.left()-ps-3, ylines[i]-ps, ps, ps*2, Qt::AlignCenter, s);
         p.drawText(r, s);
-        r = p.boundingRect(xlines[xsize-1], ylines[i]-m/2, m, m, Qt::AlignCenter, s);
+        r = p.boundingRect(boardRect.right()+7, ylines[i]-ps, ps, ps*2, Qt::AlignCenter, s);
         p.drawText(r, s);
     }
 
