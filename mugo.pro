@@ -30,5 +30,4 @@ FORMS += mainwindow.ui \
     countterritorydialog.ui \
     setupdialog.ui
 RESOURCES += resources.qrc
-RC_FILE = mugo.rc
 TRANSLATIONS = mugo.ja_JP.ts
