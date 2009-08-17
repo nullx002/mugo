@@ -32,7 +32,7 @@ protected:
     virtual void keyPressEvent(QKeyEvent* event);
 
 private:
-    bool fileNew();
+    bool fileNew(int xsize=19, int ysize=19);
     bool fileOpen();
     bool fileOpen(const QString& fname);
     bool fileOpen(const QString& fname, const QString& filter);
@@ -50,7 +50,6 @@ private:
     void setAnnotation2(QAction* action, int annotation);
     void setAnnotation3(QAction* action, int annotation);
 
-    void setBoardSize(int xsize, int ysize);
     void setCurrentFile(const QString& fname);
     void updateRecentFileActions();
 

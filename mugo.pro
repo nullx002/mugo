@@ -13,7 +13,8 @@ SOURCES += main.cpp \
     ugf.cpp \
     countterritorydialog.cpp \
     setupdialog.cpp \
-    command.cpp
+    command.cpp \
+    playwithcomputerdialog.cpp
 HEADERS += mainwindow.h \
     boardwidget.h \
     godata.h \
@@ -23,11 +24,13 @@ HEADERS += mainwindow.h \
     ugf.h \
     countterritorydialog.h \
     setupdialog.h \
-    command.h
+    command.h \
+    playwithcomputerdialog.h
 FORMS += mainwindow.ui \
     boardwidget.ui \
     gameinformationdialog.ui \
     countterritorydialog.ui \
-    setupdialog.ui
+    setupdialog.ui \
+    playwithcomputerdialog.ui
 RESOURCES += resources.qrc
 TRANSLATIONS = mugo.ja_JP.ts

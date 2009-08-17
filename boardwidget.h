@@ -144,7 +144,7 @@ public:
     QString getYString(int y) const;
     QString getXYString(int x, int y) const;
 
-    void playWithComputer(QProcess* proc);
+    void playWithComputer(QProcess* proc, bool isYourColorBlack);
 
 public slots:
     void addNodeCommand(go::nodePtr parent, go::nodePtr node, bool select=true);
@@ -157,6 +157,7 @@ public slots:
     void addNode(go::nodePtr parent, go::nodePtr node, bool select=true);
     void deleteNode(go::nodePtr node, bool deleteChildren=true);
     void modifyNode(go::nodePtr node, bool recreateBoardBuffer=false);
+    void pass();
     void setCurrentNode(go::nodePtr node = go::nodePtr());
 
 signals:
@@ -178,6 +179,7 @@ protected:
     // mouse event
     void onLButtonDown(QMouseEvent* e);
     void onRButtonDown(QMouseEvent* e);
+    void gtpLButtonDown(int sgfX, int sgfY);
 
     // draw
     void drawBoard(QPainter& p);
@@ -232,7 +234,7 @@ protected:
     bool getCoordinate(const QString& buf, int& x, int& y);
 
 private slots:
-    void comProcessReadReady();
+    void gtpReadReady();
 
 public:
     QUndoStack undoStack;
@@ -291,7 +293,10 @@ private:
     // play with computer
     QProcess* comProcess;
     QString   gtpBuf;
+    bool isYourColorBlack;
     int gtpStatus;
+    int gtpX;
+    int gtpY;
 };
 
 

@@ -9,6 +9,7 @@
 #include "ugf.h"
 #include "mainwindow.h"
 #include "gameinformationdialog.h"
+#include "playwithcomputerdialog.h"
 #include "setupdialog.h"
 #include "ui_mainwindow.h"
 
@@ -248,7 +249,7 @@ void MainWindow::on_actionGameInformation_triggered(){
 * Edit -> Pass
 */
 void MainWindow::on_actionPass_triggered(){
-    ui->boardWidget->addStoneCommand(-1, -1);
+    ui->boardWidget->pass();
 }
 
 /**
@@ -975,12 +976,24 @@ void MainWindow::on_actionCountTerritory_triggered(){
 */
 void MainWindow::on_actionPlayWithGnugo_triggered(){
     if (ui->actionPlayWithGnugo->isChecked()){
-        comProcess.start("gnugo --mode gtp");
-        ui->boardWidget->playWithComputer(&comProcess);
+        PlayWithComputerDialog dlg(this);
+        if (dlg.exec() != QDialog::Accepted)
+            return;
+
+        if (fileNew(dlg.size, dlg.size) == false)
+            return;
+
+        QString param;
+        param.sprintf(" --mode gtp --color %s --boardsize %d --komi %.2f --handicap %d --level %d",
+                dlg.isBlack ? "black" : "white" , dlg.size, dlg.komi, dlg.handicap, dlg.level);
+        param = dlg.path + param;
+        qDebug() << param;
+        comProcess.start(param);
+        ui->boardWidget->playWithComputer(&comProcess, dlg.isBlack);
     }
     else{
         comProcess.close();
-        ui->boardWidget->playWithComputer(NULL);
+        ui->boardWidget->playWithComputer(NULL, false);
     }
 }
 
@@ -1002,7 +1015,7 @@ void MainWindow::on_actionSetup_triggered(){
 * Options -> 19 x 19 Board
 */
 void MainWindow::on_action19x19Board_triggered(){
-    setBoardSize(19, 19);
+    fileNew(19, 19);
 }
 
 /**
@@ -1010,7 +1023,7 @@ void MainWindow::on_action19x19Board_triggered(){
 * Options -> 13 x 13 Board
 */
 void MainWindow::on_action13x13Board_triggered(){
-    setBoardSize(13, 13);
+    fileNew(13, 13);
 }
 
 /**
@@ -1018,7 +1031,7 @@ void MainWindow::on_action13x13Board_triggered(){
 * Options -> 9 x 9 Board
 */
 void MainWindow::on_action9x9Board_triggered(){
-    setBoardSize(9, 9);
+    fileNew(9, 9);
 }
 
 /**
@@ -1054,7 +1067,7 @@ void MainWindow::on_actionCustomBoardSize_triggered(){
     int iH = h.toInt();
     if (iW >= 2 && iW <= 52)
         if (iH == 0 || (iH >= 2 && iH <= 52))
-            setBoardSize(iW, iH == 0 ? iW : iH);
+            fileNew(iW, iH == 0 ? iW : iH);
 }
 
 /**
@@ -1303,8 +1316,13 @@ void MainWindow::setCaption(){
 /**
 * a new document is created if current document can be closed.
 */
-bool MainWindow::fileNew(){
-    return fileClose();
+bool MainWindow::fileNew(int xsize, int ysize){
+    if (fileClose() == false)
+        return false;
+
+    ui->boardWidget->setBoardSize(xsize, ysize);
+    setTreeData();
+    return true;
 }
 
 /**
@@ -1731,13 +1749,6 @@ void MainWindow::setAnnotation2(QAction* action, int annotation){
 void MainWindow::setAnnotation3(QAction* action, int annotation){
     annotation3 = action->isChecked() ? annotation : 0;
     ui->boardWidget->setAnnotation(annotation1 | annotation2 | annotation3);
-}
-
-void MainWindow::setBoardSize(int xsize, int ysize){
-    if (fileNew() == false)
-        return;
-    ui->boardWidget->setBoardSize(xsize, ysize);
-    setTreeData();
 }
 
 void MainWindow::setCurrentFile(const QString& fname){
