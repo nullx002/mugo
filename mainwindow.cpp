@@ -1414,7 +1414,7 @@ bool MainWindow::fileSaveAs(){
 * file saveas.
 */
 bool MainWindow::fileSaveAs(const QString& fname){
-    fileName = fname;
+    setCurrentFile(fname);
     go::sgf sgf;
     ui->boardWidget->getData(sgf);
     sgf.save(fileName, codec);
