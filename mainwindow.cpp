@@ -980,7 +980,7 @@ void MainWindow::on_actionPlayWithGnugo_triggered(){
         if (dlg.exec() != QDialog::Accepted)
             return;
 
-        if (fileNew(dlg.size, dlg.size) == false)
+        if (fileNew(dlg.size, dlg.size, dlg.handicap, dlg.komi) == false)
             return;
 
         QString param;
@@ -988,7 +988,7 @@ void MainWindow::on_actionPlayWithGnugo_triggered(){
                 dlg.isBlack ? "black" : "white" , dlg.size, dlg.komi, dlg.handicap, dlg.level);
         param = dlg.path + param;
         qDebug() << param;
-        comProcess.start(param);
+        comProcess.start(param, QIODevice::ReadWrite|QIODevice::Text);
         ui->boardWidget->playWithComputer(&comProcess, dlg.isBlack);
     }
     else{
@@ -1316,11 +1316,13 @@ void MainWindow::setCaption(){
 /**
 * a new document is created if current document can be closed.
 */
-bool MainWindow::fileNew(int xsize, int ysize){
+bool MainWindow::fileNew(int xsize, int ysize, int handicap, double komi){
     if (fileClose() == false)
         return false;
 
     ui->boardWidget->setBoardSize(xsize, ysize);
+    ui->boardWidget->getData().root->handicap = handicap;
+    ui->boardWidget->getData().root->komi = komi;
     setTreeData();
     return true;
 }
