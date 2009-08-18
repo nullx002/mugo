@@ -1714,6 +1714,8 @@ void BoardWidget::gtpReadReady(){
     gtpBuf += comProcess->readAll();
     if (gtpBuf.size() < 3 || gtpBuf.right(2) != "\n\n")
         return;
+//    if ((gtpBuf.size() < 5 || gtpBuf.right(4) != "\r\n\r\n") || (gtpBuf.size() < 3 || gtpBuf.right(2) != "\n\n"))
+//        return;
 
     QString buf =gtpBuf.mid(2, gtpBuf.size()-4);
     gtpBuf.clear();
