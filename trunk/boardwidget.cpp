@@ -536,6 +536,7 @@ void BoardWidget::setCommentCommand(go::nodePtr node, const QString& comment){
 
 //    undoStack.push( new SetCommentCommand(this, node, comment) );
     node->comment = comment;
+    modifyNode(node);
 }
 
 /**
