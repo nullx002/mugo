@@ -51,7 +51,7 @@ BoardWidget::~BoardWidget()
 }
 
 void BoardWidget::readSettings(){
-    QSettings settings(AUTHOR, APPNAME);
+    QSettings settings;
 
     boardType = settings.value("boardType").toInt();
     whiteType = settings.value("whiteType").toInt();

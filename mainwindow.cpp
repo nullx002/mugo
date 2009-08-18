@@ -79,7 +79,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->menu_Window->addAction( ui->undoDockWidget->toggleViewAction() );
 
     // language menu
-    QSettings settings(AUTHOR, APPNAME);
+    QSettings settings;
     QString language = settings.value("language").toString();
     if (language.isEmpty())
         ui->actionLanguageSystemDefault->setChecked(true);
@@ -1756,7 +1756,7 @@ void MainWindow::setAnnotation3(QAction* action, int annotation){
 void MainWindow::setCurrentFile(const QString& fname){
     fileName = fname;
 
-    QSettings settings(AUTHOR, APPNAME);
+    QSettings settings;
     QStringList files = settings.value("recentFileList").toStringList();
     files.removeAll(fileName);
     files.prepend(fileName);
@@ -1769,7 +1769,7 @@ void MainWindow::setCurrentFile(const QString& fname){
 
 void MainWindow::updateRecentFileActions()
 {
-    QSettings settings(AUTHOR, APPNAME);
+    QSettings settings;
     QStringList files = settings.value("recentFileList").toStringList();
 
     int numRecentFiles = qMin(files.size(), (int)MaxRecentFiles);
@@ -1788,7 +1788,7 @@ void MainWindow::updateRecentFileActions()
 }
 
 void MainWindow::setLanguage(const QString& locale, QAction* act){
-    QSettings settings(AUTHOR, APPNAME);
+    QSettings settings;
     settings.setValue("language", locale);
 
     QAction* actions[] = {
