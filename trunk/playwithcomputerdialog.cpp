@@ -1,5 +1,6 @@
 #include <QDebug>
 #include <QFileDialog>
+#include <QSettings>
 #include "playwithcomputerdialog.h"
 #include "ui_playwithcomputerdialog.h"
 
@@ -16,13 +17,13 @@ PlayWithComputerDialog::PlayWithComputerDialog(QWidget *parent) :
     m_ui->boardSizeComboBox->addItem( "13 x 13" );
     m_ui->boardSizeComboBox->addItem( "9 x 9" );
 
-    QDoubleValidator* dv = new QDoubleValidator(-20.0, 20.0, 2, this);
-    dv->setNotation(QDoubleValidator::StandardNotation);
-    m_ui->komiEdit->setValidator( dv );
-
-    m_ui->handicapEdit->setValidator( new QIntValidator(0, 9, this) );
-
-    m_ui->levelEdit->setValidator( new QIntValidator(1, 12, this) );
+    QSettings settings;
+    m_ui->colorComboBox->setCurrentIndex( settings.value("playWithComputer/color").toInt() );
+    m_ui->boardSizeComboBox->setCurrentIndex( settings.value("playWithComputer/size").toInt() );
+    m_ui->computerPathEdit->setText( settings.value("playWithComputer/path").toString() );
+    m_ui->komiSpinBox->setValue( settings.value("playWithComputer/komi", 6.5).toDouble() );
+    m_ui->handicapSpinBox->setValue( settings.value("playWithComputer/handicap").toInt() );
+    m_ui->levelSpinBox->setValue( settings.value("playWithComputer/level", 10).toInt() );
 }
 
 PlayWithComputerDialog::~PlayWithComputerDialog()
@@ -51,9 +52,17 @@ void PlayWithComputerDialog::accept(){
     size = boardSize == 0 ? 19 : (boardSize == 1 ? 13 : 9);
 
     path = m_ui->computerPathEdit->text();
-    komi = m_ui->komiEdit->text().toDouble();
-    handicap = m_ui->handicapEdit->text().toInt();
-    level = m_ui->levelEdit->text().toInt();
+    komi = m_ui->komiSpinBox->value();
+    handicap = m_ui->handicapSpinBox->value();
+    level = m_ui->levelSpinBox->value();
+
+    QSettings settings;
+    settings.setValue("playWithComputer/color", m_ui->colorComboBox->currentIndex());
+    settings.setValue("playWithComputer/size", m_ui->boardSizeComboBox->currentIndex());
+    settings.setValue("playWithComputer/path", path);
+    settings.setValue("playWithComputer/komi", komi);
+    settings.setValue("playWithComputer/handicap", handicap);
+    settings.setValue("playWithComputer/level", level);
 }
 
 /**

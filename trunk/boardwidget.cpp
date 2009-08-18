@@ -53,13 +53,13 @@ BoardWidget::~BoardWidget()
 void BoardWidget::readSettings(){
     QSettings settings;
 
-    boardType = settings.value("boardType").toInt();
-    whiteType = settings.value("whiteType").toInt();
-    blackType = settings.value("blackType").toInt();
+    boardType = settings.value("board/boardType").toInt();
+    whiteType = settings.value("board/whiteType").toInt();
+    blackType = settings.value("board/blackType").toInt();
 
-    boardColor = settings.value("boardColor").value<QColor>();
-    whiteColor = settings.value("whiteColor").value<QColor>();
-    blackColor = settings.value("blackColor").value<QColor>();
+    boardColor = settings.value("board/boardColor").value<QColor>();
+    whiteColor = settings.value("board/whiteColor").value<QColor>();
+    blackColor = settings.value("board/blackColor").value<QColor>();
 }
 
 /**
@@ -992,7 +992,7 @@ void BoardWidget::drawTerritories(QPainter& p){
             int bx = xlines[x];
             int by = ylines[y];
 
-            QColor color = board[y][x].whiteTerritory() ? QColor(255, 255, 255, 110) : QColor(0, 0, 0, 80);
+            QColor color = board[y][x].whiteTerritory() ? QColor(255, 255, 255, 110) : QColor(0, 0, 0, 60);
             p.fillRect(bx-boxSize/2, by-boxSize/2, boxSize, boxSize, color);
             p.setPen( board[y][x].whiteTerritory() ? Qt::white : Qt::black );
             p.drawText(bx-boxSize, by-boxSize, boxSize*2, boxSize*2, Qt::AlignCenter, "■");
@@ -1535,9 +1535,7 @@ void BoardWidget::countTerritory(){
             int c = go::empty;
             whichTerritory(x, y, tmp, c);
             if (board[y][x].empty() && (c & go::blackTerritory || c & go::whiteTerritory))
-                board[y][x].color |= c;
-//            if (c != go::empty)
-//                updateTerritory(x, y);
+                board[y][x].color = c;
         }
     }
 
@@ -1593,16 +1591,21 @@ void BoardWidget::addTerritory(int x, int y){
     else if ( (board[y][x].white() || board[y][x].black()) && (board[y][x].blackTerritory() || board[y][x].whiteTerritory()) )
         unsetTerritory(x, y);
 
+    countTerritory();
     repaintBoard(false);
 }
 
 void BoardWidget::setTerritory(int x, int y, int c){
-    if ( (c & go::blackTerritory && board[y][x].black()) || (c & go::whiteTerritory && board[y][x].white()) )
+    if ( c & go::blackTerritory && (board[y][x].black() || board[y][x].blackTerritory()) )
         return;
-    else if(board[y][x].blackTerritory() || board[y][x].whiteTerritory())
+    else if ( c & go::whiteTerritory && (board[y][x].white() || board[y][x].whiteTerritory()) )
         return;
 
     board[y][x].color |= c;
+    if (c == go::blackTerritory)
+        board[y][x].color &= ~go::whiteTerritory;
+    else
+        board[y][x].color &= ~go::blackTerritory;
 
     if (y > 0)
         setTerritory(x, y-1, c);
