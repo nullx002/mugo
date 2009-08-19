@@ -563,7 +563,7 @@ bool sgf::get(go::data& data) const{
 }
 
 go::nodePtr sgf::get(const node& sgfNode, go::nodePtr outNode) const{
-    // ノードを処理
+    // process node
     go::nodePtr newNode;
     switch(sgfNode.getNodeType()){
         case eBlack:
@@ -596,7 +596,7 @@ go::nodePtr sgf::get(const node& sgfNode, go::nodePtr outNode) const{
     else
         newNode = outNode;
 
-    // 子要素を処理
+    // process children
     go::nodePtr childNode = newNode;
     nodeList::const_iterator iter = sgfNode.getChildNodes().begin();
     while (iter != sgfNode.getChildNodes().end()){

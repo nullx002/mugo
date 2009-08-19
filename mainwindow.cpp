@@ -1524,7 +1524,7 @@ QTreeWidgetItem* MainWindow::addTreeWidget(go::nodePtr node, bool needRemake){
 }
 
 QTreeWidgetItem* MainWindow::createTreeWidget(go::nodePtr node){
-    // TreeItemを作成
+    // Create TreeItem Widget
     QTreeWidgetItem* nodeWidget = new QTreeWidgetItem( QStringList(createTreeText(node)) );
 
     QVariant v;
@@ -1532,7 +1532,7 @@ QTreeWidgetItem* MainWindow::createTreeWidget(go::nodePtr node){
     nodeWidget->setData(0, Qt::UserRole, v);
     nodeToTreeWidget[node] = nodeWidget;
 
-    // TreeItemにIconを設定
+    // Set Icon to TreeItem Widget
     if (node->isStone() && node->isBlack())
         nodeWidget->setIcon(0, QIcon(":/res/black_64.png"));
     else if (node->isStone() && node->isWhite())

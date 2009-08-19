@@ -33,33 +33,10 @@ class mark{
 public:
     enum eType{eCross, eCircle, eSquare, eTriangle, eCharacter, eBlackTerritory, eWhiteTerritory};
 
-    mark(const point& p_, eType t_) : p(p_), t(t_){ setCharacter(); }
+    mark(const point& p_, eType t_) : p(p_), t(t_){}
     mark(const point& p_, const QString& s_) : p(p_), t(eCharacter), s(s_){}
-    mark(int x, int y, eType t_) : p(x, y), t(t_){ setCharacter(); }
+    mark(int x, int y, eType t_) : p(x, y), t(t_){}
     mark(int x, int y, const QString& s_) : p(x, y), t(eCharacter), s(s_){}
-
-    void setCharacter(){
-        switch(t){
-            case eCross:
-                s = "×";
-                break;
-            case eCircle:
-                s = "○";
-                break;
-            case eSquare:
-                s = "□";
-                break;
-            case eTriangle:
-                s = "△";
-                break;
-            case eCharacter:
-                break;
-            case eBlackTerritory:
-            case eWhiteTerritory:
-                s = "■";
-                break;
-        };
-    }
 
     point   p;
     eType   t;

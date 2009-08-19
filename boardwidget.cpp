@@ -708,12 +708,13 @@ void BoardWidget::createBoardBuffer(){
 void BoardWidget::drawBoard(QPainter& p){
     p.save();
 
-    int w = width_  / (xsize + (showCoordinates ? 2 : 0));
-    int h = height_ / (ysize + (showCoordinates ? 2 : 0));
+    int ps = p.font().pointSize();
+    int w = (width_  + showCoordinates ? ps*2+4 : 0) / xsize;
+    int h = (height_ + showCoordinates ? ps*2+4 : 0) / ysize;
     boxSize = qMin(w, h);
     w = boxSize * (xsize - 1);
     h = boxSize * (ysize - 1);
-    int margin = int(boxSize * 0.6);
+    int margin = int(boxSize * 0.5);
 
     int l = (width_ - w) / 2;
     int r = l + boxSize * (xsize - 1);
@@ -758,7 +759,7 @@ void BoardWidget::drawBoard(QPainter& p){
     p.fillRect(boardRect.left()+3, boardRect.top()+3, boardRect.width(), boardRect.height(), Qt::gray);
     p.drawImage(boardRect.topLeft(), boardImage2);
 
-    // 横線を引く
+    // horizontal line
     ylines.clear();
     for (int i=0; i<ysize; ++i){
         int y = t + i * boxSize;
@@ -766,7 +767,7 @@ void BoardWidget::drawBoard(QPainter& p){
         ylines.push_back(y);
     }
 
-    // 縦線を引く
+    // vertical line
     xlines.clear();
     for (int i=0; i<xsize; ++i){
         int x = l + i * boxSize;
@@ -774,7 +775,7 @@ void BoardWidget::drawBoard(QPainter& p){
         xlines.push_back(x);
     }
 
-    // 星に黒丸を描画する
+    // draw stars
     QList<int> xstar, ystar;
     getStartPosition(xstar, xsize);
     getStartPosition(ystar, ysize);
@@ -866,11 +867,11 @@ void BoardWidget::drawStones(QPainter& p){
     if (currentNode->childNodes.size() > 1)
         drawBranchMoves(p, currentNode->childNodes.begin(), currentNode->childNodes.end());
 
-    drawMark(p, currentNode->crosses.begin(), currentNode->crosses.end());
-    drawMark(p, currentNode->triangles.begin(), currentNode->triangles.end());
-    drawMark(p, currentNode->circles.begin(), currentNode->circles.end());
-    drawMark(p, currentNode->squares.begin(), currentNode->squares.end());
-    drawMark(p, currentNode->characters.begin(), currentNode->characters.end());
+    drawCross(p, currentNode->crosses.begin(), currentNode->crosses.end());
+    drawTriangle(p, currentNode->triangles.begin(), currentNode->triangles.end());
+    drawCircle(p, currentNode->circles.begin(), currentNode->circles.end());
+    drawSquare(p, currentNode->squares.begin(), currentNode->squares.end());
+    drawCharacter(p, currentNode->characters.begin(), currentNode->characters.end());
 //    drawTerritories(p, currentNode->blackTerritories.begin(), currentNode->blackTerritories.end());
 //    drawTerritories(p, currentNode->whiteTerritories.begin(), currentNode->whiteTerritories.end());
 
@@ -941,7 +942,49 @@ void BoardWidget::drawBranchMoves(QPainter& p, go::nodeList::iterator first, go:
 
 /**
 */
-void BoardWidget::drawMark(QPainter& p, go::markList::iterator first, go::markList::iterator last){
+void BoardWidget::drawCross(QPainter& p, go::markList::iterator first, go::markList::iterator last){
+    QPainterPath path;
+
+    path.moveTo(-boxSize/4, -boxSize/4);
+    path.lineTo(boxSize/4, boxSize/4);
+
+    path.moveTo(boxSize/4, -boxSize/4);
+    path.lineTo(-boxSize/4, boxSize/4);
+
+    drawMark(p, path, first, last);
+}
+
+/**
+*/
+void BoardWidget::drawTriangle(QPainter& p, go::markList::iterator first, go::markList::iterator last){
+    QPainterPath path;
+
+    QPolygon polygon(3);
+    polygon[0] = QPoint(0, -boxSize/4);
+    polygon[1] = QPoint(-boxSize/4, boxSize/4);
+    polygon[2] = QPoint(boxSize/4, boxSize/4);
+    path.addPolygon(polygon);
+
+    drawMark(p, path, first, last);
+}
+
+/**
+*/
+void BoardWidget::drawCircle(QPainter& p, go::markList::iterator first, go::markList::iterator last){
+    QPainterPath path;
+    path.addEllipse(0, 0, boxSize/2, boxSize/2);
+    drawMark(p, path, first, last);
+}
+
+/**
+*/
+void BoardWidget::drawSquare(QPainter& p, go::markList::iterator first, go::markList::iterator last){
+    QPainterPath path;
+    path.addRect(-boxSize/4, -boxSize/4, boxSize/2, boxSize/2);
+    drawMark(p, path, first, last);
+}
+
+void BoardWidget::drawCharacter(QPainter& p, go::markList::iterator first, go::markList::iterator last){
     if (showMarker == false)
         return;
 
@@ -977,12 +1020,48 @@ void BoardWidget::drawMark(QPainter& p, go::markList::iterator first, go::markLi
 
 /**
 */
+void BoardWidget::drawMark(QPainter& p, const QPainterPath& path, go::markList::iterator first, go::markList::iterator last){
+    if (showMarker == false)
+        return;
+
+    while (first != last){
+        int boardX, boardY;
+        sgfToBoardCoordinate(first->p.x, first->p.y, boardX, boardY);
+
+        if (boardX >= 0 && boardX < xsize && boardY >= 0 && boardY < ysize)
+            drawPath(p, path, boardX, boardY);
+        ++first;
+    }
+}
+
+/**
+*/
+void BoardWidget::drawPath(QPainter& p, const QPainterPath& path, int boardX, int boardY){
+    p.save();
+
+    QColor color;
+    stoneInfo& info = board[boardY][boardX];
+    if (info.empty()){
+        p.setPen( Qt::black );
+        eraseBackground(p, boardX, boardY);
+    }
+    else
+        p.setPen( info.black() ? Qt::white : Qt::black );
+
+    int x = xlines[boardX];
+    int y = ylines[boardY];
+    p.translate(x, y);
+
+    p.drawPath(path);
+
+    p.restore();
+}
+
+/**
+*/
 void BoardWidget::drawTerritories(QPainter& p){
     p.save();
 
-    QFont font( p.font() );
-    font.setPointSize(int(boxSize * 0.38));
-    p.setFont(font);
 
     for (int y=0; y<ysize; ++y){
         for (int x=0; x<xsize; ++x){
@@ -994,8 +1073,9 @@ void BoardWidget::drawTerritories(QPainter& p){
 
             QColor color = board[y][x].whiteTerritory() ? QColor(255, 255, 255, 110) : QColor(0, 0, 0, 60);
             p.fillRect(bx-boxSize/2, by-boxSize/2, boxSize, boxSize, color);
-            p.setPen( board[y][x].whiteTerritory() ? Qt::white : Qt::black );
-            p.drawText(bx-boxSize, by-boxSize, boxSize*2, boxSize*2, Qt::AlignCenter, "■");
+
+            color.setAlpha(255);
+            p.fillRect(bx-boxSize/6, by-boxSize/6, boxSize/3, boxSize/3, color);
         }
     }
 
@@ -1715,12 +1795,12 @@ void BoardWidget::gtpReadReady(){
         return;
 
     gtpBuf += comProcess->readAll();
-    if (gtpBuf.size() < 3 || gtpBuf.right(2) != "\n\n")
+    if (gtpBuf.size() < 2 || gtpBuf.right(2) != "\n\n")
         return;
-//    if ((gtpBuf.size() < 5 || gtpBuf.right(4) != "\r\n\r\n") || (gtpBuf.size() < 3 || gtpBuf.right(2) != "\n\n"))
+//    if ((gtpBuf.size() < 5 || gtpBuf.right(4) != "\r\n\r\n") || (gtpBuf.size() < 2 || gtpBuf.right(2) != "\n\n"))
 //        return;
 
-    QString buf =gtpBuf.mid(2, gtpBuf.size()-4);
+    QString buf = gtpBuf.mid(2, gtpBuf.size()-2);
     gtpBuf.clear();
     qDebug() << buf;
 

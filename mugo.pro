@@ -3,7 +3,9 @@
 # -------------------------------------------------
 TARGET = mugo
 TEMPLATE = app
-QT += phonon
+unix{
+    QT += phonon
+}
 SOURCES += main.cpp \
     mainwindow.cpp \
     boardwidget.cpp \
@@ -33,4 +35,10 @@ FORMS += mainwindow.ui \
     setupdialog.ui \
     playwithcomputerdialog.ui
 RESOURCES += resources.qrc
+win32{
+    RC_FILE = mugo.rc
+}
+mac{
+    RC_FILE = pics/mugo.icns
+}
 TRANSLATIONS = mugo.ja_JP.ts
