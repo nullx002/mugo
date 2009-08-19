@@ -89,7 +89,6 @@ private:
 
 private slots:
     // File menu
-    void on_actionPlayWithGnugo_triggered();
     void on_actionNew_triggered();
     void on_actionOpen_triggered();
     void on_actionReload_triggered();
@@ -194,16 +193,16 @@ private slots:
     void on_actionNavigationToolbar_triggered();
     void on_actionOptionToolbar_triggered();
 
-    // Tools menu -> Count Territory
+    // Tools menu
     void on_actionCountTerritory_triggered();
-
-    // Option menu
-    void on_actionSetup_triggered();
+    void on_actionPlayWithGnugo_triggered();
+    void on_actionPlaySound_triggered();
     void on_action19x19Board_triggered();
     void on_action13x13Board_triggered();
     void on_action9x9Board_triggered();
     void on_actionCustomBoardSize_triggered();
-    void on_actionPlaySound_triggered();
+    void on_actionOptions_triggered();
+    // Tools -> Language menu
     void on_actionLanguageSystemDefault_triggered();
     void on_actionLanguageEnglish_triggered();
     void on_actionLanguageJapanese_triggered();
@@ -220,11 +219,9 @@ private slots:
     void on_boardWidget_updateTerritory(int alive_b, int alive_w, int dead_b, int dead_w, int capturedBlack, int capturedWhite, int blackTerritory, int whiteTerritory, double komi);
 
     // Branch widget
-    void on_branchDockWidget_visibilityChanged(bool visible);
     void on_branchWidget_currentItemChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous);
 
     // Comment widget
-    void on_commentDockWidget_visibilityChanged(bool visible);
     void on_commentWidget_textChanged();
 
     // Score Dialog

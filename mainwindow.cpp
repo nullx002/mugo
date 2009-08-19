@@ -1001,7 +1001,7 @@ void MainWindow::on_actionPlayWithGnugo_triggered(){
 * Slot
 * Options -> Setup
 */
-void MainWindow::on_actionSetup_triggered(){
+void MainWindow::on_actionOptions_triggered(){
     SetupDialog dlg(this);
     if (dlg.exec() != QDialog::Accepted)
         return;
@@ -1171,14 +1171,6 @@ void MainWindow::on_boardWidget_currentNodeChanged(go::nodePtr node){
 
 /**
 * Slot
-* branch dock widget was showed or hid.
-*/
-void MainWindow::on_branchDockWidget_visibilityChanged(bool visible){
-    ui->actionBranchWindow->setChecked(visible);
-}
-
-/**
-* Slot
 * node was changed on branch tree view.
 */
 void MainWindow::on_branchWidget_currentItemChanged(QTreeWidgetItem* current, QTreeWidgetItem* /*previous*/){
@@ -1245,14 +1237,6 @@ void MainWindow::on_boardWidget_updateTerritory(int alive_b, int alive_w, int de
     s += tr("Chinese Rule") + ":\n" + wc + "\n" + bc + "\n" + result;
 
     countTerritoryDialog->setScoreText(s);
-}
-
-/**
-* Slot
-* comment dock widget was showed or hid.
-*/
-void MainWindow::on_commentDockWidget_visibilityChanged(bool visible){
-    ui->actionCommentWindow->setChecked(visible);
 }
 
 /**
