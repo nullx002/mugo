@@ -101,18 +101,26 @@ void BoardWidget::mouseReleaseEvent(QMouseEvent* e){
 void BoardWidget::mouseMoveEvent(QMouseEvent* e){
     QWidget::mouseMoveEvent(e);
 
-    if (editMode != this->eAlternateMove && editMode != this->eGtp)
+    if (editMode == eGtp && gtpStatus != eGtpNone)
         return;
 
-    int bx = floor( double(e->x() - xlines[0] + boxSize / 2) / boxSize );
-    int by = floor( double(e->y() - ylines[0] + boxSize / 2) / boxSize );
+    bool black;
+    if (editMode == eAlternateMove || editMode == eGtp)
+        black = isBlack;
+    else if (editMode == eAddBlack || editMode == eAddWhite)
+        black = editMode == eAddBlack;
+    else
+        return;
+
+    int bx = (int)floor( double(e->x() - xlines[0] + boxSize / 2) / boxSize );
+    int by = (int)floor( double(e->y() - ylines[0] + boxSize / 2) / boxSize );
 
     offscreenBuffer3 = offscreenBuffer2.copy();
     QPainter p(&offscreenBuffer3);
 
     if (! (bx < 0 || bx >= xlines.size() || by < 0 || by >= ylines.size() || board[by][bx].color != go::empty) ){
         p.setOpacity(0.5);
-        drawImage(p, bx, by, isBlack ? black2 : white2);
+        drawImage(p, bx, by, black ? black2 : white2);
     }
 
     repaint();
@@ -448,8 +456,13 @@ void BoardWidget::resetBoard(){
 /**
 */
 void BoardWidget::clear(){
+    int xsize = goData.root->xsize;
+    int ysize = goData.root->ysize;
+
     setDirty(false);
     goData.clear();
+    goData.root->xsize = xsize;
+    goData.root->ysize = ysize;
     nodeList.clear();
     capturedBlack = 0;
     capturedWhite = 0;
@@ -709,8 +722,10 @@ void BoardWidget::drawBoard(QPainter& p){
     p.save();
 
     int ps = p.font().pointSize();
-    int w = (width_  + showCoordinates ? ps*2+4 : 0) / xsize;
-    int h = (height_ + showCoordinates ? ps*2+4 : 0) / ysize;
+//    int w = width_  / (xsize + (showCoordinates ? 2 : 0));
+//    int h = height_ / (ysize + (showCoordinates ? 2 : 0));
+    int w = (width_  - (showCoordinates ? ps*5 : 0)) / xsize;
+    int h = (height_ - (showCoordinates ? ps*5 : 0)) / ysize;
     boxSize = qMin(w, h);
     w = boxSize * (xsize - 1);
     h = boxSize * (ysize - 1);
@@ -944,12 +959,13 @@ void BoardWidget::drawBranchMoves(QPainter& p, go::nodeList::iterator first, go:
 */
 void BoardWidget::drawCross(QPainter& p, go::markList::iterator first, go::markList::iterator last){
     QPainterPath path;
+    double w = boxSize * 0.18;
 
-    path.moveTo(-boxSize/4, -boxSize/4);
-    path.lineTo(boxSize/4, boxSize/4);
+    path.moveTo(-w, -w);
+    path.lineTo(w, w);
 
-    path.moveTo(boxSize/4, -boxSize/4);
-    path.lineTo(-boxSize/4, boxSize/4);
+    path.moveTo(w, -w);
+    path.lineTo(-w, w);
 
     drawMark(p, path, first, last);
 }
@@ -958,12 +974,14 @@ void BoardWidget::drawCross(QPainter& p, go::markList::iterator first, go::markL
 */
 void BoardWidget::drawTriangle(QPainter& p, go::markList::iterator first, go::markList::iterator last){
     QPainterPath path;
-
-    QPolygon polygon(3);
-    polygon[0] = QPoint(0, -boxSize/4);
-    polygon[1] = QPoint(-boxSize/4, boxSize/4);
-    polygon[2] = QPoint(boxSize/4, boxSize/4);
+    double w = boxSize * 0.22;
+    double h = boxSize * 0.18;
+    QPolygonF polygon(3);
+    polygon[0] = QPointF(0, -h);
+    polygon[1] = QPointF(-w, h);
+    polygon[2] = QPointF(w, h);
     path.addPolygon(polygon);
+    path.closeSubpath();
 
     drawMark(p, path, first, last);
 }
@@ -972,7 +990,8 @@ void BoardWidget::drawTriangle(QPainter& p, go::markList::iterator first, go::ma
 */
 void BoardWidget::drawCircle(QPainter& p, go::markList::iterator first, go::markList::iterator last){
     QPainterPath path;
-    path.addEllipse(0, 0, boxSize/2, boxSize/2);
+    double w = boxSize * 0.42;
+    path.addEllipse(-w/2, -w/2, w, w);
     drawMark(p, path, first, last);
 }
 
@@ -980,7 +999,8 @@ void BoardWidget::drawCircle(QPainter& p, go::markList::iterator first, go::mark
 */
 void BoardWidget::drawSquare(QPainter& p, go::markList::iterator first, go::markList::iterator last){
     QPainterPath path;
-    path.addRect(-boxSize/4, -boxSize/4, boxSize/2, boxSize/2);
+    double w = boxSize * 0.4;
+    path.addRect(-w/2, -w/2, w, w);
     drawMark(p, path, first, last);
 }
 
@@ -1042,11 +1062,11 @@ void BoardWidget::drawPath(QPainter& p, const QPainterPath& path, int boardX, in
     QColor color;
     stoneInfo& info = board[boardY][boardX];
     if (info.empty()){
-        p.setPen( Qt::black );
+        p.setPen( QPen(Qt::black, 2) );
         eraseBackground(p, boardX, boardY);
     }
     else
-        p.setPen( info.black() ? Qt::white : Qt::black );
+        p.setPen( info.black() ? QPen(Qt::white, 2) : QPen(Qt::black, 2) );
 
     int x = xlines[boardX];
     int y = ylines[boardY];
@@ -1115,19 +1135,26 @@ void BoardWidget::drawTerritories(QPainter& p, go::markList::iterator first, go:
 /**
 */
 void BoardWidget::drawCurrentMark(QPainter& p, go::nodePtr node){
+    if (node->isPass())
+        return;
+
     p.save();
 
-    QFont font(p.font());
-    font.setPointSize(int(boxSize * 0.45));
-    p.setFont(font);
+    int boardX, boardY;
+    sgfToBoardCoordinate(node->getX(), node->getY(), boardX, boardY);
+    int x = xlines[boardX];
+    int y = ylines[boardY];
+
+    double w = boxSize * 0.22;
+    double h = boxSize * 0.18;
+    QPolygonF polygon(3);
+    polygon[0] = QPointF(x, y - h);
+    polygon[1] = QPointF(x - w, y + h);
+    polygon[2] = QPointF(x + w, y + h);
+
     p.setPen(Qt::red);
-    if (!node->isPass()){
-        int boardX, boardY;
-        sgfToBoardCoordinate(node->getX(), node->getY(), boardX, boardY);
-        int x = xlines[boardX];
-        int y = ylines[boardY];
-        p.drawText(x-boxSize, y-boxSize, boxSize*2, boxSize*2, Qt::AlignCenter, "▲");
-    }
+    p.setBrush( QBrush(Qt::red) );
+    p.drawPolygon(polygon);
 
     p.restore();
 }
@@ -1739,6 +1766,7 @@ void BoardWidget::playWithComputer(QProcess* proc, bool isYourColorBlack){
     comProcess = proc;
     if (comProcess){
         editMode = eGtp;
+        gtpStatus = eGtpNone;
         moveToClicked = false;
         connect(comProcess, SIGNAL(readyRead()), this, SLOT(gtpReadReady()));
 
@@ -1795,18 +1823,19 @@ void BoardWidget::gtpReadReady(){
         return;
 
     gtpBuf += comProcess->readAll();
-    if (gtpBuf.size() < 2 || gtpBuf.right(2) != "\n\n")
-        return;
-//    if ((gtpBuf.size() < 5 || gtpBuf.right(4) != "\r\n\r\n") || (gtpBuf.size() < 2 || gtpBuf.right(2) != "\n\n"))
-//        return;
 
-    QString buf = gtpBuf.mid(2, gtpBuf.size()-2);
+    if (gtpBuf.size() < 4 || gtpBuf.right(2) != "\n\n")
+        return;
+
+    QString buf = gtpBuf.mid(2, gtpBuf.size()-4);
     gtpBuf.clear();
     qDebug() << buf;
 
     if (gtpStatus == eGtpPut){
-        if (buf == "illegal move")
+        if (buf == "illegal move"){
+            gtpStatus = eGtpNone;
             return;
+        }
         addStoneCommand(gtpX, gtpY);
 
         if (isBlack)

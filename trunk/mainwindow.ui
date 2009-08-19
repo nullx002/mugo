@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>733</width>
-    <height>537</height>
+    <width>813</width>
+    <height>493</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -41,8 +41,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>733</width>
-     <height>24</height>
+     <width>813</width>
+     <height>18</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -198,32 +198,26 @@
     <property name="title">
      <string>&amp;Tools</string>
     </property>
-    <addaction name="actionCountTerritory"/>
-    <addaction name="actionPlayWithGnugo"/>
-   </widget>
-   <widget class="QMenu" name="menu_Options">
-    <property name="title">
-     <string>&amp;Options</string>
-    </property>
-    <widget class="QMenu" name="menuLanguage_2">
+    <widget class="QMenu" name="menu_Language">
      <property name="title">
-      <string>Language</string>
+      <string>&amp;Language</string>
      </property>
      <addaction name="actionLanguageSystemDefault"/>
-     <addaction name="separator"/>
      <addaction name="actionLanguageEnglish"/>
      <addaction name="actionLanguageJapanese"/>
     </widget>
-    <addaction name="actionSetup"/>
+    <addaction name="actionCountTerritory"/>
+    <addaction name="actionPlayWithGnugo"/>
+    <addaction name="separator"/>
+    <addaction name="actionPlaySound"/>
     <addaction name="separator"/>
     <addaction name="action19x19Board"/>
     <addaction name="action13x13Board"/>
     <addaction name="action9x9Board"/>
     <addaction name="actionCustomBoardSize"/>
     <addaction name="separator"/>
-    <addaction name="actionPlaySound"/>
-    <addaction name="separator"/>
-    <addaction name="menuLanguage_2"/>
+    <addaction name="menu_Language"/>
+    <addaction name="actionOptions"/>
    </widget>
    <widget class="QMenu" name="menu_Help">
     <property name="title">
@@ -252,7 +246,6 @@
    <addaction name="menu_Trace"/>
    <addaction name="menu_View"/>
    <addaction name="menuTool_s"/>
-   <addaction name="menu_Options"/>
    <addaction name="menu_Window"/>
    <addaction name="menu_Help"/>
   </widget>
@@ -477,28 +470,6 @@
   <action name="actionExit">
    <property name="text">
     <string>E&amp;xit</string>
-   </property>
-  </action>
-  <action name="actionCommentWindow">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Comment Window</string>
-   </property>
-  </action>
-  <action name="actionBranchWindow">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Branch Window</string>
    </property>
   </action>
   <action name="actionEncodingUTF8">
@@ -1182,7 +1153,7 @@
      <normaloff>:/res/sound.png</normaloff>:/res/sound.png</iconset>
    </property>
    <property name="text">
-    <string>Play Sound</string>
+    <string>Play &amp;Sound</string>
    </property>
   </action>
   <action name="actionSetMoveNumber">
@@ -1297,9 +1268,9 @@
     <string>Japanese</string>
    </property>
   </action>
-  <action name="actionSetup">
+  <action name="actionOptions">
    <property name="text">
-    <string>&amp;Setup</string>
+    <string>&amp;Options..</string>
    </property>
   </action>
   <action name="actionPlayWithGnugo">
