@@ -187,8 +187,13 @@ protected:
     void drawStones(QPainter& p);
     void drawStones2(QPainter& p);
     void drawBranchMoves(QPainter& p, go::nodeList::iterator first, go::nodeList::iterator last);
-    void drawMark(QPainter& p, go::markList::iterator first, go::markList::iterator last);
-//    void drawTerritories(QPainter& p, go::markList::iterator first, go::markList::iterator last);
+    void drawCross(QPainter& p, go::markList::iterator first, go::markList::iterator last);
+    void drawTriangle(QPainter& p, go::markList::iterator first, go::markList::iterator last);
+    void drawCircle(QPainter& p, go::markList::iterator first, go::markList::iterator last);
+    void drawSquare(QPainter& p, go::markList::iterator first, go::markList::iterator last);
+    void drawCharacter(QPainter& p, go::markList::iterator first, go::markList::iterator last);
+    void drawMark(QPainter& p, const QPainterPath& path, go::markList::iterator first, go::markList::iterator last);
+    void drawPath(QPainter& p, const QPainterPath& path, int boardX, int boardY);
     void drawTerritories(QPainter& p);
     void drawCurrentMark(QPainter& p, go::nodePtr node);
     void drawImage(QPainter& p, int x, int y, const QImage& image);
