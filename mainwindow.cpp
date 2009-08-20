@@ -28,7 +28,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 
     // undo
-    undoGroup.setActiveStack(&ui->boardWidget->undoStack);
+    undoGroup.setActiveStack(ui->boardWidget->getUndoStack());
     ui->undoView->setGroup(&undoGroup);
     ui->undoDockWidget->setVisible(false);
 
@@ -986,7 +986,7 @@ void MainWindow::on_actionPlayWithGnugo_triggered(){
         QString param;
         param.sprintf(" --mode gtp --color %s --boardsize %d --komi %.2f --handicap %d --level %d",
                 dlg.isBlack ? "black" : "white" , dlg.size, dlg.komi, dlg.handicap, dlg.level);
-        param = dlg.path + param;
+        param = '"' + dlg.path + '"' + param;
         qDebug() << param;
         comProcess.start(param, QIODevice::ReadWrite|QIODevice::Text);
         ui->boardWidget->playWithComputer(&comProcess, dlg.isBlack);

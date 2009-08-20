@@ -87,6 +87,10 @@ public:
     explicit BoardWidget(QWidget *parent = 0);
     virtual ~BoardWidget();
 
+    // undo stack
+    QUndoStack* getUndoStack(){ return &undoStack; }
+
+    // preference
     void readSettings();
 
     // draw
@@ -96,21 +100,22 @@ public:
     void paintTerritories(QPaintDevice* pd);
 
     // set/get data
+    void clear();
     void getData(go::fileBase& data);
     void setData(const go::fileBase& data);
-    void clear();
-    go::nodePtr findNodeFromMoveNumber(int moveNumber);
 
     // get node
     go::data& getData(){ return goData; }
     go::nodePtr getCurrentNode(){ return currentNode; }
+    go::nodePtr findNodeFromMoveNumber(int moveNumber);
     const go::nodeList& getCurrentNodeList() const{ return nodeList; }
 
     void getCaptured(int& black, int& white) const{ black = capturedBlack; white = capturedWhite; }
     int  getMoveNumber() const{ return currentMoveNumber; }
 
-    void addStoneCommand(int sgfX, int sgfY);
-    void addStoneCommand(int sgfX, int sgfY, int boardX, int boardY);
+    // create stone node and insert after current node
+    void addStoneNodeCommand(int sgfX, int sgfY);
+    void addStoneNodeCommand(int sgfX, int sgfY, int boardX, int boardY);
 
     // dirty flag
     bool isDirty() const{ return dirty; }
@@ -211,7 +216,6 @@ protected:
     // territory
     void countTerritory();
     void whichTerritory(int x, int y, char* tmp, int& c);
-    void updateTerritory(int x, int y);
     void addTerritory(int x, int y);
     void setTerritory(int x, int y, int c);
     void unsetTerritory(int x, int y);
@@ -223,7 +227,8 @@ protected:
     void addMark(go::markList& markList, const go::mark& mark);
     void addCharacter(go::markList& markList, const go::point& p);
     void removeMark(go::markList& markList, const go::point& p);
-    void addStone(go::nodePtr node, const go::point& sgfP, const go::point& boardP, go::color color);
+    void addStone(go::nodePtr node, const go::point& sgfPoint, go::color color);
+    void addStone(go::nodePtr node, const go::point& sgfPoint, const go::point& boardPoint, go::color color);
     void rotateSgf(go::nodePtr node);
     void rotateStoneSgf(go::stoneList& stoneList);
     void rotateMarkSgf(go::markList& markList);
@@ -237,15 +242,16 @@ protected:
     void gtpWrite(const QString& buf);
     void gtpPut(int x, int y);
     bool getCoordinate(const QString& buf, int& x, int& y);
+    void gtpHandicap();
 
 private slots:
     void gtpReadReady();
 
-public:
-    QUndoStack undoStack;
-
 private:
     Ui::BoardWidget *m_ui;
+
+    // undo
+    QUndoStack undoStack;
 
     // data
     bool dirty;
