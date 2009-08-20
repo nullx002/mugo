@@ -167,7 +167,7 @@ void BoardWidget::onLButtonDown(QMouseEvent* e){
     else if (moveToClicked && board[boardY][boardX].node)
         setCurrentNode( board[boardY][boardX].node );
     else if (editMode == eAlternateMove)
-        addStoneCommand(sgfX, sgfY, boardX, boardY);
+        addStoneNodeCommand(sgfX, sgfY, boardX, boardY);
     else if (editMode == eCountTerritory){
         addTerritory(boardX, boardY);
         int alive_b=0, alive_w=0, dead_b=0, dead_w=0, bt=0, wt=0;
@@ -620,7 +620,7 @@ void BoardWidget::pass(){
     if (editMode == eGtp)
         gtpPut(-1, -1);
     else
-        addStoneCommand(-1, -1);
+        addStoneNodeCommand(-1, -1);
 }
 
 /**
@@ -1104,36 +1104,6 @@ void BoardWidget::drawTerritories(QPainter& p){
 
 /**
 */
-/*
-void BoardWidget::drawTerritories(QPainter& p, go::markList::iterator first, go::markList::iterator last){
-    p.save();
-
-    QFont font( p.font() );
-    font.setPointSize(int(boxSize * 0.38));
-    p.setFont(font);
-
-    while (first != last){
-        int boardX, boardY;
-        sgfToBoardCoordinate(first->p.x, first->p.y, boardX, boardY);
-
-        if (boardX >= 0 && boardX < xsize && boardY >= 0 && boardY < ysize){
-            int x = xlines[boardX];
-            int y = ylines[boardY];
-
-            QColor color = first->t == go::mark::eWhiteTerritory ? QColor(255, 255, 255, 160) : QColor(0, 0, 0, 110);
-            p.fillRect(x-boxSize/2, y-boxSize/2, boxSize, boxSize, color);
-            p.setPen( first->t == go::mark::eWhiteTerritory ? Qt::white : Qt::black );
-            p.drawText(x-boxSize, y-boxSize, boxSize*2, boxSize*2, Qt::AlignCenter, first->s);
-        }
-        ++first;
-    }
-
-    p.restore();
-}
-*/
-
-/**
-*/
 void BoardWidget::drawCurrentMark(QPainter& p, go::nodePtr node){
     if (node->isPass())
         return;
@@ -1316,7 +1286,7 @@ void BoardWidget::dead(int* tmp){
 
 /**
 */
-void BoardWidget::addStoneCommand(int sgfX, int sgfY){
+void BoardWidget::addStoneNodeCommand(int sgfX, int sgfY){
     if (sgfX == -1 && sgfY == -1){
         go::nodePtr node;
         if (isBlack)
@@ -1329,13 +1299,13 @@ void BoardWidget::addStoneCommand(int sgfX, int sgfY){
     else{
         int boardX, boardY;
         sgfToBoardCoordinate(sgfX, sgfY, boardX, boardY);
-        addStoneCommand(sgfX, sgfY, boardX, boardY);
+        addStoneNodeCommand(sgfX, sgfY, boardX, boardY);
     }
 }
 
 /**
 */
-void BoardWidget::addStoneCommand(int sgfX, int sgfY, int boardX, int boardY){
+void BoardWidget::addStoneNodeCommand(int sgfX, int sgfY, int boardX, int boardY){
     if (board[boardY][boardX].empty() == false)
         return;
 
@@ -1501,6 +1471,12 @@ void BoardWidget::removeMark(go::markList& markList, const go::point& p){
         }
         ++iter;
     }
+}
+
+void BoardWidget::addStone(go::nodePtr node, const go::point& sgfPoint, go::color color){
+    go::point boardPoint;
+    sgfToBoardCoordinate(sgfPoint.x, sgfPoint.y, boardPoint.x, boardPoint.y);
+    addStone(node, sgfPoint, boardPoint, color);
 }
 
 void BoardWidget::addStone(go::nodePtr node, const go::point& sp, const go::point& bp, go::color c){
@@ -1687,9 +1663,6 @@ void BoardWidget::whichTerritory(int x, int y, char* tmp, int& c){
         whichTerritory(x+1, y, tmp, c);
 }
 
-void BoardWidget::updateTerritory(int, int){
-}
-
 void BoardWidget::addTerritory(int x, int y){
     if (board[y][x].white() && !board[y][x].blackTerritory())
         setTerritory(x, y, go::blackTerritory);
@@ -1770,16 +1743,13 @@ void BoardWidget::playWithComputer(QProcess* proc, bool isYourColorBlack){
         moveToClicked = false;
         connect(comProcess, SIGNAL(readyRead()), this, SLOT(gtpReadReady()));
 
-        if (isYourColorBlack == false){
-            gtpStatus = eGtpGen;
+        if (goData.root->handicap > 0)
+            gtpHandicap();
+
+        if (isYourColorBlack == false && goData.root->handicap == 0)
             gtpWrite("genmove black\n");
-        }
-/*
-        if (isYourColorBlack == false && handicap == 0)
-            gtpWrite("genmove black\n");
-        else if (isYourColorBlack && handicap > 0)
+        else if (isYourColorBlack && goData.root->handicap > 0)
             gtpWrite("genmove white\n");
-*/
     }
     else{
         editMode = eAlternateMove;
@@ -1824,6 +1794,10 @@ void BoardWidget::gtpReadReady(){
 
     gtpBuf += comProcess->readAll();
 
+qDebug() << gtpBuf.size();
+for (int i=0; i<gtpBuf.size(); ++i)
+    qDebug("%c(%d)", (gtpBuf[i].toAscii() != 10 ? gtpBuf[i].toAscii() : ' '), gtpBuf[i].toAscii());
+
     if (gtpBuf.size() < 4 || gtpBuf.right(2) != "\n\n")
         return;
 
@@ -1836,7 +1810,7 @@ void BoardWidget::gtpReadReady(){
             gtpStatus = eGtpNone;
             return;
         }
-        addStoneCommand(gtpX, gtpY);
+        addStoneNodeCommand(gtpX, gtpY);
 
         if (isBlack)
             gtpWrite("genmove black\n");
@@ -1847,7 +1821,7 @@ void BoardWidget::gtpReadReady(){
     else if (gtpStatus == eGtpGen){
         int x, y;
         if (getCoordinate(buf, x, y)){
-            addStoneCommand(x, y);
+            addStoneNodeCommand(x, y);
             gtpStatus = eGtpNone;
         }
     }
@@ -1868,4 +1842,65 @@ bool BoardWidget::getCoordinate(const QString& buf, int& x, int& y){
     y = goData.root->ysize - buf.mid(1).toInt();
 
     return x >= 0 && x < goData.root->xsize && y >= 0 && y < goData.root->ysize;
+}
+
+void BoardWidget::gtpHandicap(){
+    int xpos = goData.root->xsize > 9 ? 4 : 3;
+    int ypos = goData.root->ysize > 9 ? 4 : 3;
+
+    int x[9] = {
+        goData.root->xsize - xpos,
+        xpos - 1,
+        goData.root->xsize - xpos,
+        xpos - 1,
+        goData.root->xsize / 2,
+        goData.root->xsize - xpos,
+        xpos - 1,
+        goData.root->xsize / 2,
+        goData.root->xsize / 2,
+    };
+    int y[9] = {
+        ypos - 1,
+        goData.root->ysize - ypos,
+        goData.root->ysize - ypos,
+        ypos - 1,
+        goData.root->ysize / 2,
+        goData.root->ysize / 2,
+        goData.root->ysize / 2,
+        goData.root->ysize - ypos,
+        ypos - 1,
+    };
+
+    QList<int> xlist, ylist;
+    for (int i=0; i<qMax(4, goData.root->handicap); ++i){
+        xlist.push_back( x[i] );
+        ylist.push_back( y[i] );
+    }
+
+    if (goData.root->handicap > 5){
+        xlist.push_back( x[5] );
+        xlist.push_back( x[6] );
+        ylist.push_back( y[5] );
+        ylist.push_back( y[6] );
+    }
+    if (goData.root->handicap > 7){
+        xlist.push_back( x[7] );
+        xlist.push_back( x[8] );
+        ylist.push_back( y[7] );
+        ylist.push_back( y[8] );
+    }
+
+    if (goData.root->handicap > 4 && goData.root->handicap % 2 != 0){
+        xlist.push_back( x[4] );
+        ylist.push_back( y[4] );
+    }
+
+    QString msg;
+    for (int i=0; i<goData.root->handicap; ++i){
+        addStone(goData.root, go::point(xlist[i], ylist[i]), go::black);
+        msg += "black ";
+        msg += getXYString(xlist[i], ylist[i]);
+        msg += "\n";
+    }
+    gtpWrite(msg);
 }
