@@ -1609,6 +1609,14 @@ void BoardWidget::setCountTerritoryMode(bool countMode){
     repaintBoard();
 }
 
+void BoardWidget::whiteFirst(bool whiteFirst){
+    if (whiteFirst)
+        goData.root->setBlack();
+    else
+        goData.root->setWhite();
+    createBoardBuffer();
+}
+
 void BoardWidget::countTerritory(){
     char* tmp = new char[xsize * ysize];
 
@@ -1743,13 +1751,18 @@ void BoardWidget::playWithComputer(QProcess* proc, bool isYourColorBlack){
         moveToClicked = false;
         connect(comProcess, SIGNAL(readyRead()), this, SLOT(gtpReadReady()));
 
-        if (goData.root->handicap > 0)
-            gtpHandicap();
-
-        if (isYourColorBlack == false && goData.root->handicap == 0)
+        if (isYourColorBlack == false && goData.root->handicap == 0){
             gtpWrite("genmove black\n");
-        else if (isYourColorBlack && goData.root->handicap > 0)
-            gtpWrite("genmove white\n");
+            gtpStatus = eGtpGen;
+        }
+        else if (goData.root->handicap > 0){
+            whiteFirst(true);
+            gtpHandicap();
+            if (isYourColorBlack){
+                gtpWrite("genmove white\n");
+                gtpStatus = eGtpGen;
+            }
+        }
     }
     else{
         editMode = eAlternateMove;
@@ -1794,16 +1807,20 @@ void BoardWidget::gtpReadReady(){
 
     gtpBuf += comProcess->readAll();
 
-qDebug() << gtpBuf.size();
-for (int i=0; i<gtpBuf.size(); ++i)
-    qDebug("%c(%d)", (gtpBuf[i].toAscii() != 10 ? gtpBuf[i].toAscii() : ' '), gtpBuf[i].toAscii());
+//qDebug() << gtpBuf.size();
+//for (int i=0; i<gtpBuf.size(); ++i)
+//    qDebug("%c(%d)", (gtpBuf[i].toAscii() != 10 ? gtpBuf[i].toAscii() : ' '), gtpBuf[i].toAscii());
 
     if (gtpBuf.size() < 4 || gtpBuf.right(2) != "\n\n")
         return;
 
-    QString buf = gtpBuf.mid(2, gtpBuf.size()-4);
+    QStringList resList = gtpBuf.split("\n\n");
+    resList.pop_back();
     gtpBuf.clear();
-    qDebug() << buf;
+    qDebug() << resList;
+
+    QString buf = resList.last();
+    buf.remove(0, 2);
 
     if (gtpStatus == eGtpPut){
         if (buf == "illegal move"){
@@ -1872,7 +1889,7 @@ void BoardWidget::gtpHandicap(){
     };
 
     QList<int> xlist, ylist;
-    for (int i=0; i<qMax(4, goData.root->handicap); ++i){
+    for (int i=0; i<qMin(4, goData.root->handicap); ++i){
         xlist.push_back( x[i] );
         ylist.push_back( y[i] );
     }

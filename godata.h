@@ -113,8 +113,9 @@ public:
     bool isWhite() const{ return white; }
     bool isPass() const;
 
-    void setBlack(bool b = true){ black = b; }
-    void setWhite(bool w = true){ white = w; }
+    void setBlack(){ black = true; white = false; }
+    void setWhite(){ black = false; white = true; }
+    void setEmpty(){ black = false; white = false; }
 
     virtual QString nodeName() const{ return name; }
     virtual QString toString() const;

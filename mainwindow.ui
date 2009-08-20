@@ -42,7 +42,7 @@
      <x>0</x>
      <y>0</y>
      <width>813</width>
-     <height>18</height>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -134,6 +134,8 @@
     <addaction name="menu_Annotation"/>
     <addaction name="menuMove_Number"/>
     <addaction name="actionEditNodeName"/>
+    <addaction name="separator"/>
+    <addaction name="actionWhiteFirst"/>
     <addaction name="separator"/>
     <addaction name="actionRotateSgfClockwise"/>
     <addaction name="actionFlipSgfHorizontally"/>
@@ -399,6 +401,8 @@
    <addaction name="actionFlipBoardHorizontally"/>
    <addaction name="actionFlipBoardVertically"/>
    <addaction name="actionResetBoard"/>
+   <addaction name="separator"/>
+   <addaction name="actionWhiteFirst"/>
    <addaction name="separator"/>
    <addaction name="actionBranchMode"/>
   </widget>
@@ -1270,7 +1274,7 @@
   </action>
   <action name="actionOptions">
    <property name="text">
-    <string>&amp;Options..</string>
+    <string>&amp;Options...</string>
    </property>
   </action>
   <action name="actionPlayWithGnugo">
@@ -1279,6 +1283,14 @@
    </property>
    <property name="text">
     <string>Play with gnugo</string>
+   </property>
+  </action>
+  <action name="actionWhiteFirst">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>White First</string>
    </property>
   </action>
  </widget>
