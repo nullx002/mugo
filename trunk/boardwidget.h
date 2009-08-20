@@ -69,7 +69,7 @@ class BoardWidget : public QWidget {
     Q_DISABLE_COPY(BoardWidget)
 public:
     enum eEditMode{ eAlternateMove, eAddBlack, eAddWhite, eAddEmpty, eLabelMark, eCrossMark, eCircleMark, eSquareMark, eTriangleMark, eDeleteMarker, eCountTerritory, eGtp };
-    enum eGtpStatus{ eGtpNone, eGtpPut, eGtpGen };
+    enum eGtpStatus{ eGtpNone, eGtpPut, eGtpGen, eGtpHandicap };
 
     struct stoneInfo{
         stoneInfo() : number(0), color(go::empty){}
@@ -142,6 +142,7 @@ public:
     void setPlaySound(bool play){ playSound = play; }
     void setStoneSoundPath(const QString& path){ stoneSoundPath = path; stoneSound.setCurrentSource(path); }
     void setCountTerritoryMode(bool countMode);
+    void whiteFirst(bool whiteFirst);
 
     void createBoardBuffer();
     QString toString(go::nodePtr node) const;

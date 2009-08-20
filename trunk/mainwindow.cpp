@@ -491,6 +491,17 @@ void MainWindow::on_actionEditNodeName_triggered(){
 
 /**
 * Slot
+* Edit -> White First
+*/
+void MainWindow::on_actionWhiteFirst_triggered(){
+    if (ui->actionWhiteFirst->isChecked())
+        ui->boardWidget->whiteFirst(true);
+    else
+        ui->boardWidget->whiteFirst(false);
+}
+
+/**
+* Slot
 * Edit -> Rotate SGF Clockwise
 */
 void MainWindow::on_actionRotateSgfClockwise_triggered(){
@@ -977,11 +988,15 @@ void MainWindow::on_actionCountTerritory_triggered(){
 void MainWindow::on_actionPlayWithGnugo_triggered(){
     if (ui->actionPlayWithGnugo->isChecked()){
         PlayWithComputerDialog dlg(this);
-        if (dlg.exec() != QDialog::Accepted)
+        if (dlg.exec() != QDialog::Accepted){
+            ui->actionPlayWithGnugo->setChecked(false);
             return;
+        }
 
-        if (fileNew(dlg.size, dlg.size, dlg.handicap, dlg.komi) == false)
+        if (fileNew(dlg.size, dlg.size, dlg.handicap, dlg.komi) == false){
+            ui->actionPlayWithGnugo->setChecked(false);
             return;
+        }
 
         QString param;
         param.sprintf(" --mode gtp --color %s --boardsize %d --komi %.2f --handicap %d --level %d",
