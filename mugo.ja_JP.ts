@@ -25,7 +25,7 @@ alternate-background-color: rgb(255, 255, 255);</source>
     <message>
         <location filename="boardwidget.cpp" line="297"/>
         <source>Rotate SGF</source>
-        <translation></translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="boardwidget.cpp" line="1841"/>
