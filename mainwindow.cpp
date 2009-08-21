@@ -1004,6 +1004,11 @@ void MainWindow::on_actionPlayWithGnugo_triggered(){
         param = '"' + dlg.path + '"' + param;
         qDebug() << param;
         comProcess.start(param, QIODevice::ReadWrite|QIODevice::Text);
+        if (comProcess.state() == QProcess::NotRunning){
+            ui->boardWidget->playWithComputer(NULL, false);
+            QMessageBox::critical(this, APPNAME, tr("Can not launch computer go."));
+            return;
+        }
         ui->boardWidget->playWithComputer(&comProcess, dlg.isBlack);
     }
     else{

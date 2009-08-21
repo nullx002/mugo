@@ -25,7 +25,7 @@ alternate-background-color: rgb(255, 255, 255);</source>
     <message>
         <location filename="boardwidget.cpp" line="297"/>
         <source>Rotate SGF</source>
-        <translation></translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="boardwidget.cpp" line="1841"/>
@@ -366,12 +366,12 @@ Do you want to save your changes?</source>
     <message>
         <location filename="mainwindow.ui" line="50"/>
         <source>&amp;File</source>
-        <translation>ファイル(&amp;F)</translation>
+        <translation>ファイル</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="63"/>
         <source>&amp;Edit</source>
-        <translation>編集(&amp;E)</translation>
+        <translation>編集</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="67"/>
@@ -398,7 +398,7 @@ Do you want to save your changes?</source>
     <message>
         <location filename="mainwindow.ui" line="166"/>
         <source>&amp;View</source>
-        <translation>表示(&amp;V)</translation>
+        <translation>表示</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="237"/>
@@ -408,12 +408,12 @@ Do you want to save your changes?</source>
     <message>
         <location filename="mainwindow.ui" line="148"/>
         <source>&amp;Navigation</source>
-        <translation>移動(&amp;N)</translation>
+        <translation>移動</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="201"/>
         <source>&amp;Tools</source>
-        <translation>ツール(&amp;T)</translation>
+        <translation>ツール</translation>
     </message>
     <message>
         <source>&amp;Options</source>
@@ -428,12 +428,12 @@ Do you want to save your changes?</source>
     <message>
         <location filename="mainwindow.ui" line="226"/>
         <source>&amp;Help</source>
-        <translation>ヘルプ(&amp;H)</translation>
+        <translation>ヘルプ</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="233"/>
         <source>&amp;Window</source>
-        <translation>ウィンドウ(&amp;W)</translation>
+        <translation>ウィンドウ</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="277"/>
@@ -500,7 +500,7 @@ Do you want to save your changes?</source>
     <message>
         <location filename="mainwindow.ui" line="476"/>
         <source>E&amp;xit</source>
-        <translation>終了(&amp;X)</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="484"/>
