@@ -41,4 +41,5 @@ win32{
 mac{
     RC_FILE = pics/mugo.icns
 }
-TRANSLATIONS = mugo.ja_JP.ts
+TRANSLATIONS += mugo.ja_JP.ts \
+    mugo_mac.ja_JP.ts

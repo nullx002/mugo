@@ -1,4 +1,5 @@
 #include <QDebug>
+#include <QMessageBox>
 #include <QSettings>
 #include <QPainter>
 #include <QMouseEvent>
@@ -1836,6 +1837,11 @@ void BoardWidget::gtpReadReady(){
         gtpStatus = eGtpGen;
     }
     else if (gtpStatus == eGtpGen){
+        if (buf == "resign"){
+            QMessageBox::information(this, APPNAME, tr("Computer resign."));
+            return;
+        }
+
         int x, y;
         if (getCoordinate(buf, x, y)){
             addStoneNodeCommand(x, y);
