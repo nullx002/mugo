@@ -42,7 +42,7 @@
      <x>0</x>
      <y>0</y>
      <width>813</width>
-     <height>24</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -1288,6 +1288,10 @@
   <action name="actionWhiteFirst">
    <property name="checkable">
     <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/whitefirst.png</normaloff>:/res/whitefirst.png</iconset>
    </property>
    <property name="text">
     <string>White First</string>

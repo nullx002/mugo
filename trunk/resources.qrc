@@ -41,5 +41,8 @@
         <file>res/movealternate.png</file>
         <file>res/redo.png</file>
         <file>res/undo.png</file>
+        <file>res/white_128.png</file>
+        <file>res/black_128.png</file>
+        <file>res/whitefirst.png</file>
     </qresource>
 </RCC>

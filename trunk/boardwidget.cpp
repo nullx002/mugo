@@ -32,8 +32,8 @@ BoardWidget::BoardWidget(QWidget *parent) :
     flipBoardHorizontally_(false),
     flipBoardVertically_(false),
     playSound(false),
-    black1(":/res/black_64.png"),
-    white1(":/res/white_64.png"),
+    black1(":/res/black_128.png"),
+    white1(":/res/white_128.png"),
     boardImage1(":/res/bg.png"),
     stoneSound(this)
 {
