@@ -723,8 +723,6 @@ void BoardWidget::drawBoard(QPainter& p){
     p.save();
 
     int ps = p.font().pointSize();
-//    int w = width_  / (xsize + (showCoordinates ? 2 : 0));
-//    int h = height_ / (ysize + (showCoordinates ? 2 : 0));
     int w = (width_  - (showCoordinates ? ps*5 : 0)) / xsize;
     int h = (height_ - (showCoordinates ? ps*5 : 0)) / ysize;
     boxSize = qMin(w, h);

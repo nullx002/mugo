@@ -210,7 +210,7 @@ alternate-background-color: rgb(255, 255, 255);</source>
     <message>
         <location filename="command.cpp" line="38"/>
         <source>Insert %1</source>
-        <translation type="unfinished">%1に挿入</translation>
+        <translation type="unfinished">%1を挿入</translation>
     </message>
 </context>
 <context>
@@ -386,7 +386,7 @@ Do you want to save your changes?</source>
     <message>
         <location filename="mainwindow.ui" line="102"/>
         <source>&amp;Annotation</source>
-        <translation type="unfinished">注釈(&amp;A)</translation>
+        <translation type="unfinished">注釈</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="104"/>
@@ -465,7 +465,7 @@ Do you want to save your changes?</source>
     <message>
         <location filename="mainwindow.ui" line="439"/>
         <source>&amp;New</source>
-        <translation type="unfinished">新規(&amp;N)</translation>
+        <translation type="unfinished">新規</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="442"/>
@@ -475,7 +475,7 @@ Do you want to save your changes?</source>
     <message>
         <location filename="mainwindow.ui" line="451"/>
         <source>&amp;Open</source>
-        <translation type="unfinished">開く(&amp;O)</translation>
+        <translation type="unfinished">開く</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="454"/>
@@ -485,7 +485,7 @@ Do you want to save your changes?</source>
     <message>
         <location filename="mainwindow.ui" line="463"/>
         <source>&amp;Save</source>
-        <translation type="unfinished">保存(&amp;S)</translation>
+        <translation type="unfinished">保存</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="466"/>
@@ -495,7 +495,7 @@ Do you want to save your changes?</source>
     <message>
         <location filename="mainwindow.ui" line="471"/>
         <source>Save &amp;As...</source>
-        <translation type="unfinished">別名で保存(&amp;A)...</translation>
+        <translation type="unfinished">別名で保存...</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="476"/>
@@ -541,12 +541,12 @@ Do you want to save your changes?</source>
     <message>
         <location filename="mainwindow.ui" line="544"/>
         <source>Save &amp;Board As Picture</source>
-        <translation type="unfinished">画像を出力する(&amp;B)</translation>
+        <translation type="unfinished">画像を出力する</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="553"/>
         <source>&amp;About...</source>
-        <translation type="unfinished">このプログラムについて(&amp;A)...</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>&amp;Undo</source>
@@ -564,7 +564,7 @@ Do you want to save your changes?</source>
     <message>
         <location filename="mainwindow.ui" line="567"/>
         <source>&amp;Delete</source>
-        <translation type="unfinished">削除(&amp;D)</translation>
+        <translation type="unfinished">削除</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="587"/>
@@ -644,7 +644,7 @@ Do you want to save your changes?</source>
     <message>
         <location filename="mainwindow.ui" line="736"/>
         <source>About Qt...</source>
-        <translation type="unfinished">Qtについて...</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="744"/>
@@ -674,7 +674,7 @@ Do you want to save your changes?</source>
     <message>
         <location filename="mainwindow.ui" line="797"/>
         <source>&amp;Reload</source>
-        <translation type="unfinished">再読み込み(&amp;R)</translation>
+        <translation type="unfinished">再読み込み</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="805"/>
@@ -874,13 +874,13 @@ Do you want to save your changes?</source>
     <message>
         <location filename="mainwindow.ui" line="1160"/>
         <source>Play &amp;Sound</source>
-        <translation type="unfinished">サウンドを鳴らす(&amp;S)</translation>
+        <translation type="unfinished">サウンドを鳴らす</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="1277"/>
         <source>&amp;Options...</source>
         <oldsource>&amp;Options..</oldsource>
-        <translation type="unfinished">オプション(&amp;O)...</translation>
+        <translation type="unfinished">オプション...</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="1285"/>
