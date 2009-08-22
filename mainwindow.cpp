@@ -73,6 +73,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->menuEdit->insertAction(redoAction, undoAction);
     ui->editToolBar->insertAction(ui->editToolBar->actions().at(0), redoAction);
     ui->editToolBar->insertAction(redoAction, undoAction);
+    undoAction->setShortcut( QKeySequence::Undo );
+    redoAction->setShortcut( QKeySequence::Redo );
 
     // create window menu
     ui->menuWindow->addAction( ui->commentDockWidget->toggleViewAction() );
