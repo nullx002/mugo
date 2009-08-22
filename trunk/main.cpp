@@ -58,8 +58,8 @@ int main(int argc, char *argv[])
     myappTranslator.load("mugo." + locale, getTranslationPath());
     a.installTranslator(&myappTranslator);
 
-    QTextCodec::setCodecForCStrings( QTextCodec::codecForName("UTF-8") );
-    QTextCodec::setCodecForTr( QTextCodec::codecForName("UTF-8") );
+    QTextCodec::setCodecForCStrings( QTextCodec::codecForLocale() );
+    QTextCodec::setCodecForTr( QTextCodec::codecForLocale() );
 
     MainWindow w;
     w.show();
