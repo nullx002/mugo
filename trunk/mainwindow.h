@@ -66,6 +66,8 @@ private:
     go::nodePtr getNode(QTreeWidgetItem* treeWidget);
 
     void setLanguage(const QString& locale, QAction* act);
+    void setCountTerritoryMode(bool on=true);
+    void setPlayWithComputerMode(bool on=true);
 
     Ui::MainWindow *ui;
     QTextCodec* codec;
@@ -79,12 +81,17 @@ private:
 
     enum { MaxRecentFiles = 5 };
     QAction* recentFileActs[MaxRecentFiles];
-    QAction* recentSeparator;
     QLabel* moveNumberLabel;
     QLabel* capturedLabel;
     CountTerritoryDialog* countTerritoryDialog;
 
     QUndoGroup undoGroup;
+    QAction*   undoAction;
+    QAction*   redoAction;
+
+    bool countTerritoryMode;
+    bool playWithComputerMode;
+
     QProcess comProcess;
 
 private slots:
