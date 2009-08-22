@@ -42,13 +42,11 @@ private:
     bool fileClose();
     bool maybeSave();
 
-    void setEncoding(QAction* action, const char* codecName);
-    void setShowMoveNumber(QAction* action, int moveNumber);
     void setEditMode(QAction* action, BoardWidget::eEditMode editMode);
-    void setAnnotation(int annotation);
-    void setAnnotation1(QAction* action, int annotation);
-    void setAnnotation2(QAction* action, int annotation);
-    void setAnnotation3(QAction* action, int annotation);
+    void setAnnotation(int annotation, int moveAnnotation, int nodeAnnotation);
+    void setAnnotation(QAction* action, int annotation);
+    void setMoveAnnotation(QAction* action, int annotation);
+    void setNodeAnnotation(QAction* action, int annotation);
 
     void setCurrentFile(const QString& fname);
     void updateRecentFileActions();
@@ -65,7 +63,6 @@ private:
 
     go::nodePtr getNode(QTreeWidgetItem* treeWidget);
 
-    void setLanguage(const QString& locale, QAction* act);
     void setCountTerritoryMode(bool on=true);
     void setPlayWithComputerMode(bool on=true);
 
@@ -74,9 +71,9 @@ private:
     QString fileName;
     QString filter;
     NodeToTreeWidgetType nodeToTreeWidget;
-    int annotation1;
-    int annotation2;
-    int annotation3;
+    int annotation;
+    int moveAnnotation;
+    int nodeAnnotation;
     bool branchMode;
 
     enum { MaxRecentFiles = 5 };

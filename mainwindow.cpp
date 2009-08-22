@@ -18,9 +18,9 @@ Q_DECLARE_METATYPE(go::nodePtr);
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
-    , annotation1(go::node::eNoAnnotation)
-    , annotation2(go::node::eNoAnnotation)
-    , annotation3(go::node::eNoAnnotation)
+    , annotation(go::node::eNoAnnotation)
+    , moveAnnotation(go::node::eNoAnnotation)
+    , nodeAnnotation(go::node::eNoAnnotation)
     , branchMode(false)
     , countTerritoryDialog(NULL)
     , undoGroup(this)
@@ -29,21 +29,16 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    // undo
-    undoGroup.setActiveStack(ui->boardWidget->getUndoStack());
-    ui->undoView->setGroup(&undoGroup);
-    ui->undoDockWidget->setVisible(false);
+    // default codec
+    codec = QTextCodec::codecForName("UTF-8");
+    ui->boardWidget->setShowMoveNumber(0);
+    setEditMode(ui->actionAlternateMove, BoardWidget::eAlternateMove);
 
-// set sound files
-//#ifdef Q_WS_WIN
+    // set sound files
     QStringList soundPathList;
     soundPathList.push_back(qApp->applicationDirPath() + "/sounds/");
-//#elif defined(Q_WS_MAC)
-//#elif defined(Q_WS_X11)
-//    QStringList soundPathList;
     soundPathList.push_back("/usr/share/" APPNAME "/sounds/");
     soundPathList.push_back("/usr/local/share/" APPNAME "/sounds/");
-//#endif
     QStringList::iterator iter = soundPathList.begin();
     while (iter != soundPathList.end()){
         QFileInfo finfo( *iter + "stone.wav" );
@@ -64,7 +59,12 @@ MainWindow::MainWindow(QWidget *parent)
     }
     updateRecentFileActions();
 
-    // undo, redo action
+    // create undo/redo actions
+    // undo
+    undoGroup.setActiveStack(ui->boardWidget->getUndoStack());
+    ui->undoView->setGroup(&undoGroup);
+    ui->undoDockWidget->setVisible(false);
+
     undoAction = undoGroup.createUndoAction(this);
     redoAction = undoGroup.createRedoAction(this);
     undoAction->setIcon( QIcon(":/res/undo.png") );
@@ -74,7 +74,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->editToolBar->insertAction(ui->editToolBar->actions().at(0), redoAction);
     ui->editToolBar->insertAction(redoAction, undoAction);
 
-    // window menu
+    // create window menu
     ui->menuWindow->addAction( ui->commentDockWidget->toggleViewAction() );
     ui->menuWindow->addAction( ui->branchDockWidget->toggleViewAction() );
     ui->menuWindow->addAction( ui->undoDockWidget->toggleViewAction() );
@@ -102,10 +102,6 @@ MainWindow::MainWindow(QWidget *parent)
     ui->menuStoneMarkers->menuAction()->setIcon(ui->actionAddLabel->icon());
     connect( ui->menuStoneMarkers->menuAction(), SIGNAL(triggered()), this, SLOT(on_actionAddLabel_triggered()) );
 
-    setEncoding(ui->actionEncodingUTF8, "UTF-8");
-    setShowMoveNumber(ui->actionNoMoveNumber, 0);
-    setEditMode(ui->actionAlternateMove, BoardWidget::eAlternateMove);
-
     // status bar
     moveNumberLabel = new QLabel;
     moveNumberLabel->setFrameStyle(QFrame::StyledPanel|QFrame::Plain);
@@ -116,6 +112,45 @@ MainWindow::MainWindow(QWidget *parent)
     capturedLabel->setFrameStyle(QFrame::StyledPanel|QFrame::Plain);
     capturedLabel->setToolTip(tr("Captured"));
     ui->statusBar->addPermanentWidget(capturedLabel, 0);
+
+    // action group
+    QActionGroup* showMoveNumberGroup = new QActionGroup(this);
+    showMoveNumberGroup->addAction(ui->actionNoMoveNumber);
+    showMoveNumberGroup->addAction(ui->actionLast1Move);
+    showMoveNumberGroup->addAction(ui->actionLast2Moves);
+    showMoveNumberGroup->addAction(ui->actionLast5Moves);
+    showMoveNumberGroup->addAction(ui->actionLast10Moves);
+    showMoveNumberGroup->addAction(ui->actionLast20Moves);
+    showMoveNumberGroup->addAction(ui->actionLast50Moves);
+    showMoveNumberGroup->addAction(ui->actionAllMoves);
+
+    QActionGroup* encodingGroup = new QActionGroup(this);
+    encodingGroup->addAction(ui->actionEncodingUTF8);
+    encodingGroup->addAction(ui->actionISO8859_1);
+    encodingGroup->addAction(ui->actionWindows_1252);
+    encodingGroup->addAction(ui->actionEncodingGB2312);
+    encodingGroup->addAction(ui->actionEncodingBig5);
+    encodingGroup->addAction(ui->actionEncodingKorean);
+    encodingGroup->addAction(ui->actionEncodingEucJP);
+    encodingGroup->addAction(ui->actionEncodingJIS);
+    encodingGroup->addAction(ui->actionEncodingShiftJIS);
+
+    QActionGroup* editGroup = new QActionGroup(this);
+    editGroup->addAction(ui->actionAlternateMove);
+    editGroup->addAction(ui->actionAddBlackStone);
+    editGroup->addAction(ui->actionAddWhiteStone);
+    editGroup->addAction(ui->actionAddEmpty);
+    editGroup->addAction(ui->actionAddLabel);
+    editGroup->addAction(ui->actionAddCircle);
+    editGroup->addAction(ui->actionAddCross);
+    editGroup->addAction(ui->actionAddSquare);
+    editGroup->addAction(ui->actionAddTriangle);
+    editGroup->addAction(ui->actionDeleteMarker);
+
+    QActionGroup* languageGroup = new QActionGroup(this);
+    languageGroup->addAction(ui->actionLanguageSystemDefault);
+    languageGroup->addAction(ui->actionLanguageEnglish);
+    languageGroup->addAction(ui->actionLanguageJapanese);
 
     // command line
     if (qApp->argc() > 1)
@@ -353,7 +388,7 @@ void MainWindow::on_actionDeleteMarker_triggered(){
 * Edit -> Annotation -> Good Move
 */
 void MainWindow::on_actionGoodMove_triggered(){
-    setAnnotation1(ui->actionGoodMove, go::node::eGoodMove);
+    setMoveAnnotation(ui->actionGoodMove, go::node::eGoodMove);
 }
 
 /**
@@ -361,7 +396,7 @@ void MainWindow::on_actionGoodMove_triggered(){
 * Edit -> Annotation -> Very Good Move
 */
 void MainWindow::on_actionVeryGoodMove_triggered(){
-    setAnnotation1(ui->actionVeryGoodMove, go::node::eVeryGoodMove);
+    setMoveAnnotation(ui->actionVeryGoodMove, go::node::eVeryGoodMove);
 }
 
 /**
@@ -369,7 +404,7 @@ void MainWindow::on_actionVeryGoodMove_triggered(){
 * Edit -> Annotation -> Bad Move
 */
 void MainWindow::on_actionBadMove_triggered(){
-    setAnnotation1(ui->actionBadMove, go::node::eBadMove);
+    setMoveAnnotation(ui->actionBadMove, go::node::eBadMove);
 }
 
 /**
@@ -377,7 +412,7 @@ void MainWindow::on_actionBadMove_triggered(){
 * Edit -> Annotation -> Very Bad Move
 */
 void MainWindow::on_actionVeryBadMove_triggered(){
-    setAnnotation1(ui->actionVeryBadMove, go::node::eVeryBadMove);
+    setMoveAnnotation(ui->actionVeryBadMove, go::node::eVeryBadMove);
 }
 
 /**
@@ -385,7 +420,7 @@ void MainWindow::on_actionVeryBadMove_triggered(){
 * Edit -> Annotation -> Doubtful Move
 */
 void MainWindow::on_actionDoubtfulMove_triggered(){
-    setAnnotation1(ui->actionDoubtfulMove, go::node::eDoubtfulMove);
+    setMoveAnnotation(ui->actionDoubtfulMove, go::node::eDoubtfulMove);
 }
 
 /**
@@ -393,7 +428,7 @@ void MainWindow::on_actionDoubtfulMove_triggered(){
 * Edit -> Annotation -> Interesting Move
 */
 void MainWindow::on_actionInterestingMove_triggered(){
-    setAnnotation1(ui->actionInterestingMove, go::node::eInterestingMove);
+    setMoveAnnotation(ui->actionInterestingMove, go::node::eInterestingMove);
 }
 
 /**
@@ -401,7 +436,7 @@ void MainWindow::on_actionInterestingMove_triggered(){
 * Edit -> Annotation -> Even
 */
 void MainWindow::on_actionEven_triggered(){
-    setAnnotation2(ui->actionEven, go::node::eEven);
+    setNodeAnnotation(ui->actionEven, go::node::eEven);
 }
 
 /**
@@ -409,7 +444,7 @@ void MainWindow::on_actionEven_triggered(){
 * Edit -> Annotation -> Good for Black
 */
 void MainWindow::on_actionGoodForBlack_triggered(){
-    setAnnotation2(ui->actionGoodForBlack, go::node::eGoodForBlack);
+    setNodeAnnotation(ui->actionGoodForBlack, go::node::eGoodForBlack);
 }
 
 /**
@@ -417,7 +452,7 @@ void MainWindow::on_actionGoodForBlack_triggered(){
 * Edit -> Annotation -> Very Good for Black
 */
 void MainWindow::on_actionVeryGoodForBlack_triggered(){
-    setAnnotation2(ui->actionVeryGoodForBlack, go::node::eVeryGoodForBlack);
+    setNodeAnnotation(ui->actionVeryGoodForBlack, go::node::eVeryGoodForBlack);
 }
 
 /**
@@ -425,7 +460,7 @@ void MainWindow::on_actionVeryGoodForBlack_triggered(){
 * Edit -> Annotation -> Good for White
 */
 void MainWindow::on_actionGoodForWhite_triggered(){
-    setAnnotation2(ui->actionGoodForWhite, go::node::eGoodForWhite);
+    setNodeAnnotation(ui->actionGoodForWhite, go::node::eGoodForWhite);
 }
 
 /**
@@ -433,7 +468,7 @@ void MainWindow::on_actionGoodForWhite_triggered(){
 * Edit -> Annotation -> Very Good for White
 */
 void MainWindow::on_actionVeryGoodForWhite_triggered(){
-    setAnnotation2(ui->actionVeryGoodForWhite, go::node::eVeryGoodForWhite);
+    setNodeAnnotation(ui->actionVeryGoodForWhite, go::node::eVeryGoodForWhite);
 }
 
 /**
@@ -441,7 +476,7 @@ void MainWindow::on_actionVeryGoodForWhite_triggered(){
 * Edit -> Annotation -> Unclear
 */
 void MainWindow::on_actionUnclear_triggered(){
-    setAnnotation2(ui->actionUnclear, go::node::eUnclear);
+    setNodeAnnotation(ui->actionUnclear, go::node::eUnclear);
 }
 
 /**
@@ -449,7 +484,7 @@ void MainWindow::on_actionUnclear_triggered(){
 * Edit -> Annotation -> Hotspot
 */
 void MainWindow::on_actionHotspot_triggered(){
-    setAnnotation3(ui->actionHotspot, go::node::eHotspot);
+    setAnnotation(ui->actionHotspot, go::node::eHotspot);
 }
 
 /**
@@ -537,7 +572,7 @@ void MainWindow::on_actionFlipSgfVertically_triggered(){
 * Advance -> Encoding -> UTF-8
 */
 void MainWindow::on_actionEncodingUTF8_triggered(){
-    setEncoding(ui->actionEncodingUTF8, "UTF-8");
+    codec = QTextCodec::codecForName("UTF-8");
 }
 
 /**
@@ -545,7 +580,7 @@ void MainWindow::on_actionEncodingUTF8_triggered(){
 * Advance -> Encoding -> ISO8859_1
 */
 void MainWindow::on_actionISO8859_1_triggered(){
-    setEncoding(ui->actionISO8859_1, "ISO-8859-1");
+    codec = QTextCodec::codecForName("ISO-8859-1");
 }
 
 /**
@@ -553,7 +588,7 @@ void MainWindow::on_actionISO8859_1_triggered(){
 * Advance -> Encoding -> Windows_1252
 */
 void MainWindow::on_actionWindows_1252_triggered(){
-    setEncoding(ui->actionWindows_1252, "Windows-1252");
+    codec = QTextCodec::codecForName("ISO-8859-1");
 }
 
 /**
@@ -561,7 +596,7 @@ void MainWindow::on_actionWindows_1252_triggered(){
 * Advance -> Encoding -> Chinese Simplified(GB2312)
 */
 void MainWindow::on_actionEncodingGB2312_triggered(){
-    setEncoding(ui->actionEncodingGB2312, "GB2312");
+    codec = QTextCodec::codecForName("GB2312");
 }
 
 /**
@@ -569,7 +604,7 @@ void MainWindow::on_actionEncodingGB2312_triggered(){
 * Advance -> Encoding -> Chinese Traditional(Big5)
 */
 void MainWindow::on_actionEncodingBig5_triggered(){
-    setEncoding(ui->actionEncodingBig5, "Big5");
+    codec = QTextCodec::codecForName("Big5");
 }
 
 /**
@@ -577,7 +612,7 @@ void MainWindow::on_actionEncodingBig5_triggered(){
 * Advance -> Encoding -> Shift_JIS
 */
 void MainWindow::on_actionEncodingShiftJIS_triggered(){
-    setEncoding(ui->actionEncodingShiftJIS, "Shift_JIS");
+    codec = QTextCodec::codecForName("Shift_JIS");
 }
 
 /**
@@ -585,7 +620,7 @@ void MainWindow::on_actionEncodingShiftJIS_triggered(){
 * Advance -> Encoding -> JIS
 */
 void MainWindow::on_actionEncodingJIS_triggered(){
-    setEncoding(ui->actionEncodingJIS, "ISO 2022-JP");
+    codec = QTextCodec::codecForName("ISO 2022-JP");
 }
 
 /**
@@ -593,7 +628,7 @@ void MainWindow::on_actionEncodingJIS_triggered(){
 * Advance -> Encoding -> EUC-JP
 */
 void MainWindow::on_actionEncodingEucJP_triggered(){
-    setEncoding(ui->actionEncodingEucJP, "EUC-JP");
+    codec = QTextCodec::codecForName("EUC-JP");
 }
 
 /**
@@ -601,7 +636,7 @@ void MainWindow::on_actionEncodingEucJP_triggered(){
 * Advance -> Encoding -> EUC-KR
 */
 void MainWindow::on_actionEncodingKorean_triggered(){
-    setEncoding(ui->actionEncodingKorean, "EUC-KR");
+    codec = QTextCodec::codecForName("EUC-KR");
 }
 
 /**
@@ -789,7 +824,7 @@ void MainWindow::on_actionShowMoveNumber_parent_triggered(){
 * View -> Move Number-> No Move Number
 */
 void MainWindow::on_actionNoMoveNumber_triggered(){
-    setShowMoveNumber(ui->actionNoMoveNumber, 0);
+    ui->boardWidget->setShowMoveNumber(0);
 }
 
 /**
@@ -797,7 +832,7 @@ void MainWindow::on_actionNoMoveNumber_triggered(){
 * View -> Move Number-> Last 1 move
 */
 void MainWindow::on_actionLast1Move_triggered(){
-    setShowMoveNumber(ui->actionLast1Move, 1);
+    ui->boardWidget->setShowMoveNumber(1);
 }
 
 /**
@@ -805,7 +840,7 @@ void MainWindow::on_actionLast1Move_triggered(){
 * View -> Move Number-> Last 2 moves
 */
 void MainWindow::on_actionLast2Moves_triggered(){
-    setShowMoveNumber(ui->actionLast2Moves, 2);
+    ui->boardWidget->setShowMoveNumber(2);
 }
 
 /**
@@ -813,7 +848,7 @@ void MainWindow::on_actionLast2Moves_triggered(){
 * View -> Move Number-> Last 5 moves
 */
 void MainWindow::on_actionLast5Moves_triggered(){
-    setShowMoveNumber(ui->actionLast5Moves, 5);
+    ui->boardWidget->setShowMoveNumber(5);
 }
 
 /**
@@ -821,7 +856,7 @@ void MainWindow::on_actionLast5Moves_triggered(){
 * View -> Move Number-> Last 10 moves
 */
 void MainWindow::on_actionLast10Moves_triggered(){
-    setShowMoveNumber(ui->actionLast10Moves, 10);
+    ui->boardWidget->setShowMoveNumber(10);
 }
 
 /**
@@ -829,7 +864,7 @@ void MainWindow::on_actionLast10Moves_triggered(){
 * View -> Move Number-> Last 20 moves
 */
 void MainWindow::on_actionLast20Moves_triggered(){
-    setShowMoveNumber(ui->actionLast20Moves, 20);
+    ui->boardWidget->setShowMoveNumber(20);
 }
 
 /**
@@ -837,7 +872,7 @@ void MainWindow::on_actionLast20Moves_triggered(){
 * View -> Move Number-> Last 50 moves
 */
 void MainWindow::on_actionLast50Moves_triggered(){
-    setShowMoveNumber(ui->actionLast50Moves, 50);
+    ui->boardWidget->setShowMoveNumber(50);
 }
 
 /**
@@ -845,7 +880,7 @@ void MainWindow::on_actionLast50Moves_triggered(){
 * View -> Move Number-> All Moves
 */
 void MainWindow::on_actionAllMoves_triggered(){
-    setShowMoveNumber(ui->actionAllMoves, -1);
+    ui->boardWidget->setShowMoveNumber(-1);
 }
 
 /**
@@ -888,7 +923,15 @@ void MainWindow::on_actionShowBranchMoves_triggered(){
 void MainWindow::on_actionBranchMode_triggered(){
     branchMode = ui->actionBranchMode->isChecked();
 
-    setTreeData();
+    go::nodePtr currentNode = ui->boardWidget->getCurrentNode();
+    QTreeWidgetItem* currentItem = ui->branchWidget->currentItem();
+
+    remakeTreeWidget( ui->branchWidget->topLevelItem(0) );
+
+//    ui->boardWidget->setCurrentNode(current);
+    ui->branchWidget->setCurrentItem(currentItem);
+
+//    setTreeData();
 }
 
 /**
@@ -979,6 +1022,7 @@ void MainWindow::on_actionCountTerritory_triggered(){
     if (ui->actionCountTerritory->isChecked()){
         setCountTerritoryMode();
         countTerritoryDialog = new CountTerritoryDialog(this);
+        countTerritoryDialog->disconnect();
         connect(countTerritoryDialog, SIGNAL(dialogClosed()), this, SLOT(scoreDialogClosed()));
         countTerritoryDialog->show();
     }
@@ -1117,7 +1161,8 @@ void MainWindow::on_actionPlaySound_triggered(){
 * Options -> Language -> System Default
 */
 void MainWindow::on_actionLanguageSystemDefault_triggered(){
-    setLanguage( QString(), ui->actionLanguageSystemDefault );
+    QSettings settings;
+    settings.remove("language");
 }
 
 /**
@@ -1125,7 +1170,8 @@ void MainWindow::on_actionLanguageSystemDefault_triggered(){
 * Options -> Language -> English
 */
 void MainWindow::on_actionLanguageEnglish_triggered(){
-    setLanguage("en", ui->actionLanguageEnglish);
+    QSettings settings;
+    settings.setValue("language", "en");
 }
 
 /**
@@ -1133,7 +1179,8 @@ void MainWindow::on_actionLanguageEnglish_triggered(){
 * Options -> Language -> Japanese
 */
 void MainWindow::on_actionLanguageJapanese_triggered(){
-    setLanguage("ja_JP", ui->actionLanguageJapanese);
+    QSettings settings;
+    settings.setValue("language", "ja_JP");
 }
 
 /**
@@ -1192,7 +1239,7 @@ void MainWindow::on_boardWidget_nodeModified(go::nodePtr node){
 void MainWindow::on_boardWidget_currentNodeChanged(go::nodePtr node){
     setTreeWidget(node);
     ui->commentWidget->setPlainText(node->comment);
-    setAnnotation(node->annotation);
+    setAnnotation(node->annotation, node->moveAnnotation, node->nodeAnnotation);
 
     int b, w;
     ui->boardWidget->getCaptured(b, w);
@@ -1515,7 +1562,10 @@ QTreeWidgetItem* MainWindow::addTreeWidget(go::nodePtr node, bool needRemake){
         else if(parentWidget->indexOfChild(treeWidget) < 0){
             QTreeWidgetItem* p = treeWidget->parent() ? treeWidget->parent() : ui->branchWidget->invisibleRootItem();
             p->removeChild(treeWidget);
-            parentWidget->addChild(treeWidget);
+            if (parentNode->childNodes.front() == node)
+                parentWidget->insertChild(0, treeWidget);
+            else
+                parentWidget->addChild(treeWidget);
         }
     }
     else{
@@ -1645,67 +1695,13 @@ go::nodePtr MainWindow::getNode(QTreeWidgetItem* treeWidget){
     return v.value<go::nodePtr>();
 }
 
-void MainWindow::setEncoding(QAction* action, const char* codecName){
-    static QAction* actions[] = {
-        ui->actionEncodingUTF8,
-        ui->actionISO8859_1,
-        ui->actionWindows_1252,
-        ui->actionEncodingGB2312,
-        ui->actionEncodingBig5,
-        ui->actionEncodingKorean,
-        ui->actionEncodingEucJP,
-        ui->actionEncodingJIS,
-        ui->actionEncodingShiftJIS,
-    };
-    static const int N = sizeof(actions) / sizeof(actions[0]);
-
-    for (int i=0; i<N; ++i)
-        actions[i]->setChecked(actions[i] == action);
-
-    codec = QTextCodec::codecForName(codecName);
-}
-
-void MainWindow::setShowMoveNumber(QAction* action, int moveNumber){
-    static QAction* actions[] = {
-        ui->actionNoMoveNumber,
-        ui->actionLast1Move,
-        ui->actionLast2Moves,
-        ui->actionLast5Moves,
-        ui->actionLast10Moves,
-        ui->actionLast20Moves,
-        ui->actionLast50Moves,
-        ui->actionAllMoves
-    };
-    static const int N = sizeof(actions) / sizeof(actions[0]);
-
-    for (int i=0; i<N; ++i)
-        actions[i]->setChecked(actions[i] == action);
-
-    ui->boardWidget->setShowMoveNumber(moveNumber);
-}
-
 void MainWindow::setEditMode(QAction* action, BoardWidget::eEditMode editMode){
-   static QAction* actions[] = {
-        ui->actionAlternateMove,
-        ui->actionAddBlackStone,
-        ui->actionAddWhiteStone,
-        ui->actionAddEmpty,
-        ui->actionAddLabel,
-        ui->actionAddCircle,
-        ui->actionAddCross,
-        ui->actionAddSquare,
-        ui->actionAddTriangle,
-        ui->actionDeleteMarker,
-    };
-    static const int N = sizeof(actions) / sizeof(actions[0]);
-
-    for (int i=0; i<N; ++i)
-        actions[i]->setChecked(actions[i] == action);
-
+    action->setChecked(true);
     ui->menuStoneMarkers->menuAction()->setChecked( !ui->actionAlternateMove->isChecked() );
+
     if (action != ui->actionAlternateMove){
         ui->menuStoneMarkers->menuAction()->setIcon( action->icon() );
-
+        ui->menuStoneMarkers->menuAction()->disconnect();
         if (action == ui->actionAddBlackStone)
             connect( ui->menuStoneMarkers->menuAction(), SIGNAL(triggered()), this, SLOT(on_actionAddBlackStone_triggered()) );
         else if (action == ui->actionAddWhiteStone)
@@ -1729,33 +1725,49 @@ void MainWindow::setEditMode(QAction* action, BoardWidget::eEditMode editMode){
     ui->boardWidget->setEditMode(editMode);
 }
 
-void MainWindow::setAnnotation(int annotation){
+void MainWindow::setAnnotation(int annotation, int moveAnnotation, int nodeAnnotation){
    static QAction* actions[] = {
-        ui->actionGoodMove,
-        ui->actionVeryGoodMove,
-        ui->actionBadMove,
-        ui->actionVeryBadMove,
-        ui->actionDoubtfulMove,
-        ui->actionInterestingMove,
-        ui->actionEven,
-        ui->actionGoodForBlack,
-        ui->actionVeryGoodForBlack,
-        ui->actionGoodForWhite,
-        ui->actionVeryGoodForWhite,
-        ui->actionUnclear,
         ui->actionHotspot,
     };
     static const int N = sizeof(actions) / sizeof(actions[0]);
-
     for (int i=0; i<N; ++i)
-        actions[i]->setChecked( (annotation & (1 << i)) != 0 );
+        actions[i]->setChecked( i+1 == annotation );
 
-    annotation1 = annotation & 0x0000003f;
-    annotation2 = annotation & 0x00000fc0;
-    annotation3 = annotation & 0x00001000;
+    static QAction* moveActions[] = {
+        ui->actionGoodMove,
+        ui->actionVeryGoodMove,
+        ui->actionBadMove,
+        ui->actionVeryBadMove,
+        ui->actionDoubtfulMove,
+        ui->actionInterestingMove,
+    };
+    static const int moveN = sizeof(moveActions) / sizeof(moveActions[0]);
+    for (int i=0; i<moveN; ++i)
+        moveActions[i]->setChecked( i+1 == moveAnnotation );
+
+    static QAction* nodeActions[] = {
+        ui->actionEven,
+        ui->actionGoodForBlack,
+        ui->actionVeryGoodForBlack,
+        ui->actionGoodForWhite,
+        ui->actionVeryGoodForWhite,
+        ui->actionUnclear,
+    };
+    static const int nodeN = sizeof(nodeActions) / sizeof(nodeActions[0]);
+    for (int i=0; i<nodeN; ++i)
+        nodeActions[i]->setChecked( i+1 == nodeAnnotation );
+
+    this->annotation     = annotation;
+    this->moveAnnotation = moveAnnotation;
+    this->nodeAnnotation = nodeAnnotation;
 }
 
-void MainWindow::setAnnotation1(QAction* action, int annotation){
+void MainWindow::setAnnotation(QAction* action, int annotation){
+    annotation = action->isChecked() ? annotation : 0;
+    ui->boardWidget->setAnnotation(annotation);
+}
+
+void MainWindow::setMoveAnnotation(QAction* action, int annotation){
    static QAction* actions[] = {
         ui->actionGoodMove,
         ui->actionVeryGoodMove,
@@ -1770,11 +1782,11 @@ void MainWindow::setAnnotation1(QAction* action, int annotation){
         if (actions[i] != action)
             actions[i]->setChecked( false );
 
-    annotation1 = action->isChecked() ? annotation : 0;
-    ui->boardWidget->setAnnotation(annotation1 | annotation2 | annotation3);
+    moveAnnotation = action->isChecked() ? annotation : 0;
+    ui->boardWidget->setMoveAnnotation(moveAnnotation);
 }
 
-void MainWindow::setAnnotation2(QAction* action, int annotation){
+void MainWindow::setNodeAnnotation(QAction* action, int annotation){
    static QAction* actions[] = {
         ui->actionEven,
         ui->actionGoodForBlack,
@@ -1789,13 +1801,8 @@ void MainWindow::setAnnotation2(QAction* action, int annotation){
         if (actions[i] != action)
             actions[i]->setChecked( false );
 
-    annotation2 = action->isChecked() ? annotation : 0;
-    ui->boardWidget->setAnnotation(annotation1 | annotation2 | annotation3);
-}
-
-void MainWindow::setAnnotation3(QAction* action, int annotation){
-    annotation3 = action->isChecked() ? annotation : 0;
-    ui->boardWidget->setAnnotation(annotation1 | annotation2 | annotation3);
+    nodeAnnotation = action->isChecked() ? annotation : 0;
+    ui->boardWidget->setNodeAnnotation(nodeAnnotation);
 }
 
 void MainWindow::setCurrentFile(const QString& fname){
@@ -1828,22 +1835,6 @@ void MainWindow::updateRecentFileActions()
 
     for (int j = numRecentFiles; j < MaxRecentFiles; ++j)
         recentFileActs[j]->setVisible(false);
-}
-
-void MainWindow::setLanguage(const QString& locale, QAction* act){
-    QSettings settings;
-    settings.setValue("language", locale);
-
-    QAction* actions[] = {
-        ui->actionLanguageSystemDefault,
-        ui->actionLanguageEnglish,
-        ui->actionLanguageJapanese,
-    };
-    const int N = sizeof(actions) / sizeof(actions[0]);
-
-    for (int i=0; i<N; ++i){
-        actions[i]->setChecked( actions[i] == act );
-    }
 }
 
 void MainWindow::setCountTerritoryMode(bool on){

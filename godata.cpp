@@ -34,10 +34,10 @@ nodePtr createWhiteNode(nodePtr parent, int x, int y){
 
 
 
-node::node(data* data_) : goData(data_), annotation(eNoAnnotation), black(false), white(false), moveNumber(-1){
+node::node(data* data_) : goData(data_), annotation(eNoAnnotation), moveAnnotation(eNoAnnotation), nodeAnnotation(eNoAnnotation), black(false), white(false), moveNumber(-1){
 }
 
-node::node(nodePtr parent_) : goData(parent_->goData), parent(parent_), annotation(eNoAnnotation), black(false), white(false), moveNumber(-1){
+node::node(nodePtr parent_) : goData(parent_->goData), parent(parent_), annotation(eNoAnnotation), moveAnnotation(eNoAnnotation), nodeAnnotation(eNoAnnotation), black(false), white(false), moveNumber(-1){
 }
 
 void node::clear(){
@@ -70,31 +70,33 @@ QString node::toString() const{
     if (!comment.isEmpty())
         str += QString(" %1").arg( tr("Comment") );
 
-    if (annotation & eGoodMove)
+    if (moveAnnotation == eGoodMove)
         str += QString(" [%1]").arg( tr("Good Move") );
-    if (annotation & eVeryGoodMove)
+    else if (moveAnnotation == eVeryGoodMove)
         str += QString(" [%1]").arg( tr("Very Good Move") );
-    if (annotation & eBadMove)
+    else if (moveAnnotation == eBadMove)
         str += QString(" [%1]").arg( tr("Bad Move") );
-    if (annotation & eVeryBadMove)
+    else if (moveAnnotation == eVeryBadMove)
         str += QString(" [%1]").arg( tr("Very Bad Move") );
-    if (annotation & eDoubtfulMove)
+    else if (moveAnnotation == eDoubtfulMove)
         str += QString(" [%1]").arg( tr("Doubtful Move") );
-    if (annotation & eInterestingMove)
+    else if (moveAnnotation == eInterestingMove)
         str += QString(" [%1]").arg( tr("Interesting Move") );
-    if (annotation & eEven)
+
+    if (nodeAnnotation == eEven)
         str += QString(" [%1]").arg( tr("Even") );
-    if (annotation & eGoodForBlack)
+    else if (nodeAnnotation == eGoodForBlack)
         str += QString(" [%1]").arg( tr("Good for Black") );
-    if (annotation & eVeryGoodForBlack)
+    else if (nodeAnnotation == eVeryGoodForBlack)
         str += QString(" [%1]").arg( tr("Very Good for Black") );
-    if (annotation & eGoodForWhite)
+    else if (nodeAnnotation == eGoodForWhite)
         str += QString(" [%1]").arg( tr("Good for White") );
-    if (annotation & eVeryGoodForWhite)
+    else if (nodeAnnotation == eVeryGoodForWhite)
         str += QString(" [%1]").arg( tr("Very Good for White") );
-    if (annotation & eUnclear)
+    else if (nodeAnnotation == eUnclear)
         str += QString(" [%1]").arg( tr("Unclear") );
-    if (annotation & eHotspot)
+
+    if (annotation == eHotspot)
         str += QString(" [%1]").arg( tr("Hotspot") );
 
     if (!str.isEmpty() && str[0] == ' ')

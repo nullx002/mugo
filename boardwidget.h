@@ -129,7 +129,9 @@ public:
     void setShowCoordinatesWithI(bool withI){ showCoordinatesI = withI; repaintBoard(); }
     void setShowMarker(bool visible){ showMarker = visible; repaintBoard(); }
     void setShowBranchMoves(bool visible){ showBranchMoves = visible; repaintBoard(); }
-    void setAnnotation(int annotation){ currentNode->annotation = (go::node::eAnnotation)annotation; modifyNode(currentNode); }
+    void setAnnotation(int annotation){ currentNode->annotation = annotation; modifyNode(currentNode); }
+    void setMoveAnnotation(int annotation){ currentNode->moveAnnotation = annotation; modifyNode(currentNode); }
+    void setNodeAnnotation(int annotation){ currentNode->nodeAnnotation = annotation; modifyNode(currentNode); }
     void setBoardSize(int xsize, int ysize);
     void setMoveToClicked(bool moveMode = true){ moveToClicked = moveMode; }
     void rotateSgf();

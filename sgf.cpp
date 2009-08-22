@@ -78,56 +78,6 @@ bool sgf::node::setProperty(const QString& key, const QStringList& values){
     return true;
 }
 
-void sgf::node::setPosition(sgf::eNodeType type, const QString& pos){
-    nodeType = type;
-    getPosition(pos, x, y);
-}
-
-bool sgf::node::getPosition(const QString& pos, int& x, int& y, QString* str) const{
-    if (pos.size() < 2)
-        return false;
-    x = pos[0].unicode() - 'a';
-    y = pos[1].unicode() - 'a';
-
-    if (str && pos.size() > 3 && pos[2] == ':')
-        *str = pos.mid(3);
-
-    return true;
-}
-
-void sgf::node::addMark(go::markList& markList, const QStringList& values, const char* str) const{
-    QStringList::const_iterator iter = values.begin();
-    while (iter != values.end()){
-        int x, y;
-        QString str2;
-        if (getPosition(*iter, x, y, &str2))
-            markList.push_back( go::mark(x, y, str2.isEmpty() ? str : str2) );
-        ++iter;
-    }
-}
-
-void sgf::node::addMark(go::markList& markList, const QStringList& values, mark::eType type) const{
-    QStringList::const_iterator iter = values.begin();
-    while (iter != values.end()){
-        int x, y;
-        if (getPosition(*iter, x, y))
-            markList.push_back( go::mark(x, y, type) );
-        ++iter;
-    }
-}
-
-void sgf::node::addStone(go::stoneList& stoneList, const QString& key, const QStringList& values) const{
-    go::color c = key == "AB" ? go::black : key == "AW" ? go::white : go::empty;
-
-    QStringList::const_iterator iter = values.begin();
-    while (iter != values.end()){
-        int x, y;
-        if (getPosition(*iter, x, y))
-            stoneList.push_back( go::stone(x, y, c) );
-        ++iter;
-    }
-}
-
 bool sgf::node::get(go::nodePtr n) const{
     if (nodeType == eBlack || nodeType == eWhite){
         n->setX(x);
@@ -137,152 +87,6 @@ bool sgf::node::get(go::nodePtr n) const{
     propertyType::const_iterator iter = property.begin();
     while (iter != property.end()){
         get(n, iter.key(), iter.value());
-        ++iter;
-    }
-
-    return true;
-}
-
-bool sgf::node::set(const go::nodePtr n){
-    const go::informationNode* infoNode = dynamic_cast<const go::informationNode*>(n.get());
-    if (infoNode){
-        property["GM"].push_back("1");
-        property["FF"].push_back("4");
-        property["AP"].push_back(APPNAME ":" VERSION);
-        if (infoNode->xsize == infoNode->ysize)
-            property["SZ"].push_back( QString("%1").arg(infoNode->xsize) );
-        else
-            property["SZ"].push_back( QString("%1:%2").arg(infoNode->xsize).arg(infoNode->ysize) );
-        property["KM"].push_back( QString("%1").arg(infoNode->komi) );
-
-        if (infoNode->handicap != 0)   property["HA"].push_back( QString("%1").arg(infoNode->handicap) );
-        if (!infoNode->rule.isEmpty()) property["RU"].push_back( infoNode->rule );
-
-        if (!infoNode->whitePlayer.isEmpty()) property["PW"].push_back( infoNode->whitePlayer );
-        if (!infoNode->whiteRank.isEmpty())   property["WR"].push_back( infoNode->whiteRank );
-        if (!infoNode->whiteTeam.isEmpty())   property["WT"].push_back( infoNode->whiteTeam );
-        if (!infoNode->blackPlayer.isEmpty()) property["PB"].push_back( infoNode->blackPlayer );
-        if (!infoNode->blackRank.isEmpty())   property["BR"].push_back( infoNode->blackRank );
-        if (!infoNode->blackTeam.isEmpty())   property["BT"].push_back( infoNode->blackTeam );
-        if (!infoNode->result.isEmpty())      property["RE"].push_back( infoNode->result );
-        if (!infoNode->time.isEmpty())        property["TM"].push_back( infoNode->time );
-        if (!infoNode->overTime.isEmpty())    property["OT"].push_back( infoNode->overTime );
-
-        if (!infoNode->date.isEmpty())        property["DT"].push_back( infoNode->date );
-        if (!infoNode->gameName.isEmpty())    property["GN"].push_back( infoNode->gameName );
-        if (!infoNode->round.isEmpty())       property["RO"].push_back( infoNode->round );
-        if (!infoNode->place.isEmpty())       property["PC"].push_back( infoNode->place );
-        if (!infoNode->event.isEmpty())       property["EV"].push_back( infoNode->event );
-
-        if (!infoNode->gameComment.isEmpty()) property["GC"].push_back( infoNode->gameComment );
-        if (!infoNode->annotation.isEmpty())  property["AN"].push_back( infoNode->annotation );
-        if (!infoNode->copyright.isEmpty())   property["CP"].push_back( infoNode->copyright );
-        if (!infoNode->opening.isEmpty())     property["ON"].push_back( infoNode->opening );
-        if (!infoNode->source.isEmpty())      property["SO"].push_back( infoNode->source );
-        if (!infoNode->user.isEmpty())        property["US"].push_back( infoNode->user );
-    }
-    else if (n->isStone()){
-        QString str;
-        if (!n->isPass()){
-            x = n->position.x;
-            y = n->position.y;
-            str.sprintf("%c%c", 'a' + x, 'a' + y);
-        }
-        propertyType::key_type key = n->isBlack() ? "B" : "W";
-        property[key].push_back(str);
-
-        if (n->moveNumber > 0)
-            property["MN"].push_back( QString("%1").arg(n->moveNumber) );
-    }
-
-    if (!n->name.isEmpty())
-        property["N"].push_back(n->name);
-    else if (!n->comment.isEmpty())
-        property["C"].push_back(n->comment);
-
-    // marker
-    set(n->crosses);
-    set(n->circles);
-    set(n->triangles);
-    set(n->squares);
-    set(n->characters);
-    set(n->blackTerritories);
-    set(n->whiteTerritories);
-    set(n->stones);
-
-    if (n->annotation & go::node::eGoodMove)
-        property["TE"].push_back("1");
-    if (n->annotation & go::node::eVeryGoodMove)
-        property["TE"].push_back("2");
-    else if (n->annotation & go::node::eBadMove)
-        property["BM"].push_back("1");
-    else if (n->annotation & go::node::eVeryBadMove)
-        property["BM"].push_back("2");
-    else if (n->annotation & go::node::eDoubtfulMove)
-        property["DO"].push_back("");
-    else if (n->annotation & go::node::eInterestingMove)
-        property["IT"].push_back("");
-
-    if (n->annotation & go::node::eEven)
-        property["DM"].push_back("1");
-    else if (n->annotation & go::node::eGoodForBlack)
-        property["GB"].push_back("1");
-    else if (n->annotation & go::node::eVeryGoodForBlack)
-        property["GB"].push_back("2");
-    else if (n->annotation & go::node::eGoodForWhite)
-        property["GW"].push_back("1");
-    else if (n->annotation & go::node::eVeryGoodForWhite)
-        property["GW"].push_back("2");
-    else if (n->annotation & go::node::eUnclear)
-        property["UC"].push_back("1");
-
-    if (n->annotation & go::node::eHotspot)
-        property["HO"].push_back("1");
-
-    return false;
-}
-
-bool sgf::node::set(const go::markList& markList){
-    markList::const_iterator iter = markList.begin();
-    while (iter != markList.end()){
-        switch (iter->t){
-            case go::mark::eCross:
-                property["MA"].push_back( pointToString(iter->p) );
-                break;
-            case go::mark::eCircle:
-                property["CR"].push_back( pointToString(iter->p) );
-                break;
-            case go::mark::eSquare:
-                property["SQ"].push_back( pointToString(iter->p) );
-                break;
-            case go::mark::eTriangle:
-                property["TR"].push_back( pointToString(iter->p) );
-                break;
-            case go::mark::eCharacter:
-                property["LB"].push_back( pointToString(iter->p, &iter->s) );
-                break;
-            case go::mark::eBlackTerritory:
-                property["TB"].push_back( pointToString(iter->p) );
-                break;
-            case go::mark::eWhiteTerritory:
-                property["TW"].push_back( pointToString(iter->p) );
-                break;
-        };
-        ++iter;
-    }
-
-    return true;
-}
-
-bool sgf::node::set(const go::stoneList& stoneList){
-    go::stoneList::const_iterator iter = stoneList.begin();
-    while (iter != stoneList.end()){
-        if (iter->isBlack())
-            property["AB"].push_back( pointToString(iter->p) );
-        else if (iter->isWhite())
-            property["AW"].push_back( pointToString(iter->p) );
-        else if (iter->isEmpty())
-            property["AE"].push_back( pointToString(iter->p) );
         ++iter;
     }
 
@@ -375,30 +179,212 @@ bool sgf::node::get(go::nodePtr n, const QString& key, const QStringList& values
     else if (key == "AB" || key == "AW" || key == "AE")
         addStone(n->stones, key, values);
 
-    // annotation
+    // move annotation
     else if (key == "TE")
-        n->annotation |= values[0].toInt() > 1 ? go::node::eVeryGoodMove : go::node::eGoodMove;
+        n->moveAnnotation = values[0].toInt() > 1 ? go::node::eVeryGoodMove : go::node::eGoodMove;
     else if (key == "BM")
-        n->annotation |= values[0].toInt() > 1 ? go::node::eVeryBadMove : go::node::eBadMove;
+        n->moveAnnotation = values[0].toInt() > 1 ? go::node::eVeryBadMove : go::node::eBadMove;
     else if (key == "DO")
-        n->annotation |= go::node::eDoubtfulMove;
+        n->moveAnnotation = go::node::eDoubtfulMove;
     else if (key == "IT")
-        n->annotation |= go::node::eInterestingMove;
+        n->moveAnnotation = go::node::eInterestingMove;
 
+    // node annotation
     else if (key == "DM")
-        n->annotation |= go::node::eEven;
-
+        n->nodeAnnotation = go::node::eEven;
     else if (key == "GB")
-        n->annotation |= values[0].toInt() > 1 ? go::node::eVeryGoodForBlack : go::node::eGoodForBlack;
+        n->nodeAnnotation = values[0].toInt() > 1 ? go::node::eVeryGoodForBlack : go::node::eGoodForBlack;
     else if (key == "GW")
-        n->annotation |= values[0].toInt() > 1 ? go::node::eVeryGoodForWhite : go::node::eGoodForWhite;
+        n->nodeAnnotation = values[0].toInt() > 1 ? go::node::eVeryGoodForWhite : go::node::eGoodForWhite;
     else if (key == "UC")
-        n->annotation |= go::node::eUnclear;
+        n->nodeAnnotation = go::node::eUnclear;
 
+    // annotation
     else if (key == "HO")
-        n->annotation |= go::node::eHotspot;
+        n->annotation = go::node::eHotspot;
 
     return true;
+}
+
+bool sgf::node::set(const go::nodePtr n){
+    const go::informationNode* infoNode = dynamic_cast<const go::informationNode*>(n.get());
+    if (infoNode){
+        property["GM"].push_back("1");
+        property["FF"].push_back("4");
+        property["AP"].push_back(APPNAME ":" VERSION);
+        if (infoNode->xsize == infoNode->ysize)
+            property["SZ"].push_back( QString("%1").arg(infoNode->xsize) );
+        else
+            property["SZ"].push_back( QString("%1:%2").arg(infoNode->xsize).arg(infoNode->ysize) );
+        property["KM"].push_back( QString("%1").arg(infoNode->komi) );
+
+        if (infoNode->handicap != 0)   property["HA"].push_back( QString("%1").arg(infoNode->handicap) );
+        if (!infoNode->rule.isEmpty()) property["RU"].push_back( infoNode->rule );
+
+        if (!infoNode->whitePlayer.isEmpty()) property["PW"].push_back( infoNode->whitePlayer );
+        if (!infoNode->whiteRank.isEmpty())   property["WR"].push_back( infoNode->whiteRank );
+        if (!infoNode->whiteTeam.isEmpty())   property["WT"].push_back( infoNode->whiteTeam );
+        if (!infoNode->blackPlayer.isEmpty()) property["PB"].push_back( infoNode->blackPlayer );
+        if (!infoNode->blackRank.isEmpty())   property["BR"].push_back( infoNode->blackRank );
+        if (!infoNode->blackTeam.isEmpty())   property["BT"].push_back( infoNode->blackTeam );
+        if (!infoNode->result.isEmpty())      property["RE"].push_back( infoNode->result );
+        if (!infoNode->time.isEmpty())        property["TM"].push_back( infoNode->time );
+        if (!infoNode->overTime.isEmpty())    property["OT"].push_back( infoNode->overTime );
+
+        if (!infoNode->date.isEmpty())        property["DT"].push_back( infoNode->date );
+        if (!infoNode->gameName.isEmpty())    property["GN"].push_back( infoNode->gameName );
+        if (!infoNode->round.isEmpty())       property["RO"].push_back( infoNode->round );
+        if (!infoNode->place.isEmpty())       property["PC"].push_back( infoNode->place );
+        if (!infoNode->event.isEmpty())       property["EV"].push_back( infoNode->event );
+
+        if (!infoNode->gameComment.isEmpty()) property["GC"].push_back( infoNode->gameComment );
+        if (!infoNode->annotation.isEmpty())  property["AN"].push_back( infoNode->annotation );
+        if (!infoNode->copyright.isEmpty())   property["CP"].push_back( infoNode->copyright );
+        if (!infoNode->opening.isEmpty())     property["ON"].push_back( infoNode->opening );
+        if (!infoNode->source.isEmpty())      property["SO"].push_back( infoNode->source );
+        if (!infoNode->user.isEmpty())        property["US"].push_back( infoNode->user );
+    }
+    else if (n->isStone()){
+        QString str;
+        if (!n->isPass())
+            str = pointToString(n->position.x, n->position.y);
+        propertyType::key_type key = n->isBlack() ? "B" : "W";
+        property[key].push_back(str);
+
+        if (n->moveNumber > 0)
+            property["MN"].push_back( QString("%1").arg(n->moveNumber) );
+    }
+
+    if (!n->name.isEmpty())
+        property["N"].push_back(n->name);
+    else if (!n->comment.isEmpty())
+        property["C"].push_back(n->comment);
+
+    // marker
+    set(n->crosses);
+    set(n->circles);
+    set(n->triangles);
+    set(n->squares);
+    set(n->characters);
+    set(n->blackTerritories);
+    set(n->whiteTerritories);
+    set(n->stones);
+
+    if (n->moveAnnotation == go::node::eGoodMove)
+        property["TE"].push_back("1");
+    if (n->moveAnnotation == go::node::eVeryGoodMove)
+        property["TE"].push_back("2");
+    else if (n->moveAnnotation == go::node::eBadMove)
+        property["BM"].push_back("1");
+    else if (n->moveAnnotation == go::node::eVeryBadMove)
+        property["BM"].push_back("2");
+    else if (n->moveAnnotation == go::node::eDoubtfulMove)
+        property["DO"].push_back("");
+    else if (n->moveAnnotation == go::node::eInterestingMove)
+        property["IT"].push_back("");
+
+    if (n->nodeAnnotation == go::node::eEven)
+        property["DM"].push_back("1");
+    else if (n->nodeAnnotation == go::node::eGoodForBlack)
+        property["GB"].push_back("1");
+    else if (n->nodeAnnotation == go::node::eVeryGoodForBlack)
+        property["GB"].push_back("2");
+    else if (n->nodeAnnotation == go::node::eGoodForWhite)
+        property["GW"].push_back("1");
+    else if (n->nodeAnnotation == go::node::eVeryGoodForWhite)
+        property["GW"].push_back("2");
+    else if (n->nodeAnnotation == go::node::eUnclear)
+        property["UC"].push_back("1");
+
+    if (n->annotation == go::node::eHotspot)
+        property["HO"].push_back("1");
+
+    return false;
+}
+
+bool sgf::node::set(const go::markList& markList){
+    markList::const_iterator iter = markList.begin();
+    while (iter != markList.end()){
+        switch (iter->t){
+            case go::mark::eCross:
+                property["MA"].push_back( pointToString(iter->p) );
+                break;
+            case go::mark::eCircle:
+                property["CR"].push_back( pointToString(iter->p) );
+                break;
+            case go::mark::eSquare:
+                property["SQ"].push_back( pointToString(iter->p) );
+                break;
+            case go::mark::eTriangle:
+                property["TR"].push_back( pointToString(iter->p) );
+                break;
+            case go::mark::eCharacter:
+                property["LB"].push_back( pointToString(iter->p, &iter->s) );
+                break;
+            case go::mark::eBlackTerritory:
+                property["TB"].push_back( pointToString(iter->p) );
+                break;
+            case go::mark::eWhiteTerritory:
+                property["TW"].push_back( pointToString(iter->p) );
+                break;
+        };
+        ++iter;
+    }
+
+    return true;
+}
+
+bool sgf::node::set(const go::stoneList& stoneList){
+    go::stoneList::const_iterator iter = stoneList.begin();
+    while (iter != stoneList.end()){
+        if (iter->isBlack())
+            property["AB"].push_back( pointToString(iter->p) );
+        else if (iter->isWhite())
+            property["AW"].push_back( pointToString(iter->p) );
+        else if (iter->isEmpty())
+            property["AE"].push_back( pointToString(iter->p) );
+        ++iter;
+    }
+
+    return true;
+}
+
+void sgf::node::setPosition(sgf::eNodeType type, const QString& pos){
+    nodeType = type;
+    pointToInt(pos, x, y);
+}
+
+void sgf::node::addMark(go::markList& markList, const QStringList& values, const char* str) const{
+    QStringList::const_iterator iter = values.begin();
+    while (iter != values.end()){
+        int x, y;
+        QString str2;
+        if (pointToInt(*iter, x, y, &str2))
+            markList.push_back( go::mark(x, y, str2.isEmpty() ? str : str2) );
+        ++iter;
+    }
+}
+
+void sgf::node::addMark(go::markList& markList, const QStringList& values, mark::eType type) const{
+    QStringList::const_iterator iter = values.begin();
+    while (iter != values.end()){
+        int x, y;
+        if (pointToInt(*iter, x, y))
+            markList.push_back( go::mark(x, y, type) );
+        ++iter;
+    }
+}
+
+void sgf::node::addStone(go::stoneList& stoneList, const QString& key, const QStringList& values) const{
+    go::color c = key == "AB" ? go::black : key == "AW" ? go::white : go::empty;
+
+    QStringList::const_iterator iter = values.begin();
+    while (iter != values.end()){
+        int x, y;
+        if (pointToInt(*iter, x, y))
+            stoneList.push_back( go::stone(x, y, c) );
+        ++iter;
+    }
 }
 
 bool sgf::readStream(QString::iterator& first, QString::iterator last){
@@ -643,12 +629,24 @@ bool sgf::set(node* sgfNode, const go::nodePtr goNode){
     return true;
 }
 
+bool sgf::pointToInt(const QString& pos, int& x, int& y, QString* str){
+    if (pos.size() < 2)
+        return false;
+    x = pos[0].unicode() - (pos[0].isLower() ? L'a' : L'A' - 27);
+    y = pos[1].unicode() - (pos[1].isLower() ? L'a' : L'A' - 27);
+
+    if (str && pos.size() > 3 && pos[2] == ':')
+        *str = pos.mid(3);
+
+    return true;
+}
+
 QString sgf::pointToString(int x, int y, const QString* s){
     char buf[10];
     if (s)
-        sprintf(buf, "%c%c:%s", 'a' + x, 'a' + y, (const char*)s->toAscii());
+        sprintf(buf, "%c%c:%s", x + (x < 27 ? 'a' : 'A' - 27), y + (y < 27 ? 'a' : 'A' - 27), (const char*)s->toAscii());
     else
-        sprintf(buf, "%c%c", 'a' + x, 'a' + y);
+        sprintf(buf, "%c%c", x + (x < 27 ? 'a' : 'A' - 27), y + (y < 27 ? 'a' : 'A' - 27));
     return QString(buf);
 }
 
