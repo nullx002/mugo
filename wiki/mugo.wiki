@@ -7,6 +7,11 @@ Add your content here.
 
 = Details =
 
+== Language ==
+English and Japanese UI support.
+
+英語と日本語をサポートしています。
+
 == Supported SGF Properties ==
 
 === Move Properties ===
