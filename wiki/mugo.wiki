@@ -43,3 +43,6 @@ PB, BR, BT, PW, WR, WT, RE, TM, OT, GN, EV, RO, DT, PC, GC, US, SO, ON, AN, CP
 = Screen Shot =
 http://sikusiku.sakura.ne.jp/mugo/0.9.0/mugo-win.png<br/>
 (mugo on windows)
+
+http://sikusiku.sakura.ne.jp/mugo/0.9.0/mugo.png<br/>
+(mugo on linux, japanese menu, open ugf)
