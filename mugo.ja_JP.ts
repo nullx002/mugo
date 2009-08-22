@@ -210,7 +210,7 @@ alternate-background-color: rgb(255, 255, 255);</source>
     <message>
         <location filename="command.cpp" line="38"/>
         <source>Insert %1</source>
-        <translation type="unfinished">%1に挿入</translation>
+        <translation type="unfinished">%1を挿入</translation>
     </message>
 </context>
 <context>

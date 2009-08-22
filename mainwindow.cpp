@@ -57,10 +57,10 @@ MainWindow::MainWindow(QWidget *parent)
     for (int i=0; i<MaxRecentFiles; ++i){
         recentFileActs[i] = new QAction(this);
         recentFileActs[i]->setVisible(false);
-        ui->menu_File->insertAction(ui->actionExit, recentFileActs[i]);
+        ui->menuFile->insertAction(ui->actionExit, recentFileActs[i]);
         connect( recentFileActs[i], SIGNAL(triggered()), this, SLOT(openRecentFile()) );
     }
-    recentSeparator = ui->menu_File->insertSeparator(ui->actionExit);
+    recentSeparator = ui->menuFile->insertSeparator(ui->actionExit);
     updateRecentFileActions();
 
     // undo, redo action
@@ -68,15 +68,15 @@ MainWindow::MainWindow(QWidget *parent)
     QAction* redoAction = undoGroup.createRedoAction(this);
     undoAction->setIcon( QIcon(":/res/undo.png") );
     redoAction->setIcon( QIcon(":/res/redo.png") );
-    ui->menu_Edit->insertAction(ui->menu_Edit->actions().at(0), redoAction);
-    ui->menu_Edit->insertAction(redoAction, undoAction);
+    ui->menuEdit->insertAction(ui->menuEdit->actions().at(0), redoAction);
+    ui->menuEdit->insertAction(redoAction, undoAction);
     ui->editToolBar->insertAction(ui->editToolBar->actions().at(0), redoAction);
     ui->editToolBar->insertAction(redoAction, undoAction);
 
     // window menu
-    ui->menu_Window->addAction( ui->commentDockWidget->toggleViewAction() );
-    ui->menu_Window->addAction( ui->branchDockWidget->toggleViewAction() );
-    ui->menu_Window->addAction( ui->undoDockWidget->toggleViewAction() );
+    ui->menuWindow->addAction( ui->commentDockWidget->toggleViewAction() );
+    ui->menuWindow->addAction( ui->branchDockWidget->toggleViewAction() );
+    ui->menuWindow->addAction( ui->undoDockWidget->toggleViewAction() );
 
     // language menu
     QSettings settings;
@@ -88,11 +88,18 @@ MainWindow::MainWindow(QWidget *parent)
     else if (language == "ja_JP")
         ui->actionLanguageJapanese->setChecked(true);
 
-    // tool bar
-    ui->optionToolBar->insertAction( ui->optionToolBar->actions().at(0), ui->menuMoveNumber->menuAction() );
-    ui->menuMoveNumber->menuAction()->setCheckable(true);
-    ui->menuMoveNumber->menuAction()->setChecked( ui->actionShowMoveNumber->isChecked() );
-    connect( ui->menuMoveNumber->menuAction(), SIGNAL(triggered()), this, SLOT(on_actionShowMoveNumber_parent_triggered()) );
+    // tool bar (option -> show move number)
+    ui->optionToolBar->insertAction( ui->optionToolBar->actions().at(0), ui->menuShowMoveNumber->menuAction() );
+    ui->menuShowMoveNumber->menuAction()->setCheckable(true);
+    ui->menuShowMoveNumber->menuAction()->setChecked( ui->actionShowMoveNumber->isChecked() );
+    connect( ui->menuShowMoveNumber->menuAction(), SIGNAL(triggered()), this, SLOT(on_actionShowMoveNumber_parent_triggered()) );
+
+    // tool bar (edit -> stone & marker)
+    ui->editToolBar->insertAction( ui->actionDelete, ui->menuStoneMarkers->menuAction() );
+    ui->editToolBar->insertSeparator( ui->actionDelete );
+    ui->menuStoneMarkers->menuAction()->setCheckable(true);
+    ui->menuStoneMarkers->menuAction()->setIcon(ui->actionAddLabel->icon());
+    connect( ui->menuStoneMarkers->menuAction(), SIGNAL(triggered()), this, SLOT(on_actionAddLabel_triggered()) );
 
     setEncoding(ui->actionEncodingUTF8, "UTF-8");
     setShowMoveNumber(ui->actionNoMoveNumber, 0);
@@ -763,7 +770,7 @@ void MainWindow::on_actionJumpToClicked_triggered(){
 * View -> Move Number-> Show Move Number
 */
 void MainWindow::on_actionShowMoveNumber_triggered(){
-    ui->menuMoveNumber->menuAction()->setChecked( ui->actionShowMoveNumber->isChecked() );
+    ui->menuShowMoveNumber->menuAction()->setChecked( ui->actionShowMoveNumber->isChecked() );
     ui->boardWidget->setShowMoveNumber( ui->actionShowMoveNumber->isChecked() );
 }
 
@@ -772,7 +779,7 @@ void MainWindow::on_actionShowMoveNumber_triggered(){
 * View -> Move Number-> Show Move Number
 */
 void MainWindow::on_actionShowMoveNumber_parent_triggered(){
-    ui->actionShowMoveNumber->setChecked( ui->menuMoveNumber->menuAction()->isChecked() );
+    ui->actionShowMoveNumber->setChecked( ui->menuShowMoveNumber->menuAction()->isChecked() );
     on_actionShowMoveNumber_triggered();
 }
 
@@ -1684,6 +1691,30 @@ void MainWindow::setEditMode(QAction* action, BoardWidget::eEditMode editMode){
 
     for (int i=0; i<N; ++i)
         actions[i]->setChecked(actions[i] == action);
+
+    ui->menuStoneMarkers->menuAction()->setChecked( !ui->actionAlternateMove->isChecked() );
+    if (action != ui->actionAlternateMove){
+        ui->menuStoneMarkers->menuAction()->setIcon( action->icon() );
+
+        if (action == ui->actionAddBlackStone)
+            connect( ui->menuStoneMarkers->menuAction(), SIGNAL(triggered()), this, SLOT(on_actionAddBlackStone_triggered()) );
+        else if (action == ui->actionAddWhiteStone)
+            connect( ui->menuStoneMarkers->menuAction(), SIGNAL(triggered()), this, SLOT(on_actionAddWhiteStone_triggered()) );
+        else if (action == ui->actionAddEmpty)
+            connect( ui->menuStoneMarkers->menuAction(), SIGNAL(triggered()), this, SLOT(on_actionAddEmpty_triggered()) );
+        else if (action == ui->actionAddLabel)
+            connect( ui->menuStoneMarkers->menuAction(), SIGNAL(triggered()), this, SLOT(on_actionAddLabel_triggered()) );
+        else if (action == ui->actionAddCircle)
+            connect( ui->menuStoneMarkers->menuAction(), SIGNAL(triggered()), this, SLOT(on_actionAddCircle_triggered()) );
+        else if (action == ui->actionAddCross)
+            connect( ui->menuStoneMarkers->menuAction(), SIGNAL(triggered()), this, SLOT(on_actionAddCross_triggered()) );
+        else if (action == ui->actionAddSquare)
+            connect( ui->menuStoneMarkers->menuAction(), SIGNAL(triggered()), this, SLOT(on_actionAddSquare_triggered()) );
+        else if (action == ui->actionAddTriangle)
+            connect( ui->menuStoneMarkers->menuAction(), SIGNAL(triggered()), this, SLOT(on_actionAddTriangle_triggered()) );
+        else if (action == ui->actionDeleteMarker)
+            connect( ui->menuStoneMarkers->menuAction(), SIGNAL(triggered()), this, SLOT(on_actionDeleteMarker_triggered()) );
+    }
 
     ui->boardWidget->setEditMode(editMode);
 }
