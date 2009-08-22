@@ -24,6 +24,8 @@ MainWindow::MainWindow(QWidget *parent)
     , branchMode(false)
     , countTerritoryDialog(NULL)
     , undoGroup(this)
+    , countTerritoryMode(false)
+    , playWithComputerMode(false)
 {
     ui->setupUi(this);
 
@@ -57,15 +59,14 @@ MainWindow::MainWindow(QWidget *parent)
     for (int i=0; i<MaxRecentFiles; ++i){
         recentFileActs[i] = new QAction(this);
         recentFileActs[i]->setVisible(false);
-        ui->menuFile->insertAction(ui->actionExit, recentFileActs[i]);
+        ui->menuRecentFiles->addAction(recentFileActs[i]);
         connect( recentFileActs[i], SIGNAL(triggered()), this, SLOT(openRecentFile()) );
     }
-    recentSeparator = ui->menuFile->insertSeparator(ui->actionExit);
     updateRecentFileActions();
 
     // undo, redo action
-    QAction* undoAction = undoGroup.createUndoAction(this);
-    QAction* redoAction = undoGroup.createRedoAction(this);
+    undoAction = undoGroup.createUndoAction(this);
+    redoAction = undoGroup.createRedoAction(this);
     undoAction->setIcon( QIcon(":/res/undo.png") );
     redoAction->setIcon( QIcon(":/res/redo.png") );
     ui->menuEdit->insertAction(ui->menuEdit->actions().at(0), redoAction);
@@ -976,6 +977,7 @@ void MainWindow::on_actionOptionToolbar_triggered()
 */
 void MainWindow::on_actionCountTerritory_triggered(){
     if (ui->actionCountTerritory->isChecked()){
+        setCountTerritoryMode();
         countTerritoryDialog = new CountTerritoryDialog(this);
         connect(countTerritoryDialog, SIGNAL(dialogClosed()), this, SLOT(scoreDialogClosed()));
         countTerritoryDialog->show();
@@ -983,6 +985,7 @@ void MainWindow::on_actionCountTerritory_triggered(){
     else{
         delete countTerritoryDialog;
         countTerritoryDialog = NULL;
+        setCountTerritoryMode(false);
     }
 
     ui->boardWidget->setCountTerritoryMode(ui->actionCountTerritory->isChecked());
@@ -1016,11 +1019,15 @@ void MainWindow::on_actionPlayWithGnugo_triggered(){
             QMessageBox::critical(this, APPNAME, tr("Can not launch computer go."));
             return;
         }
+
+        setPlayWithComputerMode(true);
         ui->boardWidget->playWithComputer(&comProcess, dlg.isBlack);
     }
     else{
         comProcess.close();
         ui->boardWidget->playWithComputer(NULL, false);
+
+        setPlayWithComputerMode(false);
     }
 }
 
@@ -1567,6 +1574,9 @@ QTreeWidgetItem* MainWindow::remakeTreeWidget(QTreeWidgetItem* treeWidget){
 }
 
 void MainWindow::deleteNode(){
+    if (countTerritoryMode || playWithComputerMode)
+        return;
+
     ui->boardWidget->deleteNodeCommand( ui->boardWidget->getCurrentNode() );
 }
 
@@ -1818,8 +1828,6 @@ void MainWindow::updateRecentFileActions()
 
     for (int j = numRecentFiles; j < MaxRecentFiles; ++j)
         recentFileActs[j]->setVisible(false);
-
-    recentSeparator->setVisible(numRecentFiles > 0);
 }
 
 void MainWindow::setLanguage(const QString& locale, QAction* act){
@@ -1836,4 +1844,250 @@ void MainWindow::setLanguage(const QString& locale, QAction* act){
     for (int i=0; i<N; ++i){
         actions[i]->setChecked( actions[i] == act );
     }
+}
+
+void MainWindow::setCountTerritoryMode(bool on){
+    countTerritoryMode = on;
+
+    static QAction* act[] = {
+        ui->actionNew,
+        ui->actionOpen,
+        ui->actionSave,
+        ui->actionSaveAs,
+//        ui->actionExit,
+        ui->actionEncodingUTF8,
+        ui->actionEncodingShiftJIS,
+        ui->actionEncodingKorean,
+        ui->actionEncodingJIS,
+        ui->actionEncodingEucJP,
+        ui->actionISO8859_1,
+        ui->actionWindows_1252,
+        ui->actionSaveBoardAsPicture,
+        ui->actionAbout,
+        ui->actionGameInformation,
+        ui->actionDelete,
+        ui->actionPass,
+        ui->actionNoMoveNumber,
+        ui->actionLast1Move,
+        ui->actionLast2Moves,
+        ui->actionLast5Moves,
+        ui->actionLast10Moves,
+        ui->actionLast20Moves,
+        ui->actionLast50Moves,
+        ui->actionAllMoves,
+        ui->actionAddLabel,
+        ui->actionAddCircle,
+        ui->actionAddCross,
+        ui->actionAddSquare,
+        ui->actionAddTriangle,
+        ui->actionDeleteMarker,
+        ui->actionAlternateMove,
+        ui->actionAboutQT,
+        ui->actionEncodingGB2312,
+        ui->actionEncodingBig5,
+        ui->actionAddBlackStone,
+        ui->actionAddWhiteStone,
+        ui->actionAddEmpty,
+        ui->actionReload,
+        ui->actionGoodMove,
+        ui->actionVeryGoodMove,
+        ui->actionBadMove,
+        ui->actionVeryBadMove,
+        ui->actionDoubtfulMove,
+        ui->actionEven,
+        ui->actionGoodForBlack,
+        ui->actionVeryGoodForBlack,
+        ui->actionGoodForWhite,
+        ui->actionVeryGoodForWhite,
+        ui->actionUnclear,
+        ui->actionHotspot,
+        ui->actionEditNodeName,
+        ui->actionInterestingMove,
+        ui->actionFirstMove,
+        ui->actionFastRewind,
+        ui->actionPreviousMove,
+        ui->actionNextMove,
+        ui->actionFastForward,
+        ui->actionMoveLast,
+        ui->actionBackToParent,
+        ui->actionPreviousBranch,
+        ui->actionNextBranch,
+        ui->action19x19Board,
+        ui->action13x13Board,
+        ui->action9x9Board,
+        ui->actionMainToolbar,
+        ui->actionNavigationToolbar,
+        ui->actionShowMoveNumber,
+        ui->actionShowCoordinate,
+        ui->actionShowMarker,
+        ui->actionShowBranchMoves,
+        ui->actionEditToolbar,
+        ui->actionOptionToolbar,
+        ui->actionRotateSgfClockwise,
+        ui->actionFlipSgfHorizontally,
+        ui->actionFlipSgfVertically,
+        ui->actionJumpToMoveNumber,
+        ui->actionJumpToClicked,
+        ui->actionPlaySound,
+        ui->actionSetMoveNumber,
+        ui->actionUnsetMoveNumber,
+        ui->actionShowCoordinateI,
+        ui->actionBranchMode,
+        ui->actionRotateBoardClockwise,
+        ui->actionFlipBoardHorizontally,
+        ui->actionFlipBoardVertically,
+        ui->actionResetBoard,
+        ui->actionCustomBoardSize,
+//        ui->actionCountTerritory,
+        ui->actionLanguageSystemDefault,
+        ui->actionLanguageEnglish,
+        ui->actionLanguageJapanese,
+        ui->actionOptions,
+        ui->actionPlayWithGnugo,
+        ui->actionWhiteFirst,
+        ui->menuRecentFiles->menuAction(),
+        ui->menuShowMoveNumber->menuAction(),
+        ui->menuStoneMarkers->menuAction(),
+        undoAction,
+        redoAction,
+    };
+    static int N = sizeof(act) / sizeof(act[0]);
+    static QVector<bool> status(N);
+
+    if (on)
+        for (int i=0; i<N; ++i){
+            status[i] = act[i]->isEnabled();
+            act[i]->setEnabled( false );
+        }
+    else
+        for (int i=0; i<N; ++i)
+            act[i]->setEnabled( status[i] );
+
+    ui->commentWidget->setEnabled( !on );
+    ui->branchWidget->setEnabled( !on );
+}
+
+void MainWindow::setPlayWithComputerMode(bool on){
+    playWithComputerMode = on;
+
+    static QAction* act[] = {
+        ui->actionNew,
+        ui->actionOpen,
+        ui->actionSave,
+        ui->actionSaveAs,
+//        ui->actionExit,
+        ui->actionEncodingUTF8,
+        ui->actionEncodingShiftJIS,
+        ui->actionEncodingKorean,
+        ui->actionEncodingJIS,
+        ui->actionEncodingEucJP,
+        ui->actionISO8859_1,
+        ui->actionWindows_1252,
+        ui->actionSaveBoardAsPicture,
+        ui->actionAbout,
+        ui->actionGameInformation,
+        ui->actionDelete,
+//        ui->actionPass,
+        ui->actionNoMoveNumber,
+        ui->actionLast1Move,
+        ui->actionLast2Moves,
+        ui->actionLast5Moves,
+        ui->actionLast10Moves,
+        ui->actionLast20Moves,
+        ui->actionLast50Moves,
+        ui->actionAllMoves,
+        ui->actionAddLabel,
+        ui->actionAddCircle,
+        ui->actionAddCross,
+        ui->actionAddSquare,
+        ui->actionAddTriangle,
+        ui->actionDeleteMarker,
+        ui->actionAlternateMove,
+        ui->actionAboutQT,
+        ui->actionEncodingGB2312,
+        ui->actionEncodingBig5,
+        ui->actionAddBlackStone,
+        ui->actionAddWhiteStone,
+        ui->actionAddEmpty,
+        ui->actionReload,
+        ui->actionGoodMove,
+        ui->actionVeryGoodMove,
+        ui->actionBadMove,
+        ui->actionVeryBadMove,
+        ui->actionDoubtfulMove,
+        ui->actionEven,
+        ui->actionGoodForBlack,
+        ui->actionVeryGoodForBlack,
+        ui->actionGoodForWhite,
+        ui->actionVeryGoodForWhite,
+        ui->actionUnclear,
+        ui->actionHotspot,
+        ui->actionEditNodeName,
+        ui->actionInterestingMove,
+        ui->actionFirstMove,
+        ui->actionFastRewind,
+        ui->actionPreviousMove,
+        ui->actionNextMove,
+        ui->actionFastForward,
+        ui->actionMoveLast,
+        ui->actionBackToParent,
+        ui->actionPreviousBranch,
+        ui->actionNextBranch,
+        ui->action19x19Board,
+        ui->action13x13Board,
+        ui->action9x9Board,
+        ui->actionMainToolbar,
+        ui->actionNavigationToolbar,
+        ui->actionShowMoveNumber,
+        ui->actionShowCoordinate,
+        ui->actionShowMarker,
+        ui->actionShowBranchMoves,
+        ui->actionEditToolbar,
+        ui->actionOptionToolbar,
+        ui->actionRotateSgfClockwise,
+        ui->actionFlipSgfHorizontally,
+        ui->actionFlipSgfVertically,
+        ui->actionJumpToMoveNumber,
+        ui->actionJumpToClicked,
+        ui->actionPlaySound,
+        ui->actionSetMoveNumber,
+        ui->actionUnsetMoveNumber,
+        ui->actionShowCoordinateI,
+        ui->actionBranchMode,
+        ui->actionRotateBoardClockwise,
+        ui->actionFlipBoardHorizontally,
+        ui->actionFlipBoardVertically,
+        ui->actionResetBoard,
+        ui->actionCustomBoardSize,
+        ui->actionCountTerritory,
+        ui->actionLanguageSystemDefault,
+        ui->actionLanguageEnglish,
+        ui->actionLanguageJapanese,
+        ui->actionOptions,
+//        ui->actionPlayWithGnugo,
+        ui->actionWhiteFirst,
+        ui->menuRecentFiles->menuAction(),
+        ui->menuShowMoveNumber->menuAction(),
+        ui->menuStoneMarkers->menuAction(),
+        undoAction,
+        redoAction,
+    };
+    static int N = sizeof(act) / sizeof(act[0]);
+    static QVector<bool> status(N);
+
+    if (on){
+        undoGroup.setActiveStack(0);
+        for (int i=0; i<N; ++i){
+            status[i] = act[i]->isEnabled();
+            act[i]->setEnabled( false );
+        }
+    }
+    else{
+        undoGroup.setActiveStack(ui->boardWidget->getUndoStack());
+        for (int i=0; i<N; ++i)
+            act[i]->setEnabled( status[i] );
+    }
+
+    ui->commentWidget->setEnabled( !on );
+    ui->branchWidget->setEnabled( !on );
 }
