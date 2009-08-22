@@ -1787,11 +1787,11 @@ void BoardWidget::gtpPut(int x, int y){
         xy =getXYString(x, y);
 
     if (isBlack){
-        gtpWrite( QString("black %1\n").arg(xy) );
+        gtpWrite( QString("play black %1\n").arg(xy) );
         gtpStatus = eGtpPut;
     }
     else{
-        gtpWrite( QString("white %1\n").arg(xy) );
+        gtpWrite( QString("play white %1\n").arg(xy) );
         gtpStatus = eGtpPut;
     }
 }
@@ -1915,7 +1915,7 @@ void BoardWidget::gtpHandicap(){
     QString msg;
     for (int i=0; i<goData.root->handicap; ++i){
         addStone(goData.root, go::point(xlist[i], ylist[i]), go::black);
-        msg += "black ";
+        msg += "play black ";
         msg += getXYString(xlist[i], ylist[i]);
         msg += "\n";
     }
