@@ -596,11 +596,7 @@ void BoardWidget::deleteNode(go::nodePtr node, bool deleteChildren){
     setDirty(true);
     emit nodeDeleted(node, deleteChildren);
 
-    go::nodeList::iterator iter = qFind(nodeList.begin(), nodeList.end(), node);
-    if (deleteChildren)
-        nodeList.erase(iter, nodeList.end());
-    else
-        nodeList.erase(iter);
+    createNodeList();
 }
 
 /**
