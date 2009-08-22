@@ -1,3 +1,4 @@
+#include <qDebug>
 #include "command.h"
 
 
@@ -209,41 +210,24 @@ void MoveMarkCommand::undo(){
     mark->p = oldPos;
 }
 
-FlipSGFHorizontallyCommand::FlipSGFHorizontallyCommand(BoardWidget* _boardWidget, QUndoCommand* parent)
+RotateSgfCommand::RotateSgfCommand(BoardWidget* _boardWidget, const QString& _commandName, QUndoCommand* parent)
     : QUndoCommand(parent)
     , boardWidget(_boardWidget)
+    , commandName(_commandName)
 {
+qDebug() << "RotateSgfCommand::constructor";
 }
 
-void FlipSGFHorizontallyCommand::redo(){
+void RotateSgfCommand::redo(){
+qDebug() << "RotateSgfCommand::redo";
     QUndoCommand::redo();
-    setText( tr("Flip SGF Horizontally") );
+    setText(commandName);
 
     boardWidget->createBoardBuffer();
     boardWidget->repaintBoard();
 }
 
-void FlipSGFHorizontallyCommand::undo(){
-    QUndoCommand::undo();
-    boardWidget->createBoardBuffer();
-    boardWidget->repaintBoard();
-}
-
-FlipSGFVerticallyCommand::FlipSGFVerticallyCommand(BoardWidget* _boardWidget, QUndoCommand* parent)
-    : QUndoCommand(parent)
-    , boardWidget(_boardWidget)
-{
-}
-
-void FlipSGFVerticallyCommand::redo(){
-    QUndoCommand::redo();
-    setText( tr("Flip SGF Vertically") );
-
-    boardWidget->createBoardBuffer();
-    boardWidget->repaintBoard();
-}
-
-void FlipSGFVerticallyCommand::undo(){
+void RotateSgfCommand::undo(){
     QUndoCommand::undo();
     boardWidget->createBoardBuffer();
     boardWidget->repaintBoard();

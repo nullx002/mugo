@@ -1,4 +1,7 @@
 #include <QtGui/QApplication>
+#ifdef Q_WS_WIN
+#include <QWindowsVistaStyle>
+#endif
 #include <QDebug>
 #include <QSettings>
 #include <QTranslator>
@@ -38,6 +41,9 @@ int main(int argc, char *argv[])
     a.setOrganizationName(AUTHOR);
     a.setApplicationName(APPNAME);
     a.setApplicationVersion(VERSION);
+#ifdef Q_WS_WIN
+    a.setStyle(new QWindowsVistaStyle);
+#endif
 
     // Load translation
     QTranslator qtTranslator;

@@ -294,19 +294,15 @@ void BoardWidget::setBoardSize(int xsize, int ysize){
 }
 
 void BoardWidget::rotateSgf(){
-    undoStack.beginMacro( tr("Rotate SGF") );
+    RotateSgfCommand* command = new RotateSgfCommand(this, tr("Rotate SGF"));
+    rotateSgf(goData.root, command);
+    undoStack.push(command);
 
-    rotateSgf(goData.root);
-
-    undoStack.endMacro();
-
-    createBoardBuffer();
     setDirty(true);
-    repaintBoard();
 }
 
 void BoardWidget::flipSgfHorizontally(){
-    FlipSGFHorizontallyCommand* command = new FlipSGFHorizontallyCommand(this);
+    RotateSgfCommand* command = new RotateSgfCommand(this, tr("Flip SGF Horizontally"));
     flipSgf(goData.root, goData.root->xsize, 0, command);
     undoStack.push(command);
 
@@ -314,55 +310,57 @@ void BoardWidget::flipSgfHorizontally(){
 }
 
 void BoardWidget::flipSgfVertically(){
-    FlipSGFVerticallyCommand* command = new FlipSGFVerticallyCommand(this);
+    RotateSgfCommand* command = new RotateSgfCommand(this, tr("Flip SGF Vertically"));
     flipSgf(goData.root, 0, goData.root->ysize, command);
     undoStack.push(command);
 
     setDirty(true);
 }
 
-void BoardWidget::rotateSgf(go::nodePtr node){
-    int tmpX = goData.root->ysize - node->position.y - 1;
-    int tmpY = node->position.x;
-    node->position.x = tmpX;
-    node->position.y = tmpY;
-
-    emit nodeModified(node);
+void BoardWidget::rotateSgf(go::nodePtr node, QUndoCommand* command){
+    go::point p = node->position;
+    p.x = goData.root->ysize - node->position.y - 1;
+    p.y = node->position.x;
+    new MovePositionCommand(this, node, p, command);
 
     go::nodeList::iterator iter = node->childNodes.begin();
     while (iter != node->childNodes.end()){
-        rotateSgf(*iter);
+        rotateSgf(*iter, command);
         ++iter;
     }
 
-    rotateStoneSgf(node->stones);
-    rotateMarkSgf(node->crosses);
-    rotateMarkSgf(node->squares);
-    rotateMarkSgf(node->triangles);
-    rotateMarkSgf(node->circles);
-    rotateMarkSgf(node->characters);
-    rotateMarkSgf(node->blackTerritories);
-    rotateMarkSgf(node->whiteTerritories);
+    rotateStoneSgf(node, node->stones, command);
+    rotateMarkSgf(node, node->crosses, command);
+    rotateMarkSgf(node, node->squares, command);
+    rotateMarkSgf(node, node->triangles, command);
+    rotateMarkSgf(node, node->circles, command);
+    rotateMarkSgf(node, node->characters, command);
+    rotateMarkSgf(node, node->blackTerritories, command);
+    rotateMarkSgf(node, node->whiteTerritories, command);
 }
 
-void BoardWidget::rotateStoneSgf(go::stoneList& stoneList){
+void BoardWidget::rotateStoneSgf(go::nodePtr node, go::stoneList& stoneList, QUndoCommand* command){
     go::stoneList::iterator iter = stoneList.begin();
     while (iter != stoneList.end()){
-        int tmpX = goData.root->ysize - iter->p.y - 1;
-        int tmpY = iter->p.x;
-        iter->p.x = tmpX;
-        iter->p.y = tmpY;
+        go::point p = iter->p;
+        p.x = goData.root->ysize - iter->p.y - 1;
+        p.y = iter->p.x;
+
+        new MoveStoneCommand(this, node, &(*iter), p, command);
+
         ++iter;
     }
 }
 
-void BoardWidget::rotateMarkSgf(go::markList& markList){
+void BoardWidget::rotateMarkSgf(go::nodePtr node, go::markList& markList, QUndoCommand* command){
     go::markList::iterator iter = markList.begin();
     while (iter != markList.end()){
-        int tmpX = goData.root->ysize - iter->p.y - 1;
-        int tmpY = iter->p.x;
-        iter->p.x = tmpX;
-        iter->p.y = tmpY;
+        go::point p = iter->p;
+        p.x = goData.root->ysize - iter->p.y - 1;
+        p.y = iter->p.x;
+
+        new MoveMarkCommand(this, node, &(*iter), p, command);
+
         ++iter;
     }
 }

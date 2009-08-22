@@ -105,13 +105,22 @@ MainWindow::MainWindow(QWidget *parent)
     connect( ui->menuStoneMarkers->menuAction(), SIGNAL(triggered()), this, SLOT(on_actionAddLabel_triggered()) );
 
     // status bar
+#ifdef Q_WS_WIN
+    int style = QFrame::NoFrame|QFrame::Plain;
+#else
+    int style = QFrame::StyledPanel|QFrame::Plain;
+#endif
+    QLabel* messageLabel = new QLabel;
+    messageLabel->setFrameStyle(style);
+    ui->statusBar->addWidget(messageLabel, 1);
+
     moveNumberLabel = new QLabel;
-    moveNumberLabel->setFrameStyle(QFrame::StyledPanel|QFrame::Plain);
+    moveNumberLabel->setFrameStyle(style);
     moveNumberLabel->setToolTip(tr("Move Number"));
     ui->statusBar->addPermanentWidget(moveNumberLabel, 0);
 
     capturedLabel = new QLabel;
-    capturedLabel->setFrameStyle(QFrame::StyledPanel|QFrame::Plain);
+    capturedLabel->setFrameStyle(style);
     capturedLabel->setToolTip(tr("Captured"));
     ui->statusBar->addPermanentWidget(capturedLabel, 0);
 

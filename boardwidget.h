@@ -232,9 +232,9 @@ protected:
     void removeMark(go::markList& markList, const go::point& p);
     void addStone(go::nodePtr node, const go::point& sgfPoint, go::color color);
     void addStone(go::nodePtr node, const go::point& sgfPoint, const go::point& boardPoint, go::color color);
-    void rotateSgf(go::nodePtr node);
-    void rotateStoneSgf(go::stoneList& stoneList);
-    void rotateMarkSgf(go::markList& markList);
+    void rotateSgf(go::nodePtr node, QUndoCommand* command);
+    void rotateStoneSgf(go::nodePtr node, go::stoneList& stoneList, QUndoCommand* command);
+    void rotateMarkSgf(go::nodePtr node, go::markList& markList, QUndoCommand* command);
     void flipSgf(go::nodePtr node, int xsize, int ysize, QUndoCommand* command);
     void flipStoneSgf(go::nodePtr node, go::stoneList& stoneList, int xsize, int ysize, QUndoCommand* command);
     void flipMarkSgf(go::nodePtr node, go::markList& markList, int xsize, int ysize, QUndoCommand* command);

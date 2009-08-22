@@ -157,30 +157,15 @@ private:
     go::point    oldPos;
 };
 
-class FlipSGFVerticallyCommand : public QUndoCommand{
-    Q_DECLARE_TR_FUNCTIONS(FlipSGFVerticallyCommand)
-
+class RotateSgfCommand : public QUndoCommand{
 public:
-    FlipSGFVerticallyCommand(BoardWidget* boardWidget, QUndoCommand *parent = 0);
+    RotateSgfCommand(BoardWidget* boardWidget, const QString& commandName, QUndoCommand *parent = 0);
     virtual void redo();
     virtual void undo();
 
 private:
     BoardWidget* boardWidget;
-    go::nodePtr node;
-};
-
-class FlipSGFHorizontallyCommand : public QUndoCommand{
-    Q_DECLARE_TR_FUNCTIONS(FlipSGFHorizontallyCommand)
-
-public:
-    FlipSGFHorizontallyCommand(BoardWidget* boardWidget, QUndoCommand *parent = 0);
-    virtual void redo();
-    virtual void undo();
-
-private:
-    BoardWidget* boardWidget;
-    go::nodePtr node;
+    QString commandName;
 };
 
 
