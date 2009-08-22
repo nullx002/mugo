@@ -69,20 +69,24 @@ public:
     typedef QLinkedList<nodePtr> nodeList;
 
     enum eAnnotation{
-        eNoAnnotation = 0x0000,
-        eGoodMove = 0x0001,
-        eVeryGoodMove = 0x0002,
-        eBadMove = 0x0004,
-        eVeryBadMove = 0x0008,
-        eDoubtfulMove = 0x0010,
-        eInterestingMove = 0x0020,
-        eEven = 0x0040,
-        eGoodForBlack = 0x0080,
-        eVeryGoodForBlack = 0x0100,
-        eGoodForWhite = 0x0200,
-        eVeryGoodForWhite = 0x0400,
-        eUnclear = 0x0800,
-        eHotspot = 0x1000,
+        eNoAnnotation = 0,
+        eHotspot = 1,
+    };
+    enum eMoveAnnotation{
+        eGoodMove = 1,
+        eVeryGoodMove,
+        eBadMove ,
+        eVeryBadMove,
+        eDoubtfulMove,
+        eInterestingMove,
+    };
+    enum eNodeAnnotation{
+        eEven = 1,
+        eGoodForBlack,
+        eVeryGoodForBlack,
+        eGoodForWhite,
+        eVeryGoodForWhite,
+        eUnclear,
     };
 
     explicit node(data* data_);
@@ -135,6 +139,8 @@ public:
     markList  whiteTerritories;
     stoneList stones;
     int annotation;
+    int moveAnnotation;
+    int nodeAnnotation;
     QString comment;
     point position;
     bool  black;
