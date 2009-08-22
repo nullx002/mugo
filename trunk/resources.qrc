@@ -44,5 +44,7 @@
         <file>res/white_128.png</file>
         <file>res/black_128.png</file>
         <file>res/whitefirst.png</file>
+        <file>res/black_128_ds.png</file>
+        <file>res/white_128_ds.png</file>
     </qresource>
 </RCC>

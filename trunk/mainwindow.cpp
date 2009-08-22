@@ -897,7 +897,12 @@ void MainWindow::on_actionShowCoordinate_triggered(){
 */
 void MainWindow::on_actionShowCoordinateI_triggered(){
     ui->boardWidget->setShowCoordinatesWithI( ui->actionShowCoordinateI->isChecked() );
+
+    go::nodePtr currentNode = ui->boardWidget->getCurrentNode();
+
     setTreeData();
+
+    ui->boardWidget->setCurrentNode(currentNode);
 }
 
 /**
@@ -1276,11 +1281,7 @@ void MainWindow::on_boardWidget_updateTerritory(int alive_b, int alive_w, int de
 
     // japanese rule
     QString bj( tr("Black: %1 = %2(territories) + %3(captured)").arg(bscorej).arg(blackTerritory).arg(dead_w + capturedWhite) );
-    QString wj;
-    if (komi != 0.0)
-        wj = tr("White: %1 = %2(territories) + %3(captured) + %4(komi)").arg(wscorej).arg(whiteTerritory).arg(dead_b + capturedBlack).arg(komi);
-    else
-        wj = tr("White: %1 = %2(territories) + %3(captured)").arg(wscorej).arg(whiteTerritory).arg(dead_b + capturedBlack);
+    QString wj( tr("White: %1 = %2(territories) + %3(captured) + %4(komi)").arg(wscorej).arg(whiteTerritory).arg(dead_b + capturedBlack).arg(komi) );
 
     QString result;
     if (wscorej > bscorej)
