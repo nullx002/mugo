@@ -1,4 +1,4 @@
-#include <qDebug>
+#include <QDebug>
 #include "command.h"
 
 
@@ -215,11 +215,9 @@ RotateSgfCommand::RotateSgfCommand(BoardWidget* _boardWidget, const QString& _co
     , boardWidget(_boardWidget)
     , commandName(_commandName)
 {
-qDebug() << "RotateSgfCommand::constructor";
 }
 
 void RotateSgfCommand::redo(){
-qDebug() << "RotateSgfCommand::redo";
     QUndoCommand::redo();
     setText(commandName);
 
