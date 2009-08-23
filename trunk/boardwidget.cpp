@@ -1417,6 +1417,8 @@ void BoardWidget::addMark(int sgfX, int sgfY, int boardX, int boardY){
             removeMark(currentNode->crosses, p);
             removeMark(currentNode->squares, p);
             removeMark(currentNode->triangles, p);
+            removeMark(currentNode->characters, p);
+            removeStone(currentNode->stones, p);
             modifyNode(currentNode);
             break;
         }
@@ -1466,15 +1468,16 @@ void BoardWidget::addCharacter(go::markList& markList, const go::point& p){
     markList.push_back(go::mark(p, s));
 }
 
-void BoardWidget::removeMark(go::markList& markList, const go::point& p){
+bool BoardWidget::removeMark(go::markList& markList, const go::point& p){
     go::markList::iterator iter = markList.begin();
     while (iter != markList.end()){
         if (iter->p == p){
             markList.erase(iter);
-            return;
+            return true;
         }
         ++iter;
     }
+    return false;
 }
 
 void BoardWidget::addStone(go::nodePtr node, const go::point& sgfPoint, go::color color){
@@ -1493,8 +1496,10 @@ void BoardWidget::addStone(go::nodePtr node, const go::point& sp, const go::poin
             board[bp.y][bp.x].color = go::empty;
             board[bp.y][bp.x].number = 0;
 
-            if (stone.c == c || c == go::empty)
+            if (stone.c == c || c == go::empty){
+                modifyNode(node);
                 return;
+            }
             else
                 break;
         }
@@ -1509,6 +1514,18 @@ void BoardWidget::addStone(go::nodePtr node, const go::point& sp, const go::poin
         modifyNode(node);
     else
         insertNodeCommand(node, stoneNode);
+}
+
+bool BoardWidget::removeStone(go::stoneList& stoneList, const go::point& p){
+    go::stoneList::iterator iter = stoneList.begin();
+    while (iter != stoneList.end()){
+        if (iter->p == p) {
+            stoneList.erase(iter);
+            return true;
+        }
+        ++iter;
+    }
+    return false;
 }
 
 QString BoardWidget::toString(go::nodePtr node) const{
