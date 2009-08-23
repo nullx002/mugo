@@ -12,6 +12,7 @@
 #include "gameinformationdialog.h"
 #include "playwithcomputerdialog.h"
 #include "setupdialog.h"
+#include "exportasciidialog.h"
 #include "ui_mainwindow.h"
 
 Q_DECLARE_METATYPE(go::nodePtr);
@@ -297,6 +298,15 @@ void MainWindow::on_actionSaveBoardAsPicture_triggered()
 
     // change image coordinate to display
     ui->boardWidget->repaintBoard();
+}
+
+/**
+* Slot
+* File -> Export Ascii to Clipboard
+*/
+void MainWindow::on_actionExportAsciiToClipboard_triggered(){
+    ExportAsciiDialog dlg(this, ui->boardWidget->getBuffer());
+    dlg.exec();
 }
 
 /**

@@ -83,6 +83,8 @@ public:
         int color;
         go::nodePtr node;
     };
+    typedef QVector< QVector<stoneInfo> > BoardBuffer;
+
 
     explicit BoardWidget(QWidget *parent = 0);
     virtual ~BoardWidget();
@@ -110,6 +112,7 @@ public:
     go::nodePtr getCurrentNode(){ return currentNode; }
     go::nodePtr findNodeFromMoveNumber(int moveNumber);
     const go::nodeList& getCurrentNodeList() const{ return nodeList; }
+    const BoardBuffer& getBuffer(){ return board; }
 
     void getCaptured(int& black, int& white) const{ black = capturedBlack; white = capturedWhite; }
     int  getMoveNumber() const{ return currentMoveNumber; }
@@ -300,7 +303,7 @@ private:
     QRect boardRect;
     QList<int> xlines;
     QList<int> ylines;
-    QVector< QVector<stoneInfo> > board;
+    BoardBuffer board;
 
     // sound
     Sound stoneSound;

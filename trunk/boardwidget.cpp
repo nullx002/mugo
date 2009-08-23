@@ -633,10 +633,6 @@ void BoardWidget::pass(){
 * public slot
 */
 void BoardWidget::setCurrentNode(go::nodePtr node){
-if (node){
-//    qDebug() << "setCurrentNode" << node->position.x << " / " << node->position.y;
-    qDebug() << "setCurrentNode" << node->toString();
-}
     if (editMode == eCountTerritory)
         return;
 
