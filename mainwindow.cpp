@@ -100,8 +100,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect( ui->menuShowMoveNumber->menuAction(), SIGNAL(triggered()), this, SLOT(on_actionShowMoveNumber_parent_triggered()) );
 
     // tool bar (edit -> stone & marker)
-    ui->editToolBar->insertAction( ui->actionDelete, ui->menuStoneMarkers->menuAction() );
-    ui->editToolBar->insertSeparator( ui->actionDelete );
+    ui->editToolBar->insertAction( ui->actionDeleteAfterCurrent, ui->menuStoneMarkers->menuAction() );
+    ui->editToolBar->insertSeparator( ui->actionDeleteAfterCurrent );
     ui->menuStoneMarkers->menuAction()->setCheckable(true);
     ui->menuStoneMarkers->menuAction()->setIcon(ui->actionAddLabel->icon());
     connect( ui->menuStoneMarkers->menuAction(), SIGNAL(triggered()), this, SLOT(on_actionAddLabel_triggered()) );
@@ -216,7 +216,7 @@ void MainWindow::closeEvent(QCloseEvent* e){
 
 void MainWindow::keyPressEvent(QKeyEvent* event){
     if (event->key() == Qt::Key_Delete)
-        deleteNode();
+        deleteNode(true);
 }
 
 /**
@@ -438,8 +438,12 @@ void MainWindow::on_actionPass_triggered(){
 * Slot
 * Edit -> Delete
 */
-void MainWindow::on_actionDelete_triggered(){
-    deleteNode();
+void MainWindow::on_actionDeleteAfterCurrent_triggered(){
+    deleteNode(true);
+}
+
+void MainWindow::on_actionDeleteOnlyCurrent_triggered(){
+    deleteNode(false);
 }
 
 /**
@@ -1779,11 +1783,11 @@ QTreeWidgetItem* MainWindow::remakeTreeWidget(QTreeWidgetItem* treeWidget){
     return NULL;
 }
 
-void MainWindow::deleteNode(){
+void MainWindow::deleteNode(bool deleteChildren){
     if (countTerritoryMode || playWithComputerMode)
         return;
 
-    ui->boardWidget->deleteNodeCommand( ui->boardWidget->getCurrentNode() );
+    ui->boardWidget->deleteNodeCommand( ui->boardWidget->getCurrentNode(), deleteChildren );
 }
 
 void MainWindow::deleteTreeWidget(go::nodePtr node, bool deleteChildren){
@@ -2010,7 +2014,8 @@ void MainWindow::setCountTerritoryMode(bool on){
         ui->actionPasteSGFfromClipboard,
         ui->actionPasteSGFasBranchfromClipboard,
         ui->actionGameInformation,
-        ui->actionDelete,
+        ui->actionDeleteAfterCurrent,
+        ui->actionDeleteOnlyCurrent,
         ui->actionPass,
         ui->actionAlternateMove,
         ui->actionAddBlackStone,
@@ -2167,7 +2172,8 @@ void MainWindow::setPlayWithComputerMode(bool on){
         ui->actionPasteSGFfromClipboard,
         ui->actionPasteSGFasBranchfromClipboard,
         ui->actionGameInformation,
-        ui->actionDelete,
+        ui->actionDeleteAfterCurrent,
+        ui->actionDeleteOnlyCurrent,
 //        ui->actionPass,
         ui->actionAlternateMove,
         ui->actionAddBlackStone,

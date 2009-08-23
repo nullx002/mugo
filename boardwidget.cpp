@@ -596,7 +596,6 @@ void BoardWidget::deleteNode(go::nodePtr node, bool deleteChildren){
                 (*iter)->parent = parent;
                 ++iter;
             }
-            node->childNodes.clear();
         }
     }
 
@@ -1353,7 +1352,7 @@ void BoardWidget::addMark(int sgfX, int sgfY, int boardX, int boardY){
             break;
 
         case eAddEmpty:
-            addStone(currentNode, go::point(sgfX, sgfY), go::point(boardX, boardY), go::empty);
+            addEmpty(currentNode, go::point(sgfX, sgfY), go::point(boardX, boardY));
             break;
 
         case eLabelMark:{
@@ -1418,7 +1417,7 @@ void BoardWidget::addMark(int sgfX, int sgfY, int boardX, int boardY){
             removeMark(currentNode->squares, p);
             removeMark(currentNode->triangles, p);
             removeMark(currentNode->characters, p);
-            removeStone(currentNode->stones, p);
+            removeStone(currentNode->stones, p, go::point(boardX, boardY));
             modifyNode(currentNode);
             break;
         }
@@ -1487,24 +1486,15 @@ void BoardWidget::addStone(go::nodePtr node, const go::point& sgfPoint, go::colo
 }
 
 void BoardWidget::addStone(go::nodePtr node, const go::point& sp, const go::point& bp, go::color c){
-    go::nodePtr stoneNode( node->isStone() ? go::nodePtr(new go::node(node)) : node );
-    go::stoneList::iterator iter = stoneNode->stones.begin();
-    while (iter != stoneNode->stones.end()){
-        if (iter->p == sp) {
-            go::stone stone = *iter;
-            iter = stoneNode->stones.erase(iter);
-            board[bp.y][bp.x].color = go::empty;
-            board[bp.y][bp.x].number = 0;
-
-            if (stone.c == c || c == go::empty){
-                modifyNode(node);
-                return;
-            }
-            else
-                break;
-        }
-        ++iter;
+    if (removeStone(node->stones, sp, bp)){
+        modifyNode(node);
+        return;
     }
+
+    if (!board[bp.y][bp.x].empty())
+        return;
+
+    go::nodePtr stoneNode( node->isStone() ? go::nodePtr(new go::node(node)) : node );
 
     stoneNode->stones.push_back( go::stone(sp, c) );
     board[bp.y][bp.x].color = c;
@@ -1516,11 +1506,40 @@ void BoardWidget::addStone(go::nodePtr node, const go::point& sp, const go::poin
         insertNodeCommand(node, stoneNode);
 }
 
-bool BoardWidget::removeStone(go::stoneList& stoneList, const go::point& p){
+void BoardWidget::addEmpty(go::nodePtr node, const go::point& sgfPoint){
+    go::point boardPoint;
+    sgfToBoardCoordinate(sgfPoint.x, sgfPoint.y, boardPoint.x, boardPoint.y);
+    addEmpty(node, sgfPoint, boardPoint);
+}
+
+void BoardWidget::addEmpty(go::nodePtr node, const go::point& sp, const go::point& bp){
+    if (removeStone(node->stones, sp, bp)){
+        modifyNode(node);
+        return;
+    }
+
+    if (board[bp.y][bp.x].empty())
+        return;
+
+    go::nodePtr stoneNode( node->isStone() ? go::nodePtr(new go::node(node)) : node );
+
+    stoneNode->stones.push_back( go::stone(sp, go::empty) );
+    board[bp.y][bp.x].color = go::empty;
+    board[bp.y][bp.x].number = 0;
+
+    if (stoneNode == node)
+        modifyNode(node);
+    else
+        insertNodeCommand(node, stoneNode);
+}
+
+bool BoardWidget::removeStone(go::stoneList& stoneList, const go::point& sp, const go::point& bp){
     go::stoneList::iterator iter = stoneList.begin();
     while (iter != stoneList.end()){
-        if (iter->p == p) {
+        if (iter->p == sp) {
             stoneList.erase(iter);
+            board[bp.y][bp.x].color = go::empty;
+            board[bp.y][bp.x].number = 0;
             return true;
         }
         ++iter;

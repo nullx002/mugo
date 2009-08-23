@@ -55,7 +55,7 @@ private:
     QTreeWidgetItem* addTreeWidget(go::nodePtr node, bool needRemake = false);
     QTreeWidgetItem* createTreeWidget(go::nodePtr node);
     QTreeWidgetItem* remakeTreeWidget(QTreeWidgetItem* currentWidget);
-    void deleteNode();
+    void deleteNode(bool deleteNode);
     void deleteTreeWidget(go::nodePtr node, bool deleteChildren);
     void deleteTreeWidgetForMap(go::nodePtr node);
     void setTreeWidget(go::nodePtr n);
@@ -110,7 +110,8 @@ private slots:
     void on_actionPasteSGFfromClipboard_triggered();
     void on_actionPasteSGFasBranchfromClipboard_triggered();
     void on_actionGameInformation_triggered();
-    void on_actionDelete_triggered();
+    void on_actionDeleteAfterCurrent_triggered();
+    void on_actionDeleteOnlyCurrent_triggered();
     void on_actionPass_triggered();
     void on_actionEditNodeName_triggered();
 

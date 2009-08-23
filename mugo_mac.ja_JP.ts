@@ -829,7 +829,7 @@ Do you want to save your changes?</source>
     <message>
         <location filename="mainwindow.ui" line="948"/>
         <source>Add Empty</source>
-        <translation type="unfinished">石を取り除く</translation>
+        <translation type="unfinished">空白を追加</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="957"/>

@@ -44,7 +44,8 @@
         <file>res/whitefirst.png</file>
         <file>res/black_128_ds.png</file>
         <file>res/white_128_ds.png</file>
-        <file>res/optinos.png</file>
         <file>res/gameinfo.png</file>
+        <file>res/options.png</file>
+        <file>res/removeself.png</file>
     </qresource>
 </RCC>

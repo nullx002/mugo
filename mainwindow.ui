@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>813</width>
+    <width>1271</width>
     <height>539</height>
    </rect>
   </property>
@@ -41,8 +41,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>813</width>
-     <height>24</height>
+     <width>1271</width>
+     <height>18</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -165,7 +165,8 @@
     <addaction name="separator"/>
     <addaction name="actionGameInformation"/>
     <addaction name="separator"/>
-    <addaction name="actionDelete"/>
+    <addaction name="actionDeleteAfterCurrent"/>
+    <addaction name="actionDeleteOnlyCurrent"/>
     <addaction name="actionPass"/>
     <addaction name="separator"/>
     <addaction name="actionAlternateMove"/>
@@ -356,7 +357,7 @@
    <addaction name="separator"/>
    <addaction name="actionAlternateMove"/>
    <addaction name="separator"/>
-   <addaction name="actionDelete"/>
+   <addaction name="actionDeleteAfterCurrent"/>
    <addaction name="actionPass"/>
   </widget>
   <widget class="QToolBar" name="navigationToolBar">
@@ -543,13 +544,13 @@
     <string>Game Information</string>
    </property>
   </action>
-  <action name="actionDelete">
+  <action name="actionDeleteAfterCurrent">
    <property name="icon">
     <iconset>
      <normaloff>:/res/remove.png</normaloff>:/res/remove.png</iconset>
    </property>
    <property name="text">
-    <string>&amp;Delete</string>
+    <string>&amp;Delete After Current</string>
    </property>
   </action>
   <action name="actionPass">
@@ -1475,7 +1476,7 @@
   <action name="actionOptions">
    <property name="icon">
     <iconset>
-     <normaloff>:/res/optinos.png</normaloff>:/res/optinos.png</iconset>
+     <normaloff>:/res/options.png</normaloff>:/res/options.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Options...</string>
@@ -1546,6 +1547,15 @@
   <action name="actionExportAsciiToClipboard">
    <property name="text">
     <string>Export Ascii to Clipboard</string>
+   </property>
+  </action>
+  <action name="actionDeleteOnlyCurrent">
+   <property name="icon">
+    <iconset>
+     <normaloff>:/res/removeself.png</normaloff>:/res/removeself.png</iconset>
+   </property>
+   <property name="text">
+    <string>Delete Only Current</string>
    </property>
   </action>
  </widget>
