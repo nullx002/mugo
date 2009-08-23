@@ -45,14 +45,18 @@ public:
     }
 
     void play(){
+        static time_t lastTime = 0;
 #ifdef Q_WS_X11
-        if (media->currentTime() == media->totalTime()){
+        if (media->currentTime() == media->totalTime() && lastTime < time(NULL)){
             media->stop();
             media->seek(0);
+            time = time(NULL);
         }
 #endif
-        if (media)
+        if (media && media->isFinished() && lastTime < time(NULL)){
             media->play();
+            lastTime = time(NULL);
+        }
     }
 
 #ifdef Q_WS_X11
@@ -236,7 +240,9 @@ protected:
     bool removeMark(go::markList& markList, const go::point& p);
     void addStone(go::nodePtr node, const go::point& sgfPoint, go::color color);
     void addStone(go::nodePtr node, const go::point& sgfPoint, const go::point& boardPoint, go::color color);
-    bool removeStone(go::stoneList& stoneList, const go::point& p);
+    void addEmpty(go::nodePtr node, const go::point& sgfPoint);
+    void addEmpty(go::nodePtr node, const go::point& sgfPoint, const go::point& boardPoint);
+    bool removeStone(go::stoneList& stoneList, const go::point& sp, const go::point& bp);
     void rotateSgf(go::nodePtr node, QUndoCommand* command);
     void rotateStoneSgf(go::nodePtr node, go::stoneList& stoneList, QUndoCommand* command);
     void rotateMarkSgf(go::nodePtr node, go::markList& markList, QUndoCommand* command);
