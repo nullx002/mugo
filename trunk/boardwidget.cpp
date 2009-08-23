@@ -283,6 +283,17 @@ void BoardWidget::setData(const go::fileBase& data){
     repaintBoard();
 }
 
+void BoardWidget::insertData(const go::nodePtr node, const go::fileBase& data){
+    go::data d;
+    data.get(d);
+
+    node->childNodes.push_back( d.root );
+    d.root->parent = node;
+
+    createNodeList();
+    setDirty(true);
+}
+
 void BoardWidget::setBoardSize(int xsize, int ysize){
     clear();
     goData.root->xsize = xsize;
@@ -622,6 +633,10 @@ void BoardWidget::pass(){
 * public slot
 */
 void BoardWidget::setCurrentNode(go::nodePtr node){
+if (node){
+//    qDebug() << "setCurrentNode" << node->position.x << " / " << node->position.y;
+    qDebug() << "setCurrentNode" << node->toString();
+}
     if (editMode == eCountTerritory)
         return;
 

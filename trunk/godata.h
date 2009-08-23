@@ -59,7 +59,7 @@ public:
 typedef QLinkedList<mark>  markList;
 typedef QLinkedList<stone> stoneList;
 class data;
-
+class informationNode;
 
 class node{
     Q_DECLARE_TR_FUNCTIONS(go::node)
@@ -89,7 +89,6 @@ public:
         eUnclear,
     };
 
-    explicit node(data* data_);
     explicit node(nodePtr parent);
     virtual ~node(){  clear();  }
 
@@ -126,8 +125,7 @@ public:
 
 //protected:
     // node
-    data* goData;
-    nodePtr parent;
+    nodePtr   parent;
     nodeList  childNodes;
     QString   name;
     markList  crosses;
@@ -156,7 +154,6 @@ class informationNode : public node{
 //    }
 
 public:
-    explicit informationNode(data* data_) : node(data_){ initialize(); }
     explicit informationNode(nodePtr parent) : node(parent){ initialize(); }
 
     virtual bool isStone() const{ return false; }
@@ -204,7 +201,7 @@ class data{
 public:
     enum eRule{eJapanese, eChinese};
 
-    data() : root(new informationNode(this)){}
+    data() : root( new informationNode(node::nodePtr()) ){}
 
     void clear();
 
@@ -232,7 +229,7 @@ public:
 
 
 
-typedef boost::shared_ptr<node> nodePtr;
+typedef node::nodePtr nodePtr;
 typedef boost::shared_ptr<informationNode> informationPtr;
 typedef node::nodeList nodeList;
 

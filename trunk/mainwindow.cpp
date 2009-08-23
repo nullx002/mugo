@@ -4,6 +4,7 @@
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QtAlgorithms>
+#include <QClipboard>
 #include "appdef.h"
 #include "sgf.h"
 #include "ugf.h"
@@ -162,6 +163,8 @@ MainWindow::MainWindow(QWidget *parent)
         ui->actionWindows_1258,
         ui->actionWindows_1256,
         ui->actionWindows_1255,
+        ui->actionKoi8_R,
+        ui->actionKoi8_U,
         ui->actionEncodingGB2312,
         ui->actionEncodingBig5,
         ui->actionEncodingKorean,
@@ -319,6 +322,16 @@ void MainWindow::openRecentFile(){
 * Edit -> Copy SGF to Clipboard
 */
 void MainWindow::on_actionCopySGFtoClipboard_triggered(){
+    QString str;
+    QTextStream stream(&str, QIODevice::WriteOnly);
+
+    go::sgf sgf;
+    sgf.set(ui->boardWidget->getData());
+    sgf.saveStream(stream);
+    stream.flush();
+
+    QClipboard *clipboard = QApplication::clipboard();
+    clipboard->setText(str);
 }
 
 /**
@@ -326,6 +339,28 @@ void MainWindow::on_actionCopySGFtoClipboard_triggered(){
 * Edit -> Copy Current SGF to Clipboard
 */
 void MainWindow::on_actionCopyCurrentSGFtoClipboard_triggered(){
+    QString str("(");
+    QString s;
+
+    const go::nodeList& nodeList = ui->boardWidget->getCurrentNodeList();
+    go::nodeList::const_iterator iter = nodeList.begin();
+    while (iter != nodeList.end()){
+        if (s.size() > 70){
+            str.append(s);
+            str.push_back('\n');
+            s.clear();
+        }
+
+        go::sgf::node node;
+        node.set(*iter);
+        s.append( node.toString() );
+        ++iter;
+    }
+    str.append(s);
+    str.push_back(')');
+
+    QClipboard *clipboard = QApplication::clipboard();
+    clipboard->setText(str);
 }
 
 /**
@@ -333,6 +368,21 @@ void MainWindow::on_actionCopyCurrentSGFtoClipboard_triggered(){
 * Edit -> Paste SGF from Clipboard
 */
 void MainWindow::on_actionPasteSGFfromClipboard_triggered(){
+    if (maybeSave() == false)
+        return;
+
+    QClipboard *clipboard = QApplication::clipboard();
+    QString str = clipboard->text();
+
+    go::sgf sgf;
+    QString::iterator first = str.begin();
+    sgf.readStream(first, str.end());
+
+    ui->boardWidget->setData(sgf);
+
+    ui->boardWidget->setDirty(true);
+    setTreeData();
+    setCaption();
 }
 
 /**
@@ -340,6 +390,17 @@ void MainWindow::on_actionPasteSGFfromClipboard_triggered(){
 * Edit -> Paste SGF as Branch from Clipboard
 */
 void MainWindow::on_actionPasteSGFasBranchfromClipboard_triggered(){
+    QClipboard *clipboard = QApplication::clipboard();
+    QString str = clipboard->text();
+
+    go::sgf sgf;
+    QString::iterator first = str.begin();
+    sgf.readStream(first, str.end());
+
+    ui->boardWidget->insertData(ui->boardWidget->getCurrentNode(), sgf);
+
+    setTreeData();
+    setCaption();
 }
 
 /**
@@ -637,7 +698,7 @@ void MainWindow::on_actionFlipSgfVertically_triggered(){
 
 /**
 * Slot
-* Advance -> Encoding1
+* Edit -> Encoding
 */
 void MainWindow::setEncoding(){
     const QAction* act[] = {
@@ -666,6 +727,8 @@ void MainWindow::setEncoding(){
         ui->actionWindows_1256,
         ui->actionWindows_1257,
         ui->actionWindows_1258,
+        ui->actionKoi8_R,
+        ui->actionKoi8_U,
         ui->actionEncodingGB2312,
         ui->actionEncodingBig5,
         ui->actionEncodingShiftJIS,
@@ -699,6 +762,8 @@ void MainWindow::setEncoding(){
         "Windows-1256",
         "Windows-1257",
         "Windows-1258",
+        "KOI8-R",
+        "KOI8-U",
         "GB2312",
         "Big5",
         "Shift_JIS",
@@ -727,8 +792,7 @@ void MainWindow::setEncoding(){
 * Traverse -> First Move
 */
 void MainWindow::on_actionFirstMove_triggered(){
-    go::nodePtr node = ui->boardWidget->getCurrentNode();
-    ui->boardWidget->setCurrentNode( node->goData->root );
+    ui->boardWidget->setCurrentNode( ui->boardWidget->getData().root );
 }
 
 /**
@@ -1528,8 +1592,6 @@ bool MainWindow::fileOpen(const QString& fname, const QString& filter){
     else
         return false;
 
-    ui->boardWidget->setDirty(false);
-
     setTreeData();
     setCaption();
 
@@ -1929,45 +1991,32 @@ void MainWindow::setCountTerritoryMode(bool on){
         ui->actionOpen,
         ui->actionSave,
         ui->actionSaveAs,
-//        ui->actionExit,
-        ui->actionEncodingUTF8,
-        ui->actionEncodingShiftJIS,
-        ui->actionEncodingKorean,
-        ui->actionEncodingJIS,
-        ui->actionEncodingEucJP,
-        ui->actionISO8859_1,
-        ui->actionWindows_1252,
+        ui->actionReload,
         ui->actionSaveBoardAsPicture,
-        ui->actionAbout,
+//        ui->actionExit,
+
+        ui->actionCopySGFtoClipboard,
+        ui->actionCopyCurrentSGFtoClipboard,
+        ui->actionPasteSGFfromClipboard,
+        ui->actionPasteSGFasBranchfromClipboard,
         ui->actionGameInformation,
         ui->actionDelete,
         ui->actionPass,
-        ui->actionNoMoveNumber,
-        ui->actionLast1Move,
-        ui->actionLast2Moves,
-        ui->actionLast5Moves,
-        ui->actionLast10Moves,
-        ui->actionLast20Moves,
-        ui->actionLast50Moves,
-        ui->actionAllMoves,
+        ui->actionAlternateMove,
+        ui->actionAddBlackStone,
+        ui->actionAddWhiteStone,
+        ui->actionAddEmpty,
         ui->actionAddLabel,
         ui->actionAddCircle,
         ui->actionAddCross,
         ui->actionAddSquare,
         ui->actionAddTriangle,
         ui->actionDeleteMarker,
-        ui->actionAlternateMove,
-        ui->actionAboutQT,
-        ui->actionEncodingGB2312,
-        ui->actionEncodingBig5,
-        ui->actionAddBlackStone,
-        ui->actionAddWhiteStone,
-        ui->actionAddEmpty,
-        ui->actionReload,
         ui->actionGoodMove,
         ui->actionVeryGoodMove,
         ui->actionBadMove,
         ui->actionVeryBadMove,
+        ui->actionInterestingMove,
         ui->actionDoubtfulMove,
         ui->actionEven,
         ui->actionGoodForBlack,
@@ -1976,8 +2025,47 @@ void MainWindow::setCountTerritoryMode(bool on){
         ui->actionVeryGoodForWhite,
         ui->actionUnclear,
         ui->actionHotspot,
+        ui->actionSetMoveNumber,
+        ui->actionUnsetMoveNumber,
         ui->actionEditNodeName,
-        ui->actionInterestingMove,
+        ui->actionWhiteFirst,
+        ui->actionRotateSgfClockwise,
+        ui->actionFlipSgfHorizontally,
+        ui->actionFlipSgfVertically,
+        ui->actionEncodingUTF8,
+        ui->actionISO8859_1,
+        ui->actionISO8859_2,
+        ui->actionISO8859_3,
+        ui->actionISO8859_4,
+        ui->actionISO8859_5,
+        ui->actionISO8859_6,
+        ui->actionISO8859_7,
+        ui->actionISO8859_8,
+        ui->actionISO8859_9,
+        ui->actionISO8859_10,
+        ui->actionISO8859_11,
+        ui->actionISO8859_13,
+        ui->actionISO8859_14,
+        ui->actionISO8859_15,
+        ui->actionISO8859_16,
+        ui->actionWindows_1250,
+        ui->actionWindows_1251,
+        ui->actionWindows_1252,
+        ui->actionWindows_1253,
+        ui->actionWindows_1254,
+        ui->actionWindows_1255,
+        ui->actionWindows_1256,
+        ui->actionWindows_1257,
+        ui->actionWindows_1258,
+        ui->actionKoi8_R,
+        ui->actionKoi8_U,
+        ui->actionEncodingGB2312,
+        ui->actionEncodingBig5,
+        ui->actionEncodingShiftJIS,
+        ui->actionEncodingJIS,
+        ui->actionEncodingEucJP,
+        ui->actionEncodingKorean,
+
         ui->actionFirstMove,
         ui->actionFastRewind,
         ui->actionPreviousMove,
@@ -1987,39 +2075,48 @@ void MainWindow::setCountTerritoryMode(bool on){
         ui->actionBackToParent,
         ui->actionPreviousBranch,
         ui->actionNextBranch,
-        ui->action19x19Board,
-        ui->action13x13Board,
-        ui->action9x9Board,
-        ui->actionMainToolbar,
-        ui->actionNavigationToolbar,
-        ui->actionShowMoveNumber,
-        ui->actionShowCoordinate,
-        ui->actionShowMarker,
-        ui->actionShowBranchMoves,
-        ui->actionEditToolbar,
-        ui->actionOptionToolbar,
-        ui->actionRotateSgfClockwise,
-        ui->actionFlipSgfHorizontally,
-        ui->actionFlipSgfVertically,
         ui->actionJumpToMoveNumber,
         ui->actionJumpToClicked,
-        ui->actionPlaySound,
-        ui->actionSetMoveNumber,
-        ui->actionUnsetMoveNumber,
+
+        ui->actionShowMoveNumber,
+        ui->actionNoMoveNumber,
+        ui->actionLast1Move,
+        ui->actionLast2Moves,
+        ui->actionLast5Moves,
+        ui->actionLast10Moves,
+        ui->actionLast20Moves,
+        ui->actionLast50Moves,
+        ui->actionAllMoves,
+        ui->actionShowCoordinate,
         ui->actionShowCoordinateI,
+        ui->actionShowMarker,
+        ui->actionShowBranchMoves,
         ui->actionBranchMode,
         ui->actionRotateBoardClockwise,
         ui->actionFlipBoardHorizontally,
         ui->actionFlipBoardVertically,
         ui->actionResetBoard,
-        ui->actionCustomBoardSize,
+
 //        ui->actionCountTerritory,
+        ui->actionPlayWithGnugo,
+        ui->actionPlaySound,
+        ui->action19x19Board,
+        ui->action13x13Board,
+        ui->action9x9Board,
+        ui->actionCustomBoardSize,
         ui->actionLanguageSystemDefault,
         ui->actionLanguageEnglish,
         ui->actionLanguageJapanese,
         ui->actionOptions,
-        ui->actionPlayWithGnugo,
-        ui->actionWhiteFirst,
+
+        ui->actionMainToolbar,
+        ui->actionNavigationToolbar,
+        ui->actionEditToolbar,
+        ui->actionOptionToolbar,
+
+//        ui->actionAbout,
+//        ui->actionAboutQT,
+
         ui->menuRecentFiles->menuAction(),
         ui->menuShowMoveNumber->menuAction(),
         ui->menuStoneMarkers->menuAction(),
@@ -2040,6 +2137,7 @@ void MainWindow::setCountTerritoryMode(bool on){
 
     ui->commentWidget->setEnabled( !on );
     ui->branchWidget->setEnabled( !on );
+    ui->undoView->setEnabled( !on );
 }
 
 void MainWindow::setPlayWithComputerMode(bool on){
@@ -2050,45 +2148,32 @@ void MainWindow::setPlayWithComputerMode(bool on){
         ui->actionOpen,
         ui->actionSave,
         ui->actionSaveAs,
-//        ui->actionExit,
-        ui->actionEncodingUTF8,
-        ui->actionEncodingShiftJIS,
-        ui->actionEncodingKorean,
-        ui->actionEncodingJIS,
-        ui->actionEncodingEucJP,
-        ui->actionISO8859_1,
-        ui->actionWindows_1252,
+        ui->actionReload,
         ui->actionSaveBoardAsPicture,
-        ui->actionAbout,
+//        ui->actionExit,
+
+        ui->actionCopySGFtoClipboard,
+        ui->actionCopyCurrentSGFtoClipboard,
+        ui->actionPasteSGFfromClipboard,
+        ui->actionPasteSGFasBranchfromClipboard,
         ui->actionGameInformation,
         ui->actionDelete,
 //        ui->actionPass,
-        ui->actionNoMoveNumber,
-        ui->actionLast1Move,
-        ui->actionLast2Moves,
-        ui->actionLast5Moves,
-        ui->actionLast10Moves,
-        ui->actionLast20Moves,
-        ui->actionLast50Moves,
-        ui->actionAllMoves,
+        ui->actionAlternateMove,
+        ui->actionAddBlackStone,
+        ui->actionAddWhiteStone,
+        ui->actionAddEmpty,
         ui->actionAddLabel,
         ui->actionAddCircle,
         ui->actionAddCross,
         ui->actionAddSquare,
         ui->actionAddTriangle,
         ui->actionDeleteMarker,
-        ui->actionAlternateMove,
-        ui->actionAboutQT,
-        ui->actionEncodingGB2312,
-        ui->actionEncodingBig5,
-        ui->actionAddBlackStone,
-        ui->actionAddWhiteStone,
-        ui->actionAddEmpty,
-        ui->actionReload,
         ui->actionGoodMove,
         ui->actionVeryGoodMove,
         ui->actionBadMove,
         ui->actionVeryBadMove,
+        ui->actionInterestingMove,
         ui->actionDoubtfulMove,
         ui->actionEven,
         ui->actionGoodForBlack,
@@ -2097,8 +2182,47 @@ void MainWindow::setPlayWithComputerMode(bool on){
         ui->actionVeryGoodForWhite,
         ui->actionUnclear,
         ui->actionHotspot,
+        ui->actionSetMoveNumber,
+        ui->actionUnsetMoveNumber,
         ui->actionEditNodeName,
-        ui->actionInterestingMove,
+        ui->actionWhiteFirst,
+        ui->actionRotateSgfClockwise,
+        ui->actionFlipSgfHorizontally,
+        ui->actionFlipSgfVertically,
+        ui->actionEncodingUTF8,
+        ui->actionISO8859_1,
+        ui->actionISO8859_2,
+        ui->actionISO8859_3,
+        ui->actionISO8859_4,
+        ui->actionISO8859_5,
+        ui->actionISO8859_6,
+        ui->actionISO8859_7,
+        ui->actionISO8859_8,
+        ui->actionISO8859_9,
+        ui->actionISO8859_10,
+        ui->actionISO8859_11,
+        ui->actionISO8859_13,
+        ui->actionISO8859_14,
+        ui->actionISO8859_15,
+        ui->actionISO8859_16,
+        ui->actionWindows_1250,
+        ui->actionWindows_1251,
+        ui->actionWindows_1252,
+        ui->actionWindows_1253,
+        ui->actionWindows_1254,
+        ui->actionWindows_1255,
+        ui->actionWindows_1256,
+        ui->actionWindows_1257,
+        ui->actionWindows_1258,
+        ui->actionKoi8_R,
+        ui->actionKoi8_U,
+        ui->actionEncodingGB2312,
+        ui->actionEncodingBig5,
+        ui->actionEncodingShiftJIS,
+        ui->actionEncodingJIS,
+        ui->actionEncodingEucJP,
+        ui->actionEncodingKorean,
+
         ui->actionFirstMove,
         ui->actionFastRewind,
         ui->actionPreviousMove,
@@ -2108,39 +2232,48 @@ void MainWindow::setPlayWithComputerMode(bool on){
         ui->actionBackToParent,
         ui->actionPreviousBranch,
         ui->actionNextBranch,
-        ui->action19x19Board,
-        ui->action13x13Board,
-        ui->action9x9Board,
-        ui->actionMainToolbar,
-        ui->actionNavigationToolbar,
-        ui->actionShowMoveNumber,
-        ui->actionShowCoordinate,
-        ui->actionShowMarker,
-        ui->actionShowBranchMoves,
-        ui->actionEditToolbar,
-        ui->actionOptionToolbar,
-        ui->actionRotateSgfClockwise,
-        ui->actionFlipSgfHorizontally,
-        ui->actionFlipSgfVertically,
         ui->actionJumpToMoveNumber,
         ui->actionJumpToClicked,
-        ui->actionPlaySound,
-        ui->actionSetMoveNumber,
-        ui->actionUnsetMoveNumber,
+
+        ui->actionShowMoveNumber,
+        ui->actionNoMoveNumber,
+        ui->actionLast1Move,
+        ui->actionLast2Moves,
+        ui->actionLast5Moves,
+        ui->actionLast10Moves,
+        ui->actionLast20Moves,
+        ui->actionLast50Moves,
+        ui->actionAllMoves,
+        ui->actionShowCoordinate,
         ui->actionShowCoordinateI,
+        ui->actionShowMarker,
+        ui->actionShowBranchMoves,
         ui->actionBranchMode,
         ui->actionRotateBoardClockwise,
         ui->actionFlipBoardHorizontally,
         ui->actionFlipBoardVertically,
         ui->actionResetBoard,
-        ui->actionCustomBoardSize,
+
         ui->actionCountTerritory,
+//        ui->actionPlayWithGnugo,
+        ui->actionPlaySound,
+        ui->action19x19Board,
+        ui->action13x13Board,
+        ui->action9x9Board,
+        ui->actionCustomBoardSize,
         ui->actionLanguageSystemDefault,
         ui->actionLanguageEnglish,
         ui->actionLanguageJapanese,
         ui->actionOptions,
-//        ui->actionPlayWithGnugo,
-        ui->actionWhiteFirst,
+
+        ui->actionMainToolbar,
+        ui->actionNavigationToolbar,
+        ui->actionEditToolbar,
+        ui->actionOptionToolbar,
+
+//        ui->actionAbout,
+//        ui->actionAboutQT,
+
         ui->menuRecentFiles->menuAction(),
         ui->menuShowMoveNumber->menuAction(),
         ui->menuStoneMarkers->menuAction(),
@@ -2165,4 +2298,5 @@ void MainWindow::setPlayWithComputerMode(bool on){
 
     ui->commentWidget->setEnabled( !on );
     ui->branchWidget->setEnabled( !on );
+    ui->undoView->setEnabled( !on );
 }

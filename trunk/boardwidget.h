@@ -103,6 +103,7 @@ public:
     void clear();
     void getData(go::fileBase& data);
     void setData(const go::fileBase& data);
+    void insertData(const go::nodePtr node, const go::fileBase& data);
 
     // get node
     go::data& getData(){ return goData; }
