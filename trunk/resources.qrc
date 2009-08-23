@@ -41,10 +41,10 @@
         <file>res/movealternate.png</file>
         <file>res/redo.png</file>
         <file>res/undo.png</file>
-        <file>res/white_128.png</file>
-        <file>res/black_128.png</file>
         <file>res/whitefirst.png</file>
         <file>res/black_128_ds.png</file>
         <file>res/white_128_ds.png</file>
+        <file>res/optinos.png</file>
+        <file>res/gameinfo.png</file>
     </qresource>
 </RCC>
