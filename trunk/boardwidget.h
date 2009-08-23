@@ -24,7 +24,7 @@ namespace Ui {
 
 class Sound{
 public:
-    Sound(QWidget* /*parent*/) : media(NULL){
+    Sound(QWidget* parent_) : media(NULL), parent(parent_){
 #ifdef Q_WS_X11
         media = Phonon::createPlayer(Phonon::NotificationCategory);
 //        media = new Phonon::MediaObject(parent);
@@ -40,7 +40,7 @@ public:
         media->setCurrentSource(source);
 #else
         delete media;
-        media = new QSound(source, NULL);
+        media = new QSound(source, parent);
 #endif
     }
 
@@ -52,11 +52,12 @@ public:
             media->seek(0);
             time = time(NULL);
         }
-#endif
+#else
         if (media && media->isFinished() && lastTime < time(NULL)){
             media->play();
             lastTime = time(NULL);
         }
+#endif
     }
 
 #ifdef Q_WS_X11
@@ -65,6 +66,7 @@ public:
 #else
     QSound* media;
 #endif
+    QObject* parent;
 };
 
 

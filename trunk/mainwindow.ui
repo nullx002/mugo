@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1271</width>
-    <height>539</height>
+    <width>937</width>
+    <height>657</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -23,7 +23,7 @@
    <string>mugo</string>
   </property>
   <property name="windowIcon">
-   <iconset>
+   <iconset resource="resources.qrc">
     <normaloff>:/pics/mugo.png</normaloff>:/pics/mugo.png</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
@@ -41,7 +41,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1271</width>
+     <width>937</width>
      <height>18</height>
     </rect>
    </property>
@@ -118,8 +118,8 @@
      <addaction name="separator"/>
      <addaction name="actionISO8859_6"/>
      <addaction name="actionWindows_1256"/>
-     <addaction name="actionISO8859_8"/>
      <addaction name="actionWindows_1255"/>
+     <addaction name="actionISO8859_8"/>
      <addaction name="separator"/>
      <addaction name="actionEncodingGB2312"/>
      <addaction name="actionEncodingBig5"/>
@@ -210,7 +210,7 @@
       <string>Move Number</string>
      </property>
      <property name="icon">
-      <iconset>
+      <iconset resource="resources.qrc">
        <normaloff>:/res/showmovenumber.png</normaloff>:/res/showmovenumber.png</iconset>
      </property>
      <addaction name="actionShowMoveNumber"/>
@@ -462,7 +462,7 @@
   </widget>
   <action name="actionNew">
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/filenew.png</normaloff>:/res/filenew.png</iconset>
    </property>
    <property name="text">
@@ -474,7 +474,7 @@
   </action>
   <action name="actionOpen">
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/fileopen.png</normaloff>:/res/fileopen.png</iconset>
    </property>
    <property name="text">
@@ -486,7 +486,7 @@
   </action>
   <action name="actionSave">
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/filesave.png</normaloff>:/res/filesave.png</iconset>
    </property>
    <property name="text">
@@ -503,7 +503,7 @@
   </action>
   <action name="actionSaveBoardAsPicture">
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/saveimage.png</normaloff>:/res/saveimage.png</iconset>
    </property>
    <property name="text">
@@ -537,7 +537,7 @@
   </action>
   <action name="actionGameInformation">
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/gameinfo.png</normaloff>:/res/gameinfo.png</iconset>
    </property>
    <property name="text">
@@ -546,7 +546,7 @@
   </action>
   <action name="actionDeleteAfterCurrent">
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/remove.png</normaloff>:/res/remove.png</iconset>
    </property>
    <property name="text">
@@ -555,7 +555,7 @@
   </action>
   <action name="actionPass">
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/pass.png</normaloff>:/res/pass.png</iconset>
    </property>
    <property name="text">
@@ -610,7 +610,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>KOI8-R</string>
+    <string>Cyrillic (KOI8-R)</string>
    </property>
   </action>
   <action name="actionKoi8_U">
@@ -618,7 +618,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>KOI8-U</string>
+    <string>Cyrillic/Ukrainian (KOI8-U)</string>
    </property>
   </action>
   <action name="actionWindows_1250">
@@ -626,7 +626,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Windows-1250</string>
+    <string>Central European (Windows-1250)</string>
    </property>
   </action>
   <action name="actionWindows_1251">
@@ -634,7 +634,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Windows-1251</string>
+    <string>Cyrillic (Windows-1251)</string>
    </property>
   </action>
   <action name="actionWindows_1252">
@@ -642,7 +642,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Windows-1252</string>
+    <string>Western (Windows-1252)</string>
    </property>
   </action>
   <action name="actionWindows_1253">
@@ -650,7 +650,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Windows-1253</string>
+    <string>Greek (Windows-1253)</string>
    </property>
   </action>
   <action name="actionWindows_1254">
@@ -658,7 +658,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Windows-1254</string>
+    <string>Turkish (Windows-1254)</string>
    </property>
   </action>
   <action name="actionWindows_1255">
@@ -666,7 +666,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Windows-1255</string>
+    <string>Hebrew (Windows-1255)</string>
    </property>
   </action>
   <action name="actionWindows_1256">
@@ -674,7 +674,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Windows-1256</string>
+    <string>Arabic (Windows-1256)</string>
    </property>
   </action>
   <action name="actionWindows_1257">
@@ -682,7 +682,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Windows-1257</string>
+    <string>Baltic (Windows-1257)</string>
    </property>
   </action>
   <action name="actionWindows_1258">
@@ -690,7 +690,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Windows-1258</string>
+    <string>Vietnamese (Windows-1258)</string>
    </property>
   </action>
   <action name="actionISO8859_1">
@@ -698,7 +698,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>ISO-8859-1</string>
+    <string>Western (ISO-8859-1)</string>
    </property>
   </action>
   <action name="actionISO8859_2">
@@ -706,7 +706,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>ISO-8859-2</string>
+    <string>Central European (ISO-8859-2)</string>
    </property>
   </action>
   <action name="actionISO8859_3">
@@ -714,7 +714,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>ISO-8859-3</string>
+    <string>South European (ISO-8859-3)</string>
    </property>
   </action>
   <action name="actionISO8859_4">
@@ -722,7 +722,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>ISO-8859-4</string>
+    <string>Baltic (ISO-8859-4)</string>
    </property>
   </action>
   <action name="actionISO8859_5">
@@ -730,7 +730,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>ISO-8859-5</string>
+    <string>Cyrillic (ISO-8859-5)</string>
    </property>
   </action>
   <action name="actionISO8859_6">
@@ -738,7 +738,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>ISO-8859-6</string>
+    <string>Arabic (ISO-8859-6)</string>
    </property>
   </action>
   <action name="actionISO8859_7">
@@ -746,7 +746,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>ISO-8859-7</string>
+    <string>Greek (ISO-8859-7)</string>
    </property>
   </action>
   <action name="actionISO8859_8">
@@ -754,7 +754,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>ISO-8859-8</string>
+    <string>Hebrew Visual (ISO-8859-8)</string>
    </property>
   </action>
   <action name="actionISO8859_9">
@@ -762,7 +762,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>ISO-8859-9</string>
+    <string>Turkish (ISO-8859-9)</string>
    </property>
   </action>
   <action name="actionISO8859_10">
@@ -770,7 +770,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>ISO-8859-10</string>
+    <string>Nordic (ISO-8859-10)</string>
    </property>
   </action>
   <action name="actionISO8859_11">
@@ -778,7 +778,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>ISO-8859-11</string>
+    <string>Thai (ISO-8859-11)</string>
    </property>
   </action>
   <action name="actionISO8859_13">
@@ -786,7 +786,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>ISO-8859-13</string>
+    <string>Baltic (ISO-8859-13)</string>
    </property>
   </action>
   <action name="actionISO8859_14">
@@ -794,7 +794,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>ISO-8859-14</string>
+    <string>Celtic (ISO-8859-14)</string>
    </property>
   </action>
   <action name="actionISO8859_15">
@@ -802,7 +802,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>ISO-8859-15</string>
+    <string>Western (ISO-8859-15)</string>
    </property>
   </action>
   <action name="actionISO8859_16">
@@ -810,7 +810,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>ISO-8859-16</string>
+    <string>Romanian (ISO-8859-16)</string>
    </property>
   </action>
   <action name="actionAddLabel">
@@ -818,7 +818,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/text.png</normaloff>:/res/text.png</iconset>
    </property>
    <property name="text">
@@ -830,7 +830,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/circle.png</normaloff>:/res/circle.png</iconset>
    </property>
    <property name="text">
@@ -842,7 +842,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/cross.png</normaloff>:/res/cross.png</iconset>
    </property>
    <property name="text">
@@ -854,7 +854,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/square.png</normaloff>:/res/square.png</iconset>
    </property>
    <property name="text">
@@ -866,7 +866,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/triangle.png</normaloff>:/res/triangle.png</iconset>
    </property>
    <property name="text">
@@ -878,7 +878,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/rubbereraser.png</normaloff>:/res/rubbereraser.png</iconset>
    </property>
    <property name="text">
@@ -890,7 +890,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/movealternate.png</normaloff>:/res/movealternate.png</iconset>
    </property>
    <property name="text">
@@ -918,7 +918,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/black_64.png</normaloff>:/res/black_64.png</iconset>
    </property>
    <property name="text">
@@ -930,7 +930,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/white_64.png</normaloff>:/res/white_64.png</iconset>
    </property>
    <property name="text">
@@ -942,7 +942,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/empty.png</normaloff>:/res/empty.png</iconset>
    </property>
    <property name="text">
@@ -951,7 +951,7 @@
   </action>
   <action name="actionReload">
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/reload.png</normaloff>:/res/reload.png</iconset>
    </property>
    <property name="text">
@@ -1069,7 +1069,7 @@
   </action>
   <action name="actionFirstMove">
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/firstmove.png</normaloff>:/res/firstmove.png</iconset>
    </property>
    <property name="text">
@@ -1078,7 +1078,7 @@
   </action>
   <action name="actionFastRewind">
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/fastrewind.png</normaloff>:/res/fastrewind.png</iconset>
    </property>
    <property name="text">
@@ -1087,7 +1087,7 @@
   </action>
   <action name="actionPreviousMove">
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/prevmove.png</normaloff>:/res/prevmove.png</iconset>
    </property>
    <property name="text">
@@ -1096,7 +1096,7 @@
   </action>
   <action name="actionNextMove">
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/nextmove.png</normaloff>:/res/nextmove.png</iconset>
    </property>
    <property name="text">
@@ -1105,7 +1105,7 @@
   </action>
   <action name="actionFastForward">
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/fastforward.png</normaloff>:/res/fastforward.png</iconset>
    </property>
    <property name="text">
@@ -1114,7 +1114,7 @@
   </action>
   <action name="actionMoveLast">
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/lastmove.png</normaloff>:/res/lastmove.png</iconset>
    </property>
    <property name="text">
@@ -1123,7 +1123,7 @@
   </action>
   <action name="actionBackToParent">
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/backparent.png</normaloff>:/res/backparent.png</iconset>
    </property>
    <property name="text">
@@ -1132,7 +1132,7 @@
   </action>
   <action name="actionPreviousBranch">
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/prevbranch.png</normaloff>:/res/prevbranch.png</iconset>
    </property>
    <property name="text">
@@ -1141,7 +1141,7 @@
   </action>
   <action name="actionNextBranch">
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/nextbranch.png</normaloff>:/res/nextbranch.png</iconset>
    </property>
    <property name="text">
@@ -1150,7 +1150,7 @@
   </action>
   <action name="actionRotateSgfClockwise">
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/rotateright.png</normaloff>:/res/rotateright.png</iconset>
    </property>
    <property name="text">
@@ -1159,7 +1159,7 @@
   </action>
   <action name="actionFlipSgfHorizontally">
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/fliphorizontally.png</normaloff>:/res/fliphorizontally.png</iconset>
    </property>
    <property name="text">
@@ -1168,7 +1168,7 @@
   </action>
   <action name="actionFlipSgfVertically">
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/flipvertically.png</normaloff>:/res/flipvertically.png</iconset>
    </property>
    <property name="text">
@@ -1177,7 +1177,7 @@
   </action>
   <action name="actionJumpToMoveNumber">
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/jumptonumber.png</normaloff>:/res/jumptonumber.png</iconset>
    </property>
    <property name="text">
@@ -1189,7 +1189,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/jumptoclicked.png</normaloff>:/res/jumptoclicked.png</iconset>
    </property>
    <property name="text">
@@ -1211,7 +1211,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/whitefirst.png</normaloff>:/res/whitefirst.png</iconset>
    </property>
    <property name="text">
@@ -1226,7 +1226,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/showmovenumber.png</normaloff>:/res/showmovenumber.png</iconset>
    </property>
    <property name="text">
@@ -1346,7 +1346,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/branchmode.png</normaloff>:/res/branchmode.png</iconset>
    </property>
    <property name="text">
@@ -1358,7 +1358,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/rotateright.png</normaloff>:/res/rotateright.png</iconset>
    </property>
    <property name="text">
@@ -1370,7 +1370,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/fliphorizontally.png</normaloff>:/res/fliphorizontally.png</iconset>
    </property>
    <property name="text">
@@ -1382,7 +1382,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/flipvertically.png</normaloff>:/res/flipvertically.png</iconset>
    </property>
    <property name="text">
@@ -1391,7 +1391,7 @@
   </action>
   <action name="actionResetBoard">
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/resetboard.png</normaloff>:/res/resetboard.png</iconset>
    </property>
    <property name="text">
@@ -1418,11 +1418,8 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/sound.png</normaloff>:/res/sound.png</iconset>
    </property>
    <property name="text">
@@ -1475,7 +1472,7 @@
   </action>
   <action name="actionOptions">
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/options.png</normaloff>:/res/options.png</iconset>
    </property>
    <property name="text">
@@ -1528,7 +1525,7 @@
   </action>
   <action name="actionAbout">
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/pics/mugo.png</normaloff>:/pics/mugo.png</iconset>
    </property>
    <property name="text">
@@ -1537,7 +1534,7 @@
   </action>
   <action name="actionAboutQT">
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/qt.png</normaloff>:/res/qt.png</iconset>
    </property>
    <property name="text">
@@ -1551,7 +1548,7 @@
   </action>
   <action name="actionDeleteOnlyCurrent">
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/removeself.png</normaloff>:/res/removeself.png</iconset>
    </property>
    <property name="text">
@@ -1578,6 +1575,8 @@
   <tabstop>commentWidget</tabstop>
   <tabstop>undoView</tabstop>
  </tabstops>
- <resources/>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
  <connections/>
 </ui>
