@@ -116,7 +116,7 @@ mugo automatically counts territories.</source>
     <message>
         <location filename="gameinformationdialog.ui" line="157"/>
         <source>Handicap</source>
-        <translation type="unfinished">手合割</translation>
+        <translation type="unfinished">置石</translation>
     </message>
     <message>
         <location filename="gameinformationdialog.ui" line="177"/>

@@ -136,15 +136,44 @@ MainWindow::MainWindow(QWidget *parent)
     showMoveNumberGroup->addAction(ui->actionAllMoves);
 
     QActionGroup* encodingGroup = new QActionGroup(this);
-    encodingGroup->addAction(ui->actionEncodingUTF8);
-    encodingGroup->addAction(ui->actionISO8859_1);
-    encodingGroup->addAction(ui->actionWindows_1252);
-    encodingGroup->addAction(ui->actionEncodingGB2312);
-    encodingGroup->addAction(ui->actionEncodingBig5);
-    encodingGroup->addAction(ui->actionEncodingKorean);
-    encodingGroup->addAction(ui->actionEncodingEucJP);
-    encodingGroup->addAction(ui->actionEncodingJIS);
-    encodingGroup->addAction(ui->actionEncodingShiftJIS);
+    QAction* encodingActions[] = {
+        ui->actionEncodingUTF8,
+        ui->actionISO8859_1,
+        ui->actionISO8859_2,
+        ui->actionISO8859_3,
+        ui->actionISO8859_4,
+        ui->actionISO8859_5,
+        ui->actionISO8859_6,
+        ui->actionISO8859_7,
+        ui->actionISO8859_8,
+        ui->actionISO8859_9,
+        ui->actionISO8859_10,
+        ui->actionISO8859_11,
+        ui->actionISO8859_13,
+        ui->actionISO8859_14,
+        ui->actionISO8859_15,
+        ui->actionISO8859_16,
+        ui->actionWindows_1250,
+        ui->actionWindows_1251,
+        ui->actionWindows_1252,
+        ui->actionWindows_1253,
+        ui->actionWindows_1257,
+        ui->actionWindows_1254,
+        ui->actionWindows_1258,
+        ui->actionWindows_1256,
+        ui->actionWindows_1255,
+        ui->actionEncodingGB2312,
+        ui->actionEncodingBig5,
+        ui->actionEncodingKorean,
+        ui->actionEncodingEucJP,
+        ui->actionEncodingJIS,
+        ui->actionEncodingShiftJIS,
+    };
+    int encN = sizeof(encodingActions) / sizeof(encodingActions[0]);
+    for (int i=0; i<encN; ++i){
+        encodingGroup->addAction( encodingActions[i] );
+        connect( encodingActions[i], SIGNAL(triggered()), this, SLOT(setEncoding()) );
+    }
 
     QActionGroup* editGroup = new QActionGroup(this);
     editGroup->addAction(ui->actionAlternateMove);
@@ -283,6 +312,34 @@ void MainWindow::openRecentFile(){
     QAction *action = qobject_cast<QAction*>(sender());
     if (action && maybeSave())
         fileOpen(action->data().toString());
+}
+
+/**
+* Slot
+* Edit -> Copy SGF to Clipboard
+*/
+void MainWindow::on_actionCopySGFtoClipboard_triggered(){
+}
+
+/**
+* Slot
+* Edit -> Copy Current SGF to Clipboard
+*/
+void MainWindow::on_actionCopyCurrentSGFtoClipboard_triggered(){
+}
+
+/**
+* Slot
+* Edit -> Paste SGF from Clipboard
+*/
+void MainWindow::on_actionPasteSGFfromClipboard_triggered(){
+}
+
+/**
+* Slot
+* Edit -> Paste SGF as Branch from Clipboard
+*/
+void MainWindow::on_actionPasteSGFasBranchfromClipboard_triggered(){
 }
 
 /**
@@ -580,74 +637,89 @@ void MainWindow::on_actionFlipSgfVertically_triggered(){
 
 /**
 * Slot
-* Advance -> Encoding -> UTF-8
+* Advance -> Encoding1
 */
-void MainWindow::on_actionEncodingUTF8_triggered(){
-    codec = QTextCodec::codecForName("UTF-8");
-}
+void MainWindow::setEncoding(){
+    const QAction* act[] = {
+        ui->actionEncodingUTF8,
+        ui->actionISO8859_1,
+        ui->actionISO8859_2,
+        ui->actionISO8859_3,
+        ui->actionISO8859_4,
+        ui->actionISO8859_5,
+        ui->actionISO8859_6,
+        ui->actionISO8859_7,
+        ui->actionISO8859_8,
+        ui->actionISO8859_9,
+        ui->actionISO8859_10,
+        ui->actionISO8859_11,
+        ui->actionISO8859_13,
+        ui->actionISO8859_14,
+        ui->actionISO8859_15,
+        ui->actionISO8859_16,
+        ui->actionWindows_1250,
+        ui->actionWindows_1251,
+        ui->actionWindows_1252,
+        ui->actionWindows_1253,
+        ui->actionWindows_1254,
+        ui->actionWindows_1255,
+        ui->actionWindows_1256,
+        ui->actionWindows_1257,
+        ui->actionWindows_1258,
+        ui->actionEncodingGB2312,
+        ui->actionEncodingBig5,
+        ui->actionEncodingShiftJIS,
+        ui->actionEncodingJIS,
+        ui->actionEncodingEucJP,
+        ui->actionEncodingKorean,
+    };
+    const char* str[] = {
+        "UTF-8",
+        "ISO-8859-1",
+        "ISO-8859-2",
+        "ISO-8859-3",
+        "ISO-8859-4",
+        "ISO-8859-5",
+        "ISO-8859-6",
+        "ISO-8859-7",
+        "ISO-8859-8",
+        "ISO-8859-9",
+        "ISO-8859-10",
+        "ISO-8859-11",
+        "ISO-8859-13",
+        "ISO-8859-14",
+        "ISO-8859-15",
+        "ISO-8859-16",
+        "Windows-1250",
+        "Windows-1251",
+        "Windows-1252",
+        "Windows-1253",
+        "Windows-1254",
+        "Windows-1255",
+        "Windows-1256",
+        "Windows-1257",
+        "Windows-1258",
+        "GB2312",
+        "Big5",
+        "Shift_JIS",
+        "ISO 2022-JP",
+        "EUC-JP",
+        "EUC-KR",
+    };
+    int N = sizeof(act) / sizeof(act[0]);
+    QAction *action = qobject_cast<QAction*>(sender());
+    for (int i=0; i<N; ++i){
+        if (act[i] == action){
+            codec = QTextCodec::codecForName( str[i] );
 
-/**
-* Slot
-* Advance -> Encoding -> ISO8859_1
-*/
-void MainWindow::on_actionISO8859_1_triggered(){
-    codec = QTextCodec::codecForName("ISO-8859-1");
-}
+            if (codec == NULL)
+                qDebug() << "codec is null";
+            else
+                qDebug() << codec->name();
 
-/**
-* Slot
-* Advance -> Encoding -> Windows_1252
-*/
-void MainWindow::on_actionWindows_1252_triggered(){
-    codec = QTextCodec::codecForName("ISO-8859-1");
-}
-
-/**
-* Slot
-* Advance -> Encoding -> Chinese Simplified(GB2312)
-*/
-void MainWindow::on_actionEncodingGB2312_triggered(){
-    codec = QTextCodec::codecForName("GB2312");
-}
-
-/**
-* Slot
-* Advance -> Encoding -> Chinese Traditional(Big5)
-*/
-void MainWindow::on_actionEncodingBig5_triggered(){
-    codec = QTextCodec::codecForName("Big5");
-}
-
-/**
-* Slot
-* Advance -> Encoding -> Shift_JIS
-*/
-void MainWindow::on_actionEncodingShiftJIS_triggered(){
-    codec = QTextCodec::codecForName("Shift_JIS");
-}
-
-/**
-* Slot
-* Advance -> Encoding -> JIS
-*/
-void MainWindow::on_actionEncodingJIS_triggered(){
-    codec = QTextCodec::codecForName("ISO 2022-JP");
-}
-
-/**
-* Slot
-* Advance -> Encoding -> EUC-JP
-*/
-void MainWindow::on_actionEncodingEucJP_triggered(){
-    codec = QTextCodec::codecForName("EUC-JP");
-}
-
-/**
-* Slot
-* Advance -> Encoding -> EUC-KR
-*/
-void MainWindow::on_actionEncodingKorean_triggered(){
-    codec = QTextCodec::codecForName("EUC-KR");
+            return;
+        }
+    }
 }
 
 /**

@@ -104,6 +104,10 @@ private slots:
     void openRecentFile();
 
     // Edit menu
+    void on_actionCopySGFtoClipboard_triggered();
+    void on_actionCopyCurrentSGFtoClipboard_triggered();
+    void on_actionPasteSGFfromClipboard_triggered();
+    void on_actionPasteSGFasBranchfromClipboard_triggered();
     void on_actionGameInformation_triggered();
     void on_actionDelete_triggered();
     void on_actionPass_triggered();
@@ -146,15 +150,7 @@ private slots:
     void on_actionFlipSgfVertically_triggered();
 
     // Edit menu -> Encoding
-    void on_actionEncodingUTF8_triggered();
-    void on_actionWindows_1252_triggered();
-    void on_actionISO8859_1_triggered();
-    void on_actionEncodingGB2312_triggered();
-    void on_actionEncodingBig5_triggered();
-    void on_actionEncodingKorean_triggered();
-    void on_actionEncodingEucJP_triggered();
-    void on_actionEncodingJIS_triggered();
-    void on_actionEncodingShiftJIS_triggered();
+    void setEncoding();
 
     // Traverse menu
     void on_actionFirstMove_triggered();
