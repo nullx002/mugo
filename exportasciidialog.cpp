@@ -1,3 +1,5 @@
+#include <QDebug>
+#include <QSettings>
 #include <QClipboard>
 #include "exportasciidialog.h"
 #include "ui_exportasciidialog.h"
@@ -12,7 +14,11 @@ ExportAsciiDialog::ExportAsciiDialog(QWidget *parent, const BoardWidget::BoardBu
     m_ui->typeComboBox->addItem( tr("English") );
     m_ui->typeComboBox->addItem( tr("Japanese") );
 
-    createAscii(0);
+    QSettings setting;
+    int language = setting.value("asciiboard/language").toInt();
+qDebug() << language;
+    m_ui->typeComboBox->setCurrentIndex( language );
+    createAscii( language );
 }
 
 ExportAsciiDialog::~ExportAsciiDialog()
@@ -37,6 +43,9 @@ void ExportAsciiDialog::accept(){
 
     QClipboard *clipboard = QApplication::clipboard();
     clipboard->setText( m_ui->asciiTextEdit->toPlainText() );
+
+    QSettings setting;
+    setting.setValue("asciiboard/language", m_ui->typeComboBox->currentIndex());
 }
 
 /** slot
@@ -53,7 +62,12 @@ void ExportAsciiDialog::createAscii(int index){
 }
 
 void ExportAsciiDialog::createEnglishAscii(){
-    QString s;
+#ifdef Q_WS_WIN
+    QFont f("Courier", 8);
+    m_ui->asciiTextEdit->setFont(f);
+#endif
+
+    QByteArray s;
     s.reserve(boardBuffer.size() + 2 * boardBuffer[0].size() * 3);
 
     s.append("  ");
@@ -68,7 +82,7 @@ void ExportAsciiDialog::createEnglishAscii(){
 
         for (int x=0; x<boardBuffer[y].size(); ++x){
             if (boardBuffer[y][x].black())
-                s.append(" X");
+                s.append(" #");
             else if (boardBuffer[y][x].white())
                 s.append(" O");
             else if (isStar(x, y))
@@ -86,11 +100,18 @@ void ExportAsciiDialog::createEnglishAscii(){
         s.push_back( 'A' + (i > 7 ? i+1 : i) );
     }
 
-    m_ui->asciiTextEdit->setPlainText(s);
+    QTextCodec* codec = QTextCodec::codecForName("UTF-8");
+    m_ui->asciiTextEdit->setPlainText( codec->toUnicode(s) );
 }
 
 void ExportAsciiDialog::createJapaneseAscii(){
-    QString s;
+    QTextCodec* codec = QTextCodec::codecForName("UTF-8");
+#ifdef Q_WS_WIN
+    QFont f(codec->toUnicode("ＭＳ ゴシック"), 8);
+    m_ui->asciiTextEdit->setFont(f);
+#endif
+
+    QByteArray s;
     s.reserve(boardBuffer.size() + 2 * boardBuffer[0].size() * 3);
 
     const char* top[]    = {"┏", "┯", "┓"};
@@ -140,7 +161,7 @@ void ExportAsciiDialog::createJapaneseAscii(){
         s.push_back( header[j] );
     }
 
-    m_ui->asciiTextEdit->setPlainText(s);
+    m_ui->asciiTextEdit->setPlainText( codec->toUnicode(s) );
 }
 
 bool ExportAsciiDialog::isStar(int x, int y){

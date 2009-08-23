@@ -31,12 +31,15 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    QSettings settings;
+
     // default codec
     codec = QTextCodec::codecForName("UTF-8");
     ui->boardWidget->setShowMoveNumber(0);
     setEditMode(ui->actionAlternateMove, BoardWidget::eAlternateMove);
 
     // set sound files
+    ui->actionPlaySound->setChecked( settings.value("sound/play").toBool() );
     QStringList soundPathList;
     soundPathList.push_back(qApp->applicationDirPath() + "/sounds/");
     soundPathList.push_back("/usr/share/" APPNAME "/sounds/");
@@ -50,7 +53,7 @@ MainWindow::MainWindow(QWidget *parent)
         }
         ++iter;
     }
-    ui->boardWidget->setPlaySound(true);
+    ui->boardWidget->setPlaySound( ui->actionPlaySound->isChecked() );
 
     // recent files
     for (int i=0; i<MaxRecentFiles; ++i){
@@ -84,7 +87,6 @@ MainWindow::MainWindow(QWidget *parent)
     ui->menuWindow->addAction( ui->undoDockWidget->toggleViewAction() );
 
     // language menu
-    QSettings settings;
     QString language = settings.value("language").toString();
     if (language.isEmpty())
         ui->actionLanguageSystemDefault->setChecked(true);
@@ -1319,6 +1321,8 @@ void MainWindow::on_actionCustomBoardSize_triggered(){
 * Options -> Play Sound
 */
 void MainWindow::on_actionPlaySound_triggered(){
+    QSettings setting;
+    setting.setValue("sound/play", ui->actionPlaySound->isChecked());
     ui->boardWidget->setPlaySound( ui->actionPlaySound->isChecked() );
 }
 
@@ -2007,6 +2011,7 @@ void MainWindow::setCountTerritoryMode(bool on){
         ui->actionSaveAs,
         ui->actionReload,
         ui->actionSaveBoardAsPicture,
+        ui->actionExportAsciiToClipboard,
 //        ui->actionExit,
 
         ui->actionCopySGFtoClipboard,
@@ -2165,6 +2170,7 @@ void MainWindow::setPlayWithComputerMode(bool on){
         ui->actionSaveAs,
         ui->actionReload,
         ui->actionSaveBoardAsPicture,
+        ui->actionExportAsciiToClipboard,
 //        ui->actionExit,
 
         ui->actionCopySGFtoClipboard,
