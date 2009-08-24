@@ -63,6 +63,7 @@ public:
 
     virtual bool readStream(QString::iterator& first, QString::iterator last);
     virtual bool saveStream(QTextStream& stream);
+    virtual QTextCodec* getCodec(const QByteArray&) const;
 
     virtual bool get(go::data& data) const;
     virtual bool set(const go::data& data);

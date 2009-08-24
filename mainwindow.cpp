@@ -260,7 +260,7 @@ void MainWindow::on_actionOpen_triggered(){
 void MainWindow::on_actionReload_triggered(){
     if (maybeSave() == false)
         return;
-    fileOpen(fileName, filter);
+    fileOpen(fileName, filter, false);
 }
 
 /**
@@ -812,7 +812,7 @@ void MainWindow::setEncoding(){
             if (codec == NULL)
                 qDebug() << "codec is null";
             else
-                qDebug() << codec->name();
+                qDebug() << "change codec to " << codec->name();
 
             return;
         }
@@ -1609,18 +1609,18 @@ bool MainWindow::fileOpen(const QString& fname){
 /**
 * file open.
 */
-bool MainWindow::fileOpen(const QString& fname, const QString& filter){
+bool MainWindow::fileOpen(const QString& fname, const QString& filter, bool guessCodec){
     setCurrentFile(fname);
     this->filter = filter;
 
     if (filter == "sgf"){
         go::sgf sgf;
-        sgf.read(fname, codec);
+        sgf.read(fname, codec, guessCodec);
         ui->boardWidget->setData(sgf);
     }
     else if (filter == "ugf" || filter == "ugi"){
         go::ugf ugf;
-        ugf.read(fname, codec);
+        ugf.read(fname, codec, guessCodec);
         ui->boardWidget->setData(ugf);
     }
     else
