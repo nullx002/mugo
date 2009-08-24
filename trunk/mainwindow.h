@@ -30,6 +30,8 @@ public:
 protected:
     virtual void closeEvent(QCloseEvent* e);
     virtual void keyPressEvent(QKeyEvent* event);
+    virtual void dragEnterEvent(QDragEnterEvent* event);
+    virtual void dropEvent(QDropEvent* event);
 
 private:
     bool fileNew(int xsize=19, int ysize=19, int handicap=0, double komi=6.5);

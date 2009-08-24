@@ -5,6 +5,7 @@
 #include <QMessageBox>
 #include <QtAlgorithms>
 #include <QClipboard>
+#include <QUrl>
 #include "appdef.h"
 #include "sgf.h"
 #include "ugf.h"
@@ -219,6 +220,21 @@ void MainWindow::closeEvent(QCloseEvent* e){
 void MainWindow::keyPressEvent(QKeyEvent* event){
     if (event->key() == Qt::Key_Delete)
         deleteNode(true);
+}
+
+void MainWindow::dragEnterEvent(QDragEnterEvent* event)
+{
+    if (event->mimeData()->hasFormat("text/plain"))
+        event->acceptProposedAction();
+}
+
+void MainWindow::dropEvent(QDropEvent* event)
+{
+    event->acceptProposedAction();
+
+    if (maybeSave() == false)
+        return;
+    fileOpen( event->mimeData()->urls().front().toLocalFile() );
 }
 
 /**
