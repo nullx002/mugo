@@ -47,10 +47,13 @@ public:
     void play(){
         static time_t lastTime = 0;
 #ifdef Q_WS_X11
-        if (media->currentTime() == media->totalTime() && lastTime < time(NULL)){
+        if (media->currentTime() == media->totalTime()){
             media->stop();
             media->seek(0);
-            time = time(NULL);
+        }
+        if (media && lastTime < time(NULL)){
+            media->play();
+            lastTime = time(NULL);
         }
 #else
         if (media && media->isFinished() && lastTime < time(NULL)){
