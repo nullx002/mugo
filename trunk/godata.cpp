@@ -128,7 +128,7 @@ void data::clear(){
 }
 
 
-bool fileBase::read(const QString& fname, QTextCodec* codec){
+bool fileBase::read(const QString& fname, QTextCodec* defaultCodec, bool guessCodec){
     this->codec = codec;
 
     QFile f(fname);
@@ -136,7 +136,16 @@ bool fileBase::read(const QString& fname, QTextCodec* codec){
         return false;
 
     QByteArray a = f.read( f.size() );
-    QString s = codec->toUnicode(a);
+
+    QTextCodec* codec = guessCodec ? getCodec(a) : NULL;
+    if (codec)
+        qDebug() << "file codec is " << codec->name();
+    else if (guessCodec)
+        qDebug() << "unknown codec, use default codec: " << defaultCodec->name();
+    else
+        qDebug() << "use default codec: " << defaultCodec->name();
+
+    QString s = codec ? codec->toUnicode(a) : defaultCodec->toUnicode(a);
     QString::iterator iter = s.begin();
     return readStream(iter, s.end());
 }

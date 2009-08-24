@@ -37,7 +37,7 @@ private:
     bool fileNew(int xsize=19, int ysize=19, int handicap=0, double komi=6.5);
     bool fileOpen();
     bool fileOpen(const QString& fname);
-    bool fileOpen(const QString& fname, const QString& filter);
+    bool fileOpen(const QString& fname, const QString& filter, bool guessCodec=true);
     bool fileSave();
     bool fileSaveAs();
     bool fileSaveAs(const QString& fname);

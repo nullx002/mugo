@@ -29,6 +29,19 @@ bool ugf::saveStream(QTextStream& /*stream*/){
     return false;
 }
 
+QTextCodec* ugf::getCodec(const QByteArray& a) const{
+    int s = a.indexOf("\nLang=");
+    if (s == -1)
+        return NULL;
+    s += 6;
+
+    int e = a.indexOf('\n', s);
+    if (e == -1)
+        return NULL;
+
+    return QTextCodec::codecForName( a.mid(s, e-s) );
+}
+
 bool ugf::get(go::data& data) const{
     data.clear();
 

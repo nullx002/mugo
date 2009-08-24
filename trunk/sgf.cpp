@@ -416,6 +416,19 @@ bool sgf::saveStream(QTextStream& stream){
     return writeNode(stream, root);
 }
 
+QTextCodec* sgf::getCodec(const QByteArray& a) const{
+    int s = a.indexOf("CA[");
+    if (s == -1)
+        return NULL;
+    s += 3;
+
+    int e = a.indexOf(']', s);
+    if (e == -1)
+        return NULL;
+
+    return QTextCodec::codecForName( a.mid(s, e-s) );
+}
+
 bool sgf::readBranch(QString::iterator& first, QString::iterator last, node& n){
     n.setNodeType(sgf::eBranch);
     while (first != last){

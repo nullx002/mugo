@@ -215,11 +215,13 @@ public:
     fileBase(){}
     virtual ~fileBase(){}
 
-    virtual bool read(const QString& fname, QTextCodec* codec);
+    virtual bool read(const QString& fname, QTextCodec* codec, bool guessCodec);
     virtual bool readStream(QString::iterator& first, QString::iterator last) = 0;
 
     virtual bool save(const QString& fname, QTextCodec* codec);
     virtual bool saveStream(QTextStream& stream) = 0;
+
+    virtual QTextCodec* getCodec(const QByteArray&) const{ return NULL; }
 
     virtual bool get(go::data& data) const = 0;
     virtual bool set(const go::data& data) = 0;
