@@ -526,7 +526,7 @@ Do you want to save your changes?</source>
     <message>
         <location filename="mainwindow.ui" line="553"/>
         <source>&amp;Delete After Current</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">現在のノード以降を削除</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="573"/>
@@ -793,7 +793,7 @@ Do you want to save your changes?</source>
     <message>
         <location filename="mainwindow.ui" line="1555"/>
         <source>Delete Only Current</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">現在のノードを削除</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="905"/>
