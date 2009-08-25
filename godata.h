@@ -59,7 +59,7 @@ public:
 typedef QLinkedList<mark>  markList;
 typedef QLinkedList<stone> stoneList;
 class data;
-class informationNode;
+
 
 class node{
     Q_DECLARE_TR_FUNCTIONS(go::node)
@@ -89,6 +89,7 @@ public:
         eUnclear,
     };
 
+    explicit node(data* data_);
     explicit node(nodePtr parent);
     virtual ~node(){  clear();  }
 
@@ -125,7 +126,8 @@ public:
 
 //protected:
     // node
-    nodePtr   parent;
+    data* goData;
+    nodePtr parent;
     nodeList  childNodes;
     QString   name;
     markList  crosses;
@@ -154,6 +156,7 @@ class informationNode : public node{
 //    }
 
 public:
+    explicit informationNode(data* data_) : node(data_){ initialize(); }
     explicit informationNode(nodePtr parent) : node(parent){ initialize(); }
 
     virtual bool isStone() const{ return false; }
@@ -201,7 +204,7 @@ class data{
 public:
     enum eRule{eJapanese, eChinese};
 
-    data() : root( new informationNode(node::nodePtr()) ){}
+    data() : root(new informationNode(this)){}
 
     void clear();
 
@@ -215,13 +218,11 @@ public:
     fileBase(){}
     virtual ~fileBase(){}
 
-    virtual bool read(const QString& fname, QTextCodec* codec, bool guessCodec);
+    virtual bool read(const QString& fname, QTextCodec* codec);
     virtual bool readStream(QString::iterator& first, QString::iterator last) = 0;
 
     virtual bool save(const QString& fname, QTextCodec* codec);
     virtual bool saveStream(QTextStream& stream) = 0;
-
-    virtual QTextCodec* getCodec(const QByteArray&) const{ return NULL; }
 
     virtual bool get(go::data& data) const = 0;
     virtual bool set(const go::data& data) = 0;
@@ -231,7 +232,7 @@ public:
 
 
 
-typedef node::nodePtr nodePtr;
+typedef boost::shared_ptr<node> nodePtr;
 typedef boost::shared_ptr<informationNode> informationPtr;
 typedef node::nodeList nodeList;
 

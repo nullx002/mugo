@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>937</width>
-    <height>657</height>
+    <width>813</width>
+    <height>539</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -41,8 +41,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>937</width>
-     <height>18</height>
+     <width>813</width>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -60,7 +60,6 @@
     <addaction name="actionSave"/>
     <addaction name="actionSaveAs"/>
     <addaction name="actionSaveBoardAsPicture"/>
-    <addaction name="actionExportAsciiToClipboard"/>
     <addaction name="separator"/>
     <addaction name="menuRecentFiles"/>
     <addaction name="separator"/>
@@ -92,34 +91,7 @@
      <addaction name="actionEncodingUTF8"/>
      <addaction name="separator"/>
      <addaction name="actionISO8859_1"/>
-     <addaction name="actionISO8859_15"/>
      <addaction name="actionWindows_1252"/>
-     <addaction name="actionISO8859_14"/>
-     <addaction name="actionISO8859_7"/>
-     <addaction name="actionWindows_1253"/>
-     <addaction name="actionISO8859_10"/>
-     <addaction name="actionISO8859_3"/>
-     <addaction name="separator"/>
-     <addaction name="actionISO8859_4"/>
-     <addaction name="actionISO8859_13"/>
-     <addaction name="actionWindows_1257"/>
-     <addaction name="actionISO8859_2"/>
-     <addaction name="actionWindows_1250"/>
-     <addaction name="actionISO8859_5"/>
-     <addaction name="actionWindows_1251"/>
-     <addaction name="actionKoi8_R"/>
-     <addaction name="actionKoi8_U"/>
-     <addaction name="actionISO8859_16"/>
-     <addaction name="separator"/>
-     <addaction name="actionISO8859_11"/>
-     <addaction name="actionISO8859_9"/>
-     <addaction name="actionWindows_1254"/>
-     <addaction name="actionWindows_1258"/>
-     <addaction name="separator"/>
-     <addaction name="actionISO8859_6"/>
-     <addaction name="actionWindows_1256"/>
-     <addaction name="actionWindows_1255"/>
-     <addaction name="actionISO8859_8"/>
      <addaction name="separator"/>
      <addaction name="actionEncodingGB2312"/>
      <addaction name="actionEncodingBig5"/>
@@ -158,15 +130,9 @@
      <addaction name="actionUnsetMoveNumber"/>
     </widget>
     <addaction name="separator"/>
-    <addaction name="actionCopySGFtoClipboard"/>
-    <addaction name="actionCopyCurrentSGFtoClipboard"/>
-    <addaction name="actionPasteSGFfromClipboard"/>
-    <addaction name="actionPasteSGFasBranchfromClipboard"/>
-    <addaction name="separator"/>
     <addaction name="actionGameInformation"/>
     <addaction name="separator"/>
-    <addaction name="actionDeleteAfterCurrent"/>
-    <addaction name="actionDeleteOnlyCurrent"/>
+    <addaction name="actionDelete"/>
     <addaction name="actionPass"/>
     <addaction name="separator"/>
     <addaction name="actionAlternateMove"/>
@@ -309,8 +275,6 @@
    <addaction name="actionSave"/>
    <addaction name="actionReload"/>
    <addaction name="separator"/>
-   <addaction name="actionGameInformation"/>
-   <addaction name="separator"/>
    <addaction name="actionSaveBoardAsPicture"/>
   </widget>
   <widget class="QToolBar" name="optionToolBar">
@@ -357,7 +321,7 @@
    <addaction name="separator"/>
    <addaction name="actionAlternateMove"/>
    <addaction name="separator"/>
-   <addaction name="actionDeleteAfterCurrent"/>
+   <addaction name="actionDelete"/>
    <addaction name="actionPass"/>
   </widget>
   <widget class="QToolBar" name="navigationToolBar">
@@ -501,65 +465,9 @@
     <string>Save &amp;As...</string>
    </property>
   </action>
-  <action name="actionSaveBoardAsPicture">
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/res/saveimage.png</normaloff>:/res/saveimage.png</iconset>
-   </property>
-   <property name="text">
-    <string>Save &amp;Board As Picture</string>
-   </property>
-  </action>
   <action name="actionExit">
    <property name="text">
     <string>E&amp;xit</string>
-   </property>
-  </action>
-  <action name="actionCopySGFtoClipboard">
-   <property name="text">
-    <string>Copy SGF to Clipboard</string>
-   </property>
-  </action>
-  <action name="actionCopyCurrentSGFtoClipboard">
-   <property name="text">
-    <string>Copy Current SGF to Clipboard</string>
-   </property>
-  </action>
-  <action name="actionPasteSGFfromClipboard">
-   <property name="text">
-    <string>Paste SGF from Clipboard</string>
-   </property>
-  </action>
-  <action name="actionPasteSGFasBranchfromClipboard">
-   <property name="text">
-    <string>Paste SGF as Branch from Clipboard</string>
-   </property>
-  </action>
-  <action name="actionGameInformation">
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/res/gameinfo.png</normaloff>:/res/gameinfo.png</iconset>
-   </property>
-   <property name="text">
-    <string>Game Information</string>
-   </property>
-  </action>
-  <action name="actionDeleteAfterCurrent">
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/res/remove.png</normaloff>:/res/remove.png</iconset>
-   </property>
-   <property name="text">
-    <string>&amp;Delete After Current</string>
-   </property>
-  </action>
-  <action name="actionPass">
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/res/pass.png</normaloff>:/res/pass.png</iconset>
-   </property>
-   <property name="text">
-    <string>Pass</string>
    </property>
   </action>
   <action name="actionEncodingUTF8">
@@ -581,6 +489,14 @@
     <string>Japanese (Shift_JIS)</string>
    </property>
   </action>
+  <action name="actionEncodingKorean">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Korean (EUC-KR)</string>
+   </property>
+  </action>
   <action name="actionEncodingJIS">
    <property name="checkable">
     <bool>true</bool>
@@ -597,44 +513,15 @@
     <string>Japanese (EUC)</string>
    </property>
   </action>
-  <action name="actionEncodingKorean">
+  <action name="actionISO8859_1">
    <property name="checkable">
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Korean (EUC-KR)</string>
+    <string>ISO-8859-1</string>
    </property>
-  </action>
-  <action name="actionKoi8_R">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Cyrillic (KOI8-R)</string>
-   </property>
-  </action>
-  <action name="actionKoi8_U">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Cyrillic/Ukrainian (KOI8-U)</string>
-   </property>
-  </action>
-  <action name="actionWindows_1250">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Central European (Windows-1250)</string>
-   </property>
-  </action>
-  <action name="actionWindows_1251">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Cyrillic (Windows-1251)</string>
+   <property name="toolTip">
+    <string>ISO-8859-1</string>
    </property>
   </action>
   <action name="actionWindows_1252">
@@ -642,175 +529,115 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Western (Windows-1252)</string>
+    <string>Windows-1252</string>
    </property>
   </action>
-  <action name="actionWindows_1253">
+  <action name="actionSaveBoardAsPicture">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/saveimage.png</normaloff>:/res/saveimage.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save &amp;Board As Picture</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/pics/mugo.png</normaloff>:/pics/mugo.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;About...</string>
+   </property>
+  </action>
+  <action name="actionGameInformation">
+   <property name="text">
+    <string>Game Information</string>
+   </property>
+  </action>
+  <action name="actionDelete">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/remove.png</normaloff>:/res/remove.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Delete</string>
+   </property>
+  </action>
+  <action name="actionPass">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/pass.png</normaloff>:/res/pass.png</iconset>
+   </property>
+   <property name="text">
+    <string>Pass</string>
+   </property>
+  </action>
+  <action name="actionNoMoveNumber">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>No Move Number</string>
+   </property>
+  </action>
+  <action name="actionLast1Move">
    <property name="checkable">
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Greek (Windows-1253)</string>
+    <string>Last 1 Move</string>
    </property>
   </action>
-  <action name="actionWindows_1254">
+  <action name="actionLast2Moves">
    <property name="checkable">
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Turkish (Windows-1254)</string>
+    <string>Last 2 Moves</string>
    </property>
   </action>
-  <action name="actionWindows_1255">
+  <action name="actionLast5Moves">
    <property name="checkable">
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Hebrew (Windows-1255)</string>
+    <string>Last 5 Moves</string>
    </property>
   </action>
-  <action name="actionWindows_1256">
+  <action name="actionLast10Moves">
    <property name="checkable">
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Arabic (Windows-1256)</string>
+    <string>Last 10 Moves</string>
    </property>
   </action>
-  <action name="actionWindows_1257">
+  <action name="actionLast20Moves">
    <property name="checkable">
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Baltic (Windows-1257)</string>
+    <string>Last 20 Moves</string>
    </property>
   </action>
-  <action name="actionWindows_1258">
+  <action name="actionLast50Moves">
    <property name="checkable">
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Vietnamese (Windows-1258)</string>
+    <string>Last 50 Moves</string>
    </property>
   </action>
-  <action name="actionISO8859_1">
+  <action name="actionAllMoves">
    <property name="checkable">
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Western (ISO-8859-1)</string>
-   </property>
-  </action>
-  <action name="actionISO8859_2">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Central European (ISO-8859-2)</string>
-   </property>
-  </action>
-  <action name="actionISO8859_3">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>South European (ISO-8859-3)</string>
-   </property>
-  </action>
-  <action name="actionISO8859_4">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Baltic (ISO-8859-4)</string>
-   </property>
-  </action>
-  <action name="actionISO8859_5">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Cyrillic (ISO-8859-5)</string>
-   </property>
-  </action>
-  <action name="actionISO8859_6">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Arabic (ISO-8859-6)</string>
-   </property>
-  </action>
-  <action name="actionISO8859_7">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Greek (ISO-8859-7)</string>
-   </property>
-  </action>
-  <action name="actionISO8859_8">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Hebrew Visual (ISO-8859-8)</string>
-   </property>
-  </action>
-  <action name="actionISO8859_9">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Turkish (ISO-8859-9)</string>
-   </property>
-  </action>
-  <action name="actionISO8859_10">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Nordic (ISO-8859-10)</string>
-   </property>
-  </action>
-  <action name="actionISO8859_11">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Thai (ISO-8859-11)</string>
-   </property>
-  </action>
-  <action name="actionISO8859_13">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Baltic (ISO-8859-13)</string>
-   </property>
-  </action>
-  <action name="actionISO8859_14">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Celtic (ISO-8859-14)</string>
-   </property>
-  </action>
-  <action name="actionISO8859_15">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Western (ISO-8859-15)</string>
-   </property>
-  </action>
-  <action name="actionISO8859_16">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Romanian (ISO-8859-16)</string>
+    <string>All Moves</string>
    </property>
   </action>
   <action name="actionAddLabel">
@@ -895,6 +722,15 @@
    </property>
    <property name="text">
     <string>Alternate Move</string>
+   </property>
+  </action>
+  <action name="actionAboutQT">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/qt.png</normaloff>:/res/qt.png</iconset>
+   </property>
+   <property name="text">
+    <string>About Qt...</string>
    </property>
   </action>
   <action name="actionEncodingGB2312">
@@ -1148,6 +984,113 @@
     <string>Next Branch</string>
    </property>
   </action>
+  <action name="action19x19Board">
+   <property name="text">
+    <string>19 x 19 Board</string>
+   </property>
+  </action>
+  <action name="action13x13Board">
+   <property name="text">
+    <string>13 x 13 Board</string>
+   </property>
+  </action>
+  <action name="action9x9Board">
+   <property name="text">
+    <string>9 x 9 Board</string>
+   </property>
+  </action>
+  <action name="actionMainToolbar">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Main Toolbar</string>
+   </property>
+  </action>
+  <action name="actionNavigationToolbar">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Navigation Toolbar</string>
+   </property>
+  </action>
+  <action name="actionShowMoveNumber">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/showmovenumber.png</normaloff>:/res/showmovenumber.png</iconset>
+   </property>
+   <property name="text">
+    <string>Show Move Number</string>
+   </property>
+  </action>
+  <action name="actionShowCoordinate">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Coordinate</string>
+   </property>
+  </action>
+  <action name="actionShowMarker">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Marker</string>
+   </property>
+  </action>
+  <action name="actionShowBranchMoves">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Branch Moves</string>
+   </property>
+  </action>
+  <action name="actionEditToolbar">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Edit Toolbar</string>
+   </property>
+  </action>
+  <action name="actionOptionToolbar">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Option Toolbar</string>
+   </property>
+  </action>
   <action name="actionRotateSgfClockwise">
    <property name="icon">
     <iconset resource="resources.qrc">
@@ -1196,6 +1139,24 @@
     <string>Jump To Clicked</string>
    </property>
   </action>
+  <action name="actionPlaySound">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/sound.png</normaloff>:/res/sound.png</iconset>
+   </property>
+   <property name="text">
+    <string>Play &amp;Sound</string>
+   </property>
+  </action>
   <action name="actionSetMoveNumber">
    <property name="text">
     <string>Set Move Number</string>
@@ -1206,139 +1167,12 @@
     <string>Unset Move Number</string>
    </property>
   </action>
-  <action name="actionWhiteFirst">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/res/whitefirst.png</normaloff>:/res/whitefirst.png</iconset>
-   </property>
-   <property name="text">
-    <string>White First</string>
-   </property>
-  </action>
-  <action name="actionShowMoveNumber">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/res/showmovenumber.png</normaloff>:/res/showmovenumber.png</iconset>
-   </property>
-   <property name="text">
-    <string>Show Move Number</string>
-   </property>
-  </action>
-  <action name="actionNoMoveNumber">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>No Move Number</string>
-   </property>
-  </action>
-  <action name="actionLast1Move">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Last 1 Move</string>
-   </property>
-  </action>
-  <action name="actionLast2Moves">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Last 2 Moves</string>
-   </property>
-  </action>
-  <action name="actionLast5Moves">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Last 5 Moves</string>
-   </property>
-  </action>
-  <action name="actionLast10Moves">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Last 10 Moves</string>
-   </property>
-  </action>
-  <action name="actionLast20Moves">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Last 20 Moves</string>
-   </property>
-  </action>
-  <action name="actionLast50Moves">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Last 50 Moves</string>
-   </property>
-  </action>
-  <action name="actionAllMoves">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>All Moves</string>
-   </property>
-  </action>
-  <action name="actionShowCoordinate">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Show Coordinate</string>
-   </property>
-  </action>
   <action name="actionShowCoordinateI">
    <property name="checkable">
     <bool>true</bool>
    </property>
    <property name="text">
     <string>Show Coordinate With I</string>
-   </property>
-  </action>
-  <action name="actionShowMarker">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Show Marker</string>
-   </property>
-  </action>
-  <action name="actionShowBranchMoves">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Show Branch Moves</string>
    </property>
   </action>
   <action name="actionBranchMode">
@@ -1398,52 +1232,17 @@
     <string>Reset Board</string>
    </property>
   </action>
+  <action name="actionCustomBoardSize">
+   <property name="text">
+    <string>Custom Board Size</string>
+   </property>
+  </action>
   <action name="actionCountTerritory">
    <property name="checkable">
     <bool>true</bool>
    </property>
    <property name="text">
     <string>Count Territory</string>
-   </property>
-  </action>
-  <action name="actionPlayWithGnugo">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Play with gnugo</string>
-   </property>
-  </action>
-  <action name="actionPlaySound">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/res/sound.png</normaloff>:/res/sound.png</iconset>
-   </property>
-   <property name="text">
-    <string>Play &amp;Sound</string>
-   </property>
-  </action>
-  <action name="action19x19Board">
-   <property name="text">
-    <string>19 x 19 Board</string>
-   </property>
-  </action>
-  <action name="action13x13Board">
-   <property name="text">
-    <string>13 x 13 Board</string>
-   </property>
-  </action>
-  <action name="action9x9Board">
-   <property name="text">
-    <string>9 x 9 Board</string>
-   </property>
-  </action>
-  <action name="actionCustomBoardSize">
-   <property name="text">
-    <string>Custom Board Size</string>
    </property>
   </action>
   <action name="actionLanguageSystemDefault">
@@ -1471,88 +1270,28 @@
    </property>
   </action>
   <action name="actionOptions">
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/res/options.png</normaloff>:/res/options.png</iconset>
-   </property>
    <property name="text">
     <string>&amp;Options...</string>
    </property>
   </action>
-  <action name="actionMainToolbar">
+  <action name="actionPlayWithGnugo">
    <property name="checkable">
     <bool>true</bool>
    </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
    <property name="text">
-    <string>Main Toolbar</string>
+    <string>Play with gnugo</string>
    </property>
   </action>
-  <action name="actionOptionToolbar">
+  <action name="actionWhiteFirst">
    <property name="checkable">
     <bool>true</bool>
    </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Option Toolbar</string>
-   </property>
-  </action>
-  <action name="actionEditToolbar">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Edit Toolbar</string>
-   </property>
-  </action>
-  <action name="actionNavigationToolbar">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Navigation Toolbar</string>
-   </property>
-  </action>
-  <action name="actionAbout">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/pics/mugo.png</normaloff>:/pics/mugo.png</iconset>
+     <normaloff>:/res/whitefirst.png</normaloff>:/res/whitefirst.png</iconset>
    </property>
    <property name="text">
-    <string>&amp;About...</string>
-   </property>
-  </action>
-  <action name="actionAboutQT">
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/res/qt.png</normaloff>:/res/qt.png</iconset>
-   </property>
-   <property name="text">
-    <string>About Qt...</string>
-   </property>
-  </action>
-  <action name="actionExportAsciiToClipboard">
-   <property name="text">
-    <string>Export Ascii to Clipboard</string>
-   </property>
-  </action>
-  <action name="actionDeleteOnlyCurrent">
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/res/removeself.png</normaloff>:/res/removeself.png</iconset>
-   </property>
-   <property name="text">
-    <string>Delete Only Current</string>
+    <string>White First</string>
    </property>
   </action>
  </widget>

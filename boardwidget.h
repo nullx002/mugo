@@ -24,7 +24,7 @@ namespace Ui {
 
 class Sound{
 public:
-    Sound(QWidget* parent_) : media(NULL), parent(parent_){
+    Sound(QWidget* /*parent*/) : media(NULL){
 #ifdef Q_WS_X11
         media = Phonon::createPlayer(Phonon::NotificationCategory);
 //        media = new Phonon::MediaObject(parent);
@@ -40,27 +40,19 @@ public:
         media->setCurrentSource(source);
 #else
         delete media;
-        media = new QSound(source, parent);
+        media = new QSound(source, NULL);
 #endif
     }
 
     void play(){
-        static time_t lastTime = 0;
 #ifdef Q_WS_X11
         if (media->currentTime() == media->totalTime()){
             media->stop();
             media->seek(0);
         }
-        if (media && lastTime < time(NULL)){
-            media->play();
-            lastTime = time(NULL);
-        }
-#else
-        if (media && media->isFinished() && lastTime < time(NULL)){
-            media->play();
-            lastTime = time(NULL);
-        }
 #endif
+        if (media)
+            media->play();
     }
 
 #ifdef Q_WS_X11
@@ -69,7 +61,6 @@ public:
 #else
     QSound* media;
 #endif
-    QObject* parent;
 };
 
 
@@ -92,8 +83,6 @@ public:
         int color;
         go::nodePtr node;
     };
-    typedef QVector< QVector<stoneInfo> > BoardBuffer;
-
 
     explicit BoardWidget(QWidget *parent = 0);
     virtual ~BoardWidget();
@@ -114,14 +103,12 @@ public:
     void clear();
     void getData(go::fileBase& data);
     void setData(const go::fileBase& data);
-    void insertData(const go::nodePtr node, const go::fileBase& data);
 
     // get node
     go::data& getData(){ return goData; }
     go::nodePtr getCurrentNode(){ return currentNode; }
     go::nodePtr findNodeFromMoveNumber(int moveNumber);
     const go::nodeList& getCurrentNodeList() const{ return nodeList; }
-    const BoardBuffer& getBuffer(){ return board; }
 
     void getCaptured(int& black, int& white) const{ black = capturedBlack; white = capturedWhite; }
     int  getMoveNumber() const{ return currentMoveNumber; }
@@ -242,12 +229,9 @@ protected:
     void addMark(int sgfX, int sgfY, int boardX, int boardY);
     void addMark(go::markList& markList, const go::mark& mark);
     void addCharacter(go::markList& markList, const go::point& p);
-    bool removeMark(go::markList& markList, const go::point& p);
+    void removeMark(go::markList& markList, const go::point& p);
     void addStone(go::nodePtr node, const go::point& sgfPoint, go::color color);
     void addStone(go::nodePtr node, const go::point& sgfPoint, const go::point& boardPoint, go::color color);
-    void addEmpty(go::nodePtr node, const go::point& sgfPoint);
-    void addEmpty(go::nodePtr node, const go::point& sgfPoint, const go::point& boardPoint);
-    bool removeStone(go::stoneList& stoneList, const go::point& sp, const go::point& bp);
     void rotateSgf(go::nodePtr node, QUndoCommand* command);
     void rotateStoneSgf(go::nodePtr node, go::stoneList& stoneList, QUndoCommand* command);
     void rotateMarkSgf(go::nodePtr node, go::markList& markList, QUndoCommand* command);
@@ -315,7 +299,7 @@ private:
     QRect boardRect;
     QList<int> xlines;
     QList<int> ylines;
-    BoardBuffer board;
+    QVector< QVector<stoneInfo> > board;
 
     // sound
     Sound stoneSound;

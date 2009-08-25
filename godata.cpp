@@ -5,12 +5,6 @@
 
 namespace go{
 
-const informationNode* infomation(const node* node){
-    while (node->parent){
-        node = node->parent.get();
-    }
-    return (informationNode*)node;
-}
 
 nodePtr createBlackNode(nodePtr parent){
     nodePtr newNode( new node(parent) );
@@ -40,7 +34,10 @@ nodePtr createWhiteNode(nodePtr parent, int x, int y){
 
 
 
-node::node(nodePtr parent_) : parent(parent_), annotation(eNoAnnotation), moveAnnotation(eNoAnnotation), nodeAnnotation(eNoAnnotation), black(false), white(false), moveNumber(-1){
+node::node(data* data_) : goData(data_), annotation(eNoAnnotation), moveAnnotation(eNoAnnotation), nodeAnnotation(eNoAnnotation), black(false), white(false), moveNumber(-1){
+}
+
+node::node(nodePtr parent_) : goData(parent_->goData), parent(parent_), annotation(eNoAnnotation), moveAnnotation(eNoAnnotation), nodeAnnotation(eNoAnnotation), black(false), white(false), moveNumber(-1){
 }
 
 void node::clear(){
@@ -49,8 +46,7 @@ void node::clear(){
 }
 
 bool node::isPass() const{
-    const informationNode* info = infomation(this);
-    return position.x < 0 || position.y < 0 || position.x >= info->xsize || position.y >= info->ysize;
+    return position.x < 0 || position.y < 0 || position.x >= goData->root->xsize || position.y >= goData->root->ysize;
 }
 
 QString node::toString() const{
@@ -124,11 +120,11 @@ QString informationNode::nodeName() const{
 
 
 void data::clear(){
-    root.reset( new informationNode(nodePtr()) );
+    root.reset( new informationNode(this) );
 }
 
 
-bool fileBase::read(const QString& fname, QTextCodec* defaultCodec, bool guessCodec){
+bool fileBase::read(const QString& fname, QTextCodec* codec){
     this->codec = codec;
 
     QFile f(fname);
@@ -136,16 +132,7 @@ bool fileBase::read(const QString& fname, QTextCodec* defaultCodec, bool guessCo
         return false;
 
     QByteArray a = f.read( f.size() );
-
-    QTextCodec* codec = guessCodec ? getCodec(a) : NULL;
-    if (codec)
-        qDebug() << "file codec is " << codec->name();
-    else if (guessCodec)
-        qDebug() << "unknown codec, use default codec: " << defaultCodec->name();
-    else
-        qDebug() << "use default codec: " << defaultCodec->name();
-
-    QString s = codec ? codec->toUnicode(a) : defaultCodec->toUnicode(a);
+    QString s = codec->toUnicode(a);
     QString::iterator iter = s.begin();
     return readStream(iter, s.end());
 }

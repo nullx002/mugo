@@ -30,14 +30,12 @@ public:
 protected:
     virtual void closeEvent(QCloseEvent* e);
     virtual void keyPressEvent(QKeyEvent* event);
-    virtual void dragEnterEvent(QDragEnterEvent* event);
-    virtual void dropEvent(QDropEvent* event);
 
 private:
     bool fileNew(int xsize=19, int ysize=19, int handicap=0, double komi=6.5);
     bool fileOpen();
     bool fileOpen(const QString& fname);
-    bool fileOpen(const QString& fname, const QString& filter, bool guessCodec=true);
+    bool fileOpen(const QString& fname, const QString& filter);
     bool fileSave();
     bool fileSaveAs();
     bool fileSaveAs(const QString& fname);
@@ -57,7 +55,7 @@ private:
     QTreeWidgetItem* addTreeWidget(go::nodePtr node, bool needRemake = false);
     QTreeWidgetItem* createTreeWidget(go::nodePtr node);
     QTreeWidgetItem* remakeTreeWidget(QTreeWidgetItem* currentWidget);
-    void deleteNode(bool deleteNode);
+    void deleteNode();
     void deleteTreeWidget(go::nodePtr node, bool deleteChildren);
     void deleteTreeWidgetForMap(go::nodePtr node);
     void setTreeWidget(go::nodePtr n);
@@ -95,7 +93,6 @@ private:
 
 private slots:
     // File menu
-    void on_actionExportAsciiToClipboard_triggered();
     void on_actionWhiteFirst_triggered();
     void on_actionNew_triggered();
     void on_actionOpen_triggered();
@@ -107,13 +104,8 @@ private slots:
     void openRecentFile();
 
     // Edit menu
-    void on_actionCopySGFtoClipboard_triggered();
-    void on_actionCopyCurrentSGFtoClipboard_triggered();
-    void on_actionPasteSGFfromClipboard_triggered();
-    void on_actionPasteSGFasBranchfromClipboard_triggered();
     void on_actionGameInformation_triggered();
-    void on_actionDeleteAfterCurrent_triggered();
-    void on_actionDeleteOnlyCurrent_triggered();
+    void on_actionDelete_triggered();
     void on_actionPass_triggered();
     void on_actionEditNodeName_triggered();
 
@@ -154,7 +146,15 @@ private slots:
     void on_actionFlipSgfVertically_triggered();
 
     // Edit menu -> Encoding
-    void setEncoding();
+    void on_actionEncodingUTF8_triggered();
+    void on_actionWindows_1252_triggered();
+    void on_actionISO8859_1_triggered();
+    void on_actionEncodingGB2312_triggered();
+    void on_actionEncodingBig5_triggered();
+    void on_actionEncodingKorean_triggered();
+    void on_actionEncodingEucJP_triggered();
+    void on_actionEncodingJIS_triggered();
+    void on_actionEncodingShiftJIS_triggered();
 
     // Traverse menu
     void on_actionFirstMove_triggered();

@@ -3,7 +3,9 @@
 # -------------------------------------------------
 TARGET = mugo
 TEMPLATE = app
-unix:QT += phonon
+unix{
+    QT += phonon
+}
 SOURCES += main.cpp \
     mainwindow.cpp \
     boardwidget.cpp \
@@ -14,8 +16,7 @@ SOURCES += main.cpp \
     countterritorydialog.cpp \
     setupdialog.cpp \
     command.cpp \
-    playwithcomputerdialog.cpp \
-    exportasciidialog.cpp
+    playwithcomputerdialog.cpp
 HEADERS += mainwindow.h \
     boardwidget.h \
     godata.h \
@@ -26,17 +27,19 @@ HEADERS += mainwindow.h \
     countterritorydialog.h \
     setupdialog.h \
     command.h \
-    playwithcomputerdialog.h \
-    exportasciidialog.h
+    playwithcomputerdialog.h
 FORMS += mainwindow.ui \
     boardwidget.ui \
     gameinformationdialog.ui \
     countterritorydialog.ui \
     setupdialog.ui \
-    playwithcomputerdialog.ui \
-    exportasciidialog.ui
+    playwithcomputerdialog.ui
 RESOURCES += resources.qrc
-win32:RC_FILE = mugo.rc
-mac:RC_FILE = pics/mugo.icns
+win32{
+    RC_FILE = mugo.rc
+}
+mac{
+    RC_FILE = pics/mugo.icns
+}
 TRANSLATIONS += mugo.ja_JP.ts \
     mugo_mac.ja_JP.ts
