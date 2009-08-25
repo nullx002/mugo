@@ -16,7 +16,6 @@ ExportAsciiDialog::ExportAsciiDialog(QWidget *parent, const BoardWidget::BoardBu
 
     QSettings setting;
     int language = setting.value("asciiboard/language").toInt();
-qDebug() << language;
     m_ui->typeComboBox->setCurrentIndex( language );
     createAscii( language );
 }
@@ -62,8 +61,8 @@ void ExportAsciiDialog::createAscii(int index){
 }
 
 void ExportAsciiDialog::createEnglishAscii(){
-#ifdef Q_WS_WIN
-    QFont f("Courier", 8);
+#ifndef Q_WS_X11
+    QFont f("Consolas,Courier", 8);
     m_ui->asciiTextEdit->setFont(f);
 #endif
 
@@ -100,14 +99,16 @@ void ExportAsciiDialog::createEnglishAscii(){
         s.push_back( 'A' + (i > 7 ? i+1 : i) );
     }
 
-    QTextCodec* codec = QTextCodec::codecForName("UTF-8");
-    m_ui->asciiTextEdit->setPlainText( codec->toUnicode(s) );
+    m_ui->asciiTextEdit->setPlainText(s);
 }
 
 void ExportAsciiDialog::createJapaneseAscii(){
-    QTextCodec* codec = QTextCodec::codecForName("UTF-8");
 #ifdef Q_WS_WIN
-    QFont f(codec->toUnicode("ＭＳ ゴシック"), 8);
+    QFont f(QString::fromUtf8("ＭＳ ゴシック"), 8);
+    m_ui->asciiTextEdit->setFont(f);
+#endif
+#ifdef Q_WS_MAC
+    QFont f(QString::fromUtf8("Osaka−等幅"), 8);
     m_ui->asciiTextEdit->setFont(f);
 #endif
 
@@ -161,7 +162,7 @@ void ExportAsciiDialog::createJapaneseAscii(){
         s.push_back( header[j] );
     }
 
-    m_ui->asciiTextEdit->setPlainText( codec->toUnicode(s) );
+    m_ui->asciiTextEdit->setPlainText( QString::fromUtf8(s) );
 }
 
 bool ExportAsciiDialog::isStar(int x, int y){
