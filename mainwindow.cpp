@@ -45,6 +45,7 @@ MainWindow::MainWindow(QWidget *parent)
     soundPathList.push_back(qApp->applicationDirPath() + "/sounds/");
     soundPathList.push_back("/usr/share/" APPNAME "/sounds/");
     soundPathList.push_back("/usr/local/share/" APPNAME "/sounds/");
+    soundPathList.push_back("./sounds/");
     QStringList::iterator iter = soundPathList.begin();
     while (iter != soundPathList.end()){
         QFileInfo finfo( *iter + "stone.wav" );

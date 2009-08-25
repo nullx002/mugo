@@ -22,8 +22,9 @@ QString getTranslationPath(){
     pathList << appPath + "/translations"
              << "/usr/share/" APPNAME "/translations"
              << "/usr/local/share/" APPNAME "/translations";
+#elif defined(Q_WS_MAC)
+    pathList << "./translations";
 #endif
-
     QStringList::iterator iter = pathList.begin();
     while (iter != pathList.end()){
         QDir dir(*iter);
