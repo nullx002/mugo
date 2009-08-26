@@ -6,6 +6,7 @@
 #include <QTextCodec>
 #include <QUndoGroup>
 #include <QProcess>
+#include <QHttp>
 #include "boardwidget.h"
 #include "countterritorydialog.h"
 
@@ -70,6 +71,7 @@ private:
 
     Ui::MainWindow *ui;
     QTextCodec* codec;
+    QHttp* http;
     QString fileName;
     QString filter;
     NodeToTreeWidgetType nodeToTreeWidget;
@@ -95,6 +97,7 @@ private:
 
 private slots:
     // File menu
+    void on_actionOpen_URL_triggered();
     void on_actionExportAsciiToClipboard_triggered();
     void on_actionWhiteFirst_triggered();
     void on_actionNew_triggered();
@@ -231,6 +234,9 @@ private slots:
 
     // Score Dialog
     void scoreDialogClosed();
+
+    // Open URL
+    void openUrlReadReady(const QHttpResponseHeader& resp);
 };
 
 #endif // MAINWINDOW_H

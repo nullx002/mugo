@@ -39,6 +39,10 @@ MainWindow::MainWindow(QWidget *parent)
     ui->boardWidget->setShowMoveNumber(0);
     setEditMode(ui->actionAlternateMove, BoardWidget::eAlternateMove);
 
+    // for open URL
+    http = new QHttp(this);
+    connect( http, SIGNAL(readyRead(const QHttpResponseHeader&)), this, SLOT(openUrlReadReady(const QHttpResponseHeader&)) );
+
     // set sound files
     ui->actionPlaySound->setChecked( settings.value("sound/play").toBool() );
     QStringList soundPathList;
@@ -209,6 +213,8 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow(){
     delete ui;
+
+    delete http;
 }
 
 void MainWindow::closeEvent(QCloseEvent* e){
@@ -258,6 +264,23 @@ void MainWindow::on_actionNew_triggered(){
 */
 void MainWindow::on_actionOpen_triggered(){
     fileOpen();
+}
+
+void MainWindow::on_actionOpen_URL_triggered(){
+    QInputDialog dlg(this);
+    dlg.setLabelText( tr("Enter the URL of a SGF file.") );
+    if (dlg.exec() != QDialog::Accepted)
+        return;
+
+    QUrl url( dlg.textValue() );
+
+    QHttp::ConnectionMode mode = url.scheme().toLower() == "https" ? QHttp::ConnectionModeHttps : QHttp::ConnectionModeHttp;
+    http->setHost(url.host(), mode, url.port() == -1 ? 0 : url.port());
+
+    QByteArray path = QUrl::toPercentEncoding(url.path(), "!$&'()*+,;=:@/");
+    if (path.isEmpty())
+        path = "/";
+    http->get(path);
 }
 
 /**
@@ -1714,6 +1737,43 @@ bool MainWindow::maybeSave(){
     else if (ret == QMessageBox::Cancel)
         return false;
     return true;
+}
+
+/**
+* slot
+* receive open url data.
+*/
+void MainWindow::openUrlReadReady(const QHttpResponseHeader& resp){
+    switch (resp.statusCode()) {
+        case 200:                   // Ok
+        case 301:                   // Moved Permanently
+        case 302:                   // Found
+        case 303:                   // See Other
+        case 307:                   // Temporary Redirect
+            // these are not error conditions
+            break;
+
+        default:
+            QMessageBox::information(this, tr("HTTP"),
+                                     tr("Download failed: %1.")
+                                     .arg(resp.reasonPhrase()));
+            http->abort();
+    }
+
+    qDebug() << resp.statusCode();
+    qDebug() << resp.values();
+
+    QByteArray ba = http->readAll();
+    QString str(ba);
+
+    go::sgf sgf;
+    QString::iterator first = str.begin();
+    sgf.readStream(first, str.end());
+
+    ui->boardWidget->setData(sgf);
+
+    setTreeData();
+    setCaption();
 }
 
 /**
