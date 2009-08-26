@@ -227,12 +227,6 @@ void MainWindow::dragEnterEvent(QDragEnterEvent* event)
 {
     if (event->mimeData()->hasFormat("text/plain"))
         event->acceptProposedAction();
-    else{
-        QString localFile = event->mimeData()->urls().front().toLocalFile();
-        QFileInfo f(localFile);
-        if (f.suffix().compare("sgf", Qt::CaseInsensitive) == 0 || f.suffix().compare("ugf", Qt::CaseInsensitive) == 0 || f.suffix().compare("ugi", Qt::CaseInsensitive) == 0)
-            event->acceptProposedAction();
-    }
 }
 
 void MainWindow::dropEvent(QDropEvent* event)
