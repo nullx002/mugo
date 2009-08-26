@@ -8,6 +8,7 @@
 #include <QList>
 #include <QProcess>
 
+
 #ifdef Q_WS_X11
 #   include <phonon>
 #else
@@ -45,20 +46,22 @@ public:
     }
 
     void play(){
-        static time_t lastTime = 0;
+        static double lastClock = 0;
+        double currentClock = clock() / (double)CLOCKS_PER_SEC;
+
 #ifdef Q_WS_X11
         if (media->currentTime() == media->totalTime()){
             media->stop();
             media->seek(0);
         }
-        if (media && lastTime < time(NULL)){
+        if (media && currentClock - lastClock > 0.5){
             media->play();
-            lastTime = time(NULL);
+            lastClock = currentClock;
         }
 #else
-        if (media && media->isFinished() && lastTime < time(NULL)){
+        if (media && media->isFinished() && currentClock - lastClock > 0.5){
             media->play();
-            lastTime = time(NULL);
+            lastClock = currentClock;
         }
 #endif
     }
