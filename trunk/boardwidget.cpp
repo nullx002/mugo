@@ -1554,25 +1554,33 @@ QString BoardWidget::toString(go::nodePtr node) const{
         return getXYString(node->position.x, node->position.y);
 }
 
-QString BoardWidget::getXString(int x) const{
+QString BoardWidget::getXString(int x, bool showI) const{
     int a = x % 25;
-    if (showCoordinatesI == false && a > 7)
+    if (showI == false && a > 7)
         ++a;
 
     return QString("%1").arg(QChar('A' + a));
+}
+
+QString BoardWidget::getXString(int x) const{
+    return getXString(x, showCoordinatesI);
 }
 
 QString  BoardWidget::getYString(int y) const{
     return QString("%1").arg(goData.root->ysize - y);
 }
 
-QString  BoardWidget::getXYString(int x, int y) const{
+QString  BoardWidget::getXYString(int x, int y, bool showI) const{
     if (x < 0 || x >= goData.root->xsize || y < 0 || y >= goData.root->ysize)
         return "";
 
-    QString s = getXString(x);
+    QString s = getXString(x, showI);
     s.append( getYString(y) );
     return s;
+}
+
+QString BoardWidget::getXYString(int x, int y) const{
+    return getXYString(x, y, showCoordinatesI);
 }
 
 void BoardWidget::boardToSgfCoordinate(int boardX, int boardY, int& sgfX, int& sgfY){
@@ -1829,7 +1837,7 @@ void BoardWidget::gtpPut(int x, int y){
     if (x == -1 && y == -1)
         xy = "PASS";
     else
-        xy =getXYString(x, y);
+        xy =getXYString(x, y, false);
 
     if (isBlack){
         gtpWrite( QString("play black %1\n").arg(xy) );
@@ -1882,14 +1890,27 @@ void BoardWidget::gtpReadReady(){
         }
 
         int x, y;
-        if (getCoordinate(buf, x, y)){
+        if (gtpGetCoordinate(buf, x, y)){
             addStoneNodeCommand(x, y);
             gtpStatus = eGtpNone;
+        }
+
+        if (nodeList.size() >= 2){
+            go::nodeList::iterator iter = nodeList.end();
+            go::nodePtr node1 = *--iter;
+            go::nodePtr node2 = *--iter;
+            if (node1->isPass() && node2->isPass())
+                gtpGameEnd();
+        }
+    }
+    else if (gtpStatus == eGtpGen){
+        QStringList deadStones = buf.split(" ");
+        foreach(QString stone, deadStones){
         }
     }
 }
 
-bool BoardWidget::getCoordinate(const QString& buf, int& x, int& y){
+bool BoardWidget::gtpGetCoordinate(const QString& buf, int& x, int& y){
     if (buf.size() < 2)
         return false;
 
@@ -1961,8 +1982,13 @@ void BoardWidget::gtpHandicap(){
     for (int i=0; i<goData.root->handicap; ++i){
         addStone(goData.root, go::point(xlist[i], ylist[i]), go::black);
         msg += "play black ";
-        msg += getXYString(xlist[i], ylist[i]);
+        msg += getXYString(xlist[i], ylist[i], false);
         msg += "\n";
     }
     gtpWrite(msg);
+}
+
+void BoardWidget::gtpGameEnd(){
+    gtpStatus = eGtpGameEnd;
+    gtpWrite("final_status_list dead\n");
 }
