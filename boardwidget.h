@@ -78,7 +78,7 @@ class BoardWidget : public QWidget {
     Q_DISABLE_COPY(BoardWidget)
 public:
     enum eEditMode{ eAlternateMove, eAddBlack, eAddWhite, eAddEmpty, eLabelMark, eCrossMark, eCircleMark, eSquareMark, eTriangleMark, eDeleteMarker, eCountTerritory, eGtp };
-    enum eGtpStatus{ eGtpNone, eGtpPut, eGtpGen, eGtpHandicap };
+    enum eGtpStatus{ eGtpNone, eGtpPut, eGtpGen, eGtpHandicap, eGtpGameEnd };
 
     struct stoneInfo{
         stoneInfo() : number(0), color(go::empty){}
@@ -162,8 +162,10 @@ public:
     void createBoardBuffer();
     QString toString(go::nodePtr node) const;
     QString getXString(int x) const;
+    QString getXString(int x, bool showI) const;
     QString getYString(int y) const;
     QString getXYString(int x, int y) const;
+    QString getXYString(int x, int y, bool showI) const;
 
     void playWithComputer(QProcess* proc, bool isYourColorBlack);
 
@@ -260,8 +262,9 @@ protected:
 
     void gtpWrite(const QString& buf);
     void gtpPut(int x, int y);
-    bool getCoordinate(const QString& buf, int& x, int& y);
+    bool gtpGetCoordinate(const QString& buf, int& x, int& y);
     void gtpHandicap();
+    void gtpGameEnd();
 
 private slots:
     void gtpReadReady();
