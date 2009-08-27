@@ -13,6 +13,7 @@
 #   include <phonon>
 #else
 #   include <QSound>
+#   include <windows.h>
 #endif
 
 #include "godata.h"
@@ -25,20 +26,33 @@ namespace Ui {
 
 class Sound{
 public:
-    Sound(QWidget* parent_) : media(NULL), parent(parent_){
+    Sound(QWidget* parent_) : parent(parent_){
 #ifdef Q_WS_X11
         media = Phonon::createPlayer(Phonon::NotificationCategory);
 //        media = new Phonon::MediaObject(parent);
 //        audioOutput = new Phonon::AudioOutput(Phonon::NotificationCategory, parent);
 //        Phonon::createPath(media, audioOutput);
+#elif defined(Q_WS_WIN)
+#else
+            media = NULL;
 #endif
     }
     ~Sound(){
+#ifdef Q_WS_X11
         delete media;
+#elif defined(Q_WS_WIN)
+#else
+        delete media;
+#endif
     }
     void setCurrentSource(const QString& source){
 #ifdef Q_WS_X11
         media->setCurrentSource(source);
+#elif defined(Q_WS_WIN)
+        filename = source;
+        mop.lpstrDeviceType  = L"WaveAudio";
+        mop.lpstrElementName = (WCHAR*)filename.utf16();
+        mciSendCommand(0, MCI_OPEN, MCI_OPEN_TYPE|MCI_OPEN_ELEMENT, (DWORD)&mop);
 #else
         delete media;
         media = new QSound(source, parent);
@@ -54,12 +68,19 @@ public:
             media->stop();
             media->seek(0);
         }
-        if (media && currentClock - lastClock > 0.5){
+        if (media && currentClock - lastClock > 0.2){
             media->play();
             lastClock = currentClock;
         }
+#elif defined(Q_WS_WIN)
+        if (mop.wDeviceID && currentClock - lastClock > 0.2){
+            mciSendCommand(mop.wDeviceID, MCI_STOP, 0, 0);
+            mciSendCommand(mop.wDeviceID, MCI_SEEK, MCI_SEEK_TO_START, 0);
+            mciSendCommand(mop.wDeviceID, MCI_PLAY, 0, 0);
+            lastClock = currentClock;
+        }
 #else
-        if (media && media->isFinished() && currentClock - lastClock > 0.5){
+        if (media && media->isFinished() && currentClock - lastClock > 0.2){
             media->play();
             lastClock = currentClock;
         }
@@ -69,6 +90,9 @@ public:
 #ifdef Q_WS_X11
     Phonon::MediaObject* media;
 //    Phonon::AudioOutput* audioOutput;
+#elif defined(Q_WS_WIN)
+    MCI_OPEN_PARMS mop;
+    QString filename;
 #else
     QSound* media;
 #endif
