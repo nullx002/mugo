@@ -1824,8 +1824,11 @@ QTreeWidgetItem* MainWindow::addTreeWidget(go::nodePtr node, bool needRemake){
         }
         else if(parentWidget2->indexOfChild(treeWidget) < 0){
             QTreeWidgetItem* p = treeWidget->parent() ? treeWidget->parent() : ui->branchWidget->invisibleRootItem();
+            bool isselected = treeWidget->isSelected();
             p->removeChild(treeWidget);
             parentWidget2->addChild(treeWidget);
+            if (isselected)
+                ui->branchWidget->setCurrentItem(treeWidget);
         }
     }
 
