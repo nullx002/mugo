@@ -7,6 +7,7 @@
 #include <QUndoGroup>
 #include <QProcess>
 #include <QHttp>
+#include <QProgressDialog>
 #include "boardwidget.h"
 #include "countterritorydialog.h"
 
@@ -71,10 +72,9 @@ private:
 
     Ui::MainWindow *ui;
     QTextCodec* codec;
-    QHttp* http;
     QString fileName;
-    QString filter;
     NodeToTreeWidgetType nodeToTreeWidget;
+
     int annotation;
     int moveAnnotation;
     int nodeAnnotation;
@@ -92,6 +92,10 @@ private:
 
     bool countTerritoryMode;
     bool playWithComputerMode;
+
+    QProgressDialog* progressDialog;
+    QHttp* http;
+    QString downloadBuff;
 
     QProcess comProcess;
 
@@ -225,6 +229,7 @@ private slots:
     void on_boardWidget_nodeModified(go::nodePtr node);
     void on_boardWidget_currentNodeChanged(go::nodePtr node);
     void on_boardWidget_updateTerritory(int alive_b, int alive_w, int dead_b, int dead_w, int capturedBlack, int capturedWhite, int blackTerritory, int whiteTerritory, double komi);
+    void on_boardWidget_gtpGameEnded();
 
     // Branch widget
     void on_branchWidget_currentItemChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous);
@@ -237,6 +242,8 @@ private slots:
 
     // Open URL
     void openUrlReadReady(const QHttpResponseHeader& resp);
+    void openUrlReadProgress(int done, int total);
+    void openUrlDone(bool error);
 };
 
 #endif // MAINWINDOW_H
