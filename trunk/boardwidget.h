@@ -162,6 +162,7 @@ signals:
     void nodeModified(go::nodePtr node);
     void currentNodeChanged(go::nodePtr node);
     void updateTerritory(int alive_b, int alive_w, int dead_b, int dead_w, int capturedBlack, int capturedWhite, int blackTerritory, int whiteTerritory, double komi);
+    void gtpGameEnded();
 
 protected:
     // event
@@ -238,6 +239,7 @@ protected:
     bool gtpGetCoordinate(const QString& buf, int& x, int& y);
     void gtpHandicap();
     void gtpGameEnd();
+    bool isGtpGameEnd() const;
 
 private slots:
     void gtpReadReady();
@@ -297,7 +299,7 @@ private:
     Sound stoneSound;
 
     // play with computer
-    QProcess* comProcess;
+    QProcess* gtpProcess;
     QString   gtpBuf;
     bool isYourColorBlack;
     int gtpStatus;

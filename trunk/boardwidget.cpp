@@ -1858,16 +1858,17 @@ void BoardWidget::getCountTerritory(int& alive_b, int& alive_w, int& dead_b, int
                 ++alive_w;
         }
     }
+    qDebug("getCountTerritory %d, %d, %d, %d, %d, %d", alive_b, alive_w, dead_b, dead_w, bt, wt);
 }
 
 void BoardWidget::playWithComputer(QProcess* proc, bool isYourColorBlack){
     this->isYourColorBlack = isYourColorBlack;
-    comProcess = proc;
-    if (comProcess){
+    gtpProcess = proc;
+    if (gtpProcess){
         editMode = eGtp;
         gtpStatus = eGtpNone;
         moveToClicked = false;
-        connect(comProcess, SIGNAL(readyRead()), this, SLOT(gtpReadReady()));
+        connect(gtpProcess, SIGNAL(readyRead()), this, SLOT(gtpReadReady()));
 
         if (isYourColorBlack == false && goData.root->handicap == 0){
             gtpWrite("genmove black\n");
@@ -1888,16 +1889,16 @@ void BoardWidget::playWithComputer(QProcess* proc, bool isYourColorBlack){
 }
 
 void BoardWidget::gtpWrite(const QString& buf){
-    if (comProcess == NULL)
+    if (gtpProcess == NULL)
         return;
 
     qDebug() << buf;
     QByteArray ba = buf.toAscii();
-    comProcess->write( ba );
+    gtpProcess->write( ba );
 }
 
 void BoardWidget::gtpPut(int x, int y){
-    if (comProcess == NULL)
+    if (gtpProcess == NULL)
         return;
 
     gtpX = x;
@@ -1920,10 +1921,10 @@ void BoardWidget::gtpPut(int x, int y){
 }
 
 void BoardWidget::gtpReadReady(){
-    if (comProcess == NULL)
+    if (gtpProcess == NULL)
         return;
 
-    gtpBuf += comProcess->readAll();
+    gtpBuf += gtpProcess->readAll();
 
 //qDebug() << gtpBuf.size();
 //for (int i=0; i<gtpBuf.size(); ++i)
@@ -1947,6 +1948,11 @@ void BoardWidget::gtpReadReady(){
         }
         addStoneNodeCommand(gtpX, gtpY);
 
+        if (isGtpGameEnd()){
+            gtpGameEnd();
+            return;
+        }
+
         if (isBlack)
             gtpWrite("genmove black\n");
         else
@@ -1956,6 +1962,7 @@ void BoardWidget::gtpReadReady(){
     else if (gtpStatus == eGtpGen){
         if (buf == "resign"){
             QMessageBox::information(this, APPNAME, tr("Computer resign."));
+            gtpWrite("quit\n");
             return;
         }
 
@@ -1963,20 +1970,31 @@ void BoardWidget::gtpReadReady(){
         if (gtpGetCoordinate(buf, x, y)){
             addStoneNodeCommand(x, y);
             gtpStatus = eGtpNone;
-        }
 
-        if (nodeList.size() >= 2){
-            go::nodeList::iterator iter = nodeList.end();
-            go::nodePtr node1 = *--iter;
-            go::nodePtr node2 = *--iter;
-            if (node1->isPass() && node2->isPass())
+            if (isGtpGameEnd()){
                 gtpGameEnd();
+                return;
+            }
         }
     }
-    else if (gtpStatus == eGtpGen){
-        QStringList deadStones = buf.split(" ");
+    else if (gtpStatus == eGtpGameEnd){
+        gtpWrite("quit\n");
+        emit gtpGameEnded();
+
+        QStringList deadStones = buf.split(QRegExp("[ \n]"));
         foreach(QString stone, deadStones){
+            int sx, sy;  // sgfX, sgfY
+            if (gtpGetCoordinate(stone, sx, sy) == false)
+                continue;
+
+            int bx, by;  // boardX, boardY
+            sgfToBoardCoordinate(sx, sy, bx, by);
+
+            if (!board[by][bx].blackTerritory() && !board[by][bx].whiteTerritory())
+                addTerritory(bx, by);
         }
+
+        setCountTerritoryMode(true);
     }
 }
 
@@ -2061,4 +2079,16 @@ void BoardWidget::gtpHandicap(){
 void BoardWidget::gtpGameEnd(){
     gtpStatus = eGtpGameEnd;
     gtpWrite("final_status_list dead\n");
+}
+
+bool BoardWidget::isGtpGameEnd() const{
+    if (gtpStatus != eGtpGameEnd){
+        if (nodeList.size() >= 2){
+            go::nodeList::const_iterator iter = nodeList.end();
+            const go::nodePtr& node1 = *--iter;
+            const go::nodePtr& node2 = *--iter;
+            return node1->isPass() && node2->isPass();
+        }
+    }
+    return false;
 }

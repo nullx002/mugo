@@ -42,6 +42,8 @@ MainWindow::MainWindow(QWidget *parent)
     // for open URL
     http = new QHttp(this);
     connect( http, SIGNAL(readyRead(const QHttpResponseHeader&)), this, SLOT(openUrlReadReady(const QHttpResponseHeader&)) );
+    connect( http, SIGNAL(dataReadProgress(int, int)), this, SLOT(openUrlReadProgress(int, int)) );
+    connect( http, SIGNAL(done(bool)), this, SLOT(openUrlDone(bool)) );
 
     // set sound files
     ui->actionPlaySound->setChecked( settings.value("sound/play").toBool() );
@@ -244,9 +246,6 @@ void MainWindow::dragEnterEvent(QDragEnterEvent* event)
 void MainWindow::dropEvent(QDropEvent* event)
 {
     event->acceptProposedAction();
-
-    if (maybeSave() == false)
-        return;
     fileOpen( event->mimeData()->urls().front().toLocalFile() );
 }
 
@@ -267,7 +266,13 @@ void MainWindow::on_actionOpen_triggered(){
 }
 
 void MainWindow::on_actionOpen_URL_triggered(){
+    downloadBuff.clear();
+
+    if (maybeSave() == false)
+        return;
+
     QInputDialog dlg(this);
+    dlg.resize( 400, dlg.size().height() );
     dlg.setLabelText( tr("Enter the URL of a SGF file.") );
     if (dlg.exec() != QDialog::Accepted)
         return;
@@ -281,6 +286,11 @@ void MainWindow::on_actionOpen_URL_triggered(){
     if (path.isEmpty())
         path = "/";
     http->get(path);
+
+    progressDialog = new QProgressDialog("Download SGF", "cancel", 0, 100, this);
+    progressDialog->setWindowModality(Qt::WindowModal);
+    progressDialog->show();
+    progressDialog->setValue(0);
 }
 
 /**
@@ -288,9 +298,8 @@ void MainWindow::on_actionOpen_URL_triggered(){
 * File -> Reload
 */
 void MainWindow::on_actionReload_triggered(){
-    if (maybeSave() == false)
-        return;
-    fileOpen(fileName, filter, false);
+    QFileInfo fi(fileName);
+    fileOpen(fileName, fi.suffix(), false);
 }
 
 /**
@@ -371,7 +380,7 @@ void MainWindow::on_actionExit_triggered(){
 */
 void MainWindow::openRecentFile(){
     QAction *action = qobject_cast<QAction*>(sender());
-    if (action && maybeSave())
+    if (action)
         fileOpen(action->data().toString());
 }
 
@@ -1251,7 +1260,7 @@ void MainWindow::on_actionCountTerritory_triggered(){
 
 /**
 * Slot
-* Tools -> Count Territoy
+* Tools -> play with computer
 */
 void MainWindow::on_actionPlayWithGnugo_triggered(){
     if (ui->actionPlayWithGnugo->isChecked()){
@@ -1522,7 +1531,7 @@ void MainWindow::on_boardWidget_updateTerritory(int alive_b, int alive_w, int de
 
     if (wscorec > bscorec)
         result = QString(tr("W+%1")).arg(wscorec - half);
-    else if (bscorej > wscorej)
+    else if (bscorec > wscorec)
         result = QString(tr("B+%1")).arg(bscorec - half);
     else
         result = tr("Draw");
@@ -1534,10 +1543,20 @@ void MainWindow::on_boardWidget_updateTerritory(int alive_b, int alive_w, int de
 
 /**
 * Slot
+*/
+void MainWindow::on_boardWidget_gtpGameEnded(){
+    ui->actionPlayWithGnugo->setChecked(false);
+    on_actionPlayWithGnugo_triggered();
+
+    ui->actionCountTerritory->setChecked(true);
+    on_actionCountTerritory_triggered();
+}
+
+/**
+* Slot
 * comment was modified.
 */
-void MainWindow::on_commentWidget_textChanged()
-{
+void MainWindow::on_commentWidget_textChanged(){
     go::nodePtr currentNode = ui->boardWidget->getCurrentNode();
     ui->boardWidget->setCommentCommand(currentNode, ui->commentWidget->toPlainText());
 }
@@ -1608,9 +1627,6 @@ bool MainWindow::fileNew(int xsize, int ysize, int handicap, double komi){
 * file open.
 */
 bool MainWindow::fileOpen(){
-    if (maybeSave() == false)
-        return false;
-
     QString selectedFilter;
     QString fname = QFileDialog::getOpenFileName(this, QString(), QString(), tr("All Go Format(*.sgf *.ugf *.ugi);;sgf(*.sgf);;ugf(*.ugf *.ugi)"), &selectedFilter);
     if (fname.isEmpty())
@@ -1640,8 +1656,10 @@ bool MainWindow::fileOpen(const QString& fname){
 * file open.
 */
 bool MainWindow::fileOpen(const QString& fname, const QString& filter, bool guessCodec){
+    if (maybeSave() == false)
+        return false;
+
     setCurrentFile(fname);
-    this->filter = filter;
 
     if (filter == "sgf"){
         go::sgf sgf;
@@ -1694,7 +1712,6 @@ bool MainWindow::fileSaveAs(const QString& fname){
     ui->boardWidget->getData(sgf);
     sgf.save(fileName, codec);
     ui->boardWidget->setDirty(false);
-    filter = "sgf";
 
     setCaption();
 
@@ -1711,7 +1728,6 @@ bool MainWindow::fileClose(){
         return false;
 
     fileName.clear();
-    filter = "sgf";
     ui->boardWidget->clear();
 
     setTreeData();
@@ -1760,15 +1776,31 @@ void MainWindow::openUrlReadReady(const QHttpResponseHeader& resp){
             http->abort();
     }
 
-    qDebug() << resp.statusCode();
-    qDebug() << resp.values();
-
     QByteArray ba = http->readAll();
-    QString str(ba);
+    downloadBuff.append(ba);
+}
+
+void MainWindow::openUrlReadProgress(int done, int total){
+    progressDialog->setRange(0, total);
+    progressDialog->setValue(done);
+
+    downloadBuff.clear();
+}
+
+void MainWindow::openUrlDone(bool error){
+    qDebug() << "openURLDone: " << error;
+    delete progressDialog;
+
+    if (error == true){
+        downloadBuff.clear();
+        return;
+    }
 
     go::sgf sgf;
-    QString::iterator first = str.begin();
-    sgf.readStream(first, str.end());
+    QString::iterator first = downloadBuff.begin();
+    sgf.readStream(first, downloadBuff.end());
+
+    downloadBuff.clear();
 
     ui->boardWidget->setData(sgf);
 
