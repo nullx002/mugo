@@ -39,6 +39,6 @@ FORMS += mainwindow.ui \
 RESOURCES += resources.qrc
 win32:RC_FILE = mugo.rc
 mac:RC_FILE = pics/mugo.icns
-win32:LIBS += d:\qt\2009.03\mingw\lib\libwinmm.a
+win32:LIBS += libwinmm
 TRANSLATIONS += mugo.ja_JP.ts \
     mugo_mac.ja_JP.ts

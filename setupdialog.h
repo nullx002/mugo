@@ -22,6 +22,7 @@ private:
     QColor boardColor, whiteColor, blackColor;
 
 private slots:
+    void on_categoryList_currentRowChanged(int currentRow);
     void on_blackColorButton_clicked();
     void on_whiteColorButton_clicked();
     void on_boardColorButton_clicked();

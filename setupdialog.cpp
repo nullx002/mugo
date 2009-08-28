@@ -13,6 +13,10 @@ SetupDialog::SetupDialog(QWidget *parent) :
 
     QSettings settings;
 
+    // category list
+    m_ui->categoryList->addItem( tr("Board") );
+    m_ui->categoryList->addItem( tr("Marker") );
+
     // board
     m_ui->boardTypeComboBox->addItem( tr("Bitmap") );
     m_ui->boardTypeComboBox->addItem( tr("Fill Color") );
@@ -62,6 +66,13 @@ void SetupDialog::accept(){
     settings.setValue("board/boardColor", boardColor);
     settings.setValue("board/whiteColor", whiteColor);
     settings.setValue("board/blackColor", blackColor);
+}
+
+/**
+* slot
+*/
+void SetupDialog::on_categoryList_currentRowChanged(int currentRow){
+    m_ui->stackedWidget->setCurrentIndex(currentRow);
 }
 
 /**
