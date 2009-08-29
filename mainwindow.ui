@@ -42,7 +42,7 @@
      <x>0</x>
      <y>0</y>
      <width>937</width>
-     <height>20</height>
+     <height>18</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -73,7 +73,7 @@
     </property>
     <widget class="QMenu" name="menuStoneMarkers">
      <property name="title">
-      <string>Stone &amp;&amp; Markers</string>
+      <string>Stone &amp;&amp; &amp;Markers</string>
      </property>
      <addaction name="actionAddBlackStone"/>
      <addaction name="actionAddWhiteStone"/>
@@ -88,7 +88,7 @@
     </widget>
     <widget class="QMenu" name="menuEncoding">
      <property name="title">
-      <string>Encoding</string>
+      <string>&amp;Encoding</string>
      </property>
      <addaction name="actionEncodingUTF8"/>
      <addaction name="separator"/>
@@ -153,7 +153,7 @@
     </widget>
     <widget class="QMenu" name="menuEditMoveNumber">
      <property name="title">
-      <string>Move Number</string>
+      <string>Move &amp;Number</string>
      </property>
      <addaction name="actionSetMoveNumber"/>
      <addaction name="actionUnsetMoveNumber"/>
@@ -542,7 +542,7 @@
      <normaloff>:/res/gameinfo.png</normaloff>:/res/gameinfo.png</iconset>
    </property>
    <property name="text">
-    <string>Game Information</string>
+    <string>Game &amp;Information</string>
    </property>
   </action>
   <action name="actionDeleteAfterCurrent">
@@ -560,7 +560,7 @@
      <normaloff>:/res/pass.png</normaloff>:/res/pass.png</iconset>
    </property>
    <property name="text">
-    <string>Pass</string>
+    <string>&amp;Pass</string>
    </property>
   </action>
   <action name="actionEncodingUTF8">
@@ -1155,7 +1155,7 @@
      <normaloff>:/res/rotateright.png</normaloff>:/res/rotateright.png</iconset>
    </property>
    <property name="text">
-    <string>Rotate SGF Clockwise</string>
+    <string>Rotate SGF &amp;Clockwise</string>
    </property>
   </action>
   <action name="actionFlipSgfHorizontally">
@@ -1164,7 +1164,7 @@
      <normaloff>:/res/fliphorizontally.png</normaloff>:/res/fliphorizontally.png</iconset>
    </property>
    <property name="text">
-    <string>Flip SGF Horizontally</string>
+    <string>Flip SGF &amp;Horizontally</string>
    </property>
   </action>
   <action name="actionFlipSgfVertically">
@@ -1173,7 +1173,7 @@
      <normaloff>:/res/flipvertically.png</normaloff>:/res/flipvertically.png</iconset>
    </property>
    <property name="text">
-    <string>Flip SGF Vertically</string>
+    <string>Flip SGF &amp;Vertically</string>
    </property>
   </action>
   <action name="actionJumpToMoveNumber">
@@ -1216,7 +1216,7 @@
      <normaloff>:/res/whitefirst.png</normaloff>:/res/whitefirst.png</iconset>
    </property>
    <property name="text">
-    <string>White First</string>
+    <string>&amp;White First</string>
    </property>
   </action>
   <action name="actionShowMoveNumber">
@@ -1317,7 +1317,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Show Coordinate With I</string>
+    <string>Show Coordinate With &amp;I</string>
    </property>
   </action>
   <action name="actionShowMarker">
@@ -1351,7 +1351,7 @@
      <normaloff>:/res/branchmode.png</normaloff>:/res/branchmode.png</iconset>
    </property>
    <property name="text">
-    <string>Branch Mode</string>
+    <string>&amp;Branch Mode</string>
    </property>
   </action>
   <action name="actionRotateBoardClockwise">
@@ -1363,7 +1363,7 @@
      <normaloff>:/res/rotateright.png</normaloff>:/res/rotateright.png</iconset>
    </property>
    <property name="text">
-    <string>Rotate Clockwise</string>
+    <string>Rotate &amp;Clockwise</string>
    </property>
   </action>
   <action name="actionFlipBoardHorizontally">
@@ -1375,7 +1375,7 @@
      <normaloff>:/res/fliphorizontally.png</normaloff>:/res/fliphorizontally.png</iconset>
    </property>
    <property name="text">
-    <string>Flip Horizontally</string>
+    <string>Flip &amp;Horizontally</string>
    </property>
   </action>
   <action name="actionFlipBoardVertically">
@@ -1387,7 +1387,7 @@
      <normaloff>:/res/flipvertically.png</normaloff>:/res/flipvertically.png</iconset>
    </property>
    <property name="text">
-    <string>Flip Vertically</string>
+    <string>Flip &amp;Vertically</string>
    </property>
   </action>
   <action name="actionResetBoard">
@@ -1396,7 +1396,7 @@
      <normaloff>:/res/resetboard.png</normaloff>:/res/resetboard.png</iconset>
    </property>
    <property name="text">
-    <string>Reset Board</string>
+    <string>&amp;Reset Board</string>
    </property>
   </action>
   <action name="actionCountTerritory">
@@ -1404,7 +1404,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Count Territory</string>
+    <string>&amp;Count Territory</string>
    </property>
   </action>
   <action name="actionPlayWithGnugo">
@@ -1544,7 +1544,7 @@
   </action>
   <action name="actionExportAsciiToClipboard">
    <property name="text">
-    <string>Export Ascii to Clipboard</string>
+    <string>Export Ascii to &amp;Clipboard</string>
    </property>
   </action>
   <action name="actionDeleteOnlyCurrent">
@@ -1558,7 +1558,7 @@
   </action>
   <action name="actionOpen_URL">
    <property name="text">
-    <string>Open URL...</string>
+    <string>Open &amp;URL...</string>
    </property>
   </action>
  </widget>

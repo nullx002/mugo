@@ -1419,7 +1419,7 @@ void MainWindow::on_actionLanguageJapanese_triggered(){
 * Help -> About
 */
 void MainWindow::on_actionAbout_triggered(){
-    QMessageBox::about(this, APPNAME, tr(APPNAME " version " VERSION "\n\nCopyright 2009 Naoya Sase."));
+    QMessageBox::about(this, APPNAME, tr(APPNAME " version " VERSION "\n\nCopyright 2009 " AUTHOR));
 }
 
 /**
