@@ -216,6 +216,7 @@ public:
     virtual ~fileBase(){}
 
     virtual bool read(const QString& fname, QTextCodec* codec, bool guessCodec);
+    virtual bool read(const QByteArray& bytes, QTextCodec* defaultCodec, bool guessCodec);
     virtual bool readStream(QString::iterator& first, QString::iterator last) = 0;
 
     virtual bool save(const QString& fname, QTextCodec* codec);

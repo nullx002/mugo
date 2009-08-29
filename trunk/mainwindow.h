@@ -38,8 +38,8 @@ protected:
 private:
     bool fileNew(int xsize=19, int ysize=19, int handicap=0, double komi=6.5);
     bool fileOpen();
-    bool fileOpen(const QString& fname);
-    bool fileOpen(const QString& fname, const QString& filter, bool guessCodec=true);
+    bool fileOpen(const QString& fname, bool guessCodec=true);
+    bool fileOpen(const QString& fname, const QString& ext, bool guessCodec=true);
     bool fileSave();
     bool fileSaveAs();
     bool fileSaveAs(const QString& fname);
@@ -96,7 +96,7 @@ private:
 
     QProgressDialog* progressDialog;
     QHttp* http;
-    QString downloadBuff;
+    QByteArray downloadBuff;
 
     QProcess gtpProcess;
 

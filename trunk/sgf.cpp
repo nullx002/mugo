@@ -120,7 +120,7 @@ bool sgf::node::get(go::nodePtr n, const QString& key, const QStringList& values
             infoNode->ysize = values[0].mid(p+1).toInt();
         }
     }
-    else if (infoNode && key == "KM")
+    else if (infoNode && (key == "KM" || key == "KO"))
         infoNode->komi = values[0].toDouble();
     else if (infoNode && key == "HA")
         infoNode->handicap = values[0].toInt();
@@ -433,41 +433,26 @@ bool sgf::readBranch(QString::iterator& first, QString::iterator last, node& n){
     n.setNodeType(sgf::eBranch);
     while (first != last){
         QChar c = *first++;
+
         if (c == ')')
             return true;
-        else if (c != ';' && c != '(')
+        // only ';' or '(' appears hear, but ';' does not exist in korean sgf.
+        else if (c != ';' && c != '(' && !c.isLetter() )
             continue;
 
-        if (readNode(--first, last, n) == false)
-            return false;
+        node* newNode = new node;
+        n.getChildNodes().push_back(newNode);
+
+        if (c == '(')
+            readBranch(first, last, *newNode);
+        else
+            readNode(first, last, *newNode);
     }
 
     return false;
 }
 
 bool sgf::readNode(QString::iterator& first, QString::iterator last, node& n){
-    while (first != last){
-        QChar c = *first++;
-        if (c == ';'){
-            node* newNode = new node;
-            n.getChildNodes().push_back(newNode);
-
-            if (readNode2(first, last, *newNode) == false)
-                return false;
-            else
-                return true;
-        }
-        else if (c == '('){
-            node* newNode = new node;
-            n.getChildNodes().push_back(newNode);
-            return readBranch(first, last, *newNode);
-        }
-    }
-
-    return true;
-}
-
-bool sgf::readNode2(QString::iterator& first, QString::iterator last, node& n){
     while (first != last){
         QChar c = *first;
         if (c == '\r' || c == '\n'){

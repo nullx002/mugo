@@ -129,15 +129,18 @@ void data::clear(){
 
 
 bool fileBase::read(const QString& fname, QTextCodec* defaultCodec, bool guessCodec){
-    this->codec = codec;
-
     QFile f(fname);
     if (!f.open(QIODevice::ReadOnly))
         return false;
 
-    QByteArray a = f.read( f.size() );
+    QByteArray bytes = f.read( f.size() );
+    return read(bytes, defaultCodec, guessCodec);
+}
 
-    QTextCodec* codec = guessCodec ? getCodec(a) : NULL;
+bool fileBase::read(const QByteArray& bytes, QTextCodec* defaultCodec, bool guessCodec){
+    this->codec = codec;
+
+    QTextCodec* codec = guessCodec ? getCodec(bytes) : NULL;
     if (codec)
         qDebug() << "file codec is " << codec->name();
     else if (guessCodec)
@@ -145,7 +148,7 @@ bool fileBase::read(const QString& fname, QTextCodec* defaultCodec, bool guessCo
     else
         qDebug() << "use default codec: " << defaultCodec->name();
 
-    QString s = codec ? codec->toUnicode(a) : defaultCodec->toUnicode(a);
+    QString s = codec ? codec->toUnicode(bytes) : defaultCodec->toUnicode(bytes);
     QString::iterator iter = s.begin();
     return readStream(iter, s.end());
 }
