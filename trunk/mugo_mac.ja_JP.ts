@@ -32,7 +32,7 @@
         <translation type="unfinished">上下に反転</translation>
     </message>
     <message>
-        <location filename="boardwidget.cpp" line="1958"/>
+        <location filename="boardwidget.cpp" line="1964"/>
         <source>Computer resign.</source>
         <oldsource>Computer resign</oldsource>
         <translation type="unfinished">コンピュータが投了しました。</translation>
@@ -238,54 +238,65 @@ mugo automatically counts territories.</source>
         <translation type="unfinished">アゲハマ</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="275"/>
+        <location filename="mainwindow.cpp" line="276"/>
         <source>Enter the URL of a SGF file.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">SGFファイルのURLを入力してください。</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="329"/>
+        <location filename="mainwindow.cpp" line="290"/>
+        <source>Downloading SGF File</source>
+        <translation type="unfinished">SGFファイルのダウンロード中</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="330"/>
         <source>PNG image(*.png);;Bitmap image(*.bmp);;JPEG image(*.jpeg *.jpg);;TIFF image(*.tiff *.tif)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="701"/>
-        <location filename="mainwindow.cpp" line="1005"/>
+        <location filename="mainwindow.cpp" line="702"/>
+        <location filename="mainwindow.cpp" line="1006"/>
         <source>Input move number</source>
         <translation type="unfinished">着手番号を入力してください</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="728"/>
+        <location filename="mainwindow.cpp" line="729"/>
         <source>Input node name</source>
         <translation type="unfinished">ノード名を入力してください</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1286"/>
+        <location filename="mainwindow.cpp" line="1287"/>
         <source>Can not launch computer go.</source>
         <translation type="unfinished">プログラムを起動できません。</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1344"/>
+        <location filename="mainwindow.cpp" line="1296"/>
+        <source>Playing with computer can not be resumed.
+Are you sure you want to stop playing with computer?</source>
+        <translation type="unfinished">コンピューターとの対戦を中断すると再開できませんが、終了してもよろしいですか？</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="1351"/>
         <source>Input new board size. board size must be between 2-52.</source>
         <translation type="unfinished">新しい盤のサイズを入力してください。盤のサイズは２～５２の範囲でなくてはいけません。</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1471"/>
+        <location filename="mainwindow.cpp" line="1478"/>
         <source>Dead: Black %1 White %2</source>
         <oldsource>Dead: B %1 W %2</oldsource>
         <translation type="unfinished">アゲハマ：黒 %1 白 %2</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1475"/>
+        <location filename="mainwindow.cpp" line="1482"/>
         <source>LastMove: %1(%2)</source>
         <translation type="unfinished">最終着手：%1(%2)</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1503"/>
+        <location filename="mainwindow.cpp" line="1510"/>
         <source>Black: %1 = %2(territories) + %3(captured)</source>
         <translation type="unfinished">黒： %1 = %2(地) + %3(アゲハマ)</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1504"/>
+        <location filename="mainwindow.cpp" line="1511"/>
         <source>White: %1 = %2(territories) + %3(captured) + %4(komi)</source>
         <translation type="unfinished">白： %1 = %2(地) + %3(アゲハマ) + %4(コミ)</translation>
     </message>
@@ -294,92 +305,87 @@ mugo automatically counts territories.</source>
         <translation type="obsolete">白： %1 = %2(地) + %3(アゲハマ)</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1508"/>
-        <location filename="mainwindow.cpp" line="1533"/>
+        <location filename="mainwindow.cpp" line="1515"/>
+        <location filename="mainwindow.cpp" line="1540"/>
         <source>W+%1</source>
         <translation type="unfinished">白%1目勝ち</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1510"/>
-        <location filename="mainwindow.cpp" line="1535"/>
+        <location filename="mainwindow.cpp" line="1517"/>
+        <location filename="mainwindow.cpp" line="1542"/>
         <source>B+%1</source>
         <translation type="unfinished">黒%1目勝ち</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1512"/>
-        <location filename="mainwindow.cpp" line="1537"/>
+        <location filename="mainwindow.cpp" line="1519"/>
+        <location filename="mainwindow.cpp" line="1544"/>
         <source>Draw</source>
         <translation type="unfinished">持碁</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1514"/>
+        <location filename="mainwindow.cpp" line="1521"/>
         <source>Japanese Rule</source>
         <translation type="unfinished">日本ルール</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1524"/>
+        <location filename="mainwindow.cpp" line="1531"/>
         <source>Black: %1 = %2(point) - %3(komi) / 2</source>
         <oldsource>Black: %1 %2(point) - %3(komi) / 2</oldsource>
         <translation type="unfinished">黒： %1 = %2(ポイント) - %3(コミ) / 2</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1525"/>
+        <location filename="mainwindow.cpp" line="1532"/>
         <source>White: %1 = %2(point) + %3(komi) / 2</source>
         <oldsource>White: %1 %2(point) + %3(komi) / 2</oldsource>
         <translation type="unfinished">白： %1 = %2(ポイント) + %3(コミ) / 2</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1528"/>
+        <location filename="mainwindow.cpp" line="1535"/>
         <source>Black: %1 = %2(point) + %3(komi) / 2</source>
         <oldsource>Black: %1 %2(point) + %3(komi) / 2</oldsource>
         <translation type="unfinished">黒： %1 = %2(ポイント) + %3(コミ) / 2</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1529"/>
+        <location filename="mainwindow.cpp" line="1536"/>
         <source>White: %1 = %2(point) - %3(komi) / 2</source>
         <oldsource>White: %1 %2(point) - %3(komi) / 2</oldsource>
         <translation type="unfinished">白： %1 = %2(ポイント) - %3(コミ) / 2</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1539"/>
+        <location filename="mainwindow.cpp" line="1546"/>
         <source>Chinese Rule</source>
         <translation type="unfinished">中国ルール</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1624"/>
+        <location filename="mainwindow.cpp" line="1638"/>
         <source>All Go Format(*.sgf *.ugf *.ugi);;sgf(*.sgf);;ugf(*.ugf *.ugi)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1694"/>
+        <location filename="mainwindow.cpp" line="1706"/>
         <source>sgf(*.sgf)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1745"/>
+        <location filename="mainwindow.cpp" line="1755"/>
         <source>The document has been modified.
 Do you want to save your changes?</source>
         <translation type="unfinished">ドキュメントが変更されています。
 変更内容を保存しますか？</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1770"/>
-        <source>HTTP</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="mainwindow.cpp" line="1771"/>
+        <location filename="mainwindow.cpp" line="1781"/>
         <source>Download failed: %1.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">ダウンロードに失敗しました： %1.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1954"/>
+        <location filename="mainwindow.cpp" line="1966"/>
         <location filename="mainwindow.ui" line="563"/>
         <source>Pass</source>
         <translation type="unfinished">パス</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1964"/>
+        <location filename="mainwindow.cpp" line="1976"/>
         <source>Other</source>
         <translation type="unfinished">その他</translation>
     </message>

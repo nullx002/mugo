@@ -69,6 +69,7 @@ private:
 
     void setCountTerritoryMode(bool on=true);
     void setPlayWithComputerMode(bool on=true);
+    void EndGtpGame();
 
     Ui::MainWindow *ui;
     QTextCodec* codec;
@@ -97,19 +98,19 @@ private:
     QHttp* http;
     QString downloadBuff;
 
-    QProcess comProcess;
+    QProcess gtpProcess;
 
 private slots:
     // File menu
-    void on_actionOpen_URL_triggered();
-    void on_actionExportAsciiToClipboard_triggered();
     void on_actionWhiteFirst_triggered();
     void on_actionNew_triggered();
     void on_actionOpen_triggered();
+    void on_actionOpen_URL_triggered();
     void on_actionReload_triggered();
     void on_actionSave_triggered();
     void on_actionSaveAs_triggered();
     void on_actionSaveBoardAsPicture_triggered();
+    void on_actionExportAsciiToClipboard_triggered();
     void on_actionExit_triggered();
     void openRecentFile();
 
@@ -244,6 +245,7 @@ private slots:
     void openUrlReadReady(const QHttpResponseHeader& resp);
     void openUrlReadProgress(int done, int total);
     void openUrlDone(bool error);
+    void openUrlCancel();
 };
 
 #endif // MAINWINDOW_H

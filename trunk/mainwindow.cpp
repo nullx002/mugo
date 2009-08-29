@@ -268,7 +268,7 @@ void MainWindow::on_actionOpen_triggered(){
 void MainWindow::on_actionOpen_URL_triggered(){
     downloadBuff.clear();
 
-    if (maybeSave() == false)
+    if (fileClose() == false)
         return;
 
     QInputDialog dlg(this);
@@ -287,7 +287,8 @@ void MainWindow::on_actionOpen_URL_triggered(){
         path = "/";
     http->get(path);
 
-    progressDialog = new QProgressDialog("Download SGF", "cancel", 0, 100, this);
+    progressDialog = new QProgressDialog(tr("Downloading SGF File"), "cancel", 0, 100, this);
+    connect(progressDialog, SIGNAL(canceled()), this, SLOT(openUrlCancel()));
     progressDialog->setWindowModality(Qt::WindowModal);
     progressDialog->show();
     progressDialog->setValue(0);
@@ -435,7 +436,7 @@ void MainWindow::on_actionCopyCurrentSGFtoClipboard_triggered(){
 * Edit -> Paste SGF from Clipboard
 */
 void MainWindow::on_actionPasteSGFfromClipboard_triggered(){
-    if (maybeSave() == false)
+    if (fileClose() == false)
         return;
 
     QClipboard *clipboard = QApplication::clipboard();
@@ -1276,25 +1277,31 @@ void MainWindow::on_actionPlayWithGnugo_triggered(){
         }
 
         QString param;
-        param.sprintf(" --mode gtp --color %s --boardsize %d --komi %.2f --handicap %d --level %d",
-                dlg.isBlack ? "black" : "white" , dlg.size, dlg.komi, dlg.handicap, dlg.level);
+        param.sprintf(" --mode gtp --boardsize %d --komi %.2f --handicap %d --level %d",
+                        dlg.size, dlg.komi, dlg.handicap, dlg.level);
         param = '"' + dlg.path + '"' + param;
         qDebug() << param;
-        comProcess.start(param, QIODevice::ReadWrite|QIODevice::Text);
-        if (comProcess.state() == QProcess::NotRunning){
+        gtpProcess.start(param, QIODevice::ReadWrite|QIODevice::Text);
+        if (gtpProcess.state() == QProcess::NotRunning){
             ui->boardWidget->playWithComputer(NULL, false);
             QMessageBox::critical(this, APPNAME, tr("Can not launch computer go."));
             return;
         }
 
         setPlayWithComputerMode(true);
-        ui->boardWidget->playWithComputer(&comProcess, dlg.isBlack);
+        ui->boardWidget->playWithComputer(&gtpProcess, dlg.isBlack);
     }
     else{
-        comProcess.close();
-        ui->boardWidget->playWithComputer(NULL, false);
+        QMessageBox::StandardButton ret = QMessageBox::warning(this, APPNAME,
+                                                                tr("Playing with computer can not be resumed.\n"
+                                                                   "Are you sure you want to stop playing with computer?"),
+                                                                QMessageBox::Ok|QMessageBox::Cancel);
+        if (ret != QMessageBox::Ok){
+            ui->actionPlayWithGnugo->setChecked(true);
+            return;
+        }
 
-        setPlayWithComputerMode(false);
+        EndGtpGame();
     }
 }
 
@@ -1413,7 +1420,7 @@ void MainWindow::on_actionLanguageJapanese_triggered(){
 * Help -> About
 */
 void MainWindow::on_actionAbout_triggered(){
-    QMessageBox::about(this, tr(APPNAME), tr(APPNAME " version " VERSION "\n\nCopyright 2009 Naoya Sase."));
+    QMessageBox::about(this, APPNAME, tr(APPNAME " version " VERSION "\n\nCopyright 2009 Naoya Sase."));
 }
 
 /**
@@ -1546,7 +1553,7 @@ void MainWindow::on_boardWidget_updateTerritory(int alive_b, int alive_w, int de
 */
 void MainWindow::on_boardWidget_gtpGameEnded(){
     ui->actionPlayWithGnugo->setChecked(false);
-    on_actionPlayWithGnugo_triggered();
+    EndGtpGame();
 
     ui->actionCountTerritory->setChecked(true);
     on_actionCountTerritory_triggered();
@@ -1744,7 +1751,7 @@ bool MainWindow::maybeSave(){
     if (!ui->boardWidget->isDirty())
         return true;
     QMessageBox::StandardButton ret =
-    QMessageBox::warning(this, tr(APPNAME),
+    QMessageBox::warning(this, APPNAME,
                                tr("The document has been modified.\n"
                                   "Do you want to save your changes?"),
                                QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
@@ -1770,7 +1777,7 @@ void MainWindow::openUrlReadReady(const QHttpResponseHeader& resp){
             break;
 
         default:
-            QMessageBox::information(this, tr("HTTP"),
+            QMessageBox::information(this, APPNAME,
                                      tr("Download failed: %1.")
                                      .arg(resp.reasonPhrase()));
             http->abort();
@@ -1783,8 +1790,6 @@ void MainWindow::openUrlReadReady(const QHttpResponseHeader& resp){
 void MainWindow::openUrlReadProgress(int done, int total){
     progressDialog->setRange(0, total);
     progressDialog->setValue(done);
-
-    downloadBuff.clear();
 }
 
 void MainWindow::openUrlDone(bool error){
@@ -1806,6 +1811,10 @@ void MainWindow::openUrlDone(bool error){
 
     setTreeData();
     setCaption();
+}
+
+void MainWindow::openUrlCancel(){
+    http->abort();
 }
 
 /**
@@ -2439,4 +2448,11 @@ void MainWindow::setPlayWithComputerMode(bool on){
     ui->commentWidget->setEnabled( !on );
     ui->branchWidget->setEnabled( !on );
     ui->undoView->setEnabled( !on );
+}
+
+void MainWindow::EndGtpGame(){
+    gtpProcess.close();
+    ui->boardWidget->playWithComputer(NULL, false);
+
+    setPlayWithComputerMode(false);
 }
