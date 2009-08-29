@@ -1858,7 +1858,6 @@ void BoardWidget::getCountTerritory(int& alive_b, int& alive_w, int& dead_b, int
                 ++alive_w;
         }
     }
-    qDebug("getCountTerritory %d, %d, %d, %d, %d, %d", alive_b, alive_w, dead_b, dead_w, bt, wt);
 }
 
 void BoardWidget::playWithComputer(QProcess* proc, bool isYourColorBlack){

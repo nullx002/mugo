@@ -20,6 +20,8 @@ bool ugf::readStream(QString::iterator& first, QString::iterator last){
             readData(first, last);
         else if (s == "[Figure]")
             readFigure(first, last);
+        else if (s == "[Comment]")
+            readComment(first, last);
     }
 
     return false;
@@ -92,8 +94,6 @@ QString ugf::readLine(QString::iterator& first, QString::iterator& last){
 bool ugf::readHeader(QString::iterator& first, QString::iterator& last){
     while (first != last && *first != '['){
         QString str = readLine(first, last);
-        if (!str.isEmpty() && str[0] == '[')
-            break;
 
         int pos = str.indexOf('=');
         if (pos == -1)
@@ -108,8 +108,12 @@ bool ugf::readHeader(QString::iterator& first, QString::iterator& last){
             place = value;
         else if (key == "Date")
             date = value;
-        else if (key == "Rule")
-            rule = value;
+        else if (key == "Rule"){
+            if (value == "JPN")
+                rule = "Japanese";
+            else
+                rule = value;
+        }
         else if (key == "Size")
             size = value.toInt();
         else if (key == "Hdcp"){
@@ -132,6 +136,8 @@ bool ugf::readHeader(QString::iterator& first, QString::iterator& last){
             writer = value;
         else if (key == "Copyright")
             copyright = value;
+        else if (key == "Comment")
+            comment = value;
         else if (key == "WMemb1" || key == "PlayerW"){
             QStringList list = value.split(',');
             whitePlayer = list[0];
@@ -152,8 +158,6 @@ bool ugf::readHeader(QString::iterator& first, QString::iterator& last){
 bool ugf::readRemote(QString::iterator& first, QString::iterator& last){
     while (first != last && *first != '['){
         QString str = readLine(first, last);
-        if (!str.isEmpty() && str[0] == '[')
-            break;
     }
 
     return false;
@@ -162,8 +166,6 @@ bool ugf::readRemote(QString::iterator& first, QString::iterator& last){
 bool ugf::readFiles(QString::iterator& first, QString::iterator& last){
     while (first != last && *first != '['){
         QString str = readLine(first, last);
-        if (!str.isEmpty() && str[0] == '[')
-            break;
     }
 
     return false;
@@ -172,6 +174,7 @@ bool ugf::readFiles(QString::iterator& first, QString::iterator& last){
 bool ugf::readData(QString::iterator& first, QString::iterator& last){
     while (first != last && *first != '['){
         QString str = readLine(first, last);
+
         QStringList list = str.split(',');
         if (list.size() != 4)
             continue;
@@ -181,15 +184,10 @@ bool ugf::readData(QString::iterator& first, QString::iterator& last){
 
         if (list[0].size() < 2)
             continue;
+
         data d;
-        d.x = list[0][0].toAscii() - 'A';
-        d.y = list[0][1].toAscii() - 'A';
-
-        if (list[1].size() < 2)
-            continue;
-        d.color = list[1][0] == 'B' ? go::black : go::white;
-
-        dataList_.push_back(d);
+        if (getData(list, d))
+            dataList_.push_back(d);
     }
 
     return true;
@@ -198,6 +196,7 @@ bool ugf::readData(QString::iterator& first, QString::iterator& last){
 bool ugf::readFigure(QString::iterator& first, QString::iterator& last){
     while (first != last && *first != '['){
         QString str = readLine(first, last);
+
         QStringList list =  str.split(',');
         if (list.size() < 2)
             continue;
@@ -235,6 +234,49 @@ bool ugf::readFigureText(QString::iterator& first, QString::iterator& last, int 
     return true;
 }
 
+bool ugf::readComment(QString::iterator& first, QString::iterator& last){
+    while (first != last && *first != '['){
+        QString str = readLine(first, last);
+
+        QStringList list =  str.split(',');
+        if (list.size() < 2)
+            continue;
+
+        if (list[0] == ".Fig")
+            readBranch(first, last, list[1].toInt());
+    }
+
+    return true;
+}
+
+bool ugf::readBranch(QString::iterator& first, QString::iterator& last, int index){
+    if (dataList_.size() <= index)
+        return false;
+
+    data& d = dataList_[index];
+    dataList branch;
+
+    while (first != last && *first != '['){
+        QString str = readLine(first, last);
+        if (str == ".EndFig")
+            break;
+
+        QStringList list =  str.split(',');
+        if (list.size() < 2)
+            continue;
+
+        dataList::iterator b_last = dataList_.begin() + index + 2;
+        data d2;
+        if (getData(list, d2))
+            if (qFind(dataList_.begin(), b_last, d2) == b_last)
+                branch.push_back(d2);
+    }
+
+    d.branches.push_back(branch);
+
+    return true;
+}
+
 bool ugf::get(dataList::const_iterator first, dataList::const_iterator last, go::nodePtr parent) const{
     if (first == last)
         return true;
@@ -255,7 +297,27 @@ bool ugf::get(dataList::const_iterator first, dataList::const_iterator last, go:
 
     parent->childNodes.push_back(node);
 
-    return get(++first, last, node);
+    get(first+1, last, node);
+
+    branchList::const_iterator b_first = first->branches.begin();
+    branchList::const_iterator b_last  = first->branches.end();
+    while (b_first != b_last){
+        get(b_first->begin(), b_first->end(), node);
+        ++b_first;
+    }
+
+    return true;
+}
+
+bool ugf::getData(const QStringList& list, data& d){
+    if (list[1].size() < 2)
+        return false;
+
+    d.x = list[0][0].toAscii() - 'A';
+    d.y = list[0][1].toAscii() - 'A';
+    d.color = list[1][0] == 'B' ? go::black : go::white;
+
+    return true;
 }
 
 

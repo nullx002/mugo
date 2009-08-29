@@ -20,13 +20,22 @@ public:
 
     class data{
     public:
+        typedef QList<data> dataList;
+        typedef QList<dataList> branchList;
+
         int x;
         int y;
         int color;
         QString comment;
         markerList markers;
+        branchList branches;
+
+        bool operator ==(const data& d) const{
+            return x == d.x && y == d.y && color == d.color;
+        }
     };
-    typedef QList<data> dataList;
+    typedef data::dataList   dataList;
+    typedef data::branchList branchList;
 
 
     virtual bool readStream(QString::iterator& first, QString::iterator last);
@@ -44,8 +53,11 @@ private:
     bool    readData(QString::iterator& first, QString::iterator& last);
     bool    readFigure(QString::iterator& first, QString::iterator& last);
     bool    readFigureText(QString::iterator& first, QString::iterator& last, int index);
+    bool    readComment(QString::iterator& first, QString::iterator& last);
+    bool    readBranch(QString::iterator& first, QString::iterator& last, int index);
 
     bool get(dataList::const_iterator first, dataList::const_iterator last, go::nodePtr parent) const;
+    bool getData(const QStringList& list, data& d);
 
     dataList dataList_;
     QString title;
@@ -58,6 +70,7 @@ private:
     QString winner;
     QString writer;
     QString copyright;
+    QString comment;
     QString whitePlayer;
     QString whiteRank;
     QString blackPlayer;
