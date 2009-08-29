@@ -75,7 +75,6 @@ public:
 protected:
     bool readBranch(QString::iterator& first, QString::iterator last, node& n);
     bool readNode(QString::iterator& first, QString::iterator last, node& n);
-    bool readNode2(QString::iterator& first, QString::iterator last, node& n);
     bool readNodeKey(QString::iterator& first, QString::iterator last, QString& key);
     bool readNodeValues(QString::iterator& first, QString::iterator last, QStringList& values);
     bool readNodeValue(QString::iterator& first, QString::iterator last, QString& value);

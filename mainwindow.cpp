@@ -299,8 +299,7 @@ void MainWindow::on_actionOpen_URL_triggered(){
 * File -> Reload
 */
 void MainWindow::on_actionReload_triggered(){
-    QFileInfo fi(fileName);
-    fileOpen(fileName, fi.suffix(), false);
+    fileOpen(fileName);
 }
 
 /**
@@ -1655,25 +1654,25 @@ bool MainWindow::fileOpen(){
 /**
 * file open.
 */
-bool MainWindow::fileOpen(const QString& fname){
-    return fileOpen(fname, QFileInfo(fname).suffix());
+bool MainWindow::fileOpen(const QString& fname, bool guessCodec){
+    return fileOpen(fname, QFileInfo(fname).suffix(), guessCodec);
 }
 
 /**
 * file open.
 */
-bool MainWindow::fileOpen(const QString& fname, const QString& filter, bool guessCodec){
+bool MainWindow::fileOpen(const QString& fname, const QString& ext, bool guessCodec){
     if (maybeSave() == false)
         return false;
 
     setCurrentFile(fname);
 
-    if (filter == "sgf"){
+    if (ext == "sgf"){
         go::sgf sgf;
         sgf.read(fname, codec, guessCodec);
         ui->boardWidget->setData(sgf);
     }
-    else if (filter == "ugf" || filter == "ugi"){
+    else if (ext == "ugf" || ext == "ugi"){
         go::ugf ugf;
         ugf.read(fname, codec, guessCodec);
         ui->boardWidget->setData(ugf);
@@ -1802,11 +1801,9 @@ void MainWindow::openUrlDone(bool error){
     }
 
     go::sgf sgf;
-    QString::iterator first = downloadBuff.begin();
-    sgf.readStream(first, downloadBuff.end());
+    sgf.read(downloadBuff, codec, true);
 
     downloadBuff.clear();
-
     ui->boardWidget->setData(sgf);
 
     setTreeData();
