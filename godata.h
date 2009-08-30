@@ -212,7 +212,7 @@ public:
 
 class fileBase{
 public:
-    fileBase(){}
+    fileBase() : codec(NULL){}
     virtual ~fileBase(){}
 
     virtual bool read(const QString& fname, QTextCodec* codec, bool guessCodec);
