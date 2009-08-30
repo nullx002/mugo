@@ -23,7 +23,8 @@ QString getTranslationPath(){
              << "/usr/share/" APPNAME "/translations"
              << "/usr/local/share/" APPNAME "/translations";
 #elif defined(Q_WS_MAC)
-    pathList << "./translations";
+    pathList << QFileInfo(appPath + "/../Resources/translations/").absolutePath()
+             << "./translations";
 #endif
     QStringList::iterator iter = pathList.begin();
     while (iter != pathList.end()){
