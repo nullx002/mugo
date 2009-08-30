@@ -48,13 +48,16 @@ MainWindow::MainWindow(QWidget *parent)
     // set sound files
     ui->actionPlaySound->setChecked( settings.value("sound/play").toBool() );
     QStringList soundPathList;
-    soundPathList.push_back(qApp->applicationDirPath() + "/sounds/");
-    soundPathList.push_back("/usr/share/" APPNAME "/sounds/");
-    soundPathList.push_back("/usr/local/share/" APPNAME "/sounds/");
-    soundPathList.push_back("./sounds/");
+#if defined(Q_WS_MAC)
+    soundPathList.push_back( QFileInfo(qApp->applicationDirPath() + "/../Resources/sounds/").absolutePath() );
+#endif
+    soundPathList.push_back(qApp->applicationDirPath() + "/sounds");
+    soundPathList.push_back("/usr/share/" APPNAME "/sounds");
+    soundPathList.push_back("/usr/local/share/" APPNAME "/sounds");
+    soundPathList.push_back("./sounds");
     QStringList::iterator iter = soundPathList.begin();
     while (iter != soundPathList.end()){
-        QFileInfo finfo( *iter + "stone.wav" );
+        QFileInfo finfo( *iter + "/stone.wav" );
         if (finfo.exists()){
             ui->boardWidget->setStoneSoundPath(finfo.filePath());
             break;
