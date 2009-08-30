@@ -1100,7 +1100,7 @@ Do you want to save your changes?</source>
         <location filename="mainwindow.ui" line="1480"/>
         <source>&amp;Options...</source>
         <oldsource>&amp;Options..</oldsource>
-        <translation>オプション...</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="1415"/>
