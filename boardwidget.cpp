@@ -12,57 +12,36 @@
 #include "command.h"
 #include "ui_boardwidget.h"
 
-#ifdef Q_WS_WIN
-# include <qt_windows.h>
-#endif
 
-
-Sound::Sound(QWidget* parent_) : parent(parent_), lastClock(0){
-#ifdef Q_WS_X11
-    media = Phonon::createPlayer(Phonon::NotificationCategory);
-//    media = new Phonon::MediaObject(parent);
-//    audioOutput = new Phonon::AudioOutput(Phonon::NotificationCategory, parent);
-//    Phonon::createPath(media, audioOutput);
-#elif defined(Q_WS_WIN)
+Sound::Sound(QWidget* parent_) : parent(parent_){
+#if defined(Q_WS_WIN)
+    lastClock = 0;
 #else
-    media = NULL;
+    media = Phonon::createPlayer(Phonon::NotificationCategory);
 #endif
 }
 
 Sound::~Sound(){
-#ifdef Q_WS_X11
-    delete media;
-#elif defined(Q_WS_WIN)
+#if defined(Q_WS_WIN)
 #else
     delete media;
 #endif
 }
 
 void Sound::setCurrentSource(const QString& source){
-#ifdef Q_WS_X11
-    media->setCurrentSource(source);
-#elif defined(Q_WS_WIN)
+#if defined(Q_WS_WIN)
     memset(&mop, 0, sizeof(mop));
     mop.lpstrDeviceType  = L"WaveAudio";
     mop.lpstrElementName = (WCHAR*)source.utf16();
     mciSendCommand(0, MCI_OPEN, MCI_OPEN_TYPE|MCI_OPEN_ELEMENT, (DWORD)&mop);
 #else
-    delete media;
-    media = new QSound(source, parent);
+    media->setCurrentSource(source);
 #endif
 }
 
 void Sound::play(){
-#ifdef Q_WS_X11
-    if (media->currentTime() == media->totalTime()){
-        media->stop();
-        media->seek(0);
-    }
-    if (media){
-        media->play();
-    }
-#elif defined(Q_WS_WIN)
-    currentClock /= CLOCKS_PER_SEC;
+#if defined(Q_WS_WIN)
+    double currentClock = clock() / CLOCKS_PER_SEC;
     if (mop.wDeviceID && currentClock - lastClock > 0.2){
         mciSendCommand(mop.wDeviceID, MCI_STOP, 0, 0);
         mciSendCommand(mop.wDeviceID, MCI_SEEK, MCI_SEEK_TO_START, 0);
@@ -70,9 +49,12 @@ void Sound::play(){
         lastClock = currentClock;
     }
 #else
-    if (media && media->isFinished() && currentClock - lastClock > 0.2){
+    if (media->currentTime() == media->totalTime()){
+        media->stop();
+        media->seek(0);
+    }
+    if (media){
         media->play();
-        lastClock = currentClock;
     }
 #endif
 }

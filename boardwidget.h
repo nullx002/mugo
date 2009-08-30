@@ -9,11 +9,10 @@
 #include <QProcess>
 
 
-#ifdef Q_WS_X11
-#   include <phonon>
-#else
-#   include <QSound>
+#if defined(Q_WS_WIN)
 #   include <windows.h>
+#else
+#   include <phonon>
 #endif
 
 #include "godata.h"
@@ -33,15 +32,12 @@ public:
     void play();
 
     QObject* parent;
-    double   lastClock;
 
-#ifdef Q_WS_X11
-    Phonon::MediaObject* media;
-//    Phonon::AudioOutput* audioOutput;
-#elif defined(Q_WS_WIN)
+#if defined(Q_WS_WIN)
+    double   lastClock;
     MCI_OPEN_PARMS mop;
 #else
-    QSound* media;
+    Phonon::MediaObject* media;
 #endif
 };
 

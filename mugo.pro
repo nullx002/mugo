@@ -4,6 +4,7 @@
 TARGET = mugo
 TEMPLATE = app
 unix:QT += phonon
+mac:QT += phonon
 QT += network
 SOURCES += main.cpp \
     mainwindow.cpp \
