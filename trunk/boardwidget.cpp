@@ -53,18 +53,16 @@ void Sound::setCurrentSource(const QString& source){
 }
 
 void Sound::play(){
-    double currentClock = clock() / (double)CLOCKS_PER_SEC;
-
 #ifdef Q_WS_X11
     if (media->currentTime() == media->totalTime()){
         media->stop();
         media->seek(0);
     }
-    if (media && currentClock - lastClock > 0.2){
+    if (media){
         media->play();
-        lastClock = currentClock;
     }
 #elif defined(Q_WS_WIN)
+    currentClock /= CLOCKS_PER_SEC;
     if (mop.wDeviceID && currentClock - lastClock > 0.2){
         mciSendCommand(mop.wDeviceID, MCI_STOP, 0, 0);
         mciSendCommand(mop.wDeviceID, MCI_SEEK, MCI_SEEK_TO_START, 0);
