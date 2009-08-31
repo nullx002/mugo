@@ -95,7 +95,7 @@
             <item row="2" column="0">
              <widget class="QLabel" name="bgColorLabel">
               <property name="text">
-               <string>TextLabel</string>
+               <string>Background Color</string>
               </property>
              </widget>
             </item>
