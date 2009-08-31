@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>469</width>
+    <width>483</width>
     <height>455</height>
    </rect>
   </property>
@@ -64,14 +64,45 @@
             </item>
             <item row="1" column="1">
              <widget class="QPushButton" name="boardColorButton">
-              <property name="autoFillBackground">
-               <bool>true</bool>
-              </property>
               <property name="text">
                <string/>
               </property>
               <property name="autoDefault">
                <bool>false</bool>
+              </property>
+              <property name="flat">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0">
+             <widget class="QLabel" name="bgTutorColorLabel">
+              <property name="text">
+               <string>Background in Tutor</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1">
+             <widget class="QPushButton" name="bgTutorColorButton">
+              <property name="text">
+               <string/>
+              </property>
+              <property name="flat">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="bgColorLabel">
+              <property name="text">
+               <string>TextLabel</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QPushButton" name="bgColorButton">
+              <property name="text">
+               <string/>
               </property>
               <property name="flat">
                <bool>true</bool>
@@ -197,6 +228,18 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>categoryList</tabstop>
+  <tabstop>boardTypeComboBox</tabstop>
+  <tabstop>boardColorButton</tabstop>
+  <tabstop>bgColorButton</tabstop>
+  <tabstop>bgTutorColorButton</tabstop>
+  <tabstop>whiteTypeComboBox</tabstop>
+  <tabstop>whiteColorButton</tabstop>
+  <tabstop>blackTypeComboBox</tabstop>
+  <tabstop>blackColorButton</tabstop>
+  <tabstop>buttonBox</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>
