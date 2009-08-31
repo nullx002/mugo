@@ -31,6 +31,9 @@
     <string>background-color: rgb(255, 255, 255);</string>
    </property>
    <layout class="QHBoxLayout" name="horizontalLayout_3">
+    <property name="margin">
+     <number>0</number>
+    </property>
     <item>
      <widget class="BoardWidget" name="boardWidget" native="true"/>
     </item>
@@ -252,6 +255,9 @@
     <addaction name="actionCountTerritory"/>
     <addaction name="actionPlayWithGnugo"/>
     <addaction name="separator"/>
+    <addaction name="actionTutorBossSides"/>
+    <addaction name="actionTutorOneSide"/>
+    <addaction name="separator"/>
     <addaction name="actionPlaySound"/>
     <addaction name="separator"/>
     <addaction name="action19x19Board"/>
@@ -401,6 +407,9 @@
    </attribute>
    <widget class="QWidget" name="commentDockWidgetContents">
     <layout class="QHBoxLayout" name="horizontalLayout">
+     <property name="margin">
+      <number>0</number>
+     </property>
      <item>
       <widget class="QPlainTextEdit" name="commentWidget"/>
      </item>
@@ -416,6 +425,9 @@
    </attribute>
    <widget class="QWidget" name="branchDockWidgetContents">
     <layout class="QHBoxLayout" name="horizontalLayout_4">
+     <property name="margin">
+      <number>0</number>
+     </property>
      <item>
       <widget class="QTreeWidget" name="branchWidget">
        <property name="indentation">
@@ -455,6 +467,9 @@
    </attribute>
    <widget class="QWidget" name="dockWidgetContents">
     <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <property name="margin">
+      <number>0</number>
+     </property>
      <item>
       <widget class="QUndoView" name="undoView"/>
      </item>
@@ -483,6 +498,20 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionOpen_URL">
+   <property name="text">
+    <string>Open &amp;URL...</string>
+   </property>
+  </action>
+  <action name="actionReload">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/reload.png</normaloff>:/res/reload.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Reload</string>
    </property>
   </action>
   <action name="actionSave">
@@ -561,6 +590,305 @@
    </property>
    <property name="text">
     <string>&amp;Pass</string>
+   </property>
+  </action>
+  <action name="actionEditNodeName">
+   <property name="text">
+    <string>Edit Node Name</string>
+   </property>
+  </action>
+  <action name="actionAlternateMove">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/movealternate.png</normaloff>:/res/movealternate.png</iconset>
+   </property>
+   <property name="text">
+    <string>Alternate Move</string>
+   </property>
+  </action>
+  <action name="actionAddBlackStone">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/black_64.png</normaloff>:/res/black_64.png</iconset>
+   </property>
+   <property name="text">
+    <string>Add Black Stone</string>
+   </property>
+  </action>
+  <action name="actionAddWhiteStone">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/white_64.png</normaloff>:/res/white_64.png</iconset>
+   </property>
+   <property name="text">
+    <string>Add White Stone</string>
+   </property>
+  </action>
+  <action name="actionAddEmpty">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/empty.png</normaloff>:/res/empty.png</iconset>
+   </property>
+   <property name="text">
+    <string>Add Empty</string>
+   </property>
+  </action>
+  <action name="actionAddLabel">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/text.png</normaloff>:/res/text.png</iconset>
+   </property>
+   <property name="text">
+    <string>Add Label</string>
+   </property>
+  </action>
+  <action name="actionAddCircle">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/circle.png</normaloff>:/res/circle.png</iconset>
+   </property>
+   <property name="text">
+    <string>Add Circle</string>
+   </property>
+  </action>
+  <action name="actionAddCross">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/cross.png</normaloff>:/res/cross.png</iconset>
+   </property>
+   <property name="text">
+    <string>Add Cross</string>
+   </property>
+  </action>
+  <action name="actionAddSquare">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/square.png</normaloff>:/res/square.png</iconset>
+   </property>
+   <property name="text">
+    <string>Add Square</string>
+   </property>
+  </action>
+  <action name="actionAddTriangle">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/triangle.png</normaloff>:/res/triangle.png</iconset>
+   </property>
+   <property name="text">
+    <string>Add Triangle</string>
+   </property>
+  </action>
+  <action name="actionDeleteMarker">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/rubbereraser.png</normaloff>:/res/rubbereraser.png</iconset>
+   </property>
+   <property name="text">
+    <string>Delete Marker</string>
+   </property>
+  </action>
+  <action name="actionGoodMove">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Good Move</string>
+   </property>
+  </action>
+  <action name="actionVeryGoodMove">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Very Good Move</string>
+   </property>
+  </action>
+  <action name="actionBadMove">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Bad Move</string>
+   </property>
+  </action>
+  <action name="actionVeryBadMove">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Very Bad Move</string>
+   </property>
+  </action>
+  <action name="actionDoubtfulMove">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Doubtful Move</string>
+   </property>
+  </action>
+  <action name="actionEven">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Even</string>
+   </property>
+  </action>
+  <action name="actionGoodForBlack">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Good for Black</string>
+   </property>
+  </action>
+  <action name="actionVeryGoodForBlack">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Very Good for Black</string>
+   </property>
+  </action>
+  <action name="actionGoodForWhite">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Good for White</string>
+   </property>
+  </action>
+  <action name="actionVeryGoodForWhite">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Very Good for White</string>
+   </property>
+  </action>
+  <action name="actionUnclear">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Unclear</string>
+   </property>
+  </action>
+  <action name="actionHotspot">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Hotspot</string>
+   </property>
+  </action>
+  <action name="actionInterestingMove">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Interesting Move</string>
+   </property>
+  </action>
+  <action name="actionRotateSgfClockwise">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/rotateright.png</normaloff>:/res/rotateright.png</iconset>
+   </property>
+   <property name="text">
+    <string>Rotate SGF &amp;Clockwise</string>
+   </property>
+  </action>
+  <action name="actionFlipSgfHorizontally">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/fliphorizontally.png</normaloff>:/res/fliphorizontally.png</iconset>
+   </property>
+   <property name="text">
+    <string>Flip SGF &amp;Horizontally</string>
+   </property>
+  </action>
+  <action name="actionFlipSgfVertically">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/flipvertically.png</normaloff>:/res/flipvertically.png</iconset>
+   </property>
+   <property name="text">
+    <string>Flip SGF &amp;Vertically</string>
+   </property>
+  </action>
+  <action name="actionJumpToMoveNumber">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/jumptonumber.png</normaloff>:/res/jumptonumber.png</iconset>
+   </property>
+   <property name="text">
+    <string>Jump To Move Number</string>
+   </property>
+  </action>
+  <action name="actionJumpToClicked">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/jumptoclicked.png</normaloff>:/res/jumptoclicked.png</iconset>
+   </property>
+   <property name="text">
+    <string>Jump To Clicked</string>
+   </property>
+  </action>
+  <action name="actionSetMoveNumber">
+   <property name="text">
+    <string>Set Move Number</string>
+   </property>
+  </action>
+  <action name="actionUnsetMoveNumber">
+   <property name="text">
+    <string>Unset Move Number</string>
+   </property>
+  </action>
+  <action name="actionWhiteFirst">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/whitefirst.png</normaloff>:/res/whitefirst.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;White First</string>
    </property>
   </action>
   <action name="actionEncodingUTF8">
@@ -814,90 +1142,6 @@
     <string>Romanian (ISO-8859-16)</string>
    </property>
   </action>
-  <action name="actionAddLabel">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/res/text.png</normaloff>:/res/text.png</iconset>
-   </property>
-   <property name="text">
-    <string>Add Label</string>
-   </property>
-  </action>
-  <action name="actionAddCircle">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/res/circle.png</normaloff>:/res/circle.png</iconset>
-   </property>
-   <property name="text">
-    <string>Add Circle</string>
-   </property>
-  </action>
-  <action name="actionAddCross">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/res/cross.png</normaloff>:/res/cross.png</iconset>
-   </property>
-   <property name="text">
-    <string>Add Cross</string>
-   </property>
-  </action>
-  <action name="actionAddSquare">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/res/square.png</normaloff>:/res/square.png</iconset>
-   </property>
-   <property name="text">
-    <string>Add Square</string>
-   </property>
-  </action>
-  <action name="actionAddTriangle">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/res/triangle.png</normaloff>:/res/triangle.png</iconset>
-   </property>
-   <property name="text">
-    <string>Add Triangle</string>
-   </property>
-  </action>
-  <action name="actionDeleteMarker">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/res/rubbereraser.png</normaloff>:/res/rubbereraser.png</iconset>
-   </property>
-   <property name="text">
-    <string>Delete Marker</string>
-   </property>
-  </action>
-  <action name="actionAlternateMove">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/res/movealternate.png</normaloff>:/res/movealternate.png</iconset>
-   </property>
-   <property name="text">
-    <string>Alternate Move</string>
-   </property>
-  </action>
   <action name="actionEncodingGB2312">
    <property name="checkable">
     <bool>true</bool>
@@ -912,160 +1156,6 @@
    </property>
    <property name="text">
     <string>Chinese Traditional (Big5)</string>
-   </property>
-  </action>
-  <action name="actionAddBlackStone">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/res/black_64.png</normaloff>:/res/black_64.png</iconset>
-   </property>
-   <property name="text">
-    <string>Add Black Stone</string>
-   </property>
-  </action>
-  <action name="actionAddWhiteStone">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/res/white_64.png</normaloff>:/res/white_64.png</iconset>
-   </property>
-   <property name="text">
-    <string>Add White Stone</string>
-   </property>
-  </action>
-  <action name="actionAddEmpty">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/res/empty.png</normaloff>:/res/empty.png</iconset>
-   </property>
-   <property name="text">
-    <string>Add Empty</string>
-   </property>
-  </action>
-  <action name="actionReload">
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/res/reload.png</normaloff>:/res/reload.png</iconset>
-   </property>
-   <property name="text">
-    <string>&amp;Reload</string>
-   </property>
-  </action>
-  <action name="actionGoodMove">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Good Move</string>
-   </property>
-  </action>
-  <action name="actionVeryGoodMove">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Very Good Move</string>
-   </property>
-  </action>
-  <action name="actionBadMove">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Bad Move</string>
-   </property>
-  </action>
-  <action name="actionVeryBadMove">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Very Bad Move</string>
-   </property>
-  </action>
-  <action name="actionDoubtfulMove">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Doubtful Move</string>
-   </property>
-  </action>
-  <action name="actionEven">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Even</string>
-   </property>
-  </action>
-  <action name="actionGoodForBlack">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Good for Black</string>
-   </property>
-  </action>
-  <action name="actionVeryGoodForBlack">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Very Good for Black</string>
-   </property>
-  </action>
-  <action name="actionGoodForWhite">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Good for White</string>
-   </property>
-  </action>
-  <action name="actionVeryGoodForWhite">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Very Good for White</string>
-   </property>
-  </action>
-  <action name="actionUnclear">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Unclear</string>
-   </property>
-  </action>
-  <action name="actionHotspot">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Hotspot</string>
-   </property>
-  </action>
-  <action name="actionEditNodeName">
-   <property name="text">
-    <string>Edit Node Name</string>
-   </property>
-  </action>
-  <action name="actionInterestingMove">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Interesting Move</string>
    </property>
   </action>
   <action name="actionFirstMove">
@@ -1147,76 +1237,6 @@
    </property>
    <property name="text">
     <string>Next Branch</string>
-   </property>
-  </action>
-  <action name="actionRotateSgfClockwise">
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/res/rotateright.png</normaloff>:/res/rotateright.png</iconset>
-   </property>
-   <property name="text">
-    <string>Rotate SGF &amp;Clockwise</string>
-   </property>
-  </action>
-  <action name="actionFlipSgfHorizontally">
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/res/fliphorizontally.png</normaloff>:/res/fliphorizontally.png</iconset>
-   </property>
-   <property name="text">
-    <string>Flip SGF &amp;Horizontally</string>
-   </property>
-  </action>
-  <action name="actionFlipSgfVertically">
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/res/flipvertically.png</normaloff>:/res/flipvertically.png</iconset>
-   </property>
-   <property name="text">
-    <string>Flip SGF &amp;Vertically</string>
-   </property>
-  </action>
-  <action name="actionJumpToMoveNumber">
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/res/jumptonumber.png</normaloff>:/res/jumptonumber.png</iconset>
-   </property>
-   <property name="text">
-    <string>Jump To Move Number</string>
-   </property>
-  </action>
-  <action name="actionJumpToClicked">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/res/jumptoclicked.png</normaloff>:/res/jumptoclicked.png</iconset>
-   </property>
-   <property name="text">
-    <string>Jump To Clicked</string>
-   </property>
-  </action>
-  <action name="actionSetMoveNumber">
-   <property name="text">
-    <string>Set Move Number</string>
-   </property>
-  </action>
-  <action name="actionUnsetMoveNumber">
-   <property name="text">
-    <string>Unset Move Number</string>
-   </property>
-  </action>
-  <action name="actionWhiteFirst">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/res/whitefirst.png</normaloff>:/res/whitefirst.png</iconset>
-   </property>
-   <property name="text">
-    <string>&amp;White First</string>
    </property>
   </action>
   <action name="actionShowMoveNumber">
@@ -1415,6 +1435,22 @@
     <string>Play with gnugo</string>
    </property>
   </action>
+  <action name="actionTutorBossSides">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Tutor Boss Sides</string>
+   </property>
+  </action>
+  <action name="actionTutorOneSide">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Tutor One Side</string>
+   </property>
+  </action>
   <action name="actionPlaySound">
    <property name="checkable">
     <bool>true</bool>
@@ -1554,11 +1590,6 @@
    </property>
    <property name="text">
     <string>Delete Only Current</string>
-   </property>
-  </action>
-  <action name="actionOpen_URL">
-   <property name="text">
-    <string>Open &amp;URL...</string>
    </property>
   </action>
  </widget>

@@ -21,22 +21,30 @@ SetupDialog::SetupDialog(QWidget *parent) :
     m_ui->boardTypeComboBox->addItem( tr("Bitmap") );
     m_ui->boardTypeComboBox->addItem( tr("Fill Color") );
     m_ui->boardTypeComboBox->setCurrentIndex( settings.value("board/boardType").toInt() );
-    boardColor = settings.value("board/boardColor", QColor(255, 200, 100)).value<QColor>();
+    boardColor = settings.value("board/boardColor", BOARD_COLOR).value<QColor>();
     m_ui->boardColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(boardColor.red()).arg(boardColor.green()).arg(boardColor.blue()) );
 
     // white
     m_ui->whiteTypeComboBox->addItem( tr("Bitmap") );
     m_ui->whiteTypeComboBox->addItem( tr("Fill Color") );
     m_ui->whiteTypeComboBox->setCurrentIndex( settings.value("board/whiteType").toInt() );
-    whiteColor = settings.value("board/whiteColor", QColor(255, 255, 255)).value<QColor>();
+    whiteColor = settings.value("board/whiteColor", WHITE_COLOR).value<QColor>();
     m_ui->whiteColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(whiteColor.red()).arg(whiteColor.green()).arg(whiteColor.blue()) );
 
     // black
     m_ui->blackTypeComboBox->addItem( tr("Bitmap") );
     m_ui->blackTypeComboBox->addItem( tr("Fill Color") );
     m_ui->blackTypeComboBox->setCurrentIndex( settings.value("board/blackType").toInt() );
-    blackColor = settings.value("board/blackColor", QColor(0, 0, 0)).value<QColor>();
+    blackColor = settings.value("board/blackColor", BLACK_COLOR).value<QColor>();
     m_ui->blackColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(blackColor.red()).arg(blackColor.green()).arg(blackColor.blue()) );
+
+    // bg
+    bgColor = settings.value("board/bgColor", BG_COLOR).value<QColor>();
+    m_ui->bgColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(bgColor.red()).arg(bgColor.green()).arg(bgColor.blue()) );
+
+    // tutor
+    tutorColor = settings.value("board/bgTutorColor", BG_TUTOR_COLOR).value<QColor>();
+    m_ui->bgTutorColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(tutorColor.red()).arg(tutorColor.green()).arg(tutorColor.blue()) );
 }
 
 SetupDialog::~SetupDialog()
@@ -66,6 +74,8 @@ void SetupDialog::accept(){
     settings.setValue("board/boardColor", boardColor);
     settings.setValue("board/whiteColor", whiteColor);
     settings.setValue("board/blackColor", blackColor);
+    settings.setValue("board/bgColor", bgColor);
+    settings.setValue("board/bgTutorColor", tutorColor);
 }
 
 /**
@@ -94,7 +104,6 @@ void SetupDialog::on_boardColorButton_clicked(){
 */
 void SetupDialog::on_whiteColorButton_clicked(){
     QColorDialog dlg(whiteColor, this);
-    dlg.setCurrentColor(whiteColor);
     if (dlg.exec() != QDialog::Accepted)
         return;
     whiteColor = dlg.selectedColor();
@@ -107,9 +116,32 @@ void SetupDialog::on_whiteColorButton_clicked(){
 */
 void SetupDialog::on_blackColorButton_clicked(){
     QColorDialog dlg(blackColor, this);
-    dlg.setCurrentColor(blackColor);
     if (dlg.exec() != QDialog::Accepted)
         return;
     blackColor = dlg.selectedColor();
     m_ui->blackColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(blackColor.red()).arg(blackColor.green()).arg(blackColor.blue()) );
+}
+
+/**
+* slot
+* background color button clicked
+*/
+void SetupDialog::on_bgColorButton_clicked(){
+    QColorDialog dlg(bgColor , this);
+    if (dlg.exec() != QDialog::Accepted)
+        return;
+    bgColor = dlg.selectedColor();
+    m_ui->bgColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(bgColor.red()).arg(bgColor.green()).arg(bgColor.blue()) );
+}
+
+/**
+* slot
+* background in tutor color button clicked
+*/
+void SetupDialog::on_bgTutorColorButton_clicked(){
+    QColorDialog dlg(tutorColor , this);
+    if (dlg.exec() != QDialog::Accepted)
+        return;
+    tutorColor = dlg.selectedColor();
+    m_ui->bgTutorColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(tutorColor.red()).arg(tutorColor.green()).arg(tutorColor.blue()) );
 }

@@ -71,6 +71,8 @@ private:
     void setPlayWithComputerMode(bool on=true);
     void EndGtpGame();
 
+    void alertLanguageChanged();
+
     Ui::MainWindow *ui;
     QTextCodec* codec;
     QString fileName;
@@ -102,7 +104,6 @@ private:
 
 private slots:
     // File menu
-    void on_actionWhiteFirst_triggered();
     void on_actionNew_triggered();
     void on_actionOpen_triggered();
     void on_actionOpen_URL_triggered();
@@ -124,6 +125,7 @@ private slots:
     void on_actionDeleteOnlyCurrent_triggered();
     void on_actionPass_triggered();
     void on_actionEditNodeName_triggered();
+    void on_actionWhiteFirst_triggered();
 
     // Edit menu -> Stone & Marker
     void on_actionAlternateMove_triggered();
@@ -209,6 +211,8 @@ private slots:
     // Tools menu
     void on_actionCountTerritory_triggered();
     void on_actionPlayWithGnugo_triggered();
+    void on_actionTutorBossSides_triggered();
+    void on_actionTutorOneSide_triggered();
     void on_actionPlaySound_triggered();
     void on_action19x19Board_triggered();
     void on_action13x13Board_triggered();

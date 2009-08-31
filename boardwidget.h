@@ -47,6 +47,7 @@ class BoardWidget : public QWidget {
     Q_DISABLE_COPY(BoardWidget)
 public:
     enum eEditMode{ eAlternateMove, eAddBlack, eAddWhite, eAddEmpty, eLabelMark, eCrossMark, eCircleMark, eSquareMark, eTriangleMark, eDeleteMarker, eCountTerritory, eGtp };
+    enum eTutorMode{ eNoTutor, eTutorBossSides, eTutorOneSide };
     enum eGtpStatus{ eGtpNone, eGtpPut, eGtpGen, eGtpHandicap, eGtpGameEnd };
 
     struct stoneInfo{
@@ -98,6 +99,7 @@ public:
     // create stone node and insert after current node
     void addStoneNodeCommand(int sgfX, int sgfY);
     void addStoneNodeCommand(int sgfX, int sgfY, int boardX, int boardY);
+    bool tutor(int sgfX, int sgfY);
 
     // dirty flag
     bool isDirty() const{ return dirty; }
@@ -105,6 +107,7 @@ public:
 
     // set option
     void setEditMode(eEditMode editMode){ this->editMode = editMode; }
+    void setTutorMode(eTutorMode tutorMode){ this->tutorMode = tutorMode; repaintBoard(); }
     void setShowMoveNumber(bool visible){ showMoveNumber = visible; repaintBoard(); }
     void setShowMoveNumber(int number){ showMoveNumberCount = number; repaintBoard(); }
     void setShowCoordinates(bool visible){ showCoordinates = visible; repaintBoard(); }
@@ -265,6 +268,7 @@ private:
     bool showMarker;
     bool showBranchMoves;
     eEditMode editMode;
+    eTutorMode tutorMode;
     bool moveToClicked;
     int  rotateBoard_;
     bool flipBoardHorizontally_;
@@ -278,7 +282,7 @@ private:
     QImage  black1, black2;
     QImage  white1, white2;
     QImage  boardImage1, boardImage2;
-    QColor  boardColor, blackColor, whiteColor;
+    QColor  boardColor, blackColor, whiteColor, bgColor, tutorColor;
 
     int width_;
     int height_;

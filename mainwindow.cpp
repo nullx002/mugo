@@ -39,6 +39,9 @@ MainWindow::MainWindow(QWidget *parent)
     ui->boardWidget->setShowMoveNumber(0);
     setEditMode(ui->actionAlternateMove, BoardWidget::eAlternateMove);
 
+    // window settings
+    setGeometry(x(), y(), settings.value("width", WIN_W).toInt(), settings.value("height", WIN_H).toInt());
+
     // for open URL
     http = new QHttp(this);
     connect( http, SIGNAL(readyRead(const QHttpResponseHeader&)), this, SLOT(openUrlReadReady(const QHttpResponseHeader&)) );
@@ -217,6 +220,10 @@ MainWindow::MainWindow(QWidget *parent)
 }
 
 MainWindow::~MainWindow(){
+    QSettings settings;
+    settings.setValue("width", geometry().width());
+    settings.setValue("height", geometry().height());
+
     delete ui;
 
     delete http;
@@ -1309,20 +1316,43 @@ void MainWindow::on_actionPlayWithGnugo_triggered(){
 
 /**
 * Slot
-* Options -> Setup
+* Tools -> Tutor Boss Sides
 */
-void MainWindow::on_actionOptions_triggered(){
-    SetupDialog dlg(this);
-    if (dlg.exec() != QDialog::Accepted)
-        return;
-
-    ui->boardWidget->readSettings();
-    ui->boardWidget->repaintBoard();
+void MainWindow::on_actionTutorBossSides_triggered(){
+    if (ui->actionTutorBossSides->isChecked()){
+        ui->boardWidget->setTutorMode(BoardWidget::eTutorBossSides);
+        ui->actionTutorOneSide->setChecked(false);
+    }
+    else
+        ui->boardWidget->setTutorMode(BoardWidget::eNoTutor);
 }
 
 /**
 * Slot
-* Options -> 19 x 19 Board
+* Tools -> Tutor One Side
+*/
+void MainWindow::on_actionTutorOneSide_triggered(){
+    if (ui->actionTutorOneSide->isChecked()){
+        ui->boardWidget->setTutorMode(BoardWidget::eTutorOneSide);
+        ui->actionTutorBossSides->setChecked(false);
+    }
+    else
+        ui->boardWidget->setTutorMode(BoardWidget::eNoTutor);
+}
+
+/**
+* Slot
+* Tools -> Play Sound
+*/
+void MainWindow::on_actionPlaySound_triggered(){
+    QSettings setting;
+    setting.setValue("sound/play", ui->actionPlaySound->isChecked());
+    ui->boardWidget->setPlaySound( ui->actionPlaySound->isChecked() );
+}
+
+/**
+* Slot
+* Tools -> 19 x 19 Board
 */
 void MainWindow::on_action19x19Board_triggered(){
     fileNew(19, 19);
@@ -1330,7 +1360,7 @@ void MainWindow::on_action19x19Board_triggered(){
 
 /**
 * Slot
-* Options -> 13 x 13 Board
+* Tools -> 13 x 13 Board
 */
 void MainWindow::on_action13x13Board_triggered(){
     fileNew(13, 13);
@@ -1338,7 +1368,7 @@ void MainWindow::on_action13x13Board_triggered(){
 
 /**
 * Slot
-* Options -> 9 x 9 Board
+* Tools -> 9 x 9 Board
 */
 void MainWindow::on_action9x9Board_triggered(){
     fileNew(9, 9);
@@ -1346,7 +1376,7 @@ void MainWindow::on_action9x9Board_triggered(){
 
 /**
 * Slot
-* Options -> Custom Board Size
+* Tools -> Custom Board Size
 */
 void MainWindow::on_actionCustomBoardSize_triggered(){
     QInputDialog dlg(this);
@@ -1382,39 +1412,45 @@ void MainWindow::on_actionCustomBoardSize_triggered(){
 
 /**
 * Slot
-* Options -> Play Sound
-*/
-void MainWindow::on_actionPlaySound_triggered(){
-    QSettings setting;
-    setting.setValue("sound/play", ui->actionPlaySound->isChecked());
-    ui->boardWidget->setPlaySound( ui->actionPlaySound->isChecked() );
-}
-
-/**
-* Slot
-* Options -> Language -> System Default
+* Tools -> Language -> System Default
 */
 void MainWindow::on_actionLanguageSystemDefault_triggered(){
     QSettings settings;
     settings.remove("language");
+    alertLanguageChanged();
 }
 
 /**
 * Slot
-* Options -> Language -> English
+* Tools -> Language -> English
 */
 void MainWindow::on_actionLanguageEnglish_triggered(){
     QSettings settings;
     settings.setValue("language", "en");
+    alertLanguageChanged();
 }
 
 /**
 * Slot
-* Options -> Language -> Japanese
+* Tools -> Language -> Japanese
 */
 void MainWindow::on_actionLanguageJapanese_triggered(){
     QSettings settings;
     settings.setValue("language", "ja_JP");
+    alertLanguageChanged();
+}
+
+/**
+* Slot
+* Tools -> Options
+*/
+void MainWindow::on_actionOptions_triggered(){
+    SetupDialog dlg(this);
+    if (dlg.exec() != QDialog::Accepted)
+        return;
+
+    ui->boardWidget->readSettings();
+    ui->boardWidget->repaintBoard();
 }
 
 /**
@@ -2455,4 +2491,8 @@ void MainWindow::EndGtpGame(){
     ui->boardWidget->playWithComputer(NULL, false);
 
     setPlayWithComputerMode(false);
+}
+
+void MainWindow::alertLanguageChanged(){
+    QMessageBox::information(this, APPNAME, tr("Changing the language requires that application be restarted."));
 }

@@ -12,6 +12,11 @@
 #include "command.h"
 #include "ui_boardwidget.h"
 
+#ifdef Q_WS_WIN
+#   define usleep Sleep
+#else
+#   include <unistd.h>
+#endif
 
 Sound::Sound(QWidget* parent_) : parent(parent_){
 #if defined(Q_WS_WIN)
@@ -41,7 +46,7 @@ void Sound::setCurrentSource(const QString& source){
 
 void Sound::play(){
 #if defined(Q_WS_WIN)
-    double currentClock = clock() / CLOCKS_PER_SEC;
+    double currentClock = (double)clock() / CLOCKS_PER_SEC;
     if (mop.wDeviceID && currentClock - lastClock > 0.2){
         mciSendCommand(mop.wDeviceID, MCI_STOP, 0, 0);
         mciSendCommand(mop.wDeviceID, MCI_SEEK, MCI_SEEK_TO_START, 0);
@@ -77,6 +82,7 @@ BoardWidget::BoardWidget(QWidget *parent) :
     showMarker(true),
     showBranchMoves(true),
     editMode(eAlternateMove),
+    tutorMode(eNoTutor),
     moveToClicked(false),
     rotateBoard_(0),
     flipBoardHorizontally_(false),
@@ -108,9 +114,11 @@ void BoardWidget::readSettings(){
     whiteType = settings.value("board/whiteType").toInt();
     blackType = settings.value("board/blackType").toInt();
 
-    boardColor = settings.value("board/boardColor").value<QColor>();
-    whiteColor = settings.value("board/whiteColor").value<QColor>();
-    blackColor = settings.value("board/blackColor").value<QColor>();
+    boardColor = settings.value("board/boardColor", BOARD_COLOR).value<QColor>();
+    whiteColor = settings.value("board/whiteColor", WHITE_COLOR).value<QColor>();
+    blackColor = settings.value("board/blackColor", BLACK_COLOR).value<QColor>();
+    bgColor    = settings.value("board/bgColor", BG_COLOR).value<QColor>();
+    tutorColor = settings.value("board/bgTutorColor", BG_TUTOR_COLOR).value<QColor>();
 }
 
 /**
@@ -156,7 +164,7 @@ void BoardWidget::mouseMoveEvent(QMouseEvent* e){
         return;
 
     bool black;
-    if (editMode == eAlternateMove || editMode == eGtp)
+    if (editMode == eAlternateMove || editMode == eGtp || tutorMode == eTutorBossSides || tutorMode == eTutorOneSide)
         black = isBlack;
     else if (editMode == eAddBlack || editMode == eAddWhite)
         black = editMode == eAddBlack;
@@ -182,8 +190,10 @@ void BoardWidget::mouseMoveEvent(QMouseEvent* e){
 void BoardWidget::wheelEvent(QWheelEvent* e){
     QWidget::wheelEvent(e);
 
-    go::nodeList::iterator iter = qFind(nodeList.begin(), nodeList.end(), currentNode);
+    if (tutorMode != eNoTutor)
+        return;
 
+    go::nodeList::iterator iter = qFind(nodeList.begin(), nodeList.end(), currentNode);
     if (e->delta() > 0){
         if (iter != nodeList.begin() && iter != nodeList.end())
             setCurrentNode( *--iter );
@@ -204,8 +214,8 @@ void BoardWidget::resizeEvent(QResizeEvent* e){
 /**
 */
 void BoardWidget::onLButtonDown(QMouseEvent* e){
-    int boardX = (e->x() - xlines[0] + boxSize / 2) / boxSize;
-    int boardY = (e->y() - ylines[0] + boxSize / 2) / boxSize;
+    int boardX = (int)floor( double(e->x() - xlines[0] + boxSize / 2) / boxSize );
+    int boardY = (int)floor( double(e->y() - ylines[0] + boxSize / 2) / boxSize );
 
     if (boardX < 0 || boardX >= xsize || boardY < 0 || boardY >= ysize)
         return;
@@ -215,10 +225,23 @@ void BoardWidget::onLButtonDown(QMouseEvent* e){
 
     if (editMode == eGtp)
         gtpLButtonDown(sgfX, sgfY);
-    else if (moveToClicked && board[boardY][boardX].node)
-        setCurrentNode( board[boardY][boardX].node );
-    else if (editMode == eAlternateMove)
-        addStoneNodeCommand(sgfX, sgfY, boardX, boardY);
+    else if (tutorMode == eTutorBossSides)
+        tutor(sgfX, sgfY);
+    else if (tutorMode == eTutorOneSide){
+        if (tutor(sgfX, sgfY)){
+            go::nodeList::iterator iter = qFind(nodeList.begin(), nodeList.end(), currentNode);
+            if (iter != nodeList.end() && ++iter != nodeList.end()){
+                usleep(500);
+                setCurrentNode(*iter);
+            }
+        }
+    }
+    else if (editMode == eAlternateMove){
+        if (moveToClicked && board[boardY][boardX].node)
+            setCurrentNode( board[boardY][boardX].node );
+        else
+            addStoneNodeCommand(sgfX, sgfY, boardX, boardY);
+    }
     else if (editMode == eCountTerritory){
         addTerritory(boardX, boardY);
         int alive_b=0, alive_w=0, dead_b=0, dead_w=0, bt=0, wt=0;
@@ -279,7 +302,10 @@ void BoardWidget::paintBoard(QPaintDevice* pd){
     p.setFont(font);
     p.setPen(Qt::black);
 
-    p.fillRect(0, 0, width_, height_, Qt::white);
+    if (tutorMode != eNoTutor)
+        p.fillRect(0, 0, width_, height_, tutorColor);
+    else
+        p.fillRect(0, 0, width_, height_, bgColor);
 
     drawBoard(p);
     drawCoordinates(p);
@@ -550,6 +576,9 @@ go::nodePtr BoardWidget::findNodeFromMoveNumber(int moveNumber){
 * public slot
 */
 void BoardWidget::addNodeCommand(go::nodePtr parentNode, go::nodePtr childNode, bool select){
+    if (tutorMode != eNoTutor)
+        return;
+
     undoStack.push( new AddNodeCommand(this, parentNode, childNode, select) );
 }
 
@@ -557,6 +586,9 @@ void BoardWidget::addNodeCommand(go::nodePtr parentNode, go::nodePtr childNode, 
 * public slot
 */
 void BoardWidget::insertNodeCommand(go::nodePtr parentNode, go::nodePtr childNode, bool select){
+    if (tutorMode != eNoTutor)
+        return;
+
     undoStack.push( new InsertNodeCommand(this, parentNode, childNode, select) );
 }
 
@@ -564,7 +596,9 @@ void BoardWidget::insertNodeCommand(go::nodePtr parentNode, go::nodePtr childNod
 * public slot
 */
 void BoardWidget::deleteNodeCommand(go::nodePtr node, bool deleteChildren){
-    if( node == goData.root )
+    if (tutorMode != eNoTutor)
+        return;
+    else if( node == goData.root )
         return;
 
     undoStack.push( new DeleteNodeCommand(this, node, deleteChildren) );
@@ -1362,14 +1396,8 @@ void BoardWidget::addStoneNodeCommand(int sgfX, int sgfY, int boardX, int boardY
     if (board[boardY][boardX].empty() == false)
         return;
 
-    go::nodeList::iterator iter = currentNode->childNodes.begin();
-    while (iter != currentNode->childNodes.end()){
-        if ((*iter)->getX() == sgfX && (*iter)->getY() == sgfY){
-            setCurrentNode(*iter);
-            return;
-        }
-        ++iter;
-    }
+    if (tutor(sgfX, sgfY))
+        return;
 
     board[boardY][boardX].color = isBlack ? go::black : go::white;
     if (isKill(boardX, boardY) == false && isDead(boardX, boardY) == true){
@@ -1384,6 +1412,21 @@ void BoardWidget::addStoneNodeCommand(int sgfX, int sgfY, int boardX, int boardY
         n = go::createWhiteNode(currentNode, sgfX, sgfY);
 
     addNodeCommand(currentNode, n);
+}
+
+/**
+*/
+bool BoardWidget::tutor(int sgfX, int sgfY){
+    go::nodeList::iterator iter = currentNode->childNodes.begin();
+    while (iter != currentNode->childNodes.end()){
+        if ((*iter)->getX() == sgfX && (*iter)->getY() == sgfY){
+            setCurrentNode(*iter);
+            return true;
+        }
+        ++iter;
+    }
+
+    return false;
 }
 
 /**
