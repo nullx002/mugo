@@ -3,7 +3,7 @@
 
 
 #define APPNAME "mugo"
-#define VERSION "0.12.0"
+#define VERSION "0.11.0"
 #define AUTHOR   "nsase"
 
 // default value
