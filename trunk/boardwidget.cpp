@@ -13,7 +13,7 @@
 #include "ui_boardwidget.h"
 
 #ifdef Q_WS_WIN
-#   define usleep Sleep
+#   define usleep(X) Sleep(X/1000)
 #else
 #   include <unistd.h>
 #endif
@@ -58,9 +58,7 @@ void Sound::play(){
         media->stop();
         media->seek(0);
     }
-    if (media){
-        media->play();
-    }
+    media->play();
 #endif
 }
 
@@ -234,7 +232,7 @@ void BoardWidget::onLButtonDown(QMouseEvent* e){
         if (tutor(sgfX, sgfY)){
             go::nodeList::iterator iter = qFind(nodeList.begin(), nodeList.end(), currentNode);
             if (iter != nodeList.end() && ++iter != nodeList.end()){
-                usleep(500);
+                usleep(500000);
                 setCurrentNode(*iter);
             }
         }

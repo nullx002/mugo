@@ -18,16 +18,30 @@ public:
     };
     typedef QList<marker> markerList;
 
+    class stone{
+    public:
+        stone(int x_, int y_, int color_) : x(x_), y(y_), color(color_){}
+
+        int x;
+        int y;
+        int color;
+    };
+    typedef QList<stone> stoneList;
+
     class data{
     public:
         typedef QList<data> dataList;
         typedef QList<dataList> branchList;
 
+        data() : x(0), y(0), index(0), color(0){}
+
         int x;
         int y;
+        int index;
         int color;
         QString comment;
         markerList markers;
+        stoneList  stones;
         branchList branches;
 
         bool operator ==(const data& d) const{
@@ -58,6 +72,7 @@ private:
 
     bool get(dataList::const_iterator first, dataList::const_iterator last, go::nodePtr parent) const;
     bool getData(const QStringList& list, data& d);
+    data* getNthData(int index);
 
     dataList dataList_;
     QString title;
