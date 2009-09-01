@@ -316,9 +316,9 @@
    <addaction name="actionSave"/>
    <addaction name="actionReload"/>
    <addaction name="separator"/>
-   <addaction name="actionGameInformation"/>
-   <addaction name="separator"/>
    <addaction name="actionSaveBoardAsPicture"/>
+   <addaction name="separator"/>
+   <addaction name="actionGameInformation"/>
   </widget>
   <widget class="QToolBar" name="optionToolBar">
    <property name="windowTitle">
@@ -411,7 +411,11 @@
       <number>0</number>
      </property>
      <item>
-      <widget class="QPlainTextEdit" name="commentWidget"/>
+      <widget class="QPlainTextEdit" name="commentWidget">
+       <property name="frameShape">
+        <enum>QFrame::Panel</enum>
+       </property>
+      </widget>
      </item>
     </layout>
    </widget>
@@ -430,6 +434,9 @@
      </property>
      <item>
       <widget class="QTreeWidget" name="branchWidget">
+       <property name="frameShape">
+        <enum>QFrame::Panel</enum>
+       </property>
        <property name="indentation">
         <number>15</number>
        </property>
@@ -471,7 +478,11 @@
       <number>0</number>
      </property>
      <item>
-      <widget class="QUndoView" name="undoView"/>
+      <widget class="QUndoView" name="undoView">
+       <property name="frameShape">
+        <enum>QFrame::Panel</enum>
+       </property>
+      </widget>
      </item>
     </layout>
    </widget>

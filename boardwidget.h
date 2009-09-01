@@ -283,7 +283,7 @@ private:
     QImage  white1, white2;
     QImage  boardImage1, boardImage2;
     QColor  boardColor, blackColor, whiteColor, bgColor, tutorColor;
-    QColor  lastMoveColor, branchColor;
+    QColor  focusColor, branchColor;
 
     int width_;
     int height_;

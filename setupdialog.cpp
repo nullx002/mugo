@@ -15,7 +15,7 @@ SetupDialog::SetupDialog(QWidget *parent) :
 
     // category list
     m_ui->categoryList->addItem( tr("Board") );
-    m_ui->categoryList->addItem( tr("Marker") );
+    m_ui->categoryList->addItem( tr("Markers") );
 
     // board
     m_ui->boardTypeComboBox->addItem( tr("Bitmap") );
@@ -47,8 +47,8 @@ SetupDialog::SetupDialog(QWidget *parent) :
     m_ui->bgTutorColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(tutorColor.red()).arg(tutorColor.green()).arg(tutorColor.blue()) );
 
     // last move
-    lastMoveColor = settings.value("board/lastMoveColor", LASTMOVE_COLOR).value<QColor>();
-    m_ui->lastMoveColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(lastMoveColor.red()).arg(lastMoveColor.green()).arg(lastMoveColor.blue()) );
+    focusColor = settings.value("board/focusColor", FOCUS_COLOR).value<QColor>();
+    m_ui->focusColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(focusColor.red()).arg(focusColor.green()).arg(focusColor.blue()) );
 
     // branch
     branchColor = settings.value("board/branchColor", BRANCH_COLOR).value<QColor>();
@@ -86,6 +86,10 @@ void SetupDialog::accept(){
     settings.setValue("board/blackColor", blackColor);
     settings.setValue("board/bgColor", bgColor);
     settings.setValue("board/bgTutorColor", tutorColor);
+
+    // last move
+    settings.setValue("board/focusColor", focusColor);
+    settings.setValue("board/branchColor", branchColor);
 }
 
 /**
@@ -158,14 +162,14 @@ void SetupDialog::on_bgTutorColorButton_clicked(){
 
 /**
 * slot
-* last move color button clicked
+* focus color button clicked
 */
-void SetupDialog::on_lastMoveColorButton_clicked(){
-    QColorDialog dlg(lastMoveColor, this);
+void SetupDialog::on_focusColorButton_clicked(){
+    QColorDialog dlg(focusColor, this);
     if (dlg.exec() != QDialog::Accepted)
         return;
-    lastMoveColor = dlg.selectedColor();
-    m_ui->lastMoveColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(lastMoveColor.red()).arg(lastMoveColor.green()).arg(lastMoveColor.blue()) );
+    focusColor = dlg.selectedColor();
+    m_ui->focusColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(focusColor.red()).arg(focusColor.green()).arg(focusColor.blue()) );
 }
 
 /**
