@@ -45,6 +45,14 @@ SetupDialog::SetupDialog(QWidget *parent) :
     // tutor
     tutorColor = settings.value("board/bgTutorColor", BG_TUTOR_COLOR).value<QColor>();
     m_ui->bgTutorColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(tutorColor.red()).arg(tutorColor.green()).arg(tutorColor.blue()) );
+
+    // last move
+    lastMoveColor = settings.value("board/lastMoveColor", LASTMOVE_COLOR).value<QColor>();
+    m_ui->lastMoveColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(lastMoveColor.red()).arg(lastMoveColor.green()).arg(lastMoveColor.blue()) );
+
+    // branch
+    branchColor = settings.value("board/branchColor", BRANCH_COLOR).value<QColor>();
+    m_ui->branchColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(branchColor.red()).arg(branchColor.green()).arg(branchColor.blue()) );
 }
 
 SetupDialog::~SetupDialog()
@@ -68,6 +76,8 @@ void SetupDialog::accept(){
     QDialog::accept();
 
     QSettings settings;
+
+    // board
     settings.setValue("board/boardType", m_ui->boardTypeComboBox->currentIndex());
     settings.setValue("board/whiteType", m_ui->whiteTypeComboBox->currentIndex());
     settings.setValue("board/blackType", m_ui->blackTypeComboBox->currentIndex());
@@ -127,7 +137,7 @@ void SetupDialog::on_blackColorButton_clicked(){
 * background color button clicked
 */
 void SetupDialog::on_bgColorButton_clicked(){
-    QColorDialog dlg(bgColor , this);
+    QColorDialog dlg(bgColor, this);
     if (dlg.exec() != QDialog::Accepted)
         return;
     bgColor = dlg.selectedColor();
@@ -139,9 +149,33 @@ void SetupDialog::on_bgColorButton_clicked(){
 * background in tutor color button clicked
 */
 void SetupDialog::on_bgTutorColorButton_clicked(){
-    QColorDialog dlg(tutorColor , this);
+    QColorDialog dlg(tutorColor, this);
     if (dlg.exec() != QDialog::Accepted)
         return;
     tutorColor = dlg.selectedColor();
     m_ui->bgTutorColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(tutorColor.red()).arg(tutorColor.green()).arg(tutorColor.blue()) );
+}
+
+/**
+* slot
+* last move color button clicked
+*/
+void SetupDialog::on_lastMoveColorButton_clicked(){
+    QColorDialog dlg(lastMoveColor, this);
+    if (dlg.exec() != QDialog::Accepted)
+        return;
+    lastMoveColor = dlg.selectedColor();
+    m_ui->lastMoveColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(lastMoveColor.red()).arg(lastMoveColor.green()).arg(lastMoveColor.blue()) );
+}
+
+/**
+* slot
+* branch color button clicked
+*/
+void SetupDialog::on_branchColorButton_clicked(){
+    QColorDialog dlg(branchColor, this);
+    if (dlg.exec() != QDialog::Accepted)
+        return;
+    branchColor = dlg.selectedColor();
+    m_ui->branchColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(branchColor.red()).arg(branchColor.green()).arg(branchColor.blue()) );
 }

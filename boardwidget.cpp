@@ -119,6 +119,9 @@ void BoardWidget::readSettings(){
     blackColor = settings.value("board/blackColor", BLACK_COLOR).value<QColor>();
     bgColor    = settings.value("board/bgColor", BG_COLOR).value<QColor>();
     tutorColor = settings.value("board/bgTutorColor", BG_TUTOR_COLOR).value<QColor>();
+
+    lastMoveColor = settings.value("board/lastMoveColor", LASTMOVE_COLOR).value<QColor>();
+    branchColor   = settings.value("board/branchColor", BRANCH_COLOR).value<QColor>();
 }
 
 /**
@@ -1029,6 +1032,9 @@ void BoardWidget::drawBranchMoves(QPainter& p, go::nodeList::iterator first, go:
     if (showBranchMoves == false)
         return;
 
+    p.save();
+    p.setPen( branchColor );
+
     char s[] = "A";
     while (first != last){
         int boardX, boardY;
@@ -1040,6 +1046,8 @@ void BoardWidget::drawBranchMoves(QPainter& p, go::nodeList::iterator first, go:
         }
         ++first;
     }
+
+    p.restore();
 }
 
 /**

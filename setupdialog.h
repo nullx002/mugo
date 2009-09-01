@@ -19,15 +19,26 @@ protected:
 
 private:
     Ui::SetupDialog *m_ui;
+
+    // board
     QColor boardColor, whiteColor, blackColor, bgColor, tutorColor;
+
+    // marker
+    QColor lastMoveColor, branchColor;
 
 private slots:
     void on_categoryList_currentRowChanged(int currentRow);
-    void on_blackColorButton_clicked();
-    void on_whiteColorButton_clicked();
+
+    // board
     void on_boardColorButton_clicked();
+    void on_whiteColorButton_clicked();
+    void on_blackColorButton_clicked();
     void on_bgColorButton_clicked();
     void on_bgTutorColorButton_clicked();
+
+    // marker
+    void on_lastMoveColorButton_clicked();
+    void on_branchColorButton_clicked();
 };
 
 #endif // SETUPDIALOG_H
