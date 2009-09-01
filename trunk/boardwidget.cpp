@@ -120,8 +120,8 @@ void BoardWidget::readSettings(){
     bgColor    = settings.value("board/bgColor", BG_COLOR).value<QColor>();
     tutorColor = settings.value("board/bgTutorColor", BG_TUTOR_COLOR).value<QColor>();
 
-    lastMoveColor = settings.value("board/lastMoveColor", LASTMOVE_COLOR).value<QColor>();
-    branchColor   = settings.value("board/branchColor", BRANCH_COLOR).value<QColor>();
+    focusColor  = settings.value("board/focusColor", FOCUS_COLOR).value<QColor>();
+    branchColor = settings.value("board/branchColor", BRANCH_COLOR).value<QColor>();
 }
 
 /**
@@ -1217,8 +1217,8 @@ void BoardWidget::drawCurrentMark(QPainter& p, go::nodePtr node){
     polygon[1] = QPointF(x - w, y + h);
     polygon[2] = QPointF(x + w, y + h);
 
-    p.setPen(Qt::red);
-    p.setBrush( QBrush(Qt::red) );
+    p.setPen(focusColor);
+    p.setBrush( QBrush(focusColor) );
     p.drawPolygon(polygon);
 
     p.restore();

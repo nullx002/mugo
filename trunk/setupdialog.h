@@ -23,8 +23,8 @@ private:
     // board
     QColor boardColor, whiteColor, blackColor, bgColor, tutorColor;
 
-    // marker
-    QColor lastMoveColor, branchColor;
+    // markers
+    QColor focusColor, branchColor;
 
 private slots:
     void on_categoryList_currentRowChanged(int currentRow);
@@ -37,7 +37,7 @@ private slots:
     void on_bgTutorColorButton_clicked();
 
     // marker
-    void on_lastMoveColorButton_clicked();
+    void on_focusColorButton_clicked();
     void on_branchColorButton_clicked();
 };
 

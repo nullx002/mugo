@@ -35,7 +35,7 @@
         <enum>QFrame::Plain</enum>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="page">
         <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -214,20 +214,20 @@
        <widget class="QWidget" name="page_2">
         <layout class="QVBoxLayout" name="verticalLayout_3">
          <item>
-          <widget class="QGroupBox" name="groupBox">
+          <widget class="QGroupBox" name="markersGroupBox">
            <property name="title">
-            <string>GroupBox</string>
+            <string>Markers</string>
            </property>
            <layout class="QFormLayout" name="formLayout_4">
             <item row="0" column="0">
-             <widget class="QLabel" name="lastMoveLabel">
+             <widget class="QLabel" name="focusLabel">
               <property name="text">
-               <string>Last Move</string>
+               <string>Focus Color</string>
               </property>
              </widget>
             </item>
             <item row="0" column="1">
-             <widget class="QPushButton" name="lastMoveColorButton">
+             <widget class="QPushButton" name="focusColorButton">
               <property name="text">
                <string/>
               </property>
@@ -239,7 +239,7 @@
             <item row="1" column="0">
              <widget class="QLabel" name="branchLabel">
               <property name="text">
-               <string>Branch</string>
+               <string>Branch Color</string>
               </property>
              </widget>
             </item>
@@ -298,6 +298,8 @@
   <tabstop>blackTypeComboBox</tabstop>
   <tabstop>blackColorButton</tabstop>
   <tabstop>buttonBox</tabstop>
+  <tabstop>focusColorButton</tabstop>
+  <tabstop>branchColorButton</tabstop>
  </tabstops>
  <resources/>
  <connections>

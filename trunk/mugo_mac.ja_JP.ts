@@ -17,22 +17,22 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="boardwidget.cpp" line="384"/>
+        <location filename="boardwidget.cpp" line="387"/>
         <source>Rotate SGF</source>
         <translation type="unfinished">回転</translation>
     </message>
     <message>
-        <location filename="boardwidget.cpp" line="392"/>
+        <location filename="boardwidget.cpp" line="395"/>
         <source>Flip SGF Horizontally</source>
         <translation type="unfinished">左右に反転</translation>
     </message>
     <message>
-        <location filename="boardwidget.cpp" line="400"/>
+        <location filename="boardwidget.cpp" line="403"/>
         <source>Flip SGF Vertically</source>
         <translation type="unfinished">上下に反転</translation>
     </message>
     <message>
-        <location filename="boardwidget.cpp" line="1986"/>
+        <location filename="boardwidget.cpp" line="1994"/>
         <source>Computer resign.</source>
         <oldsource>Computer resign</oldsource>
         <translation type="unfinished">コンピュータが投了しました。</translation>
@@ -1319,12 +1319,14 @@ Do you want to save your changes?</source>
     <message>
         <location filename="setupdialog.cpp" line="17"/>
         <source>Board</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">碁盤</translation>
     </message>
     <message>
         <location filename="setupdialog.cpp" line="18"/>
-        <source>Marker</source>
-        <translation type="unfinished"></translation>
+        <location filename="setupdialog.ui" line="219"/>
+        <source>Markers</source>
+        <oldsource>Marker</oldsource>
+        <translation type="unfinished">マーカー</translation>
     </message>
     <message>
         <location filename="setupdialog.cpp" line="21"/>
@@ -1391,6 +1393,16 @@ Do you want to save your changes?</source>
         <location filename="setupdialog.ui" line="160"/>
         <source>Black Settings</source>
         <translation type="unfinished">黒石の設定</translation>
+    </message>
+    <message>
+        <location filename="setupdialog.ui" line="225"/>
+        <source>Focus Color</source>
+        <translation type="unfinished">フォーカスの色</translation>
+    </message>
+    <message>
+        <location filename="setupdialog.ui" line="242"/>
+        <source>Branch Color</source>
+        <translation type="unfinished">分岐の色</translation>
     </message>
 </context>
 <context>

@@ -14,7 +14,7 @@
 #define BLACK_COLOR QColor(0, 0, 0)
 #define BG_COLOR QColor(255, 255, 255)
 #define BG_TUTOR_COLOR QColor(85, 175, 127)
-#define LASTMOVE_COLOR QColor(255, 0, 0)
+#define FOCUS_COLOR QColor(255, 0, 0)
 #define BRANCH_COLOR QColor(00, 0, 255)
 
 #endif // APPDEF_H
