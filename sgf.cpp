@@ -120,7 +120,7 @@ bool sgf::node::get(go::nodePtr n, const QString& key, const QStringList& values
             infoNode->ysize = values[0].mid(p+1).toInt();
         }
     }
-    else if (infoNode && (key == "KM" || key == "KO"))
+    else if (infoNode && (key == "KM" || key == "KO")) // KM is correct, KO is used by cyber oro.
         infoNode->komi = values[0].toDouble();
     else if (infoNode && key == "HA")
         infoNode->handicap = values[0].toInt();
@@ -128,9 +128,9 @@ bool sgf::node::get(go::nodePtr n, const QString& key, const QStringList& values
         infoNode->time = values[0];
     else if (infoNode && key == "OT")
         infoNode->overTime = values[0];
-    else if (infoNode && key == "DT")
+    else if (infoNode && (key == "DT" || key == "RD"))  // DT is correct, RD is cyber oro
         infoNode->date = values[0];
-    else if (infoNode && key == "GN")
+    else if (infoNode && (key == "GN" || key == "TE"))  // GN is correct, TE is cyber oro
         infoNode->gameName = values[0];
     else if (infoNode && key == "RO")
         infoNode->round = values[0];
@@ -138,7 +138,7 @@ bool sgf::node::get(go::nodePtr n, const QString& key, const QStringList& values
         infoNode->place = values[0];
     else if (infoNode && key == "EV")
         infoNode->event = values[0];
-    else if (infoNode && key == "GC")
+    else if (infoNode && (key == "GC" || key == "TC")) // GC is correct, TC is cyber oro.
         infoNode->gameComment = values[0];
     else if (infoNode && key == "AN")
         infoNode->annotation = values[0];

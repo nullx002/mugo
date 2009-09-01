@@ -71,6 +71,12 @@ bool ugf::get(go::data& data) const{
         ++marker;
     }
 
+    stoneList::const_iterator stone = first->stones.begin();
+    while (stone != first->stones.end()){
+        data.root->stones.push_back( go::stone(stone->x, stone->y, (go::color)stone->color) );
+        ++stone;
+    }
+
     return get(++first, dataList_.end(), data.root);
 }
 
@@ -179,15 +185,17 @@ bool ugf::readData(QString::iterator& first, QString::iterator& last){
         if (list.size() != 4)
             continue;
 
-        if (list[2].toInt() < 1)
-            continue;
-
         if (list[0].size() < 2)
             continue;
 
         data d;
-        if (getData(list, d))
-            dataList_.push_back(d);
+        if (getData(list, d)){
+            data* d2 = getNthData(list[2].toInt());
+            if (d2)
+                d2->stones.push_back( stone(d.x, d.y, d.color) );
+            else
+                dataList_.push_back(d);
+        }
     }
 
     return true;
@@ -209,10 +217,9 @@ bool ugf::readFigure(QString::iterator& first, QString::iterator& last){
 }
 
 bool ugf::readFigureText(QString::iterator& first, QString::iterator& last, int index){
-    if (dataList_.size() <= index)
+    data* d = getNthData(index);
+    if (d == NULL)
         return false;
-
-    data& d = dataList_[index];
 
     while (first != last && *first != '['){
         QString str = readLine(first, last);
@@ -222,12 +229,12 @@ bool ugf::readFigureText(QString::iterator& first, QString::iterator& last, int 
 
             QStringList list =  str.split(',');
             if (list[0] == ".#" && list.size() >= 4)
-                d.markers.push_back( marker(list[1].toInt()-1, list[2].toInt()-1, list[3]) );
+                d->markers.push_back( marker(list[1].toInt()-1, list[2].toInt()-1, list[3]) );
         }
         else{
-            if (!d.comment.isEmpty())
-                d.comment.push_back('\n');
-            d.comment.append(str);
+            if (!d->comment.isEmpty())
+                d->comment.push_back('\n');
+            d->comment.append(str);
         }
     }
 
@@ -250,12 +257,11 @@ bool ugf::readComment(QString::iterator& first, QString::iterator& last){
 }
 
 bool ugf::readBranch(QString::iterator& first, QString::iterator& last, int index){
-    if (dataList_.size() <= index)
+    data* d = getNthData(index);
+    if (d == NULL)
         return false;
 
-    data& d = dataList_[index];
     dataList branch;
-
     while (first != last && *first != '['){
         QString str = readLine(first, last);
         if (str == ".EndFig")
@@ -272,7 +278,7 @@ bool ugf::readBranch(QString::iterator& first, QString::iterator& last, int inde
                 branch.push_back(d2);
     }
 
-    d.branches.push_back(branch);
+    d->branches.push_back(branch);
 
     return true;
 }
@@ -295,6 +301,12 @@ bool ugf::get(dataList::const_iterator first, dataList::const_iterator last, go:
         ++marker;
     }
 
+    stoneList::const_iterator stone = first->stones.begin();
+    while (stone != first->stones.end()){
+        node->stones.push_back( go::stone(stone->x, stone->y, (go::color)stone->color) );
+        ++stone;
+    }
+
     parent->childNodes.push_back(node);
 
     get(first+1, last, node);
@@ -313,13 +325,23 @@ bool ugf::getData(const QStringList& list, data& d){
     if (list[1].size() < 2)
         return false;
 
+    if (list[1][0] != 'B' && list[1][0] != 'W')
+        return false;
+
     d.x = list[0][0].toAscii() - 'A';
     d.y = list[0][1].toAscii() - 'A';
+    d.index = list[2].toInt();
     d.color = list[1][0] == 'B' ? go::black : go::white;
 
     return true;
 }
 
+ugf::data* ugf::getNthData(int index){
+    for (int i=0; i<dataList_.size(); ++i)
+        if (dataList_[i].index == index)
+            return &dataList_[i];
+    return NULL;
+}
 
 
 
