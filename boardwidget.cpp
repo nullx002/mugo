@@ -1,6 +1,7 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QSettings>
+#include <QFileInfo>
 #include <QPainter>
 #include <QMouseEvent>
 #include <QSound>
@@ -86,9 +87,6 @@ BoardWidget::BoardWidget(QWidget *parent) :
     flipBoardHorizontally_(false),
     flipBoardVertically_(false),
     playSound(false),
-    black1(":/res/black_128_ds.png"),
-    white1(":/res/white_128_ds.png"),
-    boardImage1(":/res/bg.png"),
     stoneSound(this)
 {
     m_ui->setupUi(this);
@@ -108,18 +106,73 @@ BoardWidget::~BoardWidget()
 void BoardWidget::readSettings(){
     QSettings settings;
 
-    boardType = settings.value("board/boardType").toInt();
-    whiteType = settings.value("board/whiteType").toInt();
-    blackType = settings.value("board/blackType").toInt();
-
+    // board
+    boardType  = settings.value("board/boardType").toInt();
     boardColor = settings.value("board/boardColor", BOARD_COLOR).value<QColor>();
-    whiteColor = settings.value("board/whiteColor", WHITE_COLOR).value<QColor>();
-    blackColor = settings.value("board/blackColor", BLACK_COLOR).value<QColor>();
     bgColor    = settings.value("board/bgColor", BG_COLOR).value<QColor>();
     tutorColor = settings.value("board/bgTutorColor", BG_TUTOR_COLOR).value<QColor>();
+    if (boardType == 0){
+        if (boardImage1.load(":/res/bg.png") == false)
+            boardType = 2;
+    }
+    else if (boardType == 1){
+        if (boardImage1.load( settings.value("board/boardPath").toString() ) == false)
+            boardType = 2;
+    }
 
+    // black stone
+    whiteType  = settings.value("board/whiteType").toInt();
+    whiteColor = settings.value("board/whiteColor", WHITE_COLOR).value<QColor>();
+    if (whiteType == 0){
+        if (white1.load(":/res/white_128_ds.png") == false)
+            whiteType = 2;
+    }
+    else{
+        if (white1.load( settings.value("board/whitePath").toString() ) == false)
+            whiteType = 2;
+    }
+
+    // white stone
+    blackColor = settings.value("board/blackColor", BLACK_COLOR).value<QColor>();
+    blackType  = settings.value("board/blackType").toInt();
+    if (blackType == 0){
+        if (black1.load(":/res/black_128_ds.png") == false)
+            blackType = 2;
+    }
+    else{
+        if (black1.load( settings.value("board/blackPath").toString() ) == false)
+            blackType = 2;
+    }
+
+    // markers
     focusColor  = settings.value("board/focusColor", FOCUS_COLOR).value<QColor>();
     branchColor = settings.value("board/branchColor", BRANCH_COLOR).value<QColor>();
+
+    // sound
+    if (settings.value("board/soundType").toInt() == 0){
+        QStringList soundPathList;
+#if defined(Q_WS_MAC)
+        soundPathList.push_back( QFileInfo(qApp->applicationDirPath() + "/../Resources/sounds/").absolutePath() );
+#endif
+        soundPathList.push_back(qApp->applicationDirPath() + "/sounds");
+        soundPathList.push_back("/usr/share/" APPNAME "/sounds");
+        soundPathList.push_back("/usr/local/share/" APPNAME "/sounds");
+        soundPathList.push_back("./sounds");
+        QStringList::iterator iter = soundPathList.begin();
+        while (iter != soundPathList.end()){
+            QFileInfo finfo( *iter + "/stone.wav" );
+            if (finfo.exists()){
+                setStoneSoundPath(finfo.filePath());
+                break;
+            }
+            ++iter;
+        }
+    }
+    else{
+        QFileInfo finfo( settings.value("board/soundPath").toString() );
+        if (finfo.exists())
+            setStoneSoundPath(finfo.filePath());
+    }
 }
 
 /**
@@ -829,12 +882,12 @@ void BoardWidget::drawBoard(QPainter& p){
 //    if (boardRect.width() != boardImage2.width()){
         boardImage2 = QImage(boardRect.size(), QImage::Format_RGB32);
         QPainter board(&boardImage2);
-        if (boardType == 0)
+        if (boardType == 0 || boardType == 1)
             board.fillRect(0, 0, boardRect.width(), boardRect.height(), QBrush(boardImage1));
         else
             board.fillRect(0, 0, boardRect.width(), boardRect.height(), boardColor);
 
-        if (blackType == 0)
+        if (blackType == 0 || blackType == 1)
             black2 = black1.scaled(boxSize, boxSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
         else{
             black2 = QImage(boxSize, boxSize, QImage::Format_ARGB32);
@@ -846,7 +899,7 @@ void BoardWidget::drawBoard(QPainter& p){
             p2.drawEllipse(1, 1, boxSize-2, boxSize-2);
         }
 
-        if (whiteType == 0)
+        if (whiteType == 0 || whiteType == 1)
             white2 = white1.scaled(boxSize, boxSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
         else{
             white2 = QImage(boxSize, boxSize, QImage::Format_ARGB32);

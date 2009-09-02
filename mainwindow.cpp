@@ -50,23 +50,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     // set sound files
     ui->actionPlaySound->setChecked( settings.value("sound/play").toBool() );
-    QStringList soundPathList;
-#if defined(Q_WS_MAC)
-    soundPathList.push_back( QFileInfo(qApp->applicationDirPath() + "/../Resources/sounds/").absolutePath() );
-#endif
-    soundPathList.push_back(qApp->applicationDirPath() + "/sounds");
-    soundPathList.push_back("/usr/share/" APPNAME "/sounds");
-    soundPathList.push_back("/usr/local/share/" APPNAME "/sounds");
-    soundPathList.push_back("./sounds");
-    QStringList::iterator iter = soundPathList.begin();
-    while (iter != soundPathList.end()){
-        QFileInfo finfo( *iter + "/stone.wav" );
-        if (finfo.exists()){
-            ui->boardWidget->setStoneSoundPath(finfo.filePath());
-            break;
-        }
-        ++iter;
-    }
     ui->boardWidget->setPlaySound( ui->actionPlaySound->isChecked() );
 
     // recent files
@@ -1673,7 +1656,7 @@ bool MainWindow::fileNew(int xsize, int ysize, int handicap, double komi){
 */
 bool MainWindow::fileOpen(){
     QString selectedFilter;
-    QString fname = QFileDialog::getOpenFileName(this, QString(), QString(), tr("All Go Format(*.sgf *.ugf *.ugi);;sgf(*.sgf);;ugf(*.ugf *.ugi)"), &selectedFilter);
+    QString fname = QFileDialog::getOpenFileName(this, QString(), QString(), tr("All Go Format(*.sgf *.ugf *.ugi);;sgf(*.sgf);;ugf(*.ugf *.ugi);;All Files(*.*)"), &selectedFilter);
     if (fname.isEmpty())
         return  false;
 
@@ -1801,6 +1784,42 @@ bool MainWindow::maybeSave(){
 }
 
 /**
+*/
+void MainWindow::setCurrentFile(const QString& fname){
+    fileName = fname;
+
+    QSettings settings;
+    QStringList files = settings.value("recentFileList").toStringList();
+    files.removeAll(fileName);
+    files.prepend(fileName);
+    while (files.size() > MaxRecentFiles)
+        files.removeLast();
+    settings.setValue("recentFileList", files);
+
+    updateRecentFileActions();
+}
+
+/**
+*/
+void MainWindow::updateRecentFileActions()
+{
+    QSettings settings;
+    QStringList files = settings.value("recentFileList").toStringList();
+
+    int numRecentFiles = qMin(files.size(), (int)MaxRecentFiles);
+
+    for (int i = 0; i < numRecentFiles; ++i) {
+        QString text = QFileInfo(files[i]).fileName();
+        recentFileActs[i]->setText(text);
+        recentFileActs[i]->setData(files[i]);
+        recentFileActs[i]->setVisible(true);
+    }
+
+    for (int j = numRecentFiles; j < MaxRecentFiles; ++j)
+        recentFileActs[j]->setVisible(false);
+}
+
+/**
 * slot
 * receive open url data.
 */
@@ -1825,11 +1844,17 @@ void MainWindow::openUrlReadReady(const QHttpResponseHeader& resp){
     downloadBuff.append(ba);
 }
 
+/**
+* slot
+*/
 void MainWindow::openUrlReadProgress(int done, int total){
     progressDialog->setRange(0, total);
     progressDialog->setValue(done);
 }
 
+/**
+* slot
+*/
 void MainWindow::openUrlDone(bool error){
     qDebug() << "openURLDone: " << error;
     delete progressDialog;
@@ -1849,6 +1874,9 @@ void MainWindow::openUrlDone(bool error){
     setCaption();
 }
 
+/**
+* slot
+*/
 void MainWindow::openUrlCancel(){
     http->abort();
 }
@@ -2132,44 +2160,13 @@ void MainWindow::setNodeAnnotation(QAction* action, int annotation){
     ui->boardWidget->setNodeAnnotation(nodeAnnotation);
 }
 
-void MainWindow::setCurrentFile(const QString& fname){
-    fileName = fname;
-
-    QSettings settings;
-    QStringList files = settings.value("recentFileList").toStringList();
-    files.removeAll(fileName);
-    files.prepend(fileName);
-    while (files.size() > MaxRecentFiles)
-        files.removeLast();
-    settings.setValue("recentFileList", files);
-
-    updateRecentFileActions();
-}
-
-void MainWindow::updateRecentFileActions()
-{
-    QSettings settings;
-    QStringList files = settings.value("recentFileList").toStringList();
-
-    int numRecentFiles = qMin(files.size(), (int)MaxRecentFiles);
-
-    for (int i = 0; i < numRecentFiles; ++i) {
-        QString text = QFileInfo(files[i]).fileName();
-        recentFileActs[i]->setText(text);
-        recentFileActs[i]->setData(files[i]);
-        recentFileActs[i]->setVisible(true);
-    }
-
-    for (int j = numRecentFiles; j < MaxRecentFiles; ++j)
-        recentFileActs[j]->setVisible(false);
-}
-
 void MainWindow::setCountTerritoryMode(bool on){
     countTerritoryMode = on;
 
     static QAction* act[] = {
         ui->actionNew,
         ui->actionOpen,
+        ui->actionOpenURL,
         ui->actionSave,
         ui->actionSaveAs,
         ui->actionReload,
@@ -2282,6 +2279,8 @@ void MainWindow::setCountTerritoryMode(bool on){
 
 //        ui->actionCountTerritory,
         ui->actionPlayWithGnugo,
+        ui->actionTutorBossSides,
+        ui->actionTutorOneSide,
         ui->actionPlaySound,
         ui->action19x19Board,
         ui->action13x13Board,
@@ -2329,6 +2328,7 @@ void MainWindow::setPlayWithComputerMode(bool on){
     static QAction* act[] = {
         ui->actionNew,
         ui->actionOpen,
+        ui->actionOpenURL,
         ui->actionSave,
         ui->actionSaveAs,
         ui->actionReload,
@@ -2441,6 +2441,8 @@ void MainWindow::setPlayWithComputerMode(bool on){
 
         ui->actionCountTerritory,
 //        ui->actionPlayWithGnugo,
+        ui->actionTutorBossSides,
+        ui->actionTutorOneSide,
         ui->actionPlaySound,
         ui->action19x19Board,
         ui->action13x13Board,

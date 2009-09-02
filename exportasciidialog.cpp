@@ -106,8 +106,7 @@ void ExportAsciiDialog::createJapaneseAscii(){
 #ifdef Q_WS_WIN
     QFont f(QString::fromUtf8("ＭＳ ゴシック"), 8);
     m_ui->asciiTextEdit->setFont(f);
-#endif
-#ifdef Q_WS_MAC
+#elif defined(Q_WS_MAC)
     QFont f(QString::fromUtf8("Osaka−等幅"), 8);
     m_ui->asciiTextEdit->setFont(f);
 #endif

@@ -127,7 +127,7 @@ public:
     void flipBoardVertically(bool flip);
     void resetBoard();
     void setPlaySound(bool play){ playSound = play; }
-    void setStoneSoundPath(const QString& path){ stoneSoundPath = path; stoneSound.setCurrentSource(path); }
+    void setStoneSoundPath(const QString& path){ stoneSound.setCurrentSource(path); }
     void setCountTerritoryMode(bool countMode);
     void whiteFirst(bool whiteFirst);
 
@@ -273,9 +273,7 @@ private:
     int  rotateBoard_;
     bool flipBoardHorizontally_;
     bool flipBoardVertically_;
-
     bool playSound;
-    QString stoneSoundPath;
 
     // draw object
     QPixmap offscreenBuffer1, offscreenBuffer2, offscreenBuffer3;
