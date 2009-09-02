@@ -13,6 +13,9 @@
   <property name="windowTitle">
    <string>Setup</string>
   </property>
+  <property name="sizeGripEnabled">
+   <bool>true</bool>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
@@ -35,20 +38,23 @@
         <enum>QFrame::Plain</enum>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>3</number>
        </property>
-       <widget class="QWidget" name="page">
+       <widget class="QWidget" name="boardPage">
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <item>
           <widget class="QGroupBox" name="boardGroupBox">
            <property name="title">
-            <string>Board Settings</string>
+            <string>Board</string>
            </property>
            <layout class="QFormLayout" name="formLayout">
+            <property name="fieldGrowthPolicy">
+             <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+            </property>
             <item row="0" column="0">
              <widget class="QLabel" name="boardTypeLabel">
               <property name="text">
-               <string>Board Type</string>
+               <string>Type</string>
               </property>
              </widget>
             </item>
@@ -58,7 +64,7 @@
             <item row="1" column="0">
              <widget class="QLabel" name="boardColorLabel">
               <property name="text">
-               <string>Board Color</string>
+               <string>Color</string>
               </property>
              </widget>
             </item>
@@ -75,31 +81,44 @@
               </property>
              </widget>
             </item>
-            <item row="3" column="0">
-             <widget class="QLabel" name="bgTutorColorLabel">
-              <property name="text">
-               <string>Background in Tutor</string>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="1">
-             <widget class="QPushButton" name="bgTutorColorButton">
-              <property name="text">
-               <string/>
-              </property>
-              <property name="flat">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
             <item row="2" column="0">
+             <widget class="QLabel" name="boardPathLabel">
+              <property name="text">
+               <string>Path</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <layout class="QHBoxLayout" name="horizontalLayout_2">
+              <item>
+               <widget class="QLineEdit" name="boardPathEdit"/>
+              </item>
+              <item>
+               <widget class="QToolButton" name="boardPathButton">
+                <property name="text">
+                 <string>...</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="boardBackgroundGroupBox">
+           <property name="title">
+            <string>Background</string>
+           </property>
+           <layout class="QFormLayout" name="formLayout_3">
+            <item row="0" column="0">
              <widget class="QLabel" name="bgColorLabel">
               <property name="text">
                <string>Background Color</string>
               </property>
              </widget>
             </item>
-            <item row="2" column="1">
+            <item row="0" column="1">
              <widget class="QPushButton" name="bgColorButton">
               <property name="text">
                <string/>
@@ -109,84 +128,17 @@
               </property>
              </widget>
             </item>
-           </layout>
-          </widget>
-         </item>
-         <item>
-          <widget class="QGroupBox" name="whiteGroupBox">
-           <property name="focusPolicy">
-            <enum>Qt::NoFocus</enum>
-           </property>
-           <property name="title">
-            <string>White Settings</string>
-           </property>
-           <layout class="QFormLayout" name="formLayout_2">
-            <item row="0" column="0">
-             <widget class="QLabel" name="whiteLabel">
-              <property name="text">
-               <string>Stone Type</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="QComboBox" name="whiteTypeComboBox"/>
-            </item>
             <item row="1" column="0">
-             <widget class="QLabel" name="whiteColorLabel">
+             <widget class="QLabel" name="bgTutorColorLabel">
               <property name="text">
-               <string>Stone Color</string>
+               <string>Background in Tutor</string>
               </property>
              </widget>
             </item>
             <item row="1" column="1">
-             <widget class="QPushButton" name="whiteColorButton">
+             <widget class="QPushButton" name="bgTutorColorButton">
               <property name="text">
                <string/>
-              </property>
-              <property name="autoDefault">
-               <bool>false</bool>
-              </property>
-              <property name="flat">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </widget>
-         </item>
-         <item>
-          <widget class="QGroupBox" name="blackGroupBox">
-           <property name="title">
-            <string>Black Settings</string>
-           </property>
-           <layout class="QFormLayout" name="formLayout_3">
-            <item row="0" column="0">
-             <widget class="QLabel" name="blackTypeLabel">
-              <property name="midLineWidth">
-               <number>0</number>
-              </property>
-              <property name="text">
-               <string>Stone Type</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="QComboBox" name="blackTypeComboBox"/>
-            </item>
-            <item row="1" column="0">
-             <widget class="QLabel" name="blackColorLabel">
-              <property name="text">
-               <string>Stone Color</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="1">
-             <widget class="QPushButton" name="blackColorButton">
-              <property name="text">
-               <string/>
-              </property>
-              <property name="autoDefault">
-               <bool>false</bool>
               </property>
               <property name="flat">
                <bool>true</bool>
@@ -211,7 +163,150 @@
          </item>
         </layout>
        </widget>
-       <widget class="QWidget" name="page_2">
+       <widget class="QWidget" name="stonePage">
+        <layout class="QVBoxLayout" name="verticalLayout_4">
+         <item>
+          <widget class="QGroupBox" name="whiteGroupBox">
+           <property name="focusPolicy">
+            <enum>Qt::NoFocus</enum>
+           </property>
+           <property name="title">
+            <string>White Stone</string>
+           </property>
+           <layout class="QFormLayout" name="formLayout_2">
+            <item row="0" column="0">
+             <widget class="QLabel" name="whiteTypeLabel">
+              <property name="text">
+               <string>Type</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QComboBox" name="whiteTypeComboBox"/>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="whiteColorLabel">
+              <property name="text">
+               <string>Color</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QPushButton" name="whiteColorButton">
+              <property name="text">
+               <string/>
+              </property>
+              <property name="autoDefault">
+               <bool>false</bool>
+              </property>
+              <property name="flat">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="whitePathLabel">
+              <property name="text">
+               <string>Path</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <layout class="QHBoxLayout" name="horizontalLayout_3">
+              <item>
+               <widget class="QLineEdit" name="whitePathEdit"/>
+              </item>
+              <item>
+               <widget class="QToolButton" name="whitePathButton">
+                <property name="text">
+                 <string>...</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="blackGroupBox">
+           <property name="title">
+            <string>Black Stone</string>
+           </property>
+           <layout class="QFormLayout" name="formLayout_5">
+            <item row="0" column="0">
+             <widget class="QLabel" name="blackTypeLabel">
+              <property name="midLineWidth">
+               <number>0</number>
+              </property>
+              <property name="text">
+               <string>Type</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QComboBox" name="blackTypeComboBox"/>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="blackColorLabel">
+              <property name="text">
+               <string>Color</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QPushButton" name="blackColorButton">
+              <property name="text">
+               <string/>
+              </property>
+              <property name="autoDefault">
+               <bool>false</bool>
+              </property>
+              <property name="flat">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="blackPathLabel">
+              <property name="text">
+               <string>Path</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <layout class="QHBoxLayout" name="horizontalLayout_4">
+              <item>
+               <widget class="QLineEdit" name="blackPathEdit"/>
+              </item>
+              <item>
+               <widget class="QToolButton" name="blackPathButton">
+                <property name="text">
+                 <string>...</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <spacer name="verticalSpacer_3">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="markerPage">
         <layout class="QVBoxLayout" name="verticalLayout_3">
          <item>
           <widget class="QGroupBox" name="markersGroupBox">
@@ -271,6 +366,63 @@
          </item>
         </layout>
        </widget>
+       <widget class="QWidget" name="soundPage">
+        <layout class="QVBoxLayout" name="verticalLayout_5">
+         <item>
+          <widget class="QGroupBox" name="soundGroupBox">
+           <property name="title">
+            <string>Sound</string>
+           </property>
+           <layout class="QFormLayout" name="formLayout_6">
+            <item row="0" column="0">
+             <widget class="QLabel" name="soundTypeLabel">
+              <property name="text">
+               <string>Type</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QComboBox" name="soundTypeComboBox"/>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="soundPathLabel">
+              <property name="text">
+               <string>Path</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <layout class="QHBoxLayout" name="horizontalLayout_5">
+              <item>
+               <widget class="QLineEdit" name="soundPathEdit"/>
+              </item>
+              <item>
+               <widget class="QToolButton" name="soundPathButton">
+                <property name="text">
+                 <string>...</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <spacer name="verticalSpacer_4">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </widget>
       </widget>
      </item>
     </layout>
@@ -291,13 +443,19 @@
   <tabstop>categoryList</tabstop>
   <tabstop>boardTypeComboBox</tabstop>
   <tabstop>boardColorButton</tabstop>
+  <tabstop>boardPathEdit</tabstop>
+  <tabstop>boardPathButton</tabstop>
   <tabstop>bgColorButton</tabstop>
   <tabstop>bgTutorColorButton</tabstop>
+  <tabstop>buttonBox</tabstop>
   <tabstop>whiteTypeComboBox</tabstop>
   <tabstop>whiteColorButton</tabstop>
+  <tabstop>whitePathEdit</tabstop>
+  <tabstop>whitePathButton</tabstop>
   <tabstop>blackTypeComboBox</tabstop>
   <tabstop>blackColorButton</tabstop>
-  <tabstop>buttonBox</tabstop>
+  <tabstop>blackPathEdit</tabstop>
+  <tabstop>blackPathButton</tabstop>
   <tabstop>focusColorButton</tabstop>
   <tabstop>branchColorButton</tabstop>
  </tabstops>

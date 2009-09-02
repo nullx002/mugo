@@ -46,14 +46,14 @@ private:
     bool fileClose();
     bool maybeSave();
 
+    void setCurrentFile(const QString& fname);
+    void updateRecentFileActions();
+
     void setEditMode(QAction* action, BoardWidget::eEditMode editMode);
     void setAnnotation(int annotation, int moveAnnotation, int nodeAnnotation);
     void setAnnotation(QAction* action, int annotation);
     void setMoveAnnotation(QAction* action, int annotation);
     void setNodeAnnotation(QAction* action, int annotation);
-
-    void setCurrentFile(const QString& fname);
-    void updateRecentFileActions();
 
     void setTreeData();
     QTreeWidgetItem* addTreeWidget(go::nodePtr node, bool needRemake = false);
