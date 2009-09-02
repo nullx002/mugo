@@ -48,14 +48,15 @@ int main(int argc, char *argv[])
 #endif
 
     // Load translation
-    QTranslator qtTranslator;
-    qtTranslator.load("qt_" + QLocale::system().name(), QLibraryInfo::location(QLibraryInfo::TranslationsPath));
-    a.installTranslator(&qtTranslator);
-
     QSettings settings;
     QString locale = settings.value("language").toString();
     if (locale.isEmpty())
         locale = QLocale::system().name();
+
+    QTranslator qtTranslator;
+    qtTranslator.load("qt_" + locale, QLibraryInfo::location(QLibraryInfo::TranslationsPath));
+    a.installTranslator(&qtTranslator);
+
     QTranslator myappTranslator;
     myappTranslator.load("mugo." + locale, getTranslationPath());
     a.installTranslator(&myappTranslator);
