@@ -24,7 +24,7 @@ private:
     QColor boardColor, whiteColor, blackColor, bgColor, tutorColor;
 
     // markers
-    QColor focusColor, branchColor;
+    QColor focusWhiteColor, focusBlackColor, branchColor;
 
 private slots:
     void on_categoryList_currentRowChanged(int currentRow);
@@ -45,7 +45,8 @@ private slots:
     void on_blackPathButton_clicked();
 
     // marker
-    void on_focusColorButton_clicked();
+    void on_focusWhiteColorButton_clicked();
+    void on_focusBlackColorButton_clicked();
     void on_branchColorButton_clicked();
 
     // sound

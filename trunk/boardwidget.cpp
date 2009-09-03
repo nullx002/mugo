@@ -120,7 +120,7 @@ void BoardWidget::readSettings(){
             boardType = 2;
     }
 
-    // black stone
+    // white stone
     whiteType  = settings.value("board/whiteType").toInt();
     whiteColor = settings.value("board/whiteColor", WHITE_COLOR).value<QColor>();
     if (whiteType == 0){
@@ -132,7 +132,7 @@ void BoardWidget::readSettings(){
             whiteType = 2;
     }
 
-    // white stone
+    // black stone
     blackColor = settings.value("board/blackColor", BLACK_COLOR).value<QColor>();
     blackType  = settings.value("board/blackType").toInt();
     if (blackType == 0){
@@ -144,8 +144,10 @@ void BoardWidget::readSettings(){
             blackType = 2;
     }
 
-    // markers
-    focusColor  = settings.value("board/focusColor", FOCUS_COLOR).value<QColor>();
+    // focus/markers
+    focusType = settings.value("board/focusType").toInt();
+    focusWhiteColor = settings.value("board/focusWhiteColor", FOCUS_WHITE_COLOR).value<QColor>();
+    focusBlackColor = settings.value("board/focusBlackColor", FOCUS_BLACK_COLOR).value<QColor>();
     branchColor = settings.value("board/branchColor", BRANCH_COLOR).value<QColor>();
 
     // sound
@@ -1104,49 +1106,28 @@ void BoardWidget::drawBranchMoves(QPainter& p, go::nodeList::iterator first, go:
 /**
 */
 void BoardWidget::drawCross(QPainter& p, go::markList::iterator first, go::markList::iterator last){
-    QPainterPath path;
-    double w = boxSize * 0.18;
-
-    path.moveTo(-w, -w);
-    path.lineTo(w, w);
-
-    path.moveTo(w, -w);
-    path.lineTo(-w, w);
-
+    QPainterPath path = createCrossPath();
     drawMark(p, path, first, last);
 }
 
 /**
 */
 void BoardWidget::drawTriangle(QPainter& p, go::markList::iterator first, go::markList::iterator last){
-    QPainterPath path;
-    double w = boxSize * 0.22;
-    double h = boxSize * 0.18;
-    QPolygonF polygon(3);
-    polygon[0] = QPointF(0, -h);
-    polygon[1] = QPointF(-w, h);
-    polygon[2] = QPointF(w, h);
-    path.addPolygon(polygon);
-    path.closeSubpath();
-
+    QPainterPath path = createTrianglePath();
     drawMark(p, path, first, last);
 }
 
 /**
 */
 void BoardWidget::drawCircle(QPainter& p, go::markList::iterator first, go::markList::iterator last){
-    QPainterPath path;
-    double w = boxSize * 0.42;
-    path.addEllipse(-w/2, -w/2, w, w);
+    QPainterPath path = createCirclePath();
     drawMark(p, path, first, last);
 }
 
 /**
 */
 void BoardWidget::drawSquare(QPainter& p, go::markList::iterator first, go::markList::iterator last){
-    QPainterPath path;
-    double w = boxSize * 0.4;
-    path.addRect(-w/2, -w/2, w, w);
+    QPainterPath path = createSquarePath();
     drawMark(p, path, first, last);
 }
 
@@ -1228,7 +1209,6 @@ void BoardWidget::drawPath(QPainter& p, const QPainterPath& path, int boardX, in
 void BoardWidget::drawTerritories(QPainter& p){
     p.save();
 
-
     for (int y=0; y<ysize; ++y){
         for (int x=0; x<xsize; ++x){
             if (!board[y][x].blackTerritory() && !board[y][x].whiteTerritory())
@@ -1256,23 +1236,97 @@ void BoardWidget::drawCurrentMark(QPainter& p, go::nodePtr node){
 
     p.save();
 
+    QBrush brush;
+    if (node->isBlack()){
+        p.setPen( QPen(focusBlackColor, 2) );
+        brush = QBrush(focusBlackColor);
+    }
+    else{
+        p.setPen( QPen(focusWhiteColor, 2) );
+        brush = QBrush(focusWhiteColor);
+    }
+
     int boardX, boardY;
     sgfToBoardCoordinate(node->getX(), node->getY(), boardX, boardY);
     int x = xlines[boardX];
     int y = ylines[boardY];
+    p.translate(x, y);
 
+    if (focusType == 0){
+        QPainterPath path = createFocusTrianglePath();
+        p.fillPath(path, brush);
+    }
+    else if (focusType == 1){
+        QPainterPath path = createCirclePath();
+        p.drawPath(path);
+    }
+    else if (focusType == 2){
+        QPainterPath path = createCrossPath();
+        p.drawPath(path);
+    }
+    else if (focusType == 3){
+        QPainterPath path = createSquarePath();
+        p.drawPath(path);
+    }
+    else if (focusType == 4){
+        QPainterPath path = createTrianglePath();
+        p.drawPath(path);
+    }
+
+    p.restore();
+}
+
+QPainterPath BoardWidget::createFocusTrianglePath() const{
+    QPainterPath path;
+    double w = boxSize * 0.25;
+    double h = boxSize * 0.15;
+    QPolygonF polygon(3);
+    polygon[0] = QPointF(0, -h);
+    polygon[1] = QPointF(-w, h);
+    polygon[2] = QPointF(w, h);
+    path.addPolygon(polygon);
+    path.closeSubpath();
+    return path;
+}
+
+QPainterPath BoardWidget::createCirclePath() const{
+    QPainterPath path;
+    double w = boxSize * 0.42;
+    path.addEllipse(-w/2, -w/2, w, w);
+    return path;
+}
+
+QPainterPath BoardWidget::createCrossPath() const{
+    QPainterPath path;
+    double w = boxSize * 0.18;
+
+    path.moveTo(-w, -w);
+    path.lineTo(w, w);
+
+    path.moveTo(w, -w);
+    path.lineTo(-w, w);
+
+    return path;
+}
+
+QPainterPath BoardWidget::createSquarePath() const{
+    QPainterPath path;
+    double w = boxSize * 0.4;
+    path.addRect(-w/2, -w/2, w, w);
+    return path;
+}
+
+QPainterPath BoardWidget::createTrianglePath() const{
+    QPainterPath path;
     double w = boxSize * 0.22;
     double h = boxSize * 0.18;
     QPolygonF polygon(3);
-    polygon[0] = QPointF(x, y - h);
-    polygon[1] = QPointF(x - w, y + h);
-    polygon[2] = QPointF(x + w, y + h);
-
-    p.setPen(focusColor);
-    p.setBrush( QBrush(focusColor) );
-    p.drawPolygon(polygon);
-
-    p.restore();
+    polygon[0] = QPointF(0, -h);
+    polygon[1] = QPointF(-w, h);
+    polygon[2] = QPointF(w, h);
+    path.addPolygon(polygon);
+    path.closeSubpath();
+    return path;
 }
 
 /**

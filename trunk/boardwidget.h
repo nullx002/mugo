@@ -195,6 +195,11 @@ protected:
     void drawImage(QPainter& p, int x, int y, const QImage& image);
     void eraseBackground(QPainter& p, int x, int y);
     void getStartPosition(QList<int>& star, int size);
+    QPainterPath createFocusTrianglePath() const;
+    QPainterPath createCirclePath() const;
+    QPainterPath createCrossPath() const;
+    QPainterPath createSquarePath() const;
+    QPainterPath createTrianglePath() const;
 
     // buffer
     void putStone(go::nodePtr n, int moveNumber);
@@ -260,7 +265,7 @@ private:
     int currentMoveNumber;
 
     // option
-    int boardType, whiteType, blackType;
+    int boardType, whiteType, blackType, focusType;
     bool showMoveNumber;
     int  showMoveNumberCount;
     bool showCoordinates;
@@ -281,7 +286,7 @@ private:
     QImage  white1, white2;
     QImage  boardImage1, boardImage2;
     QColor  boardColor, blackColor, whiteColor, bgColor, tutorColor;
-    QColor  focusColor, branchColor;
+    QColor  focusWhiteColor, focusBlackColor, branchColor;
 
     int width_;
     int height_;
