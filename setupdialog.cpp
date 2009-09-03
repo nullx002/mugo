@@ -56,8 +56,16 @@ SetupDialog::SetupDialog(QWidget *parent) :
     m_ui->blackPathEdit->setText( settings.value("board/blackPath").toString() );
 
     // markers/focus
-    focusColor = settings.value("board/focusColor", FOCUS_COLOR).value<QColor>();
-    m_ui->focusColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(focusColor.red()).arg(focusColor.green()).arg(focusColor.blue()) );
+    m_ui->focusTypeComboBox->addItem( tr("Focus Triangle") );
+    m_ui->focusTypeComboBox->addItem( tr("Circle") );
+    m_ui->focusTypeComboBox->addItem( tr("Cross") );
+    m_ui->focusTypeComboBox->addItem( tr("Square") );
+    m_ui->focusTypeComboBox->addItem( tr("Triangle") );
+    m_ui->focusTypeComboBox->setCurrentIndex( settings.value("board/focusType").toInt() );
+    focusWhiteColor = settings.value("board/focusWhiteColor", FOCUS_WHITE_COLOR).value<QColor>();
+    m_ui->focusWhiteColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(focusWhiteColor.red()).arg(focusWhiteColor.green()).arg(focusWhiteColor.blue()) );
+    focusBlackColor = settings.value("board/focusBlackColor", FOCUS_BLACK_COLOR).value<QColor>();
+    m_ui->focusBlackColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(focusBlackColor.red()).arg(focusBlackColor.green()).arg(focusBlackColor.blue()) );
 
     // markers/branch
     branchColor = settings.value("board/branchColor", BRANCH_COLOR).value<QColor>();
@@ -109,7 +117,9 @@ void SetupDialog::accept(){
     settings.setValue("board/blackPath", m_ui->blackPathEdit->text());
 
     // markers
-    settings.setValue("board/focusColor", focusColor);
+    settings.setValue("board/focusType", m_ui->focusTypeComboBox->currentIndex());
+    settings.setValue("board/focusWhiteColor", focusWhiteColor);
+    settings.setValue("board/focusBlackColor", focusBlackColor);
     settings.setValue("board/branchColor", branchColor);
 
     // sound
@@ -244,14 +254,26 @@ void SetupDialog::on_blackPathButton_clicked(){
 
 /**
 * slot
-* focus color button clicked
+* focus color (white stone) button clicked
 */
-void SetupDialog::on_focusColorButton_clicked(){
-    QColorDialog dlg(focusColor, this);
+void SetupDialog::on_focusWhiteColorButton_clicked(){
+    QColorDialog dlg(focusWhiteColor, this);
     if (dlg.exec() != QDialog::Accepted)
         return;
-    focusColor = dlg.selectedColor();
-    m_ui->focusColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(focusColor.red()).arg(focusColor.green()).arg(focusColor.blue()) );
+    focusWhiteColor = dlg.selectedColor();
+    m_ui->focusWhiteColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(focusWhiteColor.red()).arg(focusWhiteColor.green()).arg(focusWhiteColor.blue()) );
+}
+
+/**
+* slot
+* focus color (black stone) button clicked
+*/
+void SetupDialog::on_focusBlackColorButton_clicked(){
+    QColorDialog dlg(focusBlackColor, this);
+    if (dlg.exec() != QDialog::Accepted)
+        return;
+    focusBlackColor = dlg.selectedColor();
+    m_ui->focusBlackColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(focusBlackColor.red()).arg(focusBlackColor.green()).arg(focusBlackColor.blue()) );
 }
 
 /**
