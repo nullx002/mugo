@@ -6,7 +6,6 @@
         <file>res/green_64.png</file>
         <file>res/black_64.png</file>
         <file>res/white_64.png</file>
-        <file>res/bg.png</file>
         <file>res/remove.png</file>
         <file>res/prevmove.png</file>
         <file>res/fastforward.png</file>
@@ -47,5 +46,6 @@
         <file>res/gameinfo.png</file>
         <file>res/options.png</file>
         <file>res/removeself.png</file>
+        <file>res/bg.png</file>
     </qresource>
 </RCC>
