@@ -195,6 +195,10 @@ MainWindow::MainWindow(QWidget *parent)
     languageGroup->addAction(ui->actionLanguageEnglish);
     languageGroup->addAction(ui->actionLanguageJapanese);
 
+    // count territory dialog
+    countTerritoryDialog = new CountTerritoryDialog(this);
+    connect(countTerritoryDialog, SIGNAL(finished(int)), this, SLOT(scoreDialogClosed(int)));
+
     // command line
     if (qApp->argc() > 1)
         fileOpen(qApp->argv()[1]);
@@ -207,8 +211,8 @@ MainWindow::~MainWindow(){
     settings.setValue("width", geometry().width());
     settings.setValue("height", geometry().height());
 
+    delete countTerritoryDialog;
     delete ui;
-
     delete http;
 }
 
@@ -741,7 +745,7 @@ void MainWindow::on_actionWhiteFirst_triggered(){
 * Edit -> Rotate SGF Clockwise
 */
 void MainWindow::on_actionRotateSgfClockwise_triggered(){
-    ui->boardWidget->rotateSgf();
+    ui->boardWidget->rotateSgfCommand();
 }
 
 /**
@@ -749,7 +753,7 @@ void MainWindow::on_actionRotateSgfClockwise_triggered(){
 * Edit -> Flip SGF Holizontally
 */
 void MainWindow::on_actionFlipSgfHorizontally_triggered(){
-    ui->boardWidget->flipSgfHorizontally();
+    ui->boardWidget->flipSgfHorizontallyCommand();
 }
 
 /**
@@ -757,7 +761,7 @@ void MainWindow::on_actionFlipSgfHorizontally_triggered(){
 * Edit -> Flip SGF Vertically
 */
 void MainWindow::on_actionFlipSgfVertically_triggered(){
-    ui->boardWidget->flipSgfVertically();
+    ui->boardWidget->flipSgfVerticallyCommand();
 }
 
 /**
@@ -1237,15 +1241,12 @@ void MainWindow::on_actionOptionToolbar_triggered()
 void MainWindow::on_actionCountTerritory_triggered(){
     if (ui->actionCountTerritory->isChecked()){
         setCountTerritoryMode();
-        countTerritoryDialog = new CountTerritoryDialog(this);
-        countTerritoryDialog->disconnect();
-        connect(countTerritoryDialog, SIGNAL(dialogClosed()), this, SLOT(scoreDialogClosed()));
+        countTerritoryDialog->setInformationNode( ui->boardWidget->getData().root.get() );
         countTerritoryDialog->show();
     }
     else{
-        delete countTerritoryDialog;
-        countTerritoryDialog = NULL;
         setCountTerritoryMode(false);
+        setCaption();
     }
 
     ui->boardWidget->setCountTerritoryMode(ui->actionCountTerritory->isChecked());
@@ -1275,13 +1276,15 @@ void MainWindow::on_actionPlayWithGnugo_triggered(){
         qDebug() << param;
         gtpProcess.start(param, QIODevice::ReadWrite|QIODevice::Text);
         if (gtpProcess.state() == QProcess::NotRunning){
-            ui->boardWidget->playWithComputer(NULL, false);
+            ui->boardWidget->playWithComputer(NULL);
             QMessageBox::critical(this, APPNAME, tr("Can not launch computer go."));
             return;
         }
 
+        playGame = new gtp(ui->boardWidget, dlg.isBlack ? go::black : go::white, gtpProcess);
+        connect( playGame, SIGNAL(gameEnded()), this, SLOT(playGameEnded()) );
         setPlayWithComputerMode(true);
-        ui->boardWidget->playWithComputer(&gtpProcess, dlg.isBlack);
+        ui->boardWidget->playWithComputer(playGame);
     }
     else{
         QMessageBox::StandardButton ret = QMessageBox::warning(this, APPNAME,
@@ -1293,7 +1296,7 @@ void MainWindow::on_actionPlayWithGnugo_triggered(){
             return;
         }
 
-        EndGtpGame();
+        endGame();
     }
 }
 
@@ -1524,60 +1527,25 @@ void MainWindow::on_branchWidget_currentItemChanged(QTreeWidgetItem* current, QT
 * comment dock widget was showed or hid.
 */
 void MainWindow::on_boardWidget_updateTerritory(int alive_b, int alive_w, int dead_b, int dead_w, int capturedBlack, int capturedWhite, int blackTerritory, int whiteTerritory, double komi){
-    double bscorej = blackTerritory + dead_w + capturedWhite;
-    double wscorej = whiteTerritory + dead_b + capturedBlack + komi;
-
-    // japanese rule
-    QString bj( tr("Black: %1 = %2(territories) + %3(captured)").arg(bscorej).arg(blackTerritory).arg(dead_w + capturedWhite) );
-    QString wj( tr("White: %1 = %2(territories) + %3(captured) + %4(komi)").arg(wscorej).arg(whiteTerritory).arg(dead_b + capturedBlack).arg(komi) );
-
-    QString result;
-    if (wscorej > bscorej)
-        result = QString(tr("W+%1")).arg(wscorej - bscorej);
-    else if (bscorej > wscorej)
-        result = QString(tr("B+%1")).arg(bscorej - wscorej);
-    else
-        result = tr("Draw");
-
-    QString s = tr("Japanese Rule") + ":\n" + wj + "\n" + bj + "\n" + result + "\n\n";
-
-
-    // chinese rule
-    double half = (blackTerritory + alive_b + whiteTerritory + alive_w) / 2.0;
-    double bscorec = blackTerritory + alive_b - komi / 2.0;
-    double wscorec = whiteTerritory + alive_w + komi / 2.0;
-
-    QString bc, wc;
-    if (komi > 0){
-        bc = tr("Black: %1 = %2(point) - %3(komi) / 2").arg(bscorec).arg(blackTerritory + alive_b).arg(komi);
-        wc = tr("White: %1 = %2(point) + %3(komi) / 2").arg(wscorec).arg(whiteTerritory + alive_w).arg(komi);
-    }
-    else{
-        bc = tr("Black: %1 = %2(point) + %3(komi) / 2").arg(bscorec).arg(blackTerritory + alive_b).arg(komi);
-        wc = tr("White: %1 = %2(point) - %3(komi) / 2").arg(wscorec).arg(whiteTerritory + alive_w).arg(komi);
-    }
-
-    if (wscorec > bscorec)
-        result = QString(tr("W+%1")).arg(wscorec - half);
-    else if (bscorec > wscorec)
-        result = QString(tr("B+%1")).arg(bscorec - half);
-    else
-        result = tr("Draw");
-
-    s += tr("Chinese Rule") + ":\n" + wc + "\n" + bc + "\n" + result;
-
+    countTerritoryDialog->setScore(alive_b, alive_w, dead_b, dead_w, capturedBlack, capturedWhite, blackTerritory, whiteTerritory, komi);
+/*
     countTerritoryDialog->setScoreText(s);
+*/
 }
 
 /**
 * Slot
 */
-void MainWindow::on_boardWidget_gtpGameEnded(){
-    ui->actionPlayWithGnugo->setChecked(false);
-    EndGtpGame();
+void MainWindow::playGameEnded(){
+    bool resign = playGame->isResign();
 
-    ui->actionCountTerritory->setChecked(true);
-    on_actionCountTerritory_triggered();
+    ui->actionPlayWithGnugo->setChecked(false);
+    endGame();
+
+    if( !resign ){
+        ui->actionCountTerritory->setChecked(true);
+        on_actionCountTerritory_triggered();
+    }
 }
 
 /**
@@ -1593,7 +1561,7 @@ void MainWindow::on_commentWidget_textChanged(){
 * Slot
 * score dialog was closed
 */
-void MainWindow::scoreDialogClosed(){
+void MainWindow::scoreDialogClosed(int){
     ui->actionCountTerritory->setChecked(false);
     on_actionCountTerritory_triggered();
 }
@@ -2488,9 +2456,10 @@ void MainWindow::setPlayWithComputerMode(bool on){
     ui->undoView->setEnabled( !on );
 }
 
-void MainWindow::EndGtpGame(){
+void MainWindow::endGame(){
     gtpProcess.close();
-    ui->boardWidget->playWithComputer(NULL, false);
+    delete playGame;
+    ui->boardWidget->playWithComputer(NULL);
 
     setPlayWithComputerMode(false);
 }

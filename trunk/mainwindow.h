@@ -10,6 +10,7 @@
 #include <QProgressDialog>
 #include "boardwidget.h"
 #include "countterritorydialog.h"
+#include "gtp.h"
 
 namespace Ui
 {
@@ -69,7 +70,7 @@ private:
 
     void setCountTerritoryMode(bool on=true);
     void setPlayWithComputerMode(bool on=true);
-    void EndGtpGame();
+    void endGame();
 
     void alertLanguageChanged();
 
@@ -100,7 +101,8 @@ private:
     QHttp* http;
     QByteArray downloadBuff;
 
-    QProcess gtpProcess;
+    PlayGame* playGame;
+    QProcess  gtpProcess;
 
 private slots:
     // File menu
@@ -234,7 +236,6 @@ private slots:
     void on_boardWidget_nodeModified(go::nodePtr node);
     void on_boardWidget_currentNodeChanged(go::nodePtr node);
     void on_boardWidget_updateTerritory(int alive_b, int alive_w, int dead_b, int dead_w, int capturedBlack, int capturedWhite, int blackTerritory, int whiteTerritory, double komi);
-    void on_boardWidget_gtpGameEnded();
 
     // Branch widget
     void on_branchWidget_currentItemChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous);
@@ -243,13 +244,16 @@ private slots:
     void on_commentWidget_textChanged();
 
     // Score Dialog
-    void scoreDialogClosed();
+    void scoreDialogClosed(int);
 
     // Open URL
     void openUrlReadReady(const QHttpResponseHeader& resp);
     void openUrlReadProgress(int done, int total);
     void openUrlDone(bool error);
     void openUrlCancel();
+
+    // play a game
+    void playGameEnded();
 };
 
 #endif // MAINWINDOW_H

@@ -17,7 +17,9 @@ SOURCES += main.cpp \
     setupdialog.cpp \
     command.cpp \
     playwithcomputerdialog.cpp \
-    exportasciidialog.cpp
+    exportasciidialog.cpp \
+    playgame.cpp \
+    gtp.cpp
 HEADERS += mainwindow.h \
     boardwidget.h \
     godata.h \
@@ -29,7 +31,9 @@ HEADERS += mainwindow.h \
     setupdialog.h \
     command.h \
     playwithcomputerdialog.h \
-    exportasciidialog.h
+    exportasciidialog.h \
+    playgame.h \
+    gtp.h
 FORMS += mainwindow.ui \
     boardwidget.ui \
     gameinformationdialog.ui \
