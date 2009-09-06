@@ -106,6 +106,7 @@ private:
 
 private slots:
     // File menu
+    void on_actionPrint_triggered();
     void on_actionNew_triggered();
     void on_actionOpen_triggered();
     void on_actionOpen_URL_triggered();

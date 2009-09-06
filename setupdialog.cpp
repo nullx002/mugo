@@ -74,8 +74,8 @@ SetupDialog::SetupDialog(QWidget *parent) :
     // sound
     m_ui->soundTypeComboBox->addItem( tr("Default Sound") );
     m_ui->soundTypeComboBox->addItem( tr("Select File") );
-    m_ui->soundTypeComboBox->setCurrentIndex( settings.value("board/soundType").toInt() );
-    m_ui->soundPathEdit->setText( settings.value("board/soundPath").toString() );
+    m_ui->soundTypeComboBox->setCurrentIndex( settings.value("sound/type").toInt() );
+    m_ui->soundPathEdit->setText( settings.value("sound/path").toString() );
 }
 
 SetupDialog::~SetupDialog()
@@ -123,8 +123,8 @@ void SetupDialog::accept(){
     settings.setValue("board/branchColor", branchColor);
 
     // sound
-    settings.setValue("board/soundType", m_ui->soundTypeComboBox->currentIndex());
-    settings.setValue("board/soundPath", m_ui->soundPathEdit->text());
+    settings.setValue("sound/type", m_ui->soundTypeComboBox->currentIndex());
+    settings.setValue("sound/path", m_ui->soundPathEdit->text());
 }
 
 /**
