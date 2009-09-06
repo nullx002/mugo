@@ -413,7 +413,12 @@ bool sgf::saveStream(QTextStream& stream){
             ++iter;
         }
     }
-    return writeNode(stream, root);
+
+    QString s;
+    bool ret = writeNode(stream, s, root);
+    if (!s.isEmpty())
+        stream << s;
+    return ret;
 }
 
 QTextCodec* sgf::getCodec(const QByteArray& a) const{
@@ -517,21 +522,25 @@ bool sgf::readNodeValue(QString::iterator& first, QString::iterator last, QStrin
     return false;
 }
 
-bool sgf::writeNode(QTextStream& stream, const node& n){
+bool sgf::writeNode(QTextStream& stream, QString& s, const node& n){
     if (n.getNodeType() == eBranch || n.getNodeType() == eRoot){
-        stream << '(';
+        s.push_back('(');
         nodeList::const_iterator iter = n.getChildNodes().begin();
         while (iter != n.getChildNodes().end()){
-            writeNode(stream, **iter);
+            writeNode(stream, s, **iter);
             ++iter;
         }
-        stream << ")\n";
+        s.push_back(')');
     }
     else{
-        stream << n.toString() << '\n';
+        s.append(n.toString());
+        if (s.size() > 60){
+            stream << s << '\n';
+            s.clear();
+        }
         nodeList::const_iterator iter = n.getChildNodes().begin();
         while (iter != n.getChildNodes().end()){
-            writeNode(stream, **iter);
+            writeNode(stream, s, **iter);
             ++iter;
         }
     }

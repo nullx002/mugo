@@ -463,7 +463,7 @@ void MainWindow::on_actionCopyCurrentSGFtoClipboard_triggered(){
     const go::nodeList& nodeList = ui->boardWidget->getCurrentNodeList();
     go::nodeList::const_iterator iter = nodeList.begin();
     while (iter != nodeList.end()){
-        if (s.size() > 70){
+        if (s.size() > 60){
             str.append(s);
             str.push_back('\n');
             s.clear();

@@ -396,7 +396,7 @@ void BoardWidget::paintStones(QPainter& p){
 void BoardWidget::paintTerritories(QPaintDevice* pd){
     QPainter p(pd);
     p.setRenderHints(QPainter::Antialiasing|QPainter::TextAntialiasing|QPainter::SmoothPixmapTransform);
-    paintStones(p);
+    paintTerritories(p);
 }
 
 void BoardWidget::paintTerritories(QPainter& p){
@@ -429,7 +429,7 @@ void BoardWidget::print(QPrinter& printer){
     height_ = printer.height();
 
     paintBoard(p);
-    paintStones(p);
+    print( p, goData.root );
 
     p.end();
 
@@ -440,6 +440,11 @@ void BoardWidget::print(QPrinter& printer){
     qSwap(showMoveNumberCount, moveNumber_);
 
     repaintBoard();
+}
+
+void BoardWidget::print(QPainter& p, go::nodePtr node){
+    if (node->isStone()){
+    }
 }
 
 /**
@@ -1422,7 +1427,7 @@ void BoardWidget::drawStone(QPainter& p, int x, int y, bool black){
 
     p.translate(xlines[x], ylines[y]);
     if (black){
-        if (blackType == 0 || blackType == 1)
+        if (blackType >= 0)
             p.drawImage(-boxSize/2, -boxSize/2, black2);
         else{
             p.setPen(Qt::black);
