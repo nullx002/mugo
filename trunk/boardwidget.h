@@ -83,6 +83,7 @@ public:
     void paintTerritories(QPaintDevice* pd);
     void paintTerritories(QPainter& p);
     void print(QPrinter&);
+    void print(QPainter& p, go::nodePtr node);
 
     // set/get data
     void clear();
