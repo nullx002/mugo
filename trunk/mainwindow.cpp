@@ -6,6 +6,8 @@
 #include <QtAlgorithms>
 #include <QClipboard>
 #include <QUrl>
+#include <QPrinter>
+#include <QPrintDialog>
 #include "appdef.h"
 #include "sgf.h"
 #include "ugf.h"
@@ -32,11 +34,81 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    // action group
+    QActionGroup* showMoveNumberGroup = new QActionGroup(this);
+    showMoveNumberGroup->addAction(ui->actionNoMoveNumber);
+    showMoveNumberGroup->addAction(ui->actionLast1Move);
+    showMoveNumberGroup->addAction(ui->actionLast2Moves);
+    showMoveNumberGroup->addAction(ui->actionLast5Moves);
+    showMoveNumberGroup->addAction(ui->actionLast10Moves);
+    showMoveNumberGroup->addAction(ui->actionLast20Moves);
+    showMoveNumberGroup->addAction(ui->actionLast50Moves);
+    showMoveNumberGroup->addAction(ui->actionAllMoves);
+
+    QActionGroup* encodingGroup = new QActionGroup(this);
+    QAction* encodingActions[] = {
+        ui->actionEncodingUTF8,
+        ui->actionISO8859_1,
+        ui->actionISO8859_2,
+        ui->actionISO8859_3,
+        ui->actionISO8859_4,
+        ui->actionISO8859_5,
+        ui->actionISO8859_6,
+        ui->actionISO8859_7,
+        ui->actionISO8859_8,
+        ui->actionISO8859_9,
+        ui->actionISO8859_10,
+        ui->actionISO8859_11,
+        ui->actionISO8859_13,
+        ui->actionISO8859_14,
+        ui->actionISO8859_15,
+        ui->actionISO8859_16,
+        ui->actionWindows_1250,
+        ui->actionWindows_1251,
+        ui->actionWindows_1252,
+        ui->actionWindows_1253,
+        ui->actionWindows_1257,
+        ui->actionWindows_1254,
+        ui->actionWindows_1258,
+        ui->actionWindows_1256,
+        ui->actionWindows_1255,
+        ui->actionKoi8_R,
+        ui->actionKoi8_U,
+        ui->actionEncodingGB2312,
+        ui->actionEncodingBig5,
+        ui->actionEncodingKorean,
+        ui->actionEncodingEucJP,
+        ui->actionEncodingJIS,
+        ui->actionEncodingShiftJIS,
+    };
+    int encN = sizeof(encodingActions) / sizeof(encodingActions[0]);
+    for (int i=0; i<encN; ++i){
+        encodingGroup->addAction( encodingActions[i] );
+        connect( encodingActions[i], SIGNAL(triggered()), this, SLOT(setEncoding()) );
+    }
+
+    QActionGroup* editGroup = new QActionGroup(this);
+    editGroup->addAction(ui->actionAlternateMove);
+    editGroup->addAction(ui->actionAddBlackStone);
+    editGroup->addAction(ui->actionAddWhiteStone);
+    editGroup->addAction(ui->actionAddEmpty);
+    editGroup->addAction(ui->actionAddLabel);
+    editGroup->addAction(ui->actionAddCircle);
+    editGroup->addAction(ui->actionAddCross);
+    editGroup->addAction(ui->actionAddSquare);
+    editGroup->addAction(ui->actionAddTriangle);
+    editGroup->addAction(ui->actionDeleteMarker);
+
+    QActionGroup* languageGroup = new QActionGroup(this);
+    languageGroup->addAction(ui->actionLanguageSystemDefault);
+    languageGroup->addAction(ui->actionLanguageEnglish);
+    languageGroup->addAction(ui->actionLanguageJapanese);
+
+
     QSettings settings;
 
     // default codec
     codec = QTextCodec::codecForName("UTF-8");
-    ui->boardWidget->setShowMoveNumber(0);
     setEditMode(ui->actionAlternateMove, BoardWidget::eAlternateMove);
 
     // window settings
@@ -47,6 +119,44 @@ MainWindow::MainWindow(QWidget *parent)
     connect( http, SIGNAL(readyRead(const QHttpResponseHeader&)), this, SLOT(openUrlReadReady(const QHttpResponseHeader&)) );
     connect( http, SIGNAL(dataReadProgress(int, int)), this, SLOT(openUrlReadProgress(int, int)) );
     connect( http, SIGNAL(done(bool)), this, SLOT(openUrlDone(bool)) );
+
+    // marker
+    ui->actionShowMoveNumber->setChecked( settings.value("marker/showMoveNumber", true).toBool() );
+    on_actionShowMoveNumber_triggered();
+
+    int moveNumber = settings.value("marker/moveNumber", 0).toInt();
+    if (moveNumber == -1){
+        ui->actionAllMoves->setChecked(true);
+        on_actionAllMoves_triggered();
+    }
+    else if (moveNumber == 0){
+        ui->actionNoMoveNumber->setChecked(true);
+        on_actionNoMoveNumber_triggered();
+    }
+    else if (moveNumber == 1){
+        ui->actionLast1Move->setChecked(true);
+        on_actionLast1Move_triggered();
+    }
+    else if (moveNumber == 2){
+        ui->actionLast2Moves->setChecked(true);
+        on_actionLast2Moves_triggered();
+    }
+    else if (moveNumber == 5){
+        ui->actionLast5Moves->setChecked(true);
+        on_actionLast5Moves_triggered();
+    }
+    else if (moveNumber == 10){
+        ui->actionLast10Moves->setChecked(true);
+        on_actionLast10Moves_triggered();
+    }
+    else if (moveNumber == 20){
+        ui->actionLast20Moves->setChecked(true);
+        on_actionLast20Moves_triggered();
+    }
+    else if (moveNumber == 50){
+        ui->actionLast50Moves->setChecked(true);
+        on_actionLast50Moves_triggered();
+    }
 
     // set sound files
     ui->actionPlaySound->setChecked( settings.value("sound/play").toBool() );
@@ -124,76 +234,6 @@ MainWindow::MainWindow(QWidget *parent)
     capturedLabel->setFrameStyle(style);
     capturedLabel->setToolTip(tr("Captured"));
     ui->statusBar->addPermanentWidget(capturedLabel, 0);
-
-    // action group
-    QActionGroup* showMoveNumberGroup = new QActionGroup(this);
-    showMoveNumberGroup->addAction(ui->actionNoMoveNumber);
-    showMoveNumberGroup->addAction(ui->actionLast1Move);
-    showMoveNumberGroup->addAction(ui->actionLast2Moves);
-    showMoveNumberGroup->addAction(ui->actionLast5Moves);
-    showMoveNumberGroup->addAction(ui->actionLast10Moves);
-    showMoveNumberGroup->addAction(ui->actionLast20Moves);
-    showMoveNumberGroup->addAction(ui->actionLast50Moves);
-    showMoveNumberGroup->addAction(ui->actionAllMoves);
-
-    QActionGroup* encodingGroup = new QActionGroup(this);
-    QAction* encodingActions[] = {
-        ui->actionEncodingUTF8,
-        ui->actionISO8859_1,
-        ui->actionISO8859_2,
-        ui->actionISO8859_3,
-        ui->actionISO8859_4,
-        ui->actionISO8859_5,
-        ui->actionISO8859_6,
-        ui->actionISO8859_7,
-        ui->actionISO8859_8,
-        ui->actionISO8859_9,
-        ui->actionISO8859_10,
-        ui->actionISO8859_11,
-        ui->actionISO8859_13,
-        ui->actionISO8859_14,
-        ui->actionISO8859_15,
-        ui->actionISO8859_16,
-        ui->actionWindows_1250,
-        ui->actionWindows_1251,
-        ui->actionWindows_1252,
-        ui->actionWindows_1253,
-        ui->actionWindows_1257,
-        ui->actionWindows_1254,
-        ui->actionWindows_1258,
-        ui->actionWindows_1256,
-        ui->actionWindows_1255,
-        ui->actionKoi8_R,
-        ui->actionKoi8_U,
-        ui->actionEncodingGB2312,
-        ui->actionEncodingBig5,
-        ui->actionEncodingKorean,
-        ui->actionEncodingEucJP,
-        ui->actionEncodingJIS,
-        ui->actionEncodingShiftJIS,
-    };
-    int encN = sizeof(encodingActions) / sizeof(encodingActions[0]);
-    for (int i=0; i<encN; ++i){
-        encodingGroup->addAction( encodingActions[i] );
-        connect( encodingActions[i], SIGNAL(triggered()), this, SLOT(setEncoding()) );
-    }
-
-    QActionGroup* editGroup = new QActionGroup(this);
-    editGroup->addAction(ui->actionAlternateMove);
-    editGroup->addAction(ui->actionAddBlackStone);
-    editGroup->addAction(ui->actionAddWhiteStone);
-    editGroup->addAction(ui->actionAddEmpty);
-    editGroup->addAction(ui->actionAddLabel);
-    editGroup->addAction(ui->actionAddCircle);
-    editGroup->addAction(ui->actionAddCross);
-    editGroup->addAction(ui->actionAddSquare);
-    editGroup->addAction(ui->actionAddTriangle);
-    editGroup->addAction(ui->actionDeleteMarker);
-
-    QActionGroup* languageGroup = new QActionGroup(this);
-    languageGroup->addAction(ui->actionLanguageSystemDefault);
-    languageGroup->addAction(ui->actionLanguageEnglish);
-    languageGroup->addAction(ui->actionLanguageJapanese);
 
     // count territory dialog
     countTerritoryDialog = new CountTerritoryDialog(this);
@@ -361,6 +401,20 @@ void MainWindow::on_actionSaveBoardAsPicture_triggered()
 void MainWindow::on_actionExportAsciiToClipboard_triggered(){
     ExportAsciiDialog dlg(this, ui->boardWidget->getBuffer());
     dlg.exec();
+}
+
+/**
+* Slot
+* File -> Print
+*/
+void MainWindow::on_actionPrint_triggered(){
+    QPrinter printer(QPrinter::ScreenResolution);
+
+    QPrintDialog *dlg = new QPrintDialog(&printer, this);
+    if (dlg->exec() != QDialog::Accepted)
+        return;
+
+    ui->boardWidget->print(printer);
 }
 
 /**
@@ -1023,6 +1077,9 @@ void MainWindow::on_actionJumpToClicked_triggered(){
 void MainWindow::on_actionShowMoveNumber_triggered(){
     ui->menuShowMoveNumber->menuAction()->setChecked( ui->actionShowMoveNumber->isChecked() );
     ui->boardWidget->setShowMoveNumber( ui->actionShowMoveNumber->isChecked() );
+
+    QSettings settings;
+    settings.setValue("marker/showMoveNumber", ui->actionShowMoveNumber->isChecked());
 }
 
 /**
@@ -1040,6 +1097,9 @@ void MainWindow::on_actionShowMoveNumber_parent_triggered(){
 */
 void MainWindow::on_actionNoMoveNumber_triggered(){
     ui->boardWidget->setShowMoveNumber(0);
+
+    QSettings settings;
+    settings.setValue("marker/moveNumber", 0);
 }
 
 /**
@@ -1048,6 +1108,9 @@ void MainWindow::on_actionNoMoveNumber_triggered(){
 */
 void MainWindow::on_actionLast1Move_triggered(){
     ui->boardWidget->setShowMoveNumber(1);
+
+    QSettings settings;
+    settings.setValue("marker/moveNumber", 1);
 }
 
 /**
@@ -1056,6 +1119,9 @@ void MainWindow::on_actionLast1Move_triggered(){
 */
 void MainWindow::on_actionLast2Moves_triggered(){
     ui->boardWidget->setShowMoveNumber(2);
+
+    QSettings settings;
+    settings.setValue("marker/moveNumber", 2);
 }
 
 /**
@@ -1064,6 +1130,9 @@ void MainWindow::on_actionLast2Moves_triggered(){
 */
 void MainWindow::on_actionLast5Moves_triggered(){
     ui->boardWidget->setShowMoveNumber(5);
+
+    QSettings settings;
+    settings.setValue("marker/moveNumber", 5);
 }
 
 /**
@@ -1072,6 +1141,9 @@ void MainWindow::on_actionLast5Moves_triggered(){
 */
 void MainWindow::on_actionLast10Moves_triggered(){
     ui->boardWidget->setShowMoveNumber(10);
+
+    QSettings settings;
+    settings.setValue("marker/moveNumber", 10);
 }
 
 /**
@@ -1080,6 +1152,9 @@ void MainWindow::on_actionLast10Moves_triggered(){
 */
 void MainWindow::on_actionLast20Moves_triggered(){
     ui->boardWidget->setShowMoveNumber(20);
+
+    QSettings settings;
+    settings.setValue("marker/moveNumber", 20);
 }
 
 /**
@@ -1088,6 +1163,9 @@ void MainWindow::on_actionLast20Moves_triggered(){
 */
 void MainWindow::on_actionLast50Moves_triggered(){
     ui->boardWidget->setShowMoveNumber(50);
+
+    QSettings settings;
+    settings.setValue("marker/moveNumber", 50);
 }
 
 /**
@@ -1096,6 +1174,9 @@ void MainWindow::on_actionLast50Moves_triggered(){
 */
 void MainWindow::on_actionAllMoves_triggered(){
     ui->boardWidget->setShowMoveNumber(-1);
+
+    QSettings settings;
+    settings.setValue("marker/moveNumber", -1);
 }
 
 /**
@@ -1104,6 +1185,9 @@ void MainWindow::on_actionAllMoves_triggered(){
 */
 void MainWindow::on_actionShowCoordinate_triggered(){
     ui->boardWidget->setShowCoordinates( ui->actionShowCoordinate->isChecked() );
+
+    QSettings settings;
+    settings.setValue("marker/showCoordinate", ui->actionShowCoordinate->isChecked());
 }
 
 /**
@@ -1118,6 +1202,9 @@ void MainWindow::on_actionShowCoordinateI_triggered(){
     setTreeData();
 
     ui->boardWidget->setCurrentNode(currentNode);
+
+    QSettings settings;
+    settings.setValue("marker/showCoordinateWithI", ui->actionShowCoordinateI->isChecked());
 }
 
 /**
@@ -1126,6 +1213,9 @@ void MainWindow::on_actionShowCoordinateI_triggered(){
 */
 void MainWindow::on_actionShowMarker_triggered(){
     ui->boardWidget->setShowMarker( ui->actionShowMarker->isChecked() );
+
+    QSettings settings;
+    settings.setValue("marker/showMarker", ui->actionShowMarker->isChecked());
 }
 
 /**
@@ -1134,6 +1224,9 @@ void MainWindow::on_actionShowMarker_triggered(){
 */
 void MainWindow::on_actionShowBranchMoves_triggered(){
     ui->boardWidget->setShowBranchMoves( ui->actionShowBranchMoves->isChecked() );
+
+    QSettings settings;
+    settings.setValue("marker/showBranchMoves", ui->actionShowMarker->isChecked());
 }
 
 /**

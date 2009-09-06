@@ -77,8 +77,12 @@ public:
     // draw
     void repaintBoard(bool board=true, bool stones=true);
     void paintBoard(QPaintDevice* pd);
+    void paintBoard(QPainter& p);
     void paintStones(QPaintDevice* pd);
+    void paintStones(QPainter& p);
     void paintTerritories(QPaintDevice* pd);
+    void paintTerritories(QPainter& p);
+    void print(QPrinter&);
 
     // set/get data
     void clear();
@@ -186,8 +190,8 @@ protected:
     // draw
     void drawBoard(QPainter& p);
     void drawCoordinates(QPainter& p);
+    void drawStonesAndMarker(QPainter& p);
     void drawStones(QPainter& p);
-    void drawStones2(QPainter& p);
     void drawBranchMoves(QPainter& p, go::nodeList::iterator first, go::nodeList::iterator last);
     void drawCross(QPainter& p, go::markList::iterator first, go::markList::iterator last);
     void drawTriangle(QPainter& p, go::markList::iterator first, go::markList::iterator last);
@@ -198,7 +202,7 @@ protected:
     void drawPath(QPainter& p, const QPainterPath& path, int boardX, int boardY);
     void drawTerritories(QPainter& p);
     void drawCurrentMark(QPainter& p, go::nodePtr node);
-    void drawImage(QPainter& p, int x, int y, const QImage& image);
+    void drawStone(QPainter& p, int x, int y, bool black);
     void eraseBackground(QPainter& p, int x, int y);
     void getStartPosition(QList<int>& star, int size);
     QPainterPath createFocusTrianglePath() const;
