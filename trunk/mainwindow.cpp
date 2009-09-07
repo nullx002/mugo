@@ -388,6 +388,7 @@ void MainWindow::on_actionSaveBoardAsPicture_triggered()
     QImage image(w, h, QImage::Format_RGB32);
     ui->boardWidget->paintBoard(&image);
     ui->boardWidget->paintStones(&image);
+    ui->boardWidget->paintTerritories(&image);
     image.save(fname, format[n]);
 
     // change image coordinate to display
