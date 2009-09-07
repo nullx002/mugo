@@ -1004,7 +1004,7 @@ void BoardWidget::drawBoard(QPainter& p){
 //    }
 
     if (boardType >= 0){
-        p.fillRect(boardRect.left()+3, boardRect.top()+3, boardRect.width(), boardRect.height(), Qt::gray);
+        p.fillRect(boardRect.left()+3, boardRect.top()+3, boardRect.width(), boardRect.height(), QColor(10, 10, 10, 120));
         p.drawImage(boardRect.topLeft(), boardImage2);
     }
 
@@ -1300,19 +1300,21 @@ void BoardWidget::drawPath(QPainter& p, const QPainterPath& path, int boardX, in
 void BoardWidget::drawTerritories(QPainter& p){
     p.save();
 
-    for (int y=0; y<ysize; ++y){
-        for (int x=0; x<xsize; ++x){
-            if (!board[y][x].blackTerritory() && !board[y][x].whiteTerritory())
+    double w = boxSize * 0.3;
+
+    for (int by=0; by<ysize; ++by){
+        for (int bx=0; bx<xsize; ++bx){
+            if (!board[by][bx].blackTerritory() && !board[by][bx].whiteTerritory())
                 continue;
 
-            int bx = xlines[x];
-            int by = ylines[y];
+            int x = xlines[bx];
+            int y = ylines[by];
 
-            QColor color = board[y][x].whiteTerritory() ? QColor(255, 255, 255, 110) : QColor(0, 0, 0, 60);
-            p.fillRect(bx-boxSize/2, by-boxSize/2, boxSize, boxSize, color);
+            QColor color = board[by][bx].whiteTerritory() ? QColor(255, 255, 255, 105) : QColor(0, 0, 0, 45);
+            p.fillRect(x-boxSize/2, y-boxSize/2, boxSize, boxSize, color);
 
             color.setAlpha(255);
-            p.fillRect(bx-boxSize/6, by-boxSize/6, boxSize/3, boxSize/3, color);
+            p.fillRect( QRectF(x-w/2, y-w/2, w, w), color);
         }
     }
 
@@ -1427,8 +1429,10 @@ void BoardWidget::drawStone(QPainter& p, int x, int y, bool black){
 
     p.translate(xlines[x], ylines[y]);
     if (black){
-        if (blackType >= 0)
+        if (blackType >= 0){
+            p.setOpacity(board[y][x].whiteTerritory() ? 0.6 : 1.0);
             p.drawImage(-boxSize/2, -boxSize/2, black2);
+        }
         else{
             p.setPen(Qt::black);
             p.setBrush(blackColor);
@@ -1436,8 +1440,10 @@ void BoardWidget::drawStone(QPainter& p, int x, int y, bool black){
         }
     }
     else{
-        if (whiteType >= 0)
+        if (whiteType >= 0){
+            p.setOpacity(board[y][x].blackTerritory() ? 0.6 : 1.0);
             p.drawImage(-boxSize/2, -boxSize/2, white2);
+        }
         else{
             p.setPen(Qt::black);
             p.setBrush(whiteColor);
