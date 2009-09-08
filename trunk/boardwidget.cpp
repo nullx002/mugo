@@ -48,7 +48,7 @@ void Sound::setCurrentSource(const QString& source){
 
 void Sound::play(){
 #if defined(Q_WS_WIN)
-    double currentClock = (double)clock() / CLOCKS_PER_SEC;
+    qreal currentClock = (qreal)clock() / CLOCKS_PER_SEC;
     if (mop.wDeviceID && currentClock - lastClock > 0.2){
         mciSendCommand(mop.wDeviceID, MCI_STOP, 0, 0);
         mciSendCommand(mop.wDeviceID, MCI_SEEK, MCI_SEEK_TO_START, 0);
@@ -155,16 +155,14 @@ void BoardWidget::mouseMoveEvent(QMouseEvent* e){
     else
         return;
 
-    int bx = (int)floor( double(e->x() - xlines[0] + boxSize / 2) / boxSize );
-    int by = (int)floor( double(e->y() - ylines[0] + boxSize / 2) / boxSize );
+    int bx = (int)floor( qreal(e->x() - xlines[0] + boxSize / 2) / boxSize );
+    int by = (int)floor( qreal(e->y() - ylines[0] + boxSize / 2) / boxSize );
 
     offscreenBuffer3 = offscreenBuffer2.copy();
     QPainter p(&offscreenBuffer3);
 
-    if (! (bx < 0 || bx >= xlines.size() || by < 0 || by >= ylines.size() || board[by][bx].color != go::empty) ){
-        p.setOpacity(0.5);
-        drawStone(p, bx, by, black ? go::black : go::white);
-    }
+    if (! (bx < 0 || bx >= xlines.size() || by < 0 || by >= ylines.size() || board[by][bx].color != go::empty) )
+        drawStone(p, bx, by, black ? go::black : go::white, 0.5);
 
     repaint();
 }
@@ -198,8 +196,8 @@ void BoardWidget::resizeEvent(QResizeEvent* e){
 /**
 */
 void BoardWidget::onLButtonDown(QMouseEvent* e){
-    int boardX = (int)floor( double(e->x() - xlines[0] + boxSize / 2) / boxSize );
-    int boardY = (int)floor( double(e->y() - ylines[0] + boxSize / 2) / boxSize );
+    int boardX = (int)floor( qreal(e->x() - xlines[0] + boxSize / 2) / boxSize );
+    int boardY = (int)floor( qreal(e->y() - ylines[0] + boxSize / 2) / boxSize );
 
     if (boardX < 0 || boardX >= xsize || boardY < 0 || boardY >= ysize)
         return;
@@ -343,18 +341,19 @@ void BoardWidget::repaintBoard(bool board, bool stones){
 */
 void BoardWidget::paintBoard(QPaintDevice* pd){
     QPainter p(pd);
-    p.setRenderHints(QPainter::Antialiasing|QPainter::TextAntialiasing|QPainter::SmoothPixmapTransform);
+    p.setRenderHints(QPainter::Antialiasing/*|QPainter::TextAntialiasing|QPainter::SmoothPixmapTransform*/);
     paintBoard(p);
 }
 
-void BoardWidget::paintBoard(QPainter& p){
+void BoardWidget::paintBoard(QPainter& p, qreal pointSize){
     width_  = p.device()->width();
     height_ = p.device()->height();
 
     QFont font;
-    font.setPointSize(8);
+    font.setPointSizeF(pointSize);
     font.setStyleHint(QFont::SansSerif);
     font.setWeight(QFont::Normal);
+    font.setStyleStrategy(QFont::PreferAntialias);
 
     p.setFont(font);
     p.setPen(Qt::black);
@@ -374,7 +373,7 @@ void BoardWidget::paintBoard(QPainter& p){
 */
 void BoardWidget::paintStones(QPaintDevice* pd){
     QPainter p(pd);
-    p.setRenderHints(QPainter::Antialiasing|QPainter::TextAntialiasing|QPainter::SmoothPixmapTransform);
+    p.setRenderHints(QPainter::Antialiasing/*|QPainter::TextAntialiasing|QPainter::SmoothPixmapTransform*/);
     paintStones(p);
 }
 
@@ -383,9 +382,9 @@ void BoardWidget::paintStones(QPainter& p){
     height_ = p.device()->height();
 
     QFont font;
-    font.setPointSize(8);
     font.setStyleHint(QFont::SansSerif);
     font.setWeight(QFont::Normal);
+    font.setStyleStrategy(QFont::PreferAntialias);
 
     p.setFont(font);
     p.setPen(Qt::black);
@@ -397,7 +396,7 @@ void BoardWidget::paintStones(QPainter& p){
 */
 void BoardWidget::paintTerritories(QPaintDevice* pd){
     QPainter p(pd);
-    p.setRenderHints(QPainter::Antialiasing|QPainter::TextAntialiasing|QPainter::SmoothPixmapTransform);
+    p.setRenderHints(QPainter::Antialiasing/*|QPainter::TextAntialiasing|QPainter::SmoothPixmapTransform*/);
     paintTerritories(p);
 }
 
@@ -414,6 +413,12 @@ void BoardWidget::paintTerritories(QPainter& p){
 void BoardWidget::print(QPrinter& printer){
     QPainter p;
     p.begin(&printer);
+
+    board.clear();
+    board.resize(ysize);
+    for(int i=0; i<ysize; ++i)
+        board[i].resize(xsize);
+    BoardBuffer buf = board;
 
     int  boardType_  = -1;
     int  whiteType_  = -1;
@@ -433,13 +438,8 @@ void BoardWidget::print(QPrinter& printer){
     QString header = QString("%1 %2 (W) vs %3 %4 (B)").arg(goData.root->whitePlayer).arg(goData.root->whiteRank).arg(goData.root->blackPlayer).arg(goData.root->blackRank);
     p.drawText(0, 10, printer.width(), 30, Qt::AlignCenter, header);
 
-    BoardBuffer buf;
-    buf.resize( board.size() );
-    for (int i=0; i<board.size(); ++i)
-        buf[0].resize( board[i].size() );
-
     int moveNumber = 0;
-    paintBoard(p);
+    paintBoard(p, 15.0);
     print( printer, p, goData.root, moveNumber, 20, 0, buf );
 
     p.end();
@@ -450,19 +450,11 @@ void BoardWidget::print(QPrinter& printer){
     qSwap(showMoveNumber, showNumber_);
     qSwap(showMoveNumberCount, moveNumber_);
 
+    createBoardBuffer();
     repaintBoard();
 }
 
 void BoardWidget::print(QPrinter& printer, QPainter& p, go::nodePtr node, int moveNumber, int movePerPage, int moveNumberInPage, BoardBuffer& buf){
-    for (int y=0; y<buf.size(); ++y){
-        for (int x=0; x<buf[y].size(); ++x){
-            if (buf[y][x].black())
-                drawStone(p, x, y, go::black);
-            else if (buf[y][x].white())
-                drawStone(p, x, y, go::white);
-        }
-    }
-
     QFont font( p.font() );
     if (node->isStone() && !node->isPass()){
         ++moveNumber;
@@ -470,30 +462,45 @@ void BoardWidget::print(QPrinter& printer, QPainter& p, go::nodePtr node, int mo
 
         int bx, by;
         sgfToBoardCoordinate(node->position.x, node->position.y, bx, by);
-        drawStone(p, bx, by, node->color);
-        buf[by][bx].color = node->color;
-        buf[by][bx].number = moveNumber;
+        board[by][bx].color  = node->color;
+        board[by][bx].number = moveNumber;
+        removeDeadStones(bx, by);
 
-        if (moveNumber < 10)
-            font.setPointSize(int(boxSize * 0.41));
-        else if (moveNumber < 99)
-            font.setPointSize(int(boxSize * 0.38));
-        else
-            font.setPointSize(int(boxSize * 0.35));
+        if (buf[by][bx].empty()){
+            drawStone(p, bx, by, node->color);
+            buf[by][bx].color  = node->color;
+            buf[by][bx].number = moveNumber;
 
-        font.setWeight(QFont::Black);
-//        font.setWeight(board[y][x].number == currentMoveNumber ? QFont::Black: QFont::Normal);
-        p.setFont(font);
+            if (moveNumber < 10)
+                font.setPointSizeF(boxSize * 0.41);
+            else if (moveNumber < 99)
+                font.setPointSizeF(boxSize * 0.38);
+            else
+                font.setPointSizeF(boxSize * 0.35);
 
-        QString s = QString("%1").arg(moveNumber);
-        p.setPen( node->isBlack() ? Qt::white : Qt::black );
-        p.drawText(xlines[bx] - boxSize, ylines[by] - boxSize, boxSize * 2, boxSize * 2, Qt::AlignCenter, s);
+            font.setWeight(QFont::Black);
+    //        font.setWeight(board[y][x].number == currentMoveNumber ? QFont::Black: QFont::Normal);
+            p.setFont(font);
+
+            QString s = QString("%1").arg(moveNumber);
+            p.setPen( node->isBlack() ? Qt::white : Qt::black );
+            p.drawText(xlines[bx] - boxSize, ylines[by] - boxSize, boxSize * 2, boxSize * 2, Qt::AlignCenter, s);
+        }
     }
 
     if (moveNumberInPage == movePerPage){
         printer.newPage();
-        paintBoard(p);
+        paintBoard(p, 15.0);
         moveNumberInPage = 0;
+        buf = board;
+        for (int y=0; y<board.size(); ++y){
+            for (int x=0; x<board[y].size(); ++x){
+                if (board[y][x].black())
+                    drawStone(p, x, y, go::black);
+                else if (board[y][x].white())
+                    drawStone(p, x, y, go::white);
+            }
+        }
     }
 
     foreach (go::nodePtr child, node->childNodes){
@@ -1009,9 +1016,9 @@ void BoardWidget::createBoardBuffer(){
 void BoardWidget::drawBoard(QPainter& p){
     p.save();
 
-    int ps = p.font().pointSize();
-    int w = (width_  - (showCoordinates ? ps*5 : 0)) / xsize;
-    int h = (height_ - (showCoordinates ? ps*5 : 0)) / ysize;
+    QRectF coordRect = p.boundingRect(QRectF(0.0, 0.0, 1.0, 1.0), Qt::AlignCenter, "999999");
+    int w = static_cast<int>( (width_  - (showCoordinates ? coordRect.width() : 0.0)) / xsize );
+    int h = static_cast<int>( (height_ - (showCoordinates ? coordRect.width() : 0.0)) / ysize );
     boxSize = qMin(w, h);
     w = boxSize * (xsize - 1);
     h = boxSize * (ysize - 1);
@@ -1039,7 +1046,7 @@ void BoardWidget::drawBoard(QPainter& p){
         black2 = QImage(boxSize, boxSize, QImage::Format_ARGB32);
         black2.fill(0);
         QPainter p2(&black2);
-        p2.setRenderHints(QPainter::Antialiasing|QPainter::TextAntialiasing|QPainter::SmoothPixmapTransform);
+        p2.setRenderHints(QPainter::Antialiasing/*|QPainter::TextAntialiasing|QPainter::SmoothPixmapTransform*/);
         p2.setPen(Qt::black);
         p2.setBrush(blackColor);
         p2.drawEllipse(1, 1, boxSize-2, boxSize-2);
@@ -1051,7 +1058,7 @@ void BoardWidget::drawBoard(QPainter& p){
         white2 = QImage(boxSize, boxSize, QImage::Format_ARGB32);
         white2.fill(0);
         QPainter p2(&white2);
-        p2.setRenderHints(QPainter::Antialiasing|QPainter::TextAntialiasing|QPainter::SmoothPixmapTransform);
+        p2.setRenderHints(QPainter::Antialiasing/*|QPainter::TextAntialiasing|QPainter::SmoothPixmapTransform*/);
         p2.setPen(Qt::black);
         p2.setBrush(whiteColor);
         p2.drawEllipse(1, 1, boxSize-2, boxSize-2);
@@ -1065,6 +1072,9 @@ void BoardWidget::drawBoard(QPainter& p){
     // horizontal line
     ylines.clear();
     for (int i=0; i<ysize; ++i){
+//        pen.setWidth( i == 0 || i == ysize-1 ? 2 : 1 );
+//        p.setPen(pen);
+
         int y = t + i * boxSize;
         p.drawLine(l, y, r, y);
         ylines.push_back(y);
@@ -1073,6 +1083,9 @@ void BoardWidget::drawBoard(QPainter& p){
     // vertical line
     xlines.clear();
     for (int i=0; i<xsize; ++i){
+//        pen.setWidth( i == 0 || i == xsize-1 ? 2 : 1 );
+//        p.setPen(pen);
+
         int x = l + i * boxSize;
         p.drawLine(x, t, x, b);
         xlines.push_back(x);
@@ -1117,7 +1130,7 @@ void BoardWidget::drawCoordinates(QPainter& p){
 
     p.save();
 
-    int ps = p.font().pointSize();
+    QRectF r = p.boundingRect(QRectF(0.0, 0.0, 1.0, 1.0), Qt::AlignCenter, "999");
 
     for (int i=0; i<xsize; ++i){
         QString s;
@@ -1130,10 +1143,8 @@ void BoardWidget::drawCoordinates(QPainter& p){
         else if (rotateBoard_ == 3)
             s = getYString(flipBoardHorizontally_ ? xsize-i-1 : i);
 
-        QRect r = p.boundingRect(xlines[i]-ps, boardRect.top()-ps-5, ps*2, ps, Qt::AlignCenter, s);
-        p.drawText(r, s);
-        r = p.boundingRect(xlines[i]-ps, boardRect.bottom()+7, ps*2, ps, Qt::AlignCenter, s);
-        p.drawText(r, s);
+        p.drawText(QRectF(xlines[i]-r.width()/2.0, boardRect.top()-r.height(), r.width(), r.height()), Qt::AlignCenter, s);
+        p.drawText(QRectF(xlines[i]-r.width()/2.0, boardRect.bottom()+5, r.width(), r.height()), Qt::AlignCenter, s);
     }
 
     for (int i=0; i<ysize; ++i){
@@ -1147,10 +1158,8 @@ void BoardWidget::drawCoordinates(QPainter& p){
         else if (rotateBoard_ == 3)
             s = getXString(flipBoardVertically_ ? i : ysize-i-1);
 
-        QRect r = p.boundingRect(boardRect.left()-ps-5, ylines[i]-ps, ps, ps*2, Qt::AlignCenter, s);
-        p.drawText(r, s);
-        r = p.boundingRect(boardRect.right()+7, ylines[i]-ps, ps, ps*2, Qt::AlignCenter, s);
-        p.drawText(r, s);
+        p.drawText(QRectF(boardRect.left()-r.width(), ylines[i]-r.height()/2.0, r.width(), r.height()), Qt::AlignCenter, s);
+        p.drawText(QRectF(boardRect.right()+3, ylines[i]-r.height()/2.0, r.width(), r.height()), Qt::AlignCenter, s);
     }
 
     p.restore();
@@ -1162,7 +1171,7 @@ void BoardWidget::drawStonesAndMarker(QPainter& p){
     p.save();
 
     QFont font(p.font());
-    font.setPointSize(int(boxSize * 0.5));
+    font.setPointSizeF(boxSize * 0.5);
     p.setFont(font);
 
     drawStones(p);
@@ -1197,27 +1206,27 @@ void BoardWidget::drawStones(QPainter& p){
 
             // draw stone
             if (board[y][x].black())
-                drawStone(p, x, y, go::black);
+                drawStone(p, x, y, go::black, board[y][x].whiteTerritory() ? 0.6 : 1.0);
             else if (board[y][x].white())
-                drawStone(p, x, y, go::white);
+                drawStone(p, x, y, go::white, board[y][x].blackTerritory() ? 0.6 : 1.0);
 
             // draw move number
             if (showMoveNumber == false || showMoveNumberCount == 0 || board[y][x].number == 0 || (showMoveNumberCount != -1 && currentMoveNumber - showMoveNumberCount + 1 > board[y][x].number))
                 continue;
 
             if (board[y][x].number < 10)
-                font.setPointSize(int(boxSize * 0.41));
+                font.setPointSizeF(boxSize * 0.41);
             else if (board[y][x].number < 99)
-                font.setPointSize(int(boxSize * 0.38));
+                font.setPointSizeF(boxSize * 0.38);
             else
-                font.setPointSize(int(boxSize * 0.35));
+                font.setPointSizeF(boxSize * 0.35);
 
             font.setWeight(board[y][x].number == currentMoveNumber ? QFont::Black: QFont::Normal);
             p.setFont(font);
 
             QString s = QString("%1").arg(board[y][x].number);
             p.setPen( board[y][x].number == currentMoveNumber ? Qt::red : board[y][x].black() ? Qt::white : Qt::black );
-            p.drawText(xlines[x] - boxSize, ylines[y] - boxSize, boxSize * 2, boxSize * 2, Qt::AlignCenter, s);
+            p.drawText(QRectF(xlines[x] - boxSize * 0.5, ylines[y] - boxSize * 0.5, boxSize, boxSize), Qt::AlignCenter, s);
         }
     }
 
@@ -1354,7 +1363,7 @@ void BoardWidget::drawPath(QPainter& p, const QPainterPath& path, int boardX, in
 void BoardWidget::drawTerritories(QPainter& p){
     p.save();
 
-    double w = boxSize * 0.3;
+    qreal w = boxSize * 0.3;
 
     for (int by=0; by<ysize; ++by){
         for (int bx=0; bx<xsize; ++bx){
@@ -1425,8 +1434,8 @@ void BoardWidget::drawCurrentMark(QPainter& p, go::nodePtr node){
 
 QPainterPath BoardWidget::createFocusTrianglePath() const{
     QPainterPath path;
-    double w = boxSize * 0.25;
-    double h = boxSize * 0.15;
+    qreal w = boxSize * 0.25;
+    qreal h = boxSize * 0.15;
     QPolygonF polygon(3);
     polygon[0] = QPointF(0, -h);
     polygon[1] = QPointF(-w, h);
@@ -1438,14 +1447,14 @@ QPainterPath BoardWidget::createFocusTrianglePath() const{
 
 QPainterPath BoardWidget::createCirclePath() const{
     QPainterPath path;
-    double w = boxSize * 0.42;
+    qreal w = boxSize * 0.42;
     path.addEllipse(-w/2, -w/2, w, w);
     return path;
 }
 
 QPainterPath BoardWidget::createCrossPath() const{
     QPainterPath path;
-    double w = boxSize * 0.18;
+    qreal w = boxSize * 0.18;
 
     path.moveTo(-w, -w);
     path.lineTo(w, w);
@@ -1458,15 +1467,15 @@ QPainterPath BoardWidget::createCrossPath() const{
 
 QPainterPath BoardWidget::createSquarePath() const{
     QPainterPath path;
-    double w = boxSize * 0.4;
+    qreal w = boxSize * 0.4;
     path.addRect(-w/2, -w/2, w, w);
     return path;
 }
 
 QPainterPath BoardWidget::createTrianglePath() const{
     QPainterPath path;
-    double w = boxSize * 0.22;
-    double h = boxSize * 0.18;
+    qreal w = boxSize * 0.22;
+    qreal h = boxSize * 0.18;
     QPolygonF polygon(3);
     polygon[0] = QPointF(0, -h);
     polygon[1] = QPointF(-w, h);
@@ -1478,13 +1487,13 @@ QPainterPath BoardWidget::createTrianglePath() const{
 
 /**
 */
-void BoardWidget::drawStone(QPainter& p, int bx, int by, go::color color){
+void BoardWidget::drawStone(QPainter& p, int bx, int by, go::color color, qreal opacity){
     p.save();
 
     p.translate(xlines[bx], ylines[by]);
     if (color == go::black){
         if (blackType >= 0){
-            p.setOpacity(board[by][bx].whiteTerritory() ? 0.6 : 1.0);
+            p.setOpacity(opacity);
             p.drawImage(-boxSize/2, -boxSize/2, black2);
         }
         else{
@@ -1495,7 +1504,7 @@ void BoardWidget::drawStone(QPainter& p, int bx, int by, go::color color){
     }
     else{
         if (whiteType >= 0){
-            p.setOpacity(board[by][bx].blackTerritory() ? 0.6 : 1.0);
+            p.setOpacity(opacity);
             p.drawImage(-boxSize/2, -boxSize/2, white2);
         }
         else{
