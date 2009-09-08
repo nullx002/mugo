@@ -112,13 +112,11 @@ public:
     void setY(int y){ position.y = y; }
 
     virtual bool isStone() const{ return black || white; }
-    bool isBlack() const{ return black; }
-    bool isWhite() const{ return white; }
+    bool isBlack() const{ return color == black; }
+    bool isWhite() const{ return color == white; }
     bool isPass() const;
 
-    void setBlack(){ black = true; white = false; }
-    void setWhite(){ black = false; white = true; }
-    void setEmpty(){ black = false; white = false; }
+    void setColor(go::color c){ color = c; }
 
     virtual QString nodeName() const{ return name; }
     virtual QString toString() const;
@@ -141,8 +139,7 @@ public:
     int nodeAnnotation;
     QString comment;
     point position;
-    bool  black;
-    bool  white;
+    go::color color;
     int   moveNumber;
 };
 

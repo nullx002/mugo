@@ -12,10 +12,11 @@
 #include "sgf.h"
 #include "ugf.h"
 #include "mainwindow.h"
+#include "setupdialog.h"
 #include "gameinformationdialog.h"
 #include "playwithcomputerdialog.h"
-#include "setupdialog.h"
 #include "exportasciidialog.h"
+#include "printoptiondialog.h"
 #include "ui_mainwindow.h"
 
 Q_DECLARE_METATYPE(go::nodePtr);
@@ -409,10 +410,15 @@ void MainWindow::on_actionExportAsciiToClipboard_triggered(){
 * File -> Print
 */
 void MainWindow::on_actionPrint_triggered(){
+    PrintOptionDialog optionDialog(this);
+    if (optionDialog.exec() != QDialog::Accepted)
+        return;
+
+//    QPrinter printer(QPrinter::HighResolution);
     QPrinter printer(QPrinter::ScreenResolution);
 
-    QPrintDialog *dlg = new QPrintDialog(&printer, this);
-    if (dlg->exec() != QDialog::Accepted)
+    QPrintDialog printDialog(&printer, this);
+    if (printDialog.exec() != QDialog::Accepted)
         return;
 
     ui->boardWidget->print(printer);
