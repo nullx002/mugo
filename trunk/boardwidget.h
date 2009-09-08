@@ -83,7 +83,7 @@ public:
     void paintTerritories(QPaintDevice* pd);
     void paintTerritories(QPainter& p);
     void print(QPrinter&);
-    void print(QPainter& p, go::nodePtr node);
+    void print(QPrinter& printer, QPainter& p, go::nodePtr node, int moveNumber, int movePerPage, int moveNumberInPage, BoardBuffer& buf);
 
     // set/get data
     void clear();
@@ -203,7 +203,7 @@ protected:
     void drawPath(QPainter& p, const QPainterPath& path, int boardX, int boardY);
     void drawTerritories(QPainter& p);
     void drawCurrentMark(QPainter& p, go::nodePtr node);
-    void drawStone(QPainter& p, int x, int y, bool black);
+    void drawStone(QPainter& p, int boardX, int boardY, go::color);
     void eraseBackground(QPainter& p, int x, int y);
     void getStartPosition(QList<int>& star, int size);
     QPainterPath createFocusTrianglePath() const;

@@ -163,7 +163,7 @@ void BoardWidget::mouseMoveEvent(QMouseEvent* e){
 
     if (! (bx < 0 || bx >= xlines.size() || by < 0 || by >= ylines.size() || board[by][bx].color != go::empty) ){
         p.setOpacity(0.5);
-        drawStone(p, bx, by, black);
+        drawStone(p, bx, by, black ? go::black : go::white);
     }
 
     repaint();
@@ -359,10 +359,12 @@ void BoardWidget::paintBoard(QPainter& p){
     p.setFont(font);
     p.setPen(Qt::black);
 
-    if (tutorMode != eNoTutor)
-        p.fillRect(0, 0, width_, height_, tutorColor);
-    else
-        p.fillRect(0, 0, width_, height_, bgColor);
+    if (boardType >= 0){
+        if (tutorMode != eNoTutor)
+            p.fillRect(0, 0, width_, height_, tutorColor);
+        else
+            p.fillRect(0, 0, width_, height_, bgColor);
+    }
 
     drawBoard(p);
     drawCoordinates(p);
@@ -428,8 +430,17 @@ void BoardWidget::print(QPrinter& printer){
     width_  = printer.width();
     height_ = printer.height();
 
+    QString header = QString("%1 %2 (W) vs %3 %4 (B)").arg(goData.root->whitePlayer).arg(goData.root->whiteRank).arg(goData.root->blackPlayer).arg(goData.root->blackRank);
+    p.drawText(0, 10, printer.width(), 30, Qt::AlignCenter, header);
+
+    BoardBuffer buf;
+    buf.resize( board.size() );
+    for (int i=0; i<board.size(); ++i)
+        buf[0].resize( board[i].size() );
+
+    int moveNumber = 0;
     paintBoard(p);
-    print( p, goData.root );
+    print( printer, p, goData.root, moveNumber, 20, 0, buf );
 
     p.end();
 
@@ -442,8 +453,51 @@ void BoardWidget::print(QPrinter& printer){
     repaintBoard();
 }
 
-void BoardWidget::print(QPainter& p, go::nodePtr node){
-    if (node->isStone()){
+void BoardWidget::print(QPrinter& printer, QPainter& p, go::nodePtr node, int moveNumber, int movePerPage, int moveNumberInPage, BoardBuffer& buf){
+    for (int y=0; y<buf.size(); ++y){
+        for (int x=0; x<buf[y].size(); ++x){
+            if (buf[y][x].black())
+                drawStone(p, x, y, go::black);
+            else if (buf[y][x].white())
+                drawStone(p, x, y, go::white);
+        }
+    }
+
+    QFont font( p.font() );
+    if (node->isStone() && !node->isPass()){
+        ++moveNumber;
+        ++moveNumberInPage;
+
+        int bx, by;
+        sgfToBoardCoordinate(node->position.x, node->position.y, bx, by);
+        drawStone(p, bx, by, node->color);
+        buf[by][bx].color = node->color;
+        buf[by][bx].number = moveNumber;
+
+        if (moveNumber < 10)
+            font.setPointSize(int(boxSize * 0.41));
+        else if (moveNumber < 99)
+            font.setPointSize(int(boxSize * 0.38));
+        else
+            font.setPointSize(int(boxSize * 0.35));
+
+        font.setWeight(QFont::Black);
+//        font.setWeight(board[y][x].number == currentMoveNumber ? QFont::Black: QFont::Normal);
+        p.setFont(font);
+
+        QString s = QString("%1").arg(moveNumber);
+        p.setPen( node->isBlack() ? Qt::white : Qt::black );
+        p.drawText(xlines[bx] - boxSize, ylines[by] - boxSize, boxSize * 2, boxSize * 2, Qt::AlignCenter, s);
+    }
+
+    if (moveNumberInPage == movePerPage){
+        printer.newPage();
+        paintBoard(p);
+        moveNumberInPage = 0;
+    }
+
+    foreach (go::nodePtr child, node->childNodes){
+        print(printer, p, child, moveNumber, movePerPage, moveNumberInPage, buf);
     }
 }
 
@@ -970,38 +1024,38 @@ void BoardWidget::drawBoard(QPainter& p){
 
     // create board and stone image
     boardRect.setRect(l - margin, t - margin, w + margin * 2, h + margin * 2);
-//    if (boardRect.width() != boardImage2.width()){
+    if (boardType >= 0){
         boardImage2 = QImage(boardRect.size(), QImage::Format_RGB32);
         QPainter board(&boardImage2);
         if (boardType == 0 || boardType == 1)
             board.fillRect(0, 0, boardRect.width(), boardRect.height(), QBrush(boardImage1));
         else
             board.fillRect(0, 0, boardRect.width(), boardRect.height(), boardColor);
+    }
 
-        if (blackType == 0 || blackType == 1)
-            black2 = black1.scaled(boxSize, boxSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-        else{
-            black2 = QImage(boxSize, boxSize, QImage::Format_ARGB32);
-            black2.fill(0);
-            QPainter p2(&black2);
-            p2.setRenderHints(QPainter::Antialiasing|QPainter::TextAntialiasing|QPainter::SmoothPixmapTransform);
-            p2.setPen(Qt::black);
-            p2.setBrush(blackColor);
-            p2.drawEllipse(1, 1, boxSize-2, boxSize-2);
-        }
+    if (blackType == 0 || blackType == 1)
+        black2 = black1.scaled(boxSize, boxSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    else{
+        black2 = QImage(boxSize, boxSize, QImage::Format_ARGB32);
+        black2.fill(0);
+        QPainter p2(&black2);
+        p2.setRenderHints(QPainter::Antialiasing|QPainter::TextAntialiasing|QPainter::SmoothPixmapTransform);
+        p2.setPen(Qt::black);
+        p2.setBrush(blackColor);
+        p2.drawEllipse(1, 1, boxSize-2, boxSize-2);
+    }
 
-        if (whiteType == 0 || whiteType == 1)
-            white2 = white1.scaled(boxSize, boxSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-        else{
-            white2 = QImage(boxSize, boxSize, QImage::Format_ARGB32);
-            white2.fill(0);
-            QPainter p2(&white2);
-            p2.setRenderHints(QPainter::Antialiasing|QPainter::TextAntialiasing|QPainter::SmoothPixmapTransform);
-            p2.setPen(Qt::black);
-            p2.setBrush(whiteColor);
-            p2.drawEllipse(1, 1, boxSize-2, boxSize-2);
-        }
-//    }
+    if (whiteType == 0 || whiteType == 1)
+        white2 = white1.scaled(boxSize, boxSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    else{
+        white2 = QImage(boxSize, boxSize, QImage::Format_ARGB32);
+        white2.fill(0);
+        QPainter p2(&white2);
+        p2.setRenderHints(QPainter::Antialiasing|QPainter::TextAntialiasing|QPainter::SmoothPixmapTransform);
+        p2.setPen(Qt::black);
+        p2.setBrush(whiteColor);
+        p2.drawEllipse(1, 1, boxSize-2, boxSize-2);
+    }
 
     if (boardType >= 0){
         p.fillRect(boardRect.left()+3, boardRect.top()+3, boardRect.width(), boardRect.height(), QColor(10, 10, 10, 120));
@@ -1143,9 +1197,9 @@ void BoardWidget::drawStones(QPainter& p){
 
             // draw stone
             if (board[y][x].black())
-                drawStone(p, x, y, true);
+                drawStone(p, x, y, go::black);
             else if (board[y][x].white())
-                drawStone(p, x, y, false);
+                drawStone(p, x, y, go::white);
 
             // draw move number
             if (showMoveNumber == false || showMoveNumberCount == 0 || board[y][x].number == 0 || (showMoveNumberCount != -1 && currentMoveNumber - showMoveNumberCount + 1 > board[y][x].number))
@@ -1424,13 +1478,13 @@ QPainterPath BoardWidget::createTrianglePath() const{
 
 /**
 */
-void BoardWidget::drawStone(QPainter& p, int x, int y, bool black){
+void BoardWidget::drawStone(QPainter& p, int bx, int by, go::color color){
     p.save();
 
-    p.translate(xlines[x], ylines[y]);
-    if (black){
+    p.translate(xlines[bx], ylines[by]);
+    if (color == go::black){
         if (blackType >= 0){
-            p.setOpacity(board[y][x].whiteTerritory() ? 0.6 : 1.0);
+            p.setOpacity(board[by][bx].whiteTerritory() ? 0.6 : 1.0);
             p.drawImage(-boxSize/2, -boxSize/2, black2);
         }
         else{
@@ -1441,7 +1495,7 @@ void BoardWidget::drawStone(QPainter& p, int x, int y, bool black){
     }
     else{
         if (whiteType >= 0){
-            p.setOpacity(board[y][x].blackTerritory() ? 0.6 : 1.0);
+            p.setOpacity(board[by][bx].blackTerritory() ? 0.6 : 1.0);
             p.drawImage(-boxSize/2, -boxSize/2, white2);
         }
         else{
@@ -1941,9 +1995,9 @@ void BoardWidget::setCountTerritoryMode(bool countMode){
 
 void BoardWidget::whiteFirst(bool whiteFirst){
     if (whiteFirst)
-        goData.root->setBlack();
+        goData.root->setColor(go::black);
     else
-        goData.root->setWhite();
+        goData.root->setColor(go::white);
     createBoardBuffer();
 }
 
