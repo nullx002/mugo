@@ -77,7 +77,7 @@ public:
     // draw
     void repaintBoard(bool board=true, bool stones=true);
     void paintBoard(QPaintDevice* pd);
-    void paintBoard(QPainter& p);
+    void paintBoard(QPainter& p, qreal pointSize=8.0);
     void paintStones(QPaintDevice* pd);
     void paintStones(QPainter& p);
     void paintTerritories(QPaintDevice* pd);
@@ -203,7 +203,7 @@ protected:
     void drawPath(QPainter& p, const QPainterPath& path, int boardX, int boardY);
     void drawTerritories(QPainter& p);
     void drawCurrentMark(QPainter& p, go::nodePtr node);
-    void drawStone(QPainter& p, int boardX, int boardY, go::color);
+    void drawStone(QPainter& p, int boardX, int boardY, go::color, qreal opacity=1.0);
     void eraseBackground(QPainter& p, int x, int y);
     void getStartPosition(QList<int>& star, int size);
     QPainterPath createFocusTrianglePath() const;
