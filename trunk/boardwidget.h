@@ -82,8 +82,10 @@ public:
     void paintStones(QPainter& p);
     void paintTerritories(QPaintDevice* pd);
     void paintTerritories(QPainter& p);
-    void print(QPrinter&);
-    void print(QPrinter& printer, QPainter& p, go::nodePtr node, int moveNumber, int movePerPage, int moveNumberInPage, BoardBuffer& buf);
+    void print(QPrinter&, int option);
+    void print(QPrinter& printer, QPainter& p, int option, int movePerPage, BoardBuffer& buf);
+    void print(QPrinter& printer, QPainter& p, go::nodePtr node, int& moveNumber, int& moveNumberInPage, BoardBuffer& buf);
+    void newPage(QPrinter& printer, QPainter& p, int& moveNumberInPage, BoardBuffer& buf);
 
     // set/get data
     void clear();

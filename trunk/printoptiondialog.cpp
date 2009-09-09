@@ -1,3 +1,4 @@
+#include <QDebug>
 #include "printoptiondialog.h"
 #include "ui_printoptiondialog.h"
 
@@ -11,6 +12,25 @@ PrintOptionDialog::PrintOptionDialog(QWidget *parent) :
 
 PrintOptionDialog::~PrintOptionDialog()
 {
+    delete m_ui;
+}
+
+void PrintOptionDialog::changeEvent(QEvent *e)
+{
+    QDialog::changeEvent(e);
+    switch (e->type()) {
+    case QEvent::LanguageChange:
+        m_ui->retranslateUi(this);
+        break;
+    default:
+        break;
+    }
+}
+
+void PrintOptionDialog::accept()
+{
+    QDialog::accept();
+
     QRadioButton* printOptions[] = {
         m_ui->printActiveBoard,
         m_ui->printActiveBranch,
@@ -25,17 +45,4 @@ PrintOptionDialog::~PrintOptionDialog()
             break;
         }
 
-    delete m_ui;
-}
-
-void PrintOptionDialog::changeEvent(QEvent *e)
-{
-    QDialog::changeEvent(e);
-    switch (e->type()) {
-    case QEvent::LanguageChange:
-        m_ui->retranslateUi(this);
-        break;
-    default:
-        break;
-    }
 }

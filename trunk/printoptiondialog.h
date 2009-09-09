@@ -18,6 +18,9 @@ public:
 protected:
     void changeEvent(QEvent *e);
 
+public slots:
+    virtual void accept();
+
 private:
     Ui::PrintOptionDialog *m_ui;
     int printOption_;

@@ -24,6 +24,7 @@
 Sound::Sound(QWidget* parent_) : parent(parent_){
 #if defined(Q_WS_WIN)
     lastClock = 0;
+    memset(&mop, 0, sizeof(mop));
 #else
     media = Phonon::createPlayer(Phonon::NotificationCategory);
 #endif
@@ -38,6 +39,9 @@ Sound::~Sound(){
 
 void Sound::setCurrentSource(const QString& source){
 #if defined(Q_WS_WIN)
+    if (mop.wDeviceID != 0)
+        mciSendCommand(mop.wDeviceID, MCI_CLOSE, 0, 0);
+
     memset(&mop, 0, sizeof(mop));
     mop.lpstrDeviceType  = L"WaveAudio";
     mop.lpstrElementName = (WCHAR*)source.utf16();
@@ -422,7 +426,7 @@ void BoardWidget::paintTerritories(QPainter& p){
 /**
 * print
 */
-void BoardWidget::print(QPrinter& printer){
+void BoardWidget::print(QPrinter& printer, int option){
     QPainter p;
     p.begin(&printer);
 
@@ -450,9 +454,8 @@ void BoardWidget::print(QPrinter& printer){
     QString header = QString("%1 %2 (W) vs %3 %4 (B)").arg(goData.root->whitePlayer).arg(goData.root->whiteRank).arg(goData.root->blackPlayer).arg(goData.root->blackRank);
     p.drawText(0, 10, printer.width(), 30, Qt::AlignCenter, header);
 
-    int moveNumber = 0;
     paintBoard(p, 15.0);
-    print( printer, p, goData.root, moveNumber, 20, 0, buf );
+    print( printer, p, option, 20, buf);
 
     p.end();
 
@@ -466,7 +469,23 @@ void BoardWidget::print(QPrinter& printer){
     repaintBoard();
 }
 
-void BoardWidget::print(QPrinter& printer, QPainter& p, go::nodePtr node, int moveNumber, int movePerPage, int moveNumberInPage, BoardBuffer& buf){
+void BoardWidget::print(QPrinter& printer, QPainter& p, int option, int movePerPage, BoardBuffer& buf){
+    int moveNumber = 0;
+    int moveNumberInPage = 0;
+
+    if (option < 3){
+        foreach (go::nodePtr node, nodeList){
+            print(printer, p, node, moveNumber, moveNumberInPage, buf);
+
+            if (option == 0 && node == currentNode)
+                break;
+            else if (option == 2 && moveNumberInPage == movePerPage)
+                newPage(printer, p, moveNumberInPage, buf);
+        }
+    }
+}
+
+void BoardWidget::print(QPrinter& printer, QPainter& p, go::nodePtr node, int& moveNumber, int& moveNumberInPage, BoardBuffer& buf){
     QFont font( p.font() );
     if (node->isStone() && !node->isPass()){
         ++moveNumber;
@@ -491,7 +510,6 @@ void BoardWidget::print(QPrinter& printer, QPainter& p, go::nodePtr node, int mo
                 font.setPointSizeF(boxSize * 0.35);
 
             font.setWeight(QFont::Black);
-    //        font.setWeight(board[y][x].number == currentMoveNumber ? QFont::Black: QFont::Normal);
             p.setFont(font);
 
             QString s = QString("%1").arg(moveNumber);
@@ -499,24 +517,20 @@ void BoardWidget::print(QPrinter& printer, QPainter& p, go::nodePtr node, int mo
             p.drawText(xlines[bx] - boxSize, ylines[by] - boxSize, boxSize * 2, boxSize * 2, Qt::AlignCenter, s);
         }
     }
+}
 
-    if (moveNumberInPage == movePerPage){
-        printer.newPage();
-        paintBoard(p, 15.0);
-        moveNumberInPage = 0;
-        buf = board;
-        for (int y=0; y<board.size(); ++y){
-            for (int x=0; x<board[y].size(); ++x){
-                if (board[y][x].black())
-                    drawStone(p, x, y, go::black);
-                else if (board[y][x].white())
-                    drawStone(p, x, y, go::white);
-            }
+void BoardWidget::newPage(QPrinter& printer, QPainter& p, int& moveNumberInPage, BoardBuffer& buf){
+    printer.newPage();
+    paintBoard(p, 15.0);
+    moveNumberInPage = 0;
+    buf = board;
+    for (int y=0; y<board.size(); ++y){
+        for (int x=0; x<board[y].size(); ++x){
+            if (board[y][x].black())
+                drawStone(p, x, y, go::black);
+            else if (board[y][x].white())
+                drawStone(p, x, y, go::white);
         }
-    }
-
-    foreach (go::nodePtr child, node->childNodes){
-        print(printer, p, child, moveNumber, movePerPage, moveNumberInPage, buf);
     }
 }
 
