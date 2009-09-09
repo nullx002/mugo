@@ -3,13 +3,28 @@
 
 PrintOptionDialog::PrintOptionDialog(QWidget *parent) :
     QDialog(parent),
-    m_ui(new Ui::PrintOptionDialog)
+    m_ui(new Ui::PrintOptionDialog),
+    printOption_(0)
 {
     m_ui->setupUi(this);
 }
 
 PrintOptionDialog::~PrintOptionDialog()
 {
+    QRadioButton* printOptions[] = {
+        m_ui->printActiveBoard,
+        m_ui->printActiveBranch,
+        m_ui->printActiveBranchN,
+        m_ui->printAllBranches,
+        m_ui->printAllBranchesN,
+    };
+    int N = sizeof(printOptions) / sizeof(printOptions[0]);
+    for (int i=0; i<N; ++i)
+        if (printOptions[i]->isChecked()){
+            printOption_ = i;
+            break;
+        }
+
     delete m_ui;
 }
 
