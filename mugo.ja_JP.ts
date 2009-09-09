@@ -743,7 +743,7 @@ Do you want to save your changes?</source>
     <message>
         <location filename="mainwindow.ui" line="1597"/>
         <source>&amp;Print</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">印刷(&amp;P)</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="1609"/>
@@ -1248,7 +1248,7 @@ Do you want to save your changes?</source>
     <message>
         <location filename="printoptiondialog.ui" line="14"/>
         <source>Dialog</source>
-        <translation type="unfinished">コンピュータと対局</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="printoptiondialog.ui" line="20"/>
