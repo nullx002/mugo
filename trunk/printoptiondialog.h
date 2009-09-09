@@ -13,11 +13,14 @@ public:
     PrintOptionDialog(QWidget *parent = 0);
     ~PrintOptionDialog();
 
+    int printOption() const{ return printOption_; }
+
 protected:
     void changeEvent(QEvent *e);
 
 private:
     Ui::PrintOptionDialog *m_ui;
+    int printOption_;
 };
 
 #endif // PRINTOPTIONDIALOG_H

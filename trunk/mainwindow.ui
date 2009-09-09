@@ -45,7 +45,7 @@
      <x>0</x>
      <y>0</y>
      <width>937</width>
-     <height>24</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -194,7 +194,7 @@
     <property name="title">
      <string>&amp;Navigation</string>
     </property>
-    <addaction name="actionFirstMove"/>
+    <addaction name="actionMoveFirst"/>
     <addaction name="actionFastRewind"/>
     <addaction name="actionPreviousMove"/>
     <addaction name="actionNextMove"/>
@@ -386,7 +386,7 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionFirstMove"/>
+   <addaction name="actionMoveFirst"/>
    <addaction name="actionFastRewind"/>
    <addaction name="actionPreviousMove"/>
    <addaction name="actionNextMove"/>
@@ -498,9 +498,6 @@
    <property name="text">
     <string>&amp;New</string>
    </property>
-   <property name="shortcut">
-    <string>Ctrl+N</string>
-   </property>
   </action>
   <action name="actionOpen">
    <property name="icon">
@@ -509,9 +506,6 @@
    </property>
    <property name="text">
     <string>&amp;Open...</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+O</string>
    </property>
   </action>
   <action name="actionOpenURL">
@@ -535,9 +529,6 @@
    </property>
    <property name="text">
     <string>&amp;Save</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+S</string>
    </property>
   </action>
   <action name="actionSaveAs">
@@ -1172,13 +1163,13 @@
     <string>Chinese Traditional (Big5)</string>
    </property>
   </action>
-  <action name="actionFirstMove">
+  <action name="actionMoveFirst">
    <property name="icon">
     <iconset resource="resources.qrc">
      <normaloff>:/res/firstmove.png</normaloff>:/res/firstmove.png</iconset>
    </property>
    <property name="text">
-    <string>First Move</string>
+    <string>Move First</string>
    </property>
   </action>
   <action name="actionFastRewind">

@@ -186,8 +186,6 @@ MainWindow::MainWindow(QWidget *parent)
     ui->menuEdit->insertAction(redoAction, undoAction);
     ui->editToolBar->insertAction(ui->editToolBar->actions().at(0), redoAction);
     ui->editToolBar->insertAction(redoAction, undoAction);
-    undoAction->setShortcut( QKeySequence::Undo );
-    redoAction->setShortcut( QKeySequence::Redo );
 
     // create window menu
     ui->menuWindow->addAction( ui->commentDockWidget->toggleViewAction() );
@@ -235,6 +233,23 @@ MainWindow::MainWindow(QWidget *parent)
     capturedLabel->setFrameStyle(style);
     capturedLabel->setToolTip(tr("Captured"));
     ui->statusBar->addPermanentWidget(capturedLabel, 0);
+
+    // keyboard shortcut
+    ui->actionNew->setShortcut( QKeySequence::New );
+    ui->actionOpen->setShortcut( QKeySequence::Open );
+    ui->actionSave->setShortcut( QKeySequence::Save );
+    ui->actionSaveAs->setShortcut( QKeySequence::SaveAs );
+    ui->actionPrint->setShortcut( QKeySequence::Print );
+    undoAction->setShortcut( QKeySequence::Undo );
+    redoAction->setShortcut( QKeySequence::Redo );
+    ui->actionPreviousMove->setShortcut( QKeySequence::Back );
+    ui->actionNextMove->setShortcut( QKeySequence::Forward );
+    ui->actionPreviousBranch->setShortcut( QKeySequence::PreviousChild );
+    ui->actionNextBranch->setShortcut( QKeySequence::NextChild );
+    ui->actionMoveFirst->setShortcut( QKeySequence::MoveToStartOfLine );
+    ui->actionMoveLast->setShortcut( QKeySequence::MoveToEndOfLine );
+//    ui->actionFastRewind->setShortcut( QKeySequence::MoveToPreviousPage );
+//    ui->actionFastForward->setShortcut( QKeySequence::MoveToNextPage );
 
     // count territory dialog
     countTerritoryDialog = new CountTerritoryDialog(this);
@@ -420,6 +435,7 @@ void MainWindow::on_actionPrint_triggered(){
     QPrintDialog printDialog(&printer, this);
     if (printDialog.exec() != QDialog::Accepted)
         return;
+
 
     ui->boardWidget->print(printer);
 }
@@ -920,7 +936,7 @@ void MainWindow::setEncoding(){
 * Slot
 * Traverse -> First Move
 */
-void MainWindow::on_actionFirstMove_triggered(){
+void MainWindow::on_actionMoveFirst_triggered(){
     ui->boardWidget->setCurrentNode( ui->boardWidget->getData().root );
 }
 
@@ -933,7 +949,7 @@ void MainWindow::on_actionFastRewind_triggered(){
     if (node->parent == NULL)
         return;
 
-    for (int i=0; i<5; ++i){
+    for (int i=0; i<10; ++i){
         if (node->parent)
             node = node->parent;
         else
@@ -968,16 +984,16 @@ void MainWindow::on_actionNextMove_triggered(){
 * Traverse -> Fast Forward
 */
 void MainWindow::on_actionFastForward_triggered(){
-    go::nodePtr node = ui->boardWidget->getCurrentNode();
-    if (node->childNodes.empty())
-        return;
+    const go::nodeList& nodeList = ui->boardWidget->getCurrentNodeList();
+    go::nodeList::const_iterator iter = qFind(nodeList.begin(), nodeList.end(), ui->boardWidget->getCurrentNode());
 
-    for (int i=0; i<5; ++i){
-        if (!node->childNodes.empty())
-            node = node->childNodes.front();
+    go::nodePtr node = ui->boardWidget->getCurrentNode();
+    for (int i=0; i<10; ++i)
+        if (iter != nodeList.end() && ++iter != nodeList.end())
+            node = *iter;
         else
             break;
-    }
+
     ui->boardWidget->setCurrentNode(node);
 }
 
@@ -2314,7 +2330,7 @@ void MainWindow::setCountTerritoryMode(bool on){
         ui->actionEncodingEucJP,
         ui->actionEncodingKorean,
 
-        ui->actionFirstMove,
+        ui->actionMoveFirst,
         ui->actionFastRewind,
         ui->actionPreviousMove,
         ui->actionNextMove,
@@ -2476,7 +2492,7 @@ void MainWindow::setPlayWithComputerMode(bool on){
         ui->actionEncodingEucJP,
         ui->actionEncodingKorean,
 
-        ui->actionFirstMove,
+        ui->actionMoveFirst,
         ui->actionFastRewind,
         ui->actionPreviousMove,
         ui->actionNextMove,

@@ -170,7 +170,7 @@ private slots:
     void setEncoding();
 
     // Traverse menu
-    void on_actionFirstMove_triggered();
+    void on_actionMoveFirst_triggered();
     void on_actionFastRewind_triggered();
     void on_actionPreviousMove_triggered();
     void on_actionNextMove_triggered();
