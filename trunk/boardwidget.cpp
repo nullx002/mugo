@@ -6,6 +6,7 @@
 #include <QPrinter>
 #include <QMouseEvent>
 #include <QSound>
+#include <QInputDialog>
 #include <QList>
 #include <math.h>
 #include "appdef.h"
@@ -66,6 +67,16 @@ void Sound::play(){
 
 
 
+namespace{
+    const char* hiragana[] = {"あ","い","う","え","お","か","き","く","け","こ","さ","し","す","せ","そ","た","ち","つ","て","と","な","に","ぬ","ね","の","は","ひ","ふ","へ","ほ","ま","み","む","め","も","や","ゆ","よ","ら","り","る","れ","ろ","わ","を","ん"};
+    const char* katakana[] = {"ア","イ","ウ","エ","オ","カ","キ","ク","ケ","コ","サ","シ","ス","セ","ソ","タ","チ","ツ","テ","ト","ナ","ニ","ヌ","ネ","ノ","ハ","ヒ","フ","ヘ","ホ","マ","ミ","ム","メ","モ","ヤ","ユ","ヨ","ラ","リ","ル","レ","ロ","ワ","ヲ","ン"};
+    const char* hira_iroha[] = {"い","ろ","は","に","ほ","へ","と","ち","り","ぬ","る","を","わ","か","よ","た","れ","そ","つ","ね","な","ら","む","う","ゐ","の","お","く","や","ま","け","ふ","こ","え","て","あ","さ","き","ゆ","め","み","し","ゑ","ひ","も","せ","す","ん"};
+    const char* kana_iroha[] = {"イ","ロ","ハ","ニ","ホ","ヘ","ト","チ","リ","ヌ","ル","ヲ","ワ","カ","ヨ","タ","レ","ソ","ツ","ネ","ナ","ラ","ム","ウ","ヰ","ノ","オ","ク","ヤ","マ","ケ","フ","コ","エ","テ","ア","サ","キ","ユ","メ","ミ","シ","ヱ","ヒ","モ","セ","ス","ン"};
+    const int hiragana_size = sizeof(hiragana) / sizeof(hiragana[0]);
+    const int katakana_size = sizeof(katakana) / sizeof(katakana[0]);
+    const int hira_iroha_size = sizeof(hira_iroha) / sizeof(hira_iroha[0]);
+    const int kana_iroha_size = sizeof(kana_iroha) / sizeof(kana_iroha[0]);
+}
 
 BoardWidget::BoardWidget(QWidget *parent) :
     QWidget(parent),
@@ -231,7 +242,7 @@ void BoardWidget::onLButtonDown(QMouseEvent* e){
         emit updateTerritory(alive_b, alive_w, dead_b, dead_w, capturedBlack, capturedWhite, bt, wt, goData.root->komi);
     }
     else
-        addMark(sgfX, sgfY, boardX, boardY);
+        addMark(sgfX, sgfY, boardX, boardY, e->modifiers() & Qt::ControlModifier);
 }
 
 /**
@@ -289,6 +300,7 @@ void BoardWidget::readSettings(){
     focusWhiteColor = settings.value("board/focusWhiteColor", FOCUS_WHITE_COLOR).value<QColor>();
     focusBlackColor = settings.value("board/focusBlackColor", FOCUS_BLACK_COLOR).value<QColor>();
     branchColor = settings.value("board/branchColor", BRANCH_COLOR).value<QColor>();
+    labelType = settings.value("board/labelType").toInt();
 
     // sound
     if (settings.value("sound/type").toInt() == 0){
@@ -1683,7 +1695,7 @@ bool BoardWidget::moveNextStone(int sgfX, int sgfY){
 
 /**
 */
-void BoardWidget::addMark(int sgfX, int sgfY, int boardX, int boardY){
+void BoardWidget::addMark(int sgfX, int sgfY, int boardX, int boardY, bool ctrl){
     switch (editMode){
         case eAlternateMove:
             return;
@@ -1700,13 +1712,17 @@ void BoardWidget::addMark(int sgfX, int sgfY, int boardX, int boardY){
             addEmpty(currentNode, go::point(sgfX, sgfY), go::point(boardX, boardY));
             break;
 
-        case eLabelMark:{
+        case eLabelMark:
+        case eManualMark:{
             go::point p(sgfX, sgfY);
             removeMark(currentNode->circles, p);
             removeMark(currentNode->crosses, p);
             removeMark(currentNode->squares, p);
             removeMark(currentNode->triangles, p);
-            addCharacter(currentNode->characters, p);
+            if (editMode == eLabelMark && !ctrl)
+                addCharacter(currentNode->characters, p);
+            else
+                addManualEntry(currentNode->characters, p);
             modifyNode(currentNode);
             break;
         }
@@ -1786,30 +1802,66 @@ void BoardWidget::addMark(go::markList& markList, const go::mark& mark){
 }
 
 void BoardWidget::addCharacter(go::markList& markList, const go::point& p){
+    go::markList::iterator iter1 = markList.begin();
+    while (iter1 != markList.end()){
+        if (iter1->p == p){
+            markList.erase(iter1);
+            return;
+        }
+        ++iter1;
+    }
+
+    QStringList marks;
+    foreach(go::mark m, markList)
+        marks.push_back(m.s);
+    qSort(marks);
+
+    int c = 'A';
+    if (labelType == 1)
+        c = 'a';
+    else if (labelType == 2)
+        c = 1;
+    else if (labelType == 3 || labelType == 4)
+        c = 0;
+
+    QString s;
+    while (true){
+        if (labelType == 2)
+            s.sprintf("%d", c);
+        else if (labelType == 3)
+            s = QString::fromUtf8(katakana[c]);
+        else if (labelType == 4)
+            s = QString::fromUtf8(kana_iroha[c]);
+        else
+            s = QChar(c);
+
+        QStringList::iterator iter2 = qFind(marks.begin(), marks.end(), s);
+        if (iter2 == marks.end())
+            break;
+        ++iter2;
+        ++c;
+
+        if (labelType == 3 && c == katakana_size || labelType == 4 && c == kana_iroha_size)
+            break;
+    }
+    markList.push_back(go::mark(p, s));
+}
+
+void BoardWidget::addManualEntry(go::markList& markList, const go::point& p){
+    QString label = QInputDialog::getText(this, QString(), tr("Input Label"));
+    if (label.isEmpty())
+        return;
+
     go::markList::iterator iter = markList.begin();
     while (iter != markList.end()){
         if (iter->p == p){
             markList.erase(iter);
             return;
         }
-
         ++iter;
     }
 
-    char c = 'A';
-    iter = markList.begin();
-    while (iter != markList.end()){
-        QString s = QChar(c);
-        QString s2 = iter->s;
-        if (s != s2)
-            break;
-
-        ++iter;
-        ++c;
-    }
-
-    QString s = QChar(c);
-    markList.push_back(go::mark(p, s));
+    markList.push_back( go::mark(p, label) );
 }
 
 bool BoardWidget::removeMark(go::markList& markList, const go::point& p){
