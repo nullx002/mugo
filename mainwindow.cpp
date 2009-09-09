@@ -94,6 +94,7 @@ MainWindow::MainWindow(QWidget *parent)
     editGroup->addAction(ui->actionAddWhiteStone);
     editGroup->addAction(ui->actionAddEmpty);
     editGroup->addAction(ui->actionAddLabel);
+    editGroup->addAction(ui->actionAddLabelManually);
     editGroup->addAction(ui->actionAddCircle);
     editGroup->addAction(ui->actionAddCross);
     editGroup->addAction(ui->actionAddSquare);
@@ -110,6 +111,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     // default codec
     codec = QTextCodec::codecForName("UTF-8");
+
+    // edit mode
     setEditMode(ui->actionAlternateMove, BoardWidget::eAlternateMove);
 
     // window settings
@@ -615,6 +618,14 @@ void MainWindow::on_actionAddEmpty_triggered(){
 */
 void MainWindow::on_actionAddLabel_triggered(){
     setEditMode(ui->actionAddLabel, BoardWidget::eLabelMark);
+}
+
+/**
+* Slot
+* Edit -> Stone & Marker -> Add Label Manually
+*/
+void MainWindow::on_actionAddLabelManually_triggered(){
+    setEditMode(ui->actionAddLabelManually, BoardWidget::eManualMark);
 }
 
 /**
@@ -2149,6 +2160,8 @@ void MainWindow::setEditMode(QAction* action, BoardWidget::eEditMode editMode){
             connect( ui->menuStoneMarkers->menuAction(), SIGNAL(triggered()), this, SLOT(on_actionAddEmpty_triggered()) );
         else if (action == ui->actionAddLabel)
             connect( ui->menuStoneMarkers->menuAction(), SIGNAL(triggered()), this, SLOT(on_actionAddLabel_triggered()) );
+        else if (action == ui->actionAddLabelManually)
+            connect( ui->menuStoneMarkers->menuAction(), SIGNAL(triggered()), this, SLOT(on_actionAddLabelManually_triggered()) );
         else if (action == ui->actionAddCircle)
             connect( ui->menuStoneMarkers->menuAction(), SIGNAL(triggered()), this, SLOT(on_actionAddCircle_triggered()) );
         else if (action == ui->actionAddCross)

@@ -47,7 +47,7 @@ class BoardWidget : public QWidget {
     Q_OBJECT
     Q_DISABLE_COPY(BoardWidget)
 public:
-    enum eEditMode{ eAlternateMove, eAddBlack, eAddWhite, eAddEmpty, eLabelMark, eCrossMark, eCircleMark, eSquareMark, eTriangleMark, eDeleteMarker, eCountTerritory, ePlayGame };
+    enum eEditMode{ eAlternateMove, eAddBlack, eAddWhite, eAddEmpty, eLabelMark, eManualMark, eCrossMark, eCircleMark, eSquareMark, eTriangleMark, eDeleteMarker, eCountTerritory, ePlayGame };
     enum eTutorMode{ eNoTutor, eTutorBossSides, eTutorOneSide };
 
     struct stoneInfo{
@@ -229,9 +229,10 @@ protected:
 
     void setParent(go::nodePtr& parent, go::nodeList& childNodes);
     void createNodeList();
-    void addMark(int sgfX, int sgfY, int boardX, int boardY);
+    void addMark(int sgfX, int sgfY, int boardX, int boardY, bool ctrl);
     void addMark(go::markList& markList, const go::mark& mark);
     void addCharacter(go::markList& markList, const go::point& p);
+    void addManualEntry(go::markList& markList, const go::point& p);
     bool removeMark(go::markList& markList, const go::point& p);
     bool removeStone(go::stoneList& stoneList, const go::point& sp, const go::point& bp);
     void rotateSgf(go::nodePtr node, QUndoCommand* command);
@@ -258,7 +259,7 @@ private:
     int currentMoveNumber;
 
     // option
-    int boardType, whiteType, blackType, focusType;
+    int boardType, whiteType, blackType, focusType, labelType;
     bool showMoveNumber;
     int  showMoveNumberCount;
     bool showCoordinates;

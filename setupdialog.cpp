@@ -14,16 +14,7 @@ SetupDialog::SetupDialog(QWidget *parent) :
 
     QSettings settings;
 
-    // category list
-    m_ui->categoryList->addItem( tr("Board") );
-    m_ui->categoryList->addItem( tr("Stones") );
-    m_ui->categoryList->addItem( tr("Markers") );
-    m_ui->categoryList->addItem( tr("Sound") );
-
     // board/board
-    m_ui->boardTypeComboBox->addItem( tr("Default Image") );
-    m_ui->boardTypeComboBox->addItem( tr("Select File") );
-    m_ui->boardTypeComboBox->addItem( tr("Fill Color") );
     m_ui->boardTypeComboBox->setCurrentIndex( settings.value("board/boardType").toInt() );
     boardColor = settings.value("board/boardColor", BOARD_COLOR).value<QColor>();
     m_ui->boardColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(boardColor.red()).arg(boardColor.green()).arg(boardColor.blue()) );
@@ -38,29 +29,18 @@ SetupDialog::SetupDialog(QWidget *parent) :
     m_ui->bgTutorColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(tutorColor.red()).arg(tutorColor.green()).arg(tutorColor.blue()) );
 
     // stones/white
-    m_ui->whiteTypeComboBox->addItem( tr("Default Image") );
-    m_ui->whiteTypeComboBox->addItem( tr("Select File") );
-    m_ui->whiteTypeComboBox->addItem( tr("Fill Color") );
     m_ui->whiteTypeComboBox->setCurrentIndex( settings.value("board/whiteType").toInt() );
     whiteColor = settings.value("board/whiteColor", WHITE_COLOR).value<QColor>();
     m_ui->whiteColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(whiteColor.red()).arg(whiteColor.green()).arg(whiteColor.blue()) );
     m_ui->whitePathEdit->setText( settings.value("board/whitePath").toString() );
 
     // stones/black
-    m_ui->blackTypeComboBox->addItem( tr("Default Image") );
-    m_ui->blackTypeComboBox->addItem( tr("Select File") );
-    m_ui->blackTypeComboBox->addItem( tr("Fill Color") );
     m_ui->blackTypeComboBox->setCurrentIndex( settings.value("board/blackType").toInt() );
     blackColor = settings.value("board/blackColor", BLACK_COLOR).value<QColor>();
     m_ui->blackColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(blackColor.red()).arg(blackColor.green()).arg(blackColor.blue()) );
     m_ui->blackPathEdit->setText( settings.value("board/blackPath").toString() );
 
     // markers/focus
-    m_ui->focusTypeComboBox->addItem( tr("Focus Triangle") );
-    m_ui->focusTypeComboBox->addItem( tr("Circle") );
-    m_ui->focusTypeComboBox->addItem( tr("Cross") );
-    m_ui->focusTypeComboBox->addItem( tr("Square") );
-    m_ui->focusTypeComboBox->addItem( tr("Triangle") );
     m_ui->focusTypeComboBox->setCurrentIndex( settings.value("board/focusType").toInt() );
     focusWhiteColor = settings.value("board/focusWhiteColor", FOCUS_WHITE_COLOR).value<QColor>();
     m_ui->focusWhiteColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(focusWhiteColor.red()).arg(focusWhiteColor.green()).arg(focusWhiteColor.blue()) );
@@ -71,9 +51,10 @@ SetupDialog::SetupDialog(QWidget *parent) :
     branchColor = settings.value("board/branchColor", BRANCH_COLOR).value<QColor>();
     m_ui->branchColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(branchColor.red()).arg(branchColor.green()).arg(branchColor.blue()) );
 
+    // markers/label
+    m_ui->labelTypeComboBox->setCurrentIndex( settings.value("board/labelType").toInt() );
+
     // sound
-    m_ui->soundTypeComboBox->addItem( tr("Default Sound") );
-    m_ui->soundTypeComboBox->addItem( tr("Select File") );
     m_ui->soundTypeComboBox->setCurrentIndex( settings.value("sound/type").toInt() );
     m_ui->soundPathEdit->setText( settings.value("sound/path").toString() );
 }
@@ -121,6 +102,7 @@ void SetupDialog::accept(){
     settings.setValue("board/focusWhiteColor", focusWhiteColor);
     settings.setValue("board/focusBlackColor", focusBlackColor);
     settings.setValue("board/branchColor", branchColor);
+    settings.setValue("board/labelType", m_ui->labelTypeComboBox->currentIndex());
 
     // sound
     settings.setValue("sound/type", m_ui->soundTypeComboBox->currentIndex());

@@ -47,5 +47,6 @@
         <file>res/options.png</file>
         <file>res/removeself.png</file>
         <file>res/bg.png</file>
+        <file>res/text2.png</file>
     </qresource>
 </RCC>

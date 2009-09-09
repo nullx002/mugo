@@ -136,6 +136,7 @@ private slots:
     void on_actionAddWhiteStone_triggered();
     void on_actionAddEmpty_triggered();
     void on_actionAddLabel_triggered();
+    void on_actionAddLabelManually_triggered();
     void on_actionAddCross_triggered();
     void on_actionAddCircle_triggered();
     void on_actionAddSquare_triggered();
