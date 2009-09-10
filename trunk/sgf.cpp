@@ -26,7 +26,7 @@ QString sgf::node::toString() const{
         "B", "BL", "OB", "W", "WL","OW", "MN",
 
         // marker
-        "AB", "AW", "AE", "MA", "CR", "SQ", "TR", "LB", "TB", "TW",
+        "AE", "AB", "AW", "MA", "CR", "SQ", "TR", "LB", "TB", "TW",
 
         // move annotation
         "TE", "BM", "DO", "IT",
@@ -176,8 +176,12 @@ bool sgf::node::get(go::nodePtr n, const QString& key, const QStringList& values
         addMark(n->blackTerritories, values, mark::eBlackTerritory);
     else if (key == "TW")
         addMark(n->whiteTerritories, values, mark::eWhiteTerritory);
-    else if (key == "AB" || key == "AW" || key == "AE")
-        addStone(n->stones, key, values);
+    else if (key == "AB")
+        addStone(n->blackStones, key, values);
+    else if (key == "AW")
+        addStone(n->whiteStones, key, values);
+    else if (key == "AE")
+        addStone(n->emptyStones, key, values);
 
     // move annotation
     else if (key == "TE")
@@ -268,7 +272,9 @@ bool sgf::node::set(const go::nodePtr n){
     set(n->characters);
     set(n->blackTerritories);
     set(n->whiteTerritories);
-    set(n->stones);
+    set(n->emptyStones);
+    set(n->blackStones);
+    set(n->whiteStones);
 
     if (n->moveAnnotation == go::node::eGoodMove)
         property["TE"].push_back("1");

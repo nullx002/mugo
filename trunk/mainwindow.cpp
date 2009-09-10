@@ -1756,7 +1756,7 @@ bool MainWindow::fileOpen(){
 
     if (selectedFilter.indexOf("All Go Format") >= 0){
         QFileInfo info(fname);
-        selectedFilter = info.suffix();
+        selectedFilter = info.suffix().toLower();
     }
 
     if (selectedFilter.indexOf("sgf") >= 0)
@@ -1783,12 +1783,12 @@ bool MainWindow::fileOpen(const QString& fname, const QString& ext, bool guessCo
 
     setCurrentFile(fname);
 
-    if (ext == "sgf"){
+    if (ext.compare("sgf", Qt::CaseInsensitive) == 0){
         go::sgf sgf;
         sgf.read(fname, codec, guessCodec);
         ui->boardWidget->setData(sgf);
     }
-    else if (ext == "ugf" || ext == "ugi"){
+    else if (ext.compare("ugf", Qt::CaseInsensitive) == 0 || ext.compare("ugi", Qt::CaseInsensitive) == 0){
         go::ugf ugf;
         ugf.read(fname, codec, guessCodec);
         ui->boardWidget->setData(ugf);
