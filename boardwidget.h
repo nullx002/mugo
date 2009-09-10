@@ -16,7 +16,6 @@
 #endif
 
 #include "godata.h"
-#include "playgame.h"
 
 
 namespace Ui {
@@ -47,8 +46,9 @@ class BoardWidget : public QWidget {
     Q_OBJECT
     Q_DISABLE_COPY(BoardWidget)
 public:
-    enum eEditMode{ eAlternateMove, eAddBlack, eAddWhite, eAddEmpty, eLabelMark, eManualMark, eCrossMark, eCircleMark, eSquareMark, eTriangleMark, eDeleteMarker, eCountTerritory, ePlayGame };
+    enum eEditMode{ eAlternateMove, eAddBlack, eAddWhite, eAddEmpty, eLabelMark, eCrossMark, eCircleMark, eSquareMark, eTriangleMark, eDeleteMarker, eCountTerritory, eGtp };
     enum eTutorMode{ eNoTutor, eTutorBossSides, eTutorOneSide };
+    enum eGtpStatus{ eGtpNone, eGtpPut, eGtpGen, eGtpHandicap, eGtpGameEnd };
 
     struct stoneInfo{
         stoneInfo() : number(0), color(go::empty){}
@@ -77,19 +77,8 @@ public:
     // draw
     void repaintBoard(bool board=true, bool stones=true);
     void paintBoard(QPaintDevice* pd);
-    void paintBoard(QPainter& p, qreal pointSize=8.0);
     void paintStones(QPaintDevice* pd);
-    void paintStones(QPainter& p);
     void paintTerritories(QPaintDevice* pd);
-    void paintTerritories(QPainter& p);
-    void print(QPrinter&, int option, int movesPerPage);
-    void print(QPrinter& printer, QPainter& p, int option, int movePerPage, BoardBuffer& buf);
-    void print(QPrinter& printer, QPainter& p, go::nodePtr node, int& moveNumber, int& moveNumberInPage, BoardBuffer& buf, QString& rangai);
-    void printHeader(QPrinter& printer, QPainter& p, int& page);
-    void printFooter(QPrinter& printer, QPainter& p, int& page);
-    void printCaption(QPrinter& printer, QPainter& p, int fig);
-    void printRangai(QPrinter& printer, QPainter& p, QString& rangai);
-    void newPage(QPrinter& printer, QPainter& p, int& moveNumberInPage, BoardBuffer& buf, int& page, int& fig);
 
     // set/get data
     void clear();
@@ -103,35 +92,14 @@ public:
     go::nodePtr findNodeFromMoveNumber(int moveNumber);
     const go::nodeList& getCurrentNodeList() const{ return nodeList; }
     const BoardBuffer& getBuffer(){ return board; }
+
     void getCaptured(int& black, int& white) const{ black = capturedBlack; white = capturedWhite; }
     int  getMoveNumber() const{ return currentMoveNumber; }
 
     // create stone node and insert after current node
     void addStoneNodeCommand(int sgfX, int sgfY);
     void addStoneNodeCommand(int sgfX, int sgfY, int boardX, int boardY);
-    bool moveNextStone(int sgfX, int sgfY);
-
-    // command
-    void addNodeCommand(go::nodePtr parent, go::nodePtr node, bool select=true);
-    void insertNodeCommand(go::nodePtr parent, go::nodePtr node, bool select=true);
-    void deleteNodeCommand(go::nodePtr node, bool deleteChildren=true);
-    void setMoveNumberCommand(go::nodePtr node, int moveNumber);
-    void unsetMoveNumberCommand(go::nodePtr node);
-    void setNodeNameCommand(go::nodePtr node, const QString& nodeName);
-    void setCommentCommand(go::nodePtr node, const QString& comment);
-    void rotateSgfCommand();
-    void flipSgfHorizontallyCommand();
-    void flipSgfVerticallyCommand();
-
-    void addNode(go::nodePtr parent, go::nodePtr node, bool select=true);
-    void deleteNode(go::nodePtr node, bool deleteChildren=true);
-    void modifyNode(go::nodePtr node, bool recreateBoardBuffer=false);
-    void pass();
-    void setCurrentNode(go::nodePtr node = go::nodePtr());
-    void addStone(go::nodePtr node, const go::point& sgfPoint, go::color color);
-    void addStone(go::nodePtr node, const go::point& sgfPoint, const go::point& boardPoint, go::color color);
-    void addEmpty(go::nodePtr node, const go::point& sgfPoint);
-    void addEmpty(go::nodePtr node, const go::point& sgfPoint, const go::point& boardPoint);
+    bool tutor(int sgfX, int sgfY);
 
     // dirty flag
     bool isDirty() const{ return dirty; }
@@ -151,6 +119,9 @@ public:
     void setNodeAnnotation(int annotation){ currentNode->nodeAnnotation = annotation; modifyNode(currentNode); }
     void setBoardSize(int xsize, int ysize);
     void setMoveToClicked(bool moveMode = true){ moveToClicked = moveMode; }
+    void rotateSgf();
+    void flipSgfHorizontally();
+    void flipSgfVertically();
     int  rotateBoard();
     void flipBoardHorizontally(bool flip);
     void flipBoardVertically(bool flip);
@@ -167,11 +138,22 @@ public:
     QString getYString(int y) const;
     QString getXYString(int x, int y) const;
     QString getXYString(int x, int y, bool showI) const;
-    void boardToSgfCoordinate(int boardX, int boardY, int& sgfX, int& sgfY);
-    void sgfToBoardCoordinate(int sgfX, int sgfY, int& boardX, int& boardY);
-    void addTerritory(int x, int y);
 
-    void playWithComputer(PlayGame* game);
+    void playWithComputer(QProcess* proc, bool isYourColorBlack);
+
+public slots:
+    void addNodeCommand(go::nodePtr parent, go::nodePtr node, bool select=true);
+    void insertNodeCommand(go::nodePtr parent, go::nodePtr node, bool select=true);
+    void deleteNodeCommand(go::nodePtr node, bool deleteChildren=true);
+    void setMoveNumberCommand(go::nodePtr node, int moveNumber);
+    void unsetMoveNumberCommand(go::nodePtr node);
+    void setNodeNameCommand(go::nodePtr node, const QString& nodeName);
+    void setCommentCommand(go::nodePtr node, const QString& comment);
+    void addNode(go::nodePtr parent, go::nodePtr node, bool select=true);
+    void deleteNode(go::nodePtr node, bool deleteChildren=true);
+    void modifyNode(go::nodePtr node, bool recreateBoardBuffer=false);
+    void pass();
+    void setCurrentNode(go::nodePtr node = go::nodePtr());
 
 signals:
     void nodeAdded(go::nodePtr parent, go::nodePtr node, bool select=false);
@@ -179,6 +161,7 @@ signals:
     void nodeModified(go::nodePtr node);
     void currentNodeChanged(go::nodePtr node);
     void updateTerritory(int alive_b, int alive_w, int dead_b, int dead_w, int capturedBlack, int capturedWhite, int blackTerritory, int whiteTerritory, double komi);
+    void gtpGameEnded();
 
 protected:
     // event
@@ -192,13 +175,13 @@ protected:
     // mouse event
     void onLButtonDown(QMouseEvent* e);
     void onRButtonDown(QMouseEvent* e);
-    void playGameLButtonDown(int sgfX, int sgfY);
+    void gtpLButtonDown(int sgfX, int sgfY);
 
     // draw
     void drawBoard(QPainter& p);
     void drawCoordinates(QPainter& p);
-    void drawStonesAndMarker(QPainter& p);
     void drawStones(QPainter& p);
+    void drawStones2(QPainter& p);
     void drawBranchMoves(QPainter& p, go::nodeList::iterator first, go::nodeList::iterator last);
     void drawCross(QPainter& p, go::markList::iterator first, go::markList::iterator last);
     void drawTriangle(QPainter& p, go::markList::iterator first, go::markList::iterator last);
@@ -209,7 +192,7 @@ protected:
     void drawPath(QPainter& p, const QPainterPath& path, int boardX, int boardY);
     void drawTerritories(QPainter& p);
     void drawCurrentMark(QPainter& p, go::nodePtr node);
-    void drawStone(QPainter& p, int boardX, int boardY, go::color, qreal opacity=1.0);
+    void drawImage(QPainter& p, int x, int y, const QImage& image);
     void eraseBackground(QPainter& p, int x, int y);
     void getStartPosition(QList<int>& star, int size);
     QPainterPath createFocusTrianglePath() const;
@@ -229,17 +212,21 @@ protected:
     // territory
     void countTerritory();
     void whichTerritory(int x, int y, char* tmp, int& c);
+    void addTerritory(int x, int y);
     void setTerritory(int x, int y, int c);
     void unsetTerritory(int x, int y);
     void getCountTerritory(int& alive_b, int& alive_w, int& dead_b, int& dead_w, int& bt, int& wt);
 
     void setParent(go::nodePtr& parent, go::nodeList& childNodes);
     void createNodeList();
-    void addMark(int sgfX, int sgfY, int boardX, int boardY, bool ctrl);
+    void addMark(int sgfX, int sgfY, int boardX, int boardY);
     void addMark(go::markList& markList, const go::mark& mark);
     void addCharacter(go::markList& markList, const go::point& p);
-    void addManualEntry(go::markList& markList, const go::point& p);
     bool removeMark(go::markList& markList, const go::point& p);
+    void addStone(go::nodePtr node, const go::point& sgfPoint, go::color color);
+    void addStone(go::nodePtr node, const go::point& sgfPoint, const go::point& boardPoint, go::color color);
+    void addEmpty(go::nodePtr node, const go::point& sgfPoint);
+    void addEmpty(go::nodePtr node, const go::point& sgfPoint, const go::point& boardPoint);
     bool removeStone(go::stoneList& stoneList, const go::point& sp, const go::point& bp);
     void rotateSgf(go::nodePtr node, QUndoCommand* command);
     void rotateStoneSgf(go::nodePtr node, go::stoneList& stoneList, QUndoCommand* command);
@@ -247,6 +234,19 @@ protected:
     void flipSgf(go::nodePtr node, int xsize, int ysize, QUndoCommand* command);
     void flipStoneSgf(go::nodePtr node, go::stoneList& stoneList, int xsize, int ysize, QUndoCommand* command);
     void flipMarkSgf(go::nodePtr node, go::markList& markList, int xsize, int ysize, QUndoCommand* command);
+
+    void boardToSgfCoordinate(int boardX, int boardY, int& sgfX, int& sgfY);
+    void sgfToBoardCoordinate(int sgfX, int sgfY, int& boardX, int& boardY);
+
+    void gtpWrite(const QString& buf);
+    void gtpPut(int x, int y);
+    bool gtpGetCoordinate(const QString& buf, int& x, int& y);
+    void gtpHandicap();
+    void gtpGameEnd();
+    bool isGtpGameEnd() const;
+
+private slots:
+    void gtpReadReady();
 
 private:
     Ui::BoardWidget *m_ui;
@@ -259,13 +259,13 @@ private:
     go::data goData;
     int capturedBlack;
     int capturedWhite;
-    go::color color;
+    bool isBlack;
     go::nodeList nodeList;
     go::nodePtr currentNode;
     int currentMoveNumber;
 
     // option
-    int boardType, whiteType, blackType, focusType, labelType;
+    int boardType, whiteType, blackType, focusType;
     bool showMoveNumber;
     int  showMoveNumberCount;
     bool showCoordinates;
@@ -294,7 +294,7 @@ private:
     int xsize;
     int ysize;
 
-    QRect boardRect, coordinatesRect, headerRect, footerRect;
+    QRect boardRect;
     QList<int> xlines;
     QList<int> ylines;
     BoardBuffer board;
@@ -302,8 +302,13 @@ private:
     // sound
     Sound stoneSound;
 
-    // play a game
-    PlayGame* playGame;
+    // play with computer
+    QProcess* gtpProcess;
+    QString   gtpBuf;
+    bool isYourColorBlack;
+    int gtpStatus;
+    int gtpX;
+    int gtpY;
 };
 
 

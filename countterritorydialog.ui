@@ -18,7 +18,7 @@
     <widget class="QLabel" name="label">
      <property name="text">
       <string>Please click dead stones. 
-Score will be automatically updated.</string>
+mugo automatically counts territories.</string>
      </property>
     </widget>
    </item>

@@ -10,7 +10,6 @@
 #include <QProgressDialog>
 #include "boardwidget.h"
 #include "countterritorydialog.h"
-#include "gtp.h"
 
 namespace Ui
 {
@@ -70,7 +69,7 @@ private:
 
     void setCountTerritoryMode(bool on=true);
     void setPlayWithComputerMode(bool on=true);
-    void endGame();
+    void EndGtpGame();
 
     void alertLanguageChanged();
 
@@ -101,12 +100,10 @@ private:
     QHttp* http;
     QByteArray downloadBuff;
 
-    PlayGame* playGame;
-    QProcess  gtpProcess;
+    QProcess gtpProcess;
 
 private slots:
     // File menu
-    void on_actionPrint_triggered();
     void on_actionNew_triggered();
     void on_actionOpen_triggered();
     void on_actionOpen_URL_triggered();
@@ -136,7 +133,6 @@ private slots:
     void on_actionAddWhiteStone_triggered();
     void on_actionAddEmpty_triggered();
     void on_actionAddLabel_triggered();
-    void on_actionAddLabelManually_triggered();
     void on_actionAddCross_triggered();
     void on_actionAddCircle_triggered();
     void on_actionAddSquare_triggered();
@@ -171,7 +167,7 @@ private slots:
     void setEncoding();
 
     // Traverse menu
-    void on_actionMoveFirst_triggered();
+    void on_actionFirstMove_triggered();
     void on_actionFastRewind_triggered();
     void on_actionPreviousMove_triggered();
     void on_actionNextMove_triggered();
@@ -238,6 +234,7 @@ private slots:
     void on_boardWidget_nodeModified(go::nodePtr node);
     void on_boardWidget_currentNodeChanged(go::nodePtr node);
     void on_boardWidget_updateTerritory(int alive_b, int alive_w, int dead_b, int dead_w, int capturedBlack, int capturedWhite, int blackTerritory, int whiteTerritory, double komi);
+    void on_boardWidget_gtpGameEnded();
 
     // Branch widget
     void on_branchWidget_currentItemChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous);
@@ -246,16 +243,13 @@ private slots:
     void on_commentWidget_textChanged();
 
     // Score Dialog
-    void scoreDialogClosed(int);
+    void scoreDialogClosed();
 
     // Open URL
     void openUrlReadReady(const QHttpResponseHeader& resp);
     void openUrlReadProgress(int done, int total);
     void openUrlDone(bool error);
     void openUrlCancel();
-
-    // play a game
-    void playGameEnded();
 };
 
 #endif // MAINWINDOW_H

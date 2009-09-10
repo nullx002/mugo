@@ -3,12 +3,9 @@
 #include <QSettings>
 #include <QFileInfo>
 #include <QPainter>
-#include <QPrinter>
 #include <QMouseEvent>
 #include <QSound>
-#include <QInputDialog>
 #include <QList>
-#include <QDateTime>
 #include <math.h>
 #include "appdef.h"
 #include "boardwidget.h"
@@ -25,7 +22,6 @@
 Sound::Sound(QWidget* parent_) : parent(parent_){
 #if defined(Q_WS_WIN)
     lastClock = 0;
-    memset(&mop, 0, sizeof(mop));
 #else
     media = Phonon::createPlayer(Phonon::NotificationCategory);
 #endif
@@ -40,9 +36,6 @@ Sound::~Sound(){
 
 void Sound::setCurrentSource(const QString& source){
 #if defined(Q_WS_WIN)
-    if (mop.wDeviceID != 0)
-        mciSendCommand(mop.wDeviceID, MCI_CLOSE, 0, 0);
-
     memset(&mop, 0, sizeof(mop));
     mop.lpstrDeviceType  = L"WaveAudio";
     mop.lpstrElementName = (WCHAR*)source.utf16();
@@ -54,7 +47,7 @@ void Sound::setCurrentSource(const QString& source){
 
 void Sound::play(){
 #if defined(Q_WS_WIN)
-    qreal currentClock = (qreal)clock() / CLOCKS_PER_SEC;
+    double currentClock = (double)clock() / CLOCKS_PER_SEC;
     if (mop.wDeviceID && currentClock - lastClock > 0.2){
         mciSendCommand(mop.wDeviceID, MCI_STOP, 0, 0);
         mciSendCommand(mop.wDeviceID, MCI_SEEK, MCI_SEEK_TO_START, 0);
@@ -72,16 +65,6 @@ void Sound::play(){
 
 
 
-namespace{
-    const char* hiragana[] = {"あ","い","う","え","お","か","き","く","け","こ","さ","し","す","せ","そ","た","ち","つ","て","と","な","に","ぬ","ね","の","は","ひ","ふ","へ","ほ","ま","み","む","め","も","や","ゆ","よ","ら","り","る","れ","ろ","わ","を","ん"};
-    const char* katakana[] = {"ア","イ","ウ","エ","オ","カ","キ","ク","ケ","コ","サ","シ","ス","セ","ソ","タ","チ","ツ","テ","ト","ナ","ニ","ヌ","ネ","ノ","ハ","ヒ","フ","ヘ","ホ","マ","ミ","ム","メ","モ","ヤ","ユ","ヨ","ラ","リ","ル","レ","ロ","ワ","ヲ","ン"};
-    const char* hira_iroha[] = {"い","ろ","は","に","ほ","へ","と","ち","り","ぬ","る","を","わ","か","よ","た","れ","そ","つ","ね","な","ら","む","う","ゐ","の","お","く","や","ま","け","ふ","こ","え","て","あ","さ","き","ゆ","め","み","し","ゑ","ひ","も","せ","す","ん"};
-    const char* kana_iroha[] = {"イ","ロ","ハ","ニ","ホ","ヘ","ト","チ","リ","ヌ","ル","ヲ","ワ","カ","ヨ","タ","レ","ソ","ツ","ネ","ナ","ラ","ム","ウ","ヰ","ノ","オ","ク","ヤ","マ","ケ","フ","コ","エ","テ","ア","サ","キ","ユ","メ","ミ","シ","ヱ","ヒ","モ","セ","ス","ン"};
-    const int hiragana_size = sizeof(hiragana) / sizeof(hiragana[0]);
-    const int katakana_size = sizeof(katakana) / sizeof(katakana[0]);
-    const int hira_iroha_size = sizeof(hira_iroha) / sizeof(hira_iroha[0]);
-    const int kana_iroha_size = sizeof(kana_iroha) / sizeof(kana_iroha[0]);
-}
 
 BoardWidget::BoardWidget(QWidget *parent) :
     QWidget(parent),
@@ -89,7 +72,7 @@ BoardWidget::BoardWidget(QWidget *parent) :
     dirty(false),
     capturedBlack(0),
     capturedWhite(0),
-    color(go::black),
+    isBlack(true),
     currentMoveNumber(0),
     showMoveNumber(true),
     showMoveNumberCount(0),
@@ -104,8 +87,7 @@ BoardWidget::BoardWidget(QWidget *parent) :
     flipBoardHorizontally_(false),
     flipBoardVertically_(false),
     playSound(false),
-    stoneSound(this),
-    playGame(NULL)
+    stoneSound(this)
 {
     m_ui->setupUi(this);
 
@@ -121,144 +103,6 @@ BoardWidget::~BoardWidget()
     delete m_ui;
 }
 
-/**
-*/
-void BoardWidget::changeEvent(QEvent *e)
-{
-    QWidget::changeEvent(e);
-    switch (e->type()) {
-    case QEvent::LanguageChange:
-        m_ui->retranslateUi(this);
-        break;
-    default:
-        break;
-    }
-}
-
-/**
-*/
-void BoardWidget::paintEvent(QPaintEvent* e){
-    QWidget::paintEvent(e);
-
-    QPainter p(this);
-    p.drawPixmap(0, 0, width(), height(), offscreenBuffer3);
-}
-
-/**
-*/
-void BoardWidget::mouseReleaseEvent(QMouseEvent* e){
-    QWidget::mouseReleaseEvent(e);
-
-    if(e->button() & Qt::LeftButton)
-        onLButtonDown(e);
-    else if (e->button() & Qt::RightButton)
-        onRButtonDown(e);
-}
-
-/**
-*/
-void BoardWidget::mouseMoveEvent(QMouseEvent* e){
-    QWidget::mouseMoveEvent(e);
-
-    if (editMode == ePlayGame && color != playGame->yourColor())
-        return;
-
-    bool black;
-    if (editMode == eAlternateMove || editMode == ePlayGame || tutorMode == eTutorBossSides || tutorMode == eTutorOneSide)
-        black = color == go::black;
-    else if (editMode == eAddBlack || editMode == eAddWhite)
-        black = editMode == eAddBlack;
-    else
-        return;
-
-    int bx = (int)floor( qreal(e->x() - xlines[0] + boxSize / 2) / boxSize );
-    int by = (int)floor( qreal(e->y() - ylines[0] + boxSize / 2) / boxSize );
-
-    offscreenBuffer3 = offscreenBuffer2.copy();
-    QPainter p(&offscreenBuffer3);
-
-    if (! (bx < 0 || bx >= xlines.size() || by < 0 || by >= ylines.size() || board[by][bx].color != go::empty) )
-        drawStone(p, bx, by, black ? go::black : go::white, 0.5);
-
-    repaint();
-}
-
-/**
-*/
-void BoardWidget::wheelEvent(QWheelEvent* e){
-    QWidget::wheelEvent(e);
-
-    if (tutorMode != eNoTutor)
-        return;
-
-    go::nodeList::iterator iter = qFind(nodeList.begin(), nodeList.end(), currentNode);
-    if (e->delta() > 0){
-        if (iter != nodeList.begin() && iter != nodeList.end())
-            setCurrentNode( *--iter );
-    }
-    else{
-        if (iter != nodeList.end() && ++iter != nodeList.end())
-            setCurrentNode( *iter );
-    }
-}
-
-void BoardWidget::resizeEvent(QResizeEvent* e){
-    QWidget::resizeEvent(e);
-
-    offscreenBuffer1 = QPixmap(e->size());
-    repaintBoard();
-}
-
-/**
-*/
-void BoardWidget::onLButtonDown(QMouseEvent* e){
-    int boardX = (int)floor( qreal(e->x() - xlines[0] + boxSize / 2) / boxSize );
-    int boardY = (int)floor( qreal(e->y() - ylines[0] + boxSize / 2) / boxSize );
-
-    if (boardX < 0 || boardX >= xsize || boardY < 0 || boardY >= ysize)
-        return;
-
-    int sgfX, sgfY;
-    boardToSgfCoordinate(boardX, boardY, sgfX, sgfY);
-
-    if (editMode == ePlayGame)
-        playGameLButtonDown(sgfX, sgfY);
-    else if (tutorMode == eTutorBossSides)
-        moveNextStone(sgfX, sgfY);
-    else if (tutorMode == eTutorOneSide){
-        if (moveNextStone(sgfX, sgfY)){
-            go::nodeList::iterator iter = qFind(nodeList.begin(), nodeList.end(), currentNode);
-            if (iter != nodeList.end() && ++iter != nodeList.end()){
-                usleep(500000);
-                setCurrentNode(*iter);
-            }
-        }
-    }
-    else if (editMode == eAlternateMove){
-        if (moveToClicked && board[boardY][boardX].node)
-            setCurrentNode( board[boardY][boardX].node );
-        else
-            addStoneNodeCommand(sgfX, sgfY, boardX, boardY);
-    }
-    else if (editMode == eCountTerritory){
-        addTerritory(boardX, boardY);
-        int alive_b=0, alive_w=0, dead_b=0, dead_w=0, bt=0, wt=0;
-        getCountTerritory(alive_b, alive_w, dead_b, dead_w, bt, wt);
-        emit updateTerritory(alive_b, alive_w, dead_b, dead_w, capturedBlack, capturedWhite, bt, wt, goData.root->komi);
-    }
-    else
-        addMark(sgfX, sgfY, boardX, boardY, e->modifiers() & Qt::ControlModifier);
-}
-
-/**
-*/
-void BoardWidget::onRButtonDown(QMouseEvent*){
-    undoStack.undo();
-}
-
-/**
-* read settings
-*/
 void BoardWidget::readSettings(){
     QSettings settings;
 
@@ -301,14 +145,13 @@ void BoardWidget::readSettings(){
     }
 
     // focus/markers
-    focusType = settings.value("marker/focusType").toInt();
-    focusWhiteColor = settings.value("marker/focusWhiteColor", FOCUS_WHITE_COLOR).value<QColor>();
-    focusBlackColor = settings.value("marker/focusBlackColor", FOCUS_BLACK_COLOR).value<QColor>();
-    branchColor = settings.value("marker/branchColor", BRANCH_COLOR).value<QColor>();
-    labelType = settings.value("marker/labelType").toInt();
+    focusType = settings.value("board/focusType").toInt();
+    focusWhiteColor = settings.value("board/focusWhiteColor", FOCUS_WHITE_COLOR).value<QColor>();
+    focusBlackColor = settings.value("board/focusBlackColor", FOCUS_BLACK_COLOR).value<QColor>();
+    branchColor = settings.value("board/branchColor", BRANCH_COLOR).value<QColor>();
 
     // sound
-    if (settings.value("sound/type").toInt() == 0){
+    if (settings.value("board/soundType").toInt() == 0){
         QStringList soundPathList;
 #if defined(Q_WS_MAC)
         soundPathList.push_back( QFileInfo(qApp->applicationDirPath() + "/../Resources/sounds/").absolutePath() );
@@ -328,10 +171,154 @@ void BoardWidget::readSettings(){
         }
     }
     else{
-        QFileInfo finfo( settings.value("sound/path").toString() );
+        QFileInfo finfo( settings.value("board/soundPath").toString() );
         if (finfo.exists())
             setStoneSoundPath(finfo.filePath());
     }
+}
+
+/**
+*/
+void BoardWidget::changeEvent(QEvent *e)
+{
+    QWidget::changeEvent(e);
+    switch (e->type()) {
+    case QEvent::LanguageChange:
+        m_ui->retranslateUi(this);
+        break;
+    default:
+        break;
+    }
+}
+
+/**
+*/
+void BoardWidget::paintEvent(QPaintEvent* e){
+    QWidget::paintEvent(e);
+
+    QPainter p(this);
+    p.drawPixmap(0, 0, width(), height(), offscreenBuffer3);
+}
+
+/**
+*/
+void BoardWidget::mouseReleaseEvent(QMouseEvent* e){
+    QWidget::mouseReleaseEvent(e);
+
+    if(e->button() & Qt::LeftButton)
+        onLButtonDown(e);
+    else if (e->button() & Qt::RightButton)
+        onRButtonDown(e);
+}
+
+/**
+*/
+void BoardWidget::mouseMoveEvent(QMouseEvent* e){
+    QWidget::mouseMoveEvent(e);
+
+    if (editMode == eGtp && gtpStatus != eGtpNone)
+        return;
+
+    bool black;
+    if (editMode == eAlternateMove || editMode == eGtp || tutorMode == eTutorBossSides || tutorMode == eTutorOneSide)
+        black = isBlack;
+    else if (editMode == eAddBlack || editMode == eAddWhite)
+        black = editMode == eAddBlack;
+    else
+        return;
+
+    int bx = (int)floor( double(e->x() - xlines[0] + boxSize / 2) / boxSize );
+    int by = (int)floor( double(e->y() - ylines[0] + boxSize / 2) / boxSize );
+
+    offscreenBuffer3 = offscreenBuffer2.copy();
+    QPainter p(&offscreenBuffer3);
+
+    if (! (bx < 0 || bx >= xlines.size() || by < 0 || by >= ylines.size() || board[by][bx].color != go::empty) ){
+        p.setOpacity(0.5);
+        drawImage(p, bx, by, black ? black2 : white2);
+    }
+
+    repaint();
+}
+
+/**
+*/
+void BoardWidget::wheelEvent(QWheelEvent* e){
+    QWidget::wheelEvent(e);
+
+    if (tutorMode != eNoTutor)
+        return;
+
+    go::nodeList::iterator iter = qFind(nodeList.begin(), nodeList.end(), currentNode);
+    if (e->delta() > 0){
+        if (iter != nodeList.begin() && iter != nodeList.end())
+            setCurrentNode( *--iter );
+    }
+    else{
+        if (iter != nodeList.end() && ++iter != nodeList.end())
+            setCurrentNode( *iter );
+    }
+}
+
+void BoardWidget::resizeEvent(QResizeEvent* e){
+    QWidget::resizeEvent(e);
+
+    offscreenBuffer1 = QPixmap(e->size());
+    repaintBoard();
+}
+
+/**
+*/
+void BoardWidget::onLButtonDown(QMouseEvent* e){
+    int boardX = (int)floor( double(e->x() - xlines[0] + boxSize / 2) / boxSize );
+    int boardY = (int)floor( double(e->y() - ylines[0] + boxSize / 2) / boxSize );
+
+    if (boardX < 0 || boardX >= xsize || boardY < 0 || boardY >= ysize)
+        return;
+
+    int sgfX, sgfY;
+    boardToSgfCoordinate(boardX, boardY, sgfX, sgfY);
+
+    if (editMode == eGtp)
+        gtpLButtonDown(sgfX, sgfY);
+    else if (tutorMode == eTutorBossSides)
+        tutor(sgfX, sgfY);
+    else if (tutorMode == eTutorOneSide){
+        if (tutor(sgfX, sgfY)){
+            go::nodeList::iterator iter = qFind(nodeList.begin(), nodeList.end(), currentNode);
+            if (iter != nodeList.end() && ++iter != nodeList.end()){
+                usleep(500000);
+                setCurrentNode(*iter);
+            }
+        }
+    }
+    else if (editMode == eAlternateMove){
+        if (moveToClicked && board[boardY][boardX].node)
+            setCurrentNode( board[boardY][boardX].node );
+        else
+            addStoneNodeCommand(sgfX, sgfY, boardX, boardY);
+    }
+    else if (editMode == eCountTerritory){
+        addTerritory(boardX, boardY);
+        int alive_b=0, alive_w=0, dead_b=0, dead_w=0, bt=0, wt=0;
+        getCountTerritory(alive_b, alive_w, dead_b, dead_w, bt, wt);
+        emit updateTerritory(alive_b, alive_w, dead_b, dead_w, capturedBlack, capturedWhite, bt, wt, goData.root->komi);
+    }
+    else
+        addMark(sgfX, sgfY, boardX, boardY);
+}
+
+/**
+*/
+void BoardWidget::onRButtonDown(QMouseEvent*){
+    undoStack.undo();
+}
+
+/**
+*/
+void BoardWidget::gtpLButtonDown(int sgfX, int sgfY){
+    if (isBlack == isYourColorBlack)
+        gtpPut(sgfX, sgfY);
 }
 
 /**
@@ -358,31 +345,23 @@ void BoardWidget::repaintBoard(bool board, bool stones){
 */
 void BoardWidget::paintBoard(QPaintDevice* pd){
     QPainter p(pd);
-    p.setRenderHints(QPainter::Antialiasing/*|QPainter::TextAntialiasing|QPainter::SmoothPixmapTransform*/);
+    p.setRenderHints(QPainter::Antialiasing|QPainter::TextAntialiasing|QPainter::SmoothPixmapTransform);
 
     width_  = pd->width();
     height_ = pd->height();
 
-    paintBoard(p);
-}
-
-void BoardWidget::paintBoard(QPainter& p, qreal pointSize){
-
     QFont font;
-    font.setPointSizeF(pointSize);
+    font.setPointSize(8);
     font.setStyleHint(QFont::SansSerif);
     font.setWeight(QFont::Normal);
-    font.setStyleStrategy(QFont::PreferAntialias);
 
     p.setFont(font);
     p.setPen(Qt::black);
 
-    if (boardType >= 0){
-        if (tutorMode != eNoTutor)
-            p.fillRect(0, 0, width_, height_, tutorColor);
-        else
-            p.fillRect(0, 0, width_, height_, bgColor);
-    }
+    if (tutorMode != eNoTutor)
+        p.fillRect(0, 0, width_, height_, tutorColor);
+    else
+        p.fillRect(0, 0, width_, height_, bgColor);
 
     drawBoard(p);
     drawCoordinates(p);
@@ -392,284 +371,32 @@ void BoardWidget::paintBoard(QPainter& p, qreal pointSize){
 */
 void BoardWidget::paintStones(QPaintDevice* pd){
     QPainter p(pd);
-    p.setRenderHints(QPainter::Antialiasing/*|QPainter::TextAntialiasing|QPainter::SmoothPixmapTransform*/);
+    p.setRenderHints(QPainter::Antialiasing|QPainter::TextAntialiasing|QPainter::SmoothPixmapTransform);
 
     width_  = pd->width();
     height_ = pd->height();
 
-    paintStones(p);
-}
-
-void BoardWidget::paintStones(QPainter& p){
     QFont font;
+    font.setPointSize(8);
     font.setStyleHint(QFont::SansSerif);
     font.setWeight(QFont::Normal);
-    font.setStyleStrategy(QFont::PreferAntialias);
 
     p.setFont(font);
     p.setPen(Qt::black);
 
-    drawStonesAndMarker(p);
+    drawStones(p);
 }
 
 /**
 */
 void BoardWidget::paintTerritories(QPaintDevice* pd){
     QPainter p(pd);
-    p.setRenderHints(QPainter::Antialiasing/*|QPainter::TextAntialiasing|QPainter::SmoothPixmapTransform*/);
+    p.setRenderHints(QPainter::Antialiasing|QPainter::TextAntialiasing|QPainter::SmoothPixmapTransform);
 
     width_  = pd->width();
     height_ = pd->height();
 
-    paintTerritories(p);
-}
-
-void BoardWidget::paintTerritories(QPainter& p){
     drawTerritories(p);
-}
-
-/**
-* print
-*/
-void BoardWidget::print(QPrinter& printer, int option, int movesPerPage){
-    QPainter p;
-    p.begin(&printer);
-
-    board.clear();
-    board.resize(ysize);
-    for(int i=0; i<ysize; ++i)
-        board[i].resize(xsize);
-    BoardBuffer buf = board;
-
-    int  boardType_  = -1;
-    int  whiteType_  = -1;
-    int  blackType_  = -1;
-    bool showNumber_ = true;
-    int  moveNumber_ = -1;
-
-    qSwap(boardType, boardType_);
-    qSwap(whiteType, whiteType_);
-    qSwap(blackType, blackType_);
-    qSwap(showMoveNumber, showNumber_);
-    qSwap(showMoveNumberCount, moveNumber_);
-
-    width_  = printer.width();
-    height_ = printer.height();
-
-    print( printer, p, option, movesPerPage, buf );
-
-    p.end();
-
-    qSwap(boardType, boardType_);
-    qSwap(whiteType, whiteType_);
-    qSwap(blackType, blackType_);
-    qSwap(showMoveNumber, showNumber_);
-    qSwap(showMoveNumberCount, moveNumber_);
-
-    createBoardBuffer();
-    repaintBoard();
-}
-
-void BoardWidget::print(QPrinter& printer, QPainter& p, int option, int movePerPage, BoardBuffer& buf){
-    p.save();
-
-    int moveNumber = 0;
-    int moveNumberInPage = 0;
-    QString rangai;
-
-    int page = 0;
-    int fig = 0;
-    newPage(printer, p, moveNumberInPage, buf, page, fig);
-
-    if (option < 3){
-        foreach (go::nodePtr node, nodeList){
-            print(printer, p, node, moveNumber, moveNumberInPage, buf, rangai);
-
-            if (option == 0 && node == currentNode)
-                break;
-            else if (option == 2 && moveNumberInPage == movePerPage){
-                printRangai(printer, p, rangai);
-                newPage(printer, p, moveNumberInPage, buf, page, fig);
-            }
-        }
-    }
-    printRangai(printer, p, rangai);
-
-    p.restore();
-}
-
-void BoardWidget::print(QPrinter& /*printer*/, QPainter& p, go::nodePtr node, int& moveNumber, int& moveNumberInPage, BoardBuffer& buf, QString& rangai){
-    p.save();
-
-    QFont font( p.font() );
-    if (node->isStone() && !node->isPass()){
-        ++moveNumber;
-        ++moveNumberInPage;
-
-        int bx, by;
-        sgfToBoardCoordinate(node->position.x, node->position.y, bx, by);
-        board[by][bx].color  = node->color;
-        board[by][bx].number = moveNumber;
-        removeDeadStones(bx, by);
-
-        if (buf[by][bx].empty()){
-            drawStone(p, bx, by, node->color);
-            buf[by][bx].color  = node->color;
-            buf[by][bx].number = moveNumber;
-
-            if (moveNumber < 10)
-                font.setPointSizeF(boxSize * 0.41);
-            else if (moveNumber < 99)
-                font.setPointSizeF(boxSize * 0.38);
-            else
-                font.setPointSizeF(boxSize * 0.35);
-
-            font.setWeight(QFont::Black);
-            p.setFont(font);
-
-            QString s = QString("%1").arg(moveNumber);
-            p.setPen( node->isBlack() ? Qt::white : Qt::black );
-            p.drawText(xlines[bx] - boxSize, ylines[by] - boxSize, boxSize * 2, boxSize * 2, Qt::AlignCenter, s);
-        }
-        else{
-            QString s = QString( tr("%1(%2)") ).arg(moveNumber).arg( getXYString(bx, by) );
-            if (!rangai.isEmpty())
-                rangai.append(", ");
-            rangai.append(s);
-        }
-    }
-
-    p.restore();
-}
-
-void BoardWidget::printHeader(QPrinter& printer, QPainter& p, int& /*page*/){
-    p.save();
-
-    QFont f(p.font());
-    f.setPointSizeF(8.5);
-    p.setFont(f);
-
-    QString header = QString("%5 %1 %2 (W) vs %3 %4 (B)").arg(goData.root->whitePlayer).arg(goData.root->whiteRank).arg(goData.root->blackPlayer).arg(goData.root->blackRank).arg(goData.root->gameName);
-    QRect r = p.boundingRect(0, 0, printer.width(), 0, Qt::AlignTop|Qt::AlignHCenter, header);
-    headerRect.setRect(0, 0, printer.width(), r.height()+5);
-
-    p.drawText(headerRect, Qt::AlignTop|Qt::AlignHCenter, header);
-
-    p.setPen( QPen(Qt::gray, 2) );
-    p.drawLine( 0, headerRect.bottom(), printer.width(), headerRect.bottom() );
-
-    p.restore();
-}
-
-void BoardWidget::printFooter(QPrinter& printer, QPainter& p, int& page){
-    p.save();
-
-    QFont f(p.font());
-    f.setPointSizeF(8.5);
-    p.setFont(f);
-
-    QDateTime time = QDateTime::currentDateTime();
-    QString footer = time.toString(Qt::DefaultLocaleLongDate);
-    QRectF r = p.boundingRect(0, 0, printer.width(), 0, Qt::AlignBottom|Qt::AlignRight, footer);
-    footerRect.setRect(0, printer.height()-r.height(), printer.width(), r.height());
-
-    p.drawText(footerRect, Qt::AlignBottom|Qt::AlignRight, footer);
-
-    footer.sprintf("%d", page);
-    p.drawText(footerRect, Qt::AlignBottom|Qt::AlignLeft, footer);
-
-    p.setPen( QPen(Qt::gray, 2) );
-    p.drawLine(0, footerRect.top(), printer.width(), footerRect.top());
-
-    p.restore();
-}
-
-void BoardWidget::printCaption(QPrinter& printer, QPainter& p, int fig){
-    p.save();
-
-    QFont f(p.font());
-    f.setPointSizeF(14);
-    p.setFont(f);
-
-    QString text = QString( tr("Figure %1") ).arg(fig);
-    QRect r;
-    p.drawText(0, headerRect.bottom() + 20, printer.width(), printer.height(), Qt::AlignHCenter, text, &r);
-
-    p.restore();
-
-    QTransform transform;
-    transform.translate(0, r.bottom() + 5);
-    p.setTransform(transform);
-
-    height_ -= 25 + r.height();
-    if (height_ > width_)
-        height_ = width_;
-    else
-        width_ = height_;
-}
-
-void BoardWidget::printRangai(QPrinter& printer, QPainter& p, QString& rangai){
-    p.save();
-
-    QFont f(p.font());
-    f.setPointSizeF(12);
-    p.setFont(f);
-
-    if (printer.height() > printer.width())
-        p.drawText(0, coordinatesRect.bottom() + 10, printer.width(), printer.height(), Qt::TextWordWrap|Qt::AlignHCenter, rangai);
-    else
-        p.drawText(coordinatesRect.right() + 10, 0, printer.width() - coordinatesRect.right() - 10, coordinatesRect.height(), Qt::TextWordWrap|Qt::AlignHCenter, rangai);
-
-    p.restore();
-
-    rangai.clear();
-}
-
-void BoardWidget::newPage(QPrinter& printer, QPainter& p, int& moveNumberInPage, BoardBuffer& buf, int& page, int& fig){
-    if (page != 0)
-        printer.newPage();
-
-    ++page;
-    ++fig;
-
-    p.setTransform( QTransform() );
-
-    printHeader(printer, p, page);
-    printFooter(printer, p, page);
-
-    height_ = footerRect.top() - headerRect.bottom();
-
-    printCaption(printer, p, fig);
-    paintBoard(p, 15.0);
-
-    moveNumberInPage = 0;
-    buf = board;
-    for (int y=0; y<board.size(); ++y){
-        for (int x=0; x<board[y].size(); ++x){
-            if (board[y][x].black())
-                drawStone(p, x, y, go::black);
-            else if (board[y][x].white())
-                drawStone(p, x, y, go::white);
-        }
-    }
-}
-
-/**
-*/
-void BoardWidget::clear(){
-    int xsize = goData.root->xsize;
-    int ysize = goData.root->ysize;
-
-    setDirty(false);
-    goData.clear();
-    goData.root->xsize = xsize;
-    goData.root->ysize = ysize;
-    nodeList.clear();
-    capturedBlack = 0;
-    capturedWhite = 0;
-    setCurrentNode();
-    repaintBoard();
-    undoStack.clear();
 }
 
 /**
@@ -699,238 +426,6 @@ void BoardWidget::insertData(const go::nodePtr node, const go::fileBase& data){
     setDirty(true);
 }
 
-/**
-*/
-void BoardWidget::addStoneNodeCommand(int sgfX, int sgfY){
-    if (sgfX == -1 && sgfY == -1){
-        go::nodePtr node;
-        if (color == go::black)
-            node = go::createBlackNode(currentNode);
-        else
-            node = go::createWhiteNode(currentNode);
-
-        addNodeCommand(currentNode, node);
-    }
-    else{
-        int boardX, boardY;
-        sgfToBoardCoordinate(sgfX, sgfY, boardX, boardY);
-        addStoneNodeCommand(sgfX, sgfY, boardX, boardY);
-    }
-}
-
-/**
-*/
-void BoardWidget::addStoneNodeCommand(int sgfX, int sgfY, int boardX, int boardY){
-    if (board[boardY][boardX].empty() == false)
-        return;
-
-    if (moveNextStone(sgfX, sgfY))
-        return;
-
-    board[boardY][boardX].color = color;
-    if (isKill(boardX, boardY) == false && isDead(boardX, boardY) == true){
-        board[boardY][boardX].color = go::empty;
-        return;
-    }
-
-    go::nodePtr n;
-    if (color == go::black)
-        n = go::createBlackNode(currentNode, sgfX, sgfY);
-    else
-        n = go::createWhiteNode(currentNode, sgfX, sgfY);
-
-    addNodeCommand(currentNode, n);
-}
-
-/**
-*/
-void BoardWidget::addNodeCommand(go::nodePtr parentNode, go::nodePtr childNode, bool select){
-    if (tutorMode != eNoTutor)
-        return;
-
-    undoStack.push( new AddNodeCommand(this, parentNode, childNode, select) );
-}
-
-/**
-*/
-void BoardWidget::insertNodeCommand(go::nodePtr parentNode, go::nodePtr childNode, bool select){
-    if (tutorMode != eNoTutor)
-        return;
-
-    undoStack.push( new InsertNodeCommand(this, parentNode, childNode, select) );
-}
-
-/**
-*/
-void BoardWidget::deleteNodeCommand(go::nodePtr node, bool deleteChildren){
-    if (tutorMode != eNoTutor)
-        return;
-    else if( node == goData.root )
-        return;
-
-    undoStack.push( new DeleteNodeCommand(this, node, deleteChildren) );
-}
-
-/**
-*/
-void BoardWidget::setMoveNumberCommand(go::nodePtr node, int moveNumber){
-    if( node->moveNumber == moveNumber )
-        return;
-
-    undoStack.push( new SetMoveNumberCommand(this, node, moveNumber) );
-}
-
-/**
-*/
-void BoardWidget::unsetMoveNumberCommand(go::nodePtr node){
-    if( node->moveNumber == -1 )
-        return;
-
-    undoStack.push( new UnsetMoveNumberCommand(this, node) );
-}
-
-/**
-*/
-void BoardWidget::setNodeNameCommand(go::nodePtr node, const QString& nodeName){
-    if( node->name == nodeName)
-        return;
-
-    undoStack.push( new SetNodeNameCommand(this, node, nodeName) );
-}
-
-/**
-*/
-void BoardWidget::setCommentCommand(go::nodePtr node, const QString& comment){
-    if( node->comment == comment)
-        return;
-
-//    undoStack.push( new SetCommentCommand(this, node, comment) );
-    node->comment = comment;
-    modifyNode(node);
-}
-
-void BoardWidget::rotateSgfCommand(){
-    RotateSgfCommand* command = new RotateSgfCommand(this, tr("Rotate SGF"));
-    rotateSgf(goData.root, command);
-    undoStack.push(command);
-
-    setDirty(true);
-}
-
-void BoardWidget::flipSgfHorizontallyCommand(){
-    RotateSgfCommand* command = new RotateSgfCommand(this, tr("Flip SGF Horizontally"));
-    flipSgf(goData.root, goData.root->xsize, 0, command);
-    undoStack.push(command);
-
-    setDirty(true);
-}
-
-void BoardWidget::flipSgfVerticallyCommand(){
-    RotateSgfCommand* command = new RotateSgfCommand(this, tr("Flip SGF Vertically"));
-    flipSgf(goData.root, 0, goData.root->ysize, command);
-    undoStack.push(command);
-
-    setDirty(true);
-}
-
-/**
-*/
-void BoardWidget::addNode(go::nodePtr parent, go::nodePtr node, bool select){
-    parent->childNodes.push_back(node);
-    node->parent = parent;
-
-    setDirty(true);
-    emit nodeAdded(parent, node, select);
-
-    if (select)
-        setCurrentNode(node);
-}
-
-/**
-*/
-void BoardWidget::deleteNode(go::nodePtr node, bool deleteChildren){
-    if( node == goData.root )
-        return;
-
-    go::nodePtr parent = node->parent;
-    if (parent){
-        go::nodeList::iterator iter = qFind(parent->childNodes.begin(), parent->childNodes.end(), node);
-        if (iter != parent->childNodes.end())
-            parent->childNodes.erase(iter);
-
-        if (deleteChildren == false){
-            parent->childNodes += node->childNodes;
-            go::nodeList::iterator iter = node->childNodes.begin();
-            while (iter != node->childNodes.end()){
-                (*iter)->parent = parent;
-                ++iter;
-            }
-        }
-    }
-
-    setCurrentNode(parent);
-
-    setDirty(true);
-    emit nodeDeleted(node, deleteChildren);
-
-    createNodeList();
-}
-
-/**
-*/
-void BoardWidget::modifyNode(go::nodePtr node, bool recreateBoardBuffer){
-    if (recreateBoardBuffer)
-        createBoardBuffer();
-    repaintBoard(false);
-    setDirty(true);
-    emit nodeModified(node);
-}
-
-/**
-*/
-void BoardWidget::pass(){
-    if (editMode == ePlayGame){
-        if (color == playGame->yourColor())
-            playGame->move(-1, -1);
-    }
-    else
-        addStoneNodeCommand(-1, -1);
-}
-
-/**
-* public slot
-*/
-void BoardWidget::setCurrentNode(go::nodePtr node){
-    if (editMode == eCountTerritory)
-        return;
-
-    if (node == NULL)
-        node = goData.root;
-
-    if (currentNode == node && !nodeList.empty())
-        return;
-
-    currentNode  = node;
-    go::nodeList::iterator iter = qFind(nodeList.begin(), nodeList.end(), node);
-    if (iter == nodeList.end())
-        createNodeList();
-
-    createBoardBuffer();
-
-    if (playSound && node->isStone())
-        stoneSound.play();
-
-    repaintBoard(false);
-    emit currentNodeChanged(currentNode);
-}
-
-/**
-*/
-void BoardWidget::playGameLButtonDown(int sgfX, int sgfY){
-    if (color == playGame->yourColor())
-        playGame->move(sgfX, sgfY);
-}
-
 void BoardWidget::setBoardSize(int xsize, int ysize){
     clear();
     goData.root->xsize = xsize;
@@ -939,6 +434,30 @@ void BoardWidget::setBoardSize(int xsize, int ysize){
     setCurrentNode();
 
     repaintBoard();
+}
+
+void BoardWidget::rotateSgf(){
+    RotateSgfCommand* command = new RotateSgfCommand(this, tr("Rotate SGF"));
+    rotateSgf(goData.root, command);
+    undoStack.push(command);
+
+    setDirty(true);
+}
+
+void BoardWidget::flipSgfHorizontally(){
+    RotateSgfCommand* command = new RotateSgfCommand(this, tr("Flip SGF Horizontally"));
+    flipSgf(goData.root, goData.root->xsize, 0, command);
+    undoStack.push(command);
+
+    setDirty(true);
+}
+
+void BoardWidget::flipSgfVertically(){
+    RotateSgfCommand* command = new RotateSgfCommand(this, tr("Flip SGF Vertically"));
+    flipSgf(goData.root, 0, goData.root->ysize, command);
+    undoStack.push(command);
+
+    setDirty(true);
 }
 
 void BoardWidget::rotateSgf(go::nodePtr node, QUndoCommand* command){
@@ -1078,6 +597,24 @@ void BoardWidget::resetBoard(){
 
 /**
 */
+void BoardWidget::clear(){
+    int xsize = goData.root->xsize;
+    int ysize = goData.root->ysize;
+
+    setDirty(false);
+    goData.clear();
+    goData.root->xsize = xsize;
+    goData.root->ysize = ysize;
+    nodeList.clear();
+    capturedBlack = 0;
+    capturedWhite = 0;
+    setCurrentNode();
+    repaintBoard();
+    undoStack.clear();
+}
+
+/**
+*/
 go::nodePtr BoardWidget::findNodeFromMoveNumber(int moveNumber){
     go::nodeList::iterator iter = nodeList.begin();
 
@@ -1089,6 +626,173 @@ go::nodePtr BoardWidget::findNodeFromMoveNumber(int moveNumber){
     }
 
     return go::nodePtr();
+}
+
+/**
+* public slot
+*/
+void BoardWidget::addNodeCommand(go::nodePtr parentNode, go::nodePtr childNode, bool select){
+    if (tutorMode != eNoTutor)
+        return;
+
+    undoStack.push( new AddNodeCommand(this, parentNode, childNode, select) );
+}
+
+/**
+* public slot
+*/
+void BoardWidget::insertNodeCommand(go::nodePtr parentNode, go::nodePtr childNode, bool select){
+    if (tutorMode != eNoTutor)
+        return;
+
+    undoStack.push( new InsertNodeCommand(this, parentNode, childNode, select) );
+}
+
+/**
+* public slot
+*/
+void BoardWidget::deleteNodeCommand(go::nodePtr node, bool deleteChildren){
+    if (tutorMode != eNoTutor)
+        return;
+    else if( node == goData.root )
+        return;
+
+    undoStack.push( new DeleteNodeCommand(this, node, deleteChildren) );
+}
+
+/**
+* public slot
+*/
+void BoardWidget::setMoveNumberCommand(go::nodePtr node, int moveNumber){
+    if( node->moveNumber == moveNumber )
+        return;
+
+    undoStack.push( new SetMoveNumberCommand(this, node, moveNumber) );
+}
+
+/**
+* public slot
+*/
+void BoardWidget::unsetMoveNumberCommand(go::nodePtr node){
+    if( node->moveNumber == -1 )
+        return;
+
+    undoStack.push( new UnsetMoveNumberCommand(this, node) );
+}
+
+/**
+* public slot
+*/
+void BoardWidget::setNodeNameCommand(go::nodePtr node, const QString& nodeName){
+    if( node->name == nodeName)
+        return;
+
+    undoStack.push( new SetNodeNameCommand(this, node, nodeName) );
+}
+
+/**
+* public slot
+*/
+void BoardWidget::setCommentCommand(go::nodePtr node, const QString& comment){
+    if( node->comment == comment)
+        return;
+
+//    undoStack.push( new SetCommentCommand(this, node, comment) );
+    node->comment = comment;
+    modifyNode(node);
+}
+
+/**
+* public slot
+*/
+void BoardWidget::addNode(go::nodePtr parent, go::nodePtr node, bool select){
+    parent->childNodes.push_back(node);
+    node->parent = parent;
+
+    setDirty(true);
+    emit nodeAdded(parent, node, select);
+
+    if (select)
+        setCurrentNode(node);
+}
+
+/**
+* public slot
+*/
+void BoardWidget::deleteNode(go::nodePtr node, bool deleteChildren){
+    if( node == goData.root )
+        return;
+
+    go::nodePtr parent = node->parent;
+    if (parent){
+        go::nodeList::iterator iter = qFind(parent->childNodes.begin(), parent->childNodes.end(), node);
+        if (iter != parent->childNodes.end())
+            parent->childNodes.erase(iter);
+
+        if (deleteChildren == false){
+            parent->childNodes += node->childNodes;
+            go::nodeList::iterator iter = node->childNodes.begin();
+            while (iter != node->childNodes.end()){
+                (*iter)->parent = parent;
+                ++iter;
+            }
+        }
+    }
+
+    setCurrentNode(parent);
+
+    setDirty(true);
+    emit nodeDeleted(node, deleteChildren);
+
+    createNodeList();
+}
+
+/**
+* public slot
+*/
+void BoardWidget::modifyNode(go::nodePtr node, bool recreateBoardBuffer){
+    if (recreateBoardBuffer)
+        createBoardBuffer();
+    repaintBoard(false);
+    setDirty(true);
+    emit nodeModified(node);
+}
+
+/**
+* public slot
+*/
+void BoardWidget::pass(){
+    if (editMode == eGtp)
+        gtpPut(-1, -1);
+    else
+        addStoneNodeCommand(-1, -1);
+}
+
+/**
+* public slot
+*/
+void BoardWidget::setCurrentNode(go::nodePtr node){
+    if (editMode == eCountTerritory)
+        return;
+
+    if (node == NULL)
+        node = goData.root;
+
+    if (currentNode == node && !nodeList.empty())
+        return;
+
+    currentNode  = node;
+    go::nodeList::iterator iter = qFind(nodeList.begin(), nodeList.end(), node);
+    if (iter == nodeList.end())
+        createNodeList();
+
+    createBoardBuffer();
+
+    if (playSound && node->isStone())
+        stoneSound.play();
+
+    repaintBoard(false);
+    emit currentNodeChanged(currentNode);
 }
 
 /**
@@ -1162,9 +866,9 @@ void BoardWidget::createBoardBuffer(){
 void BoardWidget::drawBoard(QPainter& p){
     p.save();
 
-    QRectF coordRect = p.boundingRect(QRectF(0.0, 0.0, 1.0, 1.0), Qt::AlignCenter, "999999");
-    int w = static_cast<int>( (width_  - (showCoordinates ? coordRect.width() : 0.0)) / xsize );
-    int h = static_cast<int>( (height_ - (showCoordinates ? coordRect.width() : 0.0)) / ysize );
+    int ps = p.font().pointSize();
+    int w = (width_  - (showCoordinates ? ps*5 : 0)) / xsize;
+    int h = (height_ - (showCoordinates ? ps*5 : 0)) / ysize;
     boxSize = qMin(w, h);
     w = boxSize * (xsize - 1);
     h = boxSize * (ysize - 1);
@@ -1177,51 +881,45 @@ void BoardWidget::drawBoard(QPainter& p){
 
     // create board and stone image
     boardRect.setRect(l - margin, t - margin, w + margin * 2, h + margin * 2);
-    coordinatesRect = boardRect;
-    if (boardType >= 0){
+//    if (boardRect.width() != boardImage2.width()){
         boardImage2 = QImage(boardRect.size(), QImage::Format_RGB32);
         QPainter board(&boardImage2);
         if (boardType == 0 || boardType == 1)
             board.fillRect(0, 0, boardRect.width(), boardRect.height(), QBrush(boardImage1));
         else
             board.fillRect(0, 0, boardRect.width(), boardRect.height(), boardColor);
-    }
 
-    if (blackType == 0 || blackType == 1)
-        black2 = black1.scaled(boxSize, boxSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-    else{
-        black2 = QImage(boxSize, boxSize, QImage::Format_ARGB32);
-        black2.fill(0);
-        QPainter p2(&black2);
-        p2.setRenderHints(QPainter::Antialiasing/*|QPainter::TextAntialiasing|QPainter::SmoothPixmapTransform*/);
-        p2.setPen(Qt::black);
-        p2.setBrush(blackColor);
-        p2.drawEllipse(1, 1, boxSize-2, boxSize-2);
-    }
+        if (blackType == 0 || blackType == 1)
+            black2 = black1.scaled(boxSize, boxSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        else{
+            black2 = QImage(boxSize, boxSize, QImage::Format_ARGB32);
+            black2.fill(0);
+            QPainter p2(&black2);
+            p2.setRenderHints(QPainter::Antialiasing|QPainter::TextAntialiasing|QPainter::SmoothPixmapTransform);
+            p2.setPen(Qt::black);
+            p2.setBrush(blackColor);
+            p2.drawEllipse(1, 1, boxSize-2, boxSize-2);
+        }
 
-    if (whiteType == 0 || whiteType == 1)
-        white2 = white1.scaled(boxSize, boxSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-    else{
-        white2 = QImage(boxSize, boxSize, QImage::Format_ARGB32);
-        white2.fill(0);
-        QPainter p2(&white2);
-        p2.setRenderHints(QPainter::Antialiasing/*|QPainter::TextAntialiasing|QPainter::SmoothPixmapTransform*/);
-        p2.setPen(Qt::black);
-        p2.setBrush(whiteColor);
-        p2.drawEllipse(1, 1, boxSize-2, boxSize-2);
-    }
+        if (whiteType == 0 || whiteType == 1)
+            white2 = white1.scaled(boxSize, boxSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        else{
+            white2 = QImage(boxSize, boxSize, QImage::Format_ARGB32);
+            white2.fill(0);
+            QPainter p2(&white2);
+            p2.setRenderHints(QPainter::Antialiasing|QPainter::TextAntialiasing|QPainter::SmoothPixmapTransform);
+            p2.setPen(Qt::black);
+            p2.setBrush(whiteColor);
+            p2.drawEllipse(1, 1, boxSize-2, boxSize-2);
+        }
+//    }
 
-    if (boardType >= 0){
-        p.fillRect(boardRect.left()+3, boardRect.top()+3, boardRect.width(), boardRect.height(), QColor(10, 10, 10, 120));
-        p.drawImage(boardRect.topLeft(), boardImage2);
-    }
+    p.fillRect(boardRect.left()+3, boardRect.top()+3, boardRect.width(), boardRect.height(), Qt::gray);
+    p.drawImage(boardRect.topLeft(), boardImage2);
 
     // horizontal line
     ylines.clear();
     for (int i=0; i<ysize; ++i){
-//        pen.setWidth( i == 0 || i == ysize-1 ? 2 : 1 );
-//        p.setPen(pen);
-
         int y = t + i * boxSize;
         p.drawLine(l, y, r, y);
         ylines.push_back(y);
@@ -1230,9 +928,6 @@ void BoardWidget::drawBoard(QPainter& p){
     // vertical line
     xlines.clear();
     for (int i=0; i<xsize; ++i){
-//        pen.setWidth( i == 0 || i == xsize-1 ? 2 : 1 );
-//        p.setPen(pen);
-
         int x = l + i * boxSize;
         p.drawLine(x, t, x, b);
         xlines.push_back(x);
@@ -1277,7 +972,7 @@ void BoardWidget::drawCoordinates(QPainter& p){
 
     p.save();
 
-    QRectF r = p.boundingRect(QRectF(0.0, 0.0, 1.0, 1.0), Qt::AlignCenter, "999");
+    int ps = p.font().pointSize();
 
     for (int i=0; i<xsize; ++i){
         QString s;
@@ -1290,11 +985,11 @@ void BoardWidget::drawCoordinates(QPainter& p){
         else if (rotateBoard_ == 3)
             s = getYString(flipBoardHorizontally_ ? xsize-i-1 : i);
 
-        p.drawText(QRectF(xlines[i]-r.width()/2.0, boardRect.top()-r.height(), r.width(), r.height()), Qt::AlignCenter, s);
-        p.drawText(QRectF(xlines[i]-r.width()/2.0, boardRect.bottom()+5, r.width(), r.height()), Qt::AlignCenter, s);
+        QRect r = p.boundingRect(xlines[i]-ps, boardRect.top()-ps-2, ps*2, ps, Qt::AlignCenter, s);
+        p.drawText(r, s);
+        r = p.boundingRect(xlines[i]-ps, boardRect.bottom()+7, ps*2, ps, Qt::AlignCenter, s);
+        p.drawText(r, s);
     }
-    coordinatesRect.setTop( boardRect.top() - r.height() );
-    coordinatesRect.setBottom( boardRect.bottom() + 5 + r.height() );
 
     for (int i=0; i<ysize; ++i){
         QString s;
@@ -1307,25 +1002,25 @@ void BoardWidget::drawCoordinates(QPainter& p){
         else if (rotateBoard_ == 3)
             s = getXString(flipBoardVertically_ ? i : ysize-i-1);
 
-        p.drawText(QRectF(boardRect.left()-r.width(), ylines[i]-r.height()/2.0, r.width(), r.height()), Qt::AlignCenter, s);
-        p.drawText(QRectF(boardRect.right()+3, ylines[i]-r.height()/2.0, r.width(), r.height()), Qt::AlignCenter, s);
+        QRect r = p.boundingRect(boardRect.left()-ps-3, ylines[i]-ps, ps, ps*2, Qt::AlignCenter, s);
+        p.drawText(r, s);
+        r = p.boundingRect(boardRect.right()+7, ylines[i]-ps, ps, ps*2, Qt::AlignCenter, s);
+        p.drawText(r, s);
     }
-    coordinatesRect.setLeft( boardRect.left() - r.width() );
-    coordinatesRect.setRight( boardRect.right() + 3 + r.width() );
 
     p.restore();
 }
 
 /**
 */
-void BoardWidget::drawStonesAndMarker(QPainter& p){
+void BoardWidget::drawStones(QPainter& p){
     p.save();
 
     QFont font(p.font());
-    font.setPointSizeF(boxSize * 0.5);
+    font.setPointSize(int(boxSize * 0.5));
     p.setFont(font);
 
-    drawStones(p);
+    drawStones2(p);
 
     if (currentNode->childNodes.size() > 1)
         drawBranchMoves(p, currentNode->childNodes.begin(), currentNode->childNodes.end());
@@ -1345,7 +1040,7 @@ void BoardWidget::drawStonesAndMarker(QPainter& p){
     p.restore();
 }
 
-void BoardWidget::drawStones(QPainter& p){
+void BoardWidget::drawStones2(QPainter& p){
     p.save();
 
     QFont font( p.font() );
@@ -1357,27 +1052,27 @@ void BoardWidget::drawStones(QPainter& p){
 
             // draw stone
             if (board[y][x].black())
-                drawStone(p, x, y, go::black, board[y][x].whiteTerritory() ? 0.6 : 1.0);
+                drawImage(p, x, y, black2);
             else if (board[y][x].white())
-                drawStone(p, x, y, go::white, board[y][x].blackTerritory() ? 0.6 : 1.0);
+                drawImage(p, x, y, white2);
 
             // draw move number
             if (showMoveNumber == false || showMoveNumberCount == 0 || board[y][x].number == 0 || (showMoveNumberCount != -1 && currentMoveNumber - showMoveNumberCount + 1 > board[y][x].number))
                 continue;
 
             if (board[y][x].number < 10)
-                font.setPointSizeF(boxSize * 0.41);
+                font.setPointSize(int(boxSize * 0.41));
             else if (board[y][x].number < 99)
-                font.setPointSizeF(boxSize * 0.38);
+                font.setPointSize(int(boxSize * 0.38));
             else
-                font.setPointSizeF(boxSize * 0.35);
+                font.setPointSize(int(boxSize * 0.35));
 
             font.setWeight(board[y][x].number == currentMoveNumber ? QFont::Black: QFont::Normal);
             p.setFont(font);
 
             QString s = QString("%1").arg(board[y][x].number);
             p.setPen( board[y][x].number == currentMoveNumber ? Qt::red : board[y][x].black() ? Qt::white : Qt::black );
-            p.drawText(QRectF(xlines[x] - boxSize * 0.5, ylines[y] - boxSize * 0.5, boxSize, boxSize), Qt::AlignCenter, s);
+            p.drawText(xlines[x] - boxSize, ylines[y] - boxSize, boxSize * 2, boxSize * 2, Qt::AlignCenter, s);
         }
     }
 
@@ -1514,21 +1209,19 @@ void BoardWidget::drawPath(QPainter& p, const QPainterPath& path, int boardX, in
 void BoardWidget::drawTerritories(QPainter& p){
     p.save();
 
-    qreal w = boxSize * 0.3;
-
-    for (int by=0; by<ysize; ++by){
-        for (int bx=0; bx<xsize; ++bx){
-            if (!board[by][bx].blackTerritory() && !board[by][bx].whiteTerritory())
+    for (int y=0; y<ysize; ++y){
+        for (int x=0; x<xsize; ++x){
+            if (!board[y][x].blackTerritory() && !board[y][x].whiteTerritory())
                 continue;
 
-            int x = xlines[bx];
-            int y = ylines[by];
+            int bx = xlines[x];
+            int by = ylines[y];
 
-            QColor color = board[by][bx].whiteTerritory() ? QColor(255, 255, 255, 105) : QColor(0, 0, 0, 45);
-            p.fillRect(x-boxSize/2, y-boxSize/2, boxSize, boxSize, color);
+            QColor color = board[y][x].whiteTerritory() ? QColor(255, 255, 255, 110) : QColor(0, 0, 0, 60);
+            p.fillRect(bx-boxSize/2, by-boxSize/2, boxSize, boxSize, color);
 
             color.setAlpha(255);
-            p.fillRect( QRectF(x-w/2, y-w/2, w, w), color);
+            p.fillRect(bx-boxSize/6, by-boxSize/6, boxSize/3, boxSize/3, color);
         }
     }
 
@@ -1585,8 +1278,8 @@ void BoardWidget::drawCurrentMark(QPainter& p, go::nodePtr node){
 
 QPainterPath BoardWidget::createFocusTrianglePath() const{
     QPainterPath path;
-    qreal w = boxSize * 0.25;
-    qreal h = boxSize * 0.15;
+    double w = boxSize * 0.25;
+    double h = boxSize * 0.15;
     QPolygonF polygon(3);
     polygon[0] = QPointF(0, -h);
     polygon[1] = QPointF(-w, h);
@@ -1598,14 +1291,14 @@ QPainterPath BoardWidget::createFocusTrianglePath() const{
 
 QPainterPath BoardWidget::createCirclePath() const{
     QPainterPath path;
-    qreal w = boxSize * 0.42;
+    double w = boxSize * 0.42;
     path.addEllipse(-w/2, -w/2, w, w);
     return path;
 }
 
 QPainterPath BoardWidget::createCrossPath() const{
     QPainterPath path;
-    qreal w = boxSize * 0.18;
+    double w = boxSize * 0.18;
 
     path.moveTo(-w, -w);
     path.lineTo(w, w);
@@ -1618,15 +1311,15 @@ QPainterPath BoardWidget::createCrossPath() const{
 
 QPainterPath BoardWidget::createSquarePath() const{
     QPainterPath path;
-    qreal w = boxSize * 0.4;
+    double w = boxSize * 0.4;
     path.addRect(-w/2, -w/2, w, w);
     return path;
 }
 
 QPainterPath BoardWidget::createTrianglePath() const{
     QPainterPath path;
-    qreal w = boxSize * 0.22;
-    qreal h = boxSize * 0.18;
+    double w = boxSize * 0.22;
+    double h = boxSize * 0.18;
     QPolygonF polygon(3);
     polygon[0] = QPointF(0, -h);
     polygon[1] = QPointF(-w, h);
@@ -1638,34 +1331,8 @@ QPainterPath BoardWidget::createTrianglePath() const{
 
 /**
 */
-void BoardWidget::drawStone(QPainter& p, int bx, int by, go::color color, qreal opacity){
-    p.save();
-
-    p.translate(xlines[bx], ylines[by]);
-    if (color == go::black){
-        if (blackType >= 0){
-            p.setOpacity(opacity);
-            p.drawImage(-boxSize/2, -boxSize/2, black2);
-        }
-        else{
-            p.setPen(Qt::black);
-            p.setBrush(blackColor);
-            p.drawEllipse(-boxSize/2, -boxSize/2, boxSize-2, boxSize-2);
-        }
-    }
-    else{
-        if (whiteType >= 0){
-            p.setOpacity(opacity);
-            p.drawImage(-boxSize/2, -boxSize/2, white2);
-        }
-        else{
-            p.setPen(Qt::black);
-            p.setBrush(whiteColor);
-            p.drawEllipse(-boxSize/2, -boxSize/2, boxSize-2, boxSize-2);
-        }
-    }
-
-    p.restore();
+void BoardWidget::drawImage(QPainter& p, int x, int y, const QImage& image){
+    p.drawImage(xlines[x]-boxSize/2, ylines[y]-boxSize/2, image);
 }
 
 /**
@@ -1679,7 +1346,7 @@ void BoardWidget::eraseBackground(QPainter& p, int x, int y){
 /**
 */
 void BoardWidget::putStone(go::nodePtr node, int moveNumber){
-    color = node->isWhite() ? go::black : go::white;
+    isBlack = node->isWhite();
 
     if (node->isStone()){
         int boardX, boardY;
@@ -1819,7 +1486,50 @@ void BoardWidget::dead(int* tmp){
 
 /**
 */
-bool BoardWidget::moveNextStone(int sgfX, int sgfY){
+void BoardWidget::addStoneNodeCommand(int sgfX, int sgfY){
+    if (sgfX == -1 && sgfY == -1){
+        go::nodePtr node;
+        if (isBlack)
+            node = go::createBlackNode(currentNode);
+        else
+            node = go::createWhiteNode(currentNode);
+
+        addNodeCommand(currentNode, node);
+    }
+    else{
+        int boardX, boardY;
+        sgfToBoardCoordinate(sgfX, sgfY, boardX, boardY);
+        addStoneNodeCommand(sgfX, sgfY, boardX, boardY);
+    }
+}
+
+/**
+*/
+void BoardWidget::addStoneNodeCommand(int sgfX, int sgfY, int boardX, int boardY){
+    if (board[boardY][boardX].empty() == false)
+        return;
+
+    if (tutor(sgfX, sgfY))
+        return;
+
+    board[boardY][boardX].color = isBlack ? go::black : go::white;
+    if (isKill(boardX, boardY) == false && isDead(boardX, boardY) == true){
+        board[boardY][boardX].color = go::empty;
+        return;
+    }
+
+    go::nodePtr n;
+    if (isBlack)
+        n = go::createBlackNode(currentNode, sgfX, sgfY);
+    else
+        n = go::createWhiteNode(currentNode, sgfX, sgfY);
+
+    addNodeCommand(currentNode, n);
+}
+
+/**
+*/
+bool BoardWidget::tutor(int sgfX, int sgfY){
     go::nodeList::iterator iter = currentNode->childNodes.begin();
     while (iter != currentNode->childNodes.end()){
         if ((*iter)->getX() == sgfX && (*iter)->getY() == sgfY){
@@ -1834,7 +1544,7 @@ bool BoardWidget::moveNextStone(int sgfX, int sgfY){
 
 /**
 */
-void BoardWidget::addMark(int sgfX, int sgfY, int boardX, int boardY, bool ctrl){
+void BoardWidget::addMark(int sgfX, int sgfY, int boardX, int boardY){
     switch (editMode){
         case eAlternateMove:
             return;
@@ -1851,17 +1561,13 @@ void BoardWidget::addMark(int sgfX, int sgfY, int boardX, int boardY, bool ctrl)
             addEmpty(currentNode, go::point(sgfX, sgfY), go::point(boardX, boardY));
             break;
 
-        case eLabelMark:
-        case eManualMark:{
+        case eLabelMark:{
             go::point p(sgfX, sgfY);
             removeMark(currentNode->circles, p);
             removeMark(currentNode->crosses, p);
             removeMark(currentNode->squares, p);
             removeMark(currentNode->triangles, p);
-            if (editMode == eLabelMark && !ctrl)
-                addCharacter(currentNode->characters, p);
-            else
-                addManualEntry(currentNode->characters, p);
+            addCharacter(currentNode->characters, p);
             modifyNode(currentNode);
             break;
         }
@@ -1941,66 +1647,30 @@ void BoardWidget::addMark(go::markList& markList, const go::mark& mark){
 }
 
 void BoardWidget::addCharacter(go::markList& markList, const go::point& p){
-    go::markList::iterator iter1 = markList.begin();
-    while (iter1 != markList.end()){
-        if (iter1->p == p){
-            markList.erase(iter1);
-            return;
-        }
-        ++iter1;
-    }
-
-    QStringList marks;
-    foreach(go::mark m, markList)
-        marks.push_back(m.s);
-    qSort(marks);
-
-    int c = 'A';
-    if (labelType == 1)
-        c = 'a';
-    else if (labelType == 2)
-        c = 1;
-    else if (labelType == 3 || labelType == 4)
-        c = 0;
-
-    QString s;
-    while (true){
-        if (labelType == 2)
-            s.sprintf("%d", c);
-        else if (labelType == 3)
-            s = QString::fromUtf8(katakana[c]);
-        else if (labelType == 4)
-            s = QString::fromUtf8(kana_iroha[c]);
-        else
-            s = QChar(c);
-
-        QStringList::iterator iter2 = qFind(marks.begin(), marks.end(), s);
-        if (iter2 == marks.end())
-            break;
-        ++iter2;
-        ++c;
-
-        if ((labelType == 3 && c == katakana_size) || (labelType == 4 && c == kana_iroha_size))
-            break;
-    }
-    markList.push_back(go::mark(p, s));
-}
-
-void BoardWidget::addManualEntry(go::markList& markList, const go::point& p){
-    QString label = QInputDialog::getText(this, QString(), tr("Input Label"));
-    if (label.isEmpty())
-        return;
-
     go::markList::iterator iter = markList.begin();
     while (iter != markList.end()){
         if (iter->p == p){
             markList.erase(iter);
             return;
         }
+
         ++iter;
     }
 
-    markList.push_back( go::mark(p, label) );
+    char c = 'A';
+    iter = markList.begin();
+    while (iter != markList.end()){
+        QString s = QChar(c);
+        QString s2 = iter->s;
+        if (s != s2)
+            break;
+
+        ++iter;
+        ++c;
+    }
+
+    QString s = QChar(c);
+    markList.push_back(go::mark(p, s));
 }
 
 bool BoardWidget::removeMark(go::markList& markList, const go::point& p){
@@ -2195,9 +1865,9 @@ void BoardWidget::setCountTerritoryMode(bool countMode){
 
 void BoardWidget::whiteFirst(bool whiteFirst){
     if (whiteFirst)
-        goData.root->setColor(go::black);
+        goData.root->setBlack();
     else
-        goData.root->setColor(go::white);
+        goData.root->setWhite();
     createBoardBuffer();
 }
 
@@ -2326,20 +1996,234 @@ void BoardWidget::getCountTerritory(int& alive_b, int& alive_w, int& dead_b, int
     }
 }
 
-void BoardWidget::playWithComputer(PlayGame* game){
-    playGame = game;
-    if (playGame){
-        editMode = ePlayGame;
-        if (playGame->yourColor() == go::white && goData.root->handicap == 0)
-            playGame->wait();
+void BoardWidget::playWithComputer(QProcess* proc, bool isYourColorBlack){
+    this->isYourColorBlack = isYourColorBlack;
+    gtpProcess = proc;
+    if (gtpProcess){
+        editMode = eGtp;
+        gtpStatus = eGtpNone;
+        moveToClicked = false;
+        connect(gtpProcess, SIGNAL(readyRead()), this, SLOT(gtpReadReady()));
+
+        if (isYourColorBlack == false && goData.root->handicap == 0){
+            gtpWrite("genmove black\n");
+            gtpStatus = eGtpGen;
+        }
         else if (goData.root->handicap > 0){
             whiteFirst(true);
-            playGame->setHandicap();
-            if (playGame->yourColor() == go::black)
-                playGame->wait();
+            gtpHandicap();
+            if (isYourColorBlack){
+                gtpWrite("genmove white\n");
+                gtpStatus = eGtpGen;
+            }
         }
     }
     else{
         editMode = eAlternateMove;
     }
+}
+
+void BoardWidget::gtpWrite(const QString& buf){
+    if (gtpProcess == NULL)
+        return;
+
+    qDebug() << buf;
+    QByteArray ba = buf.toAscii();
+    gtpProcess->write( ba );
+}
+
+void BoardWidget::gtpPut(int x, int y){
+    if (gtpProcess == NULL)
+        return;
+
+    gtpX = x;
+    gtpY = y;
+
+    QString xy;
+    if (x == -1 && y == -1)
+        xy = "PASS";
+    else
+        xy =getXYString(x, y, false);
+
+    if (isBlack){
+        gtpWrite( QString("play black %1\n").arg(xy) );
+        gtpStatus = eGtpPut;
+    }
+    else{
+        gtpWrite( QString("play white %1\n").arg(xy) );
+        gtpStatus = eGtpPut;
+    }
+}
+
+void BoardWidget::gtpReadReady(){
+    if (gtpProcess == NULL)
+        return;
+
+    gtpBuf += gtpProcess->readAll();
+
+//qDebug() << gtpBuf.size();
+//for (int i=0; i<gtpBuf.size(); ++i)
+//    qDebug("%c(%d)", (gtpBuf[i].toAscii() != 10 ? gtpBuf[i].toAscii() : ' '), gtpBuf[i].toAscii());
+
+    if (gtpBuf.size() < 4 || gtpBuf.right(2) != "\n\n")
+        return;
+
+    QStringList resList = gtpBuf.split("\n\n");
+    resList.pop_back();
+    gtpBuf.clear();
+    qDebug() << resList;
+
+    QString buf = resList.last();
+    buf.remove(0, 2);
+
+    if (gtpStatus == eGtpPut){
+        if (buf == "illegal move"){
+            gtpStatus = eGtpNone;
+            return;
+        }
+        addStoneNodeCommand(gtpX, gtpY);
+
+        if (isGtpGameEnd()){
+            gtpGameEnd();
+            return;
+        }
+
+        if (isBlack)
+            gtpWrite("genmove black\n");
+        else
+            gtpWrite("genmove white\n");
+        gtpStatus = eGtpGen;
+    }
+    else if (gtpStatus == eGtpGen){
+        if (buf == "resign"){
+            QMessageBox::information(this, APPNAME, tr("Computer resign."));
+            gtpWrite("quit\n");
+            return;
+        }
+
+        int x, y;
+        if (gtpGetCoordinate(buf, x, y)){
+            addStoneNodeCommand(x, y);
+            gtpStatus = eGtpNone;
+
+            if (isGtpGameEnd()){
+                gtpGameEnd();
+                return;
+            }
+        }
+    }
+    else if (gtpStatus == eGtpGameEnd){
+        gtpWrite("quit\n");
+        emit gtpGameEnded();
+
+        QStringList deadStones = buf.split(QRegExp("[ \n]"));
+        foreach(QString stone, deadStones){
+            int sx, sy;  // sgfX, sgfY
+            if (gtpGetCoordinate(stone, sx, sy) == false)
+                continue;
+
+            int bx, by;  // boardX, boardY
+            sgfToBoardCoordinate(sx, sy, bx, by);
+
+            if (!board[by][bx].blackTerritory() && !board[by][bx].whiteTerritory())
+                addTerritory(bx, by);
+        }
+
+        setCountTerritoryMode(true);
+    }
+}
+
+bool BoardWidget::gtpGetCoordinate(const QString& buf, int& x, int& y){
+    if (buf.size() < 2)
+        return false;
+
+    if (buf == "PASS"){
+        x = y = -1;
+        return true;
+    }
+
+    x = buf[0].toAscii() - 'A';
+    if (x > 7)
+        --x;
+    y = goData.root->ysize - buf.mid(1).toInt();
+
+    return x >= 0 && x < goData.root->xsize && y >= 0 && y < goData.root->ysize;
+}
+
+void BoardWidget::gtpHandicap(){
+    int xpos = goData.root->xsize > 9 ? 4 : 3;
+    int ypos = goData.root->ysize > 9 ? 4 : 3;
+
+    int x[9] = {
+        goData.root->xsize - xpos,
+        xpos - 1,
+        goData.root->xsize - xpos,
+        xpos - 1,
+        goData.root->xsize / 2,
+        goData.root->xsize - xpos,
+        xpos - 1,
+        goData.root->xsize / 2,
+        goData.root->xsize / 2,
+    };
+    int y[9] = {
+        ypos - 1,
+        goData.root->ysize - ypos,
+        goData.root->ysize - ypos,
+        ypos - 1,
+        goData.root->ysize / 2,
+        goData.root->ysize / 2,
+        goData.root->ysize / 2,
+        goData.root->ysize - ypos,
+        ypos - 1,
+    };
+
+    QList<int> xlist, ylist;
+    for (int i=0; i<qMin(4, goData.root->handicap); ++i){
+        xlist.push_back( x[i] );
+        ylist.push_back( y[i] );
+    }
+
+    if (goData.root->handicap > 5){
+        xlist.push_back( x[5] );
+        xlist.push_back( x[6] );
+        ylist.push_back( y[5] );
+        ylist.push_back( y[6] );
+    }
+    if (goData.root->handicap > 7){
+        xlist.push_back( x[7] );
+        xlist.push_back( x[8] );
+        ylist.push_back( y[7] );
+        ylist.push_back( y[8] );
+    }
+
+    if (goData.root->handicap > 4 && goData.root->handicap % 2 != 0){
+        xlist.push_back( x[4] );
+        ylist.push_back( y[4] );
+    }
+
+    QString msg;
+    for (int i=0; i<goData.root->handicap; ++i){
+        addStone(goData.root, go::point(xlist[i], ylist[i]), go::black);
+        msg += "play black ";
+        msg += getXYString(xlist[i], ylist[i], false);
+        msg += "\n";
+    }
+    gtpWrite(msg);
+}
+
+void BoardWidget::gtpGameEnd(){
+    gtpStatus = eGtpGameEnd;
+    gtpWrite("final_status_list dead\n");
+}
+
+bool BoardWidget::isGtpGameEnd() const{
+    if (gtpStatus != eGtpGameEnd){
+        if (nodeList.size() >= 2){
+            go::nodeList::const_iterator iter = nodeList.end();
+            const go::nodePtr& node1 = *--iter;
+            const go::nodePtr& node2 = *--iter;
+            return node1->isPass() && node2->isPass();
+        }
+    }
+    return false;
 }

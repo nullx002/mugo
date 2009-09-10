@@ -79,7 +79,7 @@ protected:
     bool readNodeValues(QString::iterator& first, QString::iterator last, QStringList& values);
     bool readNodeValue(QString::iterator& first, QString::iterator last, QString& value);
 
-    bool writeNode(QTextStream& stream, QString& s, const node& n);
+    bool writeNode(QTextStream& stream, const node& n);
 
     go::nodePtr get(const node& sgfNode, go::nodePtr outNode) const;
     bool set(sgf::node* node, const go::nodePtr node2);

@@ -17,10 +17,7 @@ SOURCES += main.cpp \
     setupdialog.cpp \
     command.cpp \
     playwithcomputerdialog.cpp \
-    exportasciidialog.cpp \
-    playgame.cpp \
-    gtp.cpp \
-    printoptiondialog.cpp
+    exportasciidialog.cpp
 HEADERS += mainwindow.h \
     boardwidget.h \
     godata.h \
@@ -32,18 +29,14 @@ HEADERS += mainwindow.h \
     setupdialog.h \
     command.h \
     playwithcomputerdialog.h \
-    exportasciidialog.h \
-    playgame.h \
-    gtp.h \
-    printoptiondialog.h
+    exportasciidialog.h
 FORMS += mainwindow.ui \
     boardwidget.ui \
     gameinformationdialog.ui \
     countterritorydialog.ui \
     setupdialog.ui \
     playwithcomputerdialog.ui \
-    exportasciidialog.ui \
-    printoptiondialog.ui
+    exportasciidialog.ui
 RESOURCES += resources.qrc
 win32:RC_FILE = mugo.rc
 mac:RC_FILE = pics/mugo.icns

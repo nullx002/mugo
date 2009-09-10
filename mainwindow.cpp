@@ -6,17 +6,14 @@
 #include <QtAlgorithms>
 #include <QClipboard>
 #include <QUrl>
-#include <QPrinter>
-#include <QPrintDialog>
 #include "appdef.h"
 #include "sgf.h"
 #include "ugf.h"
 #include "mainwindow.h"
-#include "setupdialog.h"
 #include "gameinformationdialog.h"
 #include "playwithcomputerdialog.h"
+#include "setupdialog.h"
 #include "exportasciidialog.h"
-#include "printoptiondialog.h"
 #include "ui_mainwindow.h"
 
 Q_DECLARE_METATYPE(go::nodePtr);
@@ -34,6 +31,99 @@ MainWindow::MainWindow(QWidget *parent)
     , playWithComputerMode(false)
 {
     ui->setupUi(this);
+
+    QSettings settings;
+
+    // default codec
+    codec = QTextCodec::codecForName("UTF-8");
+    ui->boardWidget->setShowMoveNumber(0);
+    setEditMode(ui->actionAlternateMove, BoardWidget::eAlternateMove);
+
+    // window settings
+    setGeometry(x(), y(), settings.value("width", WIN_W).toInt(), settings.value("height", WIN_H).toInt());
+
+    // for open URL
+    http = new QHttp(this);
+    connect( http, SIGNAL(readyRead(const QHttpResponseHeader&)), this, SLOT(openUrlReadReady(const QHttpResponseHeader&)) );
+    connect( http, SIGNAL(dataReadProgress(int, int)), this, SLOT(openUrlReadProgress(int, int)) );
+    connect( http, SIGNAL(done(bool)), this, SLOT(openUrlDone(bool)) );
+
+    // set sound files
+    ui->actionPlaySound->setChecked( settings.value("sound/play").toBool() );
+    ui->boardWidget->setPlaySound( ui->actionPlaySound->isChecked() );
+
+    // recent files
+    for (int i=0; i<MaxRecentFiles; ++i){
+        recentFileActs[i] = new QAction(this);
+        recentFileActs[i]->setVisible(false);
+        ui->menuRecentFiles->addAction(recentFileActs[i]);
+        connect( recentFileActs[i], SIGNAL(triggered()), this, SLOT(openRecentFile()) );
+    }
+    updateRecentFileActions();
+
+    // create undo/redo actions
+    // undo
+    undoGroup.setActiveStack(ui->boardWidget->getUndoStack());
+    ui->undoView->setGroup(&undoGroup);
+    ui->undoDockWidget->setVisible(false);
+
+    undoAction = undoGroup.createUndoAction(this);
+    redoAction = undoGroup.createRedoAction(this);
+    undoAction->setIcon( QIcon(":/res/undo.png") );
+    redoAction->setIcon( QIcon(":/res/redo.png") );
+    ui->menuEdit->insertAction(ui->menuEdit->actions().at(0), redoAction);
+    ui->menuEdit->insertAction(redoAction, undoAction);
+    ui->editToolBar->insertAction(ui->editToolBar->actions().at(0), redoAction);
+    ui->editToolBar->insertAction(redoAction, undoAction);
+    undoAction->setShortcut( QKeySequence::Undo );
+    redoAction->setShortcut( QKeySequence::Redo );
+
+    // create window menu
+    ui->menuWindow->addAction( ui->commentDockWidget->toggleViewAction() );
+    ui->menuWindow->addAction( ui->branchDockWidget->toggleViewAction() );
+    ui->menuWindow->addAction( ui->undoDockWidget->toggleViewAction() );
+
+    // language menu
+    QString language = settings.value("language").toString();
+    if (language.isEmpty())
+        ui->actionLanguageSystemDefault->setChecked(true);
+    else if (language == "en")
+        ui->actionLanguageEnglish->setChecked(true);
+    else if (language == "ja_JP")
+        ui->actionLanguageJapanese->setChecked(true);
+
+    // tool bar (option -> show move number)
+    ui->optionToolBar->insertAction( ui->optionToolBar->actions().at(0), ui->menuShowMoveNumber->menuAction() );
+    ui->menuShowMoveNumber->menuAction()->setCheckable(true);
+    ui->menuShowMoveNumber->menuAction()->setChecked( ui->actionShowMoveNumber->isChecked() );
+    connect( ui->menuShowMoveNumber->menuAction(), SIGNAL(triggered()), this, SLOT(on_actionShowMoveNumber_parent_triggered()) );
+
+    // tool bar (edit -> stone & marker)
+    ui->editToolBar->insertAction( ui->actionDeleteAfterCurrent, ui->menuStoneMarkers->menuAction() );
+    ui->editToolBar->insertSeparator( ui->actionDeleteAfterCurrent );
+    ui->menuStoneMarkers->menuAction()->setCheckable(true);
+    ui->menuStoneMarkers->menuAction()->setIcon(ui->actionAddLabel->icon());
+    connect( ui->menuStoneMarkers->menuAction(), SIGNAL(triggered()), this, SLOT(on_actionAddLabel_triggered()) );
+
+    // status bar
+#ifdef Q_WS_WIN
+    int style = QFrame::NoFrame|QFrame::Plain;
+#else
+    int style = QFrame::StyledPanel|QFrame::Plain;
+#endif
+    QLabel* messageLabel = new QLabel;
+    messageLabel->setFrameStyle(style);
+    ui->statusBar->addWidget(messageLabel, 1);
+
+    moveNumberLabel = new QLabel;
+    moveNumberLabel->setFrameStyle(style);
+    moveNumberLabel->setToolTip(tr("Move Number"));
+    ui->statusBar->addPermanentWidget(moveNumberLabel, 0);
+
+    capturedLabel = new QLabel;
+    capturedLabel->setFrameStyle(style);
+    capturedLabel->setToolTip(tr("Captured"));
+    ui->statusBar->addPermanentWidget(capturedLabel, 0);
 
     // action group
     QActionGroup* showMoveNumberGroup = new QActionGroup(this);
@@ -94,7 +184,6 @@ MainWindow::MainWindow(QWidget *parent)
     editGroup->addAction(ui->actionAddWhiteStone);
     editGroup->addAction(ui->actionAddEmpty);
     editGroup->addAction(ui->actionAddLabel);
-    editGroup->addAction(ui->actionAddLabelManually);
     editGroup->addAction(ui->actionAddCircle);
     editGroup->addAction(ui->actionAddCross);
     editGroup->addAction(ui->actionAddSquare);
@@ -106,158 +195,6 @@ MainWindow::MainWindow(QWidget *parent)
     languageGroup->addAction(ui->actionLanguageEnglish);
     languageGroup->addAction(ui->actionLanguageJapanese);
 
-
-    QSettings settings;
-
-    // default codec
-    codec = QTextCodec::codecForName("UTF-8");
-
-    // edit mode
-    setEditMode(ui->actionAlternateMove, BoardWidget::eAlternateMove);
-
-    // window settings
-    setGeometry(x(), y(), settings.value("width", WIN_W).toInt(), settings.value("height", WIN_H).toInt());
-
-    // for open URL
-    http = new QHttp(this);
-    connect( http, SIGNAL(readyRead(const QHttpResponseHeader&)), this, SLOT(openUrlReadReady(const QHttpResponseHeader&)) );
-    connect( http, SIGNAL(dataReadProgress(int, int)), this, SLOT(openUrlReadProgress(int, int)) );
-    connect( http, SIGNAL(done(bool)), this, SLOT(openUrlDone(bool)) );
-
-    // marker
-    ui->actionShowMoveNumber->setChecked( settings.value("marker/showMoveNumber", true).toBool() );
-    on_actionShowMoveNumber_triggered();
-
-    int moveNumber = settings.value("marker/moveNumber", 0).toInt();
-    if (moveNumber == -1){
-        ui->actionAllMoves->setChecked(true);
-        on_actionAllMoves_triggered();
-    }
-    else if (moveNumber == 0){
-        ui->actionNoMoveNumber->setChecked(true);
-        on_actionNoMoveNumber_triggered();
-    }
-    else if (moveNumber == 1){
-        ui->actionLast1Move->setChecked(true);
-        on_actionLast1Move_triggered();
-    }
-    else if (moveNumber == 2){
-        ui->actionLast2Moves->setChecked(true);
-        on_actionLast2Moves_triggered();
-    }
-    else if (moveNumber == 5){
-        ui->actionLast5Moves->setChecked(true);
-        on_actionLast5Moves_triggered();
-    }
-    else if (moveNumber == 10){
-        ui->actionLast10Moves->setChecked(true);
-        on_actionLast10Moves_triggered();
-    }
-    else if (moveNumber == 20){
-        ui->actionLast20Moves->setChecked(true);
-        on_actionLast20Moves_triggered();
-    }
-    else if (moveNumber == 50){
-        ui->actionLast50Moves->setChecked(true);
-        on_actionLast50Moves_triggered();
-    }
-
-    // set sound files
-    ui->actionPlaySound->setChecked( settings.value("sound/play").toBool() );
-    ui->boardWidget->setPlaySound( ui->actionPlaySound->isChecked() );
-
-    // recent files
-    for (int i=0; i<MaxRecentFiles; ++i){
-        recentFileActs[i] = new QAction(this);
-        recentFileActs[i]->setVisible(false);
-        ui->menuRecentFiles->addAction(recentFileActs[i]);
-        connect( recentFileActs[i], SIGNAL(triggered()), this, SLOT(openRecentFile()) );
-    }
-    updateRecentFileActions();
-
-    // create undo/redo actions
-    // undo
-    undoGroup.setActiveStack(ui->boardWidget->getUndoStack());
-    ui->undoView->setGroup(&undoGroup);
-    ui->undoDockWidget->setVisible(false);
-
-    undoAction = undoGroup.createUndoAction(this);
-    redoAction = undoGroup.createRedoAction(this);
-    undoAction->setIcon( QIcon(":/res/undo.png") );
-    redoAction->setIcon( QIcon(":/res/redo.png") );
-    ui->menuEdit->insertAction(ui->menuEdit->actions().at(0), redoAction);
-    ui->menuEdit->insertAction(redoAction, undoAction);
-    ui->editToolBar->insertAction(ui->editToolBar->actions().at(0), redoAction);
-    ui->editToolBar->insertAction(redoAction, undoAction);
-
-    // create window menu
-    ui->menuWindow->addAction( ui->commentDockWidget->toggleViewAction() );
-    ui->menuWindow->addAction( ui->branchDockWidget->toggleViewAction() );
-    ui->menuWindow->addAction( ui->undoDockWidget->toggleViewAction() );
-
-    // language menu
-    QString language = settings.value("language").toString();
-    if (language.isEmpty())
-        ui->actionLanguageSystemDefault->setChecked(true);
-    else if (language == "en")
-        ui->actionLanguageEnglish->setChecked(true);
-    else if (language == "ja_JP")
-        ui->actionLanguageJapanese->setChecked(true);
-
-    // tool bar (option -> show move number)
-    ui->optionToolBar->insertAction( ui->optionToolBar->actions().at(0), ui->menuShowMoveNumber->menuAction() );
-    ui->menuShowMoveNumber->menuAction()->setCheckable(true);
-    ui->menuShowMoveNumber->menuAction()->setChecked( ui->actionShowMoveNumber->isChecked() );
-    connect( ui->menuShowMoveNumber->menuAction(), SIGNAL(triggered()), this, SLOT(on_actionShowMoveNumber_parent_triggered()) );
-
-    // tool bar (edit -> stone & marker)
-    ui->editToolBar->insertAction( ui->actionDeleteAfterCurrent, ui->menuStoneMarkers->menuAction() );
-    ui->editToolBar->insertSeparator( ui->actionDeleteAfterCurrent );
-    ui->menuStoneMarkers->menuAction()->setCheckable(true);
-    ui->menuStoneMarkers->menuAction()->setIcon(ui->actionAddLabel->icon());
-    connect( ui->menuStoneMarkers->menuAction(), SIGNAL(triggered()), this, SLOT(on_actionAddLabel_triggered()) );
-
-    // status bar
-#ifdef Q_WS_WIN
-    int style = QFrame::NoFrame|QFrame::Plain;
-#else
-    int style = QFrame::StyledPanel|QFrame::Plain;
-#endif
-    QLabel* messageLabel = new QLabel;
-    messageLabel->setFrameStyle(style);
-    ui->statusBar->addWidget(messageLabel, 1);
-
-    moveNumberLabel = new QLabel;
-    moveNumberLabel->setFrameStyle(style);
-    moveNumberLabel->setToolTip(tr("Move Number"));
-    ui->statusBar->addPermanentWidget(moveNumberLabel, 0);
-
-    capturedLabel = new QLabel;
-    capturedLabel->setFrameStyle(style);
-    capturedLabel->setToolTip(tr("Captured"));
-    ui->statusBar->addPermanentWidget(capturedLabel, 0);
-
-    // keyboard shortcut
-    ui->actionNew->setShortcut( QKeySequence::New );
-    ui->actionOpen->setShortcut( QKeySequence::Open );
-    ui->actionSave->setShortcut( QKeySequence::Save );
-    ui->actionSaveAs->setShortcut( QKeySequence::SaveAs );
-    ui->actionPrint->setShortcut( QKeySequence::Print );
-    undoAction->setShortcut( QKeySequence::Undo );
-    redoAction->setShortcut( QKeySequence::Redo );
-    ui->actionPreviousMove->setShortcut( QKeySequence::Back );
-    ui->actionNextMove->setShortcut( QKeySequence::Forward );
-    ui->actionPreviousBranch->setShortcut( QKeySequence::PreviousChild );
-    ui->actionNextBranch->setShortcut( QKeySequence::NextChild );
-    ui->actionMoveFirst->setShortcut( QKeySequence::MoveToStartOfLine );
-    ui->actionMoveLast->setShortcut( QKeySequence::MoveToEndOfLine );
-//    ui->actionFastRewind->setShortcut( QKeySequence::MoveToPreviousPage );
-//    ui->actionFastForward->setShortcut( QKeySequence::MoveToNextPage );
-
-    // count territory dialog
-    countTerritoryDialog = new CountTerritoryDialog(this);
-    connect(countTerritoryDialog, SIGNAL(finished(int)), this, SLOT(scoreDialogClosed(int)));
-
     // command line
     if (qApp->argc() > 1)
         fileOpen(qApp->argv()[1]);
@@ -267,11 +204,11 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow(){
     QSettings settings;
-    settings.setValue("width", frameSize().width());
-    settings.setValue("height", frameSize().height());
+    settings.setValue("width", geometry().width());
+    settings.setValue("height", geometry().height());
 
-    delete countTerritoryDialog;
     delete ui;
+
     delete http;
 }
 
@@ -407,7 +344,6 @@ void MainWindow::on_actionSaveBoardAsPicture_triggered()
     QImage image(w, h, QImage::Format_RGB32);
     ui->boardWidget->paintBoard(&image);
     ui->boardWidget->paintStones(&image);
-    ui->boardWidget->paintTerritories(&image);
     image.save(fname, format[n]);
 
     // change image coordinate to display
@@ -421,25 +357,6 @@ void MainWindow::on_actionSaveBoardAsPicture_triggered()
 void MainWindow::on_actionExportAsciiToClipboard_triggered(){
     ExportAsciiDialog dlg(this, ui->boardWidget->getBuffer());
     dlg.exec();
-}
-
-/**
-* Slot
-* File -> Print
-*/
-void MainWindow::on_actionPrint_triggered(){
-    PrintOptionDialog optionDialog(this);
-    if (optionDialog.exec() != QDialog::Accepted)
-        return;
-
-//    QPrinter printer(QPrinter::HighResolution);
-    QPrinter printer(QPrinter::ScreenResolution);
-
-    QPrintDialog printDialog(&printer, this);
-    if (printDialog.exec() != QDialog::Accepted)
-        return;
-
-    ui->boardWidget->print(printer, optionDialog.printOption(), optionDialog.movesPerPage());
 }
 
 /**
@@ -488,7 +405,7 @@ void MainWindow::on_actionCopyCurrentSGFtoClipboard_triggered(){
     const go::nodeList& nodeList = ui->boardWidget->getCurrentNodeList();
     go::nodeList::const_iterator iter = nodeList.begin();
     while (iter != nodeList.end()){
-        if (s.size() > 60){
+        if (s.size() > 70){
             str.append(s);
             str.push_back('\n');
             s.clear();
@@ -617,14 +534,6 @@ void MainWindow::on_actionAddEmpty_triggered(){
 */
 void MainWindow::on_actionAddLabel_triggered(){
     setEditMode(ui->actionAddLabel, BoardWidget::eLabelMark);
-}
-
-/**
-* Slot
-* Edit -> Stone & Marker -> Add Label Manually
-*/
-void MainWindow::on_actionAddLabelManually_triggered(){
-    setEditMode(ui->actionAddLabelManually, BoardWidget::eManualMark);
 }
 
 /**
@@ -832,7 +741,7 @@ void MainWindow::on_actionWhiteFirst_triggered(){
 * Edit -> Rotate SGF Clockwise
 */
 void MainWindow::on_actionRotateSgfClockwise_triggered(){
-    ui->boardWidget->rotateSgfCommand();
+    ui->boardWidget->rotateSgf();
 }
 
 /**
@@ -840,7 +749,7 @@ void MainWindow::on_actionRotateSgfClockwise_triggered(){
 * Edit -> Flip SGF Holizontally
 */
 void MainWindow::on_actionFlipSgfHorizontally_triggered(){
-    ui->boardWidget->flipSgfHorizontallyCommand();
+    ui->boardWidget->flipSgfHorizontally();
 }
 
 /**
@@ -848,7 +757,7 @@ void MainWindow::on_actionFlipSgfHorizontally_triggered(){
 * Edit -> Flip SGF Vertically
 */
 void MainWindow::on_actionFlipSgfVertically_triggered(){
-    ui->boardWidget->flipSgfVerticallyCommand();
+    ui->boardWidget->flipSgfVertically();
 }
 
 /**
@@ -946,7 +855,7 @@ void MainWindow::setEncoding(){
 * Slot
 * Traverse -> First Move
 */
-void MainWindow::on_actionMoveFirst_triggered(){
+void MainWindow::on_actionFirstMove_triggered(){
     ui->boardWidget->setCurrentNode( ui->boardWidget->getData().root );
 }
 
@@ -959,7 +868,7 @@ void MainWindow::on_actionFastRewind_triggered(){
     if (node->parent == NULL)
         return;
 
-    for (int i=0; i<10; ++i){
+    for (int i=0; i<5; ++i){
         if (node->parent)
             node = node->parent;
         else
@@ -994,16 +903,16 @@ void MainWindow::on_actionNextMove_triggered(){
 * Traverse -> Fast Forward
 */
 void MainWindow::on_actionFastForward_triggered(){
-    const go::nodeList& nodeList = ui->boardWidget->getCurrentNodeList();
-    go::nodeList::const_iterator iter = qFind(nodeList.begin(), nodeList.end(), ui->boardWidget->getCurrentNode());
-
     go::nodePtr node = ui->boardWidget->getCurrentNode();
-    for (int i=0; i<10; ++i)
-        if (iter != nodeList.end() && ++iter != nodeList.end())
-            node = *iter;
+    if (node->childNodes.empty())
+        return;
+
+    for (int i=0; i<5; ++i){
+        if (!node->childNodes.empty())
+            node = node->childNodes.front();
         else
             break;
-
+    }
     ui->boardWidget->setCurrentNode(node);
 }
 
@@ -1110,9 +1019,6 @@ void MainWindow::on_actionJumpToClicked_triggered(){
 void MainWindow::on_actionShowMoveNumber_triggered(){
     ui->menuShowMoveNumber->menuAction()->setChecked( ui->actionShowMoveNumber->isChecked() );
     ui->boardWidget->setShowMoveNumber( ui->actionShowMoveNumber->isChecked() );
-
-    QSettings settings;
-    settings.setValue("marker/showMoveNumber", ui->actionShowMoveNumber->isChecked());
 }
 
 /**
@@ -1130,9 +1036,6 @@ void MainWindow::on_actionShowMoveNumber_parent_triggered(){
 */
 void MainWindow::on_actionNoMoveNumber_triggered(){
     ui->boardWidget->setShowMoveNumber(0);
-
-    QSettings settings;
-    settings.setValue("marker/moveNumber", 0);
 }
 
 /**
@@ -1141,9 +1044,6 @@ void MainWindow::on_actionNoMoveNumber_triggered(){
 */
 void MainWindow::on_actionLast1Move_triggered(){
     ui->boardWidget->setShowMoveNumber(1);
-
-    QSettings settings;
-    settings.setValue("marker/moveNumber", 1);
 }
 
 /**
@@ -1152,9 +1052,6 @@ void MainWindow::on_actionLast1Move_triggered(){
 */
 void MainWindow::on_actionLast2Moves_triggered(){
     ui->boardWidget->setShowMoveNumber(2);
-
-    QSettings settings;
-    settings.setValue("marker/moveNumber", 2);
 }
 
 /**
@@ -1163,9 +1060,6 @@ void MainWindow::on_actionLast2Moves_triggered(){
 */
 void MainWindow::on_actionLast5Moves_triggered(){
     ui->boardWidget->setShowMoveNumber(5);
-
-    QSettings settings;
-    settings.setValue("marker/moveNumber", 5);
 }
 
 /**
@@ -1174,9 +1068,6 @@ void MainWindow::on_actionLast5Moves_triggered(){
 */
 void MainWindow::on_actionLast10Moves_triggered(){
     ui->boardWidget->setShowMoveNumber(10);
-
-    QSettings settings;
-    settings.setValue("marker/moveNumber", 10);
 }
 
 /**
@@ -1185,9 +1076,6 @@ void MainWindow::on_actionLast10Moves_triggered(){
 */
 void MainWindow::on_actionLast20Moves_triggered(){
     ui->boardWidget->setShowMoveNumber(20);
-
-    QSettings settings;
-    settings.setValue("marker/moveNumber", 20);
 }
 
 /**
@@ -1196,9 +1084,6 @@ void MainWindow::on_actionLast20Moves_triggered(){
 */
 void MainWindow::on_actionLast50Moves_triggered(){
     ui->boardWidget->setShowMoveNumber(50);
-
-    QSettings settings;
-    settings.setValue("marker/moveNumber", 50);
 }
 
 /**
@@ -1207,9 +1092,6 @@ void MainWindow::on_actionLast50Moves_triggered(){
 */
 void MainWindow::on_actionAllMoves_triggered(){
     ui->boardWidget->setShowMoveNumber(-1);
-
-    QSettings settings;
-    settings.setValue("marker/moveNumber", -1);
 }
 
 /**
@@ -1218,9 +1100,6 @@ void MainWindow::on_actionAllMoves_triggered(){
 */
 void MainWindow::on_actionShowCoordinate_triggered(){
     ui->boardWidget->setShowCoordinates( ui->actionShowCoordinate->isChecked() );
-
-    QSettings settings;
-    settings.setValue("view/showCoordinate", ui->actionShowCoordinate->isChecked());
 }
 
 /**
@@ -1235,9 +1114,6 @@ void MainWindow::on_actionShowCoordinateI_triggered(){
     setTreeData();
 
     ui->boardWidget->setCurrentNode(currentNode);
-
-    QSettings settings;
-    settings.setValue("view/showCoordinateWithI", ui->actionShowCoordinateI->isChecked());
 }
 
 /**
@@ -1246,9 +1122,6 @@ void MainWindow::on_actionShowCoordinateI_triggered(){
 */
 void MainWindow::on_actionShowMarker_triggered(){
     ui->boardWidget->setShowMarker( ui->actionShowMarker->isChecked() );
-
-    QSettings settings;
-    settings.setValue("marker/showMarker", ui->actionShowMarker->isChecked());
 }
 
 /**
@@ -1257,9 +1130,6 @@ void MainWindow::on_actionShowMarker_triggered(){
 */
 void MainWindow::on_actionShowBranchMoves_triggered(){
     ui->boardWidget->setShowBranchMoves( ui->actionShowBranchMoves->isChecked() );
-
-    QSettings settings;
-    settings.setValue("marker/showBranchMoves", ui->actionShowMarker->isChecked());
 }
 
 /**
@@ -1367,12 +1237,15 @@ void MainWindow::on_actionOptionToolbar_triggered()
 void MainWindow::on_actionCountTerritory_triggered(){
     if (ui->actionCountTerritory->isChecked()){
         setCountTerritoryMode();
-        countTerritoryDialog->setInformationNode( ui->boardWidget->getData().root.get() );
+        countTerritoryDialog = new CountTerritoryDialog(this);
+        countTerritoryDialog->disconnect();
+        connect(countTerritoryDialog, SIGNAL(dialogClosed()), this, SLOT(scoreDialogClosed()));
         countTerritoryDialog->show();
     }
     else{
+        delete countTerritoryDialog;
+        countTerritoryDialog = NULL;
         setCountTerritoryMode(false);
-        setCaption();
     }
 
     ui->boardWidget->setCountTerritoryMode(ui->actionCountTerritory->isChecked());
@@ -1402,15 +1275,13 @@ void MainWindow::on_actionPlayWithGnugo_triggered(){
         qDebug() << param;
         gtpProcess.start(param, QIODevice::ReadWrite|QIODevice::Text);
         if (gtpProcess.state() == QProcess::NotRunning){
-            ui->boardWidget->playWithComputer(NULL);
+            ui->boardWidget->playWithComputer(NULL, false);
             QMessageBox::critical(this, APPNAME, tr("Can not launch computer go."));
             return;
         }
 
-        playGame = new gtp(ui->boardWidget, dlg.isBlack ? go::black : go::white, gtpProcess);
-        connect( playGame, SIGNAL(gameEnded()), this, SLOT(playGameEnded()) );
         setPlayWithComputerMode(true);
-        ui->boardWidget->playWithComputer(playGame);
+        ui->boardWidget->playWithComputer(&gtpProcess, dlg.isBlack);
     }
     else{
         QMessageBox::StandardButton ret = QMessageBox::warning(this, APPNAME,
@@ -1422,7 +1293,7 @@ void MainWindow::on_actionPlayWithGnugo_triggered(){
             return;
         }
 
-        endGame();
+        EndGtpGame();
     }
 }
 
@@ -1653,25 +1524,60 @@ void MainWindow::on_branchWidget_currentItemChanged(QTreeWidgetItem* current, QT
 * comment dock widget was showed or hid.
 */
 void MainWindow::on_boardWidget_updateTerritory(int alive_b, int alive_w, int dead_b, int dead_w, int capturedBlack, int capturedWhite, int blackTerritory, int whiteTerritory, double komi){
-    countTerritoryDialog->setScore(alive_b, alive_w, dead_b, dead_w, capturedBlack, capturedWhite, blackTerritory, whiteTerritory, komi);
-/*
+    double bscorej = blackTerritory + dead_w + capturedWhite;
+    double wscorej = whiteTerritory + dead_b + capturedBlack + komi;
+
+    // japanese rule
+    QString bj( tr("Black: %1 = %2(territories) + %3(captured)").arg(bscorej).arg(blackTerritory).arg(dead_w + capturedWhite) );
+    QString wj( tr("White: %1 = %2(territories) + %3(captured) + %4(komi)").arg(wscorej).arg(whiteTerritory).arg(dead_b + capturedBlack).arg(komi) );
+
+    QString result;
+    if (wscorej > bscorej)
+        result = QString(tr("W+%1")).arg(wscorej - bscorej);
+    else if (bscorej > wscorej)
+        result = QString(tr("B+%1")).arg(bscorej - wscorej);
+    else
+        result = tr("Draw");
+
+    QString s = tr("Japanese Rule") + ":\n" + wj + "\n" + bj + "\n" + result + "\n\n";
+
+
+    // chinese rule
+    double half = (blackTerritory + alive_b + whiteTerritory + alive_w) / 2.0;
+    double bscorec = blackTerritory + alive_b - komi / 2.0;
+    double wscorec = whiteTerritory + alive_w + komi / 2.0;
+
+    QString bc, wc;
+    if (komi > 0){
+        bc = tr("Black: %1 = %2(point) - %3(komi) / 2").arg(bscorec).arg(blackTerritory + alive_b).arg(komi);
+        wc = tr("White: %1 = %2(point) + %3(komi) / 2").arg(wscorec).arg(whiteTerritory + alive_w).arg(komi);
+    }
+    else{
+        bc = tr("Black: %1 = %2(point) + %3(komi) / 2").arg(bscorec).arg(blackTerritory + alive_b).arg(komi);
+        wc = tr("White: %1 = %2(point) - %3(komi) / 2").arg(wscorec).arg(whiteTerritory + alive_w).arg(komi);
+    }
+
+    if (wscorec > bscorec)
+        result = QString(tr("W+%1")).arg(wscorec - half);
+    else if (bscorec > wscorec)
+        result = QString(tr("B+%1")).arg(bscorec - half);
+    else
+        result = tr("Draw");
+
+    s += tr("Chinese Rule") + ":\n" + wc + "\n" + bc + "\n" + result;
+
     countTerritoryDialog->setScoreText(s);
-*/
 }
 
 /**
 * Slot
 */
-void MainWindow::playGameEnded(){
-    bool resign = playGame->isResign();
-
+void MainWindow::on_boardWidget_gtpGameEnded(){
     ui->actionPlayWithGnugo->setChecked(false);
-    endGame();
+    EndGtpGame();
 
-    if( !resign ){
-        ui->actionCountTerritory->setChecked(true);
-        on_actionCountTerritory_triggered();
-    }
+    ui->actionCountTerritory->setChecked(true);
+    on_actionCountTerritory_triggered();
 }
 
 /**
@@ -1687,7 +1593,7 @@ void MainWindow::on_commentWidget_textChanged(){
 * Slot
 * score dialog was closed
 */
-void MainWindow::scoreDialogClosed(int){
+void MainWindow::scoreDialogClosed(){
     ui->actionCountTerritory->setChecked(false);
     on_actionCountTerritory_triggered();
 }
@@ -2159,8 +2065,6 @@ void MainWindow::setEditMode(QAction* action, BoardWidget::eEditMode editMode){
             connect( ui->menuStoneMarkers->menuAction(), SIGNAL(triggered()), this, SLOT(on_actionAddEmpty_triggered()) );
         else if (action == ui->actionAddLabel)
             connect( ui->menuStoneMarkers->menuAction(), SIGNAL(triggered()), this, SLOT(on_actionAddLabel_triggered()) );
-        else if (action == ui->actionAddLabelManually)
-            connect( ui->menuStoneMarkers->menuAction(), SIGNAL(triggered()), this, SLOT(on_actionAddLabelManually_triggered()) );
         else if (action == ui->actionAddCircle)
             connect( ui->menuStoneMarkers->menuAction(), SIGNAL(triggered()), this, SLOT(on_actionAddCircle_triggered()) );
         else if (action == ui->actionAddCross)
@@ -2342,7 +2246,7 @@ void MainWindow::setCountTerritoryMode(bool on){
         ui->actionEncodingEucJP,
         ui->actionEncodingKorean,
 
-        ui->actionMoveFirst,
+        ui->actionFirstMove,
         ui->actionFastRewind,
         ui->actionPreviousMove,
         ui->actionNextMove,
@@ -2504,7 +2408,7 @@ void MainWindow::setPlayWithComputerMode(bool on){
         ui->actionEncodingEucJP,
         ui->actionEncodingKorean,
 
-        ui->actionMoveFirst,
+        ui->actionFirstMove,
         ui->actionFastRewind,
         ui->actionPreviousMove,
         ui->actionNextMove,
@@ -2584,10 +2488,9 @@ void MainWindow::setPlayWithComputerMode(bool on){
     ui->undoView->setEnabled( !on );
 }
 
-void MainWindow::endGame(){
+void MainWindow::EndGtpGame(){
     gtpProcess.close();
-    delete playGame;
-    ui->boardWidget->playWithComputer(NULL);
+    ui->boardWidget->playWithComputer(NULL, false);
 
     setPlayWithComputerMode(false);
 }

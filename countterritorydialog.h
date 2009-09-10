@@ -3,7 +3,6 @@
 
 #include <QtGui/QDialog>
 #include <QDebug>
-#include "godata.h"
 
 namespace Ui {
     class CountTerritoryDialog;
@@ -15,18 +14,17 @@ public:
     CountTerritoryDialog(QWidget *parent = 0);
     ~CountTerritoryDialog();
 
-    void setInformationNode(go::informationNode* infoNode){ informationNode = infoNode; }
-    void setScore(int alive_b, int alive_w, int dead_b, int dead_w, int capturedBlack, int capturedWhite, int blackTerritory, int whiteTerritory, double komi);
+    void setScoreText(const QString& s);
+
+signals:
+    void dialogClosed();
 
 protected:
     virtual void changeEvent(QEvent *e);
-    virtual void accept();
+    virtual void done( int r );
 
 private:
     Ui::CountTerritoryDialog *m_ui;
-    go::informationNode* informationNode;
-    QString result_j;
-    QString result_c;
 };
 
 #endif // COUNTTERRITORYDIALOG_H

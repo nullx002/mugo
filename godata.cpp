@@ -14,7 +14,7 @@ const informationNode* infomation(const node* node){
 
 nodePtr createBlackNode(nodePtr parent){
     nodePtr newNode( new node(parent) );
-    newNode->setColor(go::black);
+    newNode->setBlack();
     return newNode;
 }
 
@@ -27,7 +27,7 @@ nodePtr createBlackNode(nodePtr parent, int x, int y){
 
 nodePtr createWhiteNode(nodePtr parent){
     nodePtr newNode( new node(parent) );
-    newNode->setColor(go::white);
+    newNode->setWhite();
     return newNode;
 }
 
@@ -40,7 +40,7 @@ nodePtr createWhiteNode(nodePtr parent, int x, int y){
 
 
 
-node::node(nodePtr parent_) : parent(parent_), annotation(eNoAnnotation), moveAnnotation(eNoAnnotation), nodeAnnotation(eNoAnnotation), color(go::empty), moveNumber(-1){
+node::node(nodePtr parent_) : parent(parent_), annotation(eNoAnnotation), moveAnnotation(eNoAnnotation), nodeAnnotation(eNoAnnotation), black(false), white(false), moveNumber(-1){
 }
 
 void node::clear(){
@@ -114,7 +114,7 @@ void informationNode::initialize(){
     ysize = 19;
     komi = 6.5;
     handicap = 0;
-    color = go::white;
+    white = true;
 }
 
 QString informationNode::nodeName() const{

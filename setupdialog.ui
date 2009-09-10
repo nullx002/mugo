@@ -27,26 +27,6 @@
          <height>16777215</height>
         </size>
        </property>
-       <item>
-        <property name="text">
-         <string>Board</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Stones</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Markers</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Sound</string>
-        </property>
-       </item>
       </widget>
      </item>
      <item>
@@ -79,23 +59,7 @@
              </widget>
             </item>
             <item row="0" column="1">
-             <widget class="QComboBox" name="boardTypeComboBox">
-              <item>
-               <property name="text">
-                <string>Default Image</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>Select File</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>Fill Color</string>
-               </property>
-              </item>
-             </widget>
+             <widget class="QComboBox" name="boardTypeComboBox"/>
             </item>
             <item row="1" column="0">
              <widget class="QLabel" name="boardColorLabel">
@@ -218,23 +182,7 @@
              </widget>
             </item>
             <item row="0" column="1">
-             <widget class="QComboBox" name="whiteTypeComboBox">
-              <item>
-               <property name="text">
-                <string>Default Image</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>Select File</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>Fill Color</string>
-               </property>
-              </item>
-             </widget>
+             <widget class="QComboBox" name="whiteTypeComboBox"/>
             </item>
             <item row="1" column="0">
              <widget class="QLabel" name="whiteColorLabel">
@@ -297,23 +245,7 @@
              </widget>
             </item>
             <item row="0" column="1">
-             <widget class="QComboBox" name="blackTypeComboBox">
-              <item>
-               <property name="text">
-                <string>Default Image</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>Select File</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>Fill Color</string>
-               </property>
-              </item>
-             </widget>
+             <widget class="QComboBox" name="blackTypeComboBox"/>
             </item>
             <item row="1" column="0">
              <widget class="QLabel" name="blackColorLabel">
@@ -390,33 +322,7 @@
              </widget>
             </item>
             <item row="0" column="1">
-             <widget class="QComboBox" name="focusTypeComboBox">
-              <item>
-               <property name="text">
-                <string>Focus Triangle</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>Circle</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>Cross</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>Square</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>Triangle</string>
-               </property>
-              </item>
-             </widget>
+             <widget class="QComboBox" name="focusTypeComboBox"/>
             </item>
             <item row="1" column="0">
              <widget class="QLabel" name="focusWhiteColorLabel">
@@ -469,42 +375,6 @@
               </property>
              </widget>
             </item>
-            <item row="4" column="0">
-             <widget class="QLabel" name="labelTypeLabel">
-              <property name="text">
-               <string>Label Type</string>
-              </property>
-             </widget>
-            </item>
-            <item row="4" column="1">
-             <widget class="QComboBox" name="labelTypeComboBox">
-              <item>
-               <property name="text">
-                <string>A,B,C...</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>a,b,c...</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>1,2,3...</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>ア,イ,ウ...</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>イ,ロ,ハ...</string>
-               </property>
-              </item>
-             </widget>
-            </item>
            </layout>
           </widget>
          </item>
@@ -539,18 +409,7 @@
              </widget>
             </item>
             <item row="0" column="1">
-             <widget class="QComboBox" name="soundTypeComboBox">
-              <item>
-               <property name="text">
-                <string>Default Sound</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>Select File</string>
-               </property>
-              </item>
-             </widget>
+             <widget class="QComboBox" name="soundTypeComboBox"/>
             </item>
             <item row="1" column="0">
              <widget class="QLabel" name="soundPathLabel">
