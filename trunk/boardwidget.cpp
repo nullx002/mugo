@@ -8,6 +8,7 @@
 #include <QSound>
 #include <QInputDialog>
 #include <QList>
+#include <QDateTime>
 #include <math.h>
 #include "appdef.h"
 #include "boardwidget.h"
@@ -451,9 +452,8 @@ void BoardWidget::print(QPrinter& printer, int option){
     width_  = printer.width();
     height_ = printer.height();
 
-    QString header = QString("%1 %2 (W) vs %3 %4 (B)").arg(goData.root->whitePlayer).arg(goData.root->whiteRank).arg(goData.root->blackPlayer).arg(goData.root->blackRank);
-    p.drawText(0, 10, printer.width(), 30, Qt::AlignCenter, header);
-
+    printHeader(printer, p);
+    printFooter(printer, p);
     paintBoard(p, 15.0);
     print( printer, p, option, 20, buf);
 
@@ -470,22 +470,32 @@ void BoardWidget::print(QPrinter& printer, int option){
 }
 
 void BoardWidget::print(QPrinter& printer, QPainter& p, int option, int movePerPage, BoardBuffer& buf){
+    p.save();
+
     int moveNumber = 0;
     int moveNumberInPage = 0;
+    QString rangai;
 
     if (option < 3){
         foreach (go::nodePtr node, nodeList){
-            print(printer, p, node, moveNumber, moveNumberInPage, buf);
+            print(printer, p, node, moveNumber, moveNumberInPage, buf, rangai);
 
             if (option == 0 && node == currentNode)
                 break;
-            else if (option == 2 && moveNumberInPage == movePerPage)
+            else if (option == 2 && moveNumberInPage == movePerPage){
+                printRangai(printer, p, rangai);
                 newPage(printer, p, moveNumberInPage, buf);
+            }
         }
     }
+    printRangai(printer, p, rangai);
+
+    p.restore();
 }
 
-void BoardWidget::print(QPrinter& printer, QPainter& p, go::nodePtr node, int& moveNumber, int& moveNumberInPage, BoardBuffer& buf){
+void BoardWidget::print(QPrinter& printer, QPainter& p, go::nodePtr node, int& moveNumber, int& moveNumberInPage, BoardBuffer& buf, QString& rangai){
+    p.save();
+
     QFont font( p.font() );
     if (node->isStone() && !node->isPass()){
         ++moveNumber;
@@ -516,12 +526,71 @@ void BoardWidget::print(QPrinter& printer, QPainter& p, go::nodePtr node, int& m
             p.setPen( node->isBlack() ? Qt::white : Qt::black );
             p.drawText(xlines[bx] - boxSize, ylines[by] - boxSize, boxSize * 2, boxSize * 2, Qt::AlignCenter, s);
         }
+        else{
+            QString s = QString( tr("%1(%2)") ).arg(moveNumber).arg( getXYString(bx, by) );
+            if (!rangai.isEmpty())
+                rangai.append(", ");
+            rangai.append(s);
+        }
     }
+
+    p.restore();
+}
+
+void BoardWidget::printHeader(QPrinter& printer, QPainter& p){
+    p.save();
+
+    QString header = QString("%5 %1 %2 (W) vs %3 %4 (B)").arg(goData.root->whitePlayer).arg(goData.root->whiteRank).arg(goData.root->blackPlayer).arg(goData.root->blackRank).arg(goData.root->gameName);
+
+    QFont f(p.font());
+    f.setPointSizeF(8.5);
+    p.setFont(f);
+
+    QRectF r = p.boundingRect(0, 0, printer.width(), 0, Qt::AlignCenter, header);
+    p.drawText( QRectF(0.0, 0.0, printer.width(), r.height()), Qt::AlignHCenter, header);
+
+    p.setPen( QPen(Qt::gray, 2) );
+    p.drawLine( QPointF(0.0, r.height()+5.0), QPointF(printer.width(), r.height()+5.0) );
+
+    p.restore();
+}
+
+void BoardWidget::printFooter(QPrinter& printer, QPainter& p){
+    p.save();
+
+    QDateTime time = QDateTime::currentDateTime();
+    QString footer = time.toString(Qt::DefaultLocaleLongDate);
+
+    QFont f(p.font());
+    f.setPointSizeF(8.5);
+    p.setFont(f);
+
+    QRectF r = p.boundingRect(0, 0, printer.width(), 0, Qt::AlignRight, footer);
+    p.drawText( QRectF(0.0, printer.height()-r.height(), printer.width(), r.height()), Qt::AlignRight, footer);
+
+    p.setPen( QPen(Qt::gray, 2) );
+    p.drawLine( QPointF(0.0, printer.height()-r.height()-5.0), QPointF(printer.width(), printer.height()-r.height()-5.0) );
+
+    p.restore();
+}
+
+void BoardWidget::printRangai(QPrinter& printer, QPainter& p, QString& rangai){
+    p.save();
+
+    p.drawText(0, boardRect.bottom() + 10, printer.width(), printer.height(), Qt::TextWordWrap, rangai);
+
+    p.restore();
+
+    rangai.clear();
 }
 
 void BoardWidget::newPage(QPrinter& printer, QPainter& p, int& moveNumberInPage, BoardBuffer& buf){
     printer.newPage();
+
+    printHeader(printer, p);
+    printFooter(printer, p);
     paintBoard(p, 15.0);
+
     moveNumberInPage = 0;
     buf = board;
     for (int y=0; y<board.size(); ++y){
