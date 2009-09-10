@@ -47,7 +47,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QSpinBox" name="spinBox">
+         <widget class="QSpinBox" name="activeBranchMovesPerPage">
           <property name="maximumSize">
            <size>
             <width>50</width>
@@ -87,7 +87,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QSpinBox" name="spinBox_2">
+         <widget class="QSpinBox" name="allBranchMovesPerPage">
           <property name="enabled">
            <bool>false</bool>
           </property>
