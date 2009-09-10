@@ -17,22 +17,32 @@
         <translation type="unfinished">碁盤</translation>
     </message>
     <message>
-        <location filename="boardwidget.cpp" line="679"/>
+        <location filename="boardwidget.cpp" line="535"/>
+        <source>%1(%2)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="boardwidget.cpp" line="594"/>
+        <source>Figure %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="boardwidget.cpp" line="813"/>
         <source>Rotate SGF</source>
         <translation type="unfinished">回転</translation>
     </message>
     <message>
-        <location filename="boardwidget.cpp" line="687"/>
+        <location filename="boardwidget.cpp" line="821"/>
         <source>Flip SGF Horizontally</source>
         <translation type="unfinished">左右に反転</translation>
     </message>
     <message>
-        <location filename="boardwidget.cpp" line="695"/>
+        <location filename="boardwidget.cpp" line="829"/>
         <source>Flip SGF Vertically</source>
         <translation type="unfinished">上下に反転</translation>
     </message>
     <message>
-        <location filename="boardwidget.cpp" line="1851"/>
+        <location filename="boardwidget.cpp" line="1990"/>
         <source>Input Label</source>
         <translation type="unfinished"></translation>
     </message>
@@ -308,77 +318,77 @@ mugo automatically counts territories.</oldsource>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="786"/>
-        <location filename="mainwindow.cpp" line="1090"/>
+        <location filename="mainwindow.cpp" line="785"/>
+        <location filename="mainwindow.cpp" line="1089"/>
         <source>Input move number</source>
         <translation type="unfinished">着手番号を入力してください</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="813"/>
+        <location filename="mainwindow.cpp" line="812"/>
         <source>Input node name</source>
         <translation type="unfinished">ノード名を入力してください</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1407"/>
+        <location filename="mainwindow.cpp" line="1406"/>
         <source>Can not launch computer go.</source>
         <translation type="unfinished">プログラムを起動できません。</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1418"/>
+        <location filename="mainwindow.cpp" line="1417"/>
         <source>Playing with computer can not be resumed.
 Are you sure you want to stop playing with computer?</source>
         <translation>コンピューターとの対戦を中断すると再開できませんが、終了してもよろしいですか？</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1496"/>
+        <location filename="mainwindow.cpp" line="1495"/>
         <source>Input new board size. board size must be between 2-52.</source>
         <translation type="unfinished">新しい盤のサイズを入力してください。盤のサイズは２～５２の範囲でなくてはいけません。</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1629"/>
+        <location filename="mainwindow.cpp" line="1628"/>
         <source>Dead: Black %1 White %2</source>
         <oldsource>Dead: B %1 W %2</oldsource>
         <translation type="unfinished">アゲハマ：黒 %1 白 %2</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1633"/>
+        <location filename="mainwindow.cpp" line="1632"/>
         <source>LastMove: %1(%2)</source>
         <translation type="unfinished">最終着手：%1(%2)</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1754"/>
+        <location filename="mainwindow.cpp" line="1753"/>
         <source>All Go Format(*.sgf *.ugf *.ugi);;sgf(*.sgf);;ugf(*.ugf *.ugi);;All Files(*.*)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1822"/>
+        <location filename="mainwindow.cpp" line="1821"/>
         <source>sgf(*.sgf)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1871"/>
+        <location filename="mainwindow.cpp" line="1870"/>
         <source>The document has been modified.
 Do you want to save your changes?</source>
         <translation>ドキュメントが変更されています。
 変更内容を保存しますか？</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1933"/>
+        <location filename="mainwindow.cpp" line="1932"/>
         <source>Download failed: %1.</source>
         <translation type="unfinished">ダウンロードに失敗しました： %1.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="2125"/>
+        <location filename="mainwindow.cpp" line="2124"/>
         <source>Pass</source>
         <translation type="unfinished">パス</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="2135"/>
+        <location filename="mainwindow.cpp" line="2134"/>
         <source>Other</source>
         <translation type="unfinished">その他</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="2597"/>
+        <location filename="mainwindow.cpp" line="2596"/>
         <source>Changing the language requires that application be restarted.</source>
         <translation type="unfinished">言語の変更は次回起動時から有効になります。</translation>
     </message>
@@ -1247,38 +1257,36 @@ Do you want to save your changes?</source>
     <name>PrintOptionDialog</name>
     <message>
         <location filename="printoptiondialog.ui" line="14"/>
-        <source>Dialog</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="printoptiondialog.ui" line="20"/>
-        <source>Print Option</source>
-        <translation type="unfinished"></translation>
+        <source>Print Options</source>
+        <oldsource>Print Option</oldsource>
+        <translation type="unfinished">印刷オプション</translation>
     </message>
     <message>
         <location filename="printoptiondialog.ui" line="26"/>
-        <source>Print active board.</source>
-        <translation type="unfinished"></translation>
+        <source>Print current board.</source>
+        <oldsource>Print active board.</oldsource>
+        <translation type="unfinished">現在の盤面のまま印刷する。</translation>
     </message>
     <message>
         <location filename="printoptiondialog.ui" line="36"/>
         <source>Print active branch.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">現在の分岐図を１ページに印刷する。</translation>
     </message>
     <message>
-        <location filename="printoptiondialog.ui" line="43"/>
-        <source>Print active branch, N moves per page.</source>
-        <translation type="unfinished"></translation>
+        <location filename="printoptiondialog.ui" line="45"/>
+        <source>Print active branch, Number of moves per page.</source>
+        <translation type="unfinished">現在の分岐図をN手ごとに印刷する。</translation>
     </message>
     <message>
-        <location filename="printoptiondialog.ui" line="53"/>
+        <location filename="printoptiondialog.ui" line="85"/>
+        <source>Print all branches, Number of moves per page.</source>
+        <translation type="unfinished">すべての分岐図をN手ごとに印刷する。</translation>
+    </message>
+    <message>
+        <location filename="printoptiondialog.ui" line="73"/>
         <source>Print all branches.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="printoptiondialog.ui" line="63"/>
-        <source>Print all branches, N moves per page.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">すべての分岐図を印刷する。</translation>
     </message>
 </context>
 <context>
@@ -1358,12 +1366,12 @@ Do you want to save your changes?</source>
         <source>1,2,3...</source>
         <translation type="unfinished"></translation>
     </message>
-    <message utf8="true">
+    <message>
         <location filename="setupdialog.ui" line="498"/>
         <source>ア,イ,ウ...</source>
         <translation type="unfinished"></translation>
     </message>
-    <message utf8="true">
+    <message>
         <location filename="setupdialog.ui" line="503"/>
         <source>イ,ロ,ハ...</source>
         <translation type="unfinished"></translation>
