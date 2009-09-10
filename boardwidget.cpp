@@ -953,7 +953,9 @@ void BoardWidget::rotateSgf(go::nodePtr node, QUndoCommand* command){
         ++iter;
     }
 
-    rotateStoneSgf(node, node->stones, command);
+    rotateStoneSgf(node, node->emptyStones, command);
+    rotateStoneSgf(node, node->blackStones, command);
+    rotateStoneSgf(node, node->whiteStones, command);
     rotateMarkSgf(node, node->crosses, command);
     rotateMarkSgf(node, node->squares, command);
     rotateMarkSgf(node, node->triangles, command);
@@ -1003,7 +1005,9 @@ void BoardWidget::flipSgf(go::nodePtr node, int xsize, int ysize, QUndoCommand* 
         ++iter;
     }
 
-    flipStoneSgf(node, node->stones, xsize, ysize, command);
+    flipStoneSgf(node, node->emptyStones, xsize, ysize, command);
+    flipStoneSgf(node, node->blackStones, xsize, ysize, command);
+    flipStoneSgf(node, node->whiteStones, xsize, ysize, command);
     flipMarkSgf(node, node->crosses, xsize, ysize, command);
     flipMarkSgf(node, node->squares, xsize, ysize, command);
     flipMarkSgf(node, node->triangles, xsize, ysize, command);
@@ -1693,8 +1697,10 @@ void BoardWidget::putStone(go::nodePtr node, int moveNumber){
         }
     }
 
-    go::stoneList::iterator iter = node->stones.begin();
-    while (iter != node->stones.end()){
+    go::stoneList stones;
+    stones << node->emptyStones << node->blackStones << node->whiteStones;
+    go::stoneList::iterator iter = stones.begin();
+    while (iter != stones.end()){
         int boardX, boardY;
         sgfToBoardCoordinate(iter->p.x, iter->p.y, boardX, boardY);
         if (boardX >= 0 && boardX < xsize && boardY >= 0 && boardY < ysize){
@@ -1917,7 +1923,9 @@ void BoardWidget::addMark(int sgfX, int sgfY, int boardX, int boardY, bool ctrl)
             removeMark(currentNode->squares, p);
             removeMark(currentNode->triangles, p);
             removeMark(currentNode->characters, p);
-            removeStone(currentNode->stones, p, go::point(boardX, boardY));
+            removeStone(currentNode->emptyStones, p, go::point(boardX, boardY));
+            removeStone(currentNode->blackStones, p, go::point(boardX, boardY));
+            removeStone(currentNode->whiteStones, p, go::point(boardX, boardY));
             modifyNode(currentNode);
             break;
         }
@@ -2022,7 +2030,7 @@ void BoardWidget::addStone(go::nodePtr node, const go::point& sgfPoint, go::colo
 }
 
 void BoardWidget::addStone(go::nodePtr node, const go::point& sp, const go::point& bp, go::color c){
-    if (removeStone(node->stones, sp, bp)){
+    if (removeStone(node->emptyStones, sp, bp) || removeStone(node->blackStones, sp, bp) || removeStone(node->whiteStones, sp, bp)){
         modifyNode(node);
         return;
     }
@@ -2032,7 +2040,13 @@ void BoardWidget::addStone(go::nodePtr node, const go::point& sp, const go::poin
 
     go::nodePtr stoneNode( node->isStone() ? go::nodePtr(new go::node(node)) : node );
 
-    stoneNode->stones.push_back( go::stone(sp, c) );
+    if (c == go::empty)
+        stoneNode->emptyStones.push_back( go::stone(sp, c) );
+    else if (c == go::black)
+        stoneNode->blackStones.push_back( go::stone(sp, c) );
+    else
+        stoneNode->whiteStones.push_back( go::stone(sp, c) );
+
     board[bp.y][bp.x].color = c;
     board[bp.y][bp.x].number = 0;
 
@@ -2049,7 +2063,7 @@ void BoardWidget::addEmpty(go::nodePtr node, const go::point& sgfPoint){
 }
 
 void BoardWidget::addEmpty(go::nodePtr node, const go::point& sp, const go::point& bp){
-    if (removeStone(node->stones, sp, bp)){
+    if (removeStone(node->emptyStones, sp, bp) || removeStone(node->blackStones, sp, bp) || removeStone(node->whiteStones, sp, bp)){
         modifyNode(node);
         return;
     }
@@ -2059,7 +2073,7 @@ void BoardWidget::addEmpty(go::nodePtr node, const go::point& sp, const go::poin
 
     go::nodePtr stoneNode( node->isStone() ? go::nodePtr(new go::node(node)) : node );
 
-    stoneNode->stones.push_back( go::stone(sp, go::empty) );
+    stoneNode->emptyStones.push_back( go::stone(sp, go::empty) );
     board[bp.y][bp.x].color = go::empty;
     board[bp.y][bp.x].number = 0;
 

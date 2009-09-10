@@ -111,7 +111,7 @@ public:
     void setX(int x){ position.x = x; }
     void setY(int y){ position.y = y; }
 
-    virtual bool isStone() const{ return black || white; }
+    virtual bool isStone() const{ return isBlack() || isWhite(); }
     bool isBlack() const{ return color == black; }
     bool isWhite() const{ return color == white; }
     bool isPass() const;
@@ -133,7 +133,9 @@ public:
     markList  characters;
     markList  blackTerritories;
     markList  whiteTerritories;
-    stoneList stones;
+    stoneList blackStones;
+    stoneList whiteStones;
+    stoneList emptyStones;
     int annotation;
     int moveAnnotation;
     int nodeAnnotation;

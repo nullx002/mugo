@@ -33,7 +33,7 @@ public:
         typedef QList<data> dataList;
         typedef QList<dataList> branchList;
 
-        data() : x(0), y(0), index(0), color(0){}
+        data() : x(-1), y(-1), index(0), color(go::empty){}
 
         int x;
         int y;
@@ -66,9 +66,10 @@ private:
     bool    readFiles(QString::iterator& first, QString::iterator& last);
     bool    readData(QString::iterator& first, QString::iterator& last);
     bool    readFigure(QString::iterator& first, QString::iterator& last);
-    bool    readFigureText(QString::iterator& first, QString::iterator& last, int index);
     bool    readComment(QString::iterator& first, QString::iterator& last);
-    bool    readBranch(QString::iterator& first, QString::iterator& last, int index);
+    bool    readFig(QString::iterator& first, QString::iterator& last, int index);
+    bool    readText(QString::iterator& first, QString::iterator& last, int index);
+    void    removeStone(stoneList& stones, int x, int y);
 
     bool get(dataList::const_iterator first, dataList::const_iterator last, go::nodePtr parent) const;
     bool getData(const QStringList& list, data& d);
@@ -90,6 +91,7 @@ private:
     QString whiteRank;
     QString blackPlayer;
     QString blackRank;
+    QString coordinateType;
 };
 
 

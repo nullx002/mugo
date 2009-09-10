@@ -4,8 +4,6 @@
 
 namespace go{
 
-
-
 bool ugf::readStream(QString::iterator& first, QString::iterator last){
     dataList_.push_back( data() );
     while (first != last){
@@ -73,7 +71,12 @@ bool ugf::get(go::data& data) const{
 
     stoneList::const_iterator stone = first->stones.begin();
     while (stone != first->stones.end()){
-        data.root->stones.push_back( go::stone(stone->x, stone->y, (go::color)stone->color) );
+        if (stone->color == go::empty)
+            data.root->emptyStones.push_back( go::stone(stone->x, stone->y, go::empty) );
+        else if (stone->color == go::black)
+            data.root->blackStones.push_back( go::stone(stone->x, stone->y, go::black) );
+        else if (stone->color == go::white)
+            data.root->whiteStones.push_back( go::stone(stone->x, stone->y, go::white) );
         ++stone;
     }
 
@@ -156,6 +159,8 @@ bool ugf::readHeader(QString::iterator& first, QString::iterator& last){
             if (list.size() > 1)
                 blackRank = list[1];
         }
+        else if (key == "CoordinateType")
+            coordinateType = value;
     }
 
     return true;
@@ -209,14 +214,81 @@ bool ugf::readFigure(QString::iterator& first, QString::iterator& last){
         if (list.size() < 2)
             continue;
 
-        if (list[0] == ".Text")
-            readFigureText(first, last, list[1].toInt());
+        if (list[0] == ".Fig")
+            readFig(first, last, list[1].toInt());
+        else if (list[0] == ".Text")
+            readText(first, last, list[1].toInt());
     }
 
     return false;
 }
 
-bool ugf::readFigureText(QString::iterator& first, QString::iterator& last, int index){
+bool ugf::readComment(QString::iterator& first, QString::iterator& last){
+    while (first != last && *first != '['){
+        QString str = readLine(first, last);
+
+        QStringList list =  str.split(',');
+        if (list.size() < 2)
+            continue;
+
+        if (list[0] == ".Fig")
+            readFig(first, last, list[1].toInt());
+    }
+
+    return true;
+}
+
+bool ugf::readFig(QString::iterator& first, QString::iterator& last, int index){
+    data addEmpty;
+    dataList::iterator iter = dataList_.begin();
+    while (iter != dataList_.end()){
+        if (iter->color == go::black || iter->color == go::white)
+            addEmpty.stones.push_back(stone(iter->x, iter->y, go::empty));
+
+        if (iter->index == index)
+            break;
+
+        ++iter;
+    }
+    if (iter == dataList_.end())
+        return false;
+
+    dataList branch;
+    branch.push_back(addEmpty);
+
+    while (first != last && *first != '['){
+        QString str = readLine(first, last);
+        if (str == ".EndFig")
+            break;
+
+        if (str == ".Text"){
+            readText(first, last, index);
+        }
+        else{
+            QStringList list =  str.split(',');
+            if (list.size() < 2)
+                continue;
+
+            data d;
+            if (getData(list, d)){
+                if (d.index == 0){
+                    removeStone(branch[0].stones, d.x, d.y);
+                    branch.back().stones.push_back(stone(d.x, d.y, d.color));
+                }
+                else
+                    branch.push_back(d);
+            }
+        }
+    }
+
+    qSwap(branch.back().comment, iter->comment);
+    qSwap(branch.back().markers, iter->markers);
+    iter->branches.push_back(branch);
+
+    return true;
+}
+
+bool ugf::readText(QString::iterator& first, QString::iterator& last, int index){
     data* d = getNthData(index);
     if (d == NULL)
         return false;
@@ -241,46 +313,15 @@ bool ugf::readFigureText(QString::iterator& first, QString::iterator& last, int 
     return true;
 }
 
-bool ugf::readComment(QString::iterator& first, QString::iterator& last){
-    while (first != last && *first != '['){
-        QString str = readLine(first, last);
-
-        QStringList list =  str.split(',');
-        if (list.size() < 2)
+void ugf::removeStone(stoneList& stones, int x, int y){
+    stoneList::iterator iter = stones.begin();
+    while (iter != stones.end()){
+        if (iter->x == x && iter->y == y){
+            iter = stones.erase(iter);
             continue;
-
-        if (list[0] == ".Fig")
-            readBranch(first, last, list[1].toInt());
+        }
+        ++iter;
     }
-
-    return true;
-}
-
-bool ugf::readBranch(QString::iterator& first, QString::iterator& last, int index){
-    data* d = getNthData(index);
-    if (d == NULL)
-        return false;
-
-    dataList branch;
-    while (first != last && *first != '['){
-        QString str = readLine(first, last);
-        if (str == ".EndFig")
-            break;
-
-        QStringList list =  str.split(',');
-        if (list.size() < 2)
-            continue;
-
-        dataList::iterator b_last = dataList_.begin() + index + 2;
-        data d2;
-        if (getData(list, d2))
-            if (qFind(dataList_.begin(), b_last, d2) == b_last)
-                branch.push_back(d2);
-    }
-
-    d->branches.push_back(branch);
-
-    return true;
 }
 
 bool ugf::get(dataList::const_iterator first, dataList::const_iterator last, go::nodePtr parent) const{
@@ -290,8 +331,10 @@ bool ugf::get(dataList::const_iterator first, dataList::const_iterator last, go:
     nodePtr node;
     if (first->color == go::black)
         node = go::createBlackNode(parent, first->x, first->y);
-    else
+    else if (first->color == go::white)
         node = go::createWhiteNode(parent, first->x, first->y);
+    else
+        node.reset(new go::node(parent));
 
     node->comment = first->comment;
 
@@ -303,7 +346,12 @@ bool ugf::get(dataList::const_iterator first, dataList::const_iterator last, go:
 
     stoneList::const_iterator stone = first->stones.begin();
     while (stone != first->stones.end()){
-        node->stones.push_back( go::stone(stone->x, stone->y, (go::color)stone->color) );
+        if (stone->color == go::empty)
+            node->emptyStones.push_back( go::stone(stone->x, stone->y, go::empty) );
+        else if (stone->color == go::black)
+            node->blackStones.push_back( go::stone(stone->x, stone->y, go::black) );
+        else if (stone->color == go::white)
+            node->whiteStones.push_back( go::stone(stone->x, stone->y, go::white) );
         ++stone;
     }
 
@@ -330,6 +378,8 @@ bool ugf::getData(const QStringList& list, data& d){
 
     d.x = list[0][0].toAscii() - 'A';
     d.y = list[0][1].toAscii() - 'A';
+    if (coordinateType == "IGS")
+        d.y = size - d.y - 1;
     d.index = list[2].toInt();
     d.color = list[1][0] == 'B' ? go::black : go::white;
 

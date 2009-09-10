@@ -59,8 +59,14 @@ QString node::toString() const{
     if (moveNumber > 0)
         str += QString(" (%1)").arg(moveNumber);
 
-    if (!stones.empty())
-        str += QString(" %1").arg( tr("Add") );
+    if (!emptyStones.empty())
+        str += QString(" %1").arg( tr("Add Empty") );
+
+    if (!whiteStones.empty())
+        str += QString(" %1").arg( tr("Add White") );
+
+    if (!blackStones.empty())
+        str += QString(" %1").arg( tr("Add Black") );
 
     if (!crosses.empty() || !triangles.empty() || !squares.empty() || !circles.empty() || !characters.empty())
         str += QString(" %1").arg( tr("Mark") );
