@@ -301,11 +301,11 @@ void BoardWidget::readSettings(){
     }
 
     // focus/markers
-    focusType = settings.value("board/focusType").toInt();
-    focusWhiteColor = settings.value("board/focusWhiteColor", FOCUS_WHITE_COLOR).value<QColor>();
-    focusBlackColor = settings.value("board/focusBlackColor", FOCUS_BLACK_COLOR).value<QColor>();
-    branchColor = settings.value("board/branchColor", BRANCH_COLOR).value<QColor>();
-    labelType = settings.value("board/labelType").toInt();
+    focusType = settings.value("marker/focusType").toInt();
+    focusWhiteColor = settings.value("marker/focusWhiteColor", FOCUS_WHITE_COLOR).value<QColor>();
+    focusBlackColor = settings.value("marker/focusBlackColor", FOCUS_BLACK_COLOR).value<QColor>();
+    branchColor = settings.value("marker/branchColor", BRANCH_COLOR).value<QColor>();
+    labelType = settings.value("marker/labelType").toInt();
 
     // sound
     if (settings.value("sound/type").toInt() == 0){

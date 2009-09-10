@@ -41,18 +41,18 @@ SetupDialog::SetupDialog(QWidget *parent) :
     m_ui->blackPathEdit->setText( settings.value("board/blackPath").toString() );
 
     // markers/focus
-    m_ui->focusTypeComboBox->setCurrentIndex( settings.value("board/focusType").toInt() );
-    focusWhiteColor = settings.value("board/focusWhiteColor", FOCUS_WHITE_COLOR).value<QColor>();
+    m_ui->focusTypeComboBox->setCurrentIndex( settings.value("marker/focusType").toInt() );
+    focusWhiteColor = settings.value("marker/focusWhiteColor", FOCUS_WHITE_COLOR).value<QColor>();
     m_ui->focusWhiteColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(focusWhiteColor.red()).arg(focusWhiteColor.green()).arg(focusWhiteColor.blue()) );
-    focusBlackColor = settings.value("board/focusBlackColor", FOCUS_BLACK_COLOR).value<QColor>();
+    focusBlackColor = settings.value("marker/focusBlackColor", FOCUS_BLACK_COLOR).value<QColor>();
     m_ui->focusBlackColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(focusBlackColor.red()).arg(focusBlackColor.green()).arg(focusBlackColor.blue()) );
 
     // markers/branch
-    branchColor = settings.value("board/branchColor", BRANCH_COLOR).value<QColor>();
+    branchColor = settings.value("marker/branchColor", BRANCH_COLOR).value<QColor>();
     m_ui->branchColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(branchColor.red()).arg(branchColor.green()).arg(branchColor.blue()) );
 
     // markers/label
-    m_ui->labelTypeComboBox->setCurrentIndex( settings.value("board/labelType").toInt() );
+    m_ui->labelTypeComboBox->setCurrentIndex( settings.value("marker/labelType").toInt() );
 
     // sound
     m_ui->soundTypeComboBox->setCurrentIndex( settings.value("sound/type").toInt() );
@@ -98,11 +98,11 @@ void SetupDialog::accept(){
     settings.setValue("board/blackPath", m_ui->blackPathEdit->text());
 
     // markers
-    settings.setValue("board/focusType", m_ui->focusTypeComboBox->currentIndex());
-    settings.setValue("board/focusWhiteColor", focusWhiteColor);
-    settings.setValue("board/focusBlackColor", focusBlackColor);
-    settings.setValue("board/branchColor", branchColor);
-    settings.setValue("board/labelType", m_ui->labelTypeComboBox->currentIndex());
+    settings.setValue("marker/focusType", m_ui->focusTypeComboBox->currentIndex());
+    settings.setValue("marker/focusWhiteColor", focusWhiteColor);
+    settings.setValue("marker/focusBlackColor", focusBlackColor);
+    settings.setValue("marker/branchColor", branchColor);
+    settings.setValue("marker/labelType", m_ui->labelTypeComboBox->currentIndex());
 
     // sound
     settings.setValue("sound/type", m_ui->soundTypeComboBox->currentIndex());

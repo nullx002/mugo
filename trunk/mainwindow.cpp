@@ -1220,7 +1220,7 @@ void MainWindow::on_actionShowCoordinate_triggered(){
     ui->boardWidget->setShowCoordinates( ui->actionShowCoordinate->isChecked() );
 
     QSettings settings;
-    settings.setValue("marker/showCoordinate", ui->actionShowCoordinate->isChecked());
+    settings.setValue("view/showCoordinate", ui->actionShowCoordinate->isChecked());
 }
 
 /**
@@ -1237,7 +1237,7 @@ void MainWindow::on_actionShowCoordinateI_triggered(){
     ui->boardWidget->setCurrentNode(currentNode);
 
     QSettings settings;
-    settings.setValue("marker/showCoordinateWithI", ui->actionShowCoordinateI->isChecked());
+    settings.setValue("view/showCoordinateWithI", ui->actionShowCoordinateI->isChecked());
 }
 
 /**
