@@ -14,6 +14,7 @@ public:
     ~PrintOptionDialog();
 
     int printOption() const{ return printOption_; }
+    int movesPerPage() const{ return movesPerPage_; }
 
 protected:
     void changeEvent(QEvent *e);
@@ -24,6 +25,7 @@ public slots:
 private:
     Ui::PrintOptionDialog *m_ui;
     int printOption_;
+    int movesPerPage_;
 };
 
 #endif // PRINTOPTIONDIALOG_H

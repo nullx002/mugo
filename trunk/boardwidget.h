@@ -82,13 +82,14 @@ public:
     void paintStones(QPainter& p);
     void paintTerritories(QPaintDevice* pd);
     void paintTerritories(QPainter& p);
-    void print(QPrinter&, int option);
+    void print(QPrinter&, int option, int movesPerPage);
     void print(QPrinter& printer, QPainter& p, int option, int movePerPage, BoardBuffer& buf);
     void print(QPrinter& printer, QPainter& p, go::nodePtr node, int& moveNumber, int& moveNumberInPage, BoardBuffer& buf, QString& rangai);
-    void printHeader(QPrinter& printer, QPainter& p);
-    void printFooter(QPrinter& printer, QPainter& p);
+    void printHeader(QPrinter& printer, QPainter& p, int& page);
+    void printFooter(QPrinter& printer, QPainter& p, int& page);
+    void printCaption(QPrinter& printer, QPainter& p, int fig);
     void printRangai(QPrinter& printer, QPainter& p, QString& rangai);
-    void newPage(QPrinter& printer, QPainter& p, int& moveNumberInPage, BoardBuffer& buf);
+    void newPage(QPrinter& printer, QPainter& p, int& moveNumberInPage, BoardBuffer& buf, int& page, int& fig);
 
     // set/get data
     void clear();
@@ -293,7 +294,7 @@ private:
     int xsize;
     int ysize;
 
-    QRect boardRect;
+    QRect boardRect, coordinatesRect, headerRect, footerRect;
     QList<int> xlines;
     QList<int> ylines;
     BoardBuffer board;

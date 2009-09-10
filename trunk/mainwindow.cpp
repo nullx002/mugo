@@ -439,7 +439,7 @@ void MainWindow::on_actionPrint_triggered(){
     if (printDialog.exec() != QDialog::Accepted)
         return;
 
-    ui->boardWidget->print(printer, optionDialog.printOption());
+    ui->boardWidget->print(printer, optionDialog.printOption(), optionDialog.movesPerPage());
 }
 
 /**
