@@ -243,7 +243,7 @@ bool ugf::readFig(QString::iterator& first, QString::iterator& last, int index){
     dataList::iterator iter = dataList_.begin();
     while (iter != dataList_.end()){
         if (iter->color == go::black || iter->color == go::white)
-            addEmpty.stones.push_back(stone(iter->x, iter->y, go::empty));
+            addEmpty.stones.push_back(stone(iter->x, iter->y, go::empty, iter->color));
 
         if (iter->index == index)
             break;
@@ -271,10 +271,8 @@ bool ugf::readFig(QString::iterator& first, QString::iterator& last, int index){
 
             data d;
             if (getData(list, d)){
-                if (d.index == 0){
-                    removeStone(branch[0].stones, d.x, d.y);
-                    branch.back().stones.push_back(stone(d.x, d.y, d.color));
-                }
+                if (d.index == 0)
+                    replaceStone(branch[0].stones, d);
                 else
                     branch.push_back(d);
             }
@@ -317,12 +315,15 @@ bool ugf::readText(QString::iterator& first, QString::iterator& last, int index)
     return true;
 }
 
-void ugf::removeStone(stoneList& stones, int x, int y){
+void ugf::replaceStone(stoneList& stones, const data& d){
     stoneList::iterator iter = stones.begin();
     while (iter != stones.end()){
-        if (iter->x == x && iter->y == y){
+        if (iter->x == d.x && iter->y == d.y){
+//            int c = iter->originalColor;
             iter = stones.erase(iter);
-            continue;
+//            if (c != d.color)
+                stones.push_back(stone(d.x, d.y, d.color));
+            break;
         }
         ++iter;
     }
