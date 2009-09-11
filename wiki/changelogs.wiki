@@ -1,0 +1,17 @@
+#summary One-sentence summary of this page.
+
+= 0.12.0 =
+== New features ==
+=== Print ===
+ * print current board.
+ * print active branch.
+ * print active branch, moves per page.
+
+== Improved features ==
+=== Label ===
+added label type.<br/>
+new label type are:
+  ABC/abc/123/aiu(japanese)/iroha(japanese)/manually
+
+=== ugf format ===
+branches and comments has been improved.
