@@ -575,7 +575,7 @@ void BoardWidget::printFooter(QPrinter& printer, QPainter& p, int& page){
     QDateTime time = QDateTime::currentDateTime();
     QString footer = time.toString(Qt::DefaultLocaleLongDate);
     QRect r = p.boundingRect(0, 0, printer.width(), 0, Qt::AlignBottom|Qt::AlignRight, footer);
-    footerRect.setRect(0, printer.height()-r.height(), printer.width(), r.height());
+    footerRect.setRect(0, printer.height()-r.height()-5, printer.width(), r.height()+5);
 
     p.drawText(footerRect, Qt::AlignBottom|Qt::AlignRight, footer);
 

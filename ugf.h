@@ -20,11 +20,12 @@ public:
 
     class stone{
     public:
-        stone(int x_, int y_, int color_) : x(x_), y(y_), color(color_){}
+        stone(int x_, int y_, int color_, int originalColor_ = 0) : x(x_), y(y_), color(color_), originalColor(originalColor_){}
 
         int x;
         int y;
         int color;
+        int originalColor;
     };
     typedef QList<stone> stoneList;
 
@@ -69,7 +70,7 @@ private:
     bool    readComment(QString::iterator& first, QString::iterator& last);
     bool    readFig(QString::iterator& first, QString::iterator& last, int index);
     bool    readText(QString::iterator& first, QString::iterator& last, int index);
-    void    removeStone(stoneList& stones, int x, int y);
+    void    replaceStone(stoneList& stones, const data& d);
 
     bool get(dataList::const_iterator first, dataList::const_iterator last, go::nodePtr parent) const;
     bool getData(const QStringList& list, data& d);
