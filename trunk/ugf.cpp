@@ -300,8 +300,12 @@ bool ugf::readText(QString::iterator& first, QString::iterator& last, int index)
                 break;
 
             QStringList list =  str.split(',');
-            if (list[0] == ".#" && list.size() >= 4)
-                d->markers.push_back( marker(list[1].toInt()-1, list[2].toInt()-1, list[3]) );
+            if (list[0] == ".#" && list.size() >= 4){
+                marker mark(list[1].toInt()-1, list[2].toInt()-1, list[3]);
+                if (coordinateType == "IGS")
+                    mark.y = size - mark.y - 1;
+                d->markers.push_back( mark );
+            }
         }
         else{
             if (!d->comment.isEmpty())
