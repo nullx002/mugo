@@ -14,4 +14,4 @@ new label type are:
   ABC/abc/123/aiu(japanese)/iroha(japanese)/manually
 
 === ugf format ===
-branches and comments has been improved.
+branche and comment has been improved.
