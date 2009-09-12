@@ -1558,6 +1558,12 @@ void MainWindow::on_boardTabWidget_tabCloseRequested(int index){
     ui->boardTabWidget->removeTab(index);
 }
 
+void MainWindow::boardTabWidgetPrev(){
+}
+
+void MainWindow::boardTabWidgetNext(){
+}
+
 /**
 * Slot
 * new node was created by BoardWidget.
