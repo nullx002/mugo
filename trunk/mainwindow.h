@@ -22,8 +22,13 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-        typedef QMap<go::nodePtr, QTreeWidgetItem*> NodeToTreeWidgetType;
+    typedef QMap<go::nodePtr, QTreeWidgetItem*> NodeToTreeWidgetType;
 
+    struct TabData{
+        NodeToTreeWidgetType nodeToTree;
+        QTreeWidget* branchWidget;
+        QString fileName;
+    };
 
     MainWindow(QWidget *parent = 0);
     ~MainWindow();
@@ -37,6 +42,8 @@ protected:
     virtual void dropEvent(QDropEvent* event);
 
 private:
+    void addDocument(BoardWidget* board, const QString& label);
+    void setDocument(BoardWidget* board);
     bool fileNew(int xsize=19, int ysize=19, int handicap=0, double komi=6.5);
     bool fileOpen();
     bool fileOpen(const QString& fname, bool guessCodec=true);
@@ -75,9 +82,12 @@ private:
     void alertLanguageChanged();
 
     Ui::MainWindow *ui;
+    QMap<BoardWidget*, TabData> tabData;
+    BoardWidget* boardWidget;
+    QTreeWidget* branchWidget;
+    NodeToTreeWidgetType* nodeToTreeWidget;
+
     QTextCodec* codec;
-    QString fileName;
-    NodeToTreeWidgetType nodeToTreeWidget;
 
     int annotation;
     int moveAnnotation;
@@ -106,7 +116,7 @@ private:
 
 private slots:
     // File menu
-    void on_actionPrint_triggered();
+    void on_boardTabWidget_tabCloseRequested(int index);
     void on_actionNew_triggered();
     void on_actionOpen_triggered();
     void on_actionOpen_URL_triggered();
@@ -115,6 +125,7 @@ private slots:
     void on_actionSaveAs_triggered();
     void on_actionSaveBoardAsPicture_triggered();
     void on_actionExportAsciiToClipboard_triggered();
+    void on_actionPrint_triggered();
     void on_actionExit_triggered();
     void openRecentFile();
 
@@ -227,14 +238,15 @@ private slots:
     void on_actionAboutQT_triggered();
 
     // Board widget
-    void on_boardWidget_nodeAdded(go::nodePtr parent, go::nodePtr node, bool select);
-    void on_boardWidget_nodeDeleted(go::nodePtr node, bool deleteChildren);
-    void on_boardWidget_nodeModified(go::nodePtr node);
-    void on_boardWidget_currentNodeChanged(go::nodePtr node);
-    void on_boardWidget_updateTerritory(int alive_b, int alive_w, int dead_b, int dead_w, int capturedBlack, int capturedWhite, int blackTerritory, int whiteTerritory, double komi);
+    void on_boardTabWidget_currentChanged(QWidget* );
+    void nodeAdded(go::nodePtr parent, go::nodePtr node, bool select);
+    void nodeDeleted(go::nodePtr node, bool deleteChildren);
+    void nodeModified(go::nodePtr node);
+    void currentNodeChanged(go::nodePtr node);
+    void updateTerritory(int alive_b, int alive_w, int dead_b, int dead_w, int capturedBlack, int capturedWhite, int blackTerritory, int whiteTerritory, double komi);
 
     // Branch widget
-    void on_branchWidget_currentItemChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous);
+    void branchWidgetCurrentItemChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous);
 
     // Comment widget
     void on_commentWidget_textChanged();
