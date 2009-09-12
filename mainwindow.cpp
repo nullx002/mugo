@@ -271,8 +271,8 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow(){
     QSettings settings;
-    settings.setValue("width", frameSize().width());
-    settings.setValue("height", frameSize().height());
+    settings.setValue("width", geometry().width());
+    settings.setValue("height", geometry().height());
 
     delete countTerritoryDialog;
     delete ui;
