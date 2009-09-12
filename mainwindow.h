@@ -116,7 +116,6 @@ private:
 
 private slots:
     // File menu
-    void on_boardTabWidget_tabCloseRequested(int index);
     void on_actionNew_triggered();
     void on_actionOpen_triggered();
     void on_actionOpen_URL_triggered();
@@ -237,8 +236,13 @@ private slots:
     void on_actionAbout_triggered();
     void on_actionAboutQT_triggered();
 
-    // Board widget
+    // Board tab widget
     void on_boardTabWidget_currentChanged(QWidget* );
+    void on_boardTabWidget_tabCloseRequested(int index);
+    void boardTabWidgetPrev();
+    void boardTabWidgetNext();
+
+    // Board widget
     void nodeAdded(go::nodePtr parent, go::nodePtr node, bool select);
     void nodeDeleted(go::nodePtr node, bool deleteChildren);
     void nodeModified(go::nodePtr node);
