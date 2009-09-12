@@ -206,12 +206,6 @@ private slots:
     void on_actionFlipBoardVertically_triggered();
     void on_actionResetBoard_triggered();
 
-    // View menu -> Toolbars
-    void on_actionMainToolbar_triggered();
-    void on_actionEditToolbar_triggered();
-    void on_actionNavigationToolbar_triggered();
-    void on_actionOptionToolbar_triggered();
-
     // Tools menu
     void on_actionCountTerritory_triggered();
     void on_actionPlayWithGnugo_triggered();

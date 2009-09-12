@@ -194,6 +194,10 @@ MainWindow::MainWindow(QWidget *parent)
     ui->menuWindow->addAction( ui->commentDockWidget->toggleViewAction() );
     ui->menuWindow->addAction( ui->branchDockWidget->toggleViewAction() );
     ui->menuWindow->addAction( ui->undoDockWidget->toggleViewAction() );
+    ui->menuToolbars->addAction( ui->mainToolBar->toggleViewAction() );
+    ui->menuToolbars->addAction( ui->editToolBar->toggleViewAction() );
+    ui->menuToolbars->addAction( ui->navigationToolBar->toggleViewAction() );
+    ui->menuToolbars->addAction( ui->optionToolBar->toggleViewAction() );
 
     // language menu
     QString language = settings.value("language").toString();
@@ -1313,51 +1317,6 @@ void MainWindow::on_actionResetBoard_triggered(){
     ui->actionRotateBoardClockwise->setChecked(false);
     ui->actionFlipBoardHorizontally->setChecked(false);
     ui->actionFlipBoardVertically->setChecked(false);
-}
-
-/**
-* Slot
-* View -> Toolbars -> Main Toolbar
-*/
-void MainWindow::on_actionMainToolbar_triggered(){
-    if (ui->actionMainToolbar->isChecked())
-        ui->mainToolBar->show();
-    else
-        ui->mainToolBar->hide();
-}
-
-/**
-* Slot
-* View -> Toolbars -> Edit Toolbar
-*/
-void MainWindow::on_actionEditToolbar_triggered(){
-    if (ui->actionEditToolbar->isChecked())
-        ui->editToolBar->show();
-    else
-        ui->editToolBar->hide();
-}
-
-/**
-* Slot
-* View -> Toolbars -> Traverse Toolbar
-*/
-void MainWindow::on_actionNavigationToolbar_triggered(){
-    if (ui->actionNavigationToolbar->isChecked())
-        ui->navigationToolBar->show();
-    else
-        ui->navigationToolBar->hide();
-}
-
-/**
-* Slot
-* View -> Toolbars -> Option Toolbar
-*/
-void MainWindow::on_actionOptionToolbar_triggered()
-{
-    if (ui->actionOptionToolbar->isChecked())
-        ui->optionToolBar->show();
-    else
-        ui->optionToolBar->hide();
 }
 
 /**
