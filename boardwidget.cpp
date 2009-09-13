@@ -18,6 +18,9 @@
 
 #ifdef Q_WS_WIN
 #   define usleep(X) Sleep(X/1000)
+
+    QString Sound::fileName;
+    MCI_OPEN_PARMS Sound::mop = {0};
 #else
 #   include <unistd.h>
 #endif
@@ -25,7 +28,6 @@
 Sound::Sound(QWidget* parent_) : parent(parent_){
 #if defined(Q_WS_WIN)
     lastClock = 0;
-    memset(&mop, 0, sizeof(mop));
 #else
     media = Phonon::createPlayer(Phonon::NotificationCategory);
 #endif
@@ -40,6 +42,10 @@ Sound::~Sound(){
 
 void Sound::setCurrentSource(const QString& source){
 #if defined(Q_WS_WIN)
+    if (fileName == source)
+        return;
+
+    fileName = source;
     if (mop.wDeviceID != 0)
         mciSendCommand(mop.wDeviceID, MCI_CLOSE, 0, 0);
 
@@ -308,6 +314,7 @@ void BoardWidget::readSettings(){
     labelType = settings.value("marker/labelType").toInt();
 
     // sound
+    playSound = settings.value("sound/play").toBool();
     if (settings.value("sound/type").toInt() == 0){
         QStringList soundPathList;
 #if defined(Q_WS_MAC)

@@ -35,8 +35,9 @@ public:
     QObject* parent;
 
 #if defined(Q_WS_WIN)
-    double   lastClock;
-    MCI_OPEN_PARMS mop;
+    double lastClock;
+    static QString fileName;
+    static MCI_OPEN_PARMS mop;
 #else
     Phonon::MediaObject* media;
 #endif

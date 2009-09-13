@@ -1511,8 +1511,11 @@ void MainWindow::on_actionOptions_triggered(){
     if (dlg.exec() != QDialog::Accepted)
         return;
 
-    boardWidget->readSettings();
-    boardWidget->repaintBoard();
+    for (int i=0; i<ui->boardTabWidget->count(); ++i){
+        BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->widget(i));
+        board->readSettings();
+        board->repaintBoard();
+    }
 }
 
 /**
