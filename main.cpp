@@ -1,6 +1,7 @@
 #include <QtGui/QApplication>
 #ifdef Q_WS_WIN
 #include <QWindowsVistaStyle>
+#include <QPlastiqueStyle>
 #endif
 #include <QDebug>
 #include <QSettings>
@@ -44,7 +45,8 @@ int main(int argc, char *argv[])
     a.setApplicationName(APPNAME);
     a.setApplicationVersion(VERSION);
 #ifdef Q_WS_WIN
-    a.setStyle(new QWindowsVistaStyle);
+//    a.setStyle(new QWindowsVistaStyle);
+    a.setStyle(new QPlastiqueStyle);
 #endif
 
     // Load translation

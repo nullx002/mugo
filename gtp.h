@@ -40,6 +40,7 @@ public:
     gtp(BoardWidget* board, go::color color, QProcess& process, QObject* parent=0);
 
     virtual void move(int x, int y);
+    virtual bool moving() const{ return moving_; }
     virtual void put(go::color c, int x, int y);
     virtual void wait();
     virtual void quit();
@@ -54,6 +55,7 @@ private:
 
     int index;
     QList<commandPtr> commandList;
+    bool moving_;
 
 private slots:
     void gtpRead();
