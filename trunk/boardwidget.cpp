@@ -160,7 +160,7 @@ void BoardWidget::mouseReleaseEvent(QMouseEvent* e){
 void BoardWidget::mouseMoveEvent(QMouseEvent* e){
     QWidget::mouseMoveEvent(e);
 
-    if (editMode == ePlayGame && color != playGame->yourColor())
+    if (editMode == ePlayGame && (color != playGame->yourColor() || playGame->moving() || currentNode != nodeList.back()))
         return;
 
     bool black;
@@ -937,7 +937,7 @@ void BoardWidget::setCurrentNode(go::nodePtr node){
 /**
 */
 void BoardWidget::playGameLButtonDown(int sgfX, int sgfY){
-    if (color == playGame->yourColor())
+    if (playGame->moving() == false && color == playGame->yourColor() && currentNode == nodeList.back())
         playGame->move(sgfX, sgfY);
 }
 

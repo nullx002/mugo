@@ -141,7 +141,7 @@ public:
     void setEditMode(eEditMode editMode){ this->editMode = editMode; }
     void setTutorMode(eTutorMode tutorMode){ this->tutorMode = tutorMode; repaintBoard(); }
     void setShowMoveNumber(bool visible){ showMoveNumber = visible; repaintBoard(); }
-    void setShowMoveNumber(int number){ showMoveNumberCount = number; repaintBoard(); }
+    void setShowMoveNumberCount(int number){ showMoveNumberCount = number; repaintBoard(); }
     void setShowCoordinates(bool visible){ showCoordinates = visible; repaintBoard(); }
     void setShowCoordinatesWithI(bool withI){ showCoordinatesI = withI; repaintBoard(); }
     void setShowMarker(bool visible){ showMarker = visible; repaintBoard(); }
@@ -159,6 +159,20 @@ public:
     void setStoneSoundPath(const QString& path){ stoneSound.setCurrentSource(path); }
     void setCountTerritoryMode(bool countMode);
     void whiteFirst(bool whiteFirst);
+
+    // get option
+    eEditMode  getEditMode() const{ return editMode; }
+    eTutorMode getTutorMode() const{ return tutorMode; }
+    bool getShowMoveNumber() const{ return showMoveNumber; }
+    int  getShowMoveNumberCount() const{ return showMoveNumberCount; }
+    bool getShowCoordinates() const{ return showCoordinates; }
+    bool getShowCoordinatesWithI() const{ return showCoordinatesI; }
+    bool getShowMarker() const{ return showMarker; }
+    bool getShowBranchMoves() const{ return showBranchMoves; }
+    int  getRotateBoard() const{ return rotateBoard_; }
+    bool getFlipBoardHorizontally() const{ return flipBoardHorizontally_; }
+    bool getFlipBoardVertically() const{ return flipBoardVertically_; }
+    bool whiteFirst() const{ return goData.root->isBlack(); }
 
     void createBoardBuffer();
     QString toString(go::nodePtr node) const;
