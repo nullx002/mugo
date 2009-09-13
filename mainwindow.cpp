@@ -306,7 +306,7 @@ void MainWindow::on_actionOpen_triggered(){
     fileOpen();
 }
 
-void MainWindow::on_actionOpen_URL_triggered(){
+void MainWindow::on_actionOpenURL_triggered(){
     downloadBuff.clear();
 
     QInputDialog dlg(this);
@@ -314,6 +314,8 @@ void MainWindow::on_actionOpen_URL_triggered(){
     dlg.setLabelText( tr("Enter the URL of a SGF file.") );
     if (dlg.exec() != QDialog::Accepted)
         return;
+
+    fileNew();
 
     QUrl url( dlg.textValue() );
 
