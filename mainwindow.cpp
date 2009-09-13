@@ -340,7 +340,7 @@ void MainWindow::on_actionOpenURL_triggered(){
 */
 void MainWindow::on_actionReload_triggered(){
     if (maybeSave())
-        fileOpen(tabData->fileName, true, false);
+        fileOpen(tabData->fileName, true, false, true);
 }
 
 /**
@@ -1904,21 +1904,24 @@ bool MainWindow::fileOpen(){
 /**
 * file open.
 */
-bool MainWindow::fileOpen(const QString& fname, bool guessCodec, bool newTab){
-    return fileOpen(fname, QFileInfo(fname).suffix(), guessCodec, newTab);
+bool MainWindow::fileOpen(const QString& fname, bool guessCodec, bool newTab, bool forceOpen){
+    return fileOpen(fname, QFileInfo(fname).suffix(), guessCodec, newTab, forceOpen);
 }
 
 /**
 * file open.
 */
-bool MainWindow::fileOpen(const QString& fname, const QString& ext, bool guessCodec, bool newTab){
-    QMap<BoardWidget*, TabData>::iterator iter = tabDatas.begin();
-    while (iter != tabDatas.end()){
-        if (iter->fileName.compare(fname, Qt::CaseInsensitive) == 0){
-            ui->boardTabWidget->setCurrentWidget(iter.key());
-            return true;
+bool MainWindow::fileOpen(const QString& fname, const QString& ext, bool guessCodec, bool newTab, bool forceOpen){
+
+    if (!forceOpen){
+        QMap<BoardWidget*, TabData>::iterator iter = tabDatas.begin();
+        while (iter != tabDatas.end()){
+            if (iter->fileName.compare(fname, Qt::CaseInsensitive) == 0){
+                ui->boardTabWidget->setCurrentWidget(iter.key());
+                return true;
+            }
+            ++iter;
         }
-        ++iter;
     }
 
     QTextCodec* codec;
@@ -2133,7 +2136,7 @@ void MainWindow::openUrlReadProgress(int done, int total){
 * slot
 */
 void MainWindow::openUrlDone(bool error){
-    qDebug() << "openURLDone: " << error;
+    qDebug() << "openUrlDone: " << error;
     delete progressDialog;
 
     if (error == true){

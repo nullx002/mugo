@@ -63,8 +63,8 @@ private:
     void setDocument(BoardWidget* board);
     bool fileNew(int xsize=19, int ysize=19, int handicap=0, double komi=6.5);
     bool fileOpen();
-    bool fileOpen(const QString& fname, bool guessCodec=true, bool newTab=true);
-    bool fileOpen(const QString& fname, const QString& ext, bool guessCodec=true, bool newTab=true);
+    bool fileOpen(const QString& fname, bool guessCodec=true, bool newTab=true, bool forceOpen=false);
+    bool fileOpen(const QString& fname, const QString& ext, bool guessCodec=true, bool newTab=true, bool forceOpen=false);
     bool fileSave();
     bool fileSaveAs();
     bool fileSaveAs(const QString& fname);
