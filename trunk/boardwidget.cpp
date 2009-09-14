@@ -314,7 +314,7 @@ void BoardWidget::readSettings(){
     labelType = settings.value("marker/labelType").toInt();
 
     // sound
-    playSound = settings.value("sound/play").toBool();
+    playSound = settings.value("sound/play", 1).toBool();
     if (settings.value("sound/type").toInt() == 0){
         QStringList soundPathList;
 #if defined(Q_WS_MAC)
