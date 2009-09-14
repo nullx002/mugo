@@ -136,7 +136,7 @@ MainWindow::MainWindow(QWidget *parent)
         ui->actionLast50Moves->setChecked(true);
 
     // set sound files
-    ui->actionPlaySound->setChecked( settings.value("sound/play").toBool() );
+    ui->actionPlaySound->setChecked( settings.value("sound/play", 1).toBool() );
 
     // recent files
     for (int i=0; i<MaxRecentFiles; ++i){
