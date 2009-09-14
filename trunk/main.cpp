@@ -40,6 +40,7 @@ QString getTranslationPath(){
 
 int main(int argc, char *argv[])
 {
+// is QFileOpenEvent received on macx??
     QApplication a(argc, argv);
     a.setOrganizationName(AUTHOR);
     a.setApplicationName(APPNAME);

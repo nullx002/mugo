@@ -2,6 +2,7 @@
 # Project created by QtCreator 2009-05-16T20:10:53
 # -------------------------------------------------
 TARGET = mugo
+mac:CONFIG += x86 ppc
 TEMPLATE = app
 unix:QT += phonon
 mac:QT += phonon
