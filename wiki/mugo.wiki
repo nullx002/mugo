@@ -44,8 +44,8 @@ PB, BR, BT, PW, WR, WT, RE, TM, OT, GN, EV, RO, DT, PC, GC, US, SO, ON, AN, CP
 http://sikusiku.sakura.ne.jp/mugo/0.13.0/mugo-win.png<br/>
 (mugo 0.13.0 on windows)
 
-http://sikusiku.sakura.ne.jp/mugo/0.9.0/mugo.png<br/>
-(mugo 0.9.0 on linux, japanese menu, open ugf)
+http://sikusiku.sakura.ne.jp/mugo/0.13.0/mugo-linux.png<br/>
+(mugo 0.13.1 on linux, japanese menu, open ugf)
 
-http://sikusiku.sakura.ne.jp/mugo/0.12.0/mugo-mac.png<br/>
-(mugo 0.12.1 on mac)
+http://sikusiku.sakura.ne.jp/mugo/0.13.0/mugo-mac.png<br/>
+(mugo 0.13.1 on mac)
