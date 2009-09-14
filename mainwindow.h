@@ -49,18 +49,6 @@ public:
     MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-    void updateMenu();
-    void setCaption();
-
-protected:
-    virtual void closeEvent(QCloseEvent* e);
-    virtual void keyPressEvent(QKeyEvent* event);
-    virtual void dragEnterEvent(QDragEnterEvent* event);
-    virtual void dropEvent(QDropEvent* event);
-
-private:
-    void addDocument(BoardWidget* board);
-    void setDocument(BoardWidget* board);
     bool fileNew(int xsize=19, int ysize=19, int handicap=0, double komi=6.5);
     bool fileOpen();
     bool fileOpen(const QString& fname, bool guessCodec=true, bool newTab=true, bool forceOpen=false);
@@ -72,8 +60,21 @@ private:
     bool tabClose(int index);
     bool maybeSave();
 
+protected:
+    virtual void closeEvent(QCloseEvent* e);
+    virtual void keyPressEvent(QKeyEvent* event);
+    virtual void dragEnterEvent(QDragEnterEvent* event);
+    virtual void dropEvent(QDropEvent* event);
+
+private:
+    void addDocument(BoardWidget* board);
+    void setDocument(BoardWidget* board);
+
     void setCurrentFile(const QString& fname);
     void updateRecentFileActions();
+
+    void updateMenu();
+    void setCaption();
 
     void setEditMode(QAction* action, BoardWidget::eEditMode editMode);
     void setAnnotation(int annotation, int moveAnnotation, int nodeAnnotation);
