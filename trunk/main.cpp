@@ -1,7 +1,9 @@
 #include <QtGui/QApplication>
 #ifdef Q_WS_WIN
-#include <QWindowsVistaStyle>
-#include <QPlastiqueStyle>
+//#   include <QWindowsVistaStyle>
+#   include <QPlastiqueStyle>
+#elif defined(Q_WS_MAC)
+#   include <QFileOpenEvent>
 #endif
 #include <QDebug>
 #include <QSettings>
@@ -9,6 +11,7 @@
 #include <QLibraryInfo>
 #include <QTextCodec>
 #include <QDir>
+#include <QMessageBox>
 #include "appdef.h"
 #include "mainwindow.h"
 
@@ -38,10 +41,50 @@ QString getTranslationPath(){
     return "./";
 }
 
+class Application : public QApplication{
+public:
+    Application(int argc, char** argv) : QApplication(argc, argv), mainWindow(NULL){}
+    virtual ~Application();
+
+#if defined(Q_WS_MAC)
+    bool event(QEvent*);
+#endif
+
+    MainWindow* newMainWindow();
+
+private:
+    MainWindow* mainWindow;
+};
+
+Application::~Application(){
+    delete mainWindow;
+}
+
+#if defined(Q_WS_MAC)
+bool Application::event(QEvent* e){
+    switch(e->type()){
+        case QEvent::FileOpen:{
+            if (mainWindow)
+                mainWindow->fileOpen( static_cast<QFileOpenEvent*>(e)->file() );
+            return true;
+        }
+
+        default:
+            return QApplication::event(e);
+    }
+}
+#endif
+
+MainWindow* Application::newMainWindow(){
+    mainWindow = new MainWindow;
+    mainWindow->show();
+    return mainWindow;
+}
+
 int main(int argc, char *argv[])
 {
 // is QFileOpenEvent received on macx??
-    QApplication a(argc, argv);
+    Application a(argc, argv);
     a.setOrganizationName(AUTHOR);
     a.setApplicationName(APPNAME);
     a.setApplicationVersion(VERSION);
@@ -67,7 +110,6 @@ int main(int argc, char *argv[])
     QTextCodec::setCodecForCStrings( QTextCodec::codecForLocale() );
     QTextCodec::setCodecForTr( QTextCodec::codecForLocale() );
 
-    MainWindow w;
-    w.show();
+    a.newMainWindow();
     return a.exec();
 }
