@@ -11,6 +11,7 @@
 #include "appdef.h"
 #include "sgf.h"
 #include "ugf.h"
+#include "gib.h"
 #include "mainwindow.h"
 #include "setupdialog.h"
 #include "gameinformationdialog.h"
@@ -1845,6 +1846,7 @@ void MainWindow::addDocument(BoardWidget* board){
 
 void MainWindow::setDocument(BoardWidget* board){
     ui->boardTabWidget->setCurrentWidget(board);
+    undoGroup.setActiveStack(board->getUndoStack());
 }
 
 /**
@@ -1854,9 +1856,6 @@ bool MainWindow::fileNew(int xsize, int ysize, int handicap, double komi){
     ++docIndex;
     BoardWidget* board = new BoardWidget;
     addDocument( board );
-
-    // undo
-    undoGroup.setActiveStack(board->getUndoStack());
 
     // edit mode
     setEditMode(ui->actionAlternateMove, BoardWidget::eAlternateMove);
@@ -1876,7 +1875,7 @@ bool MainWindow::fileNew(int xsize, int ysize, int handicap, double komi){
 */
 bool MainWindow::fileOpen(){
     QString selectedFilter;
-    QString fname = QFileDialog::getOpenFileName(this, QString(), QString(), tr("All Go Format(*.sgf *.ugf *.ugi);;sgf(*.sgf);;ugf(*.ugf *.ugi);;All Files(*.*)"), &selectedFilter);
+    QString fname = QFileDialog::getOpenFileName(this, QString(), QString(), tr("All Go Format(*.sgf *.ugf *.ugi *.gib);;sgf(*.sgf);;ugf(*.ugf *.ugi);;gib(*.gib);;All Files(*.*)"), &selectedFilter);
     if (fname.isEmpty())
         return  false;
 
@@ -1889,6 +1888,8 @@ bool MainWindow::fileOpen(){
         return fileOpen(fname, "sgf");
     else if (selectedFilter.indexOf("ugf") >= 0 || selectedFilter.indexOf("ugi") >= 0)
         return fileOpen(fname, "ugf");
+    else if (selectedFilter.indexOf("gib") >= 0)
+        return fileOpen(fname, "gib");
     else
         return false;
 }
@@ -1904,6 +1905,19 @@ bool MainWindow::fileOpen(const QString& fname, bool guessCodec, bool newTab, bo
 * file open.
 */
 bool MainWindow::fileOpen(const QString& fname, const QString& ext, bool guessCodec, bool newTab, bool forceOpen){
+
+#define READ_FILE(FORMAT){\
+    go::FORMAT fileData;\
+    fileData.read(fname, codec, guessCodec);\
+\
+    BoardWidget* board = boardWidget;\
+    if (newTab){\
+        board = new BoardWidget;\
+        addDocument(board);\
+    }\
+    board->setData(fileData);\
+}
+
 
     if (!forceOpen){
         QMap<BoardWidget*, TabData>::iterator iter = tabDatas.begin();
@@ -1922,34 +1936,12 @@ bool MainWindow::fileOpen(const QString& fname, const QString& ext, bool guessCo
     else
         codec = tabData->codec;
 
-    if (ext.compare("sgf", Qt::CaseInsensitive) == 0){
-        go::sgf sgf;
-        sgf.read(fname, codec, guessCodec);
-
-        BoardWidget* board = boardWidget;
-        if (newTab){
-            board = new BoardWidget;
-            addDocument(board);
-        }
-        board->setData(sgf);
-
-        // undo
-        undoGroup.setActiveStack(board->getUndoStack());
-    }
-    else if (ext.compare("ugf", Qt::CaseInsensitive) == 0 || ext.compare("ugi", Qt::CaseInsensitive) == 0){
-        go::ugf ugf;
-        ugf.read(fname, codec, guessCodec);
-
-        BoardWidget* board = boardWidget;
-        if (newTab){
-            board = new BoardWidget;
-            addDocument(board);
-        }
-        board->setData(ugf);
-
-        // undo
-        undoGroup.setActiveStack(board->getUndoStack());
-    }
+    if (ext.compare("sgf", Qt::CaseInsensitive) == 0)
+        READ_FILE(sgf)
+    else if (ext.compare("ugf", Qt::CaseInsensitive) == 0 || ext.compare("ugi", Qt::CaseInsensitive) == 0)
+        READ_FILE(ugf)
+    else if (ext.compare("gib", Qt::CaseInsensitive) == 0)
+        READ_FILE(gib)
     else
         return false;
 
