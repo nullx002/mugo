@@ -61,7 +61,6 @@ public:
     virtual bool set(const go::data& data);
 
 private:
-    QString readLine(QString::iterator& first, QString::iterator& last);
     bool    readHeader(QString::iterator& first, QString::iterator& last);
     bool    readRemote(QString::iterator& first, QString::iterator& last);
     bool    readFiles(QString::iterator& first, QString::iterator& last);

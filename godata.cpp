@@ -177,6 +177,18 @@ bool fileBase::save(const QString& fname, QTextCodec* codec){
     return ret;
 }
 
+QString fileBase::readLine(QString::iterator& first, QString::iterator& last){
+    QString str;
+    while (first != last){
+        QChar c = *first++;
+        if (c == '\r')
+            continue;
+        else if (c == '\n')
+            break;
+        str.push_back(c);
+    }
+    return str;
+}
 
 
 };

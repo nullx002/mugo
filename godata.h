@@ -226,6 +226,8 @@ public:
     virtual bool get(go::data& data) const = 0;
     virtual bool set(const go::data& data) = 0;
 
+    QString readLine(QString::iterator& first, QString::iterator& last);
+
     QTextCodec* codec;
 };
 
