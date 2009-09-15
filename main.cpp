@@ -50,14 +50,13 @@ public:
     bool event(QEvent*);
 #endif
 
-    MainWindow* newMainWindow();
+    void setMainWindow(MainWindow* win);
 
 private:
     MainWindow* mainWindow;
 };
 
 Application::~Application(){
-    delete mainWindow;
 }
 
 #if defined(Q_WS_MAC)
@@ -75,10 +74,8 @@ bool Application::event(QEvent* e){
 }
 #endif
 
-MainWindow* Application::newMainWindow(){
-    mainWindow = new MainWindow;
-    mainWindow->show();
-    return mainWindow;
+void Application::setMainWindow(MainWindow* win){
+    mainWindow = win;
 }
 
 int main(int argc, char *argv[])
@@ -99,17 +96,25 @@ int main(int argc, char *argv[])
     if (locale.isEmpty())
         locale = QLocale::system().name();
 
+    // application's translation path
+    QString translationPath = getTranslationPath();
+
+    // qt translation
     QTranslator qtTranslator;
-    qtTranslator.load("qt_" + locale, QLibraryInfo::location(QLibraryInfo::TranslationsPath));
+    if (qtTranslator.load("qt_" + locale, QLibraryInfo::location(QLibraryInfo::TranslationsPath)) == false)
+        qtTranslator.load("qt_" + locale, translationPath);
     a.installTranslator(&qtTranslator);
 
+    // application translation
     QTranslator myappTranslator;
-    myappTranslator.load("mugo." + locale, getTranslationPath());
+    myappTranslator.load("mugo." + locale, translationPath);
     a.installTranslator(&myappTranslator);
 
     QTextCodec::setCodecForCStrings( QTextCodec::codecForLocale() );
     QTextCodec::setCodecForTr( QTextCodec::codecForLocale() );
 
-    a.newMainWindow();
+    MainWindow m;
+    m.show();
+    a.setMainWindow(&m);
     return a.exec();
 }
