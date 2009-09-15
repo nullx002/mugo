@@ -2222,6 +2222,10 @@ QTreeWidgetItem* MainWindow::createTreeWidget(go::nodePtr node){
     // Create TreeItem Widget
     QTreeWidgetItem* nodeWidget = new QTreeWidgetItem( QStringList(createTreeText(node)) );
 
+    static QIcon treeIconGreen(":/res/green_64.png");
+    static QIcon treeIconBlack(":/res/black_64.png");
+    static QIcon treeIconWhite(":/res/white_64.png");
+
     QVariant v;
     v.setValue(node);
     nodeWidget->setData(0, Qt::UserRole, v);
@@ -2229,11 +2233,11 @@ QTreeWidgetItem* MainWindow::createTreeWidget(go::nodePtr node){
 
     // Set Icon to TreeItem Widget
     if (node->isStone() && node->isBlack())
-        nodeWidget->setIcon(0, QIcon(":/res/black_64.png"));
+        nodeWidget->setIcon(0, treeIconBlack);
     else if (node->isStone() && node->isWhite())
-        nodeWidget->setIcon(0, QIcon(":/res/white_64.png"));
+        nodeWidget->setIcon(0, treeIconWhite);
     else
-        nodeWidget->setIcon(0, QIcon(":/res/green_64.png"));
+        nodeWidget->setIcon(0, treeIconGreen);
 
     return nodeWidget;
 }
