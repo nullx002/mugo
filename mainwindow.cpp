@@ -114,30 +114,6 @@ MainWindow::MainWindow(QWidget *parent)
     connect( http, SIGNAL(dataReadProgress(int, int)), this, SLOT(openUrlReadProgress(int, int)) );
     connect( http, SIGNAL(done(bool)), this, SLOT(openUrlDone(bool)) );
 
-    // marker
-    ui->actionShowMoveNumber->setChecked( settings.value("marker/showMoveNumber", true).toBool() );
-
-    int moveNumber = settings.value("marker/moveNumber", 0).toInt();
-    if (moveNumber == -1)
-        ui->actionAllMoves->setChecked(true);
-    else if (moveNumber == 0)
-        ui->actionNoMoveNumber->setChecked(true);
-    else if (moveNumber == 1)
-        ui->actionLast1Move->setChecked(true);
-    else if (moveNumber == 2)
-        ui->actionLast2Moves->setChecked(true);
-    else if (moveNumber == 5)
-        ui->actionLast5Moves->setChecked(true);
-    else if (moveNumber == 10)
-        ui->actionLast10Moves->setChecked(true);
-    else if (moveNumber == 20)
-        ui->actionLast20Moves->setChecked(true);
-    else if (moveNumber == 50)
-        ui->actionLast50Moves->setChecked(true);
-
-    // set sound files
-    ui->actionPlaySound->setChecked( settings.value("sound/play", 1).toBool() );
-
     // recent files
     for (int i=0; i<MaxRecentFiles; ++i){
         recentFileActs[i] = new QAction(this);
@@ -1115,6 +1091,17 @@ void MainWindow::on_actionShowMoveNumber_triggered(){
 
 /**
 * Slot
+* View -> Move Number -> Reset move number in branch.
+*/
+void MainWindow::on_actionResetMoveNubmerInBranch_triggered(){
+    if (ui->actionResetMoveNubmerInBranch->isChecked())
+        boardWidget->setMoveNumberMode(tabData->branchMode ? BoardWidget::eResetInBranch : BoardWidget::eResetInVariation );
+    else
+        boardWidget->setMoveNumberMode( BoardWidget::eSequential );
+}
+
+/**
+* Slot
 * View -> Move Number-> Show Move Number
 */
 void MainWindow::on_actionShowMoveNumber_parent_triggered(){
@@ -1275,7 +1262,8 @@ void MainWindow::on_actionBranchMode_triggered(){
 //    boardWidget->setCurrentNode(current);
     branchWidget->setCurrentItem(currentItem);
 
-//    setTreeData();
+    BoardWidget::eMoveNumberMode moveNumberMode = tabData->branchMode ? BoardWidget::eResetInBranch : BoardWidget::eResetInVariation;
+    boardWidget->setMoveNumberMode( ui->actionResetMoveNubmerInBranch->isChecked() ? moveNumberMode : BoardWidget::eSequential );
 }
 
 /**
@@ -2539,6 +2527,7 @@ void MainWindow::setCountTerritoryMode(bool on){
         ui->actionJumpToClicked,
 
         ui->actionShowMoveNumber,
+        ui->actionResetMoveNubmerInBranch,
         ui->actionNoMoveNumber,
         ui->actionLast1Move,
         ui->actionLast2Moves,
@@ -2705,6 +2694,7 @@ void MainWindow::setPlayWithComputerMode(bool on){
         ui->actionJumpToClicked,
 
 //        ui->actionShowMoveNumber,
+//        ui->actionResetMoveNubmerInBranch,
 //        ui->actionNoMoveNumber,
 //        ui->actionLast1Move,
 //        ui->actionLast2Moves,

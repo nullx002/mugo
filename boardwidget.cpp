@@ -110,7 +110,7 @@ BoardWidget::BoardWidget(QWidget *parent) :
     flipBoardHorizontally_(false),
     flipBoardVertically_(false),
     playSound(false),
-    resetMoveNumberInBranch(true),
+    moveNumberMode(eSequential),
     stoneSound(this),
     playGame(NULL)
 {
@@ -307,12 +307,14 @@ void BoardWidget::readSettings(){
             blackType = 2;
     }
 
-    // focus/markers
+    // marker
     focusType = settings.value("marker/focusType").toInt();
     focusWhiteColor = settings.value("marker/focusWhiteColor", FOCUS_WHITE_COLOR).value<QColor>();
     focusBlackColor = settings.value("marker/focusBlackColor", FOCUS_BLACK_COLOR).value<QColor>();
     branchColor = settings.value("marker/branchColor", BRANCH_COLOR).value<QColor>();
     labelType = settings.value("marker/labelType").toInt();
+    showMoveNumber = settings.value("marker/showMoveNumber", true).toBool();
+    showMoveNumberCount = settings.value("marker/moveNumber", 0).toInt();
 
     // sound
     playSound = settings.value("sound/play", 1).toBool();
@@ -1148,12 +1150,17 @@ void BoardWidget::createBoardBuffer(){
     while (iter != nodeList.end()){
         if ((*iter)->moveNumber > 0)
             currentMoveNumber = (*iter)->moveNumber;
-        else if ((*iter)->isStone()){
-            if (resetMoveNumberInBranch && (*iter)->parent->childNodes.size() > 1)
-                currentMoveNumber = 1;
-            else
-                ++currentMoveNumber;
+        else if ( (*iter)->parent &&
+                  ( (moveNumberMode == eResetInBranch && (*iter)->parent->childNodes.size() > 1) ||
+                    (moveNumberMode == eResetInVariation && (*iter)->parent->childNodes.size() > 1 && *iter != (*iter)->parent->childNodes.front()) ) ){
+            for (int y=0; y<board.size(); ++y)
+                for (int x=0; x<board[y].size(); ++x)
+                    board[y][x].number = 0;
+            currentMoveNumber = 0;
         }
+
+        if ((*iter)->isStone())
+            ++currentMoveNumber;
         putStone(*iter, currentMoveNumber);
 
         if (*iter == currentNode)
