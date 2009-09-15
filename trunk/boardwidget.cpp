@@ -110,6 +110,7 @@ BoardWidget::BoardWidget(QWidget *parent) :
     flipBoardHorizontally_(false),
     flipBoardVertically_(false),
     playSound(false),
+    resetMoveNumberInBranch(true),
     stoneSound(this),
     playGame(NULL)
 {
@@ -1147,8 +1148,12 @@ void BoardWidget::createBoardBuffer(){
     while (iter != nodeList.end()){
         if ((*iter)->moveNumber > 0)
             currentMoveNumber = (*iter)->moveNumber;
-        else if ((*iter)->isStone())
-            ++currentMoveNumber;
+        else if ((*iter)->isStone()){
+            if (resetMoveNumberInBranch && (*iter)->parent->childNodes.size() > 1)
+                currentMoveNumber = 1;
+            else
+                ++currentMoveNumber;
+        }
         putStone(*iter, currentMoveNumber);
 
         if (*iter == currentNode)

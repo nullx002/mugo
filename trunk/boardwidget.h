@@ -294,6 +294,7 @@ private:
     bool flipBoardHorizontally_;
     bool flipBoardVertically_;
     bool playSound;
+    bool resetMoveNumberInBranch;
 
     // draw object
     QPixmap offscreenBuffer1, offscreenBuffer2, offscreenBuffer3;
