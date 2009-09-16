@@ -123,6 +123,9 @@ private:
     QHttp* http;
     QByteArray downloadBuff;
 
+    QList<QAction*> codecActions;
+    QList<const char*> MainWindow::codecNames;
+
 private slots:
     // File menu
     void on_actionResetMoveNubmerInBranch_triggered();
@@ -190,6 +193,7 @@ private slots:
 
     // Edit menu -> Encoding
     void setEncoding();
+    void setEncoding(QAction* action);
 
     // Traverse menu
     void on_actionMoveFirst_triggered();

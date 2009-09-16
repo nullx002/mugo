@@ -144,8 +144,6 @@ bool fileBase::read(const QString& fname, QTextCodec* defaultCodec, bool guessCo
 }
 
 bool fileBase::read(const QByteArray& bytes, QTextCodec* defaultCodec, bool guessCodec){
-    this->codec = codec;
-
     QTextCodec* codec = guessCodec ? getCodec(bytes) : NULL;
     if (codec)
         qDebug() << "file codec is " << codec->name();
@@ -154,7 +152,8 @@ bool fileBase::read(const QByteArray& bytes, QTextCodec* defaultCodec, bool gues
     else
         qDebug() << "use default codec: " << defaultCodec->name();
 
-    QString s = codec ? codec->toUnicode(bytes) : defaultCodec->toUnicode(bytes);
+    this->codec = codec ? codec : defaultCodec;
+    QString s = this->codec->toUnicode(bytes);
     if ('\\' == 0x5C)
         s.replace(QChar(0x00A5), "\\");
     QString::iterator iter = s.begin();
