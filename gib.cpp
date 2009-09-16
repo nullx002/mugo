@@ -1,4 +1,5 @@
 #include <QDebug>
+#include <QRegExp>
 #include "appdef.h"
 #include "gib.h"
 
@@ -31,7 +32,18 @@ bool gib::get(go::data& data) const{
     int hcapy2[] = {3, 15, 15, 3, 9, 9, 9};
     int hcapy3[] = {3, 15, 15, 3, 9, 9, 15, 3, 9};
 
-qDebug() << "handicap = " << handicap;
+    data.root->whitePlayer = whitePlayer;
+    data.root->whiteRank   = whiteRank;
+    data.root->blackPlayer = blackPlayer;
+    data.root->blackRank   = blackRank;
+    data.root->comment     = comment;
+    data.root->place       = place;
+    data.root->date        = gameDate;
+    data.root->name        = gameName;
+    data.root->result      = result;
+    data.root->annotation  = condition;
+    data.root->time        = gameTime;
+
     data.root->handicap = handicap;
     for (int i=0; i<handicap; ++i){
         if (handicap < 6)
@@ -71,9 +83,45 @@ bool gib::get(dataList::const_iterator first, dataList::const_iterator last, go:
 bool gib::readHeader(QString::iterator& first, QString::iterator& last){
     QString str;
     while (first != last){
-        str = readLine(first, last);
+        str.append( readLine(first, last) );
         if (str == "\\HE")
             return true;
+
+        // \[%1=%2\]
+        QRegExp rx("\\\\\\[(.+)=(.+)\\\\\\]");
+        int pos = rx.indexIn(str);
+        if (pos == -1){
+            str.push_back(' ');
+            continue;
+        }
+        str.clear();
+
+        QStringList list = rx.capturedTexts();
+        if (list.size() < 3)
+            continue;
+
+        if (list[1] == "GAMEWHITENICK")
+            whitePlayer = list[2];
+        else if (list[1] == "GAMEBLACKLEVEL")
+            whiteRank = list[2];
+        else if (list[1] == "GAMEBLACKNICK")
+            blackPlayer = list[2];
+        else if (list[1] == "GAMEBLACKLEVEL")
+            blackRank = list[2];
+        else if (list[1] == "GAMECOMMENT")
+            comment = list[2];
+        else if (list[1] == "GAMEPLACE")
+            place = list[2];
+        else if (list[1] == "GAMEDATE")
+            gameDate = list[2];
+        else if (list[1] == "GAMENAME")
+            gameName = list[2];
+        else if (list[1] == "GAMERESULT")
+            result = list[2];
+        else if (list[1] == "GAMECONDITION")
+            condition = list[2];
+        else if (list[1] == "GAMETIME")
+            gameTime = list[2];
     }
 
     return false;
@@ -103,6 +151,8 @@ bool gib::readGame(QString::iterator& first, QString::iterator& last){
 }
 
 bool gib::readINI(int hcap){
+    if (handicap < 0 || handicap > 9)
+        return false;
     handicap = hcap;
     return true;
 }

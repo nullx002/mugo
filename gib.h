@@ -24,6 +24,8 @@ public:
     };
     typedef data::dataList   dataList;
 
+    gib() : handicap(0){}
+
     virtual bool readStream(QString::iterator& first, QString::iterator last);
     virtual bool saveStream(QTextStream& stream);
 
@@ -40,6 +42,17 @@ private:
     bool readSTO(int x, int y, int color);
 
     dataList dataList_;
+    QString whitePlayer;
+    QString whiteRank;
+    QString blackPlayer;
+    QString blackRank;
+    QString comment;
+    QString place;
+    QString gameDate;
+    QString gameName;
+    QString result;
+    QString condition;
+    QString gameTime;
     int handicap;
 };
 
