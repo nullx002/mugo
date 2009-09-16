@@ -12,6 +12,7 @@
 #include "sgf.h"
 #include "ugf.h"
 #include "gib.h"
+#include "ngf.h"
 #include "mainwindow.h"
 #include "setupdialog.h"
 #include "gameinformationdialog.h"
@@ -256,10 +257,17 @@ void MainWindow::dragEnterEvent(QDragEnterEvent* event)
         event->acceptProposedAction();
     else{
 */
+        char* ext[] = {"sgf", "ugf", "ugi", "gib", "ngf"};
+        int N = sizeof(ext) / sizeof(ext[0]);
+
         QString localFile = event->mimeData()->urls().front().toLocalFile();
         QFileInfo f(localFile);
-        if (f.suffix().compare("sgf", Qt::CaseInsensitive) == 0 || f.suffix().compare("ugf", Qt::CaseInsensitive) == 0 || f.suffix().compare("ugi", Qt::CaseInsensitive) == 0)
-            event->acceptProposedAction();
+
+        for (int i=0; i<N; ++i)
+            if (f.suffix().compare(ext[i], Qt::CaseInsensitive) == 0){
+                event->acceptProposedAction();
+                break;
+            }
 //    }
 }
 
@@ -1875,36 +1883,17 @@ bool MainWindow::fileNew(int xsize, int ysize, int handicap, double komi){
 */
 bool MainWindow::fileOpen(){
     QString selectedFilter;
-    QString fname = QFileDialog::getOpenFileName(this, QString(), QString(), tr("All Go Format(*.sgf *.ugf *.ugi *.gib);;sgf(*.sgf);;ugf(*.ugf *.ugi);;gib(*.gib);;All Files(*.*)"), &selectedFilter);
+    QString fname = QFileDialog::getOpenFileName(this, QString(), QString(), tr("All Go Format(*.sgf *.ugf *.ugi *.gib *.ngf);;sgf(*.sgf);;ugf(*.ugf *.ugi);;gib(*.gib);;ngf(*.ngf);;All Files(*.*)"), &selectedFilter);
     if (fname.isEmpty())
         return  false;
 
-    if (selectedFilter.indexOf("All Go Format") >= 0){
-        QFileInfo info(fname);
-        selectedFilter = info.suffix().toLower();
-    }
-
-    if (selectedFilter.indexOf("sgf") >= 0)
-        return fileOpen(fname, "sgf");
-    else if (selectedFilter.indexOf("ugf") >= 0 || selectedFilter.indexOf("ugi") >= 0)
-        return fileOpen(fname, "ugf");
-    else if (selectedFilter.indexOf("gib") >= 0)
-        return fileOpen(fname, "gib");
-    else
-        return false;
+    return fileOpen(fname);
 }
 
 /**
 * file open.
 */
 bool MainWindow::fileOpen(const QString& fname, bool guessCodec, bool newTab, bool forceOpen){
-    return fileOpen(fname, QFileInfo(fname).suffix(), guessCodec, newTab, forceOpen);
-}
-
-/**
-* file open.
-*/
-bool MainWindow::fileOpen(const QString& fname, const QString& ext, bool guessCodec, bool newTab, bool forceOpen){
 
 #define READ_FILE(FORMAT){\
     go::FORMAT fileData;\
@@ -1917,7 +1906,6 @@ bool MainWindow::fileOpen(const QString& fname, const QString& ext, bool guessCo
     }\
     board->setData(fileData);\
 }
-
 
     if (!forceOpen){
         QMap<BoardWidget*, TabData>::iterator iter = tabDatas.begin();
@@ -1936,12 +1924,17 @@ bool MainWindow::fileOpen(const QString& fname, const QString& ext, bool guessCo
     else
         codec = tabData->codec;
 
+    QFileInfo info(fname);
+    QString ext = info.suffix().toLower();
+
     if (ext.compare("sgf", Qt::CaseInsensitive) == 0)
         READ_FILE(sgf)
     else if (ext.compare("ugf", Qt::CaseInsensitive) == 0 || ext.compare("ugi", Qt::CaseInsensitive) == 0)
         READ_FILE(ugf)
     else if (ext.compare("gib", Qt::CaseInsensitive) == 0)
         READ_FILE(gib)
+    else if (ext.compare("ngf", Qt::CaseInsensitive) == 0)
+        READ_FILE(ngf)
     else
         return false;
 

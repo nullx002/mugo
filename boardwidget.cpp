@@ -703,9 +703,11 @@ void BoardWidget::getData(go::fileBase& data){
 void BoardWidget::setData(const go::fileBase& data){
     clear();
     data.get(goData);
+    createBoardBuffer();
+    repaintBoard(true, false);
     nodeList.clear();
     setCurrentNode();
-    repaintBoard();
+//    repaintBoard();
 }
 
 void BoardWidget::insertData(const go::nodePtr node, const go::fileBase& data){
@@ -1136,7 +1138,6 @@ void BoardWidget::createNodeList(){
 void BoardWidget::createBoardBuffer(){
     xsize = (rotateBoard_ == 0 || rotateBoard_ == 2) ? goData.root->xsize : goData.root->ysize;
     ysize = (rotateBoard_ == 0 || rotateBoard_ == 2) ? goData.root->ysize : goData.root->xsize;
-
     capturedBlack = 0;
     capturedWhite = 0;
 
