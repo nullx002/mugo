@@ -24,6 +24,22 @@ bool gib::saveStream(QTextStream& stream){
     return false;
 }
 
+QTextCodec* gib::getCodec(const QByteArray& a) const{
+    int p = a.indexOf("\\[GIBOKIND=");
+    if (p == -1)
+        return NULL;
+    p += 11;
+
+    if (a.mid(p, 7) == "Japan\\]")
+        return QTextCodec::codecForName("Shift_JIS");
+    else if (a.mid(p, 8) == "Taiwan\\]")
+        return QTextCodec::codecForName("Big5");
+    else if (a.mid(p, 7) == "Korea\\]")
+        return QTextCodec::codecForName("EUC_KR");
+    else
+        return NULL;
+}
+
 bool gib::get(go::data& data) const{
     int hcapx1[] = {15, 3, 15, 3, 9};
     int hcapx2[] = {15, 3, 15, 3, 15, 3, 9};

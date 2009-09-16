@@ -23,6 +23,8 @@
 
 Q_DECLARE_METATYPE(go::nodePtr);
 
+
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -32,6 +34,74 @@ MainWindow::MainWindow(QWidget *parent)
     , playWithComputerMode(false)
 {
     ui->setupUi(this);
+
+    // encoding
+    codecActions.push_back( ui->actionEncodingUTF8 );
+    codecActions.push_back( ui->actionISO8859_1 );
+    codecActions.push_back( ui->actionISO8859_2 );
+    codecActions.push_back( ui->actionISO8859_3 );
+    codecActions.push_back( ui->actionISO8859_4 );
+    codecActions.push_back( ui->actionISO8859_5 );
+    codecActions.push_back( ui->actionISO8859_6 );
+    codecActions.push_back( ui->actionISO8859_7 );
+    codecActions.push_back( ui->actionISO8859_8 );
+    codecActions.push_back( ui->actionISO8859_9 );
+    codecActions.push_back( ui->actionISO8859_10 );
+    codecActions.push_back( ui->actionISO8859_11 );
+    codecActions.push_back( ui->actionISO8859_13 );
+    codecActions.push_back( ui->actionISO8859_14 );
+    codecActions.push_back( ui->actionISO8859_15 );
+    codecActions.push_back( ui->actionISO8859_16 );
+    codecActions.push_back( ui->actionWindows_1250 );
+    codecActions.push_back( ui->actionWindows_1251 );
+    codecActions.push_back( ui->actionWindows_1252 );
+    codecActions.push_back( ui->actionWindows_1253 );
+    codecActions.push_back( ui->actionWindows_1254 );
+    codecActions.push_back( ui->actionWindows_1255 );
+    codecActions.push_back( ui->actionWindows_1256 );
+    codecActions.push_back( ui->actionWindows_1257 );
+    codecActions.push_back( ui->actionWindows_1258 );
+    codecActions.push_back( ui->actionKoi8_R );
+    codecActions.push_back( ui->actionKoi8_U );
+    codecActions.push_back( ui->actionEncodingGB2312 );
+    codecActions.push_back( ui->actionEncodingBig5 );
+    codecActions.push_back( ui->actionEncodingShiftJIS );
+    codecActions.push_back( ui->actionEncodingJIS );
+    codecActions.push_back( ui->actionEncodingEucJP );
+    codecActions.push_back( ui->actionEncodingKorean );
+    codecNames.push_back( "UTF-8" );
+    codecNames.push_back( "ISO-8859-1" );
+    codecNames.push_back( "ISO-8859-2" );
+    codecNames.push_back( "ISO-8859-3" );
+    codecNames.push_back( "ISO-8859-4" );
+    codecNames.push_back( "ISO-8859-5" );
+    codecNames.push_back( "ISO-8859-6" );
+    codecNames.push_back( "ISO-8859-7" );
+    codecNames.push_back( "ISO-8859-8" );
+    codecNames.push_back( "ISO-8859-9" );
+    codecNames.push_back( "ISO-8859-10" );
+    codecNames.push_back( "TIS-620" );  // ISO-8859-11
+    codecNames.push_back( "ISO-8859-13" );
+    codecNames.push_back( "ISO-8859-14" );
+    codecNames.push_back( "ISO-8859-15" );
+    codecNames.push_back( "ISO-8859-16" );
+    codecNames.push_back( "windows-1250" );
+    codecNames.push_back( "windows-1251" );
+    codecNames.push_back( "windows-1252" );
+    codecNames.push_back( "windows-1253" );
+    codecNames.push_back( "windows-1254" );
+    codecNames.push_back( "windows-1255" );
+    codecNames.push_back( "windows-1256" );
+    codecNames.push_back( "windows-1257" );
+    codecNames.push_back( "windows-1258" );
+    codecNames.push_back( "KOI8-R" );
+    codecNames.push_back( "KOI8-U" );
+    codecNames.push_back( "GB2312" );
+    codecNames.push_back( "Big5" );
+    codecNames.push_back( "Shift_JIS" );
+    codecNames.push_back( "ISO-2022-JP" );
+    codecNames.push_back( "EUC-JP" );
+    codecNames.push_back( "EUC-KR" );
 
     // action group
     QActionGroup* showMoveNumberGroup = new QActionGroup(this);
@@ -45,45 +115,9 @@ MainWindow::MainWindow(QWidget *parent)
     showMoveNumberGroup->addAction(ui->actionAllMoves);
 
     QActionGroup* encodingGroup = new QActionGroup(this);
-    QAction* encodingActions[] = {
-        ui->actionEncodingUTF8,
-        ui->actionISO8859_1,
-        ui->actionISO8859_2,
-        ui->actionISO8859_3,
-        ui->actionISO8859_4,
-        ui->actionISO8859_5,
-        ui->actionISO8859_6,
-        ui->actionISO8859_7,
-        ui->actionISO8859_8,
-        ui->actionISO8859_9,
-        ui->actionISO8859_10,
-        ui->actionISO8859_11,
-        ui->actionISO8859_13,
-        ui->actionISO8859_14,
-        ui->actionISO8859_15,
-        ui->actionISO8859_16,
-        ui->actionWindows_1250,
-        ui->actionWindows_1251,
-        ui->actionWindows_1252,
-        ui->actionWindows_1253,
-        ui->actionWindows_1257,
-        ui->actionWindows_1254,
-        ui->actionWindows_1258,
-        ui->actionWindows_1256,
-        ui->actionWindows_1255,
-        ui->actionKoi8_R,
-        ui->actionKoi8_U,
-        ui->actionEncodingGB2312,
-        ui->actionEncodingBig5,
-        ui->actionEncodingKorean,
-        ui->actionEncodingEucJP,
-        ui->actionEncodingJIS,
-        ui->actionEncodingShiftJIS,
-    };
-    int encN = sizeof(encodingActions) / sizeof(encodingActions[0]);
-    for (int i=0; i<encN; ++i){
-        encodingGroup->addAction( encodingActions[i] );
-        connect( encodingActions[i], SIGNAL(triggered()), this, SLOT(setEncoding()) );
+    for (int i=0; i<codecActions.size(); ++i){
+        encodingGroup->addAction( codecActions[i] );
+        connect( codecActions[i], SIGNAL(triggered()), this, SLOT(setEncoding()) );
     }
 
     QActionGroup* editGroup = new QActionGroup(this);
@@ -329,7 +363,7 @@ void MainWindow::on_actionOpenURL_triggered(){
 */
 void MainWindow::on_actionReload_triggered(){
     if (maybeSave())
-        fileOpen(tabData->fileName, true, false, true);
+        fileOpen(tabData->fileName, false, false, true);
 }
 
 /**
@@ -838,82 +872,14 @@ void MainWindow::on_actionFlipSgfVertically_triggered(){
 * Edit -> Encoding
 */
 void MainWindow::setEncoding(){
-    const QAction* act[] = {
-        ui->actionEncodingUTF8,
-        ui->actionISO8859_1,
-        ui->actionISO8859_2,
-        ui->actionISO8859_3,
-        ui->actionISO8859_4,
-        ui->actionISO8859_5,
-        ui->actionISO8859_6,
-        ui->actionISO8859_7,
-        ui->actionISO8859_8,
-        ui->actionISO8859_9,
-        ui->actionISO8859_10,
-        ui->actionISO8859_11,
-        ui->actionISO8859_13,
-        ui->actionISO8859_14,
-        ui->actionISO8859_15,
-        ui->actionISO8859_16,
-        ui->actionWindows_1250,
-        ui->actionWindows_1251,
-        ui->actionWindows_1252,
-        ui->actionWindows_1253,
-        ui->actionWindows_1254,
-        ui->actionWindows_1255,
-        ui->actionWindows_1256,
-        ui->actionWindows_1257,
-        ui->actionWindows_1258,
-        ui->actionKoi8_R,
-        ui->actionKoi8_U,
-        ui->actionEncodingGB2312,
-        ui->actionEncodingBig5,
-        ui->actionEncodingShiftJIS,
-        ui->actionEncodingJIS,
-        ui->actionEncodingEucJP,
-        ui->actionEncodingKorean,
-    };
-    const char* str[] = {
-        "UTF-8",
-        "ISO-8859-1",
-        "ISO-8859-2",
-        "ISO-8859-3",
-        "ISO-8859-4",
-        "ISO-8859-5",
-        "ISO-8859-6",
-        "ISO-8859-7",
-        "ISO-8859-8",
-        "ISO-8859-9",
-        "ISO-8859-10",
-        "ISO-8859-11",
-        "ISO-8859-13",
-        "ISO-8859-14",
-        "ISO-8859-15",
-        "ISO-8859-16",
-        "Windows-1250",
-        "Windows-1251",
-        "Windows-1252",
-        "Windows-1253",
-        "Windows-1254",
-        "Windows-1255",
-        "Windows-1256",
-        "Windows-1257",
-        "Windows-1258",
-        "KOI8-R",
-        "KOI8-U",
-        "GB2312",
-        "Big5",
-        "Shift_JIS",
-        "ISO 2022-JP",
-        "EUC-JP",
-        "EUC-KR",
-    };
-    int N = sizeof(act) / sizeof(act[0]);
-    QAction *action = qobject_cast<QAction*>(sender());
+    setEncoding( qobject_cast<QAction*>(sender()) );
+}
+
+void MainWindow::setEncoding(QAction* action){
     tabData->encode = action;
-    for (int i=0; i<N; ++i){
-        if (act[i] == action){
-            tabData->codec = QTextCodec::codecForName( str[i] );
+    for (int i=0; i<codecActions.size(); ++i){
+        if (codecActions[i] == action){
+            tabData->codec = QTextCodec::codecForName( codecNames[i] );
 
             if (tabData->codec == NULL)
                 qDebug() << "codec is null";
@@ -1898,6 +1864,7 @@ bool MainWindow::fileOpen(const QString& fname, bool guessCodec, bool newTab, bo
 #define READ_FILE(FORMAT){\
     go::FORMAT fileData;\
     fileData.read(fname, codec, guessCodec);\
+    codec = fileData.codec;\
 \
     BoardWidget* board = boardWidget;\
     if (newTab){\
@@ -1944,6 +1911,13 @@ bool MainWindow::fileOpen(const QString& fname, bool guessCodec, bool newTab, bo
     setCaption();
 
     ui->actionReload->setEnabled(true);
+
+    for (int i=0; i<codecNames.size(); ++i){
+        if (stricmp(codec->name(), codecNames[i]) == 0){
+            codecActions[i]->setChecked(true);
+            setEncoding(codecActions[i]);
+        }
+    }
 
     return true;
 }
