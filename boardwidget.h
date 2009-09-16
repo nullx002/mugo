@@ -168,6 +168,7 @@ public:
     eTutorMode getTutorMode() const{ return tutorMode; }
     bool getShowMoveNumber() const{ return showMoveNumber; }
     int  getShowMoveNumberCount() const{ return showMoveNumberCount; }
+    eMoveNumberMode getMoveNumberMode() const{ return moveNumberMode; }
     bool getShowCoordinates() const{ return showCoordinates; }
     bool getShowCoordinatesWithI() const{ return showCoordinatesI; }
     bool getShowMarker() const{ return showMarker; }
