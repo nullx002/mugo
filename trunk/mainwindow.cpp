@@ -1709,6 +1709,7 @@ void MainWindow::updateMenu(){
     tabData->encode->setChecked(true);
 
     ui->menuShowMoveNumber->menuAction()->setChecked( boardWidget->getShowMoveNumber() );
+    ui->actionResetMoveNubmerInBranch->setChecked( boardWidget->getMoveNumberMode() != BoardWidget::eSequential );
     ui->actionShowMoveNumber->setChecked( boardWidget->getShowMoveNumber() );
     ui->actionNoMoveNumber->setChecked( boardWidget->getShowMoveNumberCount() == 0 );
     ui->actionLast1Move->setChecked( boardWidget->getShowMoveNumberCount() == 1 );
