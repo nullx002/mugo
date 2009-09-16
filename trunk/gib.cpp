@@ -32,6 +32,8 @@ bool gib::get(go::data& data) const{
     int hcapy2[] = {3, 15, 15, 3, 9, 9, 9};
     int hcapy3[] = {3, 15, 15, 3, 9, 9, 15, 3, 9};
 
+    data.root->xsize = 19;
+    data.root->ysize = 19;
     data.root->whitePlayer = whitePlayer;
     data.root->whiteRank   = whiteRank;
     data.root->blackPlayer = blackPlayer;

@@ -23,7 +23,8 @@ SOURCES += main.cpp \
     playgame.cpp \
     gtp.cpp \
     printoptiondialog.cpp \
-    gib.cpp
+    gib.cpp \
+    ngf.cpp
 HEADERS += mainwindow.h \
     boardwidget.h \
     godata.h \
@@ -39,7 +40,8 @@ HEADERS += mainwindow.h \
     playgame.h \
     gtp.h \
     printoptiondialog.h \
-    gib.h
+    gib.h \
+    ngf.h
 FORMS += mainwindow.ui \
     boardwidget.ui \
     gameinformationdialog.ui \
