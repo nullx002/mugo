@@ -155,6 +155,8 @@ bool fileBase::read(const QByteArray& bytes, QTextCodec* defaultCodec, bool gues
         qDebug() << "use default codec: " << defaultCodec->name();
 
     QString s = codec ? codec->toUnicode(bytes) : defaultCodec->toUnicode(bytes);
+    if ('\\' == 0x5C)
+        s.replace(QChar(0x00A5), "\\");
     QString::iterator iter = s.begin();
     return readStream(iter, s.end());
 }

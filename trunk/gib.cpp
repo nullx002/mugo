@@ -39,11 +39,12 @@ bool gib::get(go::data& data) const{
     data.root->comment     = comment;
     data.root->place       = place;
     data.root->date        = gameDate;
-    data.root->name        = gameName;
+    data.root->gameName    = gameName;
     data.root->result      = result;
     data.root->annotation  = condition;
     data.root->time        = gameTime;
-
+    if (handicap)
+        data.root->komi = 0;
     data.root->handicap = handicap;
     for (int i=0; i<handicap; ++i){
         if (handicap < 6)
@@ -88,7 +89,7 @@ bool gib::readHeader(QString::iterator& first, QString::iterator& last){
             return true;
 
         // \[%1=%2\]
-        QRegExp rx("\\\\\\[(.+)=(.+)\\\\\\]");
+        QRegExp rx("\\\\\\[(.+)=(.*)\\\\\\]");
         int pos = rx.indexIn(str);
         if (pos == -1){
             str.push_back(' ');
@@ -102,7 +103,7 @@ bool gib::readHeader(QString::iterator& first, QString::iterator& last){
 
         if (list[1] == "GAMEWHITENICK")
             whitePlayer = list[2];
-        else if (list[1] == "GAMEBLACKLEVEL")
+        else if (list[1] == "GAMEWHITELEVEL")
             whiteRank = list[2];
         else if (list[1] == "GAMEBLACKNICK")
             blackPlayer = list[2];
