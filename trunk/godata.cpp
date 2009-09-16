@@ -136,7 +136,7 @@ void data::clear(){
 
 bool fileBase::read(const QString& fname, QTextCodec* defaultCodec, bool guessCodec){
     QFile f(fname);
-    if (!f.open(QIODevice::ReadOnly))
+    if (!f.open(QIODevice::ReadOnly|QIODevice::Text))
         return false;
 
     QByteArray bytes = f.read( f.size() );
