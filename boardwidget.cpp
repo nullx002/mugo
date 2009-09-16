@@ -2005,9 +2005,9 @@ void BoardWidget::addCharacter(go::markList& markList, const go::point& p){
         if (labelType == 2)
             s.sprintf("%d", c);
         else if (labelType == 3)
-            s = QString::fromUtf8(katakana[c]);
+            s = katakana[c];
         else if (labelType == 4)
-            s = QString::fromUtf8(kana_iroha[c]);
+            s = kana_iroha[c];
         else
             s = QChar(c);
 
