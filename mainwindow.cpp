@@ -173,9 +173,10 @@ MainWindow::MainWindow(QWidget *parent)
     ui->editToolBar->insertAction(redoAction, undoAction);
 
     // create window menu
-    ui->menuWindow->addAction( ui->commentDockWidget->toggleViewAction() );
-    ui->menuWindow->addAction( ui->branchDockWidget->toggleViewAction() );
-    ui->menuWindow->addAction( ui->undoDockWidget->toggleViewAction() );
+    ui->menuWindow->insertAction( ui->actionPreviousTab, ui->commentDockWidget->toggleViewAction() );
+    ui->menuWindow->insertAction( ui->actionPreviousTab, ui->branchDockWidget->toggleViewAction() );
+    ui->menuWindow->insertAction( ui->actionPreviousTab, ui->undoDockWidget->toggleViewAction() );
+    ui->menuWindow->insertSeparator( ui->actionPreviousTab );
     ui->menuToolbars->addAction( ui->mainToolBar->toggleViewAction() );
     ui->menuToolbars->addAction( ui->editToolBar->toggleViewAction() );
     ui->menuToolbars->addAction( ui->navigationToolBar->toggleViewAction() );
@@ -234,12 +235,14 @@ MainWindow::MainWindow(QWidget *parent)
     redoAction->setShortcut( QKeySequence::Redo );
     ui->actionPreviousMove->setShortcut( QKeySequence::Back );
     ui->actionNextMove->setShortcut( QKeySequence::Forward );
-    ui->actionPreviousBranch->setShortcut( QKeySequence::PreviousChild );
-    ui->actionNextBranch->setShortcut( QKeySequence::NextChild );
+//    ui->actionPreviousBranch->setShortcut( QKeySequence::PreviousChild );
+//    ui->actionNextBranch->setShortcut( QKeySequence::NextChild );
     ui->actionMoveFirst->setShortcut( QKeySequence::MoveToStartOfLine );
     ui->actionMoveLast->setShortcut( QKeySequence::MoveToEndOfLine );
 //    ui->actionFastRewind->setShortcut( QKeySequence::MoveToPreviousPage );
 //    ui->actionFastForward->setShortcut( QKeySequence::MoveToNextPage );
+    ui->actionPreviousTab->setShortcut( QKeySequence::PreviousChild );
+    ui->actionNextTab->setShortcut( QKeySequence::NextChild );
 
     // command line
     if (qApp->argc() > 1)
@@ -1489,6 +1492,34 @@ void MainWindow::on_actionOptions_triggered(){
 
 /**
 * Slot
+* Window -> Previous Tab
+*/
+void MainWindow::on_actionPreviousTab_triggered(){
+    if (ui->boardTabWidget->count() <= 1)
+        return;
+
+    int index = ui->boardTabWidget->currentIndex() - 1;
+    if (index < 0)
+        index = ui->boardTabWidget->count() - 1;
+    ui->boardTabWidget->setCurrentIndex(index);
+}
+
+/**
+* Slot
+* Window->Next Tab
+*/
+void MainWindow::on_actionNextTab_triggered(){
+    if (ui->boardTabWidget->count() <= 1)
+        return;
+
+    int index = ui->boardTabWidget->currentIndex() + 1;
+    if (index >= ui->boardTabWidget->count())
+        index = 0;
+    ui->boardTabWidget->setCurrentIndex(index);
+}
+
+/**
+* Slot
 * Help -> About
 */
 void MainWindow::on_actionAbout_triggered(){
@@ -1538,12 +1569,6 @@ void MainWindow::on_boardTabWidget_currentChanged(QWidget* widget){
 
 void MainWindow::on_boardTabWidget_tabCloseRequested(int index){
     tabClose(index);
-}
-
-void MainWindow::boardTabWidgetPrev(){
-}
-
-void MainWindow::boardTabWidgetNext(){
 }
 
 /**
@@ -1757,32 +1782,29 @@ void MainWindow::updateMenu(){
 * if game information has player info, set player name to window text.
 */
 void MainWindow::setCaption(){
-    QString caption = tabData->documentName;
+    go::informationPtr gameInfo = boardWidget->getData().root;
+    bool hasPlayerInfo = !gameInfo->whitePlayer.isEmpty() || !gameInfo->whiteRank.isEmpty() ||
+                            !gameInfo->blackPlayer.isEmpty() || !gameInfo->blackRank.isEmpty();
+
+    QString caption;
+    if (hasPlayerInfo)
+        caption = tr("%1 %2 (W) vs %4 %5 (B) (Result:%7)")
+                        .arg(gameInfo->whitePlayer)
+                        .arg(gameInfo->whiteRank)
+                        .arg(gameInfo->blackPlayer)
+                        .arg(gameInfo->blackRank)
+                        .arg(gameInfo->result);
+
+    if (!hasPlayerInfo)
+        caption = tabData->documentName;
 
     if (boardWidget->isDirty())
         caption.append(" *");
 
     caption.append(" - ");
-
-    go::informationPtr gameInfo = boardWidget->getData().root;
-    bool hasPlayerInfo = !gameInfo->whitePlayer.isEmpty() || !gameInfo->whiteRank.isEmpty() ||
-                            !gameInfo->blackPlayer.isEmpty() || !gameInfo->blackRank.isEmpty();
-    if (hasPlayerInfo){
-        caption.append(gameInfo->whitePlayer);
-        caption.push_back(' ');
-        caption.append(gameInfo->whiteRank);
-        caption.append(" (W) vs ");
-        caption.append(gameInfo->blackPlayer);
-        caption.push_back(' ');
-        caption.append(gameInfo->blackRank);
-        caption.append(" (B) (Result:");
-        caption.append(gameInfo->result);
-        caption.append(") - ");
-    }
     caption.append(APPNAME);
 
     setWindowTitle(caption);
-
 
     QString docName = tabData->documentName;
     if (boardWidget->isDirty())
@@ -1928,7 +1950,8 @@ bool MainWindow::fileOpen(const QString& fname, bool guessCodec, bool newTab, bo
 */
 bool MainWindow::fileSave(){
     const QString& fileName = tabData->fileName;
-    if (fileName.isEmpty())
+    QFileInfo fi(fileName);
+    if (fileName.isEmpty() || fi.suffix() != "sgf")
         return fileSaveAs();
     else
         return fileSaveAs(fileName);
@@ -1938,7 +1961,14 @@ bool MainWindow::fileSave(){
 * file saveas.
 */
 bool MainWindow::fileSaveAs(){
-    QString fname = QFileDialog::getSaveFileName(this, QString(), QString(), tr("sgf(*.sgf)"));
+    QString defaultName;
+    if (!tabData->fileName.isEmpty()){
+        QFileInfo fi(tabData->fileName);
+        fi.setFile(fi.absoluteDir(), fi.baseName() + ".sgf");
+        defaultName = fi.absoluteFilePath();
+    }
+
+    QString fname = QFileDialog::getSaveFileName(this, QString(), defaultName, tr("sgf(*.sgf)"));
     if (fname.isEmpty())
         return false;
 

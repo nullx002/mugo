@@ -316,6 +316,8 @@
      </property>
     </widget>
     <addaction name="menuToolbars"/>
+    <addaction name="actionPreviousTab"/>
+    <addaction name="actionNextTab"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -1625,6 +1627,16 @@
    </property>
    <property name="text">
     <string>Reset Move Nubmer in Branch</string>
+   </property>
+  </action>
+  <action name="actionPreviousTab">
+   <property name="text">
+    <string>Previous Tab</string>
+   </property>
+  </action>
+  <action name="actionNextTab">
+   <property name="text">
+    <string>Next Tab</string>
    </property>
   </action>
  </widget>
