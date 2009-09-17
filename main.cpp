@@ -82,6 +82,7 @@ int main(int argc, char *argv[])
 {
 // is QFileOpenEvent received on macx??
     Application a(argc, argv);
+    a.addLibraryPath( a.applicationDirPath() + "/plugins" );
     a.setOrganizationName(AUTHOR);
     a.setApplicationName(APPNAME);
     a.setApplicationVersion(VERSION);

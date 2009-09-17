@@ -154,8 +154,13 @@ bool fileBase::read(const QByteArray& bytes, QTextCodec* defaultCodec, bool gues
 
     this->codec = codec ? codec : defaultCodec;
     QString s = this->codec->toUnicode(bytes);
-    if ('\\' == 0x5C)
-        s.replace(QChar(0x00A5), "\\");
+
+    // yen sign problem.
+    QChar chars[2] = {0x005C, 0x00A5};
+    QByteArray ba = this->codec->fromUnicode(chars, 2);
+    if (ba.size() == 2 && ba[0] == ba[1])
+        s.replace(QChar(0x00A5), QChar(0x5C));
+
     QString::iterator iter = s.begin();
     return readStream(iter, s.end());
 }

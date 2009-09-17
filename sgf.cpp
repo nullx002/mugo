@@ -475,6 +475,7 @@ bool sgf::readNode(QString::iterator& first, QString::iterator last, node& n){
         }
 
         QString key;
+        key.reserve(5);
         if (readNodeKey(first, last, key) == false)
             return false;
 
@@ -503,6 +504,7 @@ bool sgf::readNodeValues(QString::iterator& first, QString::iterator last, QStri
     while (first != last){
         if (*first == '['){
             QString v;
+            v.reserve(100);
             if (readNodeValue(++first, last, v))
                 values.push_back(v);
         }
