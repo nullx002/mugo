@@ -5,13 +5,12 @@
 #include "gtp.h"
 #include "gtp.h"
 
-gtp::gtp(BoardWidget* board, go::color color, QProcess& proc, QObject* parent) : PlayGame(board, color, parent), process(proc), index(0), moving_(false)
+gtp::gtp(BoardWidget* board, go::color color, QProcess& proc, QObject* parent) : PlayGame(board, color, parent), process(proc), index(0)
 {
     connect(&process, SIGNAL(readyRead()), this, SLOT(gtpRead()));
 }
 
 void gtp::move(int x, int y){
-qDebug() << "move";
     commandList.push_back( commandPtr(new moveCommand(x, y)) );
 
     QString xy;
@@ -24,8 +23,6 @@ qDebug() << "move";
         write( QString("play black %1\n").arg(xy) );
     else
         write( QString("play white %1\n").arg(xy) );
-
-    moving_ = true;
 }
 
 void gtp::put(go::color color, int x, int y){
@@ -87,9 +84,6 @@ void gtp::gtpRead(){
         int p = s.indexOf(' ', 2);
         QString msg = s.mid(p+1);
         int index = s.mid(1, p-1).toInt();
-
-        if (commandList[index]->status == eMove)
-            moving_ = false;
 
         if (status != '=')
             continue;

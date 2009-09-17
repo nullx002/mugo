@@ -18,9 +18,6 @@
 
 #ifdef Q_WS_WIN
 #   define usleep(X) Sleep(X/1000)
-
-    QString Sound::fileName;
-    MCI_OPEN_PARMS Sound::mop = {0};
 #else
 #   include <unistd.h>
 #endif
@@ -28,6 +25,7 @@
 Sound::Sound(QWidget* parent_) : parent(parent_){
 #if defined(Q_WS_WIN)
     lastClock = 0;
+    memset(&mop, 0, sizeof(mop));
 #else
     media = Phonon::createPlayer(Phonon::NotificationCategory);
 #endif
@@ -42,10 +40,6 @@ Sound::~Sound(){
 
 void Sound::setCurrentSource(const QString& source){
 #if defined(Q_WS_WIN)
-    if (fileName == source)
-        return;
-
-    fileName = source;
     if (mop.wDeviceID != 0)
         mciSendCommand(mop.wDeviceID, MCI_CLOSE, 0, 0);
 
@@ -110,7 +104,6 @@ BoardWidget::BoardWidget(QWidget *parent) :
     flipBoardHorizontally_(false),
     flipBoardVertically_(false),
     playSound(false),
-    moveNumberMode(eSequential),
     stoneSound(this),
     playGame(NULL)
 {
@@ -167,7 +160,7 @@ void BoardWidget::mouseReleaseEvent(QMouseEvent* e){
 void BoardWidget::mouseMoveEvent(QMouseEvent* e){
     QWidget::mouseMoveEvent(e);
 
-    if (editMode == ePlayGame && (color != playGame->yourColor() || playGame->moving() || currentNode != nodeList.back()))
+    if (editMode == ePlayGame && color != playGame->yourColor())
         return;
 
     bool black;
@@ -307,17 +300,14 @@ void BoardWidget::readSettings(){
             blackType = 2;
     }
 
-    // marker
+    // focus/markers
     focusType = settings.value("marker/focusType").toInt();
     focusWhiteColor = settings.value("marker/focusWhiteColor", FOCUS_WHITE_COLOR).value<QColor>();
     focusBlackColor = settings.value("marker/focusBlackColor", FOCUS_BLACK_COLOR).value<QColor>();
     branchColor = settings.value("marker/branchColor", BRANCH_COLOR).value<QColor>();
     labelType = settings.value("marker/labelType").toInt();
-    showMoveNumber = settings.value("marker/showMoveNumber", true).toBool();
-    showMoveNumberCount = settings.value("marker/moveNumber", 0).toInt();
 
     // sound
-    playSound = settings.value("sound/play", 1).toBool();
     if (settings.value("sound/type").toInt() == 0){
         QStringList soundPathList;
 #if defined(Q_WS_MAC)
@@ -703,11 +693,9 @@ void BoardWidget::getData(go::fileBase& data){
 void BoardWidget::setData(const go::fileBase& data){
     clear();
     data.get(goData);
-    createBoardBuffer();
-    repaintBoard(true, false);
     nodeList.clear();
     setCurrentNode();
-//    repaintBoard();
+    repaintBoard();
 }
 
 void BoardWidget::insertData(const go::nodePtr node, const go::fileBase& data){
@@ -949,7 +937,7 @@ void BoardWidget::setCurrentNode(go::nodePtr node){
 /**
 */
 void BoardWidget::playGameLButtonDown(int sgfX, int sgfY){
-    if (playGame->moving() == false && color == playGame->yourColor() && currentNode == nodeList.back())
+    if (color == playGame->yourColor())
         playGame->move(sgfX, sgfY);
 }
 
@@ -1138,6 +1126,7 @@ void BoardWidget::createNodeList(){
 void BoardWidget::createBoardBuffer(){
     xsize = (rotateBoard_ == 0 || rotateBoard_ == 2) ? goData.root->xsize : goData.root->ysize;
     ysize = (rotateBoard_ == 0 || rotateBoard_ == 2) ? goData.root->ysize : goData.root->xsize;
+
     capturedBlack = 0;
     capturedWhite = 0;
 
@@ -1151,16 +1140,7 @@ void BoardWidget::createBoardBuffer(){
     while (iter != nodeList.end()){
         if ((*iter)->moveNumber > 0)
             currentMoveNumber = (*iter)->moveNumber;
-        else if ( (*iter)->parent &&
-                  ( (moveNumberMode == eResetInBranch && (*iter)->parent->childNodes.size() > 1) ||
-                    (moveNumberMode == eResetInVariation && (*iter)->parent->childNodes.size() > 1 && *iter != (*iter)->parent->childNodes.front()) ) ){
-            for (int y=0; y<board.size(); ++y)
-                for (int x=0; x<board[y].size(); ++x)
-                    board[y][x].number = 0;
-            currentMoveNumber = 0;
-        }
-
-        if ((*iter)->isStone())
+        else if ((*iter)->isStone())
             ++currentMoveNumber;
         putStone(*iter, currentMoveNumber);
 
@@ -2006,9 +1986,9 @@ void BoardWidget::addCharacter(go::markList& markList, const go::point& p){
         if (labelType == 2)
             s.sprintf("%d", c);
         else if (labelType == 3)
-            s = katakana[c];
+            s = QString::fromUtf8(katakana[c]);
         else if (labelType == 4)
-            s = kana_iroha[c];
+            s = QString::fromUtf8(kana_iroha[c]);
         else
             s = QChar(c);
 
