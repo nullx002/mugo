@@ -128,6 +128,8 @@ private:
 
 private slots:
     // File menu
+    void on_actionNextTab_triggered();
+    void on_actionPreviousTab_triggered();
     void on_actionResetMoveNubmerInBranch_triggered();
     void on_actionCloseTab_triggered();
     void on_actionNew_triggered();
@@ -254,8 +256,6 @@ private slots:
     // Board tab widget
     void on_boardTabWidget_currentChanged(QWidget* );
     void on_boardTabWidget_tabCloseRequested(int index);
-    void boardTabWidgetPrev();
-    void boardTabWidgetNext();
 
     // Board widget
     void nodeAdded(go::nodePtr parent, go::nodePtr node, bool select);
