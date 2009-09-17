@@ -136,7 +136,7 @@ void data::clear(){
 
 bool fileBase::read(const QString& fname, QTextCodec* defaultCodec, bool guessCodec){
     QFile f(fname);
-    if (!f.open(QIODevice::ReadOnly|QIODevice::Text))
+    if (!f.open(QIODevice::ReadOnly))
         return false;
 
     QByteArray bytes = f.read( f.size() );
@@ -144,6 +144,8 @@ bool fileBase::read(const QString& fname, QTextCodec* defaultCodec, bool guessCo
 }
 
 bool fileBase::read(const QByteArray& bytes, QTextCodec* defaultCodec, bool guessCodec){
+    this->codec = codec;
+
     QTextCodec* codec = guessCodec ? getCodec(bytes) : NULL;
     if (codec)
         qDebug() << "file codec is " << codec->name();
@@ -152,10 +154,7 @@ bool fileBase::read(const QByteArray& bytes, QTextCodec* defaultCodec, bool gues
     else
         qDebug() << "use default codec: " << defaultCodec->name();
 
-    this->codec = codec ? codec : defaultCodec;
-    QString s = this->codec->toUnicode(bytes);
-    if ('\\' == 0x5C)
-        s.replace(QChar(0x00A5), "\\");
+    QString s = codec ? codec->toUnicode(bytes) : defaultCodec->toUnicode(bytes);
     QString::iterator iter = s.begin();
     return readStream(iter, s.end());
 }
@@ -178,18 +177,6 @@ bool fileBase::save(const QString& fname, QTextCodec* codec){
     return ret;
 }
 
-QString fileBase::readLine(QString::iterator& first, QString::iterator& last){
-    QString str;
-    while (first != last){
-        QChar c = *first++;
-        if (c == '\r')
-            continue;
-        else if (c == '\n')
-            break;
-        str.push_back(c);
-    }
-    return str;
-}
 
 
 };

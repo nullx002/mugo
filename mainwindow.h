@@ -22,42 +22,13 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    typedef QMap<go::nodePtr, QTreeWidgetItem*> NodeToTreeWidgetType;
+        typedef QMap<go::nodePtr, QTreeWidgetItem*> NodeToTreeWidgetType;
 
-    struct TabData{
-        TabData() : branchMode(false), countTerritoryDialog(NULL), playGame(NULL), gtpProcess(NULL){}
-
-        NodeToTreeWidgetType nodeToTree;
-        QTreeWidget* branchWidget;
-
-        QString fileName;
-        QString documentName;
-
-        QTextCodec* codec;
-        QAction* encode;
-
-        bool branchMode;
-        QVector<bool> countTerritoryMenuStatus;
-        QVector<bool> playWithComputerMenuStatus;
-
-        CountTerritoryDialog* countTerritoryDialog;
-
-        PlayGame* playGame;
-        QProcess* gtpProcess;
-    };
 
     MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-    bool fileNew(int xsize=19, int ysize=19, int handicap=0, double komi=6.5);
-    bool fileOpen();
-    bool fileOpen(const QString& fname, bool guessCodec=true, bool newTab=true, bool forceOpen=false);
-    bool fileSave();
-    bool fileSaveAs();
-    bool fileSaveAs(const QString& fname);
-    bool fileClose();
-    bool tabClose(int index);
-    bool maybeSave();
+    void setCaption();
 
 protected:
     virtual void closeEvent(QCloseEvent* e);
@@ -66,14 +37,18 @@ protected:
     virtual void dropEvent(QDropEvent* event);
 
 private:
-    void addDocument(BoardWidget* board);
-    void setDocument(BoardWidget* board);
+    bool fileNew(int xsize=19, int ysize=19, int handicap=0, double komi=6.5);
+    bool fileOpen();
+    bool fileOpen(const QString& fname, bool guessCodec=true);
+    bool fileOpen(const QString& fname, const QString& ext, bool guessCodec=true);
+    bool fileSave();
+    bool fileSaveAs();
+    bool fileSaveAs(const QString& fname);
+    bool fileClose();
+    bool maybeSave();
 
     void setCurrentFile(const QString& fname);
     void updateRecentFileActions();
-
-    void updateMenu();
-    void setCaption();
 
     void setEditMode(QAction* action, BoardWidget::eEditMode editMode);
     void setAnnotation(int annotation, int moveAnnotation, int nodeAnnotation);
@@ -100,17 +75,20 @@ private:
     void alertLanguageChanged();
 
     Ui::MainWindow *ui;
-    QMap<BoardWidget*, TabData> tabDatas;
-    TabData* tabData;
-    BoardWidget* boardWidget;
-    QTreeWidget* branchWidget;
-    NodeToTreeWidgetType* nodeToTreeWidget;
-    int docIndex;
+    QTextCodec* codec;
+    QString fileName;
+    NodeToTreeWidgetType nodeToTreeWidget;
+
+    int annotation;
+    int moveAnnotation;
+    int nodeAnnotation;
+    bool branchMode;
 
     enum { MaxRecentFiles = 5 };
     QAction* recentFileActs[MaxRecentFiles];
     QLabel* moveNumberLabel;
     QLabel* capturedLabel;
+    CountTerritoryDialog* countTerritoryDialog;
 
     QUndoGroup undoGroup;
     QAction*   undoAction;
@@ -123,24 +101,20 @@ private:
     QHttp* http;
     QByteArray downloadBuff;
 
-    QList<QAction*> codecActions;
-    QList<const char*> MainWindow::codecNames;
+    PlayGame* playGame;
+    QProcess  gtpProcess;
 
 private slots:
     // File menu
-    void on_actionNextTab_triggered();
-    void on_actionPreviousTab_triggered();
-    void on_actionResetMoveNubmerInBranch_triggered();
-    void on_actionCloseTab_triggered();
+    void on_actionPrint_triggered();
     void on_actionNew_triggered();
     void on_actionOpen_triggered();
-    void on_actionOpenURL_triggered();
+    void on_actionOpen_URL_triggered();
     void on_actionReload_triggered();
     void on_actionSave_triggered();
     void on_actionSaveAs_triggered();
     void on_actionSaveBoardAsPicture_triggered();
     void on_actionExportAsciiToClipboard_triggered();
-    void on_actionPrint_triggered();
     void on_actionExit_triggered();
     void openRecentFile();
 
@@ -195,7 +169,6 @@ private slots:
 
     // Edit menu -> Encoding
     void setEncoding();
-    void setEncoding(QAction* action);
 
     // Traverse menu
     void on_actionMoveFirst_triggered();
@@ -253,19 +226,15 @@ private slots:
     void on_actionAbout_triggered();
     void on_actionAboutQT_triggered();
 
-    // Board tab widget
-    void on_boardTabWidget_currentChanged(QWidget* );
-    void on_boardTabWidget_tabCloseRequested(int index);
-
     // Board widget
-    void nodeAdded(go::nodePtr parent, go::nodePtr node, bool select);
-    void nodeDeleted(go::nodePtr node, bool deleteChildren);
-    void nodeModified(go::nodePtr node);
-    void currentNodeChanged(go::nodePtr node);
-    void updateTerritory(int alive_b, int alive_w, int dead_b, int dead_w, int capturedBlack, int capturedWhite, int blackTerritory, int whiteTerritory, double komi);
+    void on_boardWidget_nodeAdded(go::nodePtr parent, go::nodePtr node, bool select);
+    void on_boardWidget_nodeDeleted(go::nodePtr node, bool deleteChildren);
+    void on_boardWidget_nodeModified(go::nodePtr node);
+    void on_boardWidget_currentNodeChanged(go::nodePtr node);
+    void on_boardWidget_updateTerritory(int alive_b, int alive_w, int dead_b, int dead_w, int capturedBlack, int capturedWhite, int blackTerritory, int whiteTerritory, double komi);
 
     // Branch widget
-    void branchWidgetCurrentItemChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous);
+    void on_branchWidget_currentItemChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous);
 
     // Comment widget
     void on_commentWidget_textChanged();

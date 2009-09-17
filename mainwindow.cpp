@@ -11,8 +11,6 @@
 #include "appdef.h"
 #include "sgf.h"
 #include "ugf.h"
-#include "gib.h"
-#include "ngf.h"
 #include "mainwindow.h"
 #include "setupdialog.h"
 #include "gameinformationdialog.h"
@@ -23,85 +21,19 @@
 
 Q_DECLARE_METATYPE(go::nodePtr);
 
-
-
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
-    , docIndex(0)
+    , annotation(go::node::eNoAnnotation)
+    , moveAnnotation(go::node::eNoAnnotation)
+    , nodeAnnotation(go::node::eNoAnnotation)
+    , branchMode(false)
+    , countTerritoryDialog(NULL)
     , undoGroup(this)
     , countTerritoryMode(false)
     , playWithComputerMode(false)
 {
     ui->setupUi(this);
-
-    // encoding
-    codecActions.push_back( ui->actionEncodingUTF8 );
-    codecActions.push_back( ui->actionISO8859_1 );
-    codecActions.push_back( ui->actionISO8859_2 );
-    codecActions.push_back( ui->actionISO8859_3 );
-    codecActions.push_back( ui->actionISO8859_4 );
-    codecActions.push_back( ui->actionISO8859_5 );
-    codecActions.push_back( ui->actionISO8859_6 );
-    codecActions.push_back( ui->actionISO8859_7 );
-    codecActions.push_back( ui->actionISO8859_8 );
-    codecActions.push_back( ui->actionISO8859_9 );
-    codecActions.push_back( ui->actionISO8859_10 );
-    codecActions.push_back( ui->actionISO8859_11 );
-    codecActions.push_back( ui->actionISO8859_13 );
-    codecActions.push_back( ui->actionISO8859_14 );
-    codecActions.push_back( ui->actionISO8859_15 );
-    codecActions.push_back( ui->actionISO8859_16 );
-    codecActions.push_back( ui->actionWindows_1250 );
-    codecActions.push_back( ui->actionWindows_1251 );
-    codecActions.push_back( ui->actionWindows_1252 );
-    codecActions.push_back( ui->actionWindows_1253 );
-    codecActions.push_back( ui->actionWindows_1254 );
-    codecActions.push_back( ui->actionWindows_1255 );
-    codecActions.push_back( ui->actionWindows_1256 );
-    codecActions.push_back( ui->actionWindows_1257 );
-    codecActions.push_back( ui->actionWindows_1258 );
-    codecActions.push_back( ui->actionKoi8_R );
-    codecActions.push_back( ui->actionKoi8_U );
-    codecActions.push_back( ui->actionEncodingGB2312 );
-    codecActions.push_back( ui->actionEncodingBig5 );
-    codecActions.push_back( ui->actionEncodingShiftJIS );
-    codecActions.push_back( ui->actionEncodingJIS );
-    codecActions.push_back( ui->actionEncodingEucJP );
-    codecActions.push_back( ui->actionEncodingKorean );
-    codecNames.push_back( "UTF-8" );
-    codecNames.push_back( "ISO-8859-1" );
-    codecNames.push_back( "ISO-8859-2" );
-    codecNames.push_back( "ISO-8859-3" );
-    codecNames.push_back( "ISO-8859-4" );
-    codecNames.push_back( "ISO-8859-5" );
-    codecNames.push_back( "ISO-8859-6" );
-    codecNames.push_back( "ISO-8859-7" );
-    codecNames.push_back( "ISO-8859-8" );
-    codecNames.push_back( "ISO-8859-9" );
-    codecNames.push_back( "ISO-8859-10" );
-    codecNames.push_back( "TIS-620" );  // ISO-8859-11
-    codecNames.push_back( "ISO-8859-13" );
-    codecNames.push_back( "ISO-8859-14" );
-    codecNames.push_back( "ISO-8859-15" );
-    codecNames.push_back( "ISO-8859-16" );
-    codecNames.push_back( "windows-1250" );
-    codecNames.push_back( "windows-1251" );
-    codecNames.push_back( "windows-1252" );
-    codecNames.push_back( "windows-1253" );
-    codecNames.push_back( "windows-1254" );
-    codecNames.push_back( "windows-1255" );
-    codecNames.push_back( "windows-1256" );
-    codecNames.push_back( "windows-1257" );
-    codecNames.push_back( "windows-1258" );
-    codecNames.push_back( "KOI8-R" );
-    codecNames.push_back( "KOI8-U" );
-    codecNames.push_back( "GB2312" );
-    codecNames.push_back( "Big5" );
-    codecNames.push_back( "Shift_JIS" );
-    codecNames.push_back( "ISO-2022-JP" );
-    codecNames.push_back( "EUC-JP" );
-    codecNames.push_back( "EUC-KR" );
 
     // action group
     QActionGroup* showMoveNumberGroup = new QActionGroup(this);
@@ -115,9 +47,45 @@ MainWindow::MainWindow(QWidget *parent)
     showMoveNumberGroup->addAction(ui->actionAllMoves);
 
     QActionGroup* encodingGroup = new QActionGroup(this);
-    for (int i=0; i<codecActions.size(); ++i){
-        encodingGroup->addAction( codecActions[i] );
-        connect( codecActions[i], SIGNAL(triggered()), this, SLOT(setEncoding()) );
+    QAction* encodingActions[] = {
+        ui->actionEncodingUTF8,
+        ui->actionISO8859_1,
+        ui->actionISO8859_2,
+        ui->actionISO8859_3,
+        ui->actionISO8859_4,
+        ui->actionISO8859_5,
+        ui->actionISO8859_6,
+        ui->actionISO8859_7,
+        ui->actionISO8859_8,
+        ui->actionISO8859_9,
+        ui->actionISO8859_10,
+        ui->actionISO8859_11,
+        ui->actionISO8859_13,
+        ui->actionISO8859_14,
+        ui->actionISO8859_15,
+        ui->actionISO8859_16,
+        ui->actionWindows_1250,
+        ui->actionWindows_1251,
+        ui->actionWindows_1252,
+        ui->actionWindows_1253,
+        ui->actionWindows_1257,
+        ui->actionWindows_1254,
+        ui->actionWindows_1258,
+        ui->actionWindows_1256,
+        ui->actionWindows_1255,
+        ui->actionKoi8_R,
+        ui->actionKoi8_U,
+        ui->actionEncodingGB2312,
+        ui->actionEncodingBig5,
+        ui->actionEncodingKorean,
+        ui->actionEncodingEucJP,
+        ui->actionEncodingJIS,
+        ui->actionEncodingShiftJIS,
+    };
+    int encN = sizeof(encodingActions) / sizeof(encodingActions[0]);
+    for (int i=0; i<encN; ++i){
+        encodingGroup->addAction( encodingActions[i] );
+        connect( encodingActions[i], SIGNAL(triggered()), this, SLOT(setEncoding()) );
     }
 
     QActionGroup* editGroup = new QActionGroup(this);
@@ -141,6 +109,12 @@ MainWindow::MainWindow(QWidget *parent)
 
     QSettings settings;
 
+    // default codec
+    codec = QTextCodec::codecForName("UTF-8");
+
+    // edit mode
+    setEditMode(ui->actionAlternateMove, BoardWidget::eAlternateMove);
+
     // window settings
     setGeometry(x(), y(), settings.value("width", WIN_W).toInt(), settings.value("height", WIN_H).toInt());
 
@@ -149,6 +123,48 @@ MainWindow::MainWindow(QWidget *parent)
     connect( http, SIGNAL(readyRead(const QHttpResponseHeader&)), this, SLOT(openUrlReadReady(const QHttpResponseHeader&)) );
     connect( http, SIGNAL(dataReadProgress(int, int)), this, SLOT(openUrlReadProgress(int, int)) );
     connect( http, SIGNAL(done(bool)), this, SLOT(openUrlDone(bool)) );
+
+    // marker
+    ui->actionShowMoveNumber->setChecked( settings.value("marker/showMoveNumber", true).toBool() );
+    on_actionShowMoveNumber_triggered();
+
+    int moveNumber = settings.value("marker/moveNumber", 0).toInt();
+    if (moveNumber == -1){
+        ui->actionAllMoves->setChecked(true);
+        on_actionAllMoves_triggered();
+    }
+    else if (moveNumber == 0){
+        ui->actionNoMoveNumber->setChecked(true);
+        on_actionNoMoveNumber_triggered();
+    }
+    else if (moveNumber == 1){
+        ui->actionLast1Move->setChecked(true);
+        on_actionLast1Move_triggered();
+    }
+    else if (moveNumber == 2){
+        ui->actionLast2Moves->setChecked(true);
+        on_actionLast2Moves_triggered();
+    }
+    else if (moveNumber == 5){
+        ui->actionLast5Moves->setChecked(true);
+        on_actionLast5Moves_triggered();
+    }
+    else if (moveNumber == 10){
+        ui->actionLast10Moves->setChecked(true);
+        on_actionLast10Moves_triggered();
+    }
+    else if (moveNumber == 20){
+        ui->actionLast20Moves->setChecked(true);
+        on_actionLast20Moves_triggered();
+    }
+    else if (moveNumber == 50){
+        ui->actionLast50Moves->setChecked(true);
+        on_actionLast50Moves_triggered();
+    }
+
+    // set sound files
+    ui->actionPlaySound->setChecked( settings.value("sound/play").toBool() );
+    ui->boardWidget->setPlaySound( ui->actionPlaySound->isChecked() );
 
     // recent files
     for (int i=0; i<MaxRecentFiles; ++i){
@@ -160,6 +176,8 @@ MainWindow::MainWindow(QWidget *parent)
     updateRecentFileActions();
 
     // create undo/redo actions
+    // undo
+    undoGroup.setActiveStack(ui->boardWidget->getUndoStack());
     ui->undoView->setGroup(&undoGroup);
     ui->undoDockWidget->setVisible(false);
 
@@ -173,10 +191,9 @@ MainWindow::MainWindow(QWidget *parent)
     ui->editToolBar->insertAction(redoAction, undoAction);
 
     // create window menu
-    ui->menuWindow->insertAction( ui->actionPreviousTab, ui->commentDockWidget->toggleViewAction() );
-    ui->menuWindow->insertAction( ui->actionPreviousTab, ui->branchDockWidget->toggleViewAction() );
-    ui->menuWindow->insertAction( ui->actionPreviousTab, ui->undoDockWidget->toggleViewAction() );
-    ui->menuWindow->insertSeparator( ui->actionPreviousTab );
+    ui->menuWindow->addAction( ui->commentDockWidget->toggleViewAction() );
+    ui->menuWindow->addAction( ui->branchDockWidget->toggleViewAction() );
+    ui->menuWindow->addAction( ui->undoDockWidget->toggleViewAction() );
     ui->menuToolbars->addAction( ui->mainToolBar->toggleViewAction() );
     ui->menuToolbars->addAction( ui->editToolBar->toggleViewAction() );
     ui->menuToolbars->addAction( ui->navigationToolBar->toggleViewAction() );
@@ -229,30 +246,27 @@ MainWindow::MainWindow(QWidget *parent)
     ui->actionOpen->setShortcut( QKeySequence::Open );
     ui->actionSave->setShortcut( QKeySequence::Save );
     ui->actionSaveAs->setShortcut( QKeySequence::SaveAs );
-    ui->actionCloseTab->setShortcut( QKeySequence::Close );
     ui->actionPrint->setShortcut( QKeySequence::Print );
     undoAction->setShortcut( QKeySequence::Undo );
     redoAction->setShortcut( QKeySequence::Redo );
     ui->actionPreviousMove->setShortcut( QKeySequence::Back );
     ui->actionNextMove->setShortcut( QKeySequence::Forward );
-//    ui->actionPreviousBranch->setShortcut( QKeySequence::PreviousChild );
-//    ui->actionNextBranch->setShortcut( QKeySequence::NextChild );
+    ui->actionPreviousBranch->setShortcut( QKeySequence::PreviousChild );
+    ui->actionNextBranch->setShortcut( QKeySequence::NextChild );
     ui->actionMoveFirst->setShortcut( QKeySequence::MoveToStartOfLine );
     ui->actionMoveLast->setShortcut( QKeySequence::MoveToEndOfLine );
 //    ui->actionFastRewind->setShortcut( QKeySequence::MoveToPreviousPage );
 //    ui->actionFastForward->setShortcut( QKeySequence::MoveToNextPage );
-    ui->actionPreviousTab->setShortcut( QKeySequence::PreviousChild );
-    ui->actionNextTab->setShortcut( QKeySequence::NextChild );
+
+    // count territory dialog
+    countTerritoryDialog = new CountTerritoryDialog(this);
+    connect(countTerritoryDialog, SIGNAL(finished(int)), this, SLOT(scoreDialogClosed(int)));
 
     // command line
     if (qApp->argc() > 1)
-        for (int i=1; i<qApp->argc(); ++i)
-            fileOpen(qApp->argv()[i]);
+        fileOpen(qApp->argv()[1]);
     else
         fileNew();
-
-    //
-    ui->boardTabWidget->removeTab(0);
 }
 
 MainWindow::~MainWindow(){
@@ -260,26 +274,16 @@ MainWindow::~MainWindow(){
     settings.setValue("width", geometry().width());
     settings.setValue("height", geometry().height());
 
+    delete countTerritoryDialog;
     delete ui;
     delete http;
 }
 
 void MainWindow::closeEvent(QCloseEvent* e){
-    BoardWidget* board = boardWidget;
-
-    for (int i=0; i<ui->boardTabWidget->count(); ++i){
-        boardWidget = qobject_cast<BoardWidget*>(ui->boardTabWidget->widget(i));
-        tabData = &tabDatas[boardWidget];
-
-        if (maybeSave() == false){
-            boardWidget = board;
-            tabData = &tabDatas[boardWidget];
-
-            e->ignore();
-            return;
-        }
-    }
-    e->accept();
+    if (fileClose())
+        e->accept();
+    else
+        e->ignore();
 }
 
 void MainWindow::keyPressEvent(QKeyEvent* event){
@@ -289,31 +293,20 @@ void MainWindow::keyPressEvent(QKeyEvent* event){
 
 void MainWindow::dragEnterEvent(QDragEnterEvent* event)
 {
-/*
     if (event->mimeData()->hasFormat("text/plain"))
         event->acceptProposedAction();
     else{
-*/
-        char* ext[] = {"sgf", "ugf", "ugi", "gib", "ngf"};
-        int N = sizeof(ext) / sizeof(ext[0]);
-
         QString localFile = event->mimeData()->urls().front().toLocalFile();
         QFileInfo f(localFile);
-
-        for (int i=0; i<N; ++i)
-            if (f.suffix().compare(ext[i], Qt::CaseInsensitive) == 0){
-                event->acceptProposedAction();
-                break;
-            }
-//    }
+        if (f.suffix().compare("sgf", Qt::CaseInsensitive) == 0 || f.suffix().compare("ugf", Qt::CaseInsensitive) == 0 || f.suffix().compare("ugi", Qt::CaseInsensitive) == 0)
+            event->acceptProposedAction();
+    }
 }
 
 void MainWindow::dropEvent(QDropEvent* event)
 {
     event->acceptProposedAction();
-    foreach(const QUrl& f, event->mimeData()->urls()){
-        fileOpen( f.toLocalFile() );
-    }
+    fileOpen( event->mimeData()->urls().front().toLocalFile() );
 }
 
 /**
@@ -332,16 +325,17 @@ void MainWindow::on_actionOpen_triggered(){
     fileOpen();
 }
 
-void MainWindow::on_actionOpenURL_triggered(){
+void MainWindow::on_actionOpen_URL_triggered(){
     downloadBuff.clear();
+
+    if (fileClose() == false)
+        return;
 
     QInputDialog dlg(this);
     dlg.resize( 400, dlg.size().height() );
     dlg.setLabelText( tr("Enter the URL of a SGF file.") );
     if (dlg.exec() != QDialog::Accepted)
         return;
-
-    fileNew();
 
     QUrl url( dlg.textValue() );
 
@@ -365,8 +359,7 @@ void MainWindow::on_actionOpenURL_triggered(){
 * File -> Reload
 */
 void MainWindow::on_actionReload_triggered(){
-    if (maybeSave())
-        fileOpen(tabData->fileName, false, false, true);
+    fileOpen(fileName);
 }
 
 /**
@@ -412,17 +405,17 @@ void MainWindow::on_actionSaveBoardAsPicture_triggered()
     else
         return;
 
-    int w = boardWidget->width();
-    int h = boardWidget->height();
+    int w = ui->boardWidget->width();
+    int h = ui->boardWidget->height();
     w = h = std::min(w, h);
     QImage image(w, h, QImage::Format_RGB32);
-    boardWidget->paintBoard(&image);
-    boardWidget->paintStones(&image);
-    boardWidget->paintTerritories(&image);
+    ui->boardWidget->paintBoard(&image);
+    ui->boardWidget->paintStones(&image);
+    ui->boardWidget->paintTerritories(&image);
     image.save(fname, format[n]);
 
     // change image coordinate to display
-    boardWidget->repaintBoard();
+    ui->boardWidget->repaintBoard();
 }
 
 /**
@@ -430,16 +423,8 @@ void MainWindow::on_actionSaveBoardAsPicture_triggered()
 * File -> Export Ascii to Clipboard
 */
 void MainWindow::on_actionExportAsciiToClipboard_triggered(){
-    ExportAsciiDialog dlg(this, boardWidget->getBuffer());
+    ExportAsciiDialog dlg(this, ui->boardWidget->getBuffer());
     dlg.exec();
-}
-
-/**
-* Slot
-* File -> Close Tab
-*/
-void MainWindow::on_actionCloseTab_triggered(){
-    tabClose( ui->boardTabWidget->currentIndex() );
 }
 
 /**
@@ -458,7 +443,7 @@ void MainWindow::on_actionPrint_triggered(){
     if (printDialog.exec() != QDialog::Accepted)
         return;
 
-    boardWidget->print(printer, optionDialog.printOption(), optionDialog.movesPerPage());
+    ui->boardWidget->print(printer, optionDialog.printOption(), optionDialog.movesPerPage());
 }
 
 /**
@@ -488,7 +473,7 @@ void MainWindow::on_actionCopySGFtoClipboard_triggered(){
     QTextStream stream(&str, QIODevice::WriteOnly);
 
     go::sgf sgf;
-    sgf.set(boardWidget->getData());
+    sgf.set(ui->boardWidget->getData());
     sgf.saveStream(stream);
     stream.flush();
 
@@ -504,7 +489,7 @@ void MainWindow::on_actionCopyCurrentSGFtoClipboard_triggered(){
     QString str("(");
     QString s;
 
-    const go::nodeList& nodeList = boardWidget->getCurrentNodeList();
+    const go::nodeList& nodeList = ui->boardWidget->getCurrentNodeList();
     go::nodeList::const_iterator iter = nodeList.begin();
     while (iter != nodeList.end()){
         if (s.size() > 60){
@@ -540,9 +525,9 @@ void MainWindow::on_actionPasteSGFfromClipboard_triggered(){
     QString::iterator first = str.begin();
     sgf.readStream(first, str.end());
 
-    boardWidget->setData(sgf);
+    ui->boardWidget->setData(sgf);
 
-    boardWidget->setDirty(true);
+    ui->boardWidget->setDirty(true);
     setTreeData();
     setCaption();
 }
@@ -559,7 +544,7 @@ void MainWindow::on_actionPasteSGFasBranchfromClipboard_triggered(){
     QString::iterator first = str.begin();
     sgf.readStream(first, str.end());
 
-    boardWidget->insertData(boardWidget->getCurrentNode(), sgf);
+    ui->boardWidget->insertData(ui->boardWidget->getCurrentNode(), sgf);
 
     setTreeData();
     setCaption();
@@ -570,11 +555,11 @@ void MainWindow::on_actionPasteSGFasBranchfromClipboard_triggered(){
 * Edit -> Game Information
 */
 void MainWindow::on_actionGameInformation_triggered(){
-    GameInformationDialog dlg(this, boardWidget->getData().root.get());
+    GameInformationDialog dlg(this, ui->boardWidget->getData().root.get());
     if (dlg.exec() != QDialog::Accepted)
         return;
 
-    boardWidget->setDirty(true);
+    ui->boardWidget->setDirty(true);
     setCaption();
 }
 
@@ -583,7 +568,7 @@ void MainWindow::on_actionGameInformation_triggered(){
 * Edit -> Pass
 */
 void MainWindow::on_actionPass_triggered(){
-    boardWidget->pass();
+    ui->boardWidget->pass();
 }
 
 /**
@@ -795,7 +780,7 @@ void MainWindow::on_actionHotspot_triggered(){
 * Edit -> Move Number -> Set
 */
 void MainWindow::on_actionSetMoveNumber_triggered(){
-    go::nodePtr node = boardWidget->getCurrentNode();
+    go::nodePtr node = ui->boardWidget->getCurrentNode();
     if (!node->isStone())
         return;
 
@@ -809,7 +794,7 @@ void MainWindow::on_actionSetMoveNumber_triggered(){
     if (dlg.exec() != QDialog::Accepted)
         return;
 
-    boardWidget->setMoveNumberCommand(node, dlg.intValue());
+    ui->boardWidget->setMoveNumberCommand(node, dlg.intValue());
 }
 
 /**
@@ -817,8 +802,8 @@ void MainWindow::on_actionSetMoveNumber_triggered(){
 * Edit -> Move Number -> Unset
 */
 void MainWindow::on_actionUnsetMoveNumber_triggered(){
-    go::nodePtr node = boardWidget->getCurrentNode();
-    boardWidget->unsetMoveNumberCommand(node);
+    go::nodePtr node = ui->boardWidget->getCurrentNode();
+    ui->boardWidget->unsetMoveNumberCommand(node);
 }
 
 /**
@@ -826,13 +811,13 @@ void MainWindow::on_actionUnsetMoveNumber_triggered(){
 * Edit -> Edit Node Name
 */
 void MainWindow::on_actionEditNodeName_triggered(){
-    go::nodePtr node = boardWidget->getCurrentNode();
+    go::nodePtr node = ui->boardWidget->getCurrentNode();
     QInputDialog dlg(this);
     dlg.setLabelText( tr("Input node name") );
     dlg.setTextValue(node->name);
     if (dlg.exec() != QDialog::Accepted)
         return;
-    boardWidget->setNodeNameCommand(node, dlg.textValue());
+    ui->boardWidget->setNodeNameCommand(node, dlg.textValue());
 }
 
 /**
@@ -841,9 +826,9 @@ void MainWindow::on_actionEditNodeName_triggered(){
 */
 void MainWindow::on_actionWhiteFirst_triggered(){
     if (ui->actionWhiteFirst->isChecked())
-        boardWidget->whiteFirst(true);
+        ui->boardWidget->whiteFirst(true);
     else
-        boardWidget->whiteFirst(false);
+        ui->boardWidget->whiteFirst(false);
 }
 
 /**
@@ -851,7 +836,7 @@ void MainWindow::on_actionWhiteFirst_triggered(){
 * Edit -> Rotate SGF Clockwise
 */
 void MainWindow::on_actionRotateSgfClockwise_triggered(){
-    boardWidget->rotateSgfCommand();
+    ui->boardWidget->rotateSgfCommand();
 }
 
 /**
@@ -859,7 +844,7 @@ void MainWindow::on_actionRotateSgfClockwise_triggered(){
 * Edit -> Flip SGF Holizontally
 */
 void MainWindow::on_actionFlipSgfHorizontally_triggered(){
-    boardWidget->flipSgfHorizontallyCommand();
+    ui->boardWidget->flipSgfHorizontallyCommand();
 }
 
 /**
@@ -867,7 +852,7 @@ void MainWindow::on_actionFlipSgfHorizontally_triggered(){
 * Edit -> Flip SGF Vertically
 */
 void MainWindow::on_actionFlipSgfVertically_triggered(){
-    boardWidget->flipSgfVerticallyCommand();
+    ui->boardWidget->flipSgfVerticallyCommand();
 }
 
 /**
@@ -875,19 +860,86 @@ void MainWindow::on_actionFlipSgfVertically_triggered(){
 * Edit -> Encoding
 */
 void MainWindow::setEncoding(){
-    setEncoding( qobject_cast<QAction*>(sender()) );
-}
+    const QAction* act[] = {
+        ui->actionEncodingUTF8,
+        ui->actionISO8859_1,
+        ui->actionISO8859_2,
+        ui->actionISO8859_3,
+        ui->actionISO8859_4,
+        ui->actionISO8859_5,
+        ui->actionISO8859_6,
+        ui->actionISO8859_7,
+        ui->actionISO8859_8,
+        ui->actionISO8859_9,
+        ui->actionISO8859_10,
+        ui->actionISO8859_11,
+        ui->actionISO8859_13,
+        ui->actionISO8859_14,
+        ui->actionISO8859_15,
+        ui->actionISO8859_16,
+        ui->actionWindows_1250,
+        ui->actionWindows_1251,
+        ui->actionWindows_1252,
+        ui->actionWindows_1253,
+        ui->actionWindows_1254,
+        ui->actionWindows_1255,
+        ui->actionWindows_1256,
+        ui->actionWindows_1257,
+        ui->actionWindows_1258,
+        ui->actionKoi8_R,
+        ui->actionKoi8_U,
+        ui->actionEncodingGB2312,
+        ui->actionEncodingBig5,
+        ui->actionEncodingShiftJIS,
+        ui->actionEncodingJIS,
+        ui->actionEncodingEucJP,
+        ui->actionEncodingKorean,
+    };
+    const char* str[] = {
+        "UTF-8",
+        "ISO-8859-1",
+        "ISO-8859-2",
+        "ISO-8859-3",
+        "ISO-8859-4",
+        "ISO-8859-5",
+        "ISO-8859-6",
+        "ISO-8859-7",
+        "ISO-8859-8",
+        "ISO-8859-9",
+        "ISO-8859-10",
+        "ISO-8859-11",
+        "ISO-8859-13",
+        "ISO-8859-14",
+        "ISO-8859-15",
+        "ISO-8859-16",
+        "Windows-1250",
+        "Windows-1251",
+        "Windows-1252",
+        "Windows-1253",
+        "Windows-1254",
+        "Windows-1255",
+        "Windows-1256",
+        "Windows-1257",
+        "Windows-1258",
+        "KOI8-R",
+        "KOI8-U",
+        "GB2312",
+        "Big5",
+        "Shift_JIS",
+        "ISO 2022-JP",
+        "EUC-JP",
+        "EUC-KR",
+    };
+    int N = sizeof(act) / sizeof(act[0]);
+    QAction *action = qobject_cast<QAction*>(sender());
+    for (int i=0; i<N; ++i){
+        if (act[i] == action){
+            codec = QTextCodec::codecForName( str[i] );
 
-void MainWindow::setEncoding(QAction* action){
-    tabData->encode = action;
-    for (int i=0; i<codecActions.size(); ++i){
-        if (codecActions[i] == action){
-            tabData->codec = QTextCodec::codecForName( codecNames[i] );
-
-            if (tabData->codec == NULL)
+            if (codec == NULL)
                 qDebug() << "codec is null";
             else
-                qDebug() << "change codec to " << tabData->codec->name();
+                qDebug() << "change codec to " << codec->name();
 
             return;
         }
@@ -899,7 +951,7 @@ void MainWindow::setEncoding(QAction* action){
 * Traverse -> First Move
 */
 void MainWindow::on_actionMoveFirst_triggered(){
-    boardWidget->setCurrentNode( boardWidget->getData().root );
+    ui->boardWidget->setCurrentNode( ui->boardWidget->getData().root );
 }
 
 /**
@@ -907,7 +959,7 @@ void MainWindow::on_actionMoveFirst_triggered(){
 * Traverse -> Fast Rewind
 */
 void MainWindow::on_actionFastRewind_triggered(){
-    go::nodePtr node = boardWidget->getCurrentNode();
+    go::nodePtr node = ui->boardWidget->getCurrentNode();
     if (node->parent == NULL)
         return;
 
@@ -917,7 +969,7 @@ void MainWindow::on_actionFastRewind_triggered(){
         else
             break;
     }
-    boardWidget->setCurrentNode(node);
+    ui->boardWidget->setCurrentNode(node);
 }
 
 /**
@@ -925,9 +977,9 @@ void MainWindow::on_actionFastRewind_triggered(){
 * Traverse -> Previous Move
 */
 void MainWindow::on_actionPreviousMove_triggered(){
-    go::nodePtr node = boardWidget->getCurrentNode();
+    go::nodePtr node = ui->boardWidget->getCurrentNode();
     if (node->parent)
-        boardWidget->setCurrentNode(node->parent);
+        ui->boardWidget->setCurrentNode(node->parent);
 }
 
 /**
@@ -935,10 +987,10 @@ void MainWindow::on_actionPreviousMove_triggered(){
 * Traverse -> Next Move
 */
 void MainWindow::on_actionNextMove_triggered(){
-    const go::nodeList& nodeList = boardWidget->getCurrentNodeList();
-    go::nodeList::const_iterator iter = qFind(nodeList.begin(), nodeList.end(), boardWidget->getCurrentNode());
+    const go::nodeList& nodeList = ui->boardWidget->getCurrentNodeList();
+    go::nodeList::const_iterator iter = qFind(nodeList.begin(), nodeList.end(), ui->boardWidget->getCurrentNode());
     if (iter != nodeList.end() && ++iter != nodeList.end())
-        boardWidget->setCurrentNode( *iter );
+        ui->boardWidget->setCurrentNode( *iter );
 }
 
 /**
@@ -946,17 +998,17 @@ void MainWindow::on_actionNextMove_triggered(){
 * Traverse -> Fast Forward
 */
 void MainWindow::on_actionFastForward_triggered(){
-    const go::nodeList& nodeList = boardWidget->getCurrentNodeList();
-    go::nodeList::const_iterator iter = qFind(nodeList.begin(), nodeList.end(), boardWidget->getCurrentNode());
+    const go::nodeList& nodeList = ui->boardWidget->getCurrentNodeList();
+    go::nodeList::const_iterator iter = qFind(nodeList.begin(), nodeList.end(), ui->boardWidget->getCurrentNode());
 
-    go::nodePtr node = boardWidget->getCurrentNode();
+    go::nodePtr node = ui->boardWidget->getCurrentNode();
     for (int i=0; i<10; ++i)
         if (iter != nodeList.end() && ++iter != nodeList.end())
             node = *iter;
         else
             break;
 
-    boardWidget->setCurrentNode(node);
+    ui->boardWidget->setCurrentNode(node);
 }
 
 /**
@@ -964,9 +1016,9 @@ void MainWindow::on_actionFastForward_triggered(){
 * Traverse -> Move Last
 */
 void MainWindow::on_actionMoveLast_triggered(){
-    const go::nodeList& nodeList = boardWidget->getCurrentNodeList();
+    const go::nodeList& nodeList = ui->boardWidget->getCurrentNodeList();
     go::nodePtr node = nodeList.back();
-    boardWidget->setCurrentNode(node);
+    ui->boardWidget->setCurrentNode(node);
 }
 
 /**
@@ -974,13 +1026,13 @@ void MainWindow::on_actionMoveLast_triggered(){
 * Traverse -> Back to parent
 */
 void MainWindow::on_actionBackToParent_triggered(){
-    go::nodePtr node = boardWidget->getCurrentNode();
+    go::nodePtr node = ui->boardWidget->getCurrentNode();
     while(node->parent){
         node = node->parent;
         if (node->childNodes.size() > 1)
             break;
     }
-    boardWidget->setCurrentNode( node );
+    ui->boardWidget->setCurrentNode( node );
 }
 
 /**
@@ -988,7 +1040,7 @@ void MainWindow::on_actionBackToParent_triggered(){
 * Traverse -> Previous Branch
 */
 void MainWindow::on_actionPreviousBranch_triggered(){
-    go::nodePtr node   = boardWidget->getCurrentNode();
+    go::nodePtr node   = ui->boardWidget->getCurrentNode();
     go::nodePtr parent = node->parent;
     while(parent){
         if (parent->childNodes.size() > 1)
@@ -1004,7 +1056,7 @@ void MainWindow::on_actionPreviousBranch_triggered(){
     if (iter == parent->childNodes.begin())
         return;
 
-    boardWidget->setCurrentNode( *--iter );
+    ui->boardWidget->setCurrentNode( *--iter );
 }
 
 /**
@@ -1012,7 +1064,7 @@ void MainWindow::on_actionPreviousBranch_triggered(){
 * Traverse -> Next Branch
 */
 void MainWindow::on_actionNextBranch_triggered(){
-    go::nodePtr node   = boardWidget->getCurrentNode();
+    go::nodePtr node   = ui->boardWidget->getCurrentNode();
     go::nodePtr parent = node->parent;
     while(parent){
         if (parent->childNodes.size() > 1)
@@ -1028,7 +1080,7 @@ void MainWindow::on_actionNextBranch_triggered(){
     if (++iter == parent->childNodes.end())
         return;
 
-    boardWidget->setCurrentNode( *iter );
+    ui->boardWidget->setCurrentNode( *iter );
 }
 
 /**
@@ -1042,9 +1094,9 @@ void MainWindow::on_actionJumpToMoveNumber_triggered(){
     if (dlg.exec() != QDialog::Accepted)
         return;
 
-    go::nodePtr node = boardWidget->findNodeFromMoveNumber( dlg.intValue() );
+    go::nodePtr node = ui->boardWidget->findNodeFromMoveNumber( dlg.intValue() );
     if (node)
-        boardWidget->setCurrentNode(node);
+        ui->boardWidget->setCurrentNode(node);
 }
 
 /**
@@ -1052,7 +1104,7 @@ void MainWindow::on_actionJumpToMoveNumber_triggered(){
 * Traverse -> jump to clicked
 */
 void MainWindow::on_actionJumpToClicked_triggered(){
-    boardWidget->setMoveToClicked( ui->actionJumpToClicked->isChecked() );
+    ui->boardWidget->setMoveToClicked( ui->actionJumpToClicked->isChecked() );
 }
 
 /**
@@ -1061,21 +1113,10 @@ void MainWindow::on_actionJumpToClicked_triggered(){
 */
 void MainWindow::on_actionShowMoveNumber_triggered(){
     ui->menuShowMoveNumber->menuAction()->setChecked( ui->actionShowMoveNumber->isChecked() );
-    boardWidget->setShowMoveNumber( ui->actionShowMoveNumber->isChecked() );
+    ui->boardWidget->setShowMoveNumber( ui->actionShowMoveNumber->isChecked() );
 
     QSettings settings;
     settings.setValue("marker/showMoveNumber", ui->actionShowMoveNumber->isChecked());
-}
-
-/**
-* Slot
-* View -> Move Number -> Reset move number in branch.
-*/
-void MainWindow::on_actionResetMoveNubmerInBranch_triggered(){
-    if (ui->actionResetMoveNubmerInBranch->isChecked())
-        boardWidget->setMoveNumberMode(tabData->branchMode ? BoardWidget::eResetInBranch : BoardWidget::eResetInVariation );
-    else
-        boardWidget->setMoveNumberMode( BoardWidget::eSequential );
 }
 
 /**
@@ -1092,7 +1133,7 @@ void MainWindow::on_actionShowMoveNumber_parent_triggered(){
 * View -> Move Number-> No Move Number
 */
 void MainWindow::on_actionNoMoveNumber_triggered(){
-    boardWidget->setShowMoveNumberCount(0);
+    ui->boardWidget->setShowMoveNumber(0);
 
     QSettings settings;
     settings.setValue("marker/moveNumber", 0);
@@ -1103,7 +1144,7 @@ void MainWindow::on_actionNoMoveNumber_triggered(){
 * View -> Move Number-> Last 1 move
 */
 void MainWindow::on_actionLast1Move_triggered(){
-    boardWidget->setShowMoveNumberCount(1);
+    ui->boardWidget->setShowMoveNumber(1);
 
     QSettings settings;
     settings.setValue("marker/moveNumber", 1);
@@ -1114,7 +1155,7 @@ void MainWindow::on_actionLast1Move_triggered(){
 * View -> Move Number-> Last 2 moves
 */
 void MainWindow::on_actionLast2Moves_triggered(){
-    boardWidget->setShowMoveNumberCount(2);
+    ui->boardWidget->setShowMoveNumber(2);
 
     QSettings settings;
     settings.setValue("marker/moveNumber", 2);
@@ -1125,7 +1166,7 @@ void MainWindow::on_actionLast2Moves_triggered(){
 * View -> Move Number-> Last 5 moves
 */
 void MainWindow::on_actionLast5Moves_triggered(){
-    boardWidget->setShowMoveNumberCount(5);
+    ui->boardWidget->setShowMoveNumber(5);
 
     QSettings settings;
     settings.setValue("marker/moveNumber", 5);
@@ -1136,7 +1177,7 @@ void MainWindow::on_actionLast5Moves_triggered(){
 * View -> Move Number-> Last 10 moves
 */
 void MainWindow::on_actionLast10Moves_triggered(){
-    boardWidget->setShowMoveNumberCount(10);
+    ui->boardWidget->setShowMoveNumber(10);
 
     QSettings settings;
     settings.setValue("marker/moveNumber", 10);
@@ -1147,7 +1188,7 @@ void MainWindow::on_actionLast10Moves_triggered(){
 * View -> Move Number-> Last 20 moves
 */
 void MainWindow::on_actionLast20Moves_triggered(){
-    boardWidget->setShowMoveNumberCount(20);
+    ui->boardWidget->setShowMoveNumber(20);
 
     QSettings settings;
     settings.setValue("marker/moveNumber", 20);
@@ -1158,7 +1199,7 @@ void MainWindow::on_actionLast20Moves_triggered(){
 * View -> Move Number-> Last 50 moves
 */
 void MainWindow::on_actionLast50Moves_triggered(){
-    boardWidget->setShowMoveNumberCount(50);
+    ui->boardWidget->setShowMoveNumber(50);
 
     QSettings settings;
     settings.setValue("marker/moveNumber", 50);
@@ -1169,7 +1210,7 @@ void MainWindow::on_actionLast50Moves_triggered(){
 * View -> Move Number-> All Moves
 */
 void MainWindow::on_actionAllMoves_triggered(){
-    boardWidget->setShowMoveNumberCount(-1);
+    ui->boardWidget->setShowMoveNumber(-1);
 
     QSettings settings;
     settings.setValue("marker/moveNumber", -1);
@@ -1180,7 +1221,7 @@ void MainWindow::on_actionAllMoves_triggered(){
 * View -> Show Coordinates
 */
 void MainWindow::on_actionShowCoordinate_triggered(){
-    boardWidget->setShowCoordinates( ui->actionShowCoordinate->isChecked() );
+    ui->boardWidget->setShowCoordinates( ui->actionShowCoordinate->isChecked() );
 
     QSettings settings;
     settings.setValue("view/showCoordinate", ui->actionShowCoordinate->isChecked());
@@ -1191,13 +1232,13 @@ void MainWindow::on_actionShowCoordinate_triggered(){
 * View -> Show Coordinates with I
 */
 void MainWindow::on_actionShowCoordinateI_triggered(){
-    boardWidget->setShowCoordinatesWithI( ui->actionShowCoordinateI->isChecked() );
+    ui->boardWidget->setShowCoordinatesWithI( ui->actionShowCoordinateI->isChecked() );
 
-    go::nodePtr currentNode = boardWidget->getCurrentNode();
+    go::nodePtr currentNode = ui->boardWidget->getCurrentNode();
 
     setTreeData();
 
-    boardWidget->setCurrentNode(currentNode);
+    ui->boardWidget->setCurrentNode(currentNode);
 
     QSettings settings;
     settings.setValue("view/showCoordinateWithI", ui->actionShowCoordinateI->isChecked());
@@ -1208,7 +1249,7 @@ void MainWindow::on_actionShowCoordinateI_triggered(){
 * View -> Show Marker
 */
 void MainWindow::on_actionShowMarker_triggered(){
-    boardWidget->setShowMarker( ui->actionShowMarker->isChecked() );
+    ui->boardWidget->setShowMarker( ui->actionShowMarker->isChecked() );
 
     QSettings settings;
     settings.setValue("marker/showMarker", ui->actionShowMarker->isChecked());
@@ -1219,7 +1260,7 @@ void MainWindow::on_actionShowMarker_triggered(){
 * View -> Show Branch Moves
 */
 void MainWindow::on_actionShowBranchMoves_triggered(){
-    boardWidget->setShowBranchMoves( ui->actionShowBranchMoves->isChecked() );
+    ui->boardWidget->setShowBranchMoves( ui->actionShowBranchMoves->isChecked() );
 
     QSettings settings;
     settings.setValue("marker/showBranchMoves", ui->actionShowMarker->isChecked());
@@ -1230,18 +1271,17 @@ void MainWindow::on_actionShowBranchMoves_triggered(){
 * View -> Branch Mode
 */
 void MainWindow::on_actionBranchMode_triggered(){
-    tabData->branchMode = ui->actionBranchMode->isChecked();
+    branchMode = ui->actionBranchMode->isChecked();
 
-    go::nodePtr currentNode = boardWidget->getCurrentNode();
-    QTreeWidgetItem* currentItem = branchWidget->currentItem();
+    go::nodePtr currentNode = ui->boardWidget->getCurrentNode();
+    QTreeWidgetItem* currentItem = ui->branchWidget->currentItem();
 
-    remakeTreeWidget( branchWidget->topLevelItem(0) );
+    remakeTreeWidget( ui->branchWidget->topLevelItem(0) );
 
-//    boardWidget->setCurrentNode(current);
-    branchWidget->setCurrentItem(currentItem);
+//    ui->boardWidget->setCurrentNode(current);
+    ui->branchWidget->setCurrentItem(currentItem);
 
-    BoardWidget::eMoveNumberMode moveNumberMode = tabData->branchMode ? BoardWidget::eResetInBranch : BoardWidget::eResetInVariation;
-    boardWidget->setMoveNumberMode( ui->actionResetMoveNubmerInBranch->isChecked() ? moveNumberMode : BoardWidget::eSequential );
+//    setTreeData();
 }
 
 /**
@@ -1249,7 +1289,7 @@ void MainWindow::on_actionBranchMode_triggered(){
 * View -> Rotate Clockwise
 */
 void MainWindow::on_actionRotateBoardClockwise_triggered(){
-    ui->actionRotateBoardClockwise->setChecked( boardWidget->rotateBoard() != 0 );
+    ui->actionRotateBoardClockwise->setChecked( ui->boardWidget->rotateBoard() != 0 );
 }
 
 /**
@@ -1257,7 +1297,7 @@ void MainWindow::on_actionRotateBoardClockwise_triggered(){
 * View -> Flip Horizontally
 */
 void MainWindow::on_actionFlipBoardHorizontally_triggered(){
-    boardWidget->flipBoardHorizontally( ui->actionFlipBoardHorizontally->isChecked() );
+    ui->boardWidget->flipBoardHorizontally( ui->actionFlipBoardHorizontally->isChecked() );
 }
 
 /**
@@ -1265,7 +1305,7 @@ void MainWindow::on_actionFlipBoardHorizontally_triggered(){
 * View -> Flip Vertically
 */
 void MainWindow::on_actionFlipBoardVertically_triggered(){
-    boardWidget->flipBoardVertically( ui->actionFlipBoardVertically->isChecked() );
+    ui->boardWidget->flipBoardVertically( ui->actionFlipBoardVertically->isChecked() );
 }
 
 /**
@@ -1273,7 +1313,7 @@ void MainWindow::on_actionFlipBoardVertically_triggered(){
 * View -> Reset Board
 */
 void MainWindow::on_actionResetBoard_triggered(){
-    boardWidget->resetBoard();
+    ui->boardWidget->resetBoard();
     ui->actionRotateBoardClockwise->setChecked(false);
     ui->actionFlipBoardHorizontally->setChecked(false);
     ui->actionFlipBoardVertically->setChecked(false);
@@ -1286,15 +1326,15 @@ void MainWindow::on_actionResetBoard_triggered(){
 void MainWindow::on_actionCountTerritory_triggered(){
     if (ui->actionCountTerritory->isChecked()){
         setCountTerritoryMode();
-        tabData->countTerritoryDialog->setInformationNode( boardWidget->getData().root.get() );
-        tabData->countTerritoryDialog->show();
+        countTerritoryDialog->setInformationNode( ui->boardWidget->getData().root.get() );
+        countTerritoryDialog->show();
     }
     else{
         setCountTerritoryMode(false);
         setCaption();
     }
 
-    boardWidget->setCountTerritoryMode(ui->actionCountTerritory->isChecked());
+    ui->boardWidget->setCountTerritoryMode(ui->actionCountTerritory->isChecked());
 }
 
 /**
@@ -1319,20 +1359,17 @@ void MainWindow::on_actionPlayWithGnugo_triggered(){
                         dlg.size, dlg.komi, dlg.handicap, dlg.level);
         param = '"' + dlg.path + '"' + param;
         qDebug() << param;
-        tabData->gtpProcess = new QProcess(this);
-        tabData->gtpProcess->start(param, QIODevice::ReadWrite|QIODevice::Text);
-        if (tabData->gtpProcess->state() == QProcess::NotRunning){
-            boardWidget->playWithComputer(NULL);
-            delete tabData->gtpProcess;
-            tabData->gtpProcess = NULL;
+        gtpProcess.start(param, QIODevice::ReadWrite|QIODevice::Text);
+        if (gtpProcess.state() == QProcess::NotRunning){
+            ui->boardWidget->playWithComputer(NULL);
             QMessageBox::critical(this, APPNAME, tr("Can not launch computer go."));
             return;
         }
 
-        tabData->playGame = new gtp(boardWidget, dlg.isBlack ? go::black : go::white, *tabData->gtpProcess);
-        connect( tabData->playGame, SIGNAL(gameEnded()), this, SLOT(playGameEnded()) );
+        playGame = new gtp(ui->boardWidget, dlg.isBlack ? go::black : go::white, gtpProcess);
+        connect( playGame, SIGNAL(gameEnded()), this, SLOT(playGameEnded()) );
         setPlayWithComputerMode(true);
-        boardWidget->playWithComputer(tabData->playGame);
+        ui->boardWidget->playWithComputer(playGame);
     }
     else{
         QMessageBox::StandardButton ret = QMessageBox::warning(this, APPNAME,
@@ -1354,11 +1391,11 @@ void MainWindow::on_actionPlayWithGnugo_triggered(){
 */
 void MainWindow::on_actionTutorBossSides_triggered(){
     if (ui->actionTutorBossSides->isChecked()){
-        boardWidget->setTutorMode(BoardWidget::eTutorBossSides);
+        ui->boardWidget->setTutorMode(BoardWidget::eTutorBossSides);
         ui->actionTutorOneSide->setChecked(false);
     }
     else
-        boardWidget->setTutorMode(BoardWidget::eNoTutor);
+        ui->boardWidget->setTutorMode(BoardWidget::eNoTutor);
 }
 
 /**
@@ -1367,11 +1404,11 @@ void MainWindow::on_actionTutorBossSides_triggered(){
 */
 void MainWindow::on_actionTutorOneSide_triggered(){
     if (ui->actionTutorOneSide->isChecked()){
-        boardWidget->setTutorMode(BoardWidget::eTutorOneSide);
+        ui->boardWidget->setTutorMode(BoardWidget::eTutorOneSide);
         ui->actionTutorBossSides->setChecked(false);
     }
     else
-        boardWidget->setTutorMode(BoardWidget::eNoTutor);
+        ui->boardWidget->setTutorMode(BoardWidget::eNoTutor);
 }
 
 /**
@@ -1381,7 +1418,7 @@ void MainWindow::on_actionTutorOneSide_triggered(){
 void MainWindow::on_actionPlaySound_triggered(){
     QSettings setting;
     setting.setValue("sound/play", ui->actionPlaySound->isChecked());
-    boardWidget->setPlaySound( ui->actionPlaySound->isChecked() );
+    ui->boardWidget->setPlaySound( ui->actionPlaySound->isChecked() );
 }
 
 /**
@@ -1483,39 +1520,8 @@ void MainWindow::on_actionOptions_triggered(){
     if (dlg.exec() != QDialog::Accepted)
         return;
 
-    for (int i=0; i<ui->boardTabWidget->count(); ++i){
-        BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->widget(i));
-        board->readSettings();
-        board->repaintBoard();
-    }
-}
-
-/**
-* Slot
-* Window -> Previous Tab
-*/
-void MainWindow::on_actionPreviousTab_triggered(){
-    if (ui->boardTabWidget->count() <= 1)
-        return;
-
-    int index = ui->boardTabWidget->currentIndex() - 1;
-    if (index < 0)
-        index = ui->boardTabWidget->count() - 1;
-    ui->boardTabWidget->setCurrentIndex(index);
-}
-
-/**
-* Slot
-* Window->Next Tab
-*/
-void MainWindow::on_actionNextTab_triggered(){
-    if (ui->boardTabWidget->count() <= 1)
-        return;
-
-    int index = ui->boardTabWidget->currentIndex() + 1;
-    if (index >= ui->boardTabWidget->count())
-        index = 0;
-    ui->boardTabWidget->setCurrentIndex(index);
+    ui->boardWidget->readSettings();
+    ui->boardWidget->repaintBoard();
 }
 
 /**
@@ -1535,47 +1541,10 @@ void MainWindow::on_actionAboutQT_triggered(){
 }
 
 /**
-* SLot
-* change tab page
-*/
-void MainWindow::on_boardTabWidget_currentChanged(QWidget* widget){
-    if (widget == NULL){
-        fileNew();
-        return;
-    }
-
-    BoardWidget* board = qobject_cast<BoardWidget*>(widget);
-    tabData = &tabDatas[board];
-    QMap<BoardWidget*, TabData>::iterator iter = tabDatas.begin();
-    while (iter != tabDatas.end()){
-        iter->branchWidget->setVisible(iter.key() == board);
-        iter->countTerritoryDialog->setVisible(false);
-        ++iter;
-    }
-
-    boardWidget  = board;
-    branchWidget = tabData->branchWidget;
-    nodeToTreeWidget = &tabData->nodeToTree;
-    branchWidget->setFocus(Qt::OtherFocusReason);
-
-    ui->commentWidget->setPlainText(boardWidget->getCurrentNode()->comment);
-
-    setCaption();
-    updateMenu();
-
-    // undo
-    undoGroup.setActiveStack(board->getUndoStack());
-}
-
-void MainWindow::on_boardTabWidget_tabCloseRequested(int index){
-    tabClose(index);
-}
-
-/**
 * Slot
 * new node was created by BoardWidget.
 */
-void MainWindow::nodeAdded(go::nodePtr /*parent*/, go::nodePtr node, bool /*select*/){
+void MainWindow::on_boardWidget_nodeAdded(go::nodePtr /*parent*/, go::nodePtr node, bool /*select*/){
     addTreeWidget(node, true);
     setCaption();
 }
@@ -1584,9 +1553,9 @@ void MainWindow::nodeAdded(go::nodePtr /*parent*/, go::nodePtr node, bool /*sele
 * Slot
 * node was deleted by BoardWidget.
 */
-void MainWindow::nodeDeleted(go::nodePtr node, bool deleteChildren){
+void MainWindow::on_boardWidget_nodeDeleted(go::nodePtr node, bool deleteChildren){
     if (node->parent)
-        remakeTreeWidget( (*nodeToTreeWidget)[node->parent] );
+        remakeTreeWidget( nodeToTreeWidget[node->parent] );
     deleteTreeWidget(node, deleteChildren);
 
     setCaption();
@@ -1595,10 +1564,10 @@ void MainWindow::nodeDeleted(go::nodePtr node, bool deleteChildren){
 /**
 * Slot
 */
-void MainWindow::nodeModified(go::nodePtr node){
+void MainWindow::on_boardWidget_nodeModified(go::nodePtr node){
     setCaption();
 
-    QTreeWidgetItem* treeWidget = (*nodeToTreeWidget)[node];
+    QTreeWidgetItem* treeWidget = nodeToTreeWidget[node];
     if (treeWidget == NULL)
         return;
     treeWidget->setText(0, createTreeText(node));
@@ -1608,49 +1577,52 @@ void MainWindow::nodeModified(go::nodePtr node){
 * Slot
 * current node was changed by BoardWidget.
 */
-void MainWindow::currentNodeChanged(go::nodePtr node){
+void MainWindow::on_boardWidget_currentNodeChanged(go::nodePtr node){
     setTreeWidget(node);
     ui->commentWidget->setPlainText(node->comment);
     setAnnotation(node->annotation, node->moveAnnotation, node->nodeAnnotation);
 
     int b, w;
-    boardWidget->getCaptured(b, w);
+    ui->boardWidget->getCaptured(b, w);
     capturedLabel->setText(tr("Dead: Black %1 White %2").arg(b).arg(w));
 
-    int num = boardWidget->getMoveNumber();
-    QString coord = boardWidget->getXYString(node->getX(), node->getY());
+    int num = ui->boardWidget->getMoveNumber();
+    QString coord = ui->boardWidget->getXYString(node->getX(), node->getY());
     moveNumberLabel->setText(tr("LastMove: %1(%2)").arg(num).arg(coord));
-}
-
-/**
-* Slot
-* comment dock widget was showed or hid.
-*/
-void MainWindow::updateTerritory(int alive_b, int alive_w, int dead_b, int dead_w, int capturedBlack, int capturedWhite, int blackTerritory, int whiteTerritory, double komi){
-    tabData->countTerritoryDialog->setScore(alive_b, alive_w, dead_b, dead_w, capturedBlack, capturedWhite, blackTerritory, whiteTerritory, komi);
 }
 
 /**
 * Slot
 * node was changed on branch tree view.
 */
-void MainWindow::branchWidgetCurrentItemChanged(QTreeWidgetItem* current, QTreeWidgetItem* /*previous*/){
+void MainWindow::on_branchWidget_currentItemChanged(QTreeWidgetItem* current, QTreeWidgetItem* /*previous*/){
     if (current == NULL){
-        boardWidget->setCurrentNode();
+        ui->boardWidget->setCurrentNode();
         return;
     }
 
     QVariant v = current->data(0, Qt::UserRole);
     go::nodePtr n = v.value<go::nodePtr>();
 
-    boardWidget->setCurrentNode(n);
+    ui->boardWidget->setCurrentNode(n);
+}
+
+/**
+* Slot
+* comment dock widget was showed or hid.
+*/
+void MainWindow::on_boardWidget_updateTerritory(int alive_b, int alive_w, int dead_b, int dead_w, int capturedBlack, int capturedWhite, int blackTerritory, int whiteTerritory, double komi){
+    countTerritoryDialog->setScore(alive_b, alive_w, dead_b, dead_w, capturedBlack, capturedWhite, blackTerritory, whiteTerritory, komi);
+/*
+    countTerritoryDialog->setScoreText(s);
+*/
 }
 
 /**
 * Slot
 */
 void MainWindow::playGameEnded(){
-    bool resign = tabData->playGame->isResign();
+    bool resign = playGame->isResign();
 
     ui->actionPlayWithGnugo->setChecked(false);
     endGame();
@@ -1666,8 +1638,8 @@ void MainWindow::playGameEnded(){
 * comment was modified.
 */
 void MainWindow::on_commentWidget_textChanged(){
-    go::nodePtr currentNode = boardWidget->getCurrentNode();
-    boardWidget->setCommentCommand(currentNode, ui->commentWidget->toPlainText());
+    go::nodePtr currentNode = ui->boardWidget->getCurrentNode();
+    ui->boardWidget->setCommentCommand(currentNode, ui->commentWidget->toPlainText());
 }
 
 /**
@@ -1679,191 +1651,56 @@ void MainWindow::scoreDialogClosed(int){
     on_actionCountTerritory_triggered();
 }
 
-void MainWindow::updateMenu(){
-    setCountTerritoryMode( false );
-    setPlayWithComputerMode( false );
-
-    if (tabData->fileName.isEmpty())
-        ui->actionReload->setEnabled(false);
-    undoAction->setEnabled( undoGroup.activeStack()->canUndo() );
-    redoAction->setEnabled( undoGroup.activeStack()->canRedo() );
-
-    switch(boardWidget->getEditMode()){
-        case BoardWidget::eAlternateMove:
-            setEditMode(ui->actionAlternateMove, BoardWidget::eAlternateMove);
-            break;
-        case BoardWidget::eAddBlack:
-            setEditMode(ui->actionAddBlackStone, BoardWidget::eAddBlack);
-            break;
-        case BoardWidget::eAddWhite:
-            setEditMode(ui->actionAddWhiteStone, BoardWidget::eAddWhite);
-            break;
-        case BoardWidget::eAddEmpty:
-            setEditMode(ui->actionAddEmpty, BoardWidget::eAddEmpty);
-            break;
-        case BoardWidget::eLabelMark:
-            setEditMode(ui->actionAddLabel, BoardWidget::eLabelMark);
-            break;
-        case BoardWidget::eManualMark:
-            setEditMode(ui->actionAddLabelManually, BoardWidget::eManualMark);
-            break;
-        case BoardWidget::eCrossMark:
-            setEditMode(ui->actionAddCross, BoardWidget::eCrossMark);
-            break;
-        case BoardWidget::eCircleMark:
-            setEditMode(ui->actionAddCircle, BoardWidget::eCircleMark);
-            break;
-        case BoardWidget::eSquareMark:
-            setEditMode(ui->actionAddSquare, BoardWidget::eSquareMark);
-            break;
-        case BoardWidget::eTriangleMark:
-            setEditMode(ui->actionAddTriangle, BoardWidget::eTriangleMark);
-            break;
-        case BoardWidget::eDeleteMarker:
-            setEditMode(ui->actionDeleteMarker, BoardWidget::eDeleteMarker);
-            break;
-        case BoardWidget::eCountTerritory:
-        case BoardWidget::ePlayGame:
-            break;
-    };
-
-    setAnnotation(boardWidget->getCurrentNode()->annotation, boardWidget->getCurrentNode()->moveAnnotation, boardWidget->getCurrentNode()->nodeAnnotation);
-
-    ui->actionWhiteFirst->setChecked( boardWidget->whiteFirst() );
-
-    tabData->encode->setChecked(true);
-
-    ui->menuShowMoveNumber->menuAction()->setChecked( boardWidget->getShowMoveNumber() );
-    ui->actionResetMoveNubmerInBranch->setChecked( boardWidget->getMoveNumberMode() != BoardWidget::eSequential );
-    ui->actionShowMoveNumber->setChecked( boardWidget->getShowMoveNumber() );
-    ui->actionNoMoveNumber->setChecked( boardWidget->getShowMoveNumberCount() == 0 );
-    ui->actionLast1Move->setChecked( boardWidget->getShowMoveNumberCount() == 1 );
-    ui->actionLast2Moves->setChecked( boardWidget->getShowMoveNumberCount() == 2 );
-    ui->actionLast5Moves->setChecked( boardWidget->getShowMoveNumberCount() == 5 );
-    ui->actionLast10Moves->setChecked( boardWidget->getShowMoveNumberCount() == 10 );
-    ui->actionLast20Moves->setChecked( boardWidget->getShowMoveNumberCount() == 20 );
-    ui->actionLast50Moves->setChecked( boardWidget->getShowMoveNumberCount() == 50 );
-    ui->actionAllMoves->setChecked( boardWidget->getShowMoveNumberCount() == -1 );
-
-    ui->actionShowCoordinate->setChecked( boardWidget->getShowCoordinates() );
-    ui->actionShowCoordinateI->setChecked( boardWidget->getShowCoordinatesWithI() );
-    ui->actionShowMarker->setChecked( boardWidget->getShowMarker() );
-    ui->actionShowBranchMoves->setChecked( boardWidget->getShowBranchMoves() );
-    ui->actionRotateBoardClockwise->setChecked( boardWidget->getRotateBoard() != 0 );
-    ui->actionFlipBoardHorizontally->setChecked( boardWidget->getFlipBoardHorizontally() );
-    ui->actionFlipBoardVertically->setChecked( boardWidget->getFlipBoardVertically() );
-
-    ui->actionBranchMode->setChecked( tabData->branchMode );
-
-    ui->actionTutorBossSides->setChecked( boardWidget->getTutorMode() == BoardWidget::eTutorBossSides );
-    ui->actionTutorOneSide->setChecked( boardWidget->getTutorMode() == BoardWidget::eTutorOneSide );
-
-    if (boardWidget->getEditMode() == BoardWidget::eCountTerritory){
-        setCountTerritoryMode(true);
-        ui->actionCountTerritory->setChecked(true);
-        tabData->countTerritoryDialog->setVisible(true);
-    }
-    else{
-        ui->actionCountTerritory->setChecked(false);
-        tabData->countTerritoryDialog->setVisible(false);
-    }
-
-    if (boardWidget->getEditMode() == BoardWidget::ePlayGame){
-        setPlayWithComputerMode(true);
-        ui->actionPlayWithGnugo->setChecked( true );
-    }
-    else
-        ui->actionPlayWithGnugo->setChecked( false );
-}
-
 /**
 * set text to MainWindow's title bar
 *
 * if game information has player info, set player name to window text.
 */
 void MainWindow::setCaption(){
-    go::informationPtr gameInfo = boardWidget->getData().root;
-    bool hasPlayerInfo = !gameInfo->whitePlayer.isEmpty() || !gameInfo->whiteRank.isEmpty() ||
-                            !gameInfo->blackPlayer.isEmpty() || !gameInfo->blackRank.isEmpty();
-
     QString caption;
-    if (hasPlayerInfo)
-        caption = tr("%1 %2 (W) vs %4 %5 (B) (Result:%7)")
-                        .arg(gameInfo->whitePlayer)
-                        .arg(gameInfo->whiteRank)
-                        .arg(gameInfo->blackPlayer)
-                        .arg(gameInfo->blackRank)
-                        .arg(gameInfo->result);
+    if(fileName.isEmpty())
+        caption = "Untitled";
+    else{
+        QFileInfo info(fileName);
+        caption = info.fileName();
+    }
 
-    if (!hasPlayerInfo)
-        caption = tabData->documentName;
-
-    if (boardWidget->isDirty())
+    if (ui->boardWidget->isDirty())
         caption.append(" *");
 
     caption.append(" - ");
+
+    go::informationPtr gameInfo = ui->boardWidget->getData().root;
+    bool hasPlayerInfo = !gameInfo->whitePlayer.isEmpty() || !gameInfo->whiteRank.isEmpty() ||
+                            !gameInfo->blackPlayer.isEmpty() || !gameInfo->blackRank.isEmpty();
+    if (hasPlayerInfo){
+        caption.append(gameInfo->whitePlayer);
+        caption.push_back(' ');
+        caption.append(gameInfo->whiteRank);
+        caption.append(" (W) vs ");
+        caption.append(gameInfo->blackPlayer);
+        caption.push_back(' ');
+        caption.append(gameInfo->blackRank);
+        caption.append(" (B) (Result:");
+        caption.append(gameInfo->result);
+        caption.append(") - ");
+    }
     caption.append(APPNAME);
 
     setWindowTitle(caption);
-
-    QString docName = tabData->documentName;
-    if (boardWidget->isDirty())
-        docName.append(" *");
-    int tabIndex = ui->boardTabWidget->indexOf(boardWidget);
-    ui->boardTabWidget->setTabText(tabIndex, docName);
-}
-
-void MainWindow::addDocument(BoardWidget* board){
-    QTreeWidget* tree = new QTreeWidget(ui->branchDockWidgetContents);
-    tree->setHeaderHidden(true);
-    ui->branchLayout->addWidget(tree);
-
-    TabData& data = tabDatas[board];
-    data.branchWidget = tree;
-    data.documentName = tr("Untitled-%1").arg(docIndex);
-    data.codec = QTextCodec::codecForName("UTF-8");
-    data.encode = ui->actionEncodingUTF8;
-    data.countTerritoryDialog = new CountTerritoryDialog(this);
-    connect(data.countTerritoryDialog, SIGNAL(finished(int)), this, SLOT(scoreDialogClosed(int)));
-
-    ui->boardTabWidget->addTab(board, data.documentName);
-
-    setDocument(board);
-
-    // board widget
-    connect(board, SIGNAL(nodeAdded(go::nodePtr,go::nodePtr,bool)), this, SLOT(nodeAdded(go::nodePtr,go::nodePtr,bool)));
-    connect(board, SIGNAL(nodeDeleted(go::nodePtr,bool)), this, SLOT(nodeDeleted(go::nodePtr, bool)));
-    connect(board, SIGNAL(nodeModified(go::nodePtr)), this, SLOT(nodeModified(go::nodePtr)));
-    connect(board, SIGNAL(currentNodeChanged(go::nodePtr)), this, SLOT(currentNodeChanged(go::nodePtr)));
-    connect(board, SIGNAL(updateTerritory(int,int,int,int,int,int,int,int,double)), this, SLOT(updateTerritory(int,int,int,int,int,int,int,int,double)));
-
-    // branch widget
-    connect(tree, SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)), this, SLOT(branchWidgetCurrentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)));
-}
-
-void MainWindow::setDocument(BoardWidget* board){
-    ui->boardTabWidget->setCurrentWidget(board);
-    undoGroup.setActiveStack(board->getUndoStack());
 }
 
 /**
 * a new document is created if current document can be closed.
 */
 bool MainWindow::fileNew(int xsize, int ysize, int handicap, double komi){
-    ++docIndex;
-    BoardWidget* board = new BoardWidget;
-    addDocument( board );
+    if (fileClose() == false)
+        return false;
 
-    // edit mode
-    setEditMode(ui->actionAlternateMove, BoardWidget::eAlternateMove);
-
-    // board
-    board->setBoardSize(xsize, ysize);
-    board->getData().root->handicap = handicap;
-    board->getData().root->komi = komi;
-
+    ui->boardWidget->setBoardSize(xsize, ysize);
+    ui->boardWidget->getData().root->handicap = handicap;
+    ui->boardWidget->getData().root->komi = komi;
     setTreeData();
-
     return true;
 }
 
@@ -1872,75 +1709,56 @@ bool MainWindow::fileNew(int xsize, int ysize, int handicap, double komi){
 */
 bool MainWindow::fileOpen(){
     QString selectedFilter;
-    QString fname = QFileDialog::getOpenFileName(this, QString(), QString(), tr("All Go Format(*.sgf *.ugf *.ugi *.gib *.ngf);;sgf(*.sgf);;ugf(*.ugf *.ugi);;gib(*.gib);;ngf(*.ngf);;All Files(*.*)"), &selectedFilter);
+    QString fname = QFileDialog::getOpenFileName(this, QString(), QString(), tr("All Go Format(*.sgf *.ugf *.ugi);;sgf(*.sgf);;ugf(*.ugf *.ugi);;All Files(*.*)"), &selectedFilter);
     if (fname.isEmpty())
         return  false;
 
-    return fileOpen(fname);
+    if (selectedFilter.indexOf("All Go Format") >= 0){
+        QFileInfo info(fname);
+        selectedFilter = info.suffix().toLower();
+    }
+
+    if (selectedFilter.indexOf("sgf") >= 0)
+        return fileOpen(fname, "sgf");
+    else if (selectedFilter.indexOf("ugf") >= 0 || selectedFilter.indexOf("ugi") >= 0)
+        return fileOpen(fname, "ugf");
+    else
+        return false;
 }
 
 /**
 * file open.
 */
-bool MainWindow::fileOpen(const QString& fname, bool guessCodec, bool newTab, bool forceOpen){
-
-#define READ_FILE(FORMAT){\
-    go::FORMAT fileData;\
-    fileData.read(fname, codec, guessCodec);\
-    codec = fileData.codec;\
-\
-    BoardWidget* board = boardWidget;\
-    if (newTab){\
-        board = new BoardWidget;\
-        addDocument(board);\
-    }\
-    board->setData(fileData);\
+bool MainWindow::fileOpen(const QString& fname, bool guessCodec){
+    return fileOpen(fname, QFileInfo(fname).suffix(), guessCodec);
 }
 
-    if (!forceOpen){
-        QMap<BoardWidget*, TabData>::iterator iter = tabDatas.begin();
-        while (iter != tabDatas.end()){
-            if (iter->fileName.compare(fname, Qt::CaseInsensitive) == 0){
-                ui->boardTabWidget->setCurrentWidget(iter.key());
-                return true;
-            }
-            ++iter;
-        }
-    }
-
-    QTextCodec* codec;
-    if (newTab)
-        codec = QTextCodec::codecForName("UTF-8");
-    else
-        codec = tabData->codec;
-
-    QFileInfo info(fname);
-    QString ext = info.suffix().toLower();
-
-    if (ext.compare("sgf", Qt::CaseInsensitive) == 0)
-        READ_FILE(sgf)
-    else if (ext.compare("ugf", Qt::CaseInsensitive) == 0 || ext.compare("ugi", Qt::CaseInsensitive) == 0)
-        READ_FILE(ugf)
-    else if (ext.compare("gib", Qt::CaseInsensitive) == 0)
-        READ_FILE(gib)
-    else if (ext.compare("ngf", Qt::CaseInsensitive) == 0)
-        READ_FILE(ngf)
-    else
+/**
+* file open.
+*/
+bool MainWindow::fileOpen(const QString& fname, const QString& ext, bool guessCodec){
+    if (maybeSave() == false)
         return false;
 
     setCurrentFile(fname);
-    setTreeData();
 
+    if (ext.compare("sgf", Qt::CaseInsensitive) == 0){
+        go::sgf sgf;
+        sgf.read(fname, codec, guessCodec);
+        ui->boardWidget->setData(sgf);
+    }
+    else if (ext.compare("ugf", Qt::CaseInsensitive) == 0 || ext.compare("ugi", Qt::CaseInsensitive) == 0){
+        go::ugf ugf;
+        ugf.read(fname, codec, guessCodec);
+        ui->boardWidget->setData(ugf);
+    }
+    else
+        return false;
+
+    setTreeData();
     setCaption();
 
     ui->actionReload->setEnabled(true);
-
-    for (int i=0; i<codecNames.size(); ++i){
-        if (stricmp(codec->name(), codecNames[i]) == 0){
-            codecActions[i]->setChecked(true);
-            setEncoding(codecActions[i]);
-        }
-    }
 
     return true;
 }
@@ -1949,9 +1767,7 @@ bool MainWindow::fileOpen(const QString& fname, bool guessCodec, bool newTab, bo
 * file save.
 */
 bool MainWindow::fileSave(){
-    const QString& fileName = tabData->fileName;
-    QFileInfo fi(fileName);
-    if (fileName.isEmpty() || fi.suffix() != "sgf")
+    if (fileName.isEmpty())
         return fileSaveAs();
     else
         return fileSaveAs(fileName);
@@ -1961,14 +1777,7 @@ bool MainWindow::fileSave(){
 * file saveas.
 */
 bool MainWindow::fileSaveAs(){
-    QString defaultName;
-    if (!tabData->fileName.isEmpty()){
-        QFileInfo fi(tabData->fileName);
-        fi.setFile(fi.absoluteDir(), fi.baseName() + ".sgf");
-        defaultName = fi.absoluteFilePath();
-    }
-
-    QString fname = QFileDialog::getSaveFileName(this, QString(), defaultName, tr("sgf(*.sgf)"));
+    QString fname = QFileDialog::getSaveFileName(this, QString(), QString(), tr("sgf(*.sgf)"));
     if (fname.isEmpty())
         return false;
 
@@ -1981,9 +1790,9 @@ bool MainWindow::fileSaveAs(){
 bool MainWindow::fileSaveAs(const QString& fname){
     setCurrentFile(fname);
     go::sgf sgf;
-    boardWidget->getData(sgf);
-    sgf.save(fname, tabData->codec);
-    boardWidget->setDirty(false);
+    ui->boardWidget->getData(sgf);
+    sgf.save(fileName, codec);
+    ui->boardWidget->setDirty(false);
 
     setCaption();
 
@@ -1999,29 +1808,13 @@ bool MainWindow::fileClose(){
     if (maybeSave() == false)
         return false;
 
-    return true;
-}
+    fileName.clear();
+    ui->boardWidget->clear();
 
-/**
-* tab close.
-*/
-bool MainWindow::tabClose(int index){
-    BoardWidget* board = boardWidget;
-    boardWidget = qobject_cast<BoardWidget*>(ui->boardTabWidget->widget(index));
-    tabData = &tabDatas[boardWidget];
+    setTreeData();
+    setCaption();
 
-    if (fileClose() == false){
-        boardWidget = board;
-        tabData = &tabDatas[boardWidget];
-        return false;
-    }
-
-    delete tabData->gtpProcess;
-    delete tabData->playGame;
-    delete tabData->branchWidget;
-    delete tabData->countTerritoryDialog;
-    tabDatas.remove(boardWidget);
-    ui->boardTabWidget->removeTab(index);
+    ui->actionReload->setEnabled(false);
 
     return true;
 }
@@ -2029,13 +1822,12 @@ bool MainWindow::tabClose(int index){
 /**
 */
 bool MainWindow::maybeSave(){
-    if (!boardWidget->isDirty())
+    if (!ui->boardWidget->isDirty())
         return true;
-
     QMessageBox::StandardButton ret =
     QMessageBox::warning(this, APPNAME,
-                               tr("%1 has been modified.\n"
-                                  "Do you want to save your changes?").arg(tabData->documentName),
+                               tr("The document has been modified.\n"
+                                  "Do you want to save your changes?"),
                                QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
     if (ret == QMessageBox::Save)
         return fileSave();
@@ -2047,13 +1839,12 @@ bool MainWindow::maybeSave(){
 /**
 */
 void MainWindow::setCurrentFile(const QString& fname){
-    tabData->fileName = fname;
-    tabData->documentName = QFileInfo(fname).fileName();
+    fileName = fname;
 
     QSettings settings;
     QStringList files = settings.value("recentFileList").toStringList();
-    files.removeAll(fname);
-    files.prepend(fname);
+    files.removeAll(fileName);
+    files.prepend(fileName);
     while (files.size() > MaxRecentFiles)
         files.removeLast();
     settings.setValue("recentFileList", files);
@@ -2118,7 +1909,7 @@ void MainWindow::openUrlReadProgress(int done, int total){
 * slot
 */
 void MainWindow::openUrlDone(bool error){
-    qDebug() << "openUrlDone: " << error;
+    qDebug() << "openURLDone: " << error;
     delete progressDialog;
 
     if (error == true){
@@ -2127,10 +1918,10 @@ void MainWindow::openUrlDone(bool error){
     }
 
     go::sgf sgf;
-    sgf.read(downloadBuff, QTextCodec::codecForName("UTF-8"), true);
+    sgf.read(downloadBuff, codec, true);
 
     downloadBuff.clear();
-    boardWidget->setData(sgf);
+    ui->boardWidget->setData(sgf);
 
     setTreeData();
     setCaption();
@@ -2146,27 +1937,27 @@ void MainWindow::openUrlCancel(){
 /**
 */
 void MainWindow::setTreeData(){
-    branchWidget->clear();
-    nodeToTreeWidget->clear();
+    ui->branchWidget->clear();
+    nodeToTreeWidget.clear();
 
-    addTreeWidget(boardWidget->getData().root);
-    boardWidget->setCurrentNode();
-    boardWidget->repaint();
+    addTreeWidget(ui->boardWidget->getData().root);
+    ui->boardWidget->setCurrentNode();
+    ui->boardWidget->repaint();
 }
 
 QTreeWidgetItem* MainWindow::addTreeWidget(go::nodePtr node, bool needRemake){
-    QTreeWidgetItem* treeWidget = (*nodeToTreeWidget)[node];
+    QTreeWidgetItem* treeWidget = nodeToTreeWidget[node];
     QTreeWidgetItem* newWidget  = NULL;
     if (treeWidget == NULL)
         newWidget = createTreeWidget(node);
-    QTreeWidgetItem* parentWidget  = (node->parent && (*nodeToTreeWidget)[node->parent]) ? (*nodeToTreeWidget)[node->parent] : branchWidget->invisibleRootItem();
-    QTreeWidgetItem* parentWidget2 = parentWidget->parent() ? parentWidget->parent() : branchWidget->invisibleRootItem();
+    QTreeWidgetItem* parentWidget  = (node->parent && nodeToTreeWidget[node->parent]) ? nodeToTreeWidget[node->parent] : ui->branchWidget->invisibleRootItem();
+    QTreeWidgetItem* parentWidget2 = parentWidget->parent() ? parentWidget->parent() : ui->branchWidget->invisibleRootItem();
     go::nodePtr parentNode  = node->parent;
     go::nodePtr parentNode2 = getNode(parentWidget2);
 
     bool newBranch = (parentNode2 && parentNode2->childNodes.size() > 1) ||
-                     (tabData->branchMode && parentNode && parentNode->childNodes.size() > 1) ||
-                     (!tabData->branchMode && parentNode && parentNode->childNodes.front() != node);
+                     (branchMode && parentNode && parentNode->childNodes.size() > 1) ||
+                     (!branchMode && parentNode && parentNode->childNodes.front() != node);
     if (newBranch){
         if (newWidget){
             parentWidget->addChild(newWidget);
@@ -2174,7 +1965,7 @@ QTreeWidgetItem* MainWindow::addTreeWidget(go::nodePtr node, bool needRemake){
                 remakeTreeWidget(parentWidget);
         }
         else if(parentWidget->indexOfChild(treeWidget) < 0){
-            QTreeWidgetItem* p = treeWidget->parent() ? treeWidget->parent() : branchWidget->invisibleRootItem();
+            QTreeWidgetItem* p = treeWidget->parent() ? treeWidget->parent() : ui->branchWidget->invisibleRootItem();
             p->removeChild(treeWidget);
             if (parentNode->childNodes.front() == node)
                 parentWidget->insertChild(0, treeWidget);
@@ -2190,12 +1981,12 @@ QTreeWidgetItem* MainWindow::addTreeWidget(go::nodePtr node, bool needRemake){
                 remakeTreeWidget(parentWidget2);
         }
         else if(parentWidget2->indexOfChild(treeWidget) < 0){
-            QTreeWidgetItem* p = treeWidget->parent() ? treeWidget->parent() : branchWidget->invisibleRootItem();
+            QTreeWidgetItem* p = treeWidget->parent() ? treeWidget->parent() : ui->branchWidget->invisibleRootItem();
             bool isselected = treeWidget->isSelected();
             p->removeChild(treeWidget);
             parentWidget2->addChild(treeWidget);
             if (isselected)
-                branchWidget->setCurrentItem(treeWidget);
+                ui->branchWidget->setCurrentItem(treeWidget);
         }
     }
 
@@ -2212,22 +2003,18 @@ QTreeWidgetItem* MainWindow::createTreeWidget(go::nodePtr node){
     // Create TreeItem Widget
     QTreeWidgetItem* nodeWidget = new QTreeWidgetItem( QStringList(createTreeText(node)) );
 
-    static QIcon treeIconGreen(":/res/green_64.png");
-    static QIcon treeIconBlack(":/res/black_64.png");
-    static QIcon treeIconWhite(":/res/white_64.png");
-
     QVariant v;
     v.setValue(node);
     nodeWidget->setData(0, Qt::UserRole, v);
-    (*nodeToTreeWidget)[node] = nodeWidget;
+    nodeToTreeWidget[node] = nodeWidget;
 
     // Set Icon to TreeItem Widget
     if (node->isStone() && node->isBlack())
-        nodeWidget->setIcon(0, treeIconBlack);
+        nodeWidget->setIcon(0, QIcon(":/res/black_64.png"));
     else if (node->isStone() && node->isWhite())
-        nodeWidget->setIcon(0, treeIconWhite);
+        nodeWidget->setIcon(0, QIcon(":/res/white_64.png"));
     else
-        nodeWidget->setIcon(0, treeIconGreen);
+        nodeWidget->setIcon(0, QIcon(":/res/green_64.png"));
 
     return nodeWidget;
 }
@@ -2248,14 +2035,14 @@ void MainWindow::deleteNode(bool deleteChildren){
     if (countTerritoryMode || playWithComputerMode)
         return;
 
-    boardWidget->deleteNodeCommand( boardWidget->getCurrentNode(), deleteChildren );
+    ui->boardWidget->deleteNodeCommand( ui->boardWidget->getCurrentNode(), deleteChildren );
 }
 
 void MainWindow::deleteTreeWidget(go::nodePtr node, bool deleteChildren){
-    QTreeWidgetItem* treeWidget = (*nodeToTreeWidget)[node];
+    QTreeWidgetItem* treeWidget = nodeToTreeWidget[node];
     go::nodeList::iterator iter = node->childNodes.begin();
     while (deleteChildren && iter != node->childNodes.end()){
-        QTreeWidgetItem* treeWidget2 = (*nodeToTreeWidget)[*iter];
+        QTreeWidgetItem* treeWidget2 = nodeToTreeWidget[*iter];
         if (treeWidget2->parent() != treeWidget)
             deleteTreeWidget(*iter, deleteChildren);
         ++iter;
@@ -2266,27 +2053,27 @@ void MainWindow::deleteTreeWidget(go::nodePtr node, bool deleteChildren){
 }
 
 void MainWindow::deleteTreeWidgetForMap(go::nodePtr node){
-    NodeToTreeWidgetType::iterator iter = nodeToTreeWidget->find(node);
-    if(iter == nodeToTreeWidget->end())
+    NodeToTreeWidgetType::iterator iter = nodeToTreeWidget.find(node);
+    if(iter == nodeToTreeWidget.end())
         return;
 
     go::nodeList::iterator iter2 = node->childNodes.begin();
     while (iter2 != node->childNodes.end()){
-        NodeToTreeWidgetType::iterator iter3 = nodeToTreeWidget->find(*iter2);
-        if(iter3 != nodeToTreeWidget->end())
+        NodeToTreeWidgetType::iterator iter3 = nodeToTreeWidget.find(*iter2);
+        if(iter3 != nodeToTreeWidget.end())
             if ((*iter3)->parent() == *iter)
                 deleteTreeWidgetForMap(*iter2);
 
         ++iter2;
     }
 
-    nodeToTreeWidget->erase(iter);
+    nodeToTreeWidget.erase(iter);
 }
 
 void MainWindow::setTreeWidget(go::nodePtr n){
-    NodeToTreeWidgetType::iterator iter = nodeToTreeWidget->find(n);
-    if (iter != nodeToTreeWidget->end())
-        branchWidget->setCurrentItem( iter.value() );
+    NodeToTreeWidgetType::iterator iter = nodeToTreeWidget.find(n);
+    if (iter != nodeToTreeWidget.end())
+        ui->branchWidget->setCurrentItem( iter.value() );
 }
 
 QString MainWindow::createTreeText(const go::nodePtr node){
@@ -2295,7 +2082,7 @@ QString MainWindow::createTreeText(const go::nodePtr node){
         if (node->isPass())
             s.append( tr("Pass") );
         else
-            s.append( boardWidget->getXYString(node->getX(), node->getY()) );
+            s.append( ui->boardWidget->getXYString(node->getX(), node->getY()) );
     }
 
     if (!s.isEmpty())
@@ -2345,7 +2132,7 @@ void MainWindow::setEditMode(QAction* action, BoardWidget::eEditMode editMode){
             connect( ui->menuStoneMarkers->menuAction(), SIGNAL(triggered()), this, SLOT(on_actionDeleteMarker_triggered()) );
     }
 
-    boardWidget->setEditMode(editMode);
+    ui->boardWidget->setEditMode(editMode);
 }
 
 void MainWindow::setAnnotation(int annotation, int moveAnnotation, int nodeAnnotation){
@@ -2379,10 +2166,15 @@ void MainWindow::setAnnotation(int annotation, int moveAnnotation, int nodeAnnot
     static const int nodeN = sizeof(nodeActions) / sizeof(nodeActions[0]);
     for (int i=0; i<nodeN; ++i)
         nodeActions[i]->setChecked( i+1 == nodeAnnotation );
+
+    this->annotation     = annotation;
+    this->moveAnnotation = moveAnnotation;
+    this->nodeAnnotation = nodeAnnotation;
 }
 
 void MainWindow::setAnnotation(QAction* action, int annotation){
-    boardWidget->setAnnotation(action->isChecked() ? annotation : 0);
+    annotation = action->isChecked() ? annotation : 0;
+    ui->boardWidget->setAnnotation(annotation);
 }
 
 void MainWindow::setMoveAnnotation(QAction* action, int annotation){
@@ -2400,7 +2192,8 @@ void MainWindow::setMoveAnnotation(QAction* action, int annotation){
         if (actions[i] != action)
             actions[i]->setChecked( false );
 
-    boardWidget->setMoveAnnotation(action->isChecked() ? annotation : 0);
+    moveAnnotation = action->isChecked() ? annotation : 0;
+    ui->boardWidget->setMoveAnnotation(moveAnnotation);
 }
 
 void MainWindow::setNodeAnnotation(QAction* action, int annotation){
@@ -2418,22 +2211,22 @@ void MainWindow::setNodeAnnotation(QAction* action, int annotation){
         if (actions[i] != action)
             actions[i]->setChecked( false );
 
-    boardWidget->setNodeAnnotation(action->isChecked() ? annotation : 0);
+    nodeAnnotation = action->isChecked() ? annotation : 0;
+    ui->boardWidget->setNodeAnnotation(nodeAnnotation);
 }
 
 void MainWindow::setCountTerritoryMode(bool on){
     countTerritoryMode = on;
 
     static QAction* act[] = {
-//        ui->actionNew,
-//        ui->actionOpen,
-//        ui->actionOpenURL,
+        ui->actionNew,
+        ui->actionOpen,
+        ui->actionOpenURL,
         ui->actionSave,
         ui->actionSaveAs,
         ui->actionReload,
         ui->actionSaveBoardAsPicture,
         ui->actionExportAsciiToClipboard,
-//        ui->actionPrint,
 //        ui->actionExit,
 
         ui->actionCopySGFtoClipboard,
@@ -2521,7 +2314,6 @@ void MainWindow::setCountTerritoryMode(bool on){
         ui->actionJumpToClicked,
 
         ui->actionShowMoveNumber,
-        ui->actionResetMoveNubmerInBranch,
         ui->actionNoMoveNumber,
         ui->actionLast1Move,
         ui->actionLast2Moves,
@@ -2569,11 +2361,8 @@ void MainWindow::setCountTerritoryMode(bool on){
         redoAction,
     };
     static int N = sizeof(act) / sizeof(act[0]);
-    QVector<bool>& status = tabData->countTerritoryMenuStatus;
-    if (status.size() < N){
-        status.resize(N);
-        qFill(status, true);
-    }
+    static QVector<bool> status(N);
+
     if (on)
         for (int i=0; i<N; ++i){
             status[i] = act[i]->isEnabled();
@@ -2584,7 +2373,7 @@ void MainWindow::setCountTerritoryMode(bool on){
             act[i]->setEnabled( status[i] );
 
     ui->commentWidget->setEnabled( !on );
-    branchWidget->setEnabled( !on );
+    ui->branchWidget->setEnabled( !on );
     ui->undoView->setEnabled( !on );
 }
 
@@ -2592,15 +2381,14 @@ void MainWindow::setPlayWithComputerMode(bool on){
     playWithComputerMode = on;
 
     static QAction* act[] = {
-//        ui->actionNew,
-//        ui->actionOpen,
-//        ui->actionOpenURL,
+        ui->actionNew,
+        ui->actionOpen,
+        ui->actionOpenURL,
         ui->actionSave,
         ui->actionSaveAs,
         ui->actionReload,
         ui->actionSaveBoardAsPicture,
         ui->actionExportAsciiToClipboard,
-        ui->actionPrint,
 //        ui->actionExit,
 
         ui->actionCopySGFtoClipboard,
@@ -2687,20 +2475,19 @@ void MainWindow::setPlayWithComputerMode(bool on){
         ui->actionJumpToMoveNumber,
         ui->actionJumpToClicked,
 
-//        ui->actionShowMoveNumber,
-//        ui->actionResetMoveNubmerInBranch,
-//        ui->actionNoMoveNumber,
-//        ui->actionLast1Move,
-//        ui->actionLast2Moves,
-//        ui->actionLast5Moves,
-//        ui->actionLast10Moves,
-//        ui->actionLast20Moves,
-//        ui->actionLast50Moves,
-//        ui->actionAllMoves,
-//        ui->actionShowCoordinate,
-//        ui->actionShowCoordinateI,
-//        ui->actionShowMarker,
-//        ui->actionShowBranchMoves,
+        ui->actionShowMoveNumber,
+        ui->actionNoMoveNumber,
+        ui->actionLast1Move,
+        ui->actionLast2Moves,
+        ui->actionLast5Moves,
+        ui->actionLast10Moves,
+        ui->actionLast20Moves,
+        ui->actionLast50Moves,
+        ui->actionAllMoves,
+        ui->actionShowCoordinate,
+        ui->actionShowCoordinateI,
+        ui->actionShowMarker,
+        ui->actionShowBranchMoves,
         ui->actionBranchMode,
         ui->actionRotateBoardClockwise,
         ui->actionFlipBoardHorizontally,
@@ -2730,20 +2517,15 @@ void MainWindow::setPlayWithComputerMode(bool on){
 //        ui->actionAboutQT,
 
         ui->menuRecentFiles->menuAction(),
-//        ui->menuShowMoveNumber->menuAction(),
+        ui->menuShowMoveNumber->menuAction(),
         ui->menuStoneMarkers->menuAction(),
         undoAction,
         redoAction,
     };
     static int N = sizeof(act) / sizeof(act[0]);
-    QVector<bool>& status = tabData->countTerritoryMenuStatus;
-    if (status.size() < N){
-        status.resize(N);
-        qFill(status, true);
-    }
+    static QVector<bool> status(N);
 
     if (on){
-        ui->actionPlayWithGnugo->setChecked(true);
         undoGroup.setActiveStack(0);
         for (int i=0; i<N; ++i){
             status[i] = act[i]->isEnabled();
@@ -2751,26 +2533,20 @@ void MainWindow::setPlayWithComputerMode(bool on){
         }
     }
     else{
-        ui->actionPlayWithGnugo->setChecked(false);
-        undoGroup.setActiveStack(boardWidget->getUndoStack());
+        undoGroup.setActiveStack(ui->boardWidget->getUndoStack());
         for (int i=0; i<N; ++i)
             act[i]->setEnabled( status[i] );
     }
 
     ui->commentWidget->setEnabled( !on );
-    branchWidget->setEnabled( !on );
+    ui->branchWidget->setEnabled( !on );
     ui->undoView->setEnabled( !on );
 }
 
 void MainWindow::endGame(){
-    tabData->gtpProcess->close();
-
-//    delete tabData->gtpProcess;
-    delete tabData->playGame;
-    tabData->gtpProcess = NULL;
-    tabData->playGame = NULL;
-
-    boardWidget->playWithComputer(NULL);
+    gtpProcess.close();
+    delete playGame;
+    ui->boardWidget->playWithComputer(NULL);
 
     setPlayWithComputerMode(false);
 }

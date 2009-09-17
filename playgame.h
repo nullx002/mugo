@@ -15,7 +15,6 @@ public:
     virtual ~PlayGame();
 
     virtual void move(int x, int y) = 0;
-    virtual bool moving() const = 0;
     virtual void put(go::color c, int x, int y) = 0;
     virtual void wait() = 0;
 
