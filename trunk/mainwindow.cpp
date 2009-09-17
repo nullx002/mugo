@@ -245,9 +245,10 @@ MainWindow::MainWindow(QWidget *parent)
     ui->actionNextTab->setShortcut( QKeySequence::NextChild );
 
     // command line
-    if (qApp->argc() > 1)
-        for (int i=1; i<qApp->argc(); ++i)
-            fileOpen(qApp->argv()[i]);
+    QStringList args = qApp->arguments();
+    if (args.size() > 1)
+        for (int i=1; i<args.size(); ++i)
+            fileOpen(args[i]);
     else
         fileNew();
 
