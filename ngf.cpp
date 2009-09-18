@@ -44,11 +44,11 @@ bool ngf::readStream(QString::iterator& first, QString::iterator last){
     return true;
 }
 
-bool ngf::saveStream(QTextStream& stream){
+bool ngf::saveStream(QTextStream& /*stream*/){
     return false;
 }
 
-QTextCodec* ngf::getCodec(const QByteArray& a) const{
+QTextCodec* ngf::getCodec(const QByteArray&) const{
     return QTextCodec::codecForName("Shift_JIS");
 }
 
@@ -87,7 +87,7 @@ bool ngf::get(go::data& data) const{
     return true;
 }
 
-bool ngf::set(const go::data& data){
+bool ngf::set(const go::data& /*data*/){
     return false;
 }
 
