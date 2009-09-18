@@ -1937,7 +1937,7 @@ bool MainWindow::fileOpen(const QString& fname, bool guessCodec, bool newTab, bo
     ui->actionReload->setEnabled(true);
 
     for (int i=0; i<codecNames.size(); ++i){
-        if (stricmp(codec->name(), codecNames[i]) == 0){
+        if (strcasecmp(codec->name(), codecNames[i]) == 0){
             codecActions[i]->setChecked(true);
             setEncoding(codecActions[i]);
         }

@@ -17,10 +17,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeMIMETypes</key>
-			<array>
-				<string></string>
-			</array>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleTypeIconFile</key>
@@ -34,6 +30,30 @@
 			</array>
 			<key>LSHandlerRank</key>
 			<string>Default</string>
+		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleTypeIconFile</key>
+			<string>mugo.icns</string>
+			<key>CFBundleTypeName</key>
+			<string>GIB</string>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>gib</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleTypeIconFile</key>
+			<string>mugo.icns</string>
+			<key>CFBundleTypeName</key>
+			<string>NGF</string>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>ngf</string>
+			</array>
 		</dict>
 	</array>
 	<key>CFBundleGetInfoString</key>

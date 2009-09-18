@@ -20,7 +20,7 @@ bool gib::readStream(QString::iterator& first, QString::iterator last){
     return true;
 }
 
-bool gib::saveStream(QTextStream& stream){
+bool gib::saveStream(QTextStream& /*stream*/){
     return false;
 }
 
@@ -76,7 +76,7 @@ bool gib::get(go::data& data) const{
     return true;
 }
 
-bool gib::set(const go::data& data){
+bool gib::set(const go::data& /*data*/){
     return false;
 }
 
