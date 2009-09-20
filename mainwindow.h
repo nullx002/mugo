@@ -8,7 +8,6 @@
 #include <QProcess>
 #include <QHttp>
 #include <QProgressDialog>
-#include <QActionGroup>
 #include "boardwidget.h"
 #include "countterritorydialog.h"
 #include "gtp.h"
@@ -27,8 +26,6 @@ public:
 
     struct TabData{
         TabData() : branchMode(false), countTerritoryDialog(NULL), playGame(NULL), gtpProcess(NULL){}
-
-        QAction* menuAction;
 
         NodeToTreeWidgetType nodeToTree;
         QTreeWidget* branchWidget;
@@ -105,7 +102,6 @@ private:
     Ui::MainWindow *ui;
     QMap<BoardWidget*, TabData> tabDatas;
     TabData* tabData;
-    QActionGroup tabMenuGroups;
     BoardWidget* boardWidget;
     QTreeWidget* branchWidget;
     NodeToTreeWidgetType* nodeToTreeWidget;
@@ -132,6 +128,10 @@ private:
 
 private slots:
     // File menu
+    void on_actionNextTab_triggered();
+    void on_actionPreviousTab_triggered();
+    void on_actionResetMoveNubmerInBranch_triggered();
+    void on_actionCloseTab_triggered();
     void on_actionNew_triggered();
     void on_actionOpen_triggered();
     void on_actionOpenURL_triggered();
@@ -141,7 +141,6 @@ private slots:
     void on_actionSaveBoardAsPicture_triggered();
     void on_actionExportAsciiToClipboard_triggered();
     void on_actionPrint_triggered();
-    void on_actionCloseTab_triggered();
     void on_actionExit_triggered();
     void openRecentFile();
 
@@ -213,7 +212,6 @@ private slots:
 
     // View menu -> Move Number
     void on_actionNoMoveNumber_triggered();
-    void on_actionResetMoveNubmerInBranch_triggered();
     void on_actionLast1Move_triggered();
     void on_actionLast2Moves_triggered();
     void on_actionLast5Moves_triggered();
@@ -251,10 +249,6 @@ private slots:
     void on_actionLanguageEnglish_triggered();
     void on_actionLanguageJapanese_triggered();
 
-    // window
-    void on_actionNextTab_triggered();
-    void on_actionPreviousTab_triggered();
-
     // Help menu
     void on_actionAbout_triggered();
     void on_actionAboutQT_triggered();
@@ -287,9 +281,6 @@ private slots:
 
     // play a game
     void playGameEnded();
-
-    // tab change
-    void onTabChangeRequest();
 };
 
 #endif // MAINWINDOW_H

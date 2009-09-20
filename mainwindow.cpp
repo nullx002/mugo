@@ -28,7 +28,6 @@ Q_DECLARE_METATYPE(go::nodePtr);
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
-    , tabMenuGroups(this)
     , docIndex(0)
     , undoGroup(this)
     , countTerritoryMode(false)
@@ -191,9 +190,6 @@ MainWindow::MainWindow(QWidget *parent)
         ui->actionLanguageEnglish->setChecked(true);
     else if (language == "ja_JP")
         ui->actionLanguageJapanese->setChecked(true);
-
-    // tool menu
-    ui->actionPlaySound->setChecked( settings.value("sound/play", 1).toBool() );
 
     // tool bar (option -> show move number)
     ui->optionToolBar->insertAction( ui->optionToolBar->actions().at(0), ui->menuShowMoveNumber->menuAction() );
@@ -535,6 +531,9 @@ void MainWindow::on_actionCopyCurrentSGFtoClipboard_triggered(){
 * Edit -> Paste SGF from Clipboard
 */
 void MainWindow::on_actionPasteSGFfromClipboard_triggered(){
+    if (fileClose() == false)
+        return;
+
     QClipboard *clipboard = QApplication::clipboard();
     QString str = clipboard->text();
 
@@ -542,7 +541,6 @@ void MainWindow::on_actionPasteSGFfromClipboard_triggered(){
     QString::iterator first = str.begin();
     sgf.readStream(first, str.end());
 
-    fileNew();
     boardWidget->setData(sgf);
 
     boardWidget->setDirty(true);
@@ -1560,7 +1558,6 @@ void MainWindow::on_boardTabWidget_currentChanged(QWidget* widget){
     branchWidget = tabData->branchWidget;
     nodeToTreeWidget = &tabData->nodeToTree;
     branchWidget->setFocus(Qt::OtherFocusReason);
-    tabData->menuAction->setChecked(true);
 
     ui->commentWidget->setPlainText(boardWidget->getCurrentNode()->comment);
 
@@ -1758,6 +1755,7 @@ void MainWindow::updateMenu(){
     ui->actionFlipBoardVertically->setChecked( boardWidget->getFlipBoardVertically() );
 
     ui->actionBranchMode->setChecked( tabData->branchMode );
+
     ui->actionTutorBossSides->setChecked( boardWidget->getTutorMode() == BoardWidget::eTutorBossSides );
     ui->actionTutorOneSide->setChecked( boardWidget->getTutorMode() == BoardWidget::eTutorOneSide );
 
@@ -1814,8 +1812,6 @@ void MainWindow::setCaption(){
         docName.append(" *");
     int tabIndex = ui->boardTabWidget->indexOf(boardWidget);
     ui->boardTabWidget->setTabText(tabIndex, docName);
-
-    tabData->menuAction->setText(docName);
 }
 
 void MainWindow::addDocument(BoardWidget* board){
@@ -1824,18 +1820,11 @@ void MainWindow::addDocument(BoardWidget* board){
     ui->branchLayout->addWidget(tree);
 
     TabData& data = tabDatas[board];
-    data.menuAction = new QAction(board);
-    tabMenuGroups.addAction(data.menuAction);
-    data.menuAction->setCheckable(true);
-
     data.branchWidget = tree;
     data.documentName = tr("Untitled-%1").arg(docIndex);
     data.codec = QTextCodec::codecForName("UTF-8");
     data.encode = ui->actionEncodingUTF8;
     data.countTerritoryDialog = new CountTerritoryDialog(this);
-
-    ui->menuWindow->addAction(data.menuAction);
-    connect(data.menuAction, SIGNAL(triggered()), this, SLOT(onTabChangeRequest()));
     connect(data.countTerritoryDialog, SIGNAL(finished(int)), this, SLOT(scoreDialogClosed(int)));
 
     ui->boardTabWidget->addTab(board, data.documentName);
@@ -1898,8 +1887,8 @@ bool MainWindow::fileOpen(const QString& fname, bool guessCodec, bool newTab, bo
 
 #define READ_FILE(FORMAT){\
     go::FORMAT fileData;\
-    if (fileData.read(fname, codec, guessCodec))\
-        codec = fileData.codec;\
+    fileData.read(fname, codec, guessCodec);\
+    codec = fileData.codec;\
 \
     BoardWidget* board = boardWidget;\
     if (newTab){\
@@ -2028,7 +2017,6 @@ bool MainWindow::tabClose(int index){
         return false;
     }
 
-    delete tabData->menuAction;
     delete tabData->gtpProcess;
     delete tabData->playGame;
     delete tabData->branchWidget;
@@ -2154,14 +2142,6 @@ void MainWindow::openUrlDone(bool error){
 */
 void MainWindow::openUrlCancel(){
     http->abort();
-}
-
-/**
-* slot
-*/
-void MainWindow::onTabChangeRequest(){
-    QWidget* widget = qobject_cast<QWidget*>(sender()->parent());
-    ui->boardTabWidget->setCurrentWidget(widget);
 }
 
 /**
