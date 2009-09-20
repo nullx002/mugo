@@ -128,7 +128,7 @@ private:
     QByteArray downloadBuff;
 
     QList<QAction*> codecActions;
-    QList<const char*> MainWindow::codecNames;
+    QList<const char*> codecNames;
 
 private slots:
     // File menu
