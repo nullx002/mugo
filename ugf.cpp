@@ -87,6 +87,19 @@ bool ugf::set(const go::data& /*data*/){
     return false;
 }
 
+QString ugf::readLine(QString::iterator& first, QString::iterator& last){
+    QString str;
+    while (first != last){
+        QChar c = *first++;
+        if (c == '\r')
+            continue;
+        else if (c == '\n')
+            break;
+        str.push_back(c);
+    }
+    return str;
+}
+
 bool ugf::readHeader(QString::iterator& first, QString::iterator& last){
     while (first != last && *first != '['){
         QString str = readLine(first, last);

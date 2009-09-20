@@ -2,8 +2,7 @@
 # Project created by QtCreator 2009-05-16T20:10:53
 # -------------------------------------------------
 TARGET = mugo
-mac:CONFIG += x86 \
-    ppc
+mac:CONFIG += x86 ppc
 TEMPLATE = app
 unix:QT += phonon
 mac:QT += phonon
@@ -22,9 +21,7 @@ SOURCES += main.cpp \
     exportasciidialog.cpp \
     playgame.cpp \
     gtp.cpp \
-    printoptiondialog.cpp \
-    gib.cpp \
-    ngf.cpp
+    printoptiondialog.cpp
 HEADERS += mainwindow.h \
     boardwidget.h \
     godata.h \
@@ -39,9 +36,7 @@ HEADERS += mainwindow.h \
     exportasciidialog.h \
     playgame.h \
     gtp.h \
-    printoptiondialog.h \
-    gib.h \
-    ngf.h
+    printoptiondialog.h
 FORMS += mainwindow.ui \
     boardwidget.ui \
     gameinformationdialog.ui \

@@ -104,10 +104,10 @@ void ExportAsciiDialog::createEnglishAscii(){
 
 void ExportAsciiDialog::createJapaneseAscii(){
 #ifdef Q_WS_WIN
-    QFont f("ＭＳ ゴシック", 8);
+    QFont f(QString::fromUtf8("ＭＳ ゴシック"), 8);
     m_ui->asciiTextEdit->setFont(f);
 #elif defined(Q_WS_MAC)
-    QFont f("Osaka−等幅", 8);
+    QFont f(QString::fromUtf8("Osaka−等幅"), 8);
     m_ui->asciiTextEdit->setFont(f);
 #endif
 
@@ -161,7 +161,7 @@ void ExportAsciiDialog::createJapaneseAscii(){
         s.push_back( header[j] );
     }
 
-    m_ui->asciiTextEdit->setPlainText(s);
+    m_ui->asciiTextEdit->setPlainText( QString::fromUtf8(s) );
 }
 
 bool ExportAsciiDialog::isStar(int x, int y){

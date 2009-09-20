@@ -50,13 +50,14 @@ public:
     bool event(QEvent*);
 #endif
 
-    void setMainWindow(MainWindow* win);
+    MainWindow* newMainWindow();
 
 private:
     MainWindow* mainWindow;
 };
 
 Application::~Application(){
+    delete mainWindow;
 }
 
 #if defined(Q_WS_MAC)
@@ -74,15 +75,16 @@ bool Application::event(QEvent* e){
 }
 #endif
 
-void Application::setMainWindow(MainWindow* win){
-    mainWindow = win;
+MainWindow* Application::newMainWindow(){
+    mainWindow = new MainWindow;
+    mainWindow->show();
+    return mainWindow;
 }
 
 int main(int argc, char *argv[])
 {
 // is QFileOpenEvent received on macx??
     Application a(argc, argv);
-//    a.addLibraryPath( a.applicationDirPath() + "/plugins" );
     a.setOrganizationName(AUTHOR);
     a.setApplicationName(APPNAME);
     a.setApplicationVersion(VERSION);
@@ -97,27 +99,17 @@ int main(int argc, char *argv[])
     if (locale.isEmpty())
         locale = QLocale::system().name();
 
-    // application's translation path
-    QString translationPath = getTranslationPath();
-
-    // qt translation
     QTranslator qtTranslator;
-    if (qtTranslator.load("qt_" + locale, QLibraryInfo::location(QLibraryInfo::TranslationsPath)) == false)
-        qtTranslator.load("qt_" + locale, translationPath);
+    qtTranslator.load("qt_" + locale, QLibraryInfo::location(QLibraryInfo::TranslationsPath));
     a.installTranslator(&qtTranslator);
 
-    // application translation
     QTranslator myappTranslator;
-    myappTranslator.load("mugo." + locale, translationPath);
+    myappTranslator.load("mugo." + locale, getTranslationPath());
     a.installTranslator(&myappTranslator);
 
-//    QTextCodec::setCodecForCStrings( QTextCodec::codecForLocale() );
-//    QTextCodec::setCodecForTr( QTextCodec::codecForLocale() );
-    QTextCodec::setCodecForCStrings( QTextCodec::codecForName("UTF-8") );
-    QTextCodec::setCodecForTr( QTextCodec::codecForName("UTF-8") );
+    QTextCodec::setCodecForCStrings( QTextCodec::codecForLocale() );
+    QTextCodec::setCodecForTr( QTextCodec::codecForLocale() );
 
-    MainWindow m;
-    m.show();
-    a.setMainWindow(&m);
+    a.newMainWindow();
     return a.exec();
 }

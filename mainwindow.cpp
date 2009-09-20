@@ -11,8 +11,6 @@
 #include "appdef.h"
 #include "sgf.h"
 #include "ugf.h"
-#include "gib.h"
-#include "ngf.h"
 #include "mainwindow.h"
 #include "setupdialog.h"
 #include "gameinformationdialog.h"
@@ -23,86 +21,15 @@
 
 Q_DECLARE_METATYPE(go::nodePtr);
 
-
-
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
-    , tabMenuGroups(this)
     , docIndex(0)
     , undoGroup(this)
     , countTerritoryMode(false)
     , playWithComputerMode(false)
 {
     ui->setupUi(this);
-
-    // encoding
-    codecActions.push_back( ui->actionEncodingUTF8 );
-    codecActions.push_back( ui->actionISO8859_1 );
-    codecActions.push_back( ui->actionISO8859_2 );
-    codecActions.push_back( ui->actionISO8859_3 );
-    codecActions.push_back( ui->actionISO8859_4 );
-    codecActions.push_back( ui->actionISO8859_5 );
-    codecActions.push_back( ui->actionISO8859_6 );
-    codecActions.push_back( ui->actionISO8859_7 );
-    codecActions.push_back( ui->actionISO8859_8 );
-    codecActions.push_back( ui->actionISO8859_9 );
-    codecActions.push_back( ui->actionISO8859_10 );
-    codecActions.push_back( ui->actionISO8859_11 );
-    codecActions.push_back( ui->actionISO8859_13 );
-    codecActions.push_back( ui->actionISO8859_14 );
-    codecActions.push_back( ui->actionISO8859_15 );
-    codecActions.push_back( ui->actionISO8859_16 );
-    codecActions.push_back( ui->actionWindows_1250 );
-    codecActions.push_back( ui->actionWindows_1251 );
-    codecActions.push_back( ui->actionWindows_1252 );
-    codecActions.push_back( ui->actionWindows_1253 );
-    codecActions.push_back( ui->actionWindows_1254 );
-    codecActions.push_back( ui->actionWindows_1255 );
-    codecActions.push_back( ui->actionWindows_1256 );
-    codecActions.push_back( ui->actionWindows_1257 );
-    codecActions.push_back( ui->actionWindows_1258 );
-    codecActions.push_back( ui->actionKoi8_R );
-    codecActions.push_back( ui->actionKoi8_U );
-    codecActions.push_back( ui->actionEncodingGB2312 );
-    codecActions.push_back( ui->actionEncodingBig5 );
-    codecActions.push_back( ui->actionEncodingShiftJIS );
-    codecActions.push_back( ui->actionEncodingJIS );
-    codecActions.push_back( ui->actionEncodingEucJP );
-    codecActions.push_back( ui->actionEncodingKorean );
-    codecNames.push_back( "UTF-8" );
-    codecNames.push_back( "ISO-8859-1" );
-    codecNames.push_back( "ISO-8859-2" );
-    codecNames.push_back( "ISO-8859-3" );
-    codecNames.push_back( "ISO-8859-4" );
-    codecNames.push_back( "ISO-8859-5" );
-    codecNames.push_back( "ISO-8859-6" );
-    codecNames.push_back( "ISO-8859-7" );
-    codecNames.push_back( "ISO-8859-8" );
-    codecNames.push_back( "ISO-8859-9" );
-    codecNames.push_back( "ISO-8859-10" );
-    codecNames.push_back( "TIS-620" );  // ISO-8859-11
-    codecNames.push_back( "ISO-8859-13" );
-    codecNames.push_back( "ISO-8859-14" );
-    codecNames.push_back( "ISO-8859-15" );
-    codecNames.push_back( "ISO-8859-16" );
-    codecNames.push_back( "windows-1250" );
-    codecNames.push_back( "windows-1251" );
-    codecNames.push_back( "windows-1252" );
-    codecNames.push_back( "windows-1253" );
-    codecNames.push_back( "windows-1254" );
-    codecNames.push_back( "windows-1255" );
-    codecNames.push_back( "windows-1256" );
-    codecNames.push_back( "windows-1257" );
-    codecNames.push_back( "windows-1258" );
-    codecNames.push_back( "KOI8-R" );
-    codecNames.push_back( "KOI8-U" );
-    codecNames.push_back( "GB2312" );
-    codecNames.push_back( "Big5" );
-    codecNames.push_back( "Shift_JIS" );
-    codecNames.push_back( "ISO-2022-JP" );
-    codecNames.push_back( "EUC-JP" );
-    codecNames.push_back( "EUC-KR" );
 
     // action group
     QActionGroup* showMoveNumberGroup = new QActionGroup(this);
@@ -116,9 +43,45 @@ MainWindow::MainWindow(QWidget *parent)
     showMoveNumberGroup->addAction(ui->actionAllMoves);
 
     QActionGroup* encodingGroup = new QActionGroup(this);
-    for (int i=0; i<codecActions.size(); ++i){
-        encodingGroup->addAction( codecActions[i] );
-        connect( codecActions[i], SIGNAL(triggered()), this, SLOT(setEncoding()) );
+    QAction* encodingActions[] = {
+        ui->actionEncodingUTF8,
+        ui->actionISO8859_1,
+        ui->actionISO8859_2,
+        ui->actionISO8859_3,
+        ui->actionISO8859_4,
+        ui->actionISO8859_5,
+        ui->actionISO8859_6,
+        ui->actionISO8859_7,
+        ui->actionISO8859_8,
+        ui->actionISO8859_9,
+        ui->actionISO8859_10,
+        ui->actionISO8859_11,
+        ui->actionISO8859_13,
+        ui->actionISO8859_14,
+        ui->actionISO8859_15,
+        ui->actionISO8859_16,
+        ui->actionWindows_1250,
+        ui->actionWindows_1251,
+        ui->actionWindows_1252,
+        ui->actionWindows_1253,
+        ui->actionWindows_1257,
+        ui->actionWindows_1254,
+        ui->actionWindows_1258,
+        ui->actionWindows_1256,
+        ui->actionWindows_1255,
+        ui->actionKoi8_R,
+        ui->actionKoi8_U,
+        ui->actionEncodingGB2312,
+        ui->actionEncodingBig5,
+        ui->actionEncodingKorean,
+        ui->actionEncodingEucJP,
+        ui->actionEncodingJIS,
+        ui->actionEncodingShiftJIS,
+    };
+    int encN = sizeof(encodingActions) / sizeof(encodingActions[0]);
+    for (int i=0; i<encN; ++i){
+        encodingGroup->addAction( encodingActions[i] );
+        connect( encodingActions[i], SIGNAL(triggered()), this, SLOT(setEncoding()) );
     }
 
     QActionGroup* editGroup = new QActionGroup(this);
@@ -151,6 +114,30 @@ MainWindow::MainWindow(QWidget *parent)
     connect( http, SIGNAL(dataReadProgress(int, int)), this, SLOT(openUrlReadProgress(int, int)) );
     connect( http, SIGNAL(done(bool)), this, SLOT(openUrlDone(bool)) );
 
+    // marker
+    ui->actionShowMoveNumber->setChecked( settings.value("marker/showMoveNumber", true).toBool() );
+
+    int moveNumber = settings.value("marker/moveNumber", 0).toInt();
+    if (moveNumber == -1)
+        ui->actionAllMoves->setChecked(true);
+    else if (moveNumber == 0)
+        ui->actionNoMoveNumber->setChecked(true);
+    else if (moveNumber == 1)
+        ui->actionLast1Move->setChecked(true);
+    else if (moveNumber == 2)
+        ui->actionLast2Moves->setChecked(true);
+    else if (moveNumber == 5)
+        ui->actionLast5Moves->setChecked(true);
+    else if (moveNumber == 10)
+        ui->actionLast10Moves->setChecked(true);
+    else if (moveNumber == 20)
+        ui->actionLast20Moves->setChecked(true);
+    else if (moveNumber == 50)
+        ui->actionLast50Moves->setChecked(true);
+
+    // set sound files
+    ui->actionPlaySound->setChecked( settings.value("sound/play", 1).toBool() );
+
     // recent files
     for (int i=0; i<MaxRecentFiles; ++i){
         recentFileActs[i] = new QAction(this);
@@ -174,10 +161,9 @@ MainWindow::MainWindow(QWidget *parent)
     ui->editToolBar->insertAction(redoAction, undoAction);
 
     // create window menu
-    ui->menuWindow->insertAction( ui->actionPreviousTab, ui->commentDockWidget->toggleViewAction() );
-    ui->menuWindow->insertAction( ui->actionPreviousTab, ui->branchDockWidget->toggleViewAction() );
-    ui->menuWindow->insertAction( ui->actionPreviousTab, ui->undoDockWidget->toggleViewAction() );
-    ui->menuWindow->insertSeparator( ui->actionPreviousTab );
+    ui->menuWindow->addAction( ui->commentDockWidget->toggleViewAction() );
+    ui->menuWindow->addAction( ui->branchDockWidget->toggleViewAction() );
+    ui->menuWindow->addAction( ui->undoDockWidget->toggleViewAction() );
     ui->menuToolbars->addAction( ui->mainToolBar->toggleViewAction() );
     ui->menuToolbars->addAction( ui->editToolBar->toggleViewAction() );
     ui->menuToolbars->addAction( ui->navigationToolBar->toggleViewAction() );
@@ -191,9 +177,6 @@ MainWindow::MainWindow(QWidget *parent)
         ui->actionLanguageEnglish->setChecked(true);
     else if (language == "ja_JP")
         ui->actionLanguageJapanese->setChecked(true);
-
-    // tool menu
-    ui->actionPlaySound->setChecked( settings.value("sound/play", 1).toBool() );
 
     // tool bar (option -> show move number)
     ui->optionToolBar->insertAction( ui->optionToolBar->actions().at(0), ui->menuShowMoveNumber->menuAction() );
@@ -239,20 +222,17 @@ MainWindow::MainWindow(QWidget *parent)
     redoAction->setShortcut( QKeySequence::Redo );
     ui->actionPreviousMove->setShortcut( QKeySequence::Back );
     ui->actionNextMove->setShortcut( QKeySequence::Forward );
-//    ui->actionPreviousBranch->setShortcut( QKeySequence::PreviousChild );
-//    ui->actionNextBranch->setShortcut( QKeySequence::NextChild );
+    ui->actionPreviousBranch->setShortcut( QKeySequence::PreviousChild );
+    ui->actionNextBranch->setShortcut( QKeySequence::NextChild );
     ui->actionMoveFirst->setShortcut( QKeySequence::MoveToStartOfLine );
     ui->actionMoveLast->setShortcut( QKeySequence::MoveToEndOfLine );
 //    ui->actionFastRewind->setShortcut( QKeySequence::MoveToPreviousPage );
 //    ui->actionFastForward->setShortcut( QKeySequence::MoveToNextPage );
-    ui->actionPreviousTab->setShortcut( QKeySequence::PreviousChild );
-    ui->actionNextTab->setShortcut( QKeySequence::NextChild );
 
     // command line
-    QStringList args = qApp->arguments();
-    if (args.size() > 1)
-        for (int i=1; i<args.size(); ++i)
-            fileOpen(args[i]);
+    if (qApp->argc() > 1)
+        for (int i=1; i<qApp->argc(); ++i)
+            fileOpen(qApp->argv()[i]);
     else
         fileNew();
 
@@ -299,17 +279,10 @@ void MainWindow::dragEnterEvent(QDragEnterEvent* event)
         event->acceptProposedAction();
     else{
 */
-        char* ext[] = {"sgf", "ugf", "ugi", "gib", "ngf"};
-        int N = sizeof(ext) / sizeof(ext[0]);
-
         QString localFile = event->mimeData()->urls().front().toLocalFile();
         QFileInfo f(localFile);
-
-        for (int i=0; i<N; ++i)
-            if (f.suffix().compare(ext[i], Qt::CaseInsensitive) == 0){
-                event->acceptProposedAction();
-                break;
-            }
+        if (f.suffix().compare("sgf", Qt::CaseInsensitive) == 0 || f.suffix().compare("ugf", Qt::CaseInsensitive) == 0 || f.suffix().compare("ugi", Qt::CaseInsensitive) == 0)
+            event->acceptProposedAction();
 //    }
 }
 
@@ -371,7 +344,7 @@ void MainWindow::on_actionOpenURL_triggered(){
 */
 void MainWindow::on_actionReload_triggered(){
     if (maybeSave())
-        fileOpen(tabData->fileName, false, false, true);
+        fileOpen(tabData->fileName, true, false, true);
 }
 
 /**
@@ -535,6 +508,9 @@ void MainWindow::on_actionCopyCurrentSGFtoClipboard_triggered(){
 * Edit -> Paste SGF from Clipboard
 */
 void MainWindow::on_actionPasteSGFfromClipboard_triggered(){
+    if (fileClose() == false)
+        return;
+
     QClipboard *clipboard = QApplication::clipboard();
     QString str = clipboard->text();
 
@@ -542,7 +518,6 @@ void MainWindow::on_actionPasteSGFfromClipboard_triggered(){
     QString::iterator first = str.begin();
     sgf.readStream(first, str.end());
 
-    fileNew();
     boardWidget->setData(sgf);
 
     boardWidget->setDirty(true);
@@ -878,14 +853,82 @@ void MainWindow::on_actionFlipSgfVertically_triggered(){
 * Edit -> Encoding
 */
 void MainWindow::setEncoding(){
-    setEncoding( qobject_cast<QAction*>(sender()) );
-}
-
-void MainWindow::setEncoding(QAction* action){
+    const QAction* act[] = {
+        ui->actionEncodingUTF8,
+        ui->actionISO8859_1,
+        ui->actionISO8859_2,
+        ui->actionISO8859_3,
+        ui->actionISO8859_4,
+        ui->actionISO8859_5,
+        ui->actionISO8859_6,
+        ui->actionISO8859_7,
+        ui->actionISO8859_8,
+        ui->actionISO8859_9,
+        ui->actionISO8859_10,
+        ui->actionISO8859_11,
+        ui->actionISO8859_13,
+        ui->actionISO8859_14,
+        ui->actionISO8859_15,
+        ui->actionISO8859_16,
+        ui->actionWindows_1250,
+        ui->actionWindows_1251,
+        ui->actionWindows_1252,
+        ui->actionWindows_1253,
+        ui->actionWindows_1254,
+        ui->actionWindows_1255,
+        ui->actionWindows_1256,
+        ui->actionWindows_1257,
+        ui->actionWindows_1258,
+        ui->actionKoi8_R,
+        ui->actionKoi8_U,
+        ui->actionEncodingGB2312,
+        ui->actionEncodingBig5,
+        ui->actionEncodingShiftJIS,
+        ui->actionEncodingJIS,
+        ui->actionEncodingEucJP,
+        ui->actionEncodingKorean,
+    };
+    const char* str[] = {
+        "UTF-8",
+        "ISO-8859-1",
+        "ISO-8859-2",
+        "ISO-8859-3",
+        "ISO-8859-4",
+        "ISO-8859-5",
+        "ISO-8859-6",
+        "ISO-8859-7",
+        "ISO-8859-8",
+        "ISO-8859-9",
+        "ISO-8859-10",
+        "ISO-8859-11",
+        "ISO-8859-13",
+        "ISO-8859-14",
+        "ISO-8859-15",
+        "ISO-8859-16",
+        "Windows-1250",
+        "Windows-1251",
+        "Windows-1252",
+        "Windows-1253",
+        "Windows-1254",
+        "Windows-1255",
+        "Windows-1256",
+        "Windows-1257",
+        "Windows-1258",
+        "KOI8-R",
+        "KOI8-U",
+        "GB2312",
+        "Big5",
+        "Shift_JIS",
+        "ISO 2022-JP",
+        "EUC-JP",
+        "EUC-KR",
+    };
+    int N = sizeof(act) / sizeof(act[0]);
+    QAction *action = qobject_cast<QAction*>(sender());
     tabData->encode = action;
-    for (int i=0; i<codecActions.size(); ++i){
-        if (codecActions[i] == action){
-            tabData->codec = QTextCodec::codecForName( codecNames[i] );
+    for (int i=0; i<N; ++i){
+        if (act[i] == action){
+            tabData->codec = QTextCodec::codecForName( str[i] );
 
             if (tabData->codec == NULL)
                 qDebug() << "codec is null";
@@ -1072,17 +1115,6 @@ void MainWindow::on_actionShowMoveNumber_triggered(){
 
 /**
 * Slot
-* View -> Move Number -> Reset move number in branch.
-*/
-void MainWindow::on_actionResetMoveNubmerInBranch_triggered(){
-    if (ui->actionResetMoveNubmerInBranch->isChecked())
-        boardWidget->setMoveNumberMode(tabData->branchMode ? BoardWidget::eResetInBranch : BoardWidget::eResetInVariation );
-    else
-        boardWidget->setMoveNumberMode( BoardWidget::eSequential );
-}
-
-/**
-* Slot
 * View -> Move Number-> Show Move Number
 */
 void MainWindow::on_actionShowMoveNumber_parent_triggered(){
@@ -1243,8 +1275,7 @@ void MainWindow::on_actionBranchMode_triggered(){
 //    boardWidget->setCurrentNode(current);
     branchWidget->setCurrentItem(currentItem);
 
-    BoardWidget::eMoveNumberMode moveNumberMode = tabData->branchMode ? BoardWidget::eResetInBranch : BoardWidget::eResetInVariation;
-    boardWidget->setMoveNumberMode( ui->actionResetMoveNubmerInBranch->isChecked() ? moveNumberMode : BoardWidget::eSequential );
+//    setTreeData();
 }
 
 /**
@@ -1495,34 +1526,6 @@ void MainWindow::on_actionOptions_triggered(){
 
 /**
 * Slot
-* Window -> Previous Tab
-*/
-void MainWindow::on_actionPreviousTab_triggered(){
-    if (ui->boardTabWidget->count() <= 1)
-        return;
-
-    int index = ui->boardTabWidget->currentIndex() - 1;
-    if (index < 0)
-        index = ui->boardTabWidget->count() - 1;
-    ui->boardTabWidget->setCurrentIndex(index);
-}
-
-/**
-* Slot
-* Window->Next Tab
-*/
-void MainWindow::on_actionNextTab_triggered(){
-    if (ui->boardTabWidget->count() <= 1)
-        return;
-
-    int index = ui->boardTabWidget->currentIndex() + 1;
-    if (index >= ui->boardTabWidget->count())
-        index = 0;
-    ui->boardTabWidget->setCurrentIndex(index);
-}
-
-/**
-* Slot
 * Help -> About
 */
 void MainWindow::on_actionAbout_triggered(){
@@ -1560,7 +1563,6 @@ void MainWindow::on_boardTabWidget_currentChanged(QWidget* widget){
     branchWidget = tabData->branchWidget;
     nodeToTreeWidget = &tabData->nodeToTree;
     branchWidget->setFocus(Qt::OtherFocusReason);
-    tabData->menuAction->setChecked(true);
 
     ui->commentWidget->setPlainText(boardWidget->getCurrentNode()->comment);
 
@@ -1573,6 +1575,12 @@ void MainWindow::on_boardTabWidget_currentChanged(QWidget* widget){
 
 void MainWindow::on_boardTabWidget_tabCloseRequested(int index){
     tabClose(index);
+}
+
+void MainWindow::boardTabWidgetPrev(){
+}
+
+void MainWindow::boardTabWidgetNext(){
 }
 
 /**
@@ -1738,7 +1746,6 @@ void MainWindow::updateMenu(){
     tabData->encode->setChecked(true);
 
     ui->menuShowMoveNumber->menuAction()->setChecked( boardWidget->getShowMoveNumber() );
-    ui->actionResetMoveNubmerInBranch->setChecked( boardWidget->getMoveNumberMode() != BoardWidget::eSequential );
     ui->actionShowMoveNumber->setChecked( boardWidget->getShowMoveNumber() );
     ui->actionNoMoveNumber->setChecked( boardWidget->getShowMoveNumberCount() == 0 );
     ui->actionLast1Move->setChecked( boardWidget->getShowMoveNumberCount() == 1 );
@@ -1758,6 +1765,7 @@ void MainWindow::updateMenu(){
     ui->actionFlipBoardVertically->setChecked( boardWidget->getFlipBoardVertically() );
 
     ui->actionBranchMode->setChecked( tabData->branchMode );
+
     ui->actionTutorBossSides->setChecked( boardWidget->getTutorMode() == BoardWidget::eTutorBossSides );
     ui->actionTutorOneSide->setChecked( boardWidget->getTutorMode() == BoardWidget::eTutorOneSide );
 
@@ -1785,37 +1793,38 @@ void MainWindow::updateMenu(){
 * if game information has player info, set player name to window text.
 */
 void MainWindow::setCaption(){
-    go::informationPtr gameInfo = boardWidget->getData().root;
-    bool hasPlayerInfo = !gameInfo->whitePlayer.isEmpty() || !gameInfo->whiteRank.isEmpty() ||
-                            !gameInfo->blackPlayer.isEmpty() || !gameInfo->blackRank.isEmpty();
-
-    QString caption;
-    if (hasPlayerInfo)
-        caption = tr("%1 %2 (W) vs %4 %5 (B) (Result:%7)")
-                        .arg(gameInfo->whitePlayer)
-                        .arg(gameInfo->whiteRank)
-                        .arg(gameInfo->blackPlayer)
-                        .arg(gameInfo->blackRank)
-                        .arg(gameInfo->result);
-
-    if (!hasPlayerInfo)
-        caption = tabData->documentName;
+    QString caption = tabData->documentName;
 
     if (boardWidget->isDirty())
         caption.append(" *");
 
     caption.append(" - ");
+
+    go::informationPtr gameInfo = boardWidget->getData().root;
+    bool hasPlayerInfo = !gameInfo->whitePlayer.isEmpty() || !gameInfo->whiteRank.isEmpty() ||
+                            !gameInfo->blackPlayer.isEmpty() || !gameInfo->blackRank.isEmpty();
+    if (hasPlayerInfo){
+        caption.append(gameInfo->whitePlayer);
+        caption.push_back(' ');
+        caption.append(gameInfo->whiteRank);
+        caption.append(" (W) vs ");
+        caption.append(gameInfo->blackPlayer);
+        caption.push_back(' ');
+        caption.append(gameInfo->blackRank);
+        caption.append(" (B) (Result:");
+        caption.append(gameInfo->result);
+        caption.append(") - ");
+    }
     caption.append(APPNAME);
 
     setWindowTitle(caption);
+
 
     QString docName = tabData->documentName;
     if (boardWidget->isDirty())
         docName.append(" *");
     int tabIndex = ui->boardTabWidget->indexOf(boardWidget);
     ui->boardTabWidget->setTabText(tabIndex, docName);
-
-    tabData->menuAction->setText(docName);
 }
 
 void MainWindow::addDocument(BoardWidget* board){
@@ -1824,18 +1833,11 @@ void MainWindow::addDocument(BoardWidget* board){
     ui->branchLayout->addWidget(tree);
 
     TabData& data = tabDatas[board];
-    data.menuAction = new QAction(board);
-    tabMenuGroups.addAction(data.menuAction);
-    data.menuAction->setCheckable(true);
-
     data.branchWidget = tree;
     data.documentName = tr("Untitled-%1").arg(docIndex);
     data.codec = QTextCodec::codecForName("UTF-8");
     data.encode = ui->actionEncodingUTF8;
     data.countTerritoryDialog = new CountTerritoryDialog(this);
-
-    ui->menuWindow->addAction(data.menuAction);
-    connect(data.menuAction, SIGNAL(triggered()), this, SLOT(onTabChangeRequest()));
     connect(data.countTerritoryDialog, SIGNAL(finished(int)), this, SLOT(scoreDialogClosed(int)));
 
     ui->boardTabWidget->addTab(board, data.documentName);
@@ -1855,7 +1857,6 @@ void MainWindow::addDocument(BoardWidget* board){
 
 void MainWindow::setDocument(BoardWidget* board){
     ui->boardTabWidget->setCurrentWidget(board);
-    undoGroup.setActiveStack(board->getUndoStack());
 }
 
 /**
@@ -1865,6 +1866,9 @@ bool MainWindow::fileNew(int xsize, int ysize, int handicap, double komi){
     ++docIndex;
     BoardWidget* board = new BoardWidget;
     addDocument( board );
+
+    // undo
+    undoGroup.setActiveStack(board->getUndoStack());
 
     // edit mode
     setEditMode(ui->actionAlternateMove, BoardWidget::eAlternateMove);
@@ -1884,30 +1888,34 @@ bool MainWindow::fileNew(int xsize, int ysize, int handicap, double komi){
 */
 bool MainWindow::fileOpen(){
     QString selectedFilter;
-    QString fname = QFileDialog::getOpenFileName(this, QString(), QString(), tr("All Go Format(*.sgf *.ugf *.ugi *.gib *.ngf);;sgf(*.sgf);;ugf(*.ugf *.ugi);;gib(*.gib);;ngf(*.ngf);;All Files(*.*)"), &selectedFilter);
+    QString fname = QFileDialog::getOpenFileName(this, QString(), QString(), tr("All Go Format(*.sgf *.ugf *.ugi);;sgf(*.sgf);;ugf(*.ugf *.ugi);;All Files(*.*)"), &selectedFilter);
     if (fname.isEmpty())
         return  false;
 
-    return fileOpen(fname);
+    if (selectedFilter.indexOf("All Go Format") >= 0){
+        QFileInfo info(fname);
+        selectedFilter = info.suffix().toLower();
+    }
+
+    if (selectedFilter.indexOf("sgf") >= 0)
+        return fileOpen(fname, "sgf");
+    else if (selectedFilter.indexOf("ugf") >= 0 || selectedFilter.indexOf("ugi") >= 0)
+        return fileOpen(fname, "ugf");
+    else
+        return false;
 }
 
 /**
 * file open.
 */
 bool MainWindow::fileOpen(const QString& fname, bool guessCodec, bool newTab, bool forceOpen){
-
-#define READ_FILE(FORMAT){\
-    go::FORMAT fileData;\
-    if (fileData.read(fname, codec, guessCodec))\
-        codec = fileData.codec;\
-\
-    BoardWidget* board = boardWidget;\
-    if (newTab){\
-        board = new BoardWidget;\
-        addDocument(board);\
-    }\
-    board->setData(fileData);\
+    return fileOpen(fname, QFileInfo(fname).suffix(), guessCodec, newTab, forceOpen);
 }
+
+/**
+* file open.
+*/
+bool MainWindow::fileOpen(const QString& fname, const QString& ext, bool guessCodec, bool newTab, bool forceOpen){
 
     if (!forceOpen){
         QMap<BoardWidget*, TabData>::iterator iter = tabDatas.begin();
@@ -1926,17 +1934,34 @@ bool MainWindow::fileOpen(const QString& fname, bool guessCodec, bool newTab, bo
     else
         codec = tabData->codec;
 
-    QFileInfo info(fname);
-    QString ext = info.suffix().toLower();
+    if (ext.compare("sgf", Qt::CaseInsensitive) == 0){
+        go::sgf sgf;
+        sgf.read(fname, codec, guessCodec);
 
-    if (ext.compare("sgf", Qt::CaseInsensitive) == 0)
-        READ_FILE(sgf)
-    else if (ext.compare("ugf", Qt::CaseInsensitive) == 0 || ext.compare("ugi", Qt::CaseInsensitive) == 0)
-        READ_FILE(ugf)
-    else if (ext.compare("gib", Qt::CaseInsensitive) == 0)
-        READ_FILE(gib)
-    else if (ext.compare("ngf", Qt::CaseInsensitive) == 0)
-        READ_FILE(ngf)
+        BoardWidget* board = boardWidget;
+        if (newTab){
+            board = new BoardWidget;
+            addDocument(board);
+        }
+        board->setData(sgf);
+
+        // undo
+        undoGroup.setActiveStack(board->getUndoStack());
+    }
+    else if (ext.compare("ugf", Qt::CaseInsensitive) == 0 || ext.compare("ugi", Qt::CaseInsensitive) == 0){
+        go::ugf ugf;
+        ugf.read(fname, codec, guessCodec);
+
+        BoardWidget* board = boardWidget;
+        if (newTab){
+            board = new BoardWidget;
+            addDocument(board);
+        }
+        board->setData(ugf);
+
+        // undo
+        undoGroup.setActiveStack(board->getUndoStack());
+    }
     else
         return false;
 
@@ -1947,13 +1972,6 @@ bool MainWindow::fileOpen(const QString& fname, bool guessCodec, bool newTab, bo
 
     ui->actionReload->setEnabled(true);
 
-    for (int i=0; i<codecNames.size(); ++i){
-        if (strcasecmp(codec->name(), codecNames[i]) == 0){
-            codecActions[i]->setChecked(true);
-            setEncoding(codecActions[i]);
-        }
-    }
-
     return true;
 }
 
@@ -1962,8 +1980,7 @@ bool MainWindow::fileOpen(const QString& fname, bool guessCodec, bool newTab, bo
 */
 bool MainWindow::fileSave(){
     const QString& fileName = tabData->fileName;
-    QFileInfo fi(fileName);
-    if (fileName.isEmpty() || fi.suffix() != "sgf")
+    if (fileName.isEmpty())
         return fileSaveAs();
     else
         return fileSaveAs(fileName);
@@ -1973,14 +1990,7 @@ bool MainWindow::fileSave(){
 * file saveas.
 */
 bool MainWindow::fileSaveAs(){
-    QString defaultName;
-    if (!tabData->fileName.isEmpty()){
-        QFileInfo fi(tabData->fileName);
-        fi.setFile(fi.absoluteDir(), fi.baseName() + ".sgf");
-        defaultName = fi.absoluteFilePath();
-    }
-
-    QString fname = QFileDialog::getSaveFileName(this, QString(), defaultName, tr("sgf(*.sgf)"));
+    QString fname = QFileDialog::getSaveFileName(this, QString(), QString(), tr("sgf(*.sgf)"));
     if (fname.isEmpty())
         return false;
 
@@ -2028,7 +2038,6 @@ bool MainWindow::tabClose(int index){
         return false;
     }
 
-    delete tabData->menuAction;
     delete tabData->gtpProcess;
     delete tabData->playGame;
     delete tabData->branchWidget;
@@ -2157,14 +2166,6 @@ void MainWindow::openUrlCancel(){
 }
 
 /**
-* slot
-*/
-void MainWindow::onTabChangeRequest(){
-    QWidget* widget = qobject_cast<QWidget*>(sender()->parent());
-    ui->boardTabWidget->setCurrentWidget(widget);
-}
-
-/**
 */
 void MainWindow::setTreeData(){
     branchWidget->clear();
@@ -2233,10 +2234,6 @@ QTreeWidgetItem* MainWindow::createTreeWidget(go::nodePtr node){
     // Create TreeItem Widget
     QTreeWidgetItem* nodeWidget = new QTreeWidgetItem( QStringList(createTreeText(node)) );
 
-    static QIcon treeIconGreen(":/res/green_64.png");
-    static QIcon treeIconBlack(":/res/black_64.png");
-    static QIcon treeIconWhite(":/res/white_64.png");
-
     QVariant v;
     v.setValue(node);
     nodeWidget->setData(0, Qt::UserRole, v);
@@ -2244,11 +2241,11 @@ QTreeWidgetItem* MainWindow::createTreeWidget(go::nodePtr node){
 
     // Set Icon to TreeItem Widget
     if (node->isStone() && node->isBlack())
-        nodeWidget->setIcon(0, treeIconBlack);
+        nodeWidget->setIcon(0, QIcon(":/res/black_64.png"));
     else if (node->isStone() && node->isWhite())
-        nodeWidget->setIcon(0, treeIconWhite);
+        nodeWidget->setIcon(0, QIcon(":/res/white_64.png"));
     else
-        nodeWidget->setIcon(0, treeIconGreen);
+        nodeWidget->setIcon(0, QIcon(":/res/green_64.png"));
 
     return nodeWidget;
 }
@@ -2542,7 +2539,6 @@ void MainWindow::setCountTerritoryMode(bool on){
         ui->actionJumpToClicked,
 
         ui->actionShowMoveNumber,
-        ui->actionResetMoveNubmerInBranch,
         ui->actionNoMoveNumber,
         ui->actionLast1Move,
         ui->actionLast2Moves,
@@ -2709,7 +2705,6 @@ void MainWindow::setPlayWithComputerMode(bool on){
         ui->actionJumpToClicked,
 
 //        ui->actionShowMoveNumber,
-//        ui->actionResetMoveNubmerInBranch,
 //        ui->actionNoMoveNumber,
 //        ui->actionLast1Move,
 //        ui->actionLast2Moves,
