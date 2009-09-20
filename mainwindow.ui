@@ -248,7 +248,6 @@
        <normaloff>:/res/showmovenumber.png</normaloff>:/res/showmovenumber.png</iconset>
      </property>
      <addaction name="actionShowMoveNumber"/>
-     <addaction name="actionResetMoveNubmerInBranch"/>
      <addaction name="separator"/>
      <addaction name="actionNoMoveNumber"/>
      <addaction name="actionLast1Move"/>
@@ -316,9 +315,6 @@
      </property>
     </widget>
     <addaction name="menuToolbars"/>
-    <addaction name="actionPreviousTab"/>
-    <addaction name="actionNextTab"/>
-    <addaction name="separator"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -445,9 +441,6 @@
      </property>
      <item>
       <widget class="QPlainTextEdit" name="commentWidget">
-       <property name="focusPolicy">
-        <enum>Qt::ClickFocus</enum>
-       </property>
        <property name="frameShape">
         <enum>QFrame::Panel</enum>
        </property>
@@ -1623,24 +1616,6 @@
   <action name="actionCloseTab">
    <property name="text">
     <string>Close Tab</string>
-   </property>
-  </action>
-  <action name="actionResetMoveNubmerInBranch">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Reset Move Nubmer in Branch</string>
-   </property>
-  </action>
-  <action name="actionPreviousTab">
-   <property name="text">
-    <string>Previous Tab</string>
-   </property>
-  </action>
-  <action name="actionNextTab">
-   <property name="text">
-    <string>Next Tab</string>
    </property>
   </action>
  </widget>

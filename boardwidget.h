@@ -50,7 +50,6 @@ class BoardWidget : public QWidget {
 public:
     enum eEditMode{ eAlternateMove, eAddBlack, eAddWhite, eAddEmpty, eLabelMark, eManualMark, eCrossMark, eCircleMark, eSquareMark, eTriangleMark, eDeleteMarker, eCountTerritory, ePlayGame };
     enum eTutorMode{ eNoTutor, eTutorBossSides, eTutorOneSide };
-    enum eMoveNumberMode{ eSequential, eResetInBranch, eResetInVariation };
 
     struct stoneInfo{
         stoneInfo() : number(0), color(go::empty){}
@@ -144,7 +143,6 @@ public:
     void setTutorMode(eTutorMode tutorMode){ this->tutorMode = tutorMode; repaintBoard(); }
     void setShowMoveNumber(bool visible){ showMoveNumber = visible; repaintBoard(); }
     void setShowMoveNumberCount(int number){ showMoveNumberCount = number; repaintBoard(); }
-    void setMoveNumberMode(eMoveNumberMode mode){ moveNumberMode = mode; createBoardBuffer(); repaintBoard(); }
     void setShowCoordinates(bool visible){ showCoordinates = visible; repaintBoard(); }
     void setShowCoordinatesWithI(bool withI){ showCoordinatesI = withI; repaintBoard(); }
     void setShowMarker(bool visible){ showMarker = visible; repaintBoard(); }
@@ -168,7 +166,6 @@ public:
     eTutorMode getTutorMode() const{ return tutorMode; }
     bool getShowMoveNumber() const{ return showMoveNumber; }
     int  getShowMoveNumberCount() const{ return showMoveNumberCount; }
-    eMoveNumberMode getMoveNumberMode() const{ return moveNumberMode; }
     bool getShowCoordinates() const{ return showCoordinates; }
     bool getShowCoordinatesWithI() const{ return showCoordinatesI; }
     bool getShowMarker() const{ return showMarker; }
@@ -297,7 +294,6 @@ private:
     bool flipBoardHorizontally_;
     bool flipBoardVertically_;
     bool playSound;
-    eMoveNumberMode moveNumberMode;
 
     // draw object
     QPixmap offscreenBuffer1, offscreenBuffer2, offscreenBuffer3;

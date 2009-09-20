@@ -8,7 +8,6 @@
 #include <QProcess>
 #include <QHttp>
 #include <QProgressDialog>
-#include <QActionGroup>
 #include "boardwidget.h"
 #include "countterritorydialog.h"
 #include "gtp.h"
@@ -27,8 +26,6 @@ public:
 
     struct TabData{
         TabData() : branchMode(false), countTerritoryDialog(NULL), playGame(NULL), gtpProcess(NULL){}
-
-        QAction* menuAction;
 
         NodeToTreeWidgetType nodeToTree;
         QTreeWidget* branchWidget;
@@ -52,15 +49,8 @@ public:
     MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-    bool fileNew(int xsize=19, int ysize=19, int handicap=0, double komi=6.5);
-    bool fileOpen();
-    bool fileOpen(const QString& fname, bool guessCodec=true, bool newTab=true, bool forceOpen=false);
-    bool fileSave();
-    bool fileSaveAs();
-    bool fileSaveAs(const QString& fname);
-    bool fileClose();
-    bool tabClose(int index);
-    bool maybeSave();
+    void updateMenu();
+    void setCaption();
 
 protected:
     virtual void closeEvent(QCloseEvent* e);
@@ -71,12 +61,19 @@ protected:
 private:
     void addDocument(BoardWidget* board);
     void setDocument(BoardWidget* board);
+    bool fileNew(int xsize=19, int ysize=19, int handicap=0, double komi=6.5);
+    bool fileOpen();
+    bool fileOpen(const QString& fname, bool guessCodec=true, bool newTab=true, bool forceOpen=false);
+    bool fileOpen(const QString& fname, const QString& ext, bool guessCodec=true, bool newTab=true, bool forceOpen=false);
+    bool fileSave();
+    bool fileSaveAs();
+    bool fileSaveAs(const QString& fname);
+    bool fileClose();
+    bool tabClose(int index);
+    bool maybeSave();
 
     void setCurrentFile(const QString& fname);
     void updateRecentFileActions();
-
-    void updateMenu();
-    void setCaption();
 
     void setEditMode(QAction* action, BoardWidget::eEditMode editMode);
     void setAnnotation(int annotation, int moveAnnotation, int nodeAnnotation);
@@ -105,7 +102,6 @@ private:
     Ui::MainWindow *ui;
     QMap<BoardWidget*, TabData> tabDatas;
     TabData* tabData;
-    QActionGroup tabMenuGroups;
     BoardWidget* boardWidget;
     QTreeWidget* branchWidget;
     NodeToTreeWidgetType* nodeToTreeWidget;
@@ -127,11 +123,9 @@ private:
     QHttp* http;
     QByteArray downloadBuff;
 
-    QList<QAction*> codecActions;
-    QList<const char*> MainWindow::codecNames;
-
 private slots:
     // File menu
+    void on_actionCloseTab_triggered();
     void on_actionNew_triggered();
     void on_actionOpen_triggered();
     void on_actionOpenURL_triggered();
@@ -141,7 +135,6 @@ private slots:
     void on_actionSaveBoardAsPicture_triggered();
     void on_actionExportAsciiToClipboard_triggered();
     void on_actionPrint_triggered();
-    void on_actionCloseTab_triggered();
     void on_actionExit_triggered();
     void openRecentFile();
 
@@ -196,7 +189,6 @@ private slots:
 
     // Edit menu -> Encoding
     void setEncoding();
-    void setEncoding(QAction* action);
 
     // Traverse menu
     void on_actionMoveFirst_triggered();
@@ -213,7 +205,6 @@ private slots:
 
     // View menu -> Move Number
     void on_actionNoMoveNumber_triggered();
-    void on_actionResetMoveNubmerInBranch_triggered();
     void on_actionLast1Move_triggered();
     void on_actionLast2Moves_triggered();
     void on_actionLast5Moves_triggered();
@@ -251,10 +242,6 @@ private slots:
     void on_actionLanguageEnglish_triggered();
     void on_actionLanguageJapanese_triggered();
 
-    // window
-    void on_actionNextTab_triggered();
-    void on_actionPreviousTab_triggered();
-
     // Help menu
     void on_actionAbout_triggered();
     void on_actionAboutQT_triggered();
@@ -262,6 +249,8 @@ private slots:
     // Board tab widget
     void on_boardTabWidget_currentChanged(QWidget* );
     void on_boardTabWidget_tabCloseRequested(int index);
+    void boardTabWidgetPrev();
+    void boardTabWidgetNext();
 
     // Board widget
     void nodeAdded(go::nodePtr parent, go::nodePtr node, bool select);
@@ -287,9 +276,6 @@ private slots:
 
     // play a game
     void playGameEnded();
-
-    // tab change
-    void onTabChangeRequest();
 };
 
 #endif // MAINWINDOW_H
