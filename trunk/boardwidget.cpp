@@ -1548,20 +1548,17 @@ void BoardWidget::drawPath(QPainter& p, const QPainterPath& path, int boardX, in
 void BoardWidget::drawTerritories(QPainter& p){
     p.save();
 
-    qreal w = boxSize * 0.3;
+    qreal w = boxSize * 0.33;
 
     for (int by=0; by<ysize; ++by){
         for (int bx=0; bx<xsize; ++bx){
-            if (!board[by][bx].blackTerritory() && !board[by][bx].whiteTerritory())
+            if (!board[by][bx].territory() && (editMode != eCountTerritory || !board[by][bx].empty()))
                 continue;
 
             int x = xlines[bx];
             int y = ylines[by];
 
-            QColor color = board[by][bx].whiteTerritory() ? QColor(255, 255, 255, 105) : QColor(0, 0, 0, 45);
-            p.fillRect(x-boxSize/2, y-boxSize/2, boxSize, boxSize, color);
-
-            color.setAlpha(255);
+            QColor color = board[by][bx].whiteTerritory() ? Qt::white : board[by][bx].blackTerritory() ? Qt::black : Qt::red;
             p.fillRect( QRectF(x-w/2, y-w/2, w, w), color);
         }
     }
