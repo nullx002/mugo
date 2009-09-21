@@ -41,6 +41,17 @@ QString getTranslationPath(){
     return "./";
 }
 
+bool installTranslator(QApplication& a, QTranslator& translator, const QString& path, QString file){
+    if (translator.load(file, path) == false){
+        file = file.toLower();
+        if (translator.load(file, path) == false)
+            return false;
+    }
+    a.installTranslator(&translator);
+    return true;
+}
+
+
 class Application : public QApplication{
 public:
     Application(int argc, char** argv) : QApplication(argc, argv), mainWindow(NULL){}
@@ -98,18 +109,17 @@ int main(int argc, char *argv[])
         locale = QLocale::system().name();
 
     // application's translation path
+    QTranslator appTranslator;
     QString translationPath = getTranslationPath();
 
     // qt translation
     QTranslator qtTranslator;
-    if (qtTranslator.load("qt_" + locale, QLibraryInfo::location(QLibraryInfo::TranslationsPath)) == false)
-        qtTranslator.load("qt_" + locale, translationPath);
-    a.installTranslator(&qtTranslator);
+    if (installTranslator(a, qtTranslator, QLibraryInfo::location(QLibraryInfo::TranslationsPath), "qt_" + locale) == false)
+        installTranslator(a, qtTranslator, translationPath, "qt_" + locale);
 
     // application translation
-    QTranslator myappTranslator;
-    myappTranslator.load("mugo." + locale, translationPath);
-    a.installTranslator(&myappTranslator);
+    QTranslator myTranslator;
+    installTranslator(a, myTranslator, translationPath, "mugo." + locale);
 
 //    QTextCodec::setCodecForCStrings( QTextCodec::codecForLocale() );
 //    QTextCodec::setCodecForTr( QTextCodec::codecForLocale() );
