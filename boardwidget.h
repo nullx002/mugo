@@ -53,7 +53,7 @@ public:
     enum eMoveNumberMode{ eSequential, eResetInBranch, eResetInVariation };
 
     struct stoneInfo{
-        stoneInfo() : number(0), color(go::empty){}
+        stoneInfo() : number(0), color(go::empty), dim(false){}
         bool empty() const{ return (color & (go::black | go::white)) == 0; }
         bool black() const{ return color & go::black; }
         bool white() const{ return color & go::white; }
@@ -63,6 +63,7 @@ public:
 
         int number;
         int color;
+        bool dim;
         go::nodePtr node;
     };
     typedef QVector< QVector<stoneInfo> > BoardBuffer;
@@ -223,12 +224,15 @@ protected:
     void drawTriangle(QPainter& p, go::markList::iterator first, go::markList::iterator last);
     void drawCircle(QPainter& p, go::markList::iterator first, go::markList::iterator last);
     void drawSquare(QPainter& p, go::markList::iterator first, go::markList::iterator last);
+    void drawSelect(QPainter& p, go::markList::iterator first, go::markList::iterator last);
     void drawCharacter(QPainter& p, go::markList::iterator first, go::markList::iterator last);
-    void drawMark(QPainter& p, const QPainterPath& path, go::markList::iterator first, go::markList::iterator last);
+    void drawMark(QPainter& p, const QPainterPath& path, go::markList::iterator first, go::markList::iterator last, bool fill=false);
     void drawPath(QPainter& p, const QPainterPath& path, int boardX, int boardY);
+    void fillPath(QPainter& p, const QPainterPath& path, int boardX, int boardY);
     void drawTerritories(QPainter& p);
     void drawCurrentMark(QPainter& p, go::nodePtr node);
     void drawStone(QPainter& p, int boardX, int boardY, go::color, qreal opacity=1.0);
+    void drawDim(QPainter& p, int boardX, int boardY);
     void eraseBackground(QPainter& p, int x, int y);
     void getStartPosition(QList<int>& star, int size);
     QPainterPath createFocusTrianglePath() const;
@@ -239,6 +243,7 @@ protected:
 
     // buffer
     void putStone(go::nodePtr n, int moveNumber);
+    void putDim(go::nodePtr node);
     void removeDeadStones(int x, int y);
     bool isDead(int* tmp, int c, int x, int y);
     bool isDead(int x, int y);

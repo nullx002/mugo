@@ -31,7 +31,7 @@ bool operator ==(const point& a, const point& b){
 
 class mark{
 public:
-    enum eType{eCross, eCircle, eSquare, eTriangle, eCharacter, eBlackTerritory, eWhiteTerritory};
+    enum eType{eCross, eCircle, eSquare, eTriangle, eCharacter, eBlackTerritory, eWhiteTerritory, eDim, eSelect};
 
     mark(const point& p_, eType t_) : p(p_), t(t_){}
     mark(const point& p_, const QString& s_) : p(p_), t(eCharacter), s(s_){}
@@ -130,9 +130,11 @@ public:
     markList  triangles;
     markList  circles;
     markList  squares;
+    markList  selects;
     markList  characters;
     markList  blackTerritories;
     markList  whiteTerritories;
+    markList  dims;
     stoneList blackStones;
     stoneList whiteStones;
     stoneList emptyStones;
@@ -142,6 +144,7 @@ public:
     QString comment;
     point position;
     go::color color;
+    go::color nextColor;
     int   moveNumber;
 };
 
