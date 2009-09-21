@@ -40,7 +40,7 @@ nodePtr createWhiteNode(nodePtr parent, int x, int y){
 
 
 
-node::node(nodePtr parent_) : parent(parent_), annotation(eNoAnnotation), moveAnnotation(eNoAnnotation), nodeAnnotation(eNoAnnotation), color(go::empty), moveNumber(-1){
+node::node(nodePtr parent_) : parent(parent_), annotation(eNoAnnotation), moveAnnotation(eNoAnnotation), nodeAnnotation(eNoAnnotation), color(go::empty), nextColor(go::empty), moveNumber(-1){
 }
 
 void node::clear(){
@@ -120,7 +120,7 @@ void informationNode::initialize(){
     ysize = 19;
     komi = 6.5;
     handicap = 0;
-    color = go::white;
+    nextColor = go::black;
 }
 
 QString informationNode::nodeName() const{

@@ -16,7 +16,7 @@ public:
 
     class node{
         public:
-            node() : nodeType(eUnknown), x(-1), y(-1){}
+            node() : nodeType(eUnknown){}
             ~node();
 
             QString toString() const;
@@ -42,8 +42,6 @@ public:
             bool set(const go::stoneList& markList);
 
         private:
-            void setPosition(eNodeType type, const QString& pos);
-
             void addMark(go::markList& markList, const QStringList& values, const char* str=NULL) const;
             void addMark(go::markList& markList, const QStringList& values, mark::eType type) const;
             void addStone(go::stoneList& stoneList, const QString& key, const QStringList& values) const;
@@ -51,7 +49,6 @@ public:
             nodeList childNodes;
             eNodeType nodeType;
             propertyType property;
-            int x, y;
     };
 
 

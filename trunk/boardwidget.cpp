@@ -1149,20 +1149,26 @@ void BoardWidget::createBoardBuffer(){
     currentMoveNumber = 0;
     go::nodeList::iterator iter = nodeList.begin();
     while (iter != nodeList.end()){
-        if ((*iter)->moveNumber > 0)
+        if ((*iter)->isStone())
+            ++currentMoveNumber;
+
+        if ((*iter)->moveNumber > 0){
+            for (int y=0; y<board.size(); ++y)
+                for (int x=0; x<board[y].size(); ++x)
+                    board[y][x].number = 0;
             currentMoveNumber = (*iter)->moveNumber;
+        }
         else if ( (*iter)->parent &&
                   ( (moveNumberMode == eResetInBranch && (*iter)->parent->childNodes.size() > 1) ||
                     (moveNumberMode == eResetInVariation && (*iter)->parent->childNodes.size() > 1 && *iter != (*iter)->parent->childNodes.front()) ) ){
             for (int y=0; y<board.size(); ++y)
                 for (int x=0; x<board[y].size(); ++x)
                     board[y][x].number = 0;
-            currentMoveNumber = 0;
+            currentMoveNumber = 1;
         }
 
-        if ((*iter)->isStone())
-            ++currentMoveNumber;
         putStone(*iter, currentMoveNumber);
+        putDim(*iter);
 
         if (*iter == currentNode)
             break;
@@ -1368,6 +1374,7 @@ void BoardWidget::drawStonesAndMarker(QPainter& p){
     drawTriangle(p, currentNode->triangles.begin(), currentNode->triangles.end());
     drawCircle(p, currentNode->circles.begin(), currentNode->circles.end());
     drawSquare(p, currentNode->squares.begin(), currentNode->squares.end());
+    drawSelect(p, currentNode->selects.begin(), currentNode->selects.end());
     drawCharacter(p, currentNode->characters.begin(), currentNode->characters.end());
 //    drawTerritories(p, currentNode->blackTerritories.begin(), currentNode->blackTerritories.end());
 //    drawTerritories(p, currentNode->whiteTerritories.begin(), currentNode->whiteTerritories.end());
@@ -1386,14 +1393,18 @@ void BoardWidget::drawStones(QPainter& p){
 
     for (int y=0; y<board.size(); ++y){
         for (int x=0; x<board[y].size(); ++x){
-            if (board[y][x].empty())
-                continue;
-
             // draw stone
             if (board[y][x].black())
-                drawStone(p, x, y, go::black, board[y][x].whiteTerritory() ? 0.6 : 1.0);
+                drawStone(p, x, y, go::black, board[y][x].whiteTerritory() ? 0.5 : 1.0);
             else if (board[y][x].white())
-                drawStone(p, x, y, go::white, board[y][x].blackTerritory() ? 0.6 : 1.0);
+                drawStone(p, x, y, go::white, board[y][x].blackTerritory() ? 0.5 : 1.0);
+
+            // draw dim
+            if (board[y][x].dim)
+                drawDim(p, x, y);
+
+            if (board[y][x].empty())
+                continue;
 
             // draw move number
             if (showMoveNumber == false || showMoveNumberCount == 0 || board[y][x].number == 0 || (showMoveNumberCount != -1 && currentMoveNumber - showMoveNumberCount + 1 > board[y][x].number))
@@ -1470,6 +1481,15 @@ void BoardWidget::drawSquare(QPainter& p, go::markList::iterator first, go::mark
     drawMark(p, path, first, last);
 }
 
+/**
+*/
+void BoardWidget::drawSelect(QPainter& p, go::markList::iterator first, go::markList::iterator last){
+    QPainterPath path = createSquarePath();
+    drawMark(p, path, first, last, true);
+}
+
+/**
+*/
 void BoardWidget::drawCharacter(QPainter& p, go::markList::iterator first, go::markList::iterator last){
     if (showMarker == false)
         return;
@@ -1506,7 +1526,7 @@ void BoardWidget::drawCharacter(QPainter& p, go::markList::iterator first, go::m
 
 /**
 */
-void BoardWidget::drawMark(QPainter& p, const QPainterPath& path, go::markList::iterator first, go::markList::iterator last){
+void BoardWidget::drawMark(QPainter& p, const QPainterPath& path, go::markList::iterator first, go::markList::iterator last, bool fill){
     if (showMarker == false)
         return;
 
@@ -1515,7 +1535,10 @@ void BoardWidget::drawMark(QPainter& p, const QPainterPath& path, go::markList::
         sgfToBoardCoordinate(first->p.x, first->p.y, boardX, boardY);
 
         if (boardX >= 0 && boardX < xsize && boardY >= 0 && boardY < ysize)
-            drawPath(p, path, boardX, boardY);
+            if (fill)
+                fillPath(p, path, boardX, boardY);
+            else
+                drawPath(p, path, boardX, boardY);
         ++first;
     }
 }
@@ -1525,7 +1548,6 @@ void BoardWidget::drawMark(QPainter& p, const QPainterPath& path, go::markList::
 void BoardWidget::drawPath(QPainter& p, const QPainterPath& path, int boardX, int boardY){
     p.save();
 
-    QColor color;
     stoneInfo& info = board[boardY][boardX];
     if (info.empty()){
         p.setPen( QPen(Qt::black, 2) );
@@ -1539,6 +1561,26 @@ void BoardWidget::drawPath(QPainter& p, const QPainterPath& path, int boardX, in
     p.translate(x, y);
 
     p.drawPath(path);
+
+    p.restore();
+}
+
+/**
+*/
+void BoardWidget::fillPath(QPainter& p, const QPainterPath& path, int boardX, int boardY){
+    p.save();
+
+    stoneInfo& info = board[boardY][boardX];
+    if (info.empty())
+        p.setPen( QPen(Qt::black, 2) );
+    else
+        p.setPen( info.black() ? QPen(Qt::white, 2) : QPen(Qt::black, 2) );
+
+    int x = xlines[boardX];
+    int y = ylines[boardY];
+    p.translate(x, y);
+
+    p.fillPath(path, QBrush(p.pen().color()));
 
     p.restore();
 }
@@ -1698,6 +1740,12 @@ void BoardWidget::drawStone(QPainter& p, int bx, int by, go::color color, qreal 
 
     p.restore();
 }
+/**
+*/
+void BoardWidget::drawDim(QPainter& p, int bx, int by){
+    QRect r(int(xlines[bx]-boxSize*0.5), int(ylines[by]-boxSize*0.5), boxSize, boxSize);
+    p.fillRect(r, QColor(0, 0, 0, 50));
+}
 
 /**
 */
@@ -1710,7 +1758,10 @@ void BoardWidget::eraseBackground(QPainter& p, int x, int y){
 /**
 */
 void BoardWidget::putStone(go::nodePtr node, int moveNumber){
-    color = node->isWhite() ? go::black : go::white;
+    if (node->nextColor != go::empty)
+        color = node->nextColor;
+    else
+        color = node->isWhite() ? go::black : go::white;
 
     if (node->isStone()){
         int boardX, boardY;
@@ -1726,17 +1777,26 @@ void BoardWidget::putStone(go::nodePtr node, int moveNumber){
 
     go::stoneList stones;
     stones << node->emptyStones << node->blackStones << node->whiteStones;
-    go::stoneList::iterator iter = stones.begin();
-    while (iter != stones.end()){
+    foreach(const go::stone& stone, stones){
         int boardX, boardY;
-        sgfToBoardCoordinate(iter->p.x, iter->p.y, boardX, boardY);
+        sgfToBoardCoordinate(stone.p.x, stone.p.y, boardX, boardY);
         if (boardX >= 0 && boardX < xsize && boardY >= 0 && boardY < ysize){
-            board[boardY][boardX].color  = iter->c;
+            board[boardY][boardX].color  = stone.c;
             board[boardY][boardX].number = 0;
             board[boardY][boardX].node   = node;
             removeDeadStones(boardX, boardY);
         }
-        ++iter;
+    }
+}
+
+/**
+*/
+void BoardWidget::putDim(go::nodePtr node){
+    foreach(const go::mark& mark, node->dims){
+        int boardX, boardY;
+        sgfToBoardCoordinate(mark.p.x, mark.p.y, boardX, boardY);
+        if (boardX >= 0 && boardX < xsize && boardY >= 0 && boardY < ysize)
+            board[boardY][boardX].dim = true;
     }
 }
 
@@ -2235,10 +2295,7 @@ void BoardWidget::setCountTerritoryMode(bool countMode){
 }
 
 void BoardWidget::whiteFirst(bool whiteFirst){
-    if (whiteFirst)
-        goData.root->setColor(go::black);
-    else
-        goData.root->setColor(go::white);
+    goData.root->nextColor = whiteFirst ? go::white : go::black;
     createBoardBuffer();
 }
 

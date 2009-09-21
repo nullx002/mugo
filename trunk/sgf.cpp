@@ -23,10 +23,10 @@ QString sgf::node::toString() const{
         "GC", "ON", "AN", "CP", "SO", "US",
 
         // stone
-        "B", "BL", "OB", "W", "WL","OW", "MN",
+        "B", "BL", "OB", "W", "WL","OW", "MN", "PL",
 
         // marker
-        "AE", "AB", "AW", "MA", "CR", "SQ", "TR", "LB", "TB", "TW",
+        "AE", "AB", "AW", "MA", "CR", "SQ", "TR", "SL", "LB", "TB", "TW", "DD",
 
         // move annotation
         "TE", "BM", "DO", "IT",
@@ -35,13 +35,16 @@ QString sgf::node::toString() const{
         "C", "DM", "GB", "GW", "UC", "HO", "N",
 
         // unsupported property
-        // "ST", "PL","KO","V", "AR", "LN", "DD", "SL", "FG", "PM", "VW"
+        // "ST", "KO", "V", "AR", "LN", "FG", "PM", "VW"
     };
     static const int N = sizeof(keys) / sizeof(keys[0]);
 
     QString str;
-    str.reserve(50);
+    str.reserve(100);
     str.push_back(';');
+
+    QString str2;
+    str2.reserve(100);
 
     for (int i=0; i<N; ++i){
         propertyType::const_iterator iter = property.find(keys[i]);
@@ -50,40 +53,36 @@ QString sgf::node::toString() const{
 
         const propertyType::key_type& key = iter.key();
         const propertyType::mapped_type& values = iter.value();
-        str.push_back(key);
+        str2.push_back(key);
 
         propertyType::mapped_type::const_iterator iter2 = values.begin();
         while (iter2 != values.end()){
-            str.push_back('[');
+            str2.push_back('[');
             QString tmp(*iter2);
+            tmp.replace('\\', "\\\\");
             tmp.replace(']', "\\]");
-            str.push_back(tmp);
-            str.push_back(']');
+            str2.push_back(tmp);
+            str2.push_back(']');
+
+            if (str2.length() > SGF_LINEWIDTH){
+                str.append(str2);
+                str.push_back('\n');
+                str2.clear();
+            }
             ++iter2;
         }
     }
 
+    str.append(str2);
     return str;
 }
 
 bool sgf::node::setProperty(const QString& key, const QStringList& values){
-    if (key == "B" || key == "W"){
-        if (values.size() != 1)
-            return false;
-        setPosition(key == "B" ? eBlack : eWhite, values[0]);
-    }
-
     property[key] = values;
-
     return true;
 }
 
 bool sgf::node::get(go::nodePtr n) const{
-    if (nodeType == eBlack || nodeType == eWhite){
-        n->setX(x);
-        n->setY(y);
-    }
-
     propertyType::const_iterator iter = property.begin();
     while (iter != property.end()){
         get(n, iter.key(), iter.value());
@@ -161,6 +160,18 @@ bool sgf::node::get(go::nodePtr n, const QString& key, const QStringList& values
     else if (key == "MN")
         n->moveNumber = values[0].toInt();
 
+    // move
+    else if (key == "B" || key == "W"){
+        n->setColor( key == "B" ? go::black : go::white);
+        int x, y;
+        if (pointToInt(values[0], x, y)){
+            n->setX(x);
+            n->setY(y);
+        }
+    }
+    else if (key == "PL")
+        n->nextColor = values[0] == "B" ? go::black : go::white;
+
     // mark
     else if (key == "MA" || key == "M")
         addMark(n->crosses, values, mark::eCross);
@@ -170,12 +181,16 @@ bool sgf::node::get(go::nodePtr n, const QString& key, const QStringList& values
         addMark(n->circles, values, mark::eCircle);
     else if (key == "SQ")
         addMark(n->squares, values, mark::eSquare);
+    else if (key == "SL")
+        addMark(n->selects, values, mark::eSelect);
     else if (key == "LB")
         addMark(n->characters, values);
     else if (key == "TB")
         addMark(n->blackTerritories, values, mark::eBlackTerritory);
     else if (key == "TW")
         addMark(n->whiteTerritories, values, mark::eWhiteTerritory);
+    else if (key == "DD")
+        addMark(n->dims, values, mark::eDim);
     else if (key == "AB")
         addStone(n->blackStones, key, values);
     else if (key == "AW")
@@ -261,20 +276,27 @@ bool sgf::node::set(const go::nodePtr n){
 
     if (!n->name.isEmpty())
         property["N"].push_back(n->name);
-    else if (!n->comment.isEmpty())
+    if (!n->comment.isEmpty())
         property["C"].push_back(n->comment);
+
+    if (n->nextColor == go::black)
+        property["PL"].push_back("B");
+    else if (n->nextColor == go::white)
+        property["PL"].push_back("W");
 
     // marker
     set(n->crosses);
     set(n->circles);
     set(n->triangles);
     set(n->squares);
+    set(n->selects);
     set(n->characters);
     set(n->blackTerritories);
     set(n->whiteTerritories);
     set(n->emptyStones);
     set(n->blackStones);
     set(n->whiteStones);
+    set(n->dims);
 
     if (n->moveAnnotation == go::node::eGoodMove)
         property["TE"].push_back("1");
@@ -324,6 +346,9 @@ bool sgf::node::set(const go::markList& markList){
             case go::mark::eTriangle:
                 property["TR"].push_back( pointToString(iter->p) );
                 break;
+            case go::mark::eSelect:
+                property["SL"].push_back( pointToString(iter->p) );
+                break;
             case go::mark::eCharacter:
                 property["LB"].push_back( pointToString(iter->p, &iter->s) );
                 break;
@@ -332,6 +357,9 @@ bool sgf::node::set(const go::markList& markList){
                 break;
             case go::mark::eWhiteTerritory:
                 property["TW"].push_back( pointToString(iter->p) );
+                break;
+            case go::mark::eDim:
+                property["DD"].push_back( pointToString(iter->p) );
                 break;
         };
         ++iter;
@@ -353,11 +381,6 @@ bool sgf::node::set(const go::stoneList& stoneList){
     }
 
     return true;
-}
-
-void sgf::node::setPosition(sgf::eNodeType type, const QString& pos){
-    nodeType = type;
-    pointToInt(pos, x, y);
 }
 
 void sgf::node::addMark(go::markList& markList, const QStringList& values, const char* str) const{
@@ -387,9 +410,10 @@ void sgf::node::addStone(go::stoneList& stoneList, const QString& key, const QSt
 
     QStringList::const_iterator iter = values.begin();
     while (iter != values.end()){
-        int x, y;
-        if (pointToInt(*iter, x, y))
-            stoneList.push_back( go::stone(x, y, c) );
+        QList<int> x, y;
+        if (pointToIntList(*iter, x, y))
+            for (int i=0; i<x.size(); ++i)
+                stoneList.push_back( go::stone(x[i], y[i], c) );
         ++iter;
     }
 }
@@ -467,7 +491,7 @@ bool sgf::readBranch(QString::iterator& first, QString::iterator last, node& n){
 bool sgf::readNode(QString::iterator& first, QString::iterator last, node& n){
     while (first != last){
         QChar c = *first;
-        if (c == '\r' || c == '\n'){
+        if (c.isSpace()){
             ++first;
             continue;
         }
@@ -509,6 +533,8 @@ bool sgf::readNodeValues(QString::iterator& first, QString::iterator last, QStri
             if (readNodeValue(++first, last, v))
                 values.push_back(v);
         }
+        else if (first->isSpace())
+            ++first;
         else
             return true;
     }
@@ -543,7 +569,7 @@ bool sgf::writeNode(QTextStream& stream, QString& s, const node& n){
     }
     else{
         s.append(n.toString());
-        if (s.size() > 60){
+        if (s.size() > SGF_LINEWIDTH){
             stream << s << '\n';
             s.clear();
         }
@@ -658,18 +684,20 @@ bool sgf::pointToInt(const QString& pos, int& x, int& y, QString* str){
 }
 
 bool sgf::pointToIntList(const QString& pos, QList<int>& xList, QList<int>& yList){
-    QRegExp exp("(..):(..)?");
+    QRegExp exp("(..):?(..)?");
     exp.indexIn(pos);
     QStringList list = exp.capturedTexts();
-    qDebug() << list;
 
     int x1, y1;
     if (pointToInt(list[1], x1, y1) == false)
         return false;
 
     int x2, y2;
-    if (pointToInt(list[2], x2, y2) == false)
-        return false;
+    if (list[2].isEmpty() || pointToInt(list[2], x2, y2) == false){
+        xList.push_back(x1);
+        yList.push_back(y1);
+        return true;
+    }
 
     for (int y=y1; y<=y2; ++y){
         for (int x=x1; x<=x2; ++x){
