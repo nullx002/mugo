@@ -1,6 +1,5 @@
 #include <QSettings>
 #include <QDebug>
-#include <QFileDialog>
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QtAlgorithms>
@@ -397,25 +396,23 @@ void MainWindow::on_actionSaveAs_triggered(){
 void MainWindow::on_actionSaveBoardAsPicture_triggered()
 {
     QString selectedFilter;
-    QString fname = QFileDialog::getSaveFileName(this, QString(), QString(),
+    QString fname = getSaveFileName(this, QString(), QString(),
         tr("PNG image(*.png);;Bitmap image(*.bmp);;JPEG image(*.jpeg *.jpg);;TIFF image(*.tiff *.tif)"),
         &selectedFilter);
     if (fname.isEmpty())
         return;
 
-    const char* format[] = { "PNG", "BMP", "JPG", "TIFF" };
-    int n;
-
-    if (selectedFilter.indexOf("*.png") >= 0)
-        n = 0;
-    else if (selectedFilter.indexOf("*.bmp") >= 0)
-        n = 1;
-    else if (selectedFilter.indexOf("*.jpg") >= 0)
-        n = 2;
-    else if (selectedFilter.indexOf("*.tiff") >= 0)
-        n = 3;
-    else
-        return;
+    QFileInfo fi(fname);
+    if (fi.suffix().isEmpty()){
+        if (selectedFilter.indexOf("*.png") >= 0)
+            fi.setFile(fname + ".png");
+        else if (selectedFilter.indexOf("*.bmp") >= 0)
+            fi.setFile(fname + ".bmp");
+        else if (selectedFilter.indexOf("*.jpg") >= 0)
+            fi.setFile(fname + ".jpg");
+        else if (selectedFilter.indexOf("*.tiff") >= 0)
+            fi.setFile(fname + ".tiff");
+    }
 
     int w = boardWidget->width();
     int h = boardWidget->height();
@@ -424,7 +421,7 @@ void MainWindow::on_actionSaveBoardAsPicture_triggered()
     boardWidget->paintBoard(&image);
     boardWidget->paintStones(&image);
     boardWidget->paintTerritories(&image);
-    image.save(fname, format[n]);
+    image.save(fi.absoluteFilePath());
 
     // change image coordinate to display
     boardWidget->repaintBoard();
@@ -1883,30 +1880,11 @@ bool MainWindow::fileNew(int xsize, int ysize, int handicap, double komi){
 * file open.
 */
 bool MainWindow::fileOpen(){
-    QString filter = tr("All Go Format(*.sgf *.ugf *.ugi *.gib *.ngf);;sgf(*.sgf);;ugf(*.ugf *.ugi);;gib(*.gib);;ngf(*.ngf);;All Files(*.*)");
-
-#if defined(Q_WS_X11)
-    QFileDialog dlg(this);
-    dlg.setAcceptMode(QFileDialog::AcceptOpen);
-    dlg.setFileMode(QFileDialog::ExistingFile);
-    dlg.setFilter(filter );
-
-    if (dlg.exec() != QDialog::Accepted)
-        return false;
-
-    foreach(const QString& fname, dlg.selectedFiles()){
-        fileOpen(fname);
-    }
-
-    return true;
-#else
-    QString selectedFilter;
-    QString fname = QFileDialog::getOpenFileName(this, QString(), QString(), tr("All Go Format(*.sgf *.ugf *.ugi *.gib *.ngf);;sgf(*.sgf);;ugf(*.ugf *.ugi);;gib(*.gib);;ngf(*.ngf);;All Files(*.*)"), &selectedFilter);
+    QString fname = getOpenFileName(this, QString(), QString(), tr("All Go Format(*.sgf *.ugf *.ugi *.gib *.ngf);;sgf(*.sgf);;ugf(*.ugf *.ugi);;gib(*.gib);;ngf(*.ngf);;All Files(*.*)"));
     if (fname.isEmpty())
         return  false;
 
     return fileOpen(fname);
-#endif
 }
 
 /**
@@ -1996,36 +1974,16 @@ bool MainWindow::fileSaveAs(){
     QFileInfo fi(tabData->fileName);
     fi.setFile(fi.absoluteDir(), fi.baseName() + ".sgf");
 
-#if defined(Q_WS_X11)
-    QString dir;
-    QString defaultName;
-    if (!tabData->fileName.isEmpty()){
-        dir = fi.absoluteDir().absolutePath();
-        defaultName = fi.fileName();
-    }
-
-    QFileDialog dlg(this, QString(), dir);
-    dlg.setAcceptMode(QFileDialog::AcceptSave);
-    dlg.setFileMode(QFileDialog::AnyFile);
-    dlg.setFilter(filter);
-    dlg.selectFile(defaultName);
-    if (dlg.exec() != QDialog::Accepted)
-        return false;
-
-    if(dlg.selectedFiles().isEmpty())
-        return false;
-
-    QString fname = dlg.selectedFiles()[0];
-    return fileSaveAs(fname);
-
-#else
     QString defaultName = fi.absoluteFilePath();
-    QString fname = QFileDialog::getSaveFileName(this, QString(), defaultName, filter);
+    QString fname = getSaveFileName(this, QString(), defaultName, filter);
     if (fname.isEmpty())
         return false;
 
+    fi.setFile(fname);
+    if (fi.suffix().isEmpty())
+        fname.append(".sgf");
+
     return fileSaveAs(fname);
-#endif
 }
 
 /**
@@ -2839,4 +2797,47 @@ void MainWindow::endGame(){
 
 void MainWindow::alertLanguageChanged(){
     QMessageBox::information(this, APPNAME, tr("Changing the language requires that application be restarted."));
+}
+
+QString getOpenFileName(QWidget* parent, const QString& caption, const QString& dir, const QString& filter, QString* selectedFilter, QFileDialog::Options options){
+#if defined(Q_WS_X11)
+    QFileDialog dlg(parent, caption, dir, filter);
+    dlg.setOptions(options);
+    dlg.setAcceptMode(QFileDialog::AcceptOpen);
+    dlg.setFileMode(QFileDialog::ExistingFile);
+
+    if (dlg.exec() != QDialog::Accepted)
+        return QString();
+
+    if (selectedFilter)
+        *selectedFilter = dlg.selectedFilter();
+
+    if (dlg.selectedFiles().size() == 0)
+        return QString();
+
+    return dlg.selectedFiles()[0];
+#else
+    return QFileDialog::getOpenFileName(this, QString(), QString(), tr("All Go Format(*.sgf *.ugf *.ugi *.gib *.ngf);;sgf(*.sgf);;ugf(*.ugf *.ugi);;gib(*.gib);;ngf(*.ngf);;All Files(*.*)"), selectedFilter, options);
+#endif
+}
+
+QString getSaveFileName(QWidget* parent, const QString& caption, const QString& dir, const QString& filter, QString* selectedFilter, QFileDialog::Options options){
+#if defined(Q_WS_X11)
+    QFileDialog dlg(parent, caption, dir, filter);
+    dlg.setOptions(options);
+    dlg.setAcceptMode(QFileDialog::AcceptSave);
+
+    if (dlg.exec() != QDialog::Accepted)
+        return QString();
+
+    if (selectedFilter)
+        *selectedFilter = dlg.selectedFilter();
+
+    if (dlg.selectedFiles().size() == 0)
+        return QString();
+
+    return dlg.selectedFiles()[0];
+#else
+    return QFileDialog::getSaveFileName(parent, QString(), QString(), filter, selectedFilter, options);
+#endif
 }

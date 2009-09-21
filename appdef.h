@@ -20,4 +20,10 @@
 #define FOCUS_BLACK_COLOR QColor(255, 0, 0)
 #define BRANCH_COLOR QColor(00, 0, 255)
 
+
+#include <QFileDialog>
+QString getOpenFileName(QWidget* parent = 0, const QString& caption = QString(), const QString& dir = QString(), const QString& filter = QString(), QString* selectedFilter = 0, QFileDialog::Options options = 0);
+QString getSaveFileName(QWidget* parent = 0, const QString& caption = QString(), const QString& dir = QString(), const QString& filter = QString(), QString* selectedFilter = 0, QFileDialog::Options options = 0);
+
+
 #endif // APPDEF_H
