@@ -462,7 +462,11 @@ QTextCodec* sgf::getCodec(const QByteArray& a) const{
     if (e == -1)
         return NULL;
 
-    return QTextCodec::codecForName( a.mid(s, e-s) );
+    QString name = a.mid(s, e-s);
+    if (name.compare("windows-31j", Qt::CaseInsensitive) == 0)
+        return QTextCodec::codecForName("Shift_JIS");
+    else
+        return QTextCodec::codecForName(name.toAscii());
 }
 
 bool sgf::readBranch(QString::iterator& first, QString::iterator last, node& n){
