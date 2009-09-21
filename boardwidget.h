@@ -57,6 +57,7 @@ public:
         bool empty() const{ return (color & (go::black | go::white)) == 0; }
         bool black() const{ return color & go::black; }
         bool white() const{ return color & go::white; }
+        bool territory() const{ return color & (go::blackTerritory | go::whiteTerritory); }
         bool blackTerritory() const{ return color & go::blackTerritory; }
         bool whiteTerritory() const{ return color & go::whiteTerritory; }
 
