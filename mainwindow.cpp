@@ -1999,7 +1999,7 @@ bool MainWindow::fileSaveAs(){
     QFileDialog dlg(this, QString(), dir);
     dlg.setAcceptMode(QFileDialog::AcceptSave);
     dlg.setFileMode(QFileDialog::AnyFile);
-    dlg.setFilter( tr("sgf(*.sgf") );
+    dlg.setFilter( tr("sgf(*.sgf)") );
     dlg.selectFile(defaultName);
     if (dlg.exec() != QDialog::Accepted)
         return false;
