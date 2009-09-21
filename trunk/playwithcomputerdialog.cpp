@@ -1,6 +1,6 @@
 #include <QDebug>
-#include <QFileDialog>
 #include <QSettings>
+#include "appdef.h"
 #include "playwithcomputerdialog.h"
 #include "ui_playwithcomputerdialog.h"
 
@@ -69,7 +69,7 @@ void PlayWithComputerDialog::accept(){
 * browse computer go
 */
 void PlayWithComputerDialog::on_computerPathBrowse_clicked(){
-    QString fname = QFileDialog::getOpenFileName(this);
+    QString fname = getOpenFileName(this);
     if (fname.isEmpty())
         return;
     m_ui->computerPathEdit->setText(fname);

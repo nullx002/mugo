@@ -1,7 +1,7 @@
 #include <QDebug>
 #include <QColorDialog>
-#include <QFileDialog>
 #include <QSettings>
+#include "appdef.h"
 #include "setupdialog.h"
 #include "ui_setupdialog.h"
 #include "appdef.h"
@@ -143,7 +143,7 @@ void SetupDialog::on_boardColorButton_clicked(){
 * board path borwse button is clicked
 */
 void SetupDialog::on_boardPathButton_clicked(){
-    QString fname = QFileDialog::getOpenFileName(this, QString(), QString(), tr("All Image Files(*.bmp *.gif *.jpg *.jpeg *.png *.tif *.tiff);;All Files(*.*)"));
+    QString fname = getOpenFileName(this, QString(), QString(), tr("All Image Files(*.bmp *.gif *.jpg *.jpeg *.png *.tif *.tiff);;All Files(*.*)"));
     if (!fname.isEmpty())
         m_ui->boardPathEdit->setText(fname);
 }
@@ -198,7 +198,7 @@ void SetupDialog::on_whiteColorButton_clicked(){
 * white stone type is changed
 */
 void SetupDialog::on_whitePathButton_clicked(){
-    QString fname = QFileDialog::getOpenFileName(this, QString(), QString(), tr("All Image Files(*.bmp *.gif *.jpg *.jpeg *.png *.tif *.tiff);;All Files(*.*)"));
+    QString fname = getOpenFileName(this, QString(), QString(), tr("All Image Files(*.bmp *.gif *.jpg *.jpeg *.png *.tif *.tiff);;All Files(*.*)"));
     if (!fname.isEmpty())
         m_ui->whitePathEdit->setText(fname);
 }
@@ -229,7 +229,7 @@ void SetupDialog::on_blackColorButton_clicked(){
 * black stone type is changed
 */
 void SetupDialog::on_blackPathButton_clicked(){
-    QString fname = QFileDialog::getOpenFileName(this, QString(), QString(), tr("All Image Files(*.bmp *.gif *.jpg *.jpeg *.png *.tif *.tiff);;All Files(*.*)"));
+    QString fname = getOpenFileName(this, QString(), QString(), tr("All Image Files(*.bmp *.gif *.jpg *.jpeg *.png *.tif *.tiff);;All Files(*.*)"));
     if (!fname.isEmpty())
         m_ui->blackPathEdit->setText(fname);
 }
@@ -284,7 +284,7 @@ void SetupDialog::on_soundTypeComboBox_currentIndexChanged(int index){
 * sound path browse button
 */
 void SetupDialog::on_soundPathButton_clicked(){
-    QString fname = QFileDialog::getOpenFileName(this, QString(), QString(), tr("Sound Files(*.wav *.mp3);;All Files(*.*)"));
+    QString fname = getOpenFileName(this, QString(), QString(), tr("Sound Files(*.wav *.mp3);;All Files(*.*)"));
     if (!fname.isEmpty())
         m_ui->soundPathEdit->setText(fname);
 }
