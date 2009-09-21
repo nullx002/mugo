@@ -74,6 +74,7 @@ QString sgf::node::toString() const{
     }
 
     str.append(str2);
+
     return str;
 }
 
@@ -279,10 +280,12 @@ bool sgf::node::set(const go::nodePtr n){
     if (!n->comment.isEmpty())
         property["C"].push_back(n->comment);
 
+/*
     if (n->nextColor == go::black)
         property["PL"].push_back("B");
     else if (n->nextColor == go::white)
         property["PL"].push_back("W");
+*/
 
     // marker
     set(n->crosses);
@@ -574,7 +577,9 @@ bool sgf::writeNode(QTextStream& stream, QString& s, const node& n){
     else{
         s.append(n.toString());
         if (s.size() > SGF_LINEWIDTH){
-            stream << s << '\n';
+            stream << s;
+            if (s.right(1) != "\n")
+                stream << '\n';
             s.clear();
         }
         nodeList::const_iterator iter = n.getChildNodes().begin();
