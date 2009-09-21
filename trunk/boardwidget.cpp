@@ -1534,11 +1534,12 @@ void BoardWidget::drawMark(QPainter& p, const QPainterPath& path, go::markList::
         int boardX, boardY;
         sgfToBoardCoordinate(first->p.x, first->p.y, boardX, boardY);
 
-        if (boardX >= 0 && boardX < xsize && boardY >= 0 && boardY < ysize)
+        if (boardX >= 0 && boardX < xsize && boardY >= 0 && boardY < ysize){
             if (fill)
                 fillPath(p, path, boardX, boardY);
             else
                 drawPath(p, path, boardX, boardY);
+        }
         ++first;
     }
 }
