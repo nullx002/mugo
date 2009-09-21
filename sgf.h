@@ -69,6 +69,7 @@ public:
     virtual bool set(const go::data& data);
 
     static bool pointToInt(const QString& pos, int& x, int& y, QString* str=NULL);
+    static bool pointToIntList(const QString& pos, QList<int>& x, QList<int>& y);
     static QString pointToString(int x, int y, const QString* s=NULL);
     static QString pointToString(const go::point& p, const QString* s=NULL);
 

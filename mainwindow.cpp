@@ -1883,10 +1883,14 @@ bool MainWindow::fileNew(int xsize, int ysize, int handicap, double komi){
 * file open.
 */
 bool MainWindow::fileOpen(){
+    QString filter = tr("All Go Format(*.sgf *.ugf *.ugi *.gib *.ngf);;sgf(*.sgf);;ugf(*.ugf *.ugi);;gib(*.gib);;ngf(*.ngf);;All Files(*.*)");
+
+#if defined(Q_WS_X11)
     QFileDialog dlg(this);
     dlg.setAcceptMode(QFileDialog::AcceptOpen);
     dlg.setFileMode(QFileDialog::ExistingFile);
-    dlg.setFilter( tr("All Go Format(*.sgf *.ugf *.ugi *.gib *.ngf);;sgf(*.sgf);;ugf(*.ugf *.ugi);;gib(*.gib);;ngf(*.ngf);;All Files(*.*)") );
+    dlg.setFilter(filter );
+
     if (dlg.exec() != QDialog::Accepted)
         return false;
 
@@ -1895,14 +1899,14 @@ bool MainWindow::fileOpen(){
     }
 
     return true;
-/*
+#else
     QString selectedFilter;
     QString fname = QFileDialog::getOpenFileName(this, QString(), QString(), tr("All Go Format(*.sgf *.ugf *.ugi *.gib *.ngf);;sgf(*.sgf);;ugf(*.ugf *.ugi);;gib(*.gib);;ngf(*.ngf);;All Files(*.*)"), &selectedFilter);
     if (fname.isEmpty())
         return  false;
 
     return fileOpen(fname);
-*/
+#endif
 }
 
 /**
@@ -1987,11 +1991,15 @@ bool MainWindow::fileSave(){
 * file saveas.
 */
 bool MainWindow::fileSaveAs(){
+    QString filter = tr("sgf(*.sgf)");
+
+    QFileInfo fi(tabData->fileName);
+    fi.setFile(fi.absoluteDir(), fi.baseName() + ".sgf");
+
+#if defined(Q_WS_X11)
     QString dir;
     QString defaultName;
     if (!tabData->fileName.isEmpty()){
-        QFileInfo fi(tabData->fileName);
-        fi.setFile(fi.absoluteDir(), fi.baseName() + ".sgf");
         dir = fi.absoluteDir().absolutePath();
         defaultName = fi.fileName();
     }
@@ -1999,7 +2007,7 @@ bool MainWindow::fileSaveAs(){
     QFileDialog dlg(this, QString(), dir);
     dlg.setAcceptMode(QFileDialog::AcceptSave);
     dlg.setFileMode(QFileDialog::AnyFile);
-    dlg.setFilter( tr("sgf(*.sgf)") );
+    dlg.setFilter(filter);
     dlg.selectFile(defaultName);
     if (dlg.exec() != QDialog::Accepted)
         return false;
@@ -2010,13 +2018,14 @@ bool MainWindow::fileSaveAs(){
     QString fname = dlg.selectedFiles()[0];
     return fileSaveAs(fname);
 
-/*
-    QString fname = QFileDialog::getSaveFileName(this, QString(), defaultName, tr("sgf(*.sgf)"));
+#else
+    QString defaultName = fi.absoluteFilePath();
+    QString fname = QFileDialog::getSaveFileName(this, QString(), defaultName, filter);
     if (fname.isEmpty())
         return false;
 
     return fileSaveAs(fname);
-*/
+#endif
 }
 
 /**

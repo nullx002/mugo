@@ -374,9 +374,10 @@ void sgf::node::addMark(go::markList& markList, const QStringList& values, const
 void sgf::node::addMark(go::markList& markList, const QStringList& values, mark::eType type) const{
     QStringList::const_iterator iter = values.begin();
     while (iter != values.end()){
-        int x, y;
-        if (pointToInt(*iter, x, y))
-            markList.push_back( go::mark(x, y, type) );
+        QList<int> x, y;
+        if (pointToIntList(*iter, x, y))
+            for(int i=0; i<x.size(); ++i)
+                markList.push_back( go::mark(x[i], y[i], type) );
         ++iter;
     }
 }
@@ -652,6 +653,30 @@ bool sgf::pointToInt(const QString& pos, int& x, int& y, QString* str){
 
     if (str && pos.size() > 3 && pos[2] == ':')
         *str = pos.mid(3);
+
+    return true;
+}
+
+bool sgf::pointToIntList(const QString& pos, QList<int>& xList, QList<int>& yList){
+    QRegExp exp("(..):(..)?");
+    exp.indexIn(pos);
+    QStringList list = exp.capturedTexts();
+    qDebug() << list;
+
+    int x1, y1;
+    if (pointToInt(list[1], x1, y1) == false)
+        return false;
+
+    int x2, y2;
+    if (pointToInt(list[2], x2, y2) == false)
+        return false;
+
+    for (int y=y1; y<=y2; ++y){
+        for (int x=x1; x<=x2; ++x){
+            xList.push_back( x );
+            yList.push_back( y );
+        }
+    }
 
     return true;
 }
