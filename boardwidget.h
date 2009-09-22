@@ -143,7 +143,7 @@ public:
     void setDirty(bool dirty){ this->dirty = dirty; }
 
     // set option
-    void setEditMode(eEditMode editMode){ this->editMode = editMode; }
+    void setEditMode(eEditMode editMode){ this->editMode = backupEditMode = editMode; }
     void setTutorMode(eTutorMode tutorMode){ this->tutorMode = tutorMode; repaintBoard(); }
     void setShowMoveNumber(bool visible){ showMoveNumber = visible; repaintBoard(); }
     void setShowMoveNumberCount(int number){ showMoveNumberCount = number; repaintBoard(); }
@@ -302,6 +302,7 @@ private:
     bool showMarker;
     bool showBranchMoves;
     eEditMode editMode;
+    eEditMode backupEditMode;
     eTutorMode tutorMode;
     bool moveToClicked;
     int  rotateBoard_;
