@@ -53,6 +53,8 @@ QTextCodec* ngf::getCodec(const QByteArray&) const{
 }
 
 bool ngf::get(go::data& data) const{
+    data.clear();
+
     int left = size > 9 ? 3 : 2;
     int right = size > 9 ? size-4 : size-3;
     int center = size / 2;

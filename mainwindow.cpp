@@ -20,7 +20,9 @@
 #include "printoptiondialog.h"
 #include "ui_mainwindow.h"
 
+
 Q_DECLARE_METATYPE(go::nodePtr);
+Q_DECLARE_METATYPE(go::informationPtr);
 
 
 
@@ -175,6 +177,7 @@ MainWindow::MainWindow(QWidget *parent)
     // create window menu
     ui->menuWindow->insertAction( ui->actionPreviousTab, ui->commentDockWidget->toggleViewAction() );
     ui->menuWindow->insertAction( ui->actionPreviousTab, ui->branchDockWidget->toggleViewAction() );
+    ui->menuWindow->insertAction( ui->actionPreviousTab, ui->gameListDockWidget->toggleViewAction() );
     ui->menuWindow->insertAction( ui->actionPreviousTab, ui->undoDockWidget->toggleViewAction() );
     ui->menuWindow->insertSeparator( ui->actionPreviousTab );
     ui->menuToolbars->addAction( ui->mainToolBar->toggleViewAction() );
@@ -227,6 +230,11 @@ MainWindow::MainWindow(QWidget *parent)
     capturedLabel->setToolTip(tr("Captured"));
     ui->statusBar->addPermanentWidget(capturedLabel, 0);
 
+    // game list
+    ui->gameListWidget->header()->setSortIndicator(0, Qt::AscendingOrder);
+    ui->gameListWidget->header()->resizeSection(0, 100);
+    ui->gameListWidget->header()->resizeSection(3, 300);
+
     // keyboard shortcut
     ui->actionNew->setShortcut( QKeySequence::New );
     ui->actionOpen->setShortcut( QKeySequence::Open );
@@ -246,6 +254,8 @@ MainWindow::MainWindow(QWidget *parent)
 //    ui->actionFastForward->setShortcut( QKeySequence::MoveToNextPage );
     ui->actionPreviousTab->setShortcut( QKeySequence::PreviousChild );
     ui->actionNextTab->setShortcut( QKeySequence::NextChild );
+    ui->actionCopySGFtoClipboard->setShortcut( QKeySequence::Copy );
+    ui->actionPasteSGFfromClipboard->setShortcut( QKeySequence::Paste );
 
     // command line
     QStringList args = qApp->arguments();
@@ -446,6 +456,14 @@ void MainWindow::on_actionCloseTab_triggered(){
 
 /**
 * Slot
+* File -> Close Tab
+*/
+void MainWindow::on_actionCloseAllTabs_triggered(){
+    allTabClose();
+}
+
+/**
+* Slot
 * File -> Print
 */
 void MainWindow::on_actionPrint_triggered(){
@@ -545,6 +563,7 @@ void MainWindow::on_actionPasteSGFfromClipboard_triggered(){
     boardWidget->setDirty(true);
     setTreeData();
     setCaption();
+    updateGameList();
 }
 
 /**
@@ -1563,6 +1582,7 @@ void MainWindow::on_boardTabWidget_currentChanged(QWidget* widget){
 
     setCaption();
     updateMenu();
+    updateGameList();
 
     // undo
     undoGroup.setActiveStack(board->getUndoStack());
@@ -1680,6 +1700,56 @@ void MainWindow::scoreDialogClosed(int){
     on_actionCountTerritory_triggered();
 }
 
+/**
+* set text to MainWindow's title bar
+*
+* if game information has player info, set player name to window text.
+*/
+void MainWindow::setCaption(){
+    go::informationPtr gameInfo = boardWidget->getData().root;
+    bool hasPlayerInfo = !gameInfo->whitePlayer.isEmpty() || !gameInfo->whiteRank.isEmpty() ||
+                            !gameInfo->blackPlayer.isEmpty() || !gameInfo->blackRank.isEmpty();
+
+    QString caption;
+    if (hasPlayerInfo)
+        caption = tr("%1 %2 (W) vs %4 %5 (B) (Result:%7)")
+                        .arg(gameInfo->whitePlayer)
+                        .arg(gameInfo->whiteRank)
+                        .arg(gameInfo->blackPlayer)
+                        .arg(gameInfo->blackRank)
+                        .arg(gameInfo->result);
+
+    if (!hasPlayerInfo)
+        caption = tabData->documentName;
+
+    if (!gameInfo->gameName.isEmpty()){
+        caption.append(" - ");
+        caption.append(gameInfo->gameName);
+    }
+    else if (!gameInfo->event.isEmpty()){
+        caption.append(" - ");
+        caption.append(gameInfo->event);
+    }
+
+    if (boardWidget->isDirty())
+        caption.append(" *");
+
+    caption.append(" - ");
+    caption.append(APPNAME);
+
+    setWindowTitle(caption);
+
+    QString docName = tabData->documentName;
+    if (boardWidget->isDirty())
+        docName.append(" *");
+    int tabIndex = ui->boardTabWidget->indexOf(boardWidget);
+    ui->boardTabWidget->setTabText(tabIndex, docName);
+
+    tabData->menuAction->setText(docName);
+}
+
+/**
+*/
 void MainWindow::updateMenu(){
     setCountTerritoryMode( false );
     setPlayWithComputerMode( false );
@@ -1777,42 +1847,29 @@ void MainWindow::updateMenu(){
 }
 
 /**
-* set text to MainWindow's title bar
-*
-* if game information has player info, set player name to window text.
 */
-void MainWindow::setCaption(){
-    go::informationPtr gameInfo = boardWidget->getData().root;
-    bool hasPlayerInfo = !gameInfo->whitePlayer.isEmpty() || !gameInfo->whiteRank.isEmpty() ||
-                            !gameInfo->blackPlayer.isEmpty() || !gameInfo->blackRank.isEmpty();
+void MainWindow::updateGameList(){
+    int no = 0;
+    ui->gameListWidget->clear();
+    foreach(const go::informationPtr& info, boardWidget->getData().rootList){
+        QStringList strs;
 
-    QString caption;
-    if (hasPlayerInfo)
-        caption = tr("%1 %2 (W) vs %4 %5 (B) (Result:%7)")
-                        .arg(gameInfo->whitePlayer)
-                        .arg(gameInfo->whiteRank)
-                        .arg(gameInfo->blackPlayer)
-                        .arg(gameInfo->blackRank)
-                        .arg(gameInfo->result);
+        QString noStr;
+        noStr.sprintf("%5d", ++no);
 
-    if (!hasPlayerInfo)
-        caption = tabData->documentName;
+        QString name = info->gameName.isEmpty() ? info->event : info->gameName;
+        strs << noStr << info->blackPlayer << info->whitePlayer << name << info->date << info->result;
+        QTreeWidgetItem* item = new QTreeWidgetItem(ui->gameListWidget, strs);
 
-    if (boardWidget->isDirty())
-        caption.append(" *");
+        QVariant v;
+        v.setValue(info);
+        item->setData(0, Qt::UserRole, v);
 
-    caption.append(" - ");
-    caption.append(APPNAME);
+        ui->gameListWidget->addTopLevelItem(item);
 
-    setWindowTitle(caption);
-
-    QString docName = tabData->documentName;
-    if (boardWidget->isDirty())
-        docName.append(" *");
-    int tabIndex = ui->boardTabWidget->indexOf(boardWidget);
-    ui->boardTabWidget->setTabText(tabIndex, docName);
-
-    tabData->menuAction->setText(docName);
+        if (boardWidget->getData().root == info)
+            ui->gameListWidget->setCurrentItem(item);
+    }
 }
 
 void MainWindow::addDocument(BoardWidget* board){
@@ -1917,11 +1974,7 @@ bool MainWindow::fileOpen(const QString& fname, bool guessCodec, bool newTab, bo
         }
     }
 
-    QTextCodec* codec;
-    if (newTab)
-        codec = QTextCodec::codecForName("UTF-8");
-    else
-        codec = tabData->codec;
+    QTextCodec* codec = tabData->codec;
 
     QFileInfo info(fname);
     QString ext = info.suffix().toLower();
@@ -1941,6 +1994,7 @@ bool MainWindow::fileOpen(const QString& fname, bool guessCodec, bool newTab, bo
     setTreeData();
 
     setCaption();
+    updateGameList();
 
     ui->actionReload->setEnabled(true);
 
@@ -2035,6 +2089,34 @@ bool MainWindow::tabClose(int index){
     delete tabData->countTerritoryDialog;
     tabDatas.remove(boardWidget);
     ui->boardTabWidget->removeTab(index);
+
+    return true;
+}
+
+/**
+* all tab close.
+*/
+bool MainWindow::allTabClose(){
+    BoardWidget* board = boardWidget;
+
+    int count = ui->boardTabWidget->count();
+    for (int i=0; i<count; ++i){
+        boardWidget = qobject_cast<BoardWidget*>(ui->boardTabWidget->widget(i));
+        tabData = &tabDatas[boardWidget];
+
+        if (maybeSave() == false){
+            boardWidget = board;
+            tabData = &tabDatas[boardWidget];
+
+            return false;
+        }
+    }
+
+    for (int i=0; i<count; ++i){
+        BoardWidget* boardWidget = qobject_cast<BoardWidget*>(ui->boardTabWidget->widget(0));
+        boardWidget->setDirty(false);
+        tabClose(0);
+    }
 
     return true;
 }
@@ -2454,6 +2536,8 @@ void MainWindow::setCountTerritoryMode(bool on){
         ui->actionReload,
         ui->actionSaveBoardAsPicture,
         ui->actionExportAsciiToClipboard,
+//        ui->actionCloseTab,
+//        ui->actionCloseAllTabs,
 //        ui->actionPrint,
 //        ui->actionExit,
 
@@ -2621,6 +2705,8 @@ void MainWindow::setPlayWithComputerMode(bool on){
         ui->actionReload,
         ui->actionSaveBoardAsPicture,
         ui->actionExportAsciiToClipboard,
+//        ui->actionCloseTab,
+//        ui->actionCloseAllTabs,
         ui->actionPrint,
 //        ui->actionExit,
 
@@ -2841,4 +2927,15 @@ QString getSaveFileName(QWidget* parent, const QString& caption, const QString& 
 #else
     return QFileDialog::getSaveFileName(parent, QString(), QString(), filter, selectedFilter, options);
 #endif
+}
+
+void MainWindow::on_gameListWidget_currentItemChanged(QTreeWidgetItem* current, QTreeWidgetItem*){
+    if (current == NULL)
+        return;
+
+    QVariant v = current->data(0, Qt::UserRole);
+    go::informationPtr info = v.value<go::informationPtr>();
+    boardWidget->setRoot(info);
+    setTreeData();
+    setCaption();
 }
