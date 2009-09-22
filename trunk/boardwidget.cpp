@@ -104,6 +104,7 @@ BoardWidget::BoardWidget(QWidget *parent) :
     showMarker(true),
     showBranchMoves(true),
     editMode(eAlternateMove),
+    backupEditMode(eAlternateMove),
     tutorMode(eNoTutor),
     moveToClicked(false),
     rotateBoard_(0),
@@ -2281,6 +2282,7 @@ void BoardWidget::sgfToBoardCoordinate(int sgfX, int sgfY, int& boardX, int& boa
 
 void BoardWidget::setCountTerritoryMode(bool countMode){
     if (countMode){
+        backupEditMode = editMode;
         editMode = eCountTerritory;
         countTerritory();
         int alive_b=0, alive_w=0, dead_b=0, dead_w=0, bt=0, wt=0;
@@ -2288,7 +2290,7 @@ void BoardWidget::setCountTerritoryMode(bool countMode){
         emit updateTerritory(alive_b, alive_w, dead_b, dead_w, capturedBlack, capturedWhite, bt, wt, goData.root->komi);
     }
     else{
-        editMode = eAlternateMove;
+        editMode = backupEditMode;
         createBoardBuffer();
     }
 
@@ -2540,6 +2542,7 @@ bool BoardWidget::hasTerritory(go::color c1, go::color c2, char* tmp, int x, int
 void BoardWidget::playWithComputer(PlayGame* game){
     playGame = game;
     if (playGame){
+        backupEditMode = editMode;
         editMode = ePlayGame;
         if (playGame->yourColor() == go::white && goData.root->handicap == 0)
             playGame->wait();
@@ -2551,6 +2554,6 @@ void BoardWidget::playWithComputer(PlayGame* game){
         }
     }
     else{
-        editMode = eAlternateMove;
+        editMode = backupEditMode;
     }
 }

@@ -1818,7 +1818,7 @@ void MainWindow::setCaption(){
 void MainWindow::addDocument(BoardWidget* board){
     QTreeWidget* tree = new QTreeWidget(ui->branchDockWidgetContents);
     tree->setHeaderHidden(true);
-    tree->setIndentation(20);
+    tree->setIndentation(17);
     ui->branchLayout->addWidget(tree);
 
     TabData& data = tabDatas[board];
