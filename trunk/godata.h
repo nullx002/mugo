@@ -203,11 +203,15 @@ class data{
 public:
     enum eRule{eJapanese, eChinese};
 
-    data() : root( new informationNode(node::nodePtr()) ){}
+    typedef boost::shared_ptr<informationNode> informationPtr;
+    typedef QList<informationPtr> informationList;
+
+    data();
 
     void clear();
 
-    boost::shared_ptr<informationNode> root;
+    informationList rootList;
+    informationPtr root;
 };
 
 
@@ -237,8 +241,9 @@ public:
 
 
 typedef node::nodePtr nodePtr;
-typedef boost::shared_ptr<informationNode> informationPtr;
 typedef node::nodeList nodeList;
+typedef data::informationPtr informationPtr;
+typedef data::informationList informationList;
 
 
 

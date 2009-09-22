@@ -10,14 +10,14 @@ class sgf : public fileBase{
 public:
     enum eNodeType{ eUnknown, eRoot, eGameInformation, eBranch, eBlack, eWhite };
 
-    class node;
-    typedef QLinkedList<node*> nodeList;
     typedef QMap<QString, QStringList> propertyType;
 
     class node{
         public:
+            typedef boost::shared_ptr<node> nodePtr;
+            typedef QList<nodePtr> nodeList;
+
             node() : nodeType(eUnknown){}
-            ~node();
 
             QString toString() const;
 
@@ -33,6 +33,8 @@ public:
             eNodeType getNodeType() const{ return nodeType; }
 
             bool setProperty(const QString& key, const QStringList& values);
+            propertyType& getProperty(){ return property; }
+            const propertyType& getProperty() const{ return property; }
 
             bool get(go::nodePtr n) const;
             bool get(go::nodePtr n, const QString& key, const QStringList& values) const;
@@ -51,12 +53,12 @@ public:
             propertyType property;
     };
 
+    typedef node::nodePtr  nodePtr;
+    typedef node::nodeList nodeList;
+
 
     sgf(){
-        root.setNodeType(eRoot);
     }
-
-    node& getRoot(){ return root; }
 
     virtual bool readStream(QString::iterator& first, QString::iterator last);
     virtual bool saveStream(QTextStream& stream);
@@ -71,18 +73,18 @@ public:
     static QString pointToString(const go::point& p, const QString* s=NULL);
 
 protected:
-    bool readBranch(QString::iterator& first, QString::iterator last, node& n);
-    bool readNode(QString::iterator& first, QString::iterator last, node& n);
+    bool readBranch(QString::iterator& first, QString::iterator last, nodePtr& n);
+    bool readNode(QString::iterator& first, QString::iterator last, nodePtr& n);
     bool readNodeKey(QString::iterator& first, QString::iterator last, QString& key);
     bool readNodeValues(QString::iterator& first, QString::iterator last, QStringList& values);
     bool readNodeValue(QString::iterator& first, QString::iterator last, QString& value);
 
-    bool writeNode(QTextStream& stream, QString& s, const node& n);
+    bool writeNode(QTextStream& stream, QString& s, const nodePtr& n);
 
-    go::nodePtr get(const node& sgfNode, go::nodePtr outNode) const;
-    bool set(sgf::node* node, const go::nodePtr node2);
+    go::nodePtr get(const nodePtr& sgfNode, go::nodePtr& goNode) const;
+    bool set(nodePtr& sgfNode, const go::nodePtr& goNode);
 
-    node root;
+    nodeList rootList;
 };
 
 

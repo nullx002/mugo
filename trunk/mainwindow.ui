@@ -89,6 +89,7 @@
     <addaction name="actionExportAsciiToClipboard"/>
     <addaction name="separator"/>
     <addaction name="actionCloseTab"/>
+    <addaction name="actionCloseAllTabs"/>
     <addaction name="separator"/>
     <addaction name="actionPrint"/>
     <addaction name="separator"/>
@@ -499,6 +500,76 @@
     </layout>
    </widget>
   </widget>
+  <widget class="QDockWidget" name="gameListDockWidget">
+   <property name="windowTitle">
+    <string>Game List Window</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>4</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_2">
+    <layout class="QVBoxLayout" name="verticalLayout_2">
+     <property name="margin">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="QTreeWidget" name="gameListWidget">
+       <property name="alternatingRowColors">
+        <bool>true</bool>
+       </property>
+       <property name="rootIsDecorated">
+        <bool>false</bool>
+       </property>
+       <property name="sortingEnabled">
+        <bool>true</bool>
+       </property>
+       <property name="columnCount">
+        <number>6</number>
+       </property>
+       <attribute name="headerDefaultSectionSize">
+        <number>180</number>
+       </attribute>
+       <attribute name="headerShowSortIndicator" stdset="0">
+        <bool>true</bool>
+       </attribute>
+       <attribute name="headerDefaultSectionSize">
+        <number>180</number>
+       </attribute>
+       <column>
+        <property name="text">
+         <string>No</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Black</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>White</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Name</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Date</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Result</string>
+        </property>
+       </column>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
   <action name="actionNew">
    <property name="icon">
     <iconset>
@@ -575,8 +646,14 @@
    </property>
   </action>
   <action name="actionPasteSGFasBranchfromClipboard">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Paste SGF as Branch from Clipboard</string>
+   </property>
+   <property name="visible">
+    <bool>false</bool>
    </property>
   </action>
   <action name="actionGameInformation">
@@ -1638,6 +1715,11 @@
   <action name="actionNextTab">
    <property name="text">
     <string>Next Tab</string>
+   </property>
+  </action>
+  <action name="actionCloseAllTabs">
+   <property name="text">
+    <string>Close All Tabs</string>
    </property>
   </action>
  </widget>

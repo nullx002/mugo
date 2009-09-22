@@ -722,6 +722,14 @@ void BoardWidget::insertData(const go::nodePtr node, const go::fileBase& data){
     setDirty(true);
 }
 
+void BoardWidget::setRoot(go::informationPtr& info){
+    goData.root = info;
+    nodeList.clear();
+    setCurrentNode();
+    repaintBoard();
+    undoStack.clear();
+}
+
 /**
 */
 void BoardWidget::addStoneNodeCommand(int sgfX, int sgfY){

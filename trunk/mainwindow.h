@@ -60,6 +60,7 @@ public:
     bool fileSaveAs(const QString& fname);
     bool fileClose();
     bool tabClose(int index);
+    bool allTabClose();
     bool maybeSave();
 
 protected:
@@ -75,8 +76,9 @@ private:
     void setCurrentFile(const QString& fname);
     void updateRecentFileActions();
 
-    void updateMenu();
     void setCaption();
+    void updateMenu();
+    void updateGameList();
 
     void setEditMode(QAction* action, BoardWidget::eEditMode editMode);
     void setAnnotation(int annotation, int moveAnnotation, int nodeAnnotation);
@@ -132,6 +134,8 @@ private:
 
 private slots:
     // File menu
+    void on_gameListWidget_currentItemChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous);
+    void on_actionCloseAllTabs_triggered();
     void on_actionNew_triggered();
     void on_actionOpen_triggered();
     void on_actionOpenURL_triggered();
