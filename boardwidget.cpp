@@ -1395,9 +1395,9 @@ void BoardWidget::drawStones(QPainter& p){
         for (int x=0; x<board[y].size(); ++x){
             // draw stone
             if (board[y][x].black())
-                drawStone(p, x, y, go::black, board[y][x].whiteTerritory() ? 0.5 : 1.0);
+                drawStone(p, x, y, go::black, board[y][x].whiteTerritory() || board[y][x].dame() ? 0.4 : 1.0);
             else if (board[y][x].white())
-                drawStone(p, x, y, go::white, board[y][x].blackTerritory() ? 0.5 : 1.0);
+                drawStone(p, x, y, go::white, board[y][x].blackTerritory() || board[y][x].dame() ? 0.4 : 1.0);
 
             // draw dim
             if (board[y][x].dim)
@@ -2314,6 +2314,41 @@ void BoardWidget::countTerritory(){
     }
 
     delete[] tmp;
+
+    for (int y=0; y<ysize; ++y){
+        for (int x=0; x<xsize; ++x){
+            if ((board[y][x].blackTerritory() || board[y][x].whiteTerritory())){
+                if (checkDame(x, y))
+                    board[y][x].color = (board[y][x].color & (go::black|go::white)) | go::dame;
+            }
+        }
+    }
+
+    for (int y=0; y<ysize; ++y){
+        for (int x=0; x<xsize; ++x){
+            if ((board[y][x].dame()) == 0)
+                continue;
+            int c1 = y > 0 ? board[y-1][x].color : go::dame;
+            int c2 = x < xsize-1 ? board[y][x+1].color : go::dame;
+            int c3 = y < ysize-1 ? board[y+1][x].color : go::dame;
+            int c4 = x > 0 ? board[y][x-1].color : go::dame;
+            int b = go::black | go::blackTerritory | go::dame;
+            int w = go::white | go::whiteTerritory | go::dame;
+            bool isb = c1 & b && c2 & b && c3 & b && c4 & b;
+            bool isw = c1 & w && c2 & w && c3 & w && c4 & w;
+            if (isb || isw){
+                if (y > 0 && !hasTerritory(x, y, x, y-1))
+                    continue;
+                if (y < ysize-1 && !hasTerritory(x, y, x, y+1))
+                    continue;
+                if (x < xsize-1 && !hasTerritory(x, y, x+1, y))
+                    continue;
+                if (x > 0  && !hasTerritory(x, y, x-1, y))
+                    continue;
+                board[y][x].color = isb ? go::blackTerritory : go::whiteTerritory;
+            }
+        }
+    }
 }
 
 void BoardWidget::whichTerritory(int x, int y, char* tmp, int& c){
@@ -2355,11 +2390,11 @@ void BoardWidget::whichTerritory(int x, int y, char* tmp, int& c){
 }
 
 void BoardWidget::addTerritory(int x, int y){
-    if (board[y][x].white() && !board[y][x].blackTerritory())
+    if (board[y][x].white() && !board[y][x].blackTerritory() && !board[y][x].dame())
         setTerritory(x, y, go::blackTerritory);
-    else if (board[y][x].black() && !board[y][x].whiteTerritory())
+    else if (board[y][x].black() && !board[y][x].whiteTerritory() && !board[y][x].dame())
         setTerritory(x, y, go::whiteTerritory);
-    else if ( (board[y][x].white() || board[y][x].black()) && (board[y][x].blackTerritory() || board[y][x].whiteTerritory()) )
+    else if ( (board[y][x].white() || board[y][x].black()) && (board[y][x].blackTerritory() || board[y][x].whiteTerritory() ||  board[y][x].dame()) )
         unsetTerritory(x, y);
 
     countTerritory();
@@ -2389,7 +2424,7 @@ void BoardWidget::setTerritory(int x, int y, int c){
 }
 
 void BoardWidget::unsetTerritory(int x, int y){
-    if ( !board[y][x].blackTerritory() && !board[y][x].whiteTerritory() )
+    if ( !board[y][x].blackTerritory() && !board[y][x].whiteTerritory() && !board[y][x].dame() )
         return;
 
     board[y][x].color &= go::black | go::white;
@@ -2417,12 +2452,89 @@ void BoardWidget::getCountTerritory(int& alive_b, int& alive_w, int& dead_b, int
                 if (board[y][x].black())
                     ++dead_b;
             }
+            else if (board[y][x].dame()){
+                if (board[y][x].white())
+                    ++dead_w;
+                else if (board[y][x].black())
+                    ++dead_b;
+            }
             else if (board[y][x].black())
                 ++alive_b;
             else if (board[y][x].white())
                 ++alive_w;
         }
     }
+}
+
+bool BoardWidget::checkDame(int x, int y){
+    int c = board[y][x].color;
+    return checkDame(c, x-1, y-1, x+1, y-1) || checkDame(c, x+1, y-1, x+1, y+1) || checkDame(c, x-1, y+1, x+1, y+1) || checkDame(c, x-1, y-1, x-1, y+1) || checkDame(c, x-1, y-1, x+1, y+1) || checkDame(c, x+1, y-1, x-1, y+1);
+}
+
+bool BoardWidget::checkDame(int c, int x1, int y1, int x2, int y2){
+    bool area1 = x1 >= 0 && x1 < xsize && y1 >= 0 && y1 < ysize;
+    bool area2 = x2 >= 0 && x2 < xsize && y2 >= 0 && y2 < ysize;
+    if (!area1 && !area2)
+        return false;
+
+    go::color enemy = c & go::whiteTerritory ? go::black : go::white;
+    go::color myTerritory = c & go::whiteTerritory ? go::whiteTerritory : go::blackTerritory;
+    bool b1 = x1 >= 0 && x1 < xsize && y1 >= 0 && y1 < ysize ? board[y1][x1].color & enemy && !(board[y1][x1].color & myTerritory) : true;
+    bool b2 = x2 >= 0 && x2 < xsize && y2 >= 0 && y2 < ysize ? board[y2][x2].color & enemy && !(board[y2][x2].color & myTerritory) : true;
+
+    return b1 && b2;
+}
+
+bool BoardWidget::hasTerritory(int x1, int y1, int x2, int  y2){
+    if (x2 < 0 || x2 >= xsize || y2 < 0 || y2 >= ysize)
+        return true;
+
+    go::color c1;
+    go::color c2;
+    if (board[y2][x2].black()){
+        c1 = go::black;
+        c2 = go::blackTerritory;
+    }
+    else if (board[y2][x2].white()){
+        c1 = go::white;
+        c2 = go::whiteTerritory;
+    }
+    else if (board[y2][x2].territory())
+        return true;
+    else
+        return false;
+
+    char* tmp = new char[ysize*xsize];
+    memset(tmp, 0, ysize*xsize);
+    tmp[y1*xsize+x1] = true;
+    bool ret = hasTerritory(c1, c2, tmp, x2, y2);
+    delete[] tmp;
+    return ret;
+}
+
+bool BoardWidget::hasTerritory(go::color c1, go::color c2, char* tmp, int x, int  y){
+    if (x < 0 || x >= xsize || y < 0 || y >= ysize)
+        return false;
+
+    if (tmp[y*xsize+x])
+        return false;
+    tmp[y*xsize+x] = true;
+
+    if ((board[y][x].color & c1) == 0 && (board[y][x].color & c2) == 0 && !board[y][x].dame())
+        return false;
+    if (board[y][x].color & c2 || board[y][x].dame())
+        return true;
+
+    if (hasTerritory(c1, c2, tmp, x, y-1))
+        return true;
+    else if (hasTerritory(c1, c2, tmp, x, y+1))
+        return true;
+    else if (hasTerritory(c1, c2, tmp, x-1, y))
+        return true;
+    else if (hasTerritory(c1, c2, tmp, x+1, y))
+        return true;
+    else
+        return false;
 }
 
 void BoardWidget::playWithComputer(PlayGame* game){
