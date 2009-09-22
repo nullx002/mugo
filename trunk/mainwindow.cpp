@@ -1818,6 +1818,7 @@ void MainWindow::setCaption(){
 void MainWindow::addDocument(BoardWidget* board){
     QTreeWidget* tree = new QTreeWidget(ui->branchDockWidgetContents);
     tree->setHeaderHidden(true);
+    tree->setIndentation(20);
     ui->branchLayout->addWidget(tree);
 
     TabData& data = tabDatas[board];
@@ -2817,7 +2818,7 @@ QString getOpenFileName(QWidget* parent, const QString& caption, const QString& 
 
     return dlg.selectedFiles()[0];
 #else
-    return QFileDialog::getOpenFileName(this, QString(), QString(), tr("All Go Format(*.sgf *.ugf *.ugi *.gib *.ngf);;sgf(*.sgf);;ugf(*.ugf *.ugi);;gib(*.gib);;ngf(*.ngf);;All Files(*.*)"), selectedFilter, options);
+    return QFileDialog::getOpenFileName(parent, QString(), QString(), filter, selectedFilter, options);
 #endif
 }
 
