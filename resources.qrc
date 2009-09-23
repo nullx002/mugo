@@ -48,5 +48,6 @@
         <file>res/removeself.png</file>
         <file>res/bg.png</file>
         <file>res/text2.png</file>
+        <file>res/gamelist.png</file>
     </qresource>
 </RCC>

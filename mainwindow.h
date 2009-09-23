@@ -131,10 +131,10 @@ private:
 
     QList<QAction*> codecActions;
     QList<const char*> codecNames;
+    QTextCodec* defaultCodec;
 
 private slots:
     // File menu
-    void on_gameListWidget_currentItemChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous);
     void on_actionCloseAllTabs_triggered();
     void on_actionNew_triggered();
     void on_actionOpen_triggered();
@@ -200,7 +200,8 @@ private slots:
 
     // Edit menu -> Encoding
     void setEncoding();
-    void setEncoding(QAction* action);
+    void setEncoding(QAction* action, bool saveToDefault=false);
+    void setEncoding(QTextCodec* codec);
 
     // Traverse menu
     void on_actionMoveFirst_triggered();
@@ -266,6 +267,10 @@ private slots:
     // Board tab widget
     void on_boardTabWidget_currentChanged(QWidget* );
     void on_boardTabWidget_tabCloseRequested(int index);
+
+    // GameList Widget
+//    void on_gameListWidget_currentItemChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous);
+    void on_gameListWidget_itemDoubleClicked(QTreeWidgetItem* item, int column);
 
     // Board widget
     void nodeAdded(go::nodePtr parent, go::nodePtr node, bool select);
