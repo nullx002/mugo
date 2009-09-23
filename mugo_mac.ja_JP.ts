@@ -679,7 +679,7 @@ Do you want to save your changes?</source>
     <message>
         <location filename="mainwindow.ui" line="674"/>
         <source>Paste SGF to New Tab</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">SGFを新規タブにペースト</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="679"/>
