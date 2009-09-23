@@ -64,60 +64,60 @@ mugo automatically counts territories.</oldsource>
 地が自動で計算されます。</translation>
     </message>
     <message>
-        <location filename="countterritorydialog.cpp" line="38"/>
+        <location filename="countterritorydialog.cpp" line="46"/>
         <source>Black: %1 = %2(territories) + %3(captured)</source>
         <translation type="unfinished">黒： %1 = %2(地) + %3(アゲハマ)</translation>
     </message>
     <message>
-        <location filename="countterritorydialog.cpp" line="39"/>
+        <location filename="countterritorydialog.cpp" line="47"/>
         <source>White: %1 = %2(territories) + %3(captured) + %4(komi)</source>
         <translation type="unfinished">白： %1 = %2(地) + %3(アゲハマ) + %4(コミ)</translation>
     </message>
     <message>
-        <location filename="countterritorydialog.cpp" line="42"/>
-        <location filename="countterritorydialog.cpp" line="67"/>
+        <location filename="countterritorydialog.cpp" line="51"/>
+        <location filename="countterritorydialog.cpp" line="77"/>
         <source>W+%1</source>
         <translation type="unfinished">白%1目勝ち</translation>
     </message>
     <message>
-        <location filename="countterritorydialog.cpp" line="44"/>
-        <location filename="countterritorydialog.cpp" line="69"/>
+        <location filename="countterritorydialog.cpp" line="53"/>
+        <location filename="countterritorydialog.cpp" line="79"/>
         <source>B+%1</source>
         <translation type="unfinished">黒%1目勝ち</translation>
     </message>
     <message>
-        <location filename="countterritorydialog.cpp" line="46"/>
-        <location filename="countterritorydialog.cpp" line="71"/>
+        <location filename="countterritorydialog.cpp" line="55"/>
+        <location filename="countterritorydialog.cpp" line="81"/>
         <source>Draw</source>
         <translation type="unfinished">持碁</translation>
     </message>
     <message>
-        <location filename="countterritorydialog.cpp" line="48"/>
+        <location filename="countterritorydialog.cpp" line="57"/>
         <source>Japanese Rule</source>
         <translation type="unfinished">日本ルール</translation>
     </message>
     <message>
-        <location filename="countterritorydialog.cpp" line="58"/>
+        <location filename="countterritorydialog.cpp" line="67"/>
         <source>Black: %1 = %2(point) - %3(komi) / 2</source>
         <translation type="unfinished">黒： %1 = %2(ポイント) - %3(コミ) / 2</translation>
     </message>
     <message>
-        <location filename="countterritorydialog.cpp" line="59"/>
+        <location filename="countterritorydialog.cpp" line="68"/>
         <source>White: %1 = %2(point) + %3(komi) / 2</source>
         <translation type="unfinished">白： %1 = %2(ポイント) + %3(コミ) / 2</translation>
     </message>
     <message>
-        <location filename="countterritorydialog.cpp" line="62"/>
+        <location filename="countterritorydialog.cpp" line="71"/>
         <source>Black: %1 = %2(point) + %3(komi) / 2</source>
         <translation type="unfinished">黒： %1 = %2(ポイント) + %3(コミ) / 2</translation>
     </message>
     <message>
-        <location filename="countterritorydialog.cpp" line="63"/>
+        <location filename="countterritorydialog.cpp" line="72"/>
         <source>White: %1 = %2(point) - %3(komi) / 2</source>
         <translation type="unfinished">白： %1 = %2(ポイント) - %3(コミ) / 2</translation>
     </message>
     <message>
-        <location filename="countterritorydialog.cpp" line="73"/>
+        <location filename="countterritorydialog.cpp" line="83"/>
         <source>Chinese Rule</source>
         <translation type="unfinished">中国ルール</translation>
     </message>
@@ -547,22 +547,23 @@ Do you want to save your changes?</source>
     <message>
         <location filename="mainwindow.ui" line="1027"/>
         <source>Japanese (Shift_JIS)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">日本語 (Shift_JIS)</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="1051"/>
         <source>Korean (EUC-KR)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">韓国語 (EUC-KR)</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="1035"/>
-        <source>Japanese (JIS)</source>
-        <translation type="unfinished"></translation>
+        <source>Japanese (ISO-2022-JP)</source>
+        <oldsource>Japanese (JIS)</oldsource>
+        <translation type="unfinished">日本語 (ISO-2022-JP)</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="1043"/>
         <source>Japanese (EUC)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">日本語 (EUC-JP)</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="654"/>
@@ -688,132 +689,132 @@ Do you want to save your changes?</source>
     <message>
         <location filename="mainwindow.ui" line="1059"/>
         <source>Cyrillic (KOI8-R)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">キリル文字 (KOI8-R)</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="1067"/>
         <source>Cyrillic/Ukrainian (KOI8-U)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">キリル文字/ウクライナ語 (KOI8-U)</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="1075"/>
         <source>Central European (Windows-1250)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">中欧 (Windows-1250)</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="1083"/>
         <source>Cyrillic (Windows-1251)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">キリル文字 (Windows-1251)</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="1091"/>
         <source>Western (Windows-1252)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">西欧 (Windows-1252)</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="1099"/>
         <source>Greek (Windows-1253)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">ギリシャ語 (Windows-1253)</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="1107"/>
         <source>Turkish (Windows-1254)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">トルコ語 (Windows-1254)</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="1115"/>
         <source>Hebrew (Windows-1255)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">ヘブライ語 (Windows-1255)</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="1123"/>
         <source>Arabic (Windows-1256)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">アラビア語 (Windows-1256)</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="1131"/>
         <source>Baltic (Windows-1257)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">バルト語 (Windows-1257)</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="1139"/>
         <source>Vietnamese (Windows-1258)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">ベトナム語 (Windows-1258)</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="1147"/>
         <source>Western (ISO-8859-1)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">西欧 (ISO-8859-1)</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="1155"/>
         <source>Central European (ISO-8859-2)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">中欧 (ISO-8859-2)</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="1163"/>
         <source>South European (ISO-8859-3)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">南欧 (ISO-8859-3)</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="1171"/>
         <source>Baltic (ISO-8859-4)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">バルト語 (ISO-8859-4)</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="1179"/>
         <source>Cyrillic (ISO-8859-5)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">キリル文字 (ISO-8859-5)</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="1187"/>
         <source>Arabic (ISO-8859-6)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">アラビア語 (ISO-8859-6)</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="1195"/>
         <source>Greek (ISO-8859-7)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">ギリシャ語 (ISO-8859-7)</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="1203"/>
         <source>Hebrew Visual (ISO-8859-8)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">ヘブライ語 (ISO-8859-8)</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="1211"/>
         <source>Turkish (ISO-8859-9)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">トルコ語 (ISO-8859-9)</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="1219"/>
         <source>Nordic (ISO-8859-10)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">北欧 (ISO-8859-10)</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="1227"/>
         <source>Thai (ISO-8859-11)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">タイ語 (ISO-8859-11)</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="1235"/>
         <source>Baltic (ISO-8859-13)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">バルト語 (ISO-8859-13)</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="1243"/>
         <source>Celtic (ISO-8859-14)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">ケルト語 (ISO-8859-14)</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="1251"/>
         <source>Western (ISO-8859-15)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">西欧 (ISO-8859-15)</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="1259"/>
         <source>Romanian (ISO-8859-16)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">ルーマニア語 (ISO-8859-16)</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="1284"/>
@@ -928,7 +929,7 @@ Do you want to save your changes?</source>
     <message>
         <location filename="mainwindow.ui" line="1267"/>
         <source>Chinese Simplified (GB2312)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">簡体字中国語 (GB2312)</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="196"/>
@@ -948,7 +949,7 @@ Do you want to save your changes?</source>
     <message>
         <location filename="mainwindow.ui" line="1275"/>
         <source>Chinese Traditional (Big5)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">繁体字中国語 (Big5)</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="738"/>
@@ -1481,12 +1482,12 @@ Do you want to save your changes?</source>
         <source>1,2,3...</source>
         <translation type="unfinished"></translation>
     </message>
-    <message utf8="true">
+    <message>
         <location filename="setupdialog.ui" line="492"/>
         <source>ア,イ,ウ...</source>
         <translation type="unfinished"></translation>
     </message>
-    <message utf8="true">
+    <message>
         <location filename="setupdialog.ui" line="497"/>
         <source>イ,ロ,ハ...</source>
         <translation type="unfinished"></translation>

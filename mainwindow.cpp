@@ -470,8 +470,15 @@ void MainWindow::on_actionExportAsciiToClipboard_triggered(){
 * File -> Collection -> Extract
 */
 void MainWindow::on_actionCollectionExtract_triggered(){
+    QTreeWidgetItem* item = ui->collectionWidget->currentItem();
+    if (item == NULL)
+        return;
+
+    QVariant v = item->data(0, Qt::UserRole);
+    go::informationPtr info = v.value<go::informationPtr>();
+
     go::sgf sgf;
-    sgf.set(boardWidget->getData().root);
+    sgf.set(info);
 
     fileNew();
     boardWidget->setData(sgf);
@@ -482,6 +489,10 @@ void MainWindow::on_actionCollectionExtract_triggered(){
     updateCollection();
 }
 
+/**
+* Slot
+* File -> Collectio -> Import
+*/
 void MainWindow::on_actionCollectionImport_triggered(){
     QString fname = getOpenFileName(this, QString(), QString(), OPEN_FILTER);
     if (fname.isEmpty())
@@ -497,6 +508,117 @@ void MainWindow::on_actionCollectionImport_triggered(){
 
     setCaption();
     updateCollection();
+}
+
+/**
+* Slot
+* move up
+*/
+void MainWindow::on_actionCollectionMoveUp_triggered(){
+    QTreeWidgetItem* item = ui->collectionWidget->currentItem();
+    if (item == NULL)
+        return;
+
+    QVariant v = item->data(0, Qt::UserRole);
+    go::informationPtr info = v.value<go::informationPtr>();
+
+    go::informationList& rootList = boardWidget->getData().rootList;
+    go::informationList::iterator iter = qFind(rootList.begin(), rootList.end(), info);
+    if (iter == rootList.end() || iter == rootList.begin())
+        return;
+
+    iter = rootList.insert(--iter, info);
+    rootList.erase(iter+2);
+
+    int currentNo = item->text(0).toInt();
+    item->setText(0, QString().sprintf("%5d", --currentNo));
+
+    for(int i=0; i<ui->collectionWidget->topLevelItemCount(); ++i){
+        QTreeWidgetItem* item2 = ui->collectionWidget->topLevelItem(i);
+        if (item2 == item)
+            continue;
+
+        int no = item2->text(0).toInt();
+        if (no == currentNo){
+            item2->setText(0, QString().sprintf("%5d", no+1));
+            break;
+        }
+    }
+    boardWidget->setDirty(true);
+    setCaption();
+}
+
+/**
+* Slot
+* move down
+*/
+void MainWindow::on_actionCollectionMoveDown_triggered(){
+    QTreeWidgetItem* item = ui->collectionWidget->currentItem();
+    if (item == NULL)
+        return;
+
+    QVariant v = item->data(0, Qt::UserRole);
+    go::informationPtr info = v.value<go::informationPtr>();
+
+    go::informationList& rootList = boardWidget->getData().rootList;
+    go::informationList::iterator iter = qFind(rootList.begin(), rootList.end(), info);
+    if (iter == rootList.end() || ++iter == rootList.end())
+        return;
+
+    iter = rootList.insert(++iter, info);
+    rootList.erase(iter-2);
+
+    int currentNo = item->text(0).toInt();
+    item->setText(0, QString().sprintf("%5d", ++currentNo));
+
+    for(int i=0; i<ui->collectionWidget->topLevelItemCount(); ++i){
+        QTreeWidgetItem* item2 = ui->collectionWidget->topLevelItem(i);
+        if (item2 == item)
+            continue;
+
+        int no = item2->text(0).toInt();
+        if (no == currentNo){
+            item2->setText(0, QString().sprintf("%5d", no-1));
+            break;
+        }
+    }
+    boardWidget->setDirty(true);
+    setCaption();
+}
+
+/**
+* Slot
+* delete from collection
+*/
+void MainWindow::on_actionDeleteSgfFromCollection_triggered(){
+    QTreeWidgetItem* item = ui->collectionWidget->currentItem();
+    if (item == NULL)
+        return;
+
+    QVariant v = item->data(0, Qt::UserRole);
+    go::informationPtr info = v.value<go::informationPtr>();
+
+    go::informationPtr& root= boardWidget->getData().root;
+    go::informationList& rootList = boardWidget->getData().rootList;
+    go::informationList::iterator iter = qFind(rootList.begin(), rootList.end(), info);
+    if (*iter == root){
+        QMessageBox::warning(this, QString(), tr("Remove sgf from collection failed because this sgf is editing."));
+        return;
+    }
+    rootList.erase(iter);
+
+    int currentNo = item->text(0).toInt();
+    delete item;
+
+    for (int i=0; i<ui->collectionWidget->topLevelItemCount(); ++i){
+        QTreeWidgetItem* item2 = ui->collectionWidget->topLevelItem(i);
+        int no = item2->text(0).toInt();
+        if (no > currentNo)
+            item2->setText(0, QString().sprintf("%5d", no-1));
+    }
+
+    boardWidget->setDirty(true);
+    setCaption();
 }
 
 /**
@@ -1804,117 +1926,6 @@ void MainWindow::on_collectionWidget_itemActivated(QTreeWidgetItem* item, int /*
     setCaption();
 
     branchWidget->setFocus(Qt::OtherFocusReason);
-}
-
-/**
-* Slot
-* move up
-*/
-void MainWindow::on_actionCollectionMoveUp_triggered(){
-    QTreeWidgetItem* item = ui->collectionWidget->currentItem();
-    if (item == NULL)
-        return;
-
-    QVariant v = item->data(0, Qt::UserRole);
-    go::informationPtr info = v.value<go::informationPtr>();
-
-    go::informationList& rootList = boardWidget->getData().rootList;
-    go::informationList::iterator iter = qFind(rootList.begin(), rootList.end(), info);
-    if (iter == rootList.end() || iter == rootList.begin())
-        return;
-
-    iter = rootList.insert(--iter, info);
-    rootList.erase(iter+2);
-
-    int currentNo = item->text(0).toInt();
-    item->setText(0, QString().sprintf("%5d", --currentNo));
-
-    for(int i=0; i<ui->collectionWidget->topLevelItemCount(); ++i){
-        QTreeWidgetItem* item2 = ui->collectionWidget->topLevelItem(i);
-        if (item2 == item)
-            continue;
-
-        int no = item2->text(0).toInt();
-        if (no == currentNo){
-            item2->setText(0, QString().sprintf("%5d", no+1));
-            break;
-        }
-    }
-    boardWidget->setDirty(true);
-    setCaption();
-}
-
-/**
-* Slot
-* move down
-*/
-void MainWindow::on_actionCollectionMoveDown_triggered(){
-    QTreeWidgetItem* item = ui->collectionWidget->currentItem();
-    if (item == NULL)
-        return;
-
-    QVariant v = item->data(0, Qt::UserRole);
-    go::informationPtr info = v.value<go::informationPtr>();
-
-    go::informationList& rootList = boardWidget->getData().rootList;
-    go::informationList::iterator iter = qFind(rootList.begin(), rootList.end(), info);
-    if (iter == rootList.end() || ++iter == rootList.end())
-        return;
-
-    iter = rootList.insert(++iter, info);
-    rootList.erase(iter-2);
-
-    int currentNo = item->text(0).toInt();
-    item->setText(0, QString().sprintf("%5d", ++currentNo));
-
-    for(int i=0; i<ui->collectionWidget->topLevelItemCount(); ++i){
-        QTreeWidgetItem* item2 = ui->collectionWidget->topLevelItem(i);
-        if (item2 == item)
-            continue;
-
-        int no = item2->text(0).toInt();
-        if (no == currentNo){
-            item2->setText(0, QString().sprintf("%5d", no-1));
-            break;
-        }
-    }
-    boardWidget->setDirty(true);
-    setCaption();
-}
-
-/**
-* Slot
-* delete from collection
-*/
-void MainWindow::on_actionDeleteSgfFromCollection_triggered(){
-    QTreeWidgetItem* item = ui->collectionWidget->currentItem();
-    if (item == NULL)
-        return;
-
-    QVariant v = item->data(0, Qt::UserRole);
-    go::informationPtr info = v.value<go::informationPtr>();
-
-    go::informationPtr& root= boardWidget->getData().root;
-    go::informationList& rootList = boardWidget->getData().rootList;
-    go::informationList::iterator iter = qFind(rootList.begin(), rootList.end(), info);
-    if (*iter == root){
-        QMessageBox::warning(this, QString(), tr("Remove sgf from collection failed because this sgf is editing."));
-        return;
-    }
-    rootList.erase(iter);
-
-    int currentNo = item->text(0).toInt();
-    delete item;
-
-    for (int i=0; i<ui->collectionWidget->topLevelItemCount(); ++i){
-        QTreeWidgetItem* item2 = ui->collectionWidget->topLevelItem(i);
-        int no = item2->text(0).toInt();
-        if (no > currentNo)
-            item2->setText(0, QString().sprintf("%5d", no-1));
-    }
-
-    boardWidget->setDirty(true);
-    setCaption();
 }
 
 /**
