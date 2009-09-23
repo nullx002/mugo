@@ -135,7 +135,6 @@ private:
 
 private slots:
     // File menu
-    void on_actionCloseAllTabs_triggered();
     void on_actionNew_triggered();
     void on_actionOpen_triggered();
     void on_actionOpenURL_triggered();
@@ -146,6 +145,7 @@ private slots:
     void on_actionExportAsciiToClipboard_triggered();
     void on_actionPrint_triggered();
     void on_actionCloseTab_triggered();
+    void on_actionCloseAllTabs_triggered();
     void on_actionExit_triggered();
     void openRecentFile();
 
@@ -270,7 +270,8 @@ private slots:
 
     // GameList Widget
 //    void on_gameListWidget_currentItemChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous);
-    void on_gameListWidget_itemDoubleClicked(QTreeWidgetItem* item, int column);
+//    void on_gameListWidget_itemDoubleClicked(QTreeWidgetItem* item, int column);
+    void on_gameListWidget_itemActivated(QTreeWidgetItem* item, int column);
 
     // Board widget
     void nodeAdded(go::nodePtr parent, go::nodePtr node, bool select);

@@ -544,9 +544,6 @@
        <attribute name="headerShowSortIndicator" stdset="0">
         <bool>true</bool>
        </attribute>
-       <attribute name="headerDefaultSectionSize">
-        <number>180</number>
-       </attribute>
        <column>
         <property name="text">
          <string>No</string>

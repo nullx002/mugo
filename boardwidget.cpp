@@ -403,7 +403,7 @@ void BoardWidget::paintBoard(QPainter& p, qreal pointSize){
 */
 void BoardWidget::paintStones(QPaintDevice* pd){
     QPainter p(pd);
-    p.setRenderHints(QPainter::Antialiasing/*|QPainter::TextAntialiasing|QPainter::SmoothPixmapTransform*/);
+//    p.setRenderHints(QPainter::Antialiasing/*|QPainter::TextAntialiasing|QPainter::SmoothPixmapTransform*/);
 
     width_  = pd->width();
     height_ = pd->height();
@@ -416,9 +416,7 @@ void BoardWidget::paintStones(QPainter& p){
     font.setStyleHint(QFont::SansSerif);
     font.setWeight(QFont::Normal);
     font.setStyleStrategy(QFont::PreferAntialias);
-
     p.setFont(font);
-    p.setPen(Qt::black);
 
     drawStonesAndMarker(p);
 }
@@ -1239,7 +1237,7 @@ void BoardWidget::drawBoard(QPainter& p){
     if (blackType == 0 || blackType == 1)
         black2 = black1.scaled(boxSize, boxSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
     else{
-        black2 = QImage(boxSize, boxSize, QImage::Format_ARGB32);
+        black2 = QImage(boxSize, boxSize, QImage::Format_RGB32);
         black2.fill(0);
         QPainter p2(&black2);
         p2.setRenderHints(QPainter::Antialiasing/*|QPainter::TextAntialiasing|QPainter::SmoothPixmapTransform*/);
@@ -1251,7 +1249,7 @@ void BoardWidget::drawBoard(QPainter& p){
     if (whiteType == 0 || whiteType == 1)
         white2 = white1.scaled(boxSize, boxSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
     else{
-        white2 = QImage(boxSize, boxSize, QImage::Format_ARGB32);
+        white2 = QImage(boxSize, boxSize, QImage::Format_RGB32);
         white2.fill(0);
         QPainter p2(&white2);
         p2.setRenderHints(QPainter::Antialiasing/*|QPainter::TextAntialiasing|QPainter::SmoothPixmapTransform*/);

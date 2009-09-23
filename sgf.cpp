@@ -420,10 +420,17 @@ bool sgf::readStream(QString::iterator& first, QString::iterator last){
             nodePtr root(new node());
             if (readBranch(first, last, root) == false)
                 continue;
+
+            if (root->getChildNodes().empty())
+                continue;
+
+            nodePtr info = root->getChildNodes().front();
+            if (root->getChildNodes().size() == 1 && info->getProperty().size() == 0)
+                continue;
+
             root->setNodeType(eRoot);
             rootList.push_back(root);
-            if (!root->getChildNodes().empty())
-                root->getChildNodes().front()->setNodeType(eGameInformation);
+            info->setNodeType(eGameInformation);
         }
     }
 
@@ -518,7 +525,7 @@ bool sgf::readNodeKey(QString::iterator& first, QString::iterator last, QString&
     while (first != last){
         if (*first == '[')
             return true;
-        else if (*first == ';' || *first == '(')
+        else if (*first == ';' || *first == '(' || *first == ')')
             return false;
         else
             key.push_back(*first++);
@@ -593,6 +600,9 @@ bool sgf::get(go::data& data) const{
         data.rootList.push_back(info);
         data.root = data.rootList.front();
     }
+
+    if (data.rootList.empty())
+        data.rootList.push_back(data.root);
 
     return true;
 }

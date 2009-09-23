@@ -1722,10 +1722,15 @@ void MainWindow::on_gameListWidget_currentItemChanged(QTreeWidgetItem* current, 
 }
 */
 
+/*
+void MainWindow::on_gameListWidget_itemDoubleClicked(QTreeWidgetItem* item, int column){
+}
+*/
+
 /** Slot
 * game changed by gamelist window
 */
-void MainWindow::on_gameListWidget_itemDoubleClicked(QTreeWidgetItem* item, int /*column*/){
+void MainWindow::on_gameListWidget_itemActivated(QTreeWidgetItem* item, int /*column*/){
     if (item == NULL)
         return;
 
@@ -2069,10 +2074,11 @@ bool MainWindow::fileSave(){
 bool MainWindow::fileSaveAs(){
     QString filter = tr("sgf(*.sgf)");
 
-    QFileInfo fi(tabData->fileName);
+    QString defaultName = tabData->fileName.isEmpty() ? tabData->documentName : tabData->fileName;
+    QFileInfo fi(defaultName);
     fi.setFile(fi.absoluteDir(), fi.baseName() + ".sgf");
 
-    QString defaultName = fi.absoluteFilePath();
+    defaultName = fi.absoluteFilePath();
     QString fname = getSaveFileName(this, QString(), defaultName, filter);
     if (fname.isEmpty())
         return false;
@@ -2938,7 +2944,7 @@ QString getOpenFileName(QWidget* parent, const QString& caption, const QString& 
 
     return dlg.selectedFiles()[0];
 #else
-    return QFileDialog::getOpenFileName(parent, QString(), QString(), filter, selectedFilter, options);
+    return QFileDialog::getOpenFileName(parent, QString(), dir, filter, selectedFilter, options);
 #endif
 }
 
@@ -2959,6 +2965,6 @@ QString getSaveFileName(QWidget* parent, const QString& caption, const QString& 
 
     return dlg.selectedFiles()[0];
 #else
-    return QFileDialog::getSaveFileName(parent, QString(), QString(), filter, selectedFilter, options);
+    return QFileDialog::getSaveFileName(parent, QString(), dir, filter, selectedFilter, options);
 #endif
 }
