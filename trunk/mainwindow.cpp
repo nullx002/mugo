@@ -37,6 +37,10 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    // hide dock view
+    ui->undoDockWidget->setVisible(false);
+    ui->gameListDockWidget->setVisible(false);
+
     // encoding
     codecActions.push_back( ui->actionEncodingUTF8 );
     codecActions.push_back( ui->actionISO8859_1 );
@@ -146,6 +150,10 @@ MainWindow::MainWindow(QWidget *parent)
     // window settings
     setGeometry(x(), y(), settings.value("width", WIN_W).toInt(), settings.value("height", WIN_H).toInt());
 
+    // codec
+    QByteArray codecName = settings.value("codec", "UTF-8").toByteArray();
+    defaultCodec = QTextCodec::codecForName(codecName);
+
     // for open URL
     http = new QHttp(this);
     connect( http, SIGNAL(readyRead(const QHttpResponseHeader&)), this, SLOT(openUrlReadReady(const QHttpResponseHeader&)) );
@@ -163,7 +171,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     // create undo/redo actions
     ui->undoView->setGroup(&undoGroup);
-    ui->undoDockWidget->setVisible(false);
 
     undoAction = undoGroup.createUndoAction(this);
     redoAction = undoGroup.createRedoAction(this);
@@ -197,13 +204,17 @@ MainWindow::MainWindow(QWidget *parent)
     // tool menu
     ui->actionPlaySound->setChecked( settings.value("sound/play", 1).toBool() );
 
-    // tool bar (option -> show move number)
+    // toolbar (option -> show move number)
     ui->optionToolBar->insertAction( ui->optionToolBar->actions().at(0), ui->menuShowMoveNumber->menuAction() );
     ui->menuShowMoveNumber->menuAction()->setCheckable(true);
     ui->menuShowMoveNumber->menuAction()->setChecked( ui->actionShowMoveNumber->isChecked() );
     connect( ui->menuShowMoveNumber->menuAction(), SIGNAL(triggered()), this, SLOT(on_actionShowMoveNumber_parent_triggered()) );
 
-    // tool bar (edit -> stone & marker)
+    // toolbar (gamelist)
+    ui->gameListToolBar->addAction(ui->gameListDockWidget->toggleViewAction());
+    ui->gameListDockWidget->toggleViewAction()->setIcon( QIcon(":/res/gamelist.png") );
+
+    // toolbar (edit -> stone & marker)
     ui->editToolBar->insertAction( ui->actionDeleteAfterCurrent, ui->menuStoneMarkers->menuAction() );
     ui->editToolBar->insertSeparator( ui->actionDeleteAfterCurrent );
     ui->menuStoneMarkers->menuAction()->setCheckable(true);
@@ -595,6 +606,7 @@ void MainWindow::on_actionGameInformation_triggered(){
 
     boardWidget->setDirty(true);
     setCaption();
+    updateGameList();
 }
 
 /**
@@ -894,21 +906,35 @@ void MainWindow::on_actionFlipSgfVertically_triggered(){
 * Edit -> Encoding
 */
 void MainWindow::setEncoding(){
-    setEncoding( qobject_cast<QAction*>(sender()) );
+    setEncoding( qobject_cast<QAction*>(sender()), true );
 }
 
-void MainWindow::setEncoding(QAction* action){
+void MainWindow::setEncoding(QAction* action, bool saveToDefault){
     tabData->encode = action;
     for (int i=0; i<codecActions.size(); ++i){
         if (codecActions[i] == action){
             tabData->codec = QTextCodec::codecForName( codecNames[i] );
 
-            if (tabData->codec == NULL)
-                qDebug() << "codec is null";
-            else
+            if (tabData->codec){
                 qDebug() << "change codec to " << tabData->codec->name();
+                if (saveToDefault){
+                    defaultCodec = tabData->codec;
+                    QSettings().setValue("codec", defaultCodec->name());
+                }
+            }
+            else
+                qDebug() << "codec is null";
 
             return;
+        }
+    }
+}
+
+void MainWindow::setEncoding(QTextCodec* codec){
+    for (int i=0; i<codecNames.size(); ++i){
+        if (strcasecmp(codec->name(), codecNames[i]) == 0){
+            codecActions[i]->setChecked(true);
+            setEncoding(codecActions[i]);
         }
     }
 }
@@ -1691,6 +1717,27 @@ void MainWindow::on_commentWidget_textChanged(){
     boardWidget->setCommentCommand(currentNode, ui->commentWidget->toPlainText());
 }
 
+/*
+void MainWindow::on_gameListWidget_currentItemChanged(QTreeWidgetItem* current, QTreeWidgetItem*){
+}
+*/
+
+/** Slot
+* game changed by gamelist window
+*/
+void MainWindow::on_gameListWidget_itemDoubleClicked(QTreeWidgetItem* item, int /*column*/){
+    if (item == NULL)
+        return;
+
+    QVariant v = item->data(0, Qt::UserRole);
+    go::informationPtr info = v.value<go::informationPtr>();
+    boardWidget->setRoot(info);
+    setTreeData();
+    setCaption();
+
+    branchWidget->setFocus(Qt::OtherFocusReason);
+}
+
 /**
 * Slot
 * score dialog was closed
@@ -1885,7 +1932,7 @@ void MainWindow::addDocument(BoardWidget* board){
 
     data.branchWidget = tree;
     data.documentName = tr("Untitled-%1").arg(docIndex);
-    data.codec = QTextCodec::codecForName("UTF-8");
+    data.codec = defaultCodec;
     data.encode = ui->actionEncodingUTF8;
     data.countTerritoryDialog = new CountTerritoryDialog(this);
 
@@ -1930,6 +1977,7 @@ bool MainWindow::fileNew(int xsize, int ysize, int handicap, double komi){
     board->getData().root->komi = komi;
 
     setTreeData();
+    setEncoding(defaultCodec);
 
     return true;
 }
@@ -1974,7 +2022,7 @@ bool MainWindow::fileOpen(const QString& fname, bool guessCodec, bool newTab, bo
         }
     }
 
-    QTextCodec* codec = tabData->codec;
+    QTextCodec* codec = newTab == true ? defaultCodec : tabData->codec;
 
     QFileInfo info(fname);
     QString ext = info.suffix().toLower();
@@ -1998,12 +2046,7 @@ bool MainWindow::fileOpen(const QString& fname, bool guessCodec, bool newTab, bo
 
     ui->actionReload->setEnabled(true);
 
-    for (int i=0; i<codecNames.size(); ++i){
-        if (strcasecmp(codec->name(), codecNames[i]) == 0){
-            codecActions[i]->setChecked(true);
-            setEncoding(codecActions[i]);
-        }
-    }
+    setEncoding(codec);
 
     return true;
 }
@@ -2222,13 +2265,14 @@ void MainWindow::openUrlDone(bool error){
     }
 
     go::sgf sgf;
-    sgf.read(downloadBuff, QTextCodec::codecForName("UTF-8"), true);
+    sgf.read(downloadBuff, defaultCodec, true);
 
     downloadBuff.clear();
     boardWidget->setData(sgf);
 
     setTreeData();
     setCaption();
+    updateGameList();
 }
 
 /**
@@ -2659,11 +2703,6 @@ void MainWindow::setCountTerritoryMode(bool on){
         ui->actionLanguageJapanese,
         ui->actionOptions,
 
-        ui->actionMainToolbar,
-        ui->actionNavigationToolbar,
-        ui->actionEditToolbar,
-        ui->actionOptionToolbar,
-
 //        ui->actionAbout,
 //        ui->actionAboutQT,
 
@@ -2828,11 +2867,6 @@ void MainWindow::setPlayWithComputerMode(bool on){
         ui->actionLanguageJapanese,
         ui->actionOptions,
 
-        ui->actionMainToolbar,
-        ui->actionNavigationToolbar,
-        ui->actionEditToolbar,
-        ui->actionOptionToolbar,
-
 //        ui->actionAbout,
 //        ui->actionAboutQT,
 
@@ -2927,15 +2961,4 @@ QString getSaveFileName(QWidget* parent, const QString& caption, const QString& 
 #else
     return QFileDialog::getSaveFileName(parent, QString(), QString(), filter, selectedFilter, options);
 #endif
-}
-
-void MainWindow::on_gameListWidget_currentItemChanged(QTreeWidgetItem* current, QTreeWidgetItem*){
-    if (current == NULL)
-        return;
-
-    QVariant v = current->data(0, Qt::UserRole);
-    go::informationPtr info = v.value<go::informationPtr>();
-    boardWidget->setRoot(info);
-    setTreeData();
-    setCaption();
 }
