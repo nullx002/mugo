@@ -22,7 +22,7 @@ bool ugf::readStream(QString::iterator& first, QString::iterator last){
             readComment(first, last);
     }
 
-    return false;
+    return true;
 }
 
 bool ugf::saveStream(QTextStream& /*stream*/){

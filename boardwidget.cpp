@@ -709,6 +709,16 @@ void BoardWidget::setData(const go::fileBase& data){
 //    repaintBoard();
 }
 
+/**
+*/
+void BoardWidget::addData(const go::fileBase& data){
+    go::data d;
+    data.get(d);
+
+    goData.rootList += d.rootList;
+    setDirty(true);
+}
+
 void BoardWidget::insertData(const go::nodePtr node, const go::fileBase& data){
     go::data d;
     data.get(d);
@@ -2353,7 +2363,11 @@ void BoardWidget::countTerritory(){
                     continue;
                 if (x > 0  && !hasTerritory(x, y, x-1, y))
                     continue;
-                board[y][x].color = isb ? go::blackTerritory : go::whiteTerritory;
+
+                if (isb)
+                    board[y][x].color = (board[y][x].color & go::white) | go::blackTerritory;
+                else
+                    board[y][x].color = (board[y][x].color & go::black) | go::whiteTerritory;
             }
         }
     }

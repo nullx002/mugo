@@ -49,5 +49,7 @@
         <file>res/bg.png</file>
         <file>res/text2.png</file>
         <file>res/gamelist.png</file>
+        <file>res/sgfextract.png</file>
+        <file>res/sgfimport.png</file>
     </qresource>
 </RCC>

@@ -9,6 +9,7 @@
 #include <QHttp>
 #include <QProgressDialog>
 #include <QActionGroup>
+#include <QTextCodec>
 #include "boardwidget.h"
 #include "countterritorydialog.h"
 #include "gtp.h"
@@ -55,6 +56,7 @@ public:
     bool fileNew(int xsize=19, int ysize=19, int handicap=0, double komi=6.5);
     bool fileOpen();
     bool fileOpen(const QString& fname, bool guessCodec=true, bool newTab=true, bool forceOpen=false);
+    go::fileBase* readFile(const QString& fname, QTextCodec*& codec, bool guessCodec);
     bool fileSave();
     bool fileSaveAs();
     bool fileSaveAs(const QString& fname);
@@ -78,7 +80,7 @@ private:
 
     void setCaption();
     void updateMenu();
-    void updateGameList();
+    void updateCollection();
 
     void setEditMode(QAction* action, BoardWidget::eEditMode editMode);
     void setAnnotation(int annotation, int moveAnnotation, int nodeAnnotation);
@@ -133,8 +135,11 @@ private:
     QList<const char*> codecNames;
     QTextCodec* defaultCodec;
 
+    QString OPEN_FILTER;
+
 private slots:
     // File menu
+    void on_actionCollectionImport_triggered();
     void on_actionNew_triggered();
     void on_actionOpen_triggered();
     void on_actionOpenURL_triggered();
@@ -143,17 +148,19 @@ private slots:
     void on_actionSaveAs_triggered();
     void on_actionSaveBoardAsPicture_triggered();
     void on_actionExportAsciiToClipboard_triggered();
-    void on_actionPrint_triggered();
+    void on_actionCollectionExtract_triggered();
     void on_actionCloseTab_triggered();
     void on_actionCloseAllTabs_triggered();
+    void on_actionPrint_triggered();
     void on_actionExit_triggered();
     void openRecentFile();
 
     // Edit menu
-    void on_actionCopySGFtoClipboard_triggered();
-    void on_actionCopyCurrentSGFtoClipboard_triggered();
-    void on_actionPasteSGFfromClipboard_triggered();
-    void on_actionPasteSGFasBranchfromClipboard_triggered();
+    void on_actionCopySgfToClipboard_triggered();
+    void on_actionCopyCurrentSgfToClipboard_triggered();
+    void on_actionPasteSgfToNewTab_triggered();
+    void on_actionPasteSgfToCollection_triggered();
+//    void on_actionPasteSgfAsBranchFromClipboard_triggered();
     void on_actionGameInformation_triggered();
     void on_actionDeleteAfterCurrent_triggered();
     void on_actionDeleteOnlyCurrent_triggered();
@@ -268,10 +275,13 @@ private slots:
     void on_boardTabWidget_currentChanged(QWidget* );
     void on_boardTabWidget_tabCloseRequested(int index);
 
-    // GameList Widget
-//    void on_gameListWidget_currentItemChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous);
-//    void on_gameListWidget_itemDoubleClicked(QTreeWidgetItem* item, int column);
-    void on_gameListWidget_itemActivated(QTreeWidgetItem* item, int column);
+    // Collection Widget
+//    void on_collectionWidget_currentItemChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous);
+//    void on_collectionWidget_itemDoubleClicked(QTreeWidgetItem* item, int column);
+    void on_collectionWidget_itemActivated(QTreeWidgetItem* item, int column);
+    void on_actionCollectionMoveUp_triggered();
+    void on_actionCollectionMoveDown_triggered();
+    void on_actionDeleteSgfFromCollection_triggered();
 
     // Board widget
     void nodeAdded(go::nodePtr parent, go::nodePtr node, bool select);

@@ -660,11 +660,29 @@ bool sgf::set(const go::data& data){
 
         nodePtr gameInfo(new node());
         gameInfo->set(info);
+        gameInfo->setNodeType(sgf::eGameInformation);
         root->getChildNodes().push_back(gameInfo);
 
         if (set(gameInfo, info) == false)
             return false;
     }
+    return true;
+}
+
+bool sgf::set(const go::informationPtr& info){
+    rootList.clear();
+
+    nodePtr root(new node());
+    root->setNodeType(eRoot);
+    rootList.push_back(root);
+
+    nodePtr gameInfo(new node());
+    gameInfo->set(info);
+    gameInfo->setNodeType(sgf::eGameInformation);
+    root->getChildNodes().push_back(gameInfo);
+
+    if (set(gameInfo, info) == false)
+        return false;
     return true;
 }
 

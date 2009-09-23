@@ -25,8 +25,7 @@ protected:
 private:
     Ui::CountTerritoryDialog *m_ui;
     go::informationNode* informationNode;
-    QString result_j;
-    QString result_c;
+    double scorej;
 };
 
 #endif // COUNTTERRITORYDIALOG_H

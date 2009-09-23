@@ -37,9 +37,11 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    OPEN_FILTER = tr("All Go Format(*.sgf *.ugf *.ugi *.gib *.ngf);;sgf(*.sgf);;ugf(*.ugf *.ugi);;gib(*.gib);;ngf(*.ngf);;All Files(*.*)");
+
     // hide dock view
     ui->undoDockWidget->setVisible(false);
-    ui->gameListDockWidget->setVisible(false);
+    ui->collectionDockWidget->setVisible(false);
 
     // encoding
     codecActions.push_back( ui->actionEncodingUTF8 );
@@ -184,13 +186,14 @@ MainWindow::MainWindow(QWidget *parent)
     // create window menu
     ui->menuWindow->insertAction( ui->actionPreviousTab, ui->commentDockWidget->toggleViewAction() );
     ui->menuWindow->insertAction( ui->actionPreviousTab, ui->branchDockWidget->toggleViewAction() );
-    ui->menuWindow->insertAction( ui->actionPreviousTab, ui->gameListDockWidget->toggleViewAction() );
+    ui->menuWindow->insertAction( ui->actionPreviousTab, ui->collectionDockWidget->toggleViewAction() );
     ui->menuWindow->insertAction( ui->actionPreviousTab, ui->undoDockWidget->toggleViewAction() );
     ui->menuWindow->insertSeparator( ui->actionPreviousTab );
     ui->menuToolbars->addAction( ui->mainToolBar->toggleViewAction() );
     ui->menuToolbars->addAction( ui->editToolBar->toggleViewAction() );
     ui->menuToolbars->addAction( ui->navigationToolBar->toggleViewAction() );
     ui->menuToolbars->addAction( ui->optionToolBar->toggleViewAction() );
+    ui->menuToolbars->addAction( ui->collectionToolBar->toggleViewAction() );
 
     // language menu
     QString language = settings.value("language").toString();
@@ -210,9 +213,10 @@ MainWindow::MainWindow(QWidget *parent)
     ui->menuShowMoveNumber->menuAction()->setChecked( ui->actionShowMoveNumber->isChecked() );
     connect( ui->menuShowMoveNumber->menuAction(), SIGNAL(triggered()), this, SLOT(on_actionShowMoveNumber_parent_triggered()) );
 
-    // toolbar (gamelist)
-    ui->gameListToolBar->addAction(ui->gameListDockWidget->toggleViewAction());
-    ui->gameListDockWidget->toggleViewAction()->setIcon( QIcon(":/res/gamelist.png") );
+    // toolbar (collection)
+    ui->collectionToolBar->insertAction(ui->actionCollectionExtract, ui->collectionDockWidget->toggleViewAction());
+    ui->collectionToolBar->insertSeparator(ui->actionCollectionExtract);
+    ui->collectionDockWidget->toggleViewAction()->setIcon( QIcon(":/res/gamelist.png") );
 
     // toolbar (edit -> stone & marker)
     ui->editToolBar->insertAction( ui->actionDeleteAfterCurrent, ui->menuStoneMarkers->menuAction() );
@@ -242,9 +246,9 @@ MainWindow::MainWindow(QWidget *parent)
     ui->statusBar->addPermanentWidget(capturedLabel, 0);
 
     // game list
-    ui->gameListWidget->header()->setSortIndicator(0, Qt::AscendingOrder);
-    ui->gameListWidget->header()->resizeSection(0, 100);
-    ui->gameListWidget->header()->resizeSection(3, 300);
+    ui->collectionWidget->header()->setSortIndicator(0, Qt::AscendingOrder);
+    ui->collectionWidget->header()->resizeSection(0, 80);
+    ui->collectionWidget->header()->resizeSection(3, 350);
 
     // keyboard shortcut
     ui->actionNew->setShortcut( QKeySequence::New );
@@ -259,14 +263,14 @@ MainWindow::MainWindow(QWidget *parent)
     ui->actionNextMove->setShortcut( QKeySequence::Forward );
 //    ui->actionPreviousBranch->setShortcut( QKeySequence::PreviousChild );
 //    ui->actionNextBranch->setShortcut( QKeySequence::NextChild );
-    ui->actionMoveFirst->setShortcut( QKeySequence::MoveToStartOfLine );
-    ui->actionMoveLast->setShortcut( QKeySequence::MoveToEndOfLine );
+//    ui->actionMoveFirst->setShortcut( QKeySequence::MoveToStartOfLine );
+//    ui->actionMoveLast->setShortcut( QKeySequence::MoveToEndOfLine );
 //    ui->actionFastRewind->setShortcut( QKeySequence::MoveToPreviousPage );
 //    ui->actionFastForward->setShortcut( QKeySequence::MoveToNextPage );
     ui->actionPreviousTab->setShortcut( QKeySequence::PreviousChild );
     ui->actionNextTab->setShortcut( QKeySequence::NextChild );
-    ui->actionCopySGFtoClipboard->setShortcut( QKeySequence::Copy );
-    ui->actionPasteSGFfromClipboard->setShortcut( QKeySequence::Paste );
+    ui->actionCopySgfToClipboard->setShortcut( QKeySequence::Copy );
+    ui->actionPasteSgfToNewTab->setShortcut( QKeySequence::Paste );
 
     // command line
     QStringList args = qApp->arguments();
@@ -357,6 +361,10 @@ void MainWindow::on_actionOpen_triggered(){
     fileOpen();
 }
 
+/**
+* Slot
+* File -> Open URL
+*/
 void MainWindow::on_actionOpenURL_triggered(){
     downloadBuff.clear();
 
@@ -459,6 +467,40 @@ void MainWindow::on_actionExportAsciiToClipboard_triggered(){
 
 /**
 * Slot
+* File -> Collection -> Extract
+*/
+void MainWindow::on_actionCollectionExtract_triggered(){
+    go::sgf sgf;
+    sgf.set(boardWidget->getData().root);
+
+    fileNew();
+    boardWidget->setData(sgf);
+
+    boardWidget->setDirty(true);
+    setTreeData();
+    setCaption();
+    updateCollection();
+}
+
+void MainWindow::on_actionCollectionImport_triggered(){
+    QString fname = getOpenFileName(this, QString(), QString(), OPEN_FILTER);
+    if (fname.isEmpty())
+        return;
+
+    QTextCodec* codec = tabData->codec;
+    go::fileBase* data = readFile(fname, codec, true);
+    if (data == NULL)
+        return;
+
+    boardWidget->addData(*data);
+    delete data;
+
+    setCaption();
+    updateCollection();
+}
+
+/**
+* Slot
 * File -> Close Tab
 */
 void MainWindow::on_actionCloseTab_triggered(){
@@ -514,12 +556,12 @@ void MainWindow::openRecentFile(){
 * Slot
 * Edit -> Copy SGF to Clipboard
 */
-void MainWindow::on_actionCopySGFtoClipboard_triggered(){
+void MainWindow::on_actionCopySgfToClipboard_triggered(){
     QString str;
     QTextStream stream(&str, QIODevice::WriteOnly);
 
     go::sgf sgf;
-    sgf.set(boardWidget->getData());
+    sgf.set(boardWidget->getData().root);
     sgf.saveStream(stream);
     stream.flush();
 
@@ -529,9 +571,9 @@ void MainWindow::on_actionCopySGFtoClipboard_triggered(){
 
 /**
 * Slot
-* Edit -> Copy Current SGF to Clipboard
+* Edit -> Copy Current SGF Branch to Clipboard
 */
-void MainWindow::on_actionCopyCurrentSGFtoClipboard_triggered(){
+void MainWindow::on_actionCopyCurrentSgfToClipboard_triggered(){
     QString str("(");
     QString s;
 
@@ -558,9 +600,9 @@ void MainWindow::on_actionCopyCurrentSGFtoClipboard_triggered(){
 
 /**
 * Slot
-* Edit -> Paste SGF from Clipboard
+* Edit -> Paste SGF to New Tab
 */
-void MainWindow::on_actionPasteSGFfromClipboard_triggered(){
+void MainWindow::on_actionPasteSgfToNewTab_triggered(){
     QClipboard *clipboard = QApplication::clipboard();
     QString str = clipboard->text();
 
@@ -574,14 +616,34 @@ void MainWindow::on_actionPasteSGFfromClipboard_triggered(){
     boardWidget->setDirty(true);
     setTreeData();
     setCaption();
-    updateGameList();
+    updateCollection();
+}
+
+/**
+* Slot
+* Edit -> Paste SGF to Collection
+*/
+void MainWindow::on_actionPasteSgfToCollection_triggered(){
+    QClipboard *clipboard = QApplication::clipboard();
+    QString str = clipboard->text();
+
+    go::sgf sgf;
+    QString::iterator first = str.begin();
+    sgf.readStream(first, str.end());
+
+    boardWidget->addData(sgf);
+
+    setTreeData();
+    setCaption();
+    updateCollection();
 }
 
 /**
 * Slot
 * Edit -> Paste SGF as Branch from Clipboard
 */
-void MainWindow::on_actionPasteSGFasBranchfromClipboard_triggered(){
+/*
+void MainWindow::on_actionPasteSgfAsBranchFromClipboard_triggered(){
     QClipboard *clipboard = QApplication::clipboard();
     QString str = clipboard->text();
 
@@ -594,6 +656,7 @@ void MainWindow::on_actionPasteSGFasBranchfromClipboard_triggered(){
     setTreeData();
     setCaption();
 }
+*/
 
 /**
 * Slot
@@ -606,7 +669,7 @@ void MainWindow::on_actionGameInformation_triggered(){
 
     boardWidget->setDirty(true);
     setCaption();
-    updateGameList();
+    updateCollection();
 }
 
 /**
@@ -1608,7 +1671,7 @@ void MainWindow::on_boardTabWidget_currentChanged(QWidget* widget){
 
     setCaption();
     updateMenu();
-    updateGameList();
+    updateCollection();
 
     // undo
     undoGroup.setActiveStack(board->getUndoStack());
@@ -1718,19 +1781,19 @@ void MainWindow::on_commentWidget_textChanged(){
 }
 
 /*
-void MainWindow::on_gameListWidget_currentItemChanged(QTreeWidgetItem* current, QTreeWidgetItem*){
+void MainWindow::on_collectionWidget_currentItemChanged(QTreeWidgetItem* current, QTreeWidgetItem*){
 }
 */
 
 /*
-void MainWindow::on_gameListWidget_itemDoubleClicked(QTreeWidgetItem* item, int column){
+void MainWindow::on_collectionWidget_itemDoubleClicked(QTreeWidgetItem* item, int column){
 }
 */
 
 /** Slot
 * game changed by gamelist window
 */
-void MainWindow::on_gameListWidget_itemActivated(QTreeWidgetItem* item, int /*column*/){
+void MainWindow::on_collectionWidget_itemActivated(QTreeWidgetItem* item, int /*column*/){
     if (item == NULL)
         return;
 
@@ -1741,6 +1804,117 @@ void MainWindow::on_gameListWidget_itemActivated(QTreeWidgetItem* item, int /*co
     setCaption();
 
     branchWidget->setFocus(Qt::OtherFocusReason);
+}
+
+/**
+* Slot
+* move up
+*/
+void MainWindow::on_actionCollectionMoveUp_triggered(){
+    QTreeWidgetItem* item = ui->collectionWidget->currentItem();
+    if (item == NULL)
+        return;
+
+    QVariant v = item->data(0, Qt::UserRole);
+    go::informationPtr info = v.value<go::informationPtr>();
+
+    go::informationList& rootList = boardWidget->getData().rootList;
+    go::informationList::iterator iter = qFind(rootList.begin(), rootList.end(), info);
+    if (iter == rootList.end() || iter == rootList.begin())
+        return;
+
+    iter = rootList.insert(--iter, info);
+    rootList.erase(iter+2);
+
+    int currentNo = item->text(0).toInt();
+    item->setText(0, QString().sprintf("%5d", --currentNo));
+
+    for(int i=0; i<ui->collectionWidget->topLevelItemCount(); ++i){
+        QTreeWidgetItem* item2 = ui->collectionWidget->topLevelItem(i);
+        if (item2 == item)
+            continue;
+
+        int no = item2->text(0).toInt();
+        if (no == currentNo){
+            item2->setText(0, QString().sprintf("%5d", no+1));
+            break;
+        }
+    }
+    boardWidget->setDirty(true);
+    setCaption();
+}
+
+/**
+* Slot
+* move down
+*/
+void MainWindow::on_actionCollectionMoveDown_triggered(){
+    QTreeWidgetItem* item = ui->collectionWidget->currentItem();
+    if (item == NULL)
+        return;
+
+    QVariant v = item->data(0, Qt::UserRole);
+    go::informationPtr info = v.value<go::informationPtr>();
+
+    go::informationList& rootList = boardWidget->getData().rootList;
+    go::informationList::iterator iter = qFind(rootList.begin(), rootList.end(), info);
+    if (iter == rootList.end() || ++iter == rootList.end())
+        return;
+
+    iter = rootList.insert(++iter, info);
+    rootList.erase(iter-2);
+
+    int currentNo = item->text(0).toInt();
+    item->setText(0, QString().sprintf("%5d", ++currentNo));
+
+    for(int i=0; i<ui->collectionWidget->topLevelItemCount(); ++i){
+        QTreeWidgetItem* item2 = ui->collectionWidget->topLevelItem(i);
+        if (item2 == item)
+            continue;
+
+        int no = item2->text(0).toInt();
+        if (no == currentNo){
+            item2->setText(0, QString().sprintf("%5d", no-1));
+            break;
+        }
+    }
+    boardWidget->setDirty(true);
+    setCaption();
+}
+
+/**
+* Slot
+* delete from collection
+*/
+void MainWindow::on_actionDeleteSgfFromCollection_triggered(){
+    QTreeWidgetItem* item = ui->collectionWidget->currentItem();
+    if (item == NULL)
+        return;
+
+    QVariant v = item->data(0, Qt::UserRole);
+    go::informationPtr info = v.value<go::informationPtr>();
+
+    go::informationPtr& root= boardWidget->getData().root;
+    go::informationList& rootList = boardWidget->getData().rootList;
+    go::informationList::iterator iter = qFind(rootList.begin(), rootList.end(), info);
+    if (*iter == root){
+        QMessageBox::warning(this, QString(), tr("Remove sgf from collection failed because this sgf is editing."));
+        return;
+    }
+    rootList.erase(iter);
+
+    int currentNo = item->text(0).toInt();
+    delete item;
+
+    for (int i=0; i<ui->collectionWidget->topLevelItemCount(); ++i){
+        QTreeWidgetItem* item2 = ui->collectionWidget->topLevelItem(i);
+        int no = item2->text(0).toInt();
+        if (no > currentNo)
+            item2->setText(0, QString().sprintf("%5d", no-1));
+    }
+
+    boardWidget->setDirty(true);
+    setCaption();
 }
 
 /**
@@ -1900,9 +2074,9 @@ void MainWindow::updateMenu(){
 
 /**
 */
-void MainWindow::updateGameList(){
+void MainWindow::updateCollection(){
     int no = 0;
-    ui->gameListWidget->clear();
+    ui->collectionWidget->clear();
     foreach(const go::informationPtr& info, boardWidget->getData().rootList){
         QStringList strs;
 
@@ -1911,16 +2085,18 @@ void MainWindow::updateGameList(){
 
         QString name = info->gameName.isEmpty() ? info->event : info->gameName;
         strs << noStr << info->blackPlayer << info->whitePlayer << name << info->date << info->result;
-        QTreeWidgetItem* item = new QTreeWidgetItem(ui->gameListWidget, strs);
+        QTreeWidgetItem* item = new QTreeWidgetItem(ui->collectionWidget, strs);
 
         QVariant v;
         v.setValue(info);
         item->setData(0, Qt::UserRole, v);
 
-        ui->gameListWidget->addTopLevelItem(item);
+        ui->collectionWidget->addTopLevelItem(item);
 
-        if (boardWidget->getData().root == info)
-            ui->gameListWidget->setCurrentItem(item);
+        if (boardWidget->getData().root == info){
+            ui->collectionWidget->setCurrentItem(item);
+            ui->collectionWidget->scrollToItem(item);
+        }
     }
 }
 
@@ -1991,7 +2167,7 @@ bool MainWindow::fileNew(int xsize, int ysize, int handicap, double komi){
 * file open.
 */
 bool MainWindow::fileOpen(){
-    QString fname = getOpenFileName(this, QString(), QString(), tr("All Go Format(*.sgf *.ugf *.ugi *.gib *.ngf);;sgf(*.sgf);;ugf(*.ugf *.ugi);;gib(*.gib);;ngf(*.ngf);;All Files(*.*)"));
+    QString fname = getOpenFileName(this, QString(), QString(), OPEN_FILTER);
     if (fname.isEmpty())
         return  false;
 
@@ -2002,20 +2178,6 @@ bool MainWindow::fileOpen(){
 * file open.
 */
 bool MainWindow::fileOpen(const QString& fname, bool guessCodec, bool newTab, bool forceOpen){
-
-#define READ_FILE(FORMAT){\
-    go::FORMAT fileData;\
-    if (fileData.read(fname, codec, guessCodec))\
-        codec = fileData.codec;\
-\
-    BoardWidget* board = boardWidget;\
-    if (newTab){\
-        board = new BoardWidget;\
-        addDocument(board);\
-    }\
-    board->setData(fileData);\
-}
-
     if (!forceOpen){
         QMap<BoardWidget*, TabData>::iterator iter = tabDatas.begin();
         while (iter != tabDatas.end()){
@@ -2029,31 +2191,61 @@ bool MainWindow::fileOpen(const QString& fname, bool guessCodec, bool newTab, bo
 
     QTextCodec* codec = newTab == true ? defaultCodec : tabData->codec;
 
-    QFileInfo info(fname);
-    QString ext = info.suffix().toLower();
-
-    if (ext.compare("sgf", Qt::CaseInsensitive) == 0)
-        READ_FILE(sgf)
-    else if (ext.compare("ugf", Qt::CaseInsensitive) == 0 || ext.compare("ugi", Qt::CaseInsensitive) == 0)
-        READ_FILE(ugf)
-    else if (ext.compare("gib", Qt::CaseInsensitive) == 0)
-        READ_FILE(gib)
-    else if (ext.compare("ngf", Qt::CaseInsensitive) == 0)
-        READ_FILE(ngf)
-    else
+    go::fileBase* data = readFile(fname, codec, guessCodec);
+    if (data == NULL)
         return false;
+
+    BoardWidget* board = boardWidget;
+    if (newTab){
+        board = new BoardWidget;
+        addDocument(board);
+    }
+    board->setData(*data);
+    delete data;
 
     setCurrentFile(fname);
     setTreeData();
 
     setCaption();
-    updateGameList();
+    updateCollection();
 
     ui->actionReload->setEnabled(true);
 
     setEncoding(codec);
 
     return true;
+}
+
+go::fileBase* MainWindow::readFile(const QString& fname, QTextCodec*& codec, bool guessCodec){
+#define READ_FILE(FORMAT){\
+    go::FORMAT* data = new go::FORMAT;\
+    if (data->read(fname, codec, guessCodec)){\
+        codec = data->codec;\
+        return data;\
+    }\
+    else{\
+        delete data;\
+        return NULL;\
+    }\
+}
+
+    QFileInfo info(fname);
+    QString ext = info.suffix().toLower();
+
+    if (ext.compare("sgf") == 0){
+        READ_FILE(sgf);
+    }
+    else if (ext.compare("ugf") == 0 || ext.compare("ugi") == 0){
+        READ_FILE(ugf);
+    }
+    else if (ext.compare("gib") == 0){
+        READ_FILE(gib);
+    }
+    else if (ext.compare("ngf") == 0){
+        READ_FILE(ngf);
+    }
+    else
+        return NULL;
 }
 
 /**
@@ -2278,7 +2470,7 @@ void MainWindow::openUrlDone(bool error){
 
     setTreeData();
     setCaption();
-    updateGameList();
+    updateCollection();
 }
 
 /**
@@ -2580,6 +2772,7 @@ void MainWindow::setCountTerritoryMode(bool on){
     static QAction* act[] = {
 //        ui->actionNew,
 //        ui->actionOpen,
+//        ui->actionOpenDuplicate,
 //        ui->actionOpenURL,
         ui->actionSave,
         ui->actionSaveAs,
@@ -2591,10 +2784,11 @@ void MainWindow::setCountTerritoryMode(bool on){
 //        ui->actionPrint,
 //        ui->actionExit,
 
-        ui->actionCopySGFtoClipboard,
-        ui->actionCopyCurrentSGFtoClipboard,
-        ui->actionPasteSGFfromClipboard,
-        ui->actionPasteSGFasBranchfromClipboard,
+        ui->actionCopySgfToClipboard,
+        ui->actionCopyCurrentSgfToClipboard,
+        ui->actionPasteSgfToNewTab,
+        ui->actionPasteSgfToCollection,
+//        ui->actionPasteSgfAsBranchFromClipboard,
         ui->actionGameInformation,
         ui->actionDeleteAfterCurrent,
         ui->actionDeleteOnlyCurrent,
@@ -2744,6 +2938,7 @@ void MainWindow::setPlayWithComputerMode(bool on){
     static QAction* act[] = {
 //        ui->actionNew,
 //        ui->actionOpen,
+//        ui->actionOpenDuplicate,
 //        ui->actionOpenURL,
         ui->actionSave,
         ui->actionSaveAs,
@@ -2755,10 +2950,11 @@ void MainWindow::setPlayWithComputerMode(bool on){
         ui->actionPrint,
 //        ui->actionExit,
 
-        ui->actionCopySGFtoClipboard,
-        ui->actionCopyCurrentSGFtoClipboard,
-        ui->actionPasteSGFfromClipboard,
-        ui->actionPasteSGFasBranchfromClipboard,
+        ui->actionCopySgfToClipboard,
+        ui->actionCopyCurrentSgfToClipboard,
+        ui->actionPasteSgfToNewTab,
+        ui->actionPasteSgfToCollection,
+//        ui->actionPasteSgfAsBranchFromClipboard,
         ui->actionGameInformation,
         ui->actionDeleteAfterCurrent,
         ui->actionDeleteOnlyCurrent,
