@@ -1722,21 +1722,6 @@ void MainWindow::on_actionOptions_triggered(){
 
 /**
 * Slot
-* Tools -> Clear Settings
-*/
-void MainWindow::on_actionClearSettings_triggered(){
-    QSettings settings;
-    settings.clear();
-
-    for (int i=0; i<ui->boardTabWidget->count(); ++i){
-        BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->widget(i));
-        board->readSettings();
-        board->repaintBoard();
-    }
-}
-
-/**
-* Slot
 * Window -> Previous Tab
 */
 void MainWindow::on_actionPreviousTab_triggered(){
@@ -2292,15 +2277,7 @@ bool MainWindow::fileSave(){
 bool MainWindow::fileSaveAs(){
     QString filter = tr("sgf(*.sgf)");
 
-    QString defaultName;
-    if (!tabData->fileName.isEmpty())
-        defaultName = tabData->fileName;
-    else{
-        defaultName = getDefaultSaveName();
-        if (defaultName.isEmpty())
-            defaultName = tabData->documentName;
-    }
-
+    QString defaultName = tabData->fileName.isEmpty() ? tabData->documentName : tabData->fileName;
     QFileInfo fi(defaultName);
     fi.setFile(fi.absoluteDir(), fi.baseName() + ".sgf");
 
@@ -3154,50 +3131,6 @@ void MainWindow::endGame(){
 
 void MainWindow::alertLanguageChanged(){
     QMessageBox::information(this, APPNAME, tr("Changing the language requires that application be restarted."));
-}
-
-QString MainWindow::getDefaultSaveName() const{
-
-#define REPLACE(K, V){\
-    if (saveName.indexOf(K) >= 0 && !V.isEmpty()){\
-        replaced = true;\
-        saveName.replace(K, V);\
-    }\
-}
-
-    QString saveName = QSettings().value("saveName", SAVE_NAME).toString();
-
-    go::informationPtr i = boardWidget->getData().root;
-    QString date = i->date;
-    date.replace("/", "-");
-
-    bool replaced = false;
-
-    REPLACE("%PB%", i->blackPlayer);
-    REPLACE("%BR%", i->blackRank);
-    REPLACE("%BT%", i->blackTeam);
-    REPLACE("%PW%", i->whitePlayer);
-    REPLACE("%WR%", i->whiteRank);
-    REPLACE("%WT%", i->whiteTeam);
-    REPLACE("%DT%", date);
-    REPLACE("%GN%", i->name);
-    REPLACE("%RO%", i->round);
-    REPLACE("%EV%", i->event);
-    REPLACE("%PC%", i->place);
-    REPLACE("%RE%", i->result);
-
-    if (replaced == false)
-        return QString();
-
-    saveName.remove('\\');
-    saveName.remove('/');
-    saveName.remove(':');
-    saveName.remove('<');
-    saveName.remove('>');
-    saveName.remove('|');
-    saveName.remove('"');
-
-    return saveName;
 }
 
 QString getOpenFileName(QWidget* parent, const QString& caption, const QString& dir, const QString& filter, QString* selectedFilter, QFileDialog::Options options){

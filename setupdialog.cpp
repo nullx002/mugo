@@ -57,9 +57,6 @@ SetupDialog::SetupDialog(QWidget *parent) :
     // sound
     m_ui->soundTypeComboBox->setCurrentIndex( settings.value("sound/type").toInt() );
     m_ui->soundPathEdit->setText( settings.value("sound/path").toString() );
-
-    // save name
-    m_ui->saveNameEdit->setText( settings.value("saveName", SAVE_NAME).toString() );
 }
 
 SetupDialog::~SetupDialog()
@@ -110,9 +107,6 @@ void SetupDialog::accept(){
     // sound
     settings.setValue("sound/type", m_ui->soundTypeComboBox->currentIndex());
     settings.setValue("sound/path", m_ui->soundPathEdit->text());
-
-    // save name
-    settings.setValue("saveName", m_ui->saveNameEdit->text());
 }
 
 /**
