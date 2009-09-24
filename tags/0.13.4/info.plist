@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleTypeIconFile</key>
+			<string>mugo.icns</string>
+			<key>CFBundleTypeName</key>
+			<string>Smart Game Format</string>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>sgf</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleTypeIconFile</key>
+			<string>mugo.icns</string>
+			<key>CFBundleTypeName</key>
+			<string>UGF</string>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>ugf</string>
+				<string>ugi</string>
+			</array>
+			<key>LSHandlerRank</key>
+			<string>Default</string>
+		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleTypeIconFile</key>
+			<string>mugo.icns</string>
+			<key>CFBundleTypeName</key>
+			<string>GIB</string>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>gib</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleTypeIconFile</key>
+			<string>mugo.icns</string>
+			<key>CFBundleTypeName</key>
+			<string>NGF</string>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>ngf</string>
+			</array>
+		</dict>
+	</array>
+	<key>CFBundleGetInfoString</key>
+	<string>mugo SGF Editor; Copyright nsase</string>
+	<key>CFBundleIconFile</key>
+	<string>mugo.icns</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleExecutable</key>
+	<string>mugo</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.nsase.mugo</string>
+	<key>CFBundleVersion</key>
+	<string>0.12.1</string>
+	<key>CFBundleShortVersionString</key>
+	<string>0.12.1</string>
+</dict>
+</plist>
