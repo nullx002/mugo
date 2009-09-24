@@ -1,12 +1,14 @@
-#include <QSettings>
 #include <QDebug>
-#include <QInputDialog>
+#include <QSettings>
 #include <QMessageBox>
+#include <QInputDialog>
 #include <QtAlgorithms>
 #include <QClipboard>
 #include <QUrl>
+#include <QHttp>
 #include <QPrinter>
 #include <QPrintDialog>
+#include <QProgressDialog>
 #include "appdef.h"
 #include "sgf.h"
 #include "ugf.h"
@@ -377,20 +379,7 @@ void MainWindow::on_actionOpenURL_triggered(){
     fileNew();
 
     QUrl url( dlg.textValue() );
-
-    QHttp::ConnectionMode mode = url.scheme().toLower() == "https" ? QHttp::ConnectionModeHttps : QHttp::ConnectionModeHttp;
-    http->setHost(url.host(), mode, url.port() == -1 ? 0 : url.port());
-
-    QByteArray path = QUrl::toPercentEncoding(url.path(), "!$&'()*+,;=:@/");
-    if (path.isEmpty())
-        path = "/";
-    http->get(path);
-
-    progressDialog = new QProgressDialog(tr("Downloading SGF File"), "cancel", 0, 100, this);
-    connect(progressDialog, SIGNAL(canceled()), this, SLOT(openUrlCancel()));
-    progressDialog->setWindowModality(Qt::WindowModal);
-    progressDialog->show();
-    progressDialog->setValue(0);
+    urlOpen(url);
 }
 
 /**
@@ -398,8 +387,12 @@ void MainWindow::on_actionOpenURL_triggered(){
 * File -> Reload
 */
 void MainWindow::on_actionReload_triggered(){
-    if (maybeSave())
-        fileOpen(tabData->fileName, false, false, true);
+    if (maybeSave()){
+        if (!tabData->fileName.isEmpty())
+            fileOpen(tabData->fileName, false, false, true);
+        else if (!tabData->url.isEmpty())
+            urlOpen(tabData->url);
+    }
 }
 
 /**
@@ -2242,6 +2235,33 @@ bool MainWindow::fileOpen(const QString& fname, bool guessCodec, bool newTab, bo
     return true;
 }
 
+bool MainWindow::urlOpen(const QUrl& url){
+    tabData->url = url;
+    tabData->fileName.clear();
+    QString fname = url.toString();
+    int p = fname.lastIndexOf('/');
+    if (p >= 0)
+        tabData->documentName = fname.mid(p+1);
+
+    QHttp::ConnectionMode mode = url.scheme().toLower() == "https" ? QHttp::ConnectionModeHttps : QHttp::ConnectionModeHttp;
+    http->setHost(url.host(), mode, url.port() == -1 ? 0 : url.port());
+
+    QByteArray path = QUrl::toPercentEncoding(url.path(), "!$&'()*+,;=:@/");
+    if (path.isEmpty())
+        path = "/";
+    http->get(path);
+
+    progressDialog = new QProgressDialog(tr("Downloading SGF File"), "cancel", 0, 100, this);
+    connect(progressDialog, SIGNAL(canceled()), this, SLOT(openUrlCancel()));
+    progressDialog->setWindowModality(Qt::WindowModal);
+    progressDialog->show();
+    progressDialog->setValue(0);
+
+    ui->actionReload->setEnabled(true);
+
+    return true;
+}
+
 go::fileBase* MainWindow::readFile(const QString& fname, QTextCodec*& codec, bool guessCodec){
 #define READ_FILE(FORMAT){\
     go::FORMAT* data = new go::FORMAT;\
@@ -2419,11 +2439,16 @@ bool MainWindow::maybeSave(){
 void MainWindow::setCurrentFile(const QString& fname){
     tabData->fileName = fname;
     tabData->documentName = QFileInfo(fname).fileName();
+    tabData->url.clear();
+
+#if defined(Q_WS_WIN)
+    tabData->fileName.replace("\\", "/");
+#endif
 
     QSettings settings;
     QStringList files = settings.value("recentFileList").toStringList();
-    files.removeAll(fname);
-    files.prepend(fname);
+    files.removeAll(tabData->fileName);
+    files.prepend(tabData->fileName);
     while (files.size() > MaxRecentFiles)
         files.removeLast();
     settings.setValue("recentFileList", files);

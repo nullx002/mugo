@@ -59,6 +59,9 @@ QString node::toString() const{
     if (moveNumber > 0)
         str += QString(" (%1)").arg(moveNumber);
 
+    if (!comment.isEmpty())
+        str += QString(" %1").arg( tr("Comment") );
+
     if (!emptyStones.empty())
         str += QString(" %1").arg( tr("Add Empty") );
 
@@ -68,6 +71,9 @@ QString node::toString() const{
     if (!blackStones.empty())
         str += QString(" %1").arg( tr("Add Black") );
 
+    if (!dims.empty())
+        str += QString(" %1").arg( tr("Dim") );
+
     if (!crosses.empty() || !triangles.empty() || !squares.empty() || !circles.empty() || !characters.empty())
         str += QString(" %1").arg( tr("Mark") );
 
@@ -76,9 +82,6 @@ QString node::toString() const{
 
     if (!whiteTerritories.empty())
         str += QString(" %1").arg( tr("WhiteTerritories") );
-
-    if (!comment.isEmpty())
-        str += QString(" %1").arg( tr("Comment") );
 
     if (moveAnnotation == eGoodMove)
         str += QString(" [%1]").arg( tr("Good Move") );
