@@ -149,7 +149,9 @@ void BoardWidget::paintEvent(QPaintEvent* e){
     QWidget::paintEvent(e);
 
     QPainter p(this);
-    p.drawPixmap(0, 0, width(), height(), offscreenBuffer3);
+    int x = width() / 2 - offscreenBuffer3.width() / 2;
+    int y = height() / 2 - offscreenBuffer3.height() / 2;
+    p.drawPixmap(x, y, offscreenBuffer3);
 }
 
 /**
@@ -167,6 +169,8 @@ void BoardWidget::mouseReleaseEvent(QMouseEvent* e){
 */
 void BoardWidget::mouseMoveEvent(QMouseEvent* e){
     QWidget::mouseMoveEvent(e);
+    int x = e->x() - (width() / 2 - offscreenBuffer1.width() / 2);
+    int y = e->y() - (height() / 2 - offscreenBuffer1.height() / 2);
 
     if (editMode == ePlayGame && (color != playGame->yourColor() || playGame->moving() || currentNode != nodeList.back()))
         return;
@@ -179,8 +183,8 @@ void BoardWidget::mouseMoveEvent(QMouseEvent* e){
     else
         return;
 
-    int bx = (int)floor( qreal(e->x() - xlines[0] + boxSize / 2) / boxSize );
-    int by = (int)floor( qreal(e->y() - ylines[0] + boxSize / 2) / boxSize );
+    int bx = (int)floor( qreal(x - xlines[0] + boxSize / 2) / boxSize );
+    int by = (int)floor( qreal(y - ylines[0] + boxSize / 2) / boxSize );
 
     offscreenBuffer3 = offscreenBuffer2.copy();
     QPainter p(&offscreenBuffer3);
@@ -213,15 +217,19 @@ void BoardWidget::wheelEvent(QWheelEvent* e){
 void BoardWidget::resizeEvent(QResizeEvent* e){
     QWidget::resizeEvent(e);
 
-    offscreenBuffer1 = QPixmap(e->size());
+    int w = qMin(e->size().width(), e->size().height());
+    offscreenBuffer1 = QPixmap(w, w);
     repaintBoard();
 }
 
 /**
 */
 void BoardWidget::onLButtonDown(QMouseEvent* e){
-    int boardX = (int)floor( qreal(e->x() - xlines[0] + boxSize / 2) / boxSize );
-    int boardY = (int)floor( qreal(e->y() - ylines[0] + boxSize / 2) / boxSize );
+    int x = e->x() - (width() / 2 - offscreenBuffer1.width() / 2);
+    int y = e->y() - (height() / 2 - offscreenBuffer1.height() / 2);
+
+    int boardX = (int)floor( qreal(x - xlines[0] + boxSize / 2) / boxSize );
+    int boardY = (int)floor( qreal(y - ylines[0] + boxSize / 2) / boxSize );
 
     if (boardX < 0 || boardX >= xsize || boardY < 0 || boardY >= ysize)
         return;
@@ -1247,7 +1255,7 @@ void BoardWidget::drawBoard(QPainter& p){
     if (blackType == 0 || blackType == 1)
         black2 = black1.scaled(boxSize, boxSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
     else{
-        black2 = QImage(boxSize, boxSize, QImage::Format_RGB32);
+        black2 = QImage(boxSize, boxSize, QImage::Format_ARGB32);
         black2.fill(0);
         QPainter p2(&black2);
         p2.setRenderHints(QPainter::Antialiasing/*|QPainter::TextAntialiasing|QPainter::SmoothPixmapTransform*/);
@@ -1259,7 +1267,7 @@ void BoardWidget::drawBoard(QPainter& p){
     if (whiteType == 0 || whiteType == 1)
         white2 = white1.scaled(boxSize, boxSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
     else{
-        white2 = QImage(boxSize, boxSize, QImage::Format_RGB32);
+        white2 = QImage(boxSize, boxSize, QImage::Format_ARGB32);
         white2.fill(0);
         QPainter p2(&white2);
         p2.setRenderHints(QPainter::Antialiasing/*|QPainter::TextAntialiasing|QPainter::SmoothPixmapTransform*/);
@@ -1732,27 +1740,28 @@ QPainterPath BoardWidget::createTrianglePath() const{
 void BoardWidget::drawStone(QPainter& p, int bx, int by, go::color color, qreal opacity){
     p.save();
 
-    p.translate(xlines[bx], ylines[by]);
+    int x = xlines[bx];
+    int y = ylines[by];
     if (color == go::black){
         if (blackType >= 0){
             p.setOpacity(opacity);
-            p.drawImage(-boxSize/2, -boxSize/2, black2);
+            p.drawImage(x - boxSize/2, y - boxSize/2, black2);
         }
         else{
             p.setPen(Qt::black);
             p.setBrush(blackColor);
-            p.drawEllipse(-boxSize/2, -boxSize/2, boxSize-2, boxSize-2);
+            p.drawEllipse(x - boxSize/2, y - boxSize/2, boxSize-2, boxSize-2);
         }
     }
     else{
         if (whiteType >= 0){
             p.setOpacity(opacity);
-            p.drawImage(-boxSize/2, -boxSize/2, white2);
+            p.drawImage(x - boxSize/2, y - boxSize/2, white2);
         }
         else{
             p.setPen(Qt::black);
             p.setBrush(whiteColor);
-            p.drawEllipse(-boxSize/2, -boxSize/2, boxSize-2, boxSize-2);
+            p.drawEllipse(x - boxSize/2, y - boxSize/2, boxSize-2, boxSize-2);
         }
     }
 

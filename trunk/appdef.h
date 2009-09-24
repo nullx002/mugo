@@ -3,7 +3,7 @@
 
 
 #define APPNAME "mugo"
-#define VERSION "0.14.0"
+#define VERSION "0.14.1"
 #define AUTHOR   "nsase"
 
 #define SGF_LINEWIDTH 60
@@ -19,6 +19,7 @@
 #define FOCUS_WHITE_COLOR QColor(255, 0, 0)
 #define FOCUS_BLACK_COLOR QColor(255, 0, 0)
 #define BRANCH_COLOR QColor(00, 0, 255)
+#define SAVE_NAME "%DT%-%PB%-%PW%"
 
 
 #include <QFileDialog>

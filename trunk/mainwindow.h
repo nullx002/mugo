@@ -105,6 +105,7 @@ private:
     void endGame();
 
     void alertLanguageChanged();
+    QString getDefaultSaveName() const;
 
     Ui::MainWindow *ui;
     QMap<BoardWidget*, TabData> tabDatas;
@@ -139,7 +140,6 @@ private:
 
 private slots:
     // File menu
-    void on_actionCollectionImport_triggered();
     void on_actionNew_triggered();
     void on_actionOpen_triggered();
     void on_actionOpenURL_triggered();
@@ -149,6 +149,7 @@ private slots:
     void on_actionSaveBoardAsPicture_triggered();
     void on_actionExportAsciiToClipboard_triggered();
     void on_actionCollectionExtract_triggered();
+    void on_actionCollectionImport_triggered();
     void on_actionCloseTab_triggered();
     void on_actionCloseAllTabs_triggered();
     void on_actionPrint_triggered();
@@ -258,6 +259,7 @@ private slots:
     void on_action9x9Board_triggered();
     void on_actionCustomBoardSize_triggered();
     void on_actionOptions_triggered();
+    void on_actionClearSettings_triggered();
     // Tools -> Language menu
     void on_actionLanguageSystemDefault_triggered();
     void on_actionLanguageEnglish_triggered();
