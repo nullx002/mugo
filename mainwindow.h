@@ -67,8 +67,8 @@ public:
     bool fileSaveAs();
     bool fileSaveAs(const QString& fname);
     bool fileClose();
-    bool tabClose(int index);
-    bool allTabClose();
+    bool closeTab(int index);
+    bool closeAllTab();
     bool maybeSave();
 
 protected:
