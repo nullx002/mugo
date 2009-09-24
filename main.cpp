@@ -1,7 +1,7 @@
 #include <QtGui/QApplication>
 #ifdef Q_WS_WIN
 //#   include <QWindowsVistaStyle>
-#  include <QPlastiqueStyle>
+#   include <QPlastiqueStyle>
 #elif defined(Q_WS_MAC)
 #   include <QFileOpenEvent>
 #endif

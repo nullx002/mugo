@@ -129,14 +129,8 @@ QString informationNode::nodeName() const{
 }
 
 
-data::data() : root(new informationNode(node::nodePtr())){
-    rootList.push_back( root );
-}
-
 void data::clear(){
-    rootList.clear();
     root.reset( new informationNode(nodePtr()) );
-    rootList.push_back( root );
 }
 
 

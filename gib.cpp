@@ -41,8 +41,6 @@ QTextCodec* gib::getCodec(const QByteArray& a) const{
 }
 
 bool gib::get(go::data& data) const{
-    data.clear();
-
     int hcapx1[] = {15, 3, 15, 3, 9};
     int hcapx2[] = {15, 3, 15, 3, 15, 3, 9};
     int hcapx3[] = {15, 3, 15, 3, 15, 3, 9, 9, 9};

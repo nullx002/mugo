@@ -60,7 +60,6 @@ public:
         bool territory() const{ return color & (go::blackTerritory | go::whiteTerritory); }
         bool blackTerritory() const{ return color & go::blackTerritory; }
         bool whiteTerritory() const{ return color & go::whiteTerritory; }
-        bool dame() const{ return color & go::dame; }
 
         int number;
         int color;
@@ -100,9 +99,7 @@ public:
     void clear();
     void getData(go::fileBase& data);
     void setData(const go::fileBase& data);
-    void addData(const go::fileBase& data);
     void insertData(const go::nodePtr node, const go::fileBase& data);
-    void setRoot(go::informationPtr& info);
 
     // get node
     go::data& getData(){ return goData; }
@@ -145,7 +142,7 @@ public:
     void setDirty(bool dirty){ this->dirty = dirty; }
 
     // set option
-    void setEditMode(eEditMode editMode){ this->editMode = backupEditMode = editMode; }
+    void setEditMode(eEditMode editMode){ this->editMode = editMode; }
     void setTutorMode(eTutorMode tutorMode){ this->tutorMode = tutorMode; repaintBoard(); }
     void setShowMoveNumber(bool visible){ showMoveNumber = visible; repaintBoard(); }
     void setShowMoveNumberCount(int number){ showMoveNumberCount = number; repaintBoard(); }
@@ -259,10 +256,6 @@ protected:
     void setTerritory(int x, int y, int c);
     void unsetTerritory(int x, int y);
     void getCountTerritory(int& alive_b, int& alive_w, int& dead_b, int& dead_w, int& bt, int& wt);
-    bool checkDame(int x, int  y);
-    bool checkDame(int c, int x1, int  y1, int x2, int  y2);
-    bool hasTerritory(int x1, int  y1, int x2, int  y2);
-    bool hasTerritory(go::color c1, go::color c2, char* tmp, int x, int  y);
 
     void setParent(go::nodePtr& parent, go::nodeList& childNodes);
     void createNodeList();
@@ -304,7 +297,6 @@ private:
     bool showMarker;
     bool showBranchMoves;
     eEditMode editMode;
-    eEditMode backupEditMode;
     eTutorMode tutorMode;
     bool moveToClicked;
     int  rotateBoard_;

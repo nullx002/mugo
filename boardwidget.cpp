@@ -104,7 +104,6 @@ BoardWidget::BoardWidget(QWidget *parent) :
     showMarker(true),
     showBranchMoves(true),
     editMode(eAlternateMove),
-    backupEditMode(eAlternateMove),
     tutorMode(eNoTutor),
     moveToClicked(false),
     rotateBoard_(0),
@@ -149,9 +148,7 @@ void BoardWidget::paintEvent(QPaintEvent* e){
     QWidget::paintEvent(e);
 
     QPainter p(this);
-    int x = width() / 2 - offscreenBuffer3.width() / 2;
-    int y = height() / 2 - offscreenBuffer3.height() / 2;
-    p.drawPixmap(x, y, offscreenBuffer3);
+    p.drawPixmap(0, 0, width(), height(), offscreenBuffer3);
 }
 
 /**
@@ -169,8 +166,6 @@ void BoardWidget::mouseReleaseEvent(QMouseEvent* e){
 */
 void BoardWidget::mouseMoveEvent(QMouseEvent* e){
     QWidget::mouseMoveEvent(e);
-    int x = e->x() - (width() / 2 - offscreenBuffer1.width() / 2);
-    int y = e->y() - (height() / 2 - offscreenBuffer1.height() / 2);
 
     if (editMode == ePlayGame && (color != playGame->yourColor() || playGame->moving() || currentNode != nodeList.back()))
         return;
@@ -183,8 +178,8 @@ void BoardWidget::mouseMoveEvent(QMouseEvent* e){
     else
         return;
 
-    int bx = (int)floor( qreal(x - xlines[0] + boxSize / 2) / boxSize );
-    int by = (int)floor( qreal(y - ylines[0] + boxSize / 2) / boxSize );
+    int bx = (int)floor( qreal(e->x() - xlines[0] + boxSize / 2) / boxSize );
+    int by = (int)floor( qreal(e->y() - ylines[0] + boxSize / 2) / boxSize );
 
     offscreenBuffer3 = offscreenBuffer2.copy();
     QPainter p(&offscreenBuffer3);
@@ -217,19 +212,15 @@ void BoardWidget::wheelEvent(QWheelEvent* e){
 void BoardWidget::resizeEvent(QResizeEvent* e){
     QWidget::resizeEvent(e);
 
-    int w = qMin(e->size().width(), e->size().height());
-    offscreenBuffer1 = QPixmap(w, w);
+    offscreenBuffer1 = QPixmap(e->size());
     repaintBoard();
 }
 
 /**
 */
 void BoardWidget::onLButtonDown(QMouseEvent* e){
-    int x = e->x() - (width() / 2 - offscreenBuffer1.width() / 2);
-    int y = e->y() - (height() / 2 - offscreenBuffer1.height() / 2);
-
-    int boardX = (int)floor( qreal(x - xlines[0] + boxSize / 2) / boxSize );
-    int boardY = (int)floor( qreal(y - ylines[0] + boxSize / 2) / boxSize );
+    int boardX = (int)floor( qreal(e->x() - xlines[0] + boxSize / 2) / boxSize );
+    int boardY = (int)floor( qreal(e->y() - ylines[0] + boxSize / 2) / boxSize );
 
     if (boardX < 0 || boardX >= xsize || boardY < 0 || boardY >= ysize)
         return;
@@ -411,7 +402,7 @@ void BoardWidget::paintBoard(QPainter& p, qreal pointSize){
 */
 void BoardWidget::paintStones(QPaintDevice* pd){
     QPainter p(pd);
-//    p.setRenderHints(QPainter::Antialiasing/*|QPainter::TextAntialiasing|QPainter::SmoothPixmapTransform*/);
+    p.setRenderHints(QPainter::Antialiasing/*|QPainter::TextAntialiasing|QPainter::SmoothPixmapTransform*/);
 
     width_  = pd->width();
     height_ = pd->height();
@@ -424,7 +415,9 @@ void BoardWidget::paintStones(QPainter& p){
     font.setStyleHint(QFont::SansSerif);
     font.setWeight(QFont::Normal);
     font.setStyleStrategy(QFont::PreferAntialias);
+
     p.setFont(font);
+    p.setPen(Qt::black);
 
     drawStonesAndMarker(p);
 }
@@ -717,16 +710,6 @@ void BoardWidget::setData(const go::fileBase& data){
 //    repaintBoard();
 }
 
-/**
-*/
-void BoardWidget::addData(const go::fileBase& data){
-    go::data d;
-    data.get(d);
-
-    goData.rootList += d.rootList;
-    setDirty(true);
-}
-
 void BoardWidget::insertData(const go::nodePtr node, const go::fileBase& data){
     go::data d;
     data.get(d);
@@ -736,14 +719,6 @@ void BoardWidget::insertData(const go::nodePtr node, const go::fileBase& data){
 
     createNodeList();
     setDirty(true);
-}
-
-void BoardWidget::setRoot(go::informationPtr& info){
-    goData.root = info;
-    nodeList.clear();
-    setCurrentNode();
-    repaintBoard();
-    undoStack.clear();
 }
 
 /**
@@ -1420,9 +1395,9 @@ void BoardWidget::drawStones(QPainter& p){
         for (int x=0; x<board[y].size(); ++x){
             // draw stone
             if (board[y][x].black())
-                drawStone(p, x, y, go::black, board[y][x].whiteTerritory() || board[y][x].dame() ? 0.4 : 1.0);
+                drawStone(p, x, y, go::black, board[y][x].whiteTerritory() ? 0.5 : 1.0);
             else if (board[y][x].white())
-                drawStone(p, x, y, go::white, board[y][x].blackTerritory() || board[y][x].dame() ? 0.4 : 1.0);
+                drawStone(p, x, y, go::white, board[y][x].blackTerritory() ? 0.5 : 1.0);
 
             // draw dim
             if (board[y][x].dim)
@@ -1740,28 +1715,27 @@ QPainterPath BoardWidget::createTrianglePath() const{
 void BoardWidget::drawStone(QPainter& p, int bx, int by, go::color color, qreal opacity){
     p.save();
 
-    int x = xlines[bx];
-    int y = ylines[by];
+    p.translate(xlines[bx], ylines[by]);
     if (color == go::black){
         if (blackType >= 0){
             p.setOpacity(opacity);
-            p.drawImage(x - boxSize/2, y - boxSize/2, black2);
+            p.drawImage(-boxSize/2, -boxSize/2, black2);
         }
         else{
             p.setPen(Qt::black);
             p.setBrush(blackColor);
-            p.drawEllipse(x - boxSize/2, y - boxSize/2, boxSize-2, boxSize-2);
+            p.drawEllipse(-boxSize/2, -boxSize/2, boxSize-2, boxSize-2);
         }
     }
     else{
         if (whiteType >= 0){
             p.setOpacity(opacity);
-            p.drawImage(x - boxSize/2, y - boxSize/2, white2);
+            p.drawImage(-boxSize/2, -boxSize/2, white2);
         }
         else{
             p.setPen(Qt::black);
             p.setBrush(whiteColor);
-            p.drawEllipse(x - boxSize/2, y - boxSize/2, boxSize-2, boxSize-2);
+            p.drawEllipse(-boxSize/2, -boxSize/2, boxSize-2, boxSize-2);
         }
     }
 
@@ -2307,7 +2281,6 @@ void BoardWidget::sgfToBoardCoordinate(int sgfX, int sgfY, int& boardX, int& boa
 
 void BoardWidget::setCountTerritoryMode(bool countMode){
     if (countMode){
-        backupEditMode = editMode;
         editMode = eCountTerritory;
         countTerritory();
         int alive_b=0, alive_w=0, dead_b=0, dead_w=0, bt=0, wt=0;
@@ -2315,7 +2288,7 @@ void BoardWidget::setCountTerritoryMode(bool countMode){
         emit updateTerritory(alive_b, alive_w, dead_b, dead_w, capturedBlack, capturedWhite, bt, wt, goData.root->komi);
     }
     else{
-        editMode = backupEditMode;
+        editMode = eAlternateMove;
         createBoardBuffer();
     }
 
@@ -2341,45 +2314,6 @@ void BoardWidget::countTerritory(){
     }
 
     delete[] tmp;
-
-    for (int y=0; y<ysize; ++y){
-        for (int x=0; x<xsize; ++x){
-            if ((board[y][x].blackTerritory() || board[y][x].whiteTerritory())){
-                if (checkDame(x, y))
-                    board[y][x].color = (board[y][x].color & (go::black|go::white)) | go::dame;
-            }
-        }
-    }
-
-    for (int y=0; y<ysize; ++y){
-        for (int x=0; x<xsize; ++x){
-            if ((board[y][x].dame()) == 0)
-                continue;
-            int c1 = y > 0 ? board[y-1][x].color : go::dame;
-            int c2 = x < xsize-1 ? board[y][x+1].color : go::dame;
-            int c3 = y < ysize-1 ? board[y+1][x].color : go::dame;
-            int c4 = x > 0 ? board[y][x-1].color : go::dame;
-            int b = go::black | go::blackTerritory | go::dame;
-            int w = go::white | go::whiteTerritory | go::dame;
-            bool isb = c1 & b && c2 & b && c3 & b && c4 & b;
-            bool isw = c1 & w && c2 & w && c3 & w && c4 & w;
-            if (isb || isw){
-                if (y > 0 && !hasTerritory(x, y, x, y-1))
-                    continue;
-                if (y < ysize-1 && !hasTerritory(x, y, x, y+1))
-                    continue;
-                if (x < xsize-1 && !hasTerritory(x, y, x+1, y))
-                    continue;
-                if (x > 0  && !hasTerritory(x, y, x-1, y))
-                    continue;
-
-                if (isb)
-                    board[y][x].color = (board[y][x].color & go::white) | go::blackTerritory;
-                else
-                    board[y][x].color = (board[y][x].color & go::black) | go::whiteTerritory;
-            }
-        }
-    }
 }
 
 void BoardWidget::whichTerritory(int x, int y, char* tmp, int& c){
@@ -2421,11 +2355,11 @@ void BoardWidget::whichTerritory(int x, int y, char* tmp, int& c){
 }
 
 void BoardWidget::addTerritory(int x, int y){
-    if (board[y][x].white() && !board[y][x].blackTerritory() && !board[y][x].dame())
+    if (board[y][x].white() && !board[y][x].blackTerritory())
         setTerritory(x, y, go::blackTerritory);
-    else if (board[y][x].black() && !board[y][x].whiteTerritory() && !board[y][x].dame())
+    else if (board[y][x].black() && !board[y][x].whiteTerritory())
         setTerritory(x, y, go::whiteTerritory);
-    else if ( (board[y][x].white() || board[y][x].black()) && (board[y][x].blackTerritory() || board[y][x].whiteTerritory() ||  board[y][x].dame()) )
+    else if ( (board[y][x].white() || board[y][x].black()) && (board[y][x].blackTerritory() || board[y][x].whiteTerritory()) )
         unsetTerritory(x, y);
 
     countTerritory();
@@ -2455,7 +2389,7 @@ void BoardWidget::setTerritory(int x, int y, int c){
 }
 
 void BoardWidget::unsetTerritory(int x, int y){
-    if ( !board[y][x].blackTerritory() && !board[y][x].whiteTerritory() && !board[y][x].dame() )
+    if ( !board[y][x].blackTerritory() && !board[y][x].whiteTerritory() )
         return;
 
     board[y][x].color &= go::black | go::white;
@@ -2483,12 +2417,6 @@ void BoardWidget::getCountTerritory(int& alive_b, int& alive_w, int& dead_b, int
                 if (board[y][x].black())
                     ++dead_b;
             }
-            else if (board[y][x].dame()){
-                if (board[y][x].white())
-                    ++dead_w;
-                else if (board[y][x].black())
-                    ++dead_b;
-            }
             else if (board[y][x].black())
                 ++alive_b;
             else if (board[y][x].white())
@@ -2497,81 +2425,9 @@ void BoardWidget::getCountTerritory(int& alive_b, int& alive_w, int& dead_b, int
     }
 }
 
-bool BoardWidget::checkDame(int x, int y){
-    int c = board[y][x].color;
-    return checkDame(c, x-1, y-1, x+1, y-1) || checkDame(c, x+1, y-1, x+1, y+1) || checkDame(c, x-1, y+1, x+1, y+1) || checkDame(c, x-1, y-1, x-1, y+1) || checkDame(c, x-1, y-1, x+1, y+1) || checkDame(c, x+1, y-1, x-1, y+1);
-}
-
-bool BoardWidget::checkDame(int c, int x1, int y1, int x2, int y2){
-    bool area1 = x1 >= 0 && x1 < xsize && y1 >= 0 && y1 < ysize;
-    bool area2 = x2 >= 0 && x2 < xsize && y2 >= 0 && y2 < ysize;
-    if (!area1 && !area2)
-        return false;
-
-    go::color enemy = c & go::whiteTerritory ? go::black : go::white;
-    go::color myTerritory = c & go::whiteTerritory ? go::whiteTerritory : go::blackTerritory;
-    bool b1 = x1 >= 0 && x1 < xsize && y1 >= 0 && y1 < ysize ? board[y1][x1].color & enemy && !(board[y1][x1].color & myTerritory) : true;
-    bool b2 = x2 >= 0 && x2 < xsize && y2 >= 0 && y2 < ysize ? board[y2][x2].color & enemy && !(board[y2][x2].color & myTerritory) : true;
-
-    return b1 && b2;
-}
-
-bool BoardWidget::hasTerritory(int x1, int y1, int x2, int  y2){
-    if (x2 < 0 || x2 >= xsize || y2 < 0 || y2 >= ysize)
-        return true;
-
-    go::color c1;
-    go::color c2;
-    if (board[y2][x2].black()){
-        c1 = go::black;
-        c2 = go::blackTerritory;
-    }
-    else if (board[y2][x2].white()){
-        c1 = go::white;
-        c2 = go::whiteTerritory;
-    }
-    else if (board[y2][x2].territory())
-        return true;
-    else
-        return false;
-
-    char* tmp = new char[ysize*xsize];
-    memset(tmp, 0, ysize*xsize);
-    tmp[y1*xsize+x1] = true;
-    bool ret = hasTerritory(c1, c2, tmp, x2, y2);
-    delete[] tmp;
-    return ret;
-}
-
-bool BoardWidget::hasTerritory(go::color c1, go::color c2, char* tmp, int x, int  y){
-    if (x < 0 || x >= xsize || y < 0 || y >= ysize)
-        return false;
-
-    if (tmp[y*xsize+x])
-        return false;
-    tmp[y*xsize+x] = true;
-
-    if ((board[y][x].color & c1) == 0 && (board[y][x].color & c2) == 0 && !board[y][x].dame())
-        return false;
-    if (board[y][x].color & c2 || board[y][x].dame())
-        return true;
-
-    if (hasTerritory(c1, c2, tmp, x, y-1))
-        return true;
-    else if (hasTerritory(c1, c2, tmp, x, y+1))
-        return true;
-    else if (hasTerritory(c1, c2, tmp, x-1, y))
-        return true;
-    else if (hasTerritory(c1, c2, tmp, x+1, y))
-        return true;
-    else
-        return false;
-}
-
 void BoardWidget::playWithComputer(PlayGame* game){
     playGame = game;
     if (playGame){
-        backupEditMode = editMode;
         editMode = ePlayGame;
         if (playGame->yourColor() == go::white && goData.root->handicap == 0)
             playGame->wait();
@@ -2583,6 +2439,6 @@ void BoardWidget::playWithComputer(PlayGame* game){
         }
     }
     else{
-        editMode = backupEditMode;
+        editMode = eAlternateMove;
     }
 }

@@ -6,6 +6,14 @@ namespace go{
 
 
 
+sgf::node::~node(){
+    nodeList::iterator iter = childNodes.begin();
+    while (iter != childNodes.end()){
+            delete *iter;
+            ++iter;
+    }
+}
+
 QString sgf::node::toString() const{
     static const QString keys[] = {
         // game information
@@ -414,45 +422,37 @@ void sgf::node::addStone(go::stoneList& stoneList, const QString& key, const QSt
 }
 
 bool sgf::readStream(QString::iterator& first, QString::iterator last){
+    bool ret = false;
+
     while (first != last){
         QChar c = *first++;
         if (c == '('){
-            nodePtr root(new node());
-            if (readBranch(first, last, root) == false)
-                continue;
-
-            if (root->getChildNodes().empty())
-                continue;
-
-            nodePtr info = root->getChildNodes().front();
-            if (root->getChildNodes().size() == 1 && info->getProperty().size() == 0)
-                continue;
-
-            root->setNodeType(eRoot);
-            rootList.push_back(root);
-            info->setNodeType(eGameInformation);
+            ret = readBranch(first, last, root);
+            root.setNodeType(eRoot);
+            break;
         }
     }
 
-    return true;
+    if (!root.getChildNodes().empty())
+        root.getChildNodes().front()->setNodeType(eGameInformation);
+
+    return ret;
 }
 
 bool sgf::saveStream(QTextStream& stream){
-    foreach (nodePtr root, rootList){
-        if (codec){
-            foreach (nodePtr info, root->getChildNodes()){
-                info->setProperty("CA", QStringList(codec->name()));
-            }
+    nodeList::iterator iter = root.getChildNodes().begin();
+    if (codec){
+        while (iter != root.getChildNodes().end()){
+            (*iter)->setProperty("CA", QStringList(codec->name()));
+            ++iter;
         }
-
-        QString s;
-        writeNode(stream, s, root);
-        if (!s.isEmpty())
-            stream << s;
-        stream << '\n';
     }
 
-    return true;
+    QString s;
+    bool ret = writeNode(stream, s, root);
+    if (!s.isEmpty())
+        stream << s;
+    return ret;
 }
 
 QTextCodec* sgf::getCodec(const QByteArray& a) const{
@@ -472,8 +472,8 @@ QTextCodec* sgf::getCodec(const QByteArray& a) const{
         return QTextCodec::codecForName(name.toAscii());
 }
 
-bool sgf::readBranch(QString::iterator& first, QString::iterator last, nodePtr& n){
-    n->setNodeType(sgf::eBranch);
+bool sgf::readBranch(QString::iterator& first, QString::iterator last, node& n){
+    n.setNodeType(sgf::eBranch);
     while (first != last){
         QChar c = *first++;
 
@@ -483,19 +483,19 @@ bool sgf::readBranch(QString::iterator& first, QString::iterator last, nodePtr& 
         else if (c != ';' && c != '(' && !c.isLetter() )
             continue;
 
-        nodePtr newNode( new node );
-        n->getChildNodes().push_back(newNode);
+        node* newNode = new node;
+        n.getChildNodes().push_back(newNode);
 
         if (c == '(')
-            readBranch(first, last, newNode);
+            readBranch(first, last, *newNode);
         else
-            readNode(first, last, newNode);
+            readNode(first, last, *newNode);
     }
 
     return false;
 }
 
-bool sgf::readNode(QString::iterator& first, QString::iterator last, nodePtr& n){
+bool sgf::readNode(QString::iterator& first, QString::iterator last, node& n){
     while (first != last){
         QChar c = *first;
         if (c.isSpace()){
@@ -515,7 +515,7 @@ bool sgf::readNode(QString::iterator& first, QString::iterator last, nodePtr& n)
         if (readNodeValues(first, last, values) == false)
             return false;
 
-        n->setProperty(key, values);
+        n.setProperty(key, values);
     }
 
     return true;
@@ -525,8 +525,6 @@ bool sgf::readNodeKey(QString::iterator& first, QString::iterator last, QString&
     while (first != last){
         if (*first == '[')
             return true;
-        else if (*first == ';' || *first == '(' || *first == ')')
-            return false;
         else
             key.push_back(*first++);
     }
@@ -566,24 +564,28 @@ bool sgf::readNodeValue(QString::iterator& first, QString::iterator last, QStrin
     return false;
 }
 
-bool sgf::writeNode(QTextStream& stream, QString& s, const nodePtr& n){
-    if (n->getNodeType() == eBranch || n->getNodeType() == eRoot){
+bool sgf::writeNode(QTextStream& stream, QString& s, const node& n){
+    if (n.getNodeType() == eBranch || n.getNodeType() == eRoot){
         s.push_back('(');
-        foreach(const nodePtr& childNode, n->getChildNodes()){
-            writeNode(stream, s, childNode);
+        nodeList::const_iterator iter = n.getChildNodes().begin();
+        while (iter != n.getChildNodes().end()){
+            writeNode(stream, s, **iter);
+            ++iter;
         }
         s.push_back(')');
     }
     else{
-        s.append(n->toString());
+        s.append(n.toString());
         if (s.size() > SGF_LINEWIDTH){
             stream << s;
             if (s.right(1) != "\n")
                 stream << '\n';
             s.clear();
         }
-        foreach(const nodePtr& childNode, n->getChildNodes()){
-            writeNode(stream, s, childNode);
+        nodeList::const_iterator iter = n.getChildNodes().begin();
+        while (iter != n.getChildNodes().end()){
+            writeNode(stream, s, **iter);
+            ++iter;
         }
     }
 
@@ -592,25 +594,15 @@ bool sgf::writeNode(QTextStream& stream, QString& s, const nodePtr& n){
 
 bool sgf::get(go::data& data) const{
     data.clear();
-    data.rootList.clear();
-    foreach(const nodePtr& root, rootList){
-        go::informationPtr info(new go::informationNode(go::nodePtr()));
-        go::nodePtr node(info);
-        get(root, node);
-        data.rootList.push_back(info);
-        data.root = data.rootList.front();
-    }
-
-    if (data.rootList.empty())
-        data.rootList.push_back(data.root);
+    get(root, data.root);
 
     return true;
 }
 
-go::nodePtr sgf::get(const nodePtr& sgfNode, go::nodePtr& outNode) const{
+go::nodePtr sgf::get(const node& sgfNode, go::nodePtr outNode) const{
     // process node
     go::nodePtr newNode;
-    switch(sgfNode->getNodeType()){
+    switch(sgfNode.getNodeType()){
         case eBlack:
             newNode = go::createBlackNode(outNode);
             break;
@@ -623,7 +615,7 @@ go::nodePtr sgf::get(const nodePtr& sgfNode, go::nodePtr& outNode) const{
             break;
 
         case eGameInformation:
-            sgfNode->get(outNode);
+            sgfNode.get(outNode);
             break;
 
         case eRoot:
@@ -636,71 +628,50 @@ go::nodePtr sgf::get(const nodePtr& sgfNode, go::nodePtr& outNode) const{
 
     if (newNode){
         outNode->childNodes.push_back(newNode);
-        sgfNode->get(newNode);
+        sgfNode.get(newNode);
     }
     else
         newNode = outNode;
 
     // process children
     go::nodePtr childNode = newNode;
-    foreach(const nodePtr& node, sgfNode->getChildNodes()){
-        childNode = get(node, childNode);
+    nodeList::const_iterator iter = sgfNode.getChildNodes().begin();
+    while (iter != sgfNode.getChildNodes().end()){
+        childNode = get(**iter, childNode);
+        ++iter;
     }
 
     return newNode;
 }
 
 bool sgf::set(const go::data& data){
-    rootList.clear();
+    root.clear();
+    root.setNodeType(eRoot);
 
-    foreach(const go::informationPtr& info, data.rootList){
-        nodePtr root(new node());
-        root->setNodeType(eRoot);
-        rootList.push_back(root);
+    node* gameInfo = new node;
+    gameInfo->set(data.root);
+    root.getChildNodes().push_back(gameInfo);
 
-        nodePtr gameInfo(new node());
-        gameInfo->set(info);
-        gameInfo->setNodeType(sgf::eGameInformation);
-        root->getChildNodes().push_back(gameInfo);
-
-        if (set(gameInfo, info) == false)
-            return false;
-    }
-    return true;
+    return set(gameInfo, data.root);
 }
 
-bool sgf::set(const go::informationPtr& info){
-    rootList.clear();
-
-    nodePtr root(new node());
-    root->setNodeType(eRoot);
-    rootList.push_back(root);
-
-    nodePtr gameInfo(new node());
-    gameInfo->set(info);
-    gameInfo->setNodeType(sgf::eGameInformation);
-    root->getChildNodes().push_back(gameInfo);
-
-    if (set(gameInfo, info) == false)
-        return false;
-    return true;
-}
-
-bool sgf::set(nodePtr& sgfNode, const go::nodePtr& goNode){
+bool sgf::set(node* sgfNode, const go::nodePtr goNode){
     if (goNode->childNodes.size() > 1){
-        foreach(const go::nodePtr& inNode, goNode->childNodes){
-            nodePtr branchNode(new node);
+        go::nodeList::const_iterator iter = goNode->childNodes.begin();
+        while (iter != goNode->childNodes.end()){
+            node* branchNode = new node;
             branchNode->setNodeType(eBranch);
             sgfNode->getChildNodes().push_back(branchNode);
 
-            nodePtr newNode(new node);
-            newNode->set( inNode );
+            node* newNode = new node;
+            newNode->set( *iter );
             branchNode->getChildNodes().push_back(newNode);
-            set(newNode, inNode);
+            set(newNode, *iter);
+            ++iter;
         }
     }
     else if (goNode->childNodes.size() == 1){
-        nodePtr newNode(new node);
+        node* newNode = new node;
         newNode->set( goNode->childNodes.front() );
         sgfNode->getChildNodes().push_back(newNode);
         set(sgfNode, goNode->childNodes.front());

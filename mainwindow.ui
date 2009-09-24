@@ -77,13 +77,6 @@
       <string>Recent Files</string>
      </property>
     </widget>
-    <widget class="QMenu" name="menuCollection">
-     <property name="title">
-      <string>Collection</string>
-     </property>
-     <addaction name="actionCollectionExtract"/>
-     <addaction name="actionCollectionImport"/>
-    </widget>
     <addaction name="actionNew"/>
     <addaction name="actionOpen"/>
     <addaction name="actionOpenURL"/>
@@ -95,10 +88,7 @@
     <addaction name="actionSaveBoardAsPicture"/>
     <addaction name="actionExportAsciiToClipboard"/>
     <addaction name="separator"/>
-    <addaction name="menuCollection"/>
-    <addaction name="separator"/>
     <addaction name="actionCloseTab"/>
-    <addaction name="actionCloseAllTabs"/>
     <addaction name="separator"/>
     <addaction name="actionPrint"/>
     <addaction name="separator"/>
@@ -199,11 +189,10 @@
      <addaction name="actionUnsetMoveNumber"/>
     </widget>
     <addaction name="separator"/>
-    <addaction name="actionCopySgfToClipboard"/>
-    <addaction name="actionCopyCurrentSgfToClipboard"/>
-    <addaction name="actionPasteSgfToNewTab"/>
-    <addaction name="actionPasteSgfToCollection"/>
-    <addaction name="actionPasteSgfAsBranchFromClipboard"/>
+    <addaction name="actionCopySGFtoClipboard"/>
+    <addaction name="actionCopyCurrentSGFtoClipboard"/>
+    <addaction name="actionPasteSGFfromClipboard"/>
+    <addaction name="actionPasteSGFasBranchfromClipboard"/>
     <addaction name="separator"/>
     <addaction name="actionGameInformation"/>
     <addaction name="separator"/>
@@ -306,7 +295,6 @@
     <addaction name="separator"/>
     <addaction name="menuLanguage"/>
     <addaction name="actionOptions"/>
-    <addaction name="actionClearSettings"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -386,28 +374,6 @@
    <addaction name="actionWhiteFirst"/>
    <addaction name="separator"/>
    <addaction name="actionBranchMode"/>
-  </widget>
-  <widget class="QToolBar" name="collectionToolBar">
-   <property name="windowTitle">
-    <string>Collection Toolbar</string>
-   </property>
-   <property name="iconSize">
-    <size>
-     <width>18</width>
-     <height>18</height>
-    </size>
-   </property>
-   <attribute name="toolBarArea">
-    <enum>TopToolBarArea</enum>
-   </attribute>
-   <attribute name="toolBarBreak">
-    <bool>false</bool>
-   </attribute>
-   <addaction name="actionCollectionExtract"/>
-   <addaction name="actionCollectionImport"/>
-   <addaction name="actionCollectionMoveUp"/>
-   <addaction name="actionCollectionMoveDown"/>
-   <addaction name="actionDeleteSgfFromCollection"/>
   </widget>
   <widget class="QToolBar" name="editToolBar">
    <property name="windowTitle">
@@ -518,7 +484,7 @@
    <attribute name="dockWidgetArea">
     <number>1</number>
    </attribute>
-   <widget class="QWidget" name="undoDockWidgetContents">
+   <widget class="QWidget" name="dockWidgetContents">
     <layout class="QHBoxLayout" name="undoLayout">
      <property name="margin">
       <number>0</number>
@@ -528,73 +494,6 @@
        <property name="frameShape">
         <enum>QFrame::Panel</enum>
        </property>
-      </widget>
-     </item>
-    </layout>
-   </widget>
-  </widget>
-  <widget class="QDockWidget" name="collectionDockWidget">
-   <property name="windowTitle">
-    <string>Collection Window</string>
-   </property>
-   <attribute name="dockWidgetArea">
-    <number>4</number>
-   </attribute>
-   <widget class="QWidget" name="collectionDockWidgetContents">
-    <layout class="QVBoxLayout" name="verticalLayout_2">
-     <property name="margin">
-      <number>0</number>
-     </property>
-     <item>
-      <widget class="QTreeWidget" name="collectionWidget">
-       <property name="alternatingRowColors">
-        <bool>true</bool>
-       </property>
-       <property name="rootIsDecorated">
-        <bool>false</bool>
-       </property>
-       <property name="sortingEnabled">
-        <bool>true</bool>
-       </property>
-       <property name="columnCount">
-        <number>6</number>
-       </property>
-       <attribute name="headerDefaultSectionSize">
-        <number>170</number>
-       </attribute>
-       <attribute name="headerShowSortIndicator" stdset="0">
-        <bool>true</bool>
-       </attribute>
-       <column>
-        <property name="text">
-         <string>No</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Black</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>White</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Name</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Date</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Result</string>
-        </property>
-       </column>
       </widget>
      </item>
     </layout>
@@ -660,27 +559,24 @@
     <string>E&amp;xit</string>
    </property>
   </action>
-  <action name="actionCopySgfToClipboard">
+  <action name="actionCopySGFtoClipboard">
    <property name="text">
     <string>Copy SGF to Clipboard</string>
    </property>
   </action>
-  <action name="actionCopyCurrentSgfToClipboard">
+  <action name="actionCopyCurrentSGFtoClipboard">
    <property name="text">
-    <string>Copy Current Branch to Clipboard</string>
+    <string>Copy Current SGF to Clipboard</string>
    </property>
   </action>
-  <action name="actionPasteSgfToNewTab">
+  <action name="actionPasteSGFfromClipboard">
    <property name="text">
-    <string>Paste SGF to New Tab</string>
+    <string>Paste SGF from Clipboard</string>
    </property>
   </action>
-  <action name="actionPasteSgfAsBranchFromClipboard">
+  <action name="actionPasteSGFasBranchfromClipboard">
    <property name="text">
     <string>Paste SGF as Branch from Clipboard</string>
-   </property>
-   <property name="visible">
-    <bool>false</bool>
    </property>
   </action>
   <action name="actionGameInformation">
@@ -1033,7 +929,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Japanese (ISO-2022-JP)</string>
+    <string>Japanese (JIS)</string>
    </property>
   </action>
   <action name="actionEncodingEucJP">
@@ -1628,6 +1524,50 @@
     <string>&amp;Options...</string>
    </property>
   </action>
+  <action name="actionMainToolbar">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Main Toolbar</string>
+   </property>
+  </action>
+  <action name="actionOptionToolbar">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Option Toolbar</string>
+   </property>
+  </action>
+  <action name="actionEditToolbar">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Edit Toolbar</string>
+   </property>
+  </action>
+  <action name="actionNavigationToolbar">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Navigation Toolbar</string>
+   </property>
+  </action>
   <action name="actionAbout">
    <property name="icon">
     <iconset>
@@ -1698,66 +1638,6 @@
   <action name="actionNextTab">
    <property name="text">
     <string>Next Tab</string>
-   </property>
-  </action>
-  <action name="actionCloseAllTabs">
-   <property name="text">
-    <string>Close All Tabs</string>
-   </property>
-  </action>
-  <action name="actionCollectionExtract">
-   <property name="icon">
-    <iconset>
-     <normaloff>:/res/sgfextract.png</normaloff>:/res/sgfextract.png</iconset>
-   </property>
-   <property name="text">
-    <string>Extract</string>
-   </property>
-  </action>
-  <action name="actionCollectionMoveUp">
-   <property name="icon">
-    <iconset>
-     <normaloff>:/res/prevbranch.png</normaloff>:/res/prevbranch.png</iconset>
-   </property>
-   <property name="text">
-    <string>Move Up</string>
-   </property>
-  </action>
-  <action name="actionCollectionMoveDown">
-   <property name="icon">
-    <iconset>
-     <normaloff>:/res/nextbranch.png</normaloff>:/res/nextbranch.png</iconset>
-   </property>
-   <property name="text">
-    <string>Move Down</string>
-   </property>
-  </action>
-  <action name="actionDeleteSgfFromCollection">
-   <property name="icon">
-    <iconset>
-     <normaloff>:/res/removeself.png</normaloff>:/res/removeself.png</iconset>
-   </property>
-   <property name="text">
-    <string>Delete SGF</string>
-   </property>
-  </action>
-  <action name="actionPasteSgfToCollection">
-   <property name="text">
-    <string>Paste SGF to Collection</string>
-   </property>
-  </action>
-  <action name="actionCollectionImport">
-   <property name="icon">
-    <iconset>
-     <normaloff>:/res/sgfimport.png</normaloff>:/res/sgfimport.png</iconset>
-   </property>
-   <property name="text">
-    <string>Import</string>
-   </property>
-  </action>
-  <action name="actionClearSettings">
-   <property name="text">
-    <string>Clear Settings</string>
    </property>
   </action>
  </widget>
