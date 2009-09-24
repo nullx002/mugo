@@ -1392,6 +1392,8 @@ void BoardWidget::drawStonesAndMarker(QPainter& p){
 
     drawStones(p);
 
+    p.setRenderHints(QPainter::Antialiasing|QPainter::TextAntialiasing);
+
     if (currentNode->childNodes.size() > 1)
         drawBranchMoves(p, currentNode->childNodes.begin(), currentNode->childNodes.end());
 

@@ -2,17 +2,21 @@
 #define MAINWINDOW_H
 
 #include <QtGui/QMainWindow>
-#include <QTreeWidgetItem>
-#include <QTextCodec>
 #include <QUndoGroup>
-#include <QProcess>
-#include <QHttp>
-#include <QProgressDialog>
+#include <QUrl>
 #include <QActionGroup>
-#include <QTextCodec>
 #include "boardwidget.h"
 #include "countterritorydialog.h"
 #include "gtp.h"
+
+class QTextCodec;
+class QTreeWidget;
+class QTreeWidgetItem;
+class QProgressDialog;
+class QHttp;
+class QHttpResponseHeader;
+class QProcess;
+
 
 namespace Ui
 {
@@ -36,6 +40,7 @@ public:
 
         QString fileName;
         QString documentName;
+        QUrl url;
 
         QTextCodec* codec;
         QAction* encode;
@@ -56,6 +61,7 @@ public:
     bool fileNew(int xsize=19, int ysize=19, int handicap=0, double komi=6.5);
     bool fileOpen();
     bool fileOpen(const QString& fname, bool guessCodec=true, bool newTab=true, bool forceOpen=false);
+    bool urlOpen(const QUrl& url);
     go::fileBase* readFile(const QString& fname, QTextCodec*& codec, bool guessCodec);
     bool fileSave();
     bool fileSaveAs();
