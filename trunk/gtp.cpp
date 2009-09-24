@@ -11,7 +11,6 @@ gtp::gtp(BoardWidget* board, go::color color, QProcess& proc, QObject* parent) :
 }
 
 void gtp::move(int x, int y){
-qDebug() << "move";
     commandList.push_back( commandPtr(new moveCommand(x, y)) );
 
     QString xy;

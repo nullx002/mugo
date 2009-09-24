@@ -63,7 +63,7 @@
         <enum>QFrame::Plain</enum>
        </property>
        <property name="currentIndex">
-        <number>4</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="boardPage">
         <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -678,7 +678,6 @@
   <tabstop>boardPathButton</tabstop>
   <tabstop>bgColorButton</tabstop>
   <tabstop>bgTutorColorButton</tabstop>
-  <tabstop>buttonBox</tabstop>
   <tabstop>whiteTypeComboBox</tabstop>
   <tabstop>whiteColorButton</tabstop>
   <tabstop>whitePathEdit</tabstop>
@@ -687,8 +686,16 @@
   <tabstop>blackColorButton</tabstop>
   <tabstop>blackPathEdit</tabstop>
   <tabstop>blackPathButton</tabstop>
+  <tabstop>focusTypeComboBox</tabstop>
+  <tabstop>focusWhiteColorButton</tabstop>
   <tabstop>focusBlackColorButton</tabstop>
   <tabstop>branchColorButton</tabstop>
+  <tabstop>labelTypeComboBox</tabstop>
+  <tabstop>soundTypeComboBox</tabstop>
+  <tabstop>soundPathEdit</tabstop>
+  <tabstop>soundPathButton</tabstop>
+  <tabstop>saveNameEdit</tabstop>
+  <tabstop>buttonBox</tabstop>
  </tabstops>
  <resources/>
  <connections>

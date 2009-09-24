@@ -1,3 +1,4 @@
+#include <QDebug>
 #include "boardwidget.h"
 #include "playgame.h"
 

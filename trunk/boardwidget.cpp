@@ -937,7 +937,7 @@ void BoardWidget::modifyNode(go::nodePtr node, bool recreateBoardBuffer){
 */
 void BoardWidget::pass(){
     if (editMode == ePlayGame){
-        if (color == playGame->yourColor())
+        if (color == playGame->yourColor() && !playGame->moving())
             playGame->move(-1, -1);
     }
     else
@@ -2319,7 +2319,8 @@ void BoardWidget::sgfToBoardCoordinate(int sgfX, int sgfY, int& boardX, int& boa
 
 void BoardWidget::setCountTerritoryMode(bool countMode){
     if (countMode){
-        backupEditMode = editMode;
+        if (editMode != ePlayGame && editMode != eCountTerritory)
+            backupEditMode = editMode;
         editMode = eCountTerritory;
         countTerritory();
         int alive_b=0, alive_w=0, dead_b=0, dead_w=0, bt=0, wt=0;
@@ -2583,7 +2584,8 @@ bool BoardWidget::hasTerritory(go::color c1, go::color c2, char* tmp, int x, int
 void BoardWidget::playWithComputer(PlayGame* game){
     playGame = game;
     if (playGame){
-        backupEditMode = editMode;
+        if (editMode != ePlayGame && editMode != eCountTerritory)
+            backupEditMode = editMode;
         editMode = ePlayGame;
         if (playGame->yourColor() == go::white && goData.root->handicap == 0)
             playGame->wait();

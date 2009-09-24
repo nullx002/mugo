@@ -619,7 +619,7 @@ void MainWindow::on_actionDeleteSgfFromCollection_triggered(){
 * File -> Close Tab
 */
 void MainWindow::on_actionCloseTab_triggered(){
-    tabClose( ui->boardTabWidget->currentIndex() );
+    closeTab( ui->boardTabWidget->currentIndex() );
 }
 
 /**
@@ -627,7 +627,7 @@ void MainWindow::on_actionCloseTab_triggered(){
 * File -> Close Tab
 */
 void MainWindow::on_actionCloseAllTabs_triggered(){
-    allTabClose();
+    closeAllTab();
 }
 
 /**
@@ -1542,6 +1542,8 @@ void MainWindow::on_actionPlayWithGnugo_triggered(){
                         dlg.size, dlg.komi, dlg.handicap, dlg.level);
         param = '"' + dlg.path + '"' + param;
         qDebug() << param;
+
+        delete tabData->gtpProcess;
         tabData->gtpProcess = new QProcess(this);
         tabData->gtpProcess->start(param, QIODevice::ReadWrite|QIODevice::Text);
         if (tabData->gtpProcess->state() == QProcess::NotRunning){
@@ -1552,6 +1554,7 @@ void MainWindow::on_actionPlayWithGnugo_triggered(){
             return;
         }
 
+        delete tabData->playGame;
         tabData->playGame = new gtp(boardWidget, dlg.isBlack ? go::black : go::white, *tabData->gtpProcess);
         connect( tabData->playGame, SIGNAL(gameEnded()), this, SLOT(playGameEnded()) );
         setPlayWithComputerMode(true);
@@ -1808,7 +1811,7 @@ void MainWindow::on_boardTabWidget_currentChanged(QWidget* widget){
 }
 
 void MainWindow::on_boardTabWidget_tabCloseRequested(int index){
-    tabClose(index);
+    closeTab(index);
 }
 
 /**
@@ -2366,7 +2369,7 @@ bool MainWindow::fileClose(){
 /**
 * tab close.
 */
-bool MainWindow::tabClose(int index){
+bool MainWindow::closeTab(int index){
     BoardWidget* board = boardWidget;
     boardWidget = qobject_cast<BoardWidget*>(ui->boardTabWidget->widget(index));
     tabData = &tabDatas[boardWidget];
@@ -2391,7 +2394,7 @@ bool MainWindow::tabClose(int index){
 /**
 * all tab close.
 */
-bool MainWindow::allTabClose(){
+bool MainWindow::closeAllTab(){
     BoardWidget* board = boardWidget;
 
     int count = ui->boardTabWidget->count();
@@ -2410,7 +2413,7 @@ bool MainWindow::allTabClose(){
     for (int i=0; i<count; ++i){
         BoardWidget* boardWidget = qobject_cast<BoardWidget*>(ui->boardTabWidget->widget(0));
         boardWidget->setDirty(false);
-        tabClose(0);
+        closeTab(0);
     }
 
     return true;
@@ -3167,13 +3170,7 @@ void MainWindow::setPlayWithComputerMode(bool on){
 void MainWindow::endGame(){
     tabData->gtpProcess->close();
 
-//    delete tabData->gtpProcess;
-    delete tabData->playGame;
-    tabData->gtpProcess = NULL;
-    tabData->playGame = NULL;
-
     boardWidget->playWithComputer(NULL);
-
     setPlayWithComputerMode(false);
 }
 
