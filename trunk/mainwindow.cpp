@@ -2965,6 +2965,12 @@ void MainWindow::setCountTerritoryMode(bool on){
         ui->actionLanguageJapanese,
         ui->actionOptions,
 
+        ui->actionCollectionExtract,
+        ui->actionCollectionImport,
+        ui->actionCollectionMoveDown,
+        ui->actionCollectionMoveUp,
+        ui->actionDeleteSgfFromCollection,
+
 //        ui->actionAbout,
 //        ui->actionAboutQT,
 
@@ -2992,6 +2998,7 @@ void MainWindow::setCountTerritoryMode(bool on){
     ui->commentWidget->setEnabled( !on );
     branchWidget->setEnabled( !on );
     ui->undoView->setEnabled( !on );
+    ui->collectionWidget->setEnabled( !on );
 }
 
 void MainWindow::setPlayWithComputerMode(bool on){
@@ -3131,6 +3138,12 @@ void MainWindow::setPlayWithComputerMode(bool on){
         ui->actionLanguageJapanese,
         ui->actionOptions,
 
+        ui->actionCollectionExtract,
+        ui->actionCollectionImport,
+        ui->actionCollectionMoveDown,
+        ui->actionCollectionMoveUp,
+        ui->actionDeleteSgfFromCollection,
+
 //        ui->actionAbout,
 //        ui->actionAboutQT,
 
@@ -3165,6 +3178,7 @@ void MainWindow::setPlayWithComputerMode(bool on){
     ui->commentWidget->setEnabled( !on );
     branchWidget->setEnabled( !on );
     ui->undoView->setEnabled( !on );
+    ui->collectionWidget->setEnabled( !on );
 }
 
 void MainWindow::endGame(){
