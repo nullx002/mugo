@@ -1174,14 +1174,11 @@ void BoardWidget::createBoardBuffer(){
     currentMoveNumber = 0;
     go::nodeList::iterator iter = nodeList.begin();
     while (iter != nodeList.end()){
-        if ((*iter)->isStone())
-            ++currentMoveNumber;
-
         if ((*iter)->moveNumber > 0){
             for (int y=0; y<board.size(); ++y)
                 for (int x=0; x<board[y].size(); ++x)
                     board[y][x].number = 0;
-            currentMoveNumber = (*iter)->moveNumber;
+            currentMoveNumber = (*iter)->moveNumber - 1;
         }
         else if ( (*iter)->parent &&
                   ( (moveNumberMode == eResetInBranch && (*iter)->parent->childNodes.size() > 1) ||
@@ -1189,8 +1186,11 @@ void BoardWidget::createBoardBuffer(){
             for (int y=0; y<board.size(); ++y)
                 for (int x=0; x<board[y].size(); ++x)
                     board[y][x].number = 0;
-            currentMoveNumber = 1;
+            currentMoveNumber = 0;
         }
+
+        if ((*iter)->isStone())
+            ++currentMoveNumber;
 
         putStone(*iter, currentMoveNumber);
         putDim(*iter);
@@ -1771,7 +1771,7 @@ void BoardWidget::drawStone(QPainter& p, int bx, int by, go::color color, qreal 
 */
 void BoardWidget::drawDim(QPainter& p, int bx, int by){
     QRect r(int(xlines[bx]-boxSize*0.5), int(ylines[by]-boxSize*0.5), boxSize, boxSize);
-    p.fillRect(r, QColor(0, 0, 0, 50));
+    p.fillRect(r, QColor(0, 0, 0, 130));
 }
 
 /**
@@ -1790,18 +1790,6 @@ void BoardWidget::putStone(go::nodePtr node, int moveNumber){
     else
         color = node->isWhite() ? go::black : go::white;
 
-    if (node->isStone()){
-        int boardX, boardY;
-        sgfToBoardCoordinate(node->getX(), node->getY(), boardX, boardY);
-
-        if (boardX >= 0 && boardX < xsize && boardY >= 0 && boardY < ysize){
-            board[boardY][boardX].color  = node->isBlack() ? go::black : go::white;
-            board[boardY][boardX].number = moveNumber;
-            board[boardY][boardX].node   = node;
-            removeDeadStones(boardX, boardY);
-        }
-    }
-
     go::stoneList stones;
     stones << node->emptyStones << node->blackStones << node->whiteStones;
     foreach(const go::stone& stone, stones){
@@ -1810,6 +1798,17 @@ void BoardWidget::putStone(go::nodePtr node, int moveNumber){
         if (boardX >= 0 && boardX < xsize && boardY >= 0 && boardY < ysize){
             board[boardY][boardX].color  = stone.c;
             board[boardY][boardX].number = 0;
+            board[boardY][boardX].node   = node;
+        }
+    }
+
+    if (node->isStone()){
+        int boardX, boardY;
+        sgfToBoardCoordinate(node->getX(), node->getY(), boardX, boardY);
+
+        if (boardX >= 0 && boardX < xsize && boardY >= 0 && boardY < ysize){
+            board[boardY][boardX].color  = node->isBlack() ? go::black : go::white;
+            board[boardY][boardX].number = moveNumber;
             board[boardY][boardX].node   = node;
             removeDeadStones(boardX, boardY);
         }
@@ -1830,8 +1829,11 @@ void BoardWidget::putDim(go::nodePtr node){
 /**
 */
 void BoardWidget::removeDeadStones(int x, int y){
-    int c = board[y][x].color == go::black ? go::white : go::black;
+    if (board[y][x].empty())
+        return;
 
+    // check kill enemy
+    int c = board[y][x].black() ? go::white : go::black;
     int* tmp = new int[xsize * ysize];
 
     memset(tmp, 0, sizeof(int) * xsize * ysize);
@@ -1848,6 +1850,14 @@ void BoardWidget::removeDeadStones(int x, int y){
 
     memset(tmp, 0, sizeof(int) * xsize * ysize);
     if (x < xsize-1 && board[y][x+1].color == c && isDead(tmp, c, x + 1, y))
+        dead(tmp);
+
+
+    // check suicide
+    c = board[y][x].black() ? go::black : go::white;
+
+    memset(tmp, 0, sizeof(int) * xsize * ysize);
+    if (isDead(tmp, c, x, y))
         dead(tmp);
 
     delete[] tmp;
