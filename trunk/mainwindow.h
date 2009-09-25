@@ -7,7 +7,6 @@
 #include <QActionGroup>
 #include "boardwidget.h"
 #include "countterritorydialog.h"
-#include "gtp.h"
 
 class QTextCodec;
 class QTreeWidget;

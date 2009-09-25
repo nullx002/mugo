@@ -14,6 +14,7 @@
 #include "ugf.h"
 #include "gib.h"
 #include "ngf.h"
+#include "gtp.h"
 #include "mainwindow.h"
 #include "setupdialog.h"
 #include "gameinformationdialog.h"
