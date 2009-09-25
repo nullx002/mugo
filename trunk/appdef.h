@@ -19,7 +19,7 @@
 #define FOCUS_WHITE_COLOR QColor(255, 0, 0)
 #define FOCUS_BLACK_COLOR QColor(255, 0, 0)
 #define BRANCH_COLOR QColor(00, 0, 255)
-#define SAVE_NAME "%DT%-%PB%-%PW%"
+#define SAVE_NAME "%DT%_%PB%_%PW%"
 
 
 #include <QFileDialog>
