@@ -204,7 +204,7 @@ public:
     enum eRule{eJapanese, eChinese};
 
     typedef boost::shared_ptr<informationNode> informationPtr;
-    typedef QList<informationPtr> informationList;
+    typedef QLinkedList<informationPtr> informationList;
 
     data();
 

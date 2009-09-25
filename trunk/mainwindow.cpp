@@ -520,9 +520,7 @@ void MainWindow::on_actionCollectionMoveUp_triggered(){
     go::informationList::iterator iter = qFind(rootList.begin(), rootList.end(), info);
     if (iter == rootList.end() || iter == rootList.begin())
         return;
-
-    iter = rootList.insert(--iter, info);
-    rootList.erase(iter+2);
+    qSwap(*iter, *(iter-1));
 
     int currentNo = item->text(0).toInt();
     item->setText(0, QString().sprintf("%5d", --currentNo));
@@ -556,11 +554,9 @@ void MainWindow::on_actionCollectionMoveDown_triggered(){
 
     go::informationList& rootList = boardWidget->getData().rootList;
     go::informationList::iterator iter = qFind(rootList.begin(), rootList.end(), info);
-    if (iter == rootList.end() || ++iter == rootList.end())
+    if (iter == rootList.end() || iter+1 == rootList.end())
         return;
-
-    iter = rootList.insert(++iter, info);
-    rootList.erase(iter-2);
+    qSwap(*iter, *(iter+1));
 
     int currentNo = item->text(0).toInt();
     item->setText(0, QString().sprintf("%5d", ++currentNo));

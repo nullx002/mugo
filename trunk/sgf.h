@@ -15,7 +15,7 @@ public:
     class node{
         public:
             typedef boost::shared_ptr<node> nodePtr;
-            typedef QList<nodePtr> nodeList;
+            typedef QLinkedList<nodePtr> nodeList;
 
             node() : nodeType(eUnknown){}
 
