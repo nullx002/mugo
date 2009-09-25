@@ -415,8 +415,9 @@ void sgf::node::addStone(go::stoneList& stoneList, const QString& key, const QSt
 
 bool sgf::readStream(QString::iterator& first, QString::iterator last){
     while (first != last){
-        QChar c = *first++;
-        if (c == '('){
+        wchar_t c = first->unicode();
+        ++first;
+        if (c == L'('){
             nodePtr root(new node());
             if (readBranch(first, last, root) == false)
                 continue;
@@ -475,18 +476,19 @@ QTextCodec* sgf::getCodec(const QByteArray& a) const{
 bool sgf::readBranch(QString::iterator& first, QString::iterator last, nodePtr& n){
     n->setNodeType(sgf::eBranch);
     while (first != last){
-        QChar c = *first++;
+        wchar_t c = first->unicode();
+        ++first;
 
-        if (c == ')')
+        if (c == L')')
             return true;
         // only ';' or '(' appears hear, but ';' does not exist in korean sgf.
-        else if (c != ';' && c != '(' && !c.isLetter() )
+        else if (c != L';' && c != L'(' && iswspace(c))
             continue;
 
         nodePtr newNode( new node );
         n->getChildNodes().push_back(newNode);
 
-        if (c == '(')
+        if (c == L'(')
             readBranch(first, last, newNode);
         else
             readNode(first, last, newNode);
@@ -497,12 +499,12 @@ bool sgf::readBranch(QString::iterator& first, QString::iterator last, nodePtr& 
 
 bool sgf::readNode(QString::iterator& first, QString::iterator last, nodePtr& n){
     while (first != last){
-        QChar c = *first;
-        if (c.isSpace()){
+        wchar_t c = first->unicode();
+        if (iswspace(c)){
             ++first;
             continue;
         }
-        else if (c == ';' || c == '(' || c == ')'){
+        else if (c == L';' || c == L'(' || c == L')'){
             break;
         }
 
@@ -523,12 +525,15 @@ bool sgf::readNode(QString::iterator& first, QString::iterator last, nodePtr& n)
 
 bool sgf::readNodeKey(QString::iterator& first, QString::iterator last, QString& key){
     while (first != last){
-        if (*first == '[')
+        wchar_t c = first->unicode();
+        if (c == L'[')
             return true;
-        else if (*first == ';' || *first == '(' || *first == ')')
+        else if (c == L';' || c == L'(' || c == L')')
             return false;
-        else
-            key.push_back(*first++);
+        else{
+            key.push_back(c);
+            ++first;
+        }
     }
 
     return false;
@@ -536,13 +541,14 @@ bool sgf::readNodeKey(QString::iterator& first, QString::iterator last, QString&
 
 bool sgf::readNodeValues(QString::iterator& first, QString::iterator last, QStringList& values){
     while (first != last){
-        if (*first == '['){
+        wchar_t c = first->unicode();
+        if (c == L'['){
             QString v;
             v.reserve(100);
             if (readNodeValue(++first, last, v))
                 values.push_back(v);
         }
-        else if (first->isSpace())
+        else if (iswspace(c))
             ++first;
         else
             return true;
@@ -553,13 +559,16 @@ bool sgf::readNodeValues(QString::iterator& first, QString::iterator last, QStri
 
 bool sgf::readNodeValue(QString::iterator& first, QString::iterator last, QString& value){
     while (first != last){
-        QChar c = *first++;
+        wchar_t c = first->unicode();
+        ++first;
 
         if (c == ']')
             return true;
 
-        if (c == '\\')
-            c = *first++;
+        if (c == '\\'){
+            c = first->unicode();
+            ++first;
+        }
         value.push_back(c);
     }
 
