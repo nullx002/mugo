@@ -439,7 +439,7 @@ void MainWindow::on_actionSaveBoardAsPicture_triggered()
 
     int w = boardWidget->width();
     int h = boardWidget->height();
-    w = h = std::min(w, h);
+    w = h = qMin(w, h);
     QImage image(w, h, QImage::Format_RGB32);
     boardWidget->paintBoard(&image);
     boardWidget->paintStones(&image);
