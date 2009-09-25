@@ -3255,7 +3255,7 @@ QString getOpenFileName(QWidget* parent, const QString& caption, const QString& 
 
     return dlg.selectedFiles()[0];
 #else
-    return QFileDialog::getOpenFileName(parent, QString(), dir, filter, selectedFilter, options);
+    return QFileDialog::getOpenFileName(parent, caption, dir, filter, selectedFilter, options);
 #endif
 }
 
@@ -3276,6 +3276,6 @@ QString getSaveFileName(QWidget* parent, const QString& caption, const QString& 
 
     return dlg.selectedFiles()[0];
 #else
-    return QFileDialog::getSaveFileName(parent, QString(), dir, filter, selectedFilter, options);
+    return QFileDialog::getSaveFileName(parent, caption, dir, filter, selectedFilter, options);
 #endif
 }
