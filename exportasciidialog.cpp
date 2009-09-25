@@ -104,20 +104,20 @@ void ExportAsciiDialog::createEnglishAscii(){
 
 void ExportAsciiDialog::createJapaneseAscii(){
 #ifdef Q_WS_WIN
-    QFont f("ＭＳ ゴシック", 8);
+    QFont f("\xef\xbc\xad\xef\xbc\xb3\x20\xe3\x82\xb4\xe3\x82\xb7\xe3\x83\x83\xe3\x82\xaf", 8);  // ms gothic
     m_ui->asciiTextEdit->setFont(f);
 #elif defined(Q_WS_MAC)
-    QFont f("Osaka−等幅", 8);
+    QFont f("Osaka−\xe7\xad\x89\xe5\xb9\x85", 8);
     m_ui->asciiTextEdit->setFont(f);
 #endif
 
     QByteArray s;
     s.reserve(boardBuffer.size() + 2 * boardBuffer[0].size() * 3);
 
-    const char* top[]    = {"┏", "┯", "┓"};
-    const char* center[] = {"┠", "┼", "┨"};
-    const char* bottom[] = {"┗", "┷", "┛"};
-    const char* header[] = {"Ａ", "Ｂ", "Ｃ", "Ｄ", "Ｅ", "Ｆ", "Ｇ", "Ｈ", "Ｊ", "Ｋ", "Ｌ", "Ｍ", "Ｎ", "Ｏ", "Ｐ", "Ｑ", "Ｒ", "Ｓ", "Ｔ", "Ｕ", "Ｖ", "Ｗ", "Ｘ", "Ｙ", "Ｚ"};
+    const char* top[]    = {"\xe2\x94\x8f","\xe2\x94\xaf","\xe2\x94\x93"};
+    const char* center[] = {"\xe2\x94\xa0","\xe2\x94\xbc","\xe2\x94\xa8"};
+    const char* bottom[] = {"\xe2\x94\x97","\xe2\x94\xb7","\xe2\x94\x9b"};
+    const char* header[] = {"\xef\xbc\xa1","\xef\xbc\xa2","\xef\xbc\xa3","\xef\xbc\xa4","\xef\xbc\xa5","\xef\xbc\xa6","\xef\xbc\xa7","\xef\xbc\xa8","\xef\xbc\xaa","\xef\xbc\xab","\xef\xbc\xac","\xef\xbc\xad","\xef\xbc\xae","\xef\xbc\xaf","\xef\xbc\xb0","\xef\xbc\xb1","\xef\xbc\xb2","\xef\xbc\xb3","\xef\xbc\xb4","\xef\xbc\xb5","\xef\xbc\xb6","\xef\xbc\xb7","\xef\xbc\xb8","\xef\xbc\xb9","\xef\xbc\xba"};
     int headerNum = sizeof(header)/sizeof(header[0]);
 
     s.append("　");
@@ -136,16 +136,16 @@ void ExportAsciiDialog::createJapaneseAscii(){
 
         for (int x=0; x<boardBuffer[y].size(); ++x){
             if (boardBuffer[y][x].black())
-                s.append("●");
+                s.append("\xe2\x97\x8f");
             else if (boardBuffer[y][x].white())
-                s.append("○");
+                s.append("\xe2\x97\x8b");
             else{
                 if (x == 0)
                     s.append(b[0]);
                 else if (x == boardBuffer[y].size() - 1)
                     s.append(b[2]);
                 else if (isStar(x, y))
-                    s.append("╋");
+                    s.append("\xe2\x95\x8b");
                 else
                     s.append(b[1]);
             }

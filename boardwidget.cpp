@@ -60,8 +60,8 @@ void Sound::setCurrentSource(const QString& source){
 
 void Sound::play(){
 #if defined(Q_WS_WIN)
-    qreal currentClock = (qreal)clock() / CLOCKS_PER_SEC;
-    if (mop.wDeviceID && currentClock - lastClock > 0.2){
+    DWORD currentClock = GetTickCount();
+    if (mop.wDeviceID && currentClock - lastClock > 200){
         mciSendCommand(mop.wDeviceID, MCI_STOP, 0, 0);
         mciSendCommand(mop.wDeviceID, MCI_SEEK, MCI_SEEK_TO_START, 0);
         mciSendCommand(mop.wDeviceID, MCI_PLAY, 0, 0);
@@ -79,13 +79,9 @@ void Sound::play(){
 
 
 namespace{
-    const char* hiragana[] = {"あ","い","う","え","お","か","き","く","け","こ","さ","し","す","せ","そ","た","ち","つ","て","と","な","に","ぬ","ね","の","は","ひ","ふ","へ","ほ","ま","み","む","め","も","や","ゆ","よ","ら","り","る","れ","ろ","わ","を","ん"};
-    const char* katakana[] = {"ア","イ","ウ","エ","オ","カ","キ","ク","ケ","コ","サ","シ","ス","セ","ソ","タ","チ","ツ","テ","ト","ナ","ニ","ヌ","ネ","ノ","ハ","ヒ","フ","ヘ","ホ","マ","ミ","ム","メ","モ","ヤ","ユ","ヨ","ラ","リ","ル","レ","ロ","ワ","ヲ","ン"};
-    const char* hira_iroha[] = {"い","ろ","は","に","ほ","へ","と","ち","り","ぬ","る","を","わ","か","よ","た","れ","そ","つ","ね","な","ら","む","う","ゐ","の","お","く","や","ま","け","ふ","こ","え","て","あ","さ","き","ゆ","め","み","し","ゑ","ひ","も","せ","す","ん"};
-    const char* kana_iroha[] = {"イ","ロ","ハ","ニ","ホ","ヘ","ト","チ","リ","ヌ","ル","ヲ","ワ","カ","ヨ","タ","レ","ソ","ツ","ネ","ナ","ラ","ム","ウ","ヰ","ノ","オ","ク","ヤ","マ","ケ","フ","コ","エ","テ","ア","サ","キ","ユ","メ","ミ","シ","ヱ","ヒ","モ","セ","ス","ン"};
-    const int hiragana_size = sizeof(hiragana) / sizeof(hiragana[0]);
+    const char* katakana[] = {"\xe3\x82\xa2","\xe3\x82\xa4","\xe3\x82\xa6","\xe3\x82\xa8","\xe3\x82\xaa","\xe3\x82\xab","\xe3\x82\xad","\xe3\x82\xaf","\xe3\x82\xb1","\xe3\x82\xb3","\xe3\x82\xb5","\xe3\x82\xb7","\xe3\x82\xb9","\xe3\x82\xbb","\xe3\x82\xbd","\xe3\x82\xbf","\xe3\x83\x81","\xe3\x83\x84","\xe3\x83\x86","\xe3\x83\x88","\xe3\x83\x8a","\xe3\x83\x8b","\xe3\x83\x8c","\xe3\x83\x8d","\xe3\x83\x8e","\xe3\x83\x8f","\xe3\x83\x92","\xe3\x83\x95","\xe3\x83\x98","\xe3\x83\x9b","\xe3\x83\x9e","\xe3\x83\x9f","\xe3\x83\xa0","\xe3\x83\xa1","\xe3\x83\xa2","\xe3\x83\xa4","\xe3\x83\xa6","\xe3\x83\xa8","\xe3\x83\xa9","\xe3\x83\xaa","\xe3\x83\xab","\xe3\x83\xac","\xe3\x83\xad","\xe3\x83\xaf","\xe3\x83\xb2","\xe3\x83\xb3"};
+    const char* kana_iroha[] = {"\xe3\x82\xa4","\xe3\x83\xad","\xe3\x83\x8f","\xe3\x83\x8b","\xe3\x83\x9b","\xe3\x83\x98","\xe3\x83\x88","\xe3\x83\x81","\xe3\x83\xaa","\xe3\x83\x8c","\xe3\x83\xab","\xe3\x83\xb2","\xe3\x83\xaf","\xe3\x82\xab","\xe3\x83\xa8","\xe3\x82\xbf","\xe3\x83\xac","\xe3\x82\xbd","\xe3\x83\x84","\xe3\x83\x8d","\xe3\x83\x8a","\xe3\x83\xa9","\xe3\x83\xa0","\xe3\x82\xa6","\xe3\x83\xb0","\xe3\x83\x8e","\xe3\x82\xaa","\xe3\x82\xaf","\xe3\x83\xa4","\xe3\x83\x9e","\xe3\x82\xb1","\xe3\x83\x95","\xe3\x82\xb3","\xe3\x82\xa8","\xe3\x83\x86","\xe3\x82\xa2","\xe3\x82\xb5","\xe3\x82\xad","\xe3\x83\xa6","\xe3\x83\xa1","\xe3\x83\x9f","\xe3\x82\xb7","\xe3\x83\xb1","\xe3\x83\x92","\xe3\x83\xa2","\xe3\x82\xbb","\xe3\x82\xb9","\xe3\x83\xb3"};
     const int katakana_size = sizeof(katakana) / sizeof(katakana[0]);
-    const int hira_iroha_size = sizeof(hira_iroha) / sizeof(hira_iroha[0]);
     const int kana_iroha_size = sizeof(kana_iroha) / sizeof(kana_iroha[0]);
 }
 
