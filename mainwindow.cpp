@@ -389,6 +389,9 @@ void MainWindow::on_actionOpenURL_triggered(){
 */
 void MainWindow::on_actionReload_triggered(){
     if (maybeSave()){
+        branchWidget->clear();
+        nodeToTreeWidget->clear();
+
         if (!tabData->fileName.isEmpty())
             fileOpen(tabData->fileName, false, false, true);
         else if (!tabData->url.isEmpty())
