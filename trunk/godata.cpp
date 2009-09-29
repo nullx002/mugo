@@ -6,8 +6,8 @@
 namespace go{
 
 const informationNode* infomation(const node* node){
-    while (node->parent){
-        node = node->parent.get();
+    while (node->parent()){
+        node = node->parent().get();
     }
     return (informationNode*)node;
 }
@@ -40,11 +40,11 @@ nodePtr createWhiteNode(nodePtr parent, int x, int y){
 
 
 
-node::node(nodePtr parent_) : parent(parent_), annotation(eNoAnnotation), moveAnnotation(eNoAnnotation), nodeAnnotation(eNoAnnotation), color(go::empty), nextColor(go::empty), moveNumber(-1){
+node::node(nodePtr p_) : parent_(p_), annotation(eNoAnnotation), moveAnnotation(eNoAnnotation), nodeAnnotation(eNoAnnotation), color(go::empty), nextColor(go::empty), moveNumber(-1){
 }
 
 void node::clear(){
-    parent.reset();
+    parent_.reset();
     childNodes.clear();
 }
 
@@ -118,6 +118,13 @@ QString node::toString() const{
     return str;
 }
 
+informationNode::informationNode(nodePtr parent) : node(parent){
+    initialize();
+}
+
+informationNode::~informationNode(){
+}
+
 void informationNode::initialize(){
     xsize = 19;
     ysize = 19;
@@ -132,7 +139,7 @@ QString informationNode::nodeName() const{
 }
 
 
-data::data() : root(new informationNode(node::nodePtr())){
+data::data() : root(new informationNode()){
     rootList.push_back( root );
 }
 

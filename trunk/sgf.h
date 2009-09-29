@@ -10,13 +10,13 @@ class sgf : public fileBase{
 public:
     enum eNodeType{ eUnknown, eRoot, eGameInformation, eBranch, eBlack, eWhite };
 
+    class node;
+    typedef boost::shared_ptr<node> nodePtr;
+    typedef QList<nodePtr> nodeList;
     typedef QMap<QString, QStringList> propertyType;
 
     class node{
         public:
-            typedef boost::shared_ptr<node> nodePtr;
-            typedef QLinkedList<nodePtr> nodeList;
-
             node() : nodeType(eUnknown){}
 
             QString toString() const;
@@ -52,9 +52,6 @@ public:
             eNodeType nodeType;
             propertyType property;
     };
-
-    typedef node::nodePtr  nodePtr;
-    typedef node::nodeList nodeList;
 
 
     sgf(){
