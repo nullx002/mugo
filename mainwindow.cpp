@@ -2383,7 +2383,7 @@ bool MainWindow::closeTab(int index){
         return false;
     }
 
-    board->clear();
+    boardWidget->clear();
     delete tabData->menuAction;
     delete tabData->gtpProcess;
     delete tabData->playGame;
@@ -2391,6 +2391,9 @@ bool MainWindow::closeTab(int index){
     delete tabData->countTerritoryDialog;
     tabDatas.remove(boardWidget);
     ui->boardTabWidget->removeTab(index);
+
+    boardWidget = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    tabData = &tabDatas[boardWidget];
 
     return true;
 }
