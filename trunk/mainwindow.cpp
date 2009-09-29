@@ -1721,6 +1721,9 @@ void MainWindow::on_actionOptions_triggered(){
 * Tools -> Clear Settings
 */
 void MainWindow::on_actionClearSettings_triggered(){
+    if ( QMessageBox::question(this, QString(), tr("Are you sure you want to clear the configuration?"), QMessageBox::Yes|QMessageBox::No) != QMessageBox::Yes)
+        return;
+
     QSettings settings;
     settings.clear();
 

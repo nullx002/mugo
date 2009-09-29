@@ -65,7 +65,7 @@
      <x>0</x>
      <y>0</y>
      <width>937</width>
-     <height>20</height>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -462,12 +462,6 @@
    <addaction name="actionJumpToClicked"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
-  <widget class="QDockWidget" name="dockWidget">
-   <attribute name="dockWidgetArea">
-    <number>2</number>
-   </attribute>
-   <widget class="QWidget" name="dockWidgetContents_2"/>
-  </widget>
   <widget class="QDockWidget" name="commentDockWidget">
    <property name="windowTitle">
     <string>Comment Window</string>
@@ -1713,7 +1707,7 @@
   </action>
   <action name="actionCollectionExtract">
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/sgfextract.png</normaloff>:/res/sgfextract.png</iconset>
    </property>
    <property name="text">
@@ -1722,7 +1716,7 @@
   </action>
   <action name="actionCollectionMoveUp">
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/prevbranch.png</normaloff>:/res/prevbranch.png</iconset>
    </property>
    <property name="text">
@@ -1731,7 +1725,7 @@
   </action>
   <action name="actionCollectionMoveDown">
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/nextbranch.png</normaloff>:/res/nextbranch.png</iconset>
    </property>
    <property name="text">
@@ -1740,7 +1734,7 @@
   </action>
   <action name="actionDeleteSgfFromCollection">
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/removeself.png</normaloff>:/res/removeself.png</iconset>
    </property>
    <property name="text">
@@ -1754,7 +1748,7 @@
   </action>
   <action name="actionCollectionImport">
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/res/sgfimport.png</normaloff>:/res/sgfimport.png</iconset>
    </property>
    <property name="text">

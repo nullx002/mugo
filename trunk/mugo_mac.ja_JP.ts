@@ -17,32 +17,32 @@
         <translation type="unfinished">碁盤</translation>
     </message>
     <message>
-        <location filename="boardwidget.cpp" line="555"/>
+        <location filename="boardwidget.cpp" line="551"/>
         <source>%1(%2)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="boardwidget.cpp" line="615"/>
+        <location filename="boardwidget.cpp" line="611"/>
         <source>Figure %1</source>
         <translation type="unfinished">第 %1 譜</translation>
     </message>
     <message>
-        <location filename="boardwidget.cpp" line="860"/>
+        <location filename="boardwidget.cpp" line="856"/>
         <source>Rotate SGF</source>
         <translation type="unfinished">回転</translation>
     </message>
     <message>
-        <location filename="boardwidget.cpp" line="868"/>
+        <location filename="boardwidget.cpp" line="864"/>
         <source>Flip SGF Horizontally</source>
         <translation type="unfinished">左右に反転</translation>
     </message>
     <message>
-        <location filename="boardwidget.cpp" line="876"/>
+        <location filename="boardwidget.cpp" line="872"/>
         <source>Flip SGF Vertically</source>
         <translation type="unfinished">上下に反転</translation>
     </message>
     <message>
-        <location filename="boardwidget.cpp" line="2122"/>
+        <location filename="boardwidget.cpp" line="2120"/>
         <source>Input Label</source>
         <translation type="unfinished">ラベルを入力</translation>
     </message>
@@ -299,92 +299,97 @@ mugo automatically counts territories.</oldsource>
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="mainwindow.cpp" line="40"/>
+        <location filename="mainwindow.cpp" line="43"/>
         <source>All Go Format(*.sgf *.ugf *.ugi *.gib *.ngf);;sgf(*.sgf);;ugf(*.ugf *.ugi);;gib(*.gib);;ngf(*.ngf);;All Files(*.*)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="245"/>
+        <location filename="mainwindow.cpp" line="248"/>
         <source>Captured</source>
         <translation type="unfinished">アゲハマ</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="373"/>
+        <location filename="mainwindow.cpp" line="376"/>
         <source>Enter the URL of a SGF file.</source>
         <translation type="unfinished">SGFファイルのURLを入力してください。</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="389"/>
+        <location filename="mainwindow.cpp" line="2260"/>
         <source>Downloading SGF File</source>
         <translation type="unfinished">SGFファイルのダウンロード中</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="429"/>
+        <location filename="mainwindow.cpp" line="426"/>
         <source>PNG image(*.png);;Bitmap image(*.bmp);;JPEG image(*.jpeg *.jpg);;TIFF image(*.tiff *.tif)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1020"/>
-        <location filename="mainwindow.cpp" line="1271"/>
+        <location filename="mainwindow.cpp" line="1013"/>
+        <location filename="mainwindow.cpp" line="1264"/>
         <source>Input move number</source>
         <translation type="unfinished">着手番号を入力してください</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1047"/>
+        <location filename="mainwindow.cpp" line="1040"/>
         <source>Input node name</source>
         <translation type="unfinished">ノード名を入力してください</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1558"/>
+        <location filename="mainwindow.cpp" line="1553"/>
         <source>Can not launch computer go.</source>
         <translation type="unfinished">プログラムを起動できません。</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1569"/>
+        <location filename="mainwindow.cpp" line="1565"/>
         <source>Playing with computer can not be resumed.
 Are you sure you want to stop playing with computer?</source>
         <translation>コンピューターとの対戦を中断すると再開できませんが、終了してもよろしいですか？</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1647"/>
+        <location filename="mainwindow.cpp" line="1643"/>
         <source>Input new board size. board size must be between 2-52.</source>
         <translation type="unfinished">新しい盤のサイズを入力してください。盤のサイズは２～５２の範囲でなくてはいけません。</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1865"/>
+        <location filename="mainwindow.cpp" line="1724"/>
+        <source>Are you sure you want to clear the configuration?</source>
+        <translation type="unfinished">設定を初期値に戻しますがよろしいですか？</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="1864"/>
         <source>Dead: Black %1 White %2</source>
         <oldsource>Dead: B %1 W %2</oldsource>
         <translation type="unfinished">アゲハマ：黒 %1 白 %2</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1869"/>
+        <location filename="mainwindow.cpp" line="1868"/>
         <source>LastMove: %1(%2)</source>
         <translation type="unfinished">最終着手：%1(%2)</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="605"/>
+        <location filename="mainwindow.cpp" line="598"/>
         <source>Remove sgf from collection failed because this sgf is editing.</source>
         <translation type="unfinished">編集中のSGFを削除することは出来ません。</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1967"/>
+        <location filename="mainwindow.cpp" line="1966"/>
         <source>%1 %2 (W) vs %4 %5 (B) (Result:%7)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="2141"/>
+        <location filename="mainwindow.cpp" line="2139"/>
         <source>Untitled-%1</source>
         <translation type="unfinished">無題-%1</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="2407"/>
+        <location filename="mainwindow.cpp" line="2434"/>
         <source>%1 has been modified.
 Do you want to save your changes?</source>
         <translation type="unfinished">%1は変更されています。
 変更内容を保存しますか？</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="2293"/>
+        <location filename="mainwindow.cpp" line="2319"/>
         <source>sgf(*.sgf)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -395,22 +400,22 @@ Do you want to save your changes?</source>
 変更内容を保存しますか？</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="2470"/>
+        <location filename="mainwindow.cpp" line="2502"/>
         <source>Download failed: %1.</source>
         <translation type="unfinished">ダウンロードに失敗しました： %1.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="2675"/>
+        <location filename="mainwindow.cpp" line="2707"/>
         <source>Pass</source>
         <translation type="unfinished">パス</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="2685"/>
+        <location filename="mainwindow.cpp" line="2717"/>
         <source>Other</source>
         <translation type="unfinished">その他</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="3156"/>
+        <location filename="mainwindow.cpp" line="3196"/>
         <source>Changing the language requires that application be restarted.</source>
         <translation type="unfinished">言語の変更は次回起動時から有効になります。</translation>
     </message>
@@ -453,7 +458,7 @@ Do you want to save your changes?</source>
         <translation type="unfinished">注釈</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="240"/>
+        <location filename="mainwindow.cpp" line="243"/>
         <location filename="mainwindow.ui" line="252"/>
         <source>Move Number</source>
         <translation type="unfinished">着手番号</translation>
@@ -1492,12 +1497,12 @@ Do you want to save your changes?</source>
         <source>1,2,3...</source>
         <translation type="unfinished"></translation>
     </message>
-    <message utf8="true">
+    <message>
         <location filename="setupdialog.ui" line="518"/>
         <source>ア,イ,ウ...</source>
         <translation type="unfinished"></translation>
     </message>
-    <message utf8="true">
+    <message>
         <location filename="setupdialog.ui" line="523"/>
         <source>イ,ロ,ハ...</source>
         <translation type="unfinished"></translation>
@@ -1653,7 +1658,7 @@ Do you want to save your changes?</source>
 <context>
     <name>go::informationNode</name>
     <message>
-        <location filename="godata.cpp" line="130"/>
+        <location filename="godata.cpp" line="137"/>
         <source>GameInfo</source>
         <translation type="unfinished">ゲーム情報</translation>
     </message>
@@ -1773,7 +1778,7 @@ Do you want to save your changes?</source>
 <context>
     <name>gtp</name>
     <message>
-        <location filename="gtp.cpp" line="108"/>
+        <location filename="gtp.cpp" line="107"/>
         <source>Computer resign.</source>
         <translation type="unfinished">コンピュータが投了しました。</translation>
     </message>
