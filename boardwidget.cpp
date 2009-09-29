@@ -728,7 +728,7 @@ void BoardWidget::insertData(const go::nodePtr node, const go::fileBase& data){
     data.get(d);
 
     node->childNodes.push_back( d.root );
-    d.root->parent = node;
+    d.root->parent_ = node;
 
     createNodeList();
     setDirty(true);
@@ -880,7 +880,7 @@ void BoardWidget::flipSgfVerticallyCommand(){
 */
 void BoardWidget::addNode(go::nodePtr parent, go::nodePtr node, bool select){
     parent->childNodes.push_back(node);
-    node->parent = parent;
+    node->parent_ = parent;
 
     setDirty(true);
     emit nodeAdded(parent, node, select);
@@ -895,7 +895,7 @@ void BoardWidget::deleteNode(go::nodePtr node, bool deleteChildren){
     if( node == goData.root )
         return;
 
-    go::nodePtr parent = node->parent;
+    go::nodePtr parent = node->parent();
     if (parent){
         go::nodeList::iterator iter = qFind(parent->childNodes.begin(), parent->childNodes.end(), node);
         if (iter != parent->childNodes.end())
@@ -905,7 +905,7 @@ void BoardWidget::deleteNode(go::nodePtr node, bool deleteChildren){
             parent->childNodes += node->childNodes;
             go::nodeList::iterator iter = node->childNodes.begin();
             while (iter != node->childNodes.end()){
-                (*iter)->parent = parent;
+                (*iter)->parent_ = parent;
                 ++iter;
             }
         }
@@ -1144,7 +1144,7 @@ void BoardWidget::createNodeList(){
     nodeList.clear();
 
     go::nodePtr node = currentNode;
-    while ((node = node->parent) != NULL)
+    while ((node = node->parent()) != NULL)
         nodeList.push_front(node);
 
     nodeList.push_back( node = currentNode );
@@ -1176,9 +1176,9 @@ void BoardWidget::createBoardBuffer(){
                     board[y][x].number = 0;
             currentMoveNumber = (*iter)->moveNumber - 1;
         }
-        else if ( (*iter)->parent &&
-                  ( (moveNumberMode == eResetInBranch && (*iter)->parent->childNodes.size() > 1) ||
-                    (moveNumberMode == eResetInVariation && (*iter)->parent->childNodes.size() > 1 && *iter != (*iter)->parent->childNodes.front()) ) ){
+        else if ( (*iter)->parent() &&
+                  ( (moveNumberMode == eResetInBranch && (*iter)->parent()->childNodes.size() > 1) ||
+                    (moveNumberMode == eResetInVariation && (*iter)->parent()->childNodes.size() > 1 && *iter != (*iter)->parent()->childNodes.front()) ) ){
             for (int y=0; y<board.size(); ++y)
                 for (int x=0; x<board[y].size(); ++x)
                     board[y][x].number = 0;
