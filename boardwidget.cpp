@@ -145,6 +145,12 @@ void BoardWidget::paintEvent(QPaintEvent* e){
     QWidget::paintEvent(e);
 
     QPainter p(this);
+
+    if (tutorMode != eNoTutor)
+        p.fillRect(0, 0, p.device()->width(), p.device()->height(), tutorColor);
+    else
+        p.fillRect(0, 0, p.device()->width(), p.device()->height(), bgColor);
+
     int x = width() / 2 - offscreenBuffer3.width() / 2;
     int y = height() / 2 - offscreenBuffer3.height() / 2;
     p.drawPixmap(x, y, offscreenBuffer3);
