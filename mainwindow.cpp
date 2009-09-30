@@ -1788,18 +1788,18 @@ void MainWindow::on_boardTabWidget_currentChanged(QWidget* widget){
         return;
     }
 
-    BoardWidget* board = qobject_cast<BoardWidget*>(widget);
-    tabData = &tabDatas[board];
+    boardWidget = qobject_cast<BoardWidget*>(widget);
+    tabData = &tabDatas[boardWidget];
+    branchWidget = tabData->branchWidget;
+    nodeToTreeWidget = &tabData->nodeToTree;
+
     QMap<BoardWidget*, TabData>::iterator iter = tabDatas.begin();
     while (iter != tabDatas.end()){
-        iter->branchWidget->setVisible(iter.key() == board);
+        iter->branchWidget->setVisible(iter.key() == boardWidget);
         iter->countTerritoryDialog->setVisible(false);
         ++iter;
     }
 
-    boardWidget  = board;
-    branchWidget = tabData->branchWidget;
-    nodeToTreeWidget = &tabData->nodeToTree;
     branchWidget->setFocus(Qt::OtherFocusReason);
     tabData->menuAction->setChecked(true);
 
@@ -1810,7 +1810,7 @@ void MainWindow::on_boardTabWidget_currentChanged(QWidget* widget){
     updateCollection();
 
     // undo
-    undoGroup.setActiveStack(board->getUndoStack());
+    undoGroup.setActiveStack(boardWidget->getUndoStack());
 }
 
 void MainWindow::on_boardTabWidget_tabCloseRequested(int index){
@@ -2181,8 +2181,9 @@ bool MainWindow::fileNew(int xsize, int ysize, int handicap, double komi){
     board->getData().root->handicap = handicap;
     board->getData().root->komi = komi;
 
-    setTreeData();
     setEncoding(defaultCodec);
+
+    setTreeData();
     updateCollection();
 
     return true;
@@ -2230,7 +2231,6 @@ bool MainWindow::fileOpen(const QString& fname, bool guessCodec, bool newTab, bo
 
     setCurrentFile(fname);
     setTreeData();
-
     setCaption();
     updateCollection();
 
