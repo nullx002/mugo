@@ -3202,9 +3202,10 @@ void MainWindow::alertLanguageChanged(){
 QString MainWindow::getDefaultSaveName() const{
 
 #define REPLACE(K, V){\
-    if (saveName.indexOf(K) >= 0 && !V.isEmpty()){\
-        replaced = true;\
+    if (saveName.indexOf(K) >= 0){\
         saveName.replace(K, V);\
+        if (!V.isEmpty())\
+            replaced = true;\
     }\
 }
 

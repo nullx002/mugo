@@ -1246,7 +1246,7 @@ void BoardWidget::drawBoard(QPainter& p){
     boardRect.setRect(l - margin, t - margin, w + margin * 2, h + margin * 2);
     coordinatesRect = boardRect;
     if (boardType >= 0){
-        boardImage2 = QImage(boardRect.size(), QImage::Format_RGB32);
+        boardImage2 = QPixmap(boardRect.size());
         QPainter board(&boardImage2);
         if (boardType == 0 || boardType == 1)
             board.fillRect(0, 0, boardRect.width(), boardRect.height(), QBrush(boardImage1));
@@ -1257,8 +1257,8 @@ void BoardWidget::drawBoard(QPainter& p){
     if (blackType == 0 || blackType == 1)
         black2 = black1.scaled(boxSize, boxSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
     else{
-        black2 = QImage(boxSize, boxSize, QImage::Format_ARGB32);
-        black2.fill(0);
+        black2 = QPixmap(boxSize, boxSize);
+        black2.fill( Qt::transparent );
         QPainter p2(&black2);
         p2.setRenderHints(QPainter::Antialiasing/*|QPainter::TextAntialiasing|QPainter::SmoothPixmapTransform*/);
         p2.setPen(Qt::black);
@@ -1269,8 +1269,8 @@ void BoardWidget::drawBoard(QPainter& p){
     if (whiteType == 0 || whiteType == 1)
         white2 = white1.scaled(boxSize, boxSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
     else{
-        white2 = QImage(boxSize, boxSize, QImage::Format_ARGB32);
-        white2.fill(0);
+        white2 = QPixmap(boxSize, boxSize);
+        white2.fill( Qt::transparent );
         QPainter p2(&white2);
         p2.setRenderHints(QPainter::Antialiasing/*|QPainter::TextAntialiasing|QPainter::SmoothPixmapTransform*/);
         p2.setPen(Qt::black);
@@ -1280,7 +1280,7 @@ void BoardWidget::drawBoard(QPainter& p){
 
     if (boardType >= 0){
         p.fillRect(boardRect.left()+3, boardRect.top()+3, boardRect.width(), boardRect.height(), QColor(10, 10, 10, 120));
-        p.drawImage(boardRect.topLeft(), boardImage2);
+        p.drawPixmap(boardRect.topLeft(), boardImage2);
     }
 
     // horizontal line
@@ -1749,7 +1749,7 @@ void BoardWidget::drawStone(QPainter& p, int bx, int by, go::color color, qreal 
     if (color == go::black){
         if (blackType >= 0){
             p.setOpacity(opacity);
-            p.drawImage(x - boxSize/2, y - boxSize/2, black2);
+            p.drawPixmap(x - boxSize/2, y - boxSize/2, black2);
         }
         else{
             p.setPen(Qt::black);
@@ -1760,7 +1760,7 @@ void BoardWidget::drawStone(QPainter& p, int bx, int by, go::color color, qreal 
     else{
         if (whiteType >= 0){
             p.setOpacity(opacity);
-            p.drawImage(x - boxSize/2, y - boxSize/2, white2);
+            p.drawPixmap(x - boxSize/2, y - boxSize/2, white2);
         }
         else{
             p.setPen(Qt::black);
@@ -1783,7 +1783,7 @@ void BoardWidget::drawDim(QPainter& p, int bx, int by){
 void BoardWidget::eraseBackground(QPainter& p, int x, int y){
     int dx = xlines[x] - boxSize / 2;
     int dy = ylines[y] - boxSize / 2;
-    p.drawImage(dx, dy, boardImage2, dx - boardRect.left(), dy - boardRect.top(), boxSize, boxSize);
+    p.drawPixmap(dx, dy, boardImage2, dx - boardRect.left(), dy - boardRect.top(), boxSize, boxSize);
 }
 
 /**
