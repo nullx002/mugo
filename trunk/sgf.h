@@ -12,7 +12,7 @@ public:
 
     class node;
     typedef boost::shared_ptr<node> nodePtr;
-    typedef QList<nodePtr> nodeList;
+    typedef QLinkedList<nodePtr> nodeList;
     typedef QMap<QString, QStringList> propertyType;
 
     class node{
@@ -72,7 +72,7 @@ public:
 
 protected:
     bool readBranch(QString::iterator& first, QString::iterator last, nodePtr& n);
-    bool readNode(QString::iterator& first, QString::iterator last, nodePtr& n);
+    bool readNode(QString::iterator& first, QString::iterator last, nodePtr& n, int& pt);
     bool readNodeKey(QString::iterator& first, QString::iterator last, QString& key);
     bool readNodeValues(QString::iterator& first, QString::iterator last, QStringList& values);
     bool readNodeValue(QString::iterator& first, QString::iterator last, QString& value);
