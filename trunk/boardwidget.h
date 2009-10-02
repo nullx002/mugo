@@ -315,9 +315,9 @@ private:
 
     // draw object
     QPixmap offscreenBuffer1, offscreenBuffer2, offscreenBuffer3;
-    QImage  black1, black2;
-    QImage  white1, white2;
-    QImage  boardImage1, boardImage2;
+    QPixmap black1, black2;
+    QPixmap white1, white2;
+    QPixmap boardImage1, boardImage2;
     QColor  boardColor, blackColor, whiteColor, bgColor, tutorColor;
     QColor  focusWhiteColor, focusBlackColor, branchColor;
 
