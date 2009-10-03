@@ -473,10 +473,10 @@ QTextCodec* sgf::getCodec(const QByteArray& a) const{
         return QTextCodec::codecForName(name.toAscii());
 }
 
-bool sgf::readBranch(QString::iterator& first, QString::iterator last, nodePtr& n){
+bool sgf::readBranch(QString::iterator& first, QString::iterator last, nodePtr n){
     n->setNodeType(sgf::eBranch);
-    nodeList::iterator end = n->getChildNodes().end();
-    nodeList::iterator branchNode = end;
+    nodePtr branchParent;
+    nodeList::iterator branchNode = n->getChildNodes().end();
     int pt = 1;
 
     while (first != last){
@@ -495,27 +495,34 @@ bool sgf::readBranch(QString::iterator& first, QString::iterator last, nodePtr& 
 
             readBranch(first, last, newNode);
 
-            if (branchNode == end)
+            if (branchNode == n->getChildNodes().end()){
                 branchNode = iter;
+                branchParent = n;
+            }
         }
         else{
             if (c != ';')
                 --first;
 
             nodePtr newNode( new node );
-            if (branchNode == end){
-                if (pt == 1)
+
+            if (pt == 1){
+                if ( branchNode == n->getChildNodes().end() )
                     n->getChildNodes().push_back(newNode);
                 else{
-                    newNode = n;
-                    --pt;
+                    // cyber oro? original format.
+                    newNode->setNodeType(sgf::eBranch);
+                    branchParent->getChildNodes().insert(branchNode, newNode);
+                    n = newNode;
+                    branchNode = n->getChildNodes().end();
+                    branchParent.reset();
+                    newNode.reset( new node );
+                    n->getChildNodes().push_back(newNode);
                 }
-                readNode(first, last, newNode, pt);
             }
-            else{
-                n->getChildNodes().insert(branchNode, newNode);
-                readBranch(first, last, newNode);
-            }
+            else
+                --pt;
+            readNode(first, last, newNode, pt);
         }
     }
 

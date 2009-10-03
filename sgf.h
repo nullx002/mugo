@@ -71,7 +71,7 @@ public:
     static QString pointToString(const go::point& p, const QString* s=NULL);
 
 protected:
-    bool readBranch(QString::iterator& first, QString::iterator last, nodePtr& n);
+    bool readBranch(QString::iterator& first, QString::iterator last, nodePtr n);
     bool readNode(QString::iterator& first, QString::iterator last, nodePtr& n, int& pt);
     bool readNodeKey(QString::iterator& first, QString::iterator last, QString& key);
     bool readNodeValues(QString::iterator& first, QString::iterator last, QStringList& values);
