@@ -145,12 +145,6 @@ void BoardWidget::paintEvent(QPaintEvent* e){
     QWidget::paintEvent(e);
 
     QPainter p(this);
-
-    if (tutorMode != eNoTutor)
-        p.fillRect(0, 0, p.device()->width(), p.device()->height(), tutorColor);
-    else
-        p.fillRect(0, 0, p.device()->width(), p.device()->height(), bgColor);
-
     int x = width() / 2 - offscreenBuffer3.width() / 2;
     int y = height() / 2 - offscreenBuffer3.height() / 2;
     p.drawPixmap(x, y, offscreenBuffer3);
@@ -734,7 +728,7 @@ void BoardWidget::insertData(const go::nodePtr node, const go::fileBase& data){
     data.get(d);
 
     node->childNodes.push_back( d.root );
-    d.root->parent_ = node;
+    d.root->parent = node;
 
     createNodeList();
     setDirty(true);
@@ -886,7 +880,7 @@ void BoardWidget::flipSgfVerticallyCommand(){
 */
 void BoardWidget::addNode(go::nodePtr parent, go::nodePtr node, bool select){
     parent->childNodes.push_back(node);
-    node->parent_ = parent;
+    node->parent = parent;
 
     setDirty(true);
     emit nodeAdded(parent, node, select);
@@ -901,7 +895,7 @@ void BoardWidget::deleteNode(go::nodePtr node, bool deleteChildren){
     if( node == goData.root )
         return;
 
-    go::nodePtr parent = node->parent();
+    go::nodePtr parent = node->parent;
     if (parent){
         go::nodeList::iterator iter = qFind(parent->childNodes.begin(), parent->childNodes.end(), node);
         if (iter != parent->childNodes.end())
@@ -911,7 +905,7 @@ void BoardWidget::deleteNode(go::nodePtr node, bool deleteChildren){
             parent->childNodes += node->childNodes;
             go::nodeList::iterator iter = node->childNodes.begin();
             while (iter != node->childNodes.end()){
-                (*iter)->parent_ = parent;
+                (*iter)->parent = parent;
                 ++iter;
             }
         }
@@ -1150,7 +1144,7 @@ void BoardWidget::createNodeList(){
     nodeList.clear();
 
     go::nodePtr node = currentNode;
-    while ((node = node->parent()) != NULL)
+    while ((node = node->parent) != NULL)
         nodeList.push_front(node);
 
     nodeList.push_back( node = currentNode );
@@ -1182,9 +1176,9 @@ void BoardWidget::createBoardBuffer(){
                     board[y][x].number = 0;
             currentMoveNumber = (*iter)->moveNumber - 1;
         }
-        else if ( (*iter)->parent() &&
-                  ( (moveNumberMode == eResetInBranch && (*iter)->parent()->childNodes.size() > 1) ||
-                    (moveNumberMode == eResetInVariation && (*iter)->parent()->childNodes.size() > 1 && *iter != (*iter)->parent()->childNodes.front()) ) ){
+        else if ( (*iter)->parent &&
+                  ( (moveNumberMode == eResetInBranch && (*iter)->parent->childNodes.size() > 1) ||
+                    (moveNumberMode == eResetInVariation && (*iter)->parent->childNodes.size() > 1 && *iter != (*iter)->parent->childNodes.front()) ) ){
             for (int y=0; y<board.size(); ++y)
                 for (int x=0; x<board[y].size(); ++x)
                     board[y][x].number = 0;
@@ -1246,7 +1240,7 @@ void BoardWidget::drawBoard(QPainter& p){
     boardRect.setRect(l - margin, t - margin, w + margin * 2, h + margin * 2);
     coordinatesRect = boardRect;
     if (boardType >= 0){
-        boardImage2 = QPixmap(boardRect.size());
+        boardImage2 = QImage(boardRect.size(), QImage::Format_RGB32);
         QPainter board(&boardImage2);
         if (boardType == 0 || boardType == 1)
             board.fillRect(0, 0, boardRect.width(), boardRect.height(), QBrush(boardImage1));
@@ -1257,8 +1251,8 @@ void BoardWidget::drawBoard(QPainter& p){
     if (blackType == 0 || blackType == 1)
         black2 = black1.scaled(boxSize, boxSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
     else{
-        black2 = QPixmap(boxSize, boxSize);
-        black2.fill( Qt::transparent );
+        black2 = QImage(boxSize, boxSize, QImage::Format_ARGB32);
+        black2.fill(0);
         QPainter p2(&black2);
         p2.setRenderHints(QPainter::Antialiasing/*|QPainter::TextAntialiasing|QPainter::SmoothPixmapTransform*/);
         p2.setPen(Qt::black);
@@ -1269,8 +1263,8 @@ void BoardWidget::drawBoard(QPainter& p){
     if (whiteType == 0 || whiteType == 1)
         white2 = white1.scaled(boxSize, boxSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
     else{
-        white2 = QPixmap(boxSize, boxSize);
-        white2.fill( Qt::transparent );
+        white2 = QImage(boxSize, boxSize, QImage::Format_ARGB32);
+        white2.fill(0);
         QPainter p2(&white2);
         p2.setRenderHints(QPainter::Antialiasing/*|QPainter::TextAntialiasing|QPainter::SmoothPixmapTransform*/);
         p2.setPen(Qt::black);
@@ -1280,7 +1274,7 @@ void BoardWidget::drawBoard(QPainter& p){
 
     if (boardType >= 0){
         p.fillRect(boardRect.left()+3, boardRect.top()+3, boardRect.width(), boardRect.height(), QColor(10, 10, 10, 120));
-        p.drawPixmap(boardRect.topLeft(), boardImage2);
+        p.drawImage(boardRect.topLeft(), boardImage2);
     }
 
     // horizontal line
@@ -1749,7 +1743,7 @@ void BoardWidget::drawStone(QPainter& p, int bx, int by, go::color color, qreal 
     if (color == go::black){
         if (blackType >= 0){
             p.setOpacity(opacity);
-            p.drawPixmap(x - boxSize/2, y - boxSize/2, black2);
+            p.drawImage(x - boxSize/2, y - boxSize/2, black2);
         }
         else{
             p.setPen(Qt::black);
@@ -1760,7 +1754,7 @@ void BoardWidget::drawStone(QPainter& p, int bx, int by, go::color color, qreal 
     else{
         if (whiteType >= 0){
             p.setOpacity(opacity);
-            p.drawPixmap(x - boxSize/2, y - boxSize/2, white2);
+            p.drawImage(x - boxSize/2, y - boxSize/2, white2);
         }
         else{
             p.setPen(Qt::black);
@@ -1783,7 +1777,7 @@ void BoardWidget::drawDim(QPainter& p, int bx, int by){
 void BoardWidget::eraseBackground(QPainter& p, int x, int y){
     int dx = xlines[x] - boxSize / 2;
     int dy = ylines[y] - boxSize / 2;
-    p.drawPixmap(dx, dy, boardImage2, dx - boardRect.left(), dy - boardRect.top(), boxSize, boxSize);
+    p.drawImage(dx, dy, boardImage2, dx - boardRect.left(), dy - boardRect.top(), boxSize, boxSize);
 }
 
 /**

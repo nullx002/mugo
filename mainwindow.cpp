@@ -389,9 +389,6 @@ void MainWindow::on_actionOpenURL_triggered(){
 */
 void MainWindow::on_actionReload_triggered(){
     if (maybeSave()){
-        branchWidget->clear();
-        nodeToTreeWidget->clear();
-
         if (!tabData->fileName.isEmpty())
             fileOpen(tabData->fileName, false, false, true);
         else if (!tabData->url.isEmpty())
@@ -1131,12 +1128,12 @@ void MainWindow::on_actionMoveFirst_triggered(){
 */
 void MainWindow::on_actionFastRewind_triggered(){
     go::nodePtr node = boardWidget->getCurrentNode();
-    if (node->parent() == NULL)
+    if (node->parent == NULL)
         return;
 
     for (int i=0; i<10; ++i){
-        if (node->parent())
-            node = node->parent();
+        if (node->parent)
+            node = node->parent;
         else
             break;
     }
@@ -1149,8 +1146,8 @@ void MainWindow::on_actionFastRewind_triggered(){
 */
 void MainWindow::on_actionPreviousMove_triggered(){
     go::nodePtr node = boardWidget->getCurrentNode();
-    if (node->parent())
-        boardWidget->setCurrentNode(node->parent());
+    if (node->parent)
+        boardWidget->setCurrentNode(node->parent);
 }
 
 /**
@@ -1198,8 +1195,8 @@ void MainWindow::on_actionMoveLast_triggered(){
 */
 void MainWindow::on_actionBackToParent_triggered(){
     go::nodePtr node = boardWidget->getCurrentNode();
-    while(node->parent()){
-        node = node->parent();
+    while(node->parent){
+        node = node->parent;
         if (node->childNodes.size() > 1)
             break;
     }
@@ -1212,12 +1209,12 @@ void MainWindow::on_actionBackToParent_triggered(){
 */
 void MainWindow::on_actionPreviousBranch_triggered(){
     go::nodePtr node   = boardWidget->getCurrentNode();
-    go::nodePtr parent = node->parent();
+    go::nodePtr parent = node->parent;
     while(parent){
         if (parent->childNodes.size() > 1)
             break;
         node = parent;
-        parent = parent->parent();
+        parent = parent->parent;
     }
 
     if (parent == NULL)
@@ -1236,12 +1233,12 @@ void MainWindow::on_actionPreviousBranch_triggered(){
 */
 void MainWindow::on_actionNextBranch_triggered(){
     go::nodePtr node   = boardWidget->getCurrentNode();
-    go::nodePtr parent = node->parent();
+    go::nodePtr parent = node->parent;
     while(parent){
         if (parent->childNodes.size() > 1)
             break;
         node = parent;
-        parent = parent->parent();
+        parent = parent->parent;
     }
 
     if (parent == NULL)
@@ -1721,9 +1718,6 @@ void MainWindow::on_actionOptions_triggered(){
 * Tools -> Clear Settings
 */
 void MainWindow::on_actionClearSettings_triggered(){
-    if ( QMessageBox::question(this, QString(), tr("Are you sure you want to clear the configuration?"), QMessageBox::Yes|QMessageBox::No) != QMessageBox::Yes)
-        return;
-
     QSettings settings;
     settings.clear();
 
@@ -1788,18 +1782,18 @@ void MainWindow::on_boardTabWidget_currentChanged(QWidget* widget){
         return;
     }
 
-    boardWidget = qobject_cast<BoardWidget*>(widget);
-    tabData = &tabDatas[boardWidget];
-    branchWidget = tabData->branchWidget;
-    nodeToTreeWidget = &tabData->nodeToTree;
-
+    BoardWidget* board = qobject_cast<BoardWidget*>(widget);
+    tabData = &tabDatas[board];
     QMap<BoardWidget*, TabData>::iterator iter = tabDatas.begin();
     while (iter != tabDatas.end()){
-        iter->branchWidget->setVisible(iter.key() == boardWidget);
+        iter->branchWidget->setVisible(iter.key() == board);
         iter->countTerritoryDialog->setVisible(false);
         ++iter;
     }
 
+    boardWidget  = board;
+    branchWidget = tabData->branchWidget;
+    nodeToTreeWidget = &tabData->nodeToTree;
     branchWidget->setFocus(Qt::OtherFocusReason);
     tabData->menuAction->setChecked(true);
 
@@ -1810,7 +1804,7 @@ void MainWindow::on_boardTabWidget_currentChanged(QWidget* widget){
     updateCollection();
 
     // undo
-    undoGroup.setActiveStack(boardWidget->getUndoStack());
+    undoGroup.setActiveStack(board->getUndoStack());
 }
 
 void MainWindow::on_boardTabWidget_tabCloseRequested(int index){
@@ -1831,8 +1825,8 @@ void MainWindow::nodeAdded(go::nodePtr /*parent*/, go::nodePtr node, bool /*sele
 * node was deleted by BoardWidget.
 */
 void MainWindow::nodeDeleted(go::nodePtr node, bool deleteChildren){
-    if (node->parent())
-        remakeTreeWidget( (*nodeToTreeWidget)[node->parent()] );
+    if (node->parent)
+        remakeTreeWidget( (*nodeToTreeWidget)[node->parent] );
     deleteTreeWidget(node, deleteChildren);
 
     setCaption();
@@ -2115,6 +2109,7 @@ void MainWindow::updateCollection(){
         QVariant v;
         v.setValue(info);
         item->setData(0, Qt::UserRole, v);
+
         ui->collectionWidget->addTopLevelItem(item);
 
         if (boardWidget->getData().root == info){
@@ -2181,10 +2176,8 @@ bool MainWindow::fileNew(int xsize, int ysize, int handicap, double komi){
     board->getData().root->handicap = handicap;
     board->getData().root->komi = komi;
 
-    setEncoding(defaultCodec);
-
     setTreeData();
-    updateCollection();
+    setEncoding(defaultCodec);
 
     return true;
 }
@@ -2231,6 +2224,7 @@ bool MainWindow::fileOpen(const QString& fname, bool guessCodec, bool newTab, bo
 
     setCurrentFile(fname);
     setTreeData();
+
     setCaption();
     updateCollection();
 
@@ -2383,7 +2377,6 @@ bool MainWindow::closeTab(int index){
         return false;
     }
 
-    boardWidget->clear();
     delete tabData->menuAction;
     delete tabData->gtpProcess;
     delete tabData->playGame;
@@ -2391,9 +2384,6 @@ bool MainWindow::closeTab(int index){
     delete tabData->countTerritoryDialog;
     tabDatas.remove(boardWidget);
     ui->boardTabWidget->removeTab(index);
-
-    boardWidget = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
-    tabData = &tabDatas[boardWidget];
 
     return true;
 }
@@ -2573,9 +2563,9 @@ QTreeWidgetItem* MainWindow::addTreeWidget(go::nodePtr node, bool needRemake){
     QTreeWidgetItem* newWidget  = NULL;
     if (treeWidget == NULL)
         newWidget = createTreeWidget(node);
-    QTreeWidgetItem* parentWidget  = (node->parent() && (*nodeToTreeWidget)[node->parent()]) ? (*nodeToTreeWidget)[node->parent()] : branchWidget->invisibleRootItem();
+    QTreeWidgetItem* parentWidget  = (node->parent && (*nodeToTreeWidget)[node->parent]) ? (*nodeToTreeWidget)[node->parent] : branchWidget->invisibleRootItem();
     QTreeWidgetItem* parentWidget2 = parentWidget->parent() ? parentWidget->parent() : branchWidget->invisibleRootItem();
-    go::nodePtr parentNode  = node->parent();
+    go::nodePtr parentNode  = node->parent;
     go::nodePtr parentNode2 = getNode(parentWidget2);
 
     bool newBranch = (parentNode2 && parentNode2->childNodes.size() > 1) ||
@@ -3202,10 +3192,9 @@ void MainWindow::alertLanguageChanged(){
 QString MainWindow::getDefaultSaveName() const{
 
 #define REPLACE(K, V){\
-    if (saveName.indexOf(K) >= 0){\
+    if (saveName.indexOf(K) >= 0 && !V.isEmpty()){\
+        replaced = true;\
         saveName.replace(K, V);\
-        if (!V.isEmpty())\
-            replaced = true;\
     }\
 }
 

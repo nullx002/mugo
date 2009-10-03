@@ -9,17 +9,8 @@
 #include <QMap>
 #include <QTextCodec>
 #include <boost/shared_ptr.hpp>
-#include <boost/weak_ptr.hpp>
 
 namespace go{
-
-class node;
-class informationNode;
-typedef boost::shared_ptr<node> nodePtr;
-typedef boost::weak_ptr<node> nodeWPtr;
-typedef QList<nodePtr> nodeList;
-typedef boost::shared_ptr<informationNode> informationPtr;
-typedef QList<informationPtr> informationList;
 
 
 enum color{ empty=0, black=1, white=2, blackTerritory=4, whiteTerritory=8, dame=16 };
@@ -65,8 +56,8 @@ public:
     color c;
 };
 
-typedef QList<mark>  markList;
-typedef QList<stone> stoneList;
+typedef QLinkedList<mark>  markList;
+typedef QLinkedList<stone> stoneList;
 class data;
 class informationNode;
 
@@ -74,6 +65,9 @@ class node{
     Q_DECLARE_TR_FUNCTIONS(go::node)
 
 public:
+    typedef boost::shared_ptr<node> nodePtr;
+    typedef QLinkedList<nodePtr> nodeList;
+
     enum eAnnotation{
         eNoAnnotation = 0,
         eHotspot = 1,
@@ -99,8 +93,17 @@ public:
     virtual ~node(){  clear();  }
 
     void clear();
-    nodePtr parent(){ return parent_.lock(); }
-    const nodePtr parent() const{ return parent_.lock(); }
+
+/*
+    node* getParent(){ return parent; }
+    const node* getParent() const{ return parent; }
+
+    const nodeList& getChildNodes() const{ return childNodes; }
+    nodeList& getChildNodes(){ return childNodes; }
+
+    const string& getComment() const{ return comment; }
+    void setComment(const string& comment){ this->comment = comment; }
+*/
 
     int getX() const{ return position.x; }
     int getY() const{ return position.y; }
@@ -120,7 +123,7 @@ public:
 
 //protected:
     // node
-    nodeWPtr  parent_;
+    nodePtr   parent;
     nodeList  childNodes;
     QString   name;
     markList  crosses;
@@ -153,8 +156,7 @@ class informationNode : public node{
 //    }
 
 public:
-    explicit informationNode(nodePtr parent=nodePtr());
-    ~informationNode();
+    explicit informationNode(nodePtr parent) : node(parent){ initialize(); }
 
     virtual bool isStone() const{ return false; }
 
@@ -201,6 +203,9 @@ class data{
 public:
     enum eRule{eJapanese, eChinese};
 
+    typedef boost::shared_ptr<informationNode> informationPtr;
+    typedef QLinkedList<informationPtr> informationList;
+
     data();
 
     void clear();
@@ -232,6 +237,13 @@ public:
 
     QTextCodec* codec;
 };
+
+
+
+typedef node::nodePtr nodePtr;
+typedef node::nodeList nodeList;
+typedef data::informationPtr informationPtr;
+typedef data::informationList informationList;
 
 
 
