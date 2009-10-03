@@ -71,7 +71,7 @@ QString sgf::node::toString() const{
 }
 
 bool sgf::node::setProperty(const QString& key, const QStringList& values){
-    property[key] += values;
+    property[key] = values;
     return true;
 }
 
@@ -147,8 +147,8 @@ bool sgf::node::get(go::nodePtr n, const QString& key, const QStringList& values
 
     // comment
     else if (key == "C")
-        n->comment = values.join("\n");
-    else if (key == "N" || key == "RN")  // N is correct, RN is cyber oro version?
+        n->comment = values[0];
+    else if (key == "N")
         n->name = values[0];
     else if (key == "MN")
         n->moveNumber = values[0].toInt();
@@ -475,10 +475,6 @@ QTextCodec* sgf::getCodec(const QByteArray& a) const{
 
 bool sgf::readBranch(QString::iterator& first, QString::iterator last, nodePtr& n){
     n->setNodeType(sgf::eBranch);
-    nodeList::iterator end = n->getChildNodes().end();
-    nodeList::iterator branchNode = end;
-    int pt = 1;
-
     while (first != last){
         wchar_t c = first->unicode();
         ++first;
@@ -489,40 +485,19 @@ bool sgf::readBranch(QString::iterator& first, QString::iterator last, nodePtr& 
         else if (c != L';' && c != L'(' && iswspace(c))
             continue;
 
-        if (c == L'('){
-            nodePtr newNode( new node );
-            nodeList::iterator iter = n->getChildNodes().insert(n->getChildNodes().end(), newNode);
+        nodePtr newNode( new node );
+        n->getChildNodes().push_back(newNode);
 
+        if (c == L'(')
             readBranch(first, last, newNode);
-
-            if (branchNode == end)
-                branchNode = iter;
-        }
-        else{
-            if (c != ';')
-                --first;
-
-            nodePtr newNode( new node );
-            if (branchNode == end){
-                if (pt == 1)
-                    n->getChildNodes().push_back(newNode);
-                else{
-                    newNode = n;
-                    --pt;
-                }
-                readNode(first, last, newNode, pt);
-            }
-            else{
-                n->getChildNodes().insert(branchNode, newNode);
-                readBranch(first, last, newNode);
-            }
-        }
+        else
+            readNode(first, last, newNode);
     }
 
-    return true;
+    return false;
 }
 
-bool sgf::readNode(QString::iterator& first, QString::iterator last, nodePtr& n, int& pt){
+bool sgf::readNode(QString::iterator& first, QString::iterator last, nodePtr& n){
     while (first != last){
         wchar_t c = first->unicode();
         if (iswspace(c)){
@@ -543,10 +518,6 @@ bool sgf::readNode(QString::iterator& first, QString::iterator last, nodePtr& n,
             return false;
 
         n->setProperty(key, values);
-
-        // for cyber oro?
-        if (key == "PT")
-            pt = values[0].toInt();
     }
 
     return true;
