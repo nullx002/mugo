@@ -2366,35 +2366,41 @@ void BoardWidget::countTerritory(){
         }
     }
 
-    for (int y=0; y<ysize; ++y){
-        for (int x=0; x<xsize; ++x){
-            if ((board[y][x].dame()) == 0)
-                continue;
-            int c1 = y > 0 ? board[y-1][x].color : go::dame;
-            int c2 = x < xsize-1 ? board[y][x+1].color : go::dame;
-            int c3 = y < ysize-1 ? board[y+1][x].color : go::dame;
-            int c4 = x > 0 ? board[y][x-1].color : go::dame;
-            int b = go::black | go::blackTerritory | go::dame;
-            int w = go::white | go::whiteTerritory | go::dame;
-            bool isb = c1 & b && c2 & b && c3 & b && c4 & b;
-            bool isw = c1 & w && c2 & w && c3 & w && c4 & w;
-            if (isb || isw){
-                if (y > 0 && !hasTerritory(x, y, x, y-1))
-                    continue;
-                if (y < ysize-1 && !hasTerritory(x, y, x, y+1))
-                    continue;
-                if (x < xsize-1 && !hasTerritory(x, y, x+1, y))
-                    continue;
-                if (x > 0  && !hasTerritory(x, y, x-1, y))
-                    continue;
+    bool changed = false;
+    do{
+        changed =false;
 
-                if (isb)
-                    board[y][x].color = (board[y][x].color & go::white) | go::blackTerritory;
-                else
-                    board[y][x].color = (board[y][x].color & go::black) | go::whiteTerritory;
+        for (int y=0; y<ysize; ++y){
+            for (int x=0; x<xsize; ++x){
+                if ((board[y][x].dame()) == 0)
+                    continue;
+                int c1 = y > 0 ? board[y-1][x].color : go::dame;
+                int c2 = x < xsize-1 ? board[y][x+1].color : go::dame;
+                int c3 = y < ysize-1 ? board[y+1][x].color : go::dame;
+                int c4 = x > 0 ? board[y][x-1].color : go::dame;
+                int b = go::black | go::blackTerritory | go::dame;
+                int w = go::white | go::whiteTerritory | go::dame;
+                bool isb = c1 & b && c2 & b && c3 & b && c4 & b;
+                bool isw = c1 & w && c2 & w && c3 & w && c4 & w;
+                if (isb || isw){
+                    if (y > 0 && !hasTerritory(x, y, x, y-1))
+                        continue;
+                    if (y < ysize-1 && !hasTerritory(x, y, x, y+1))
+                        continue;
+                    if (x < xsize-1 && !hasTerritory(x, y, x+1, y))
+                        continue;
+                    if (x > 0  && !hasTerritory(x, y, x-1, y))
+                        continue;
+
+                    changed = true;
+                    if (isb)
+                        board[y][x].color = (board[y][x].color & go::white) | go::blackTerritory;
+                    else
+                        board[y][x].color = (board[y][x].color & go::black) | go::whiteTerritory;
+                }
             }
         }
-    }
+    } while (changed);
 }
 
 void BoardWidget::whichTerritory(int x, int y, char* tmp, int& c){
@@ -2537,18 +2543,18 @@ bool BoardWidget::hasTerritory(int x1, int y1, int x2, int  y2){
 
     go::color c1;
     go::color c2;
-    if (board[y2][x2].black()){
+    if (board[y2][x2].black() && !board[y2][x2].whiteTerritory()){
         c1 = go::black;
         c2 = go::blackTerritory;
     }
-    else if (board[y2][x2].white()){
+    else if (board[y2][x2].white() && !board[y2][x2].blackTerritory()){
         c1 = go::white;
         c2 = go::whiteTerritory;
     }
     else if (board[y2][x2].territory())
         return true;
-    else
-        return false;
+    else // if dame
+        return true;
 
     char* tmp = new char[ysize*xsize];
     memset(tmp, 0, ysize*xsize);
@@ -2568,7 +2574,7 @@ bool BoardWidget::hasTerritory(go::color c1, go::color c2, char* tmp, int x, int
 
     if ((board[y][x].color & c1) == 0 && (board[y][x].color & c2) == 0 && !board[y][x].dame())
         return false;
-    if (board[y][x].color & c2 || board[y][x].dame())
+    if (board[y][x].color & c2/* || board[y][x].dame()*/)
         return true;
 
     if (hasTerritory(c1, c2, tmp, x, y-1))
