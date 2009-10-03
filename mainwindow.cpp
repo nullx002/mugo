@@ -2306,7 +2306,7 @@ go::fileBase* MainWindow::readFile(const QString& fname, QTextCodec*& codec, boo
 bool MainWindow::fileSave(){
     const QString& fileName = tabData->fileName;
     QFileInfo fi(fileName);
-    if (fileName.isEmpty() || fi.suffix() != "sgf")
+    if (fileName.isEmpty() || fi.suffix().compare("sgf", Qt::CaseInsensitive) != 0)
         return fileSaveAs();
     else
         return fileSaveAs(fileName);
