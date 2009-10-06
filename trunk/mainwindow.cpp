@@ -153,7 +153,7 @@ MainWindow::MainWindow(QWidget *parent)
     QSettings settings;
 
     // window settings
-    setGeometry(x(), y(), settings.value("width", WIN_W).toInt(), settings.value("height", WIN_H).toInt());
+    restoreState( settings.value("docksState").toByteArray() );
 
     // codec
     QByteArray codecName = settings.value("codec", "UTF-8").toByteArray();
@@ -289,8 +289,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow(){
     QSettings settings;
-    settings.setValue("width", geometry().width());
-    settings.setValue("height", geometry().height());
+    settings.setValue("docksState", saveState());
 
     delete ui;
     delete http;
