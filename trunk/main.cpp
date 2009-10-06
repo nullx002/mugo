@@ -1,7 +1,6 @@
 #include <QtGui/QApplication>
 #ifdef Q_WS_WIN
-//#   include <QWindowsVistaStyle>
-#  include <QPlastiqueStyle>
+#  include "qtdotnetstyle.h"
 #elif defined(Q_WS_MAC)
 #   include <QFileOpenEvent>
 #endif
@@ -98,8 +97,7 @@ int main(int argc, char *argv[])
     a.setApplicationName(APPNAME);
     a.setApplicationVersion(VERSION);
 #ifdef Q_WS_WIN
-//    a.setStyle(new QWindowsVistaStyle);
-    a.setStyle(new QPlastiqueStyle);
+    a.setStyle( new QtDotNetStyle(QtDotNetStyle::Standard) );
 #endif
 
     // Load translation

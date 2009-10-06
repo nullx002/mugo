@@ -42,6 +42,8 @@ HEADERS += mainwindow.h \
     printoptiondialog.h \
     gib.h \
     ngf.h
+win32:SOURCES += qtdotnetstyle.cpp
+win32:HEADERS += qtdotnetstyle.h
 FORMS += mainwindow.ui \
     boardwidget.ui \
     gameinformationdialog.ui \
