@@ -89,6 +89,8 @@ public:
     void paintTerritories(QPainter& p);
     void print(QPrinter&, int option, int movesPerPage);
     void print(QPrinter& printer, QPainter& p, int option, int movePerPage, BoardBuffer& buf);
+    void print(QPrinter& printer, QPainter& p, const go::nodeList& node, int& page, int& fig, int& moveNumber, int& moveNumberInPage, int option, int movePerPage, BoardBuffer& buf, QString& rangai);
+    void print(QPrinter& printer, QPainter& p, go::nodePtr node, int& page, int& fig, int& moveNumber, int& moveNumberInPage, int option, int movePerPage, BoardBuffer& buf, QString& rangai);
     void print(QPrinter& printer, QPainter& p, go::nodePtr node, int page, int& moveNumber, int& moveNumberInPage, BoardBuffer& buf, QString& rangai);
     void printHeader(QPrinter& printer, QPainter& p, int& page);
     void printFooter(QPrinter& printer, QPainter& p, int& page);
