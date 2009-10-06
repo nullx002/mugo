@@ -535,27 +535,32 @@ void BoardWidget::print(QPrinter& printer, QPainter& p, go::nodePtr node, int& p
     if (iter == node->childNodes.end())
         return;
 
+    bool craeteNewPage = node->childNodes.size() > 1 || (option == 4 && moveNumberInPage == movePerPage);
     BoardBuffer board2, buf2;
-
-    print(printer, p, *iter, page, fig, moveNumber, moveNumberInPage, option, movePerPage, buf, rangai);
-
-    ++iter;
-    if (iter != node->childNodes.end()){
+    if ( craeteNewPage ){
         board2 = board;
         buf2   = buf;
     }
 
-    while (iter != node->childNodes.end()){
+    while (++iter != node->childNodes.end()){
+        int moveNumber2 = 0;
+        int moveNumberInPage2 = 0;
+
         printRangai(printer, p, rangai, page);
         newPage(printer, p, moveNumberInPage, buf, page, fig);
-        print(printer, p, *iter, page, fig, moveNumber, moveNumberInPage, option, movePerPage, buf, rangai);
-        ++iter;
-    }
+        print(printer, p, *iter, page, fig, moveNumber2, moveNumberInPage2, option, movePerPage, buf, rangai);
 
-    if (!board2.empty()){
         board = board2;
         buf   = buf2;
     }
+
+    if ( craeteNewPage ){
+        printRangai(printer, p, rangai, page);
+        newPage(printer, p, moveNumberInPage, buf, page, fig);
+    }
+
+    iter = node->childNodes.begin();
+    print(printer, p, *iter, page, fig, moveNumber, moveNumberInPage, option, movePerPage, buf, rangai);
 }
 
 void BoardWidget::print(QPrinter& printer, QPainter& p, go::nodePtr node, int page, int& moveNumber, int& moveNumberInPage, BoardBuffer& buf, QString& rangai){
