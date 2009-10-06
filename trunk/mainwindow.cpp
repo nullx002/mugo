@@ -152,9 +152,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     QSettings settings;
 
-    // window settings
-    restoreState( settings.value("docksState").toByteArray() );
-
     // codec
     QByteArray codecName = settings.value("codec", "UTF-8").toByteArray();
     defaultCodec = QTextCodec::codecForName(codecName);
@@ -275,6 +272,10 @@ MainWindow::MainWindow(QWidget *parent)
     ui->actionCopySgfToClipboard->setShortcut( QKeySequence::Copy );
     ui->actionPasteSgfToNewTab->setShortcut( QKeySequence::Paste );
 
+    // window settings
+    restoreState( settings.value("docksState").toByteArray() );
+    ui->collectionWidget->header()->restoreState( settings.value("collectionState").toByteArray() );
+
     // command line
     QStringList args = qApp->arguments();
     if (args.size() > 1)
@@ -290,6 +291,7 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow(){
     QSettings settings;
     settings.setValue("docksState", saveState());
+    settings.setValue("collectionState", ui->collectionWidget->header()->saveState());
 
     delete ui;
     delete http;
