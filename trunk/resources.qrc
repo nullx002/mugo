@@ -51,5 +51,6 @@
         <file>res/gamelist.png</file>
         <file>res/sgfextract.png</file>
         <file>res/sgfimport.png</file>
+        <file>res/print.png</file>
     </qresource>
 </RCC>
