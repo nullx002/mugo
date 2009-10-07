@@ -793,12 +793,12 @@ bool sgf::pointToIntList(const QString& pos, QList<int>& xList, QList<int>& yLis
 }
 
 QString sgf::pointToString(int x, int y, const QString* s){
-    char buf[10];
+    QString buf;
     if (s)
-        sprintf(buf, "%c%c:%s", x + (x < 27 ? 'a' : 'A' - 27), y + (y < 27 ? 'a' : 'A' - 27), (const char*)s->toAscii());
+        buf.sprintf("%c%c:%s", x + (x < 27 ? 'a' : 'A' - 27), y + (y < 27 ? 'a' : 'A' - 27), (const char*)s->toAscii());
     else
-        sprintf(buf, "%c%c", x + (x < 27 ? 'a' : 'A' - 27), y + (y < 27 ? 'a' : 'A' - 27));
-    return QString(buf);
+        buf.sprintf("%c%c", x + (x < 27 ? 'a' : 'A' - 27), y + (y < 27 ? 'a' : 'A' - 27));
+    return buf;
 }
 
 QString sgf::pointToString(const go::point& p, const QString* s){
