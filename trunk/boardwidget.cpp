@@ -515,7 +515,7 @@ void BoardWidget::print(QPrinter& printer, QPainter& p, int option, int movePerP
     p.restore();
 }
 
-void BoardWidget::print(QPrinter& printer, QPainter& p, const go::nodeList& node, int& page, int& fig, int& moveNumber, int& moveNumberInPage, int option, int movePerPage, BoardBuffer& buf, QString& rangai){
+void BoardWidget::print(QPrinter& printer, QPainter& p, const go::nodeList& nodeList, int& page, int& fig, int& moveNumber, int& moveNumberInPage, int option, int movePerPage, BoardBuffer& buf, QString& rangai){
     foreach (go::nodePtr node, nodeList){
         print(printer, p, node, page, moveNumber, moveNumberInPage, buf, rangai);
 
