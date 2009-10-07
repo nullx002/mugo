@@ -464,7 +464,7 @@
   <widget class="QStatusBar" name="statusBar"/>
   <widget class="QDockWidget" name="commentDockWidget">
    <property name="windowTitle">
-    <string>Comment Window</string>
+    <string>Comment View</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>2</number>
@@ -489,7 +489,7 @@
   </widget>
   <widget class="QDockWidget" name="branchDockWidget">
    <property name="windowTitle">
-    <string>Branch Window</string>
+    <string>Branch View</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>2</number>
@@ -513,7 +513,7 @@
     <bool>false</bool>
    </property>
    <property name="windowTitle">
-    <string>Undo Window</string>
+    <string>Undo View</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>1</number>
@@ -535,7 +535,7 @@
   </widget>
   <widget class="QDockWidget" name="collectionDockWidget">
    <property name="windowTitle">
-    <string>Collection Window</string>
+    <string>Collection View</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>4</number>
