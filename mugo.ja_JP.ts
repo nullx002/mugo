@@ -501,13 +501,15 @@ Do you want to save your changes?</source>
     </message>
     <message>
         <location filename="mainwindow.ui" line="467"/>
-        <source>Comment Window</source>
-        <translation type="unfinished">コメントウィンドウ</translation>
+        <source>Comment View</source>
+        <oldsource>Comment Window</oldsource>
+        <translation type="unfinished">コメント ビュー</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="492"/>
-        <source>Branch Window</source>
-        <translation type="unfinished">分岐ウィンドウ</translation>
+        <source>Branch View</source>
+        <oldsource>Branch Window</oldsource>
+        <translation type="unfinished">分岐 ビュー</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="77"/>
@@ -516,8 +518,9 @@ Do you want to save your changes?</source>
     </message>
     <message>
         <location filename="mainwindow.ui" line="516"/>
-        <source>Undo Window</source>
-        <translation type="unfinished">アンドゥウィンドウ</translation>
+        <source>Undo View</source>
+        <oldsource>Undo Window</oldsource>
+        <translation type="unfinished">アンドゥ ビュー</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="609"/>
@@ -639,7 +642,7 @@ Do you want to save your changes?</source>
     <message>
         <location filename="mainwindow.ui" line="412"/>
         <source>Edit Toolbar</source>
-        <translation type="unfinished">編集ツールバー</translation>
+        <translation type="unfinished">編集 ツールバー</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="570"/>
@@ -989,12 +992,13 @@ Do you want to save your changes?</source>
     <message>
         <location filename="mainwindow.ui" line="390"/>
         <source>Collection Toolbar</source>
-        <translation type="unfinished">コレクションツールバー</translation>
+        <translation type="unfinished">コレクション ツールバー</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="538"/>
-        <source>Collection Window</source>
-        <translation type="unfinished">コレクションウィンドウ</translation>
+        <source>Collection View</source>
+        <oldsource>Collection Window</oldsource>
+        <translation type="unfinished">コレクション ビュー</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="843"/>
@@ -1124,12 +1128,12 @@ Do you want to save your changes?</source>
     <message>
         <location filename="mainwindow.ui" line="342"/>
         <source>Main Toolbar</source>
-        <translation type="unfinished">メインツールバー</translation>
+        <translation type="unfinished">メイン ツールバー</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="436"/>
         <source>Navigation Toolbar</source>
-        <translation type="unfinished">移動ツールバー</translation>
+        <translation type="unfinished">移動 ツールバー</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="1651"/>
@@ -1167,7 +1171,7 @@ Do you want to save your changes?</source>
         <location filename="mainwindow.ui" line="367"/>
         <source>View Toolbar</source>
         <oldsource>Option Toolbar</oldsource>
-        <translation type="unfinished">表示ツールバー</translation>
+        <translation type="unfinished">表示 ツールバー</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="948"/>
