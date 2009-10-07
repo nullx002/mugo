@@ -362,9 +362,9 @@
    <addaction name="separator"/>
    <addaction name="actionGameInformation"/>
   </widget>
-  <widget class="QToolBar" name="optionToolBar">
+  <widget class="QToolBar" name="viewToolBar">
    <property name="windowTitle">
-    <string>Option Toolbar</string>
+    <string>View Toolbar</string>
    </property>
    <property name="iconSize">
     <size>
@@ -382,8 +382,6 @@
    <addaction name="actionFlipBoardHorizontally"/>
    <addaction name="actionFlipBoardVertically"/>
    <addaction name="actionResetBoard"/>
-   <addaction name="separator"/>
-   <addaction name="actionWhiteFirst"/>
    <addaction name="separator"/>
    <addaction name="actionBranchMode"/>
   </widget>
@@ -430,6 +428,8 @@
    <addaction name="separator"/>
    <addaction name="actionDeleteAfterCurrent"/>
    <addaction name="actionPass"/>
+   <addaction name="separator"/>
+   <addaction name="actionWhiteFirst"/>
   </widget>
   <widget class="QToolBar" name="navigationToolBar">
    <property name="windowTitle">
@@ -1721,7 +1721,7 @@
   <action name="actionCollectionMoveUp">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/res/prevbranch.png</normaloff>:/res/prevbranch.png</iconset>
+     <normaloff>:/res/collectionup.png</normaloff>:/res/collectionup.png</iconset>
    </property>
    <property name="text">
     <string>Move Up</string>
@@ -1730,7 +1730,7 @@
   <action name="actionCollectionMoveDown">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/res/nextbranch.png</normaloff>:/res/nextbranch.png</iconset>
+     <normaloff>:/res/collectiondown.png</normaloff>:/res/collectiondown.png</iconset>
    </property>
    <property name="text">
     <string>Move Down</string>

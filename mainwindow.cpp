@@ -192,7 +192,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->menuToolbars->addAction( ui->mainToolBar->toggleViewAction() );
     ui->menuToolbars->addAction( ui->editToolBar->toggleViewAction() );
     ui->menuToolbars->addAction( ui->navigationToolBar->toggleViewAction() );
-    ui->menuToolbars->addAction( ui->optionToolBar->toggleViewAction() );
+    ui->menuToolbars->addAction( ui->viewToolBar->toggleViewAction() );
     ui->menuToolbars->addAction( ui->collectionToolBar->toggleViewAction() );
 
     // language menu
@@ -208,7 +208,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->actionPlaySound->setChecked( settings.value("sound/play", 1).toBool() );
 
     // toolbar (option -> show move number)
-    ui->optionToolBar->insertAction( ui->optionToolBar->actions().at(0), ui->menuShowMoveNumber->menuAction() );
+    ui->viewToolBar->insertAction( ui->viewToolBar->actions().at(0), ui->menuShowMoveNumber->menuAction() );
     ui->menuShowMoveNumber->menuAction()->setCheckable(true);
     ui->menuShowMoveNumber->menuAction()->setChecked( ui->actionShowMoveNumber->isChecked() );
     connect( ui->menuShowMoveNumber->menuAction(), SIGNAL(triggered()), this, SLOT(on_actionShowMoveNumber_parent_triggered()) );

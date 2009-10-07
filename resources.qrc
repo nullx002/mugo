@@ -52,5 +52,7 @@
         <file>res/sgfextract.png</file>
         <file>res/sgfimport.png</file>
         <file>res/print.png</file>
+        <file>res/collectionup.png</file>
+        <file>res/collectiondown.png</file>
     </qresource>
 </RCC>
