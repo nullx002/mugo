@@ -2225,7 +2225,7 @@ void BoardWidget::addStone(go::nodePtr node, const go::point& sp, const go::poin
     if (stoneNode == node)
         modifyNode(node);
     else
-        insertNodeCommand(node, stoneNode);
+        addNodeCommand(node, stoneNode);
 }
 
 void BoardWidget::addEmpty(go::nodePtr node, const go::point& sgfPoint){
