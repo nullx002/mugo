@@ -2252,7 +2252,7 @@ void BoardWidget::addEmpty(go::nodePtr node, const go::point& sp, const go::poin
     if (stoneNode == node)
         modifyNode(node);
     else
-        insertNodeCommand(node, stoneNode);
+        addNodeCommand(node, stoneNode);
 }
 
 bool BoardWidget::removeStone(go::stoneList& stoneList, const go::point& sp, const go::point& bp){
