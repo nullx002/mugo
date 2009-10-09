@@ -314,6 +314,9 @@ private slots:
 
     // play a game
     void playGameEnded();
+    void on_actionGamePass_triggered();
+    void on_actionGameResign_triggered();
+    void on_actionGameUndo_triggered();
 
     // tab change
     void onTabChangeRequest();

@@ -271,6 +271,12 @@ void BoardWidget::onLButtonDown(QMouseEvent* e){
 /**
 */
 void BoardWidget::onRButtonDown(QMouseEvent*){
+    undo();
+}
+
+/**
+*/
+void BoardWidget::undo(){
     undoStack.undo();
 }
 

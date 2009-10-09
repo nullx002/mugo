@@ -1807,14 +1807,14 @@ void MainWindow::on_boardTabWidget_currentChanged(QWidget* widget){
     branchWidget->setFocus(Qt::OtherFocusReason);
     tabData->menuAction->setChecked(true);
 
+    // undo
+    undoGroup.setActiveStack(boardWidget->getUndoStack());
+
     ui->commentWidget->setPlainText(boardWidget->getCurrentNode()->comment);
 
     setCaption();
     updateMenu();
     updateCollection();
-
-    // undo
-    undoGroup.setActiveStack(boardWidget->getUndoStack());
 }
 
 void MainWindow::on_boardTabWidget_tabCloseRequested(int index){
@@ -1909,6 +1909,28 @@ void MainWindow::playGameEnded(){
         ui->actionCountTerritory->setChecked(true);
         on_actionCountTerritory_triggered();
     }
+}
+
+/**
+* Slot
+*/
+void MainWindow::on_actionGamePass_triggered(){
+    on_actionPass_triggered();
+}
+
+/**
+* Slot
+*/
+void MainWindow::on_actionGameResign_triggered(){
+    if (QMessageBox::warning(this, QString(), tr("Are you sure you want to resign?"), QMessageBox::Ok|QMessageBox::Cancel) != QMessageBox::Ok)
+        return;
+}
+
+/**
+* Slot
+*/
+void MainWindow::on_actionGameUndo_triggered(){
+    boardWidget->undo();
 }
 
 /**
@@ -2011,8 +2033,6 @@ void MainWindow::updateMenu(){
 
     if (tabData->fileName.isEmpty())
         ui->actionReload->setEnabled(false);
-    undoAction->setEnabled( undoGroup.activeStack()->canUndo() );
-    redoAction->setEnabled( undoGroup.activeStack()->canRedo() );
 
     switch(boardWidget->getEditMode()){
         case BoardWidget::eAlternateMove:
@@ -2982,6 +3002,10 @@ void MainWindow::setCountTerritoryMode(bool on){
         ui->actionCollectionMoveUp,
         ui->actionDeleteSgfFromCollection,
 
+//        ui->actionGamePass,
+//        ui->actionGameResign,
+//        ui->actionGameUndo,
+
 //        ui->actionAbout,
 //        ui->actionAboutQT,
 
@@ -3155,12 +3179,17 @@ void MainWindow::setPlayWithComputerMode(bool on){
         ui->actionCollectionMoveUp,
         ui->actionDeleteSgfFromCollection,
 
+//        ui->actionGamePass,
+//        ui->actionGameResign,
+//        ui->actionGameUndo,
+
 //        ui->actionAbout,
 //        ui->actionAboutQT,
 
         ui->menuRecentFiles->menuAction(),
 //        ui->menuShowMoveNumber->menuAction(),
         ui->menuStoneMarkers->menuAction(),
+
         undoAction,
         redoAction,
     };
@@ -3173,6 +3202,9 @@ void MainWindow::setPlayWithComputerMode(bool on){
 
     if (on){
         ui->actionPlayWithGnugo->setChecked(true);
+        ui->actionGamePass->setEnabled(true);
+        ui->actionGameResign->setEnabled(true);
+        ui->actionGameUndo->setEnabled(true);
         undoGroup.setActiveStack(0);
         for (int i=0; i<N; ++i){
             status[i] = act[i]->isEnabled();
@@ -3181,6 +3213,9 @@ void MainWindow::setPlayWithComputerMode(bool on){
     }
     else{
         ui->actionPlayWithGnugo->setChecked(false);
+        ui->actionGamePass->setEnabled(false);
+        ui->actionGameResign->setEnabled(false);
+        ui->actionGameUndo->setEnabled(false);
         undoGroup.setActiveStack(boardWidget->getUndoStack());
         for (int i=0; i<N; ++i)
             act[i]->setEnabled( status[i] );

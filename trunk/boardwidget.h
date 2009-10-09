@@ -115,12 +115,14 @@ public:
     void getCaptured(int& black, int& white) const{ black = capturedBlack; white = capturedWhite; }
     int  getMoveNumber() const{ return currentMoveNumber; }
 
+    // command
+    void undo();
+
     // create stone node and insert after current node
     void addStoneNodeCommand(int sgfX, int sgfY);
     void addStoneNodeCommand(int sgfX, int sgfY, int boardX, int boardY);
     bool moveNextStone(int sgfX, int sgfY);
 
-    // command
     void addNodeCommand(go::nodePtr parent, go::nodePtr node, bool select=true);
     void insertNodeCommand(go::nodePtr parent, go::nodePtr node, bool select=true);
     void deleteNodeCommand(go::nodePtr node, bool deleteChildren=true);
