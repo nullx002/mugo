@@ -30,7 +30,7 @@ void CountTerritoryDialog::accept(){
     if (scorej > 0)
         informationNode->result = QString("W+%1").arg(scorej);
     else if (scorej < 0)
-        informationNode->result = QString("B+%1").arg(scorej);
+        informationNode->result = QString("B+%1").arg(scorej * -1);
     else
         informationNode->result = "Draw";
 
@@ -38,8 +38,8 @@ void CountTerritoryDialog::accept(){
 }
 
 void CountTerritoryDialog::setScore(int alive_b, int alive_w, int dead_b, int dead_w, int capturedBlack, int capturedWhite, int blackTerritory, int whiteTerritory, double komi){
-    double bscorej = blackTerritory + dead_w + capturedWhite;
-    double wscorej = whiteTerritory + dead_b + capturedBlack + komi;
+    qreal bscorej = blackTerritory + dead_w + capturedWhite;
+    qreal wscorej = whiteTerritory + dead_b + capturedBlack + komi;
     scorej = wscorej - bscorej;
 
     // japanese rule
