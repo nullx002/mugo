@@ -294,6 +294,7 @@
     <addaction name="actionCountTerritory"/>
     <addaction name="actionPlayWithGnugo"/>
     <addaction name="separator"/>
+    <addaction name="actionAutomaticReplay"/>
     <addaction name="actionTutorBossSides"/>
     <addaction name="actionTutorOneSide"/>
     <addaction name="separator"/>
@@ -1800,6 +1801,14 @@
    </property>
    <property name="text">
     <string>undo</string>
+   </property>
+  </action>
+  <action name="actionAutomaticReplay">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Automatic Replay</string>
    </property>
   </action>
  </widget>

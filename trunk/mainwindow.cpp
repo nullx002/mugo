@@ -46,6 +46,9 @@ MainWindow::MainWindow(QWidget *parent)
     ui->undoDockWidget->setVisible(false);
     ui->collectionDockWidget->setVisible(false);
 
+    // auto play
+    connect(&autoReplayTimer, SIGNAL(timeout()), this, SLOT(autoReplayTimer_timeout()));
+
     // encoding
     codecActions.push_back( ui->actionEncodingUTF8 );
     codecActions.push_back( ui->actionISO8859_1 );
@@ -1908,6 +1911,9 @@ void MainWindow::playGameEnded(){
     if( !resign ){
         ui->actionCountTerritory->setChecked(true);
         on_actionCountTerritory_triggered();
+
+        setCaption();
+        updateCollection();
     }
 }
 
@@ -1924,6 +1930,9 @@ void MainWindow::on_actionGamePass_triggered(){
 void MainWindow::on_actionGameResign_triggered(){
     if (QMessageBox::warning(this, QString(), tr("Are you sure you want to resign?"), QMessageBox::Ok|QMessageBox::Cancel) != QMessageBox::Ok)
         return;
+
+    tabData->playGame->setResign(true);
+    playGameEnded();
 }
 
 /**
@@ -1975,6 +1984,9 @@ void MainWindow::on_collectionWidget_itemActivated(QTreeWidgetItem* item, int /*
 void MainWindow::scoreDialogClosed(int){
     ui->actionCountTerritory->setChecked(false);
     on_actionCountTerritory_triggered();
+
+    setCaption();
+    updateCollection();
 }
 
 /**
@@ -3324,4 +3336,22 @@ QString getSaveFileName(QWidget* parent, const QString& caption, const QString& 
 #else
     return QFileDialog::getSaveFileName(parent, caption, dir, filter, selectedFilter, options);
 #endif
+}
+
+void MainWindow::on_actionAutomaticReplay_triggered(){
+    if (autoReplayTimer.isActive())
+        autoReplayTimer.stop();
+    else
+        autoReplayTimer.start(1300);
+
+    ui->actionAutomaticReplay->setChecked( autoReplayTimer.isActive() );
+}
+
+void MainWindow::autoReplayTimer_timeout(){
+    on_actionNextMove_triggered();
+
+    const go::nodeList& nodeList = boardWidget->getCurrentNodeList();
+    go::nodeList::const_iterator iter = qFind(nodeList.begin(), nodeList.end(), boardWidget->getCurrentNode());
+    if (iter == nodeList.end() || ++iter == nodeList.end())
+        on_actionAutomaticReplay_triggered();
 }
