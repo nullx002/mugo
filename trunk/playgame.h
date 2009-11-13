@@ -14,22 +14,25 @@ public:
     PlayGame(BoardWidget* board, go::color color, QObject *parent = 0);
     virtual ~PlayGame();
 
-    virtual void move(int x, int y) = 0;
+    virtual bool undo() = 0;
+
+    virtual bool move(int x, int y) = 0;
+    virtual bool put(go::color c, int x, int y) = 0;
+    virtual bool wait() = 0;
     virtual bool moving() const = 0;
-    virtual void put(go::color c, int x, int y) = 0;
-    virtual void wait() = 0;
 
     go::color yourColor() const;
     bool isGameEnd() const;
     void setHandicap();
     bool isResign() const{ return isResign_; }
+    void setResign(bool resign){ isResign_ = resign; }
 
 signals:
     void gameEnded();
 
 protected:
     BoardWidget* boardWidget_;
-    go::color yourColor_;
+    go::color color_, yourColor_;
     bool isResign_;
 
 //Q_DECLARE_PRIVATE(PlayGame)
