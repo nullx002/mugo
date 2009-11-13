@@ -7,6 +7,7 @@
 #include <QVector>
 #include <QList>
 #include <QProcess>
+#include <QTimer>
 
 
 #if defined(Q_WS_WIN)
@@ -49,7 +50,7 @@ class BoardWidget : public QWidget {
     Q_DISABLE_COPY(BoardWidget)
 public:
     enum eEditMode{ eAlternateMove, eAddBlack, eAddWhite, eAddEmpty, eLabelMark, eManualMark, eCrossMark, eCircleMark, eSquareMark, eTriangleMark, eDeleteMarker, eCountTerritory, ePlayGame };
-    enum eTutorMode{ eNoTutor, eTutorBossSides, eTutorOneSide };
+    enum eTutorMode{ eNoTutor, eTutorBothSides, eTutorOneSide, eAutoReplay };
     enum eMoveNumberMode{ eSequential, eResetInBranch, eResetInVariation };
 
     struct stoneInfo{
@@ -78,6 +79,10 @@ public:
 
     // preference
     void readSettings();
+
+    // property
+//    bool isReadOnly() const{ return readOnly; }
+//    void setReadOnly(bool v){ readOnly = v; }
 
     // draw
     void repaintBoard(bool board=true, bool stones=true);
@@ -199,6 +204,8 @@ public:
     void addTerritory(int x, int y);
 
     void playWithComputer(PlayGame* game);
+    void autoReplay();
+    bool isAutoReplay() const{ return autoReplayTimer.isActive(); }
 
 signals:
     void nodeAdded(go::nodePtr parent, go::nodePtr node, bool select=false);
@@ -206,6 +213,7 @@ signals:
     void nodeModified(go::nodePtr node);
     void currentNodeChanged(go::nodePtr node);
     void updateTerritory(int alive_b, int alive_w, int dead_b, int dead_w, int capturedBlack, int capturedWhite, int blackTerritory, int whiteTerritory, double komi);
+    void automaticReplayEnded();
 
 protected:
     // event
@@ -289,6 +297,9 @@ private:
     // undo
     QUndoStack undoStack;
 
+    // property
+//    bool readOnly;
+
     // data
     bool dirty;
     go::data goData;
@@ -339,8 +350,15 @@ private:
     // sound
     Sound stoneSound;
 
+    // timer
+    QTimer autoReplayTimer;
+
     // play a game
     PlayGame* playGame;
+
+private slots:
+    // auto replay
+    void autoReplayTimer_timeout();
 };
 
 
