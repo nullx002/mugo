@@ -46,9 +46,6 @@ MainWindow::MainWindow(QWidget *parent)
     ui->undoDockWidget->setVisible(false);
     ui->collectionDockWidget->setVisible(false);
 
-    // auto play
-    connect(&autoReplayTimer, SIGNAL(timeout()), this, SLOT(autoReplayTimer_timeout()));
-
     // encoding
     codecActions.push_back( ui->actionEncodingUTF8 );
     codecActions.push_back( ui->actionISO8859_1 );
@@ -1585,9 +1582,9 @@ void MainWindow::on_actionPlayWithGnugo_triggered(){
 * Slot
 * Tools -> Tutor Boss Sides
 */
-void MainWindow::on_actionTutorBossSides_triggered(){
-    if (ui->actionTutorBossSides->isChecked()){
-        boardWidget->setTutorMode(BoardWidget::eTutorBossSides);
+void MainWindow::on_actionTutorBothSides_triggered(){
+    if (ui->actionTutorBothSides->isChecked()){
+        boardWidget->setTutorMode(BoardWidget::eTutorBothSides);
         ui->actionTutorOneSide->setChecked(false);
     }
     else
@@ -1601,7 +1598,7 @@ void MainWindow::on_actionTutorBossSides_triggered(){
 void MainWindow::on_actionTutorOneSide_triggered(){
     if (ui->actionTutorOneSide->isChecked()){
         boardWidget->setTutorMode(BoardWidget::eTutorOneSide);
-        ui->actionTutorBossSides->setChecked(false);
+        ui->actionTutorBothSides->setChecked(false);
     }
     else
         boardWidget->setTutorMode(BoardWidget::eNoTutor);
@@ -2112,7 +2109,8 @@ void MainWindow::updateMenu(){
     ui->actionFlipBoardVertically->setChecked( boardWidget->getFlipBoardVertically() );
 
     ui->actionBranchMode->setChecked( tabData->branchMode );
-    ui->actionTutorBossSides->setChecked( boardWidget->getTutorMode() == BoardWidget::eTutorBossSides );
+    ui->actionAutomaticReplay->setChecked( boardWidget->isAutoReplay() );
+    ui->actionTutorBothSides->setChecked( boardWidget->getTutorMode() == BoardWidget::eTutorBothSides );
     ui->actionTutorOneSide->setChecked( boardWidget->getTutorMode() == BoardWidget::eTutorOneSide );
 
     if (boardWidget->getEditMode() == BoardWidget::eCountTerritory){
@@ -2191,6 +2189,7 @@ void MainWindow::addDocument(BoardWidget* board){
     connect(board, SIGNAL(nodeModified(go::nodePtr)), this, SLOT(nodeModified(go::nodePtr)));
     connect(board, SIGNAL(currentNodeChanged(go::nodePtr)), this, SLOT(currentNodeChanged(go::nodePtr)));
     connect(board, SIGNAL(updateTerritory(int,int,int,int,int,int,int,int,double)), this, SLOT(updateTerritory(int,int,int,int,int,int,int,int,double)));
+    connect(board, SIGNAL(automaticReplayEnded()), this, SLOT(automaticReplay_ended()));
 
     // branch widget
     connect(tree, SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)), this, SLOT(branchWidgetCurrentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)));
@@ -2996,7 +2995,8 @@ void MainWindow::setCountTerritoryMode(bool on){
 
 //        ui->actionCountTerritory,
         ui->actionPlayWithGnugo,
-        ui->actionTutorBossSides,
+        ui->actionAutomaticReplay,
+        ui->actionTutorBothSides,
         ui->actionTutorOneSide,
         ui->actionPlaySound,
         ui->action19x19Board,
@@ -3173,7 +3173,8 @@ void MainWindow::setPlayWithComputerMode(bool on){
 
         ui->actionCountTerritory,
 //        ui->actionPlayWithGnugo,
-        ui->actionTutorBossSides,
+        ui->actionAutomaticReplay,
+        ui->actionTutorBothSides,
         ui->actionTutorOneSide,
         ui->actionPlaySound,
         ui->action19x19Board,
@@ -3339,19 +3340,10 @@ QString getSaveFileName(QWidget* parent, const QString& caption, const QString& 
 }
 
 void MainWindow::on_actionAutomaticReplay_triggered(){
-    if (autoReplayTimer.isActive())
-        autoReplayTimer.stop();
-    else
-        autoReplayTimer.start(1300);
-
-    ui->actionAutomaticReplay->setChecked( autoReplayTimer.isActive() );
+    boardWidget->autoReplay();
+    ui->actionAutomaticReplay->setChecked( boardWidget->isAutoReplay() );
 }
 
-void MainWindow::autoReplayTimer_timeout(){
-    on_actionNextMove_triggered();
-
-    const go::nodeList& nodeList = boardWidget->getCurrentNodeList();
-    go::nodeList::const_iterator iter = qFind(nodeList.begin(), nodeList.end(), boardWidget->getCurrentNode());
-    if (iter == nodeList.end() || ++iter == nodeList.end())
-        on_actionAutomaticReplay_triggered();
+void MainWindow::automaticReplay_ended(){
+    ui->actionAutomaticReplay->setChecked( false );
 }

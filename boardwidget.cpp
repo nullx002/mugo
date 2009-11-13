@@ -88,6 +88,7 @@ namespace{
 BoardWidget::BoardWidget(QWidget *parent) :
     QWidget(parent),
     m_ui(new Ui::BoardWidget),
+//    readOnly(false),
     dirty(false),
     capturedBlack(0),
     capturedWhite(0),
@@ -114,6 +115,9 @@ BoardWidget::BoardWidget(QWidget *parent) :
     m_ui->setupUi(this);
 
 //    stoneSound = Phonon::createPlayer(Phonon::NotificationCategory);
+
+    // auto replay
+    connect(&autoReplayTimer, SIGNAL(timeout()), this, SLOT(autoReplayTimer_timeout()));
 
     readSettings();
 
@@ -178,7 +182,7 @@ void BoardWidget::mouseMoveEvent(QMouseEvent* e){
         return;
 
     bool black;
-    if (editMode == eAlternateMove || editMode == ePlayGame || tutorMode == eTutorBossSides || tutorMode == eTutorOneSide)
+    if (editMode == eAlternateMove || editMode == ePlayGame || tutorMode == eTutorBothSides || tutorMode == eTutorOneSide)
         black = color == go::black;
     else if (editMode == eAddBlack || editMode == eAddWhite)
         black = editMode == eAddBlack;
@@ -241,7 +245,7 @@ void BoardWidget::onLButtonDown(QMouseEvent* e){
 
     if (editMode == ePlayGame)
         playGameLButtonDown(sgfX, sgfY);
-    else if (tutorMode == eTutorBossSides)
+    else if (tutorMode == eTutorBothSides)
         moveNextStone(sgfX, sgfY);
     else if (tutorMode == eTutorOneSide){
         if (moveNextStone(sgfX, sgfY)){
@@ -258,6 +262,8 @@ void BoardWidget::onLButtonDown(QMouseEvent* e){
         else
             addStoneNodeCommand(sgfX, sgfY, boardX, boardY);
     }
+    else if (tutorMode == eAutoReplay)
+        return;
     else if (editMode == eCountTerritory){
         addTerritory(boardX, boardY);
         int alive_b=0, alive_w=0, dead_b=0, dead_w=0, bt=0, wt=0;
@@ -271,13 +277,17 @@ void BoardWidget::onLButtonDown(QMouseEvent* e){
 /**
 */
 void BoardWidget::onRButtonDown(QMouseEvent*){
-    undo();
+    if (editMode == eAlternateMove)
+        undo();
 }
 
 /**
 */
 void BoardWidget::undo(){
-    undoStack.undo();
+    if (editMode == eAlternateMove)
+        undoStack.undo();
+    else if (editMode == ePlayGame)
+        playGame->undo();
 }
 
 /**
@@ -989,7 +999,7 @@ void BoardWidget::modifyNode(go::nodePtr node, bool recreateBoardBuffer){
 */
 void BoardWidget::pass(){
     if (editMode == ePlayGame){
-        if (color == playGame->yourColor() && !playGame->moving())
+        if (color == playGame->yourColor())
             playGame->move(-1, -1);
     }
     else
@@ -1026,7 +1036,7 @@ void BoardWidget::setCurrentNode(go::nodePtr node){
 /**
 */
 void BoardWidget::playGameLButtonDown(int sgfX, int sgfY){
-    if (playGame->moving() == false && color == playGame->yourColor() && currentNode == nodeList.back())
+    if (color == playGame->yourColor() && currentNode == nodeList.back())
         playGame->move(sgfX, sgfY);
 }
 
@@ -2656,5 +2666,22 @@ void BoardWidget::playWithComputer(PlayGame* game){
     }
     else{
         editMode = backupEditMode;
+    }
+}
+
+void BoardWidget::autoReplay(){
+    if (autoReplayTimer.isActive())
+        autoReplayTimer.stop();
+    else
+        autoReplayTimer.start(1300);
+}
+
+void BoardWidget::autoReplayTimer_timeout(){
+    go::nodeList::iterator iter = qFind(nodeList.begin(), nodeList.end(), currentNode);
+    if (iter != nodeList.end() && ++iter != nodeList.end())
+        setCurrentNode( *iter );
+    else{
+        autoReplayTimer.stop();
+        emit automaticReplayEnded();
     }
 }

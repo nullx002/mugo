@@ -5,7 +5,6 @@
 #include <QUndoGroup>
 #include <QUrl>
 #include <QActionGroup>
-#include <QTimer>
 #include "boardwidget.h"
 #include "countterritorydialog.h"
 
@@ -142,8 +141,6 @@ private:
     QList<const char*> codecNames;
     QTextCodec* defaultCodec;
 
-    QTimer autoReplayTimer;
-
     QString OPEN_FILTER;
 
 private slots:
@@ -260,7 +257,7 @@ private slots:
     void on_actionCountTerritory_triggered();
     void on_actionPlayWithGnugo_triggered();
     void on_actionAutomaticReplay_triggered();
-    void on_actionTutorBossSides_triggered();
+    void on_actionTutorBothSides_triggered();
     void on_actionTutorOneSide_triggered();
     void on_actionPlaySound_triggered();
     void on_action19x19Board_triggered();
@@ -326,7 +323,7 @@ private slots:
     void onTabChangeRequest();
 
     // auto replay
-    void autoReplayTimer_timeout();
+    void automaticReplay_ended();
 };
 
 #endif // MAINWINDOW_H
