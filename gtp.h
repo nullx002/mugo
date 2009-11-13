@@ -8,12 +8,14 @@
 class gtp : public PlayGame{
 Q_OBJECT
 public:
-    enum eStatus{ eMove, eGen, ePut, eQuit, eDeadList };
+    enum eKind{ eMove, eGen, ePut, eQuit, eDeadList, eUndo };
+    enum eStatus{ eProcessing, eSuccess, eFailure };
 
     class command{
         public:
-            command(eStatus s) : status(s){}
+            command(eKind k) : kind(k), status(eProcessing){}
 
+            eKind kind;
             eStatus status;
     };
 
@@ -35,16 +37,23 @@ public:
             go::color color;
     };
 
+    class undoCommand : public command{
+        public:
+            undoCommand() : command(eUndo){}
+    };
+
     typedef boost::shared_ptr<command> commandPtr;
 
     gtp(BoardWidget* board, go::color color, QProcess& process, QObject* parent=0);
 
-    virtual void move(int x, int y);
-    virtual bool moving() const{ return moving_; }
-    virtual void put(go::color c, int x, int y);
-    virtual void wait();
+    virtual bool undo();
+
+    virtual bool move(int x, int y);
+    virtual bool put(go::color c, int x, int y);
+    virtual bool wait();
     virtual void quit();
     virtual void deadList();
+    virtual bool moving() const;
 
 private:
     void write(const QString& s);
@@ -55,7 +64,6 @@ private:
 
     int index;
     QList<commandPtr> commandList;
-    bool moving_;
 
 private slots:
     void gtpRead();

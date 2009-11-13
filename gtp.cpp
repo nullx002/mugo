@@ -5,12 +5,26 @@
 #include "gtp.h"
 #include "gtp.h"
 
-gtp::gtp(BoardWidget* board, go::color color, QProcess& proc, QObject* parent) : PlayGame(board, color, parent), process(proc), index(0), moving_(false)
+gtp::gtp(BoardWidget* board, go::color color, QProcess& proc, QObject* parent) : PlayGame(board, color, parent), process(proc), index(0)
 {
     connect(&process, SIGNAL(readyRead()), this, SLOT(gtpRead()));
 }
 
-void gtp::move(int x, int y){
+bool gtp::undo(){
+    if (moving())
+        return false;
+
+    commandList.push_back( commandPtr(new undoCommand) );
+    commandList.push_back( commandPtr(new undoCommand) );
+    write( QString("undo\nnundo\n") );
+
+    return true;
+}
+
+bool gtp::move(int x, int y){
+    if (moving())
+        return false;
+
     commandList.push_back( commandPtr(new moveCommand(x, y)) );
 
     QString xy;
@@ -24,10 +38,13 @@ void gtp::move(int x, int y){
     else
         write( QString("play white %1\n").arg(xy) );
 
-    moving_ = true;
+    return true;
 }
 
-void gtp::put(go::color color, int x, int y){
+bool gtp::put(go::color color, int x, int y){
+    if (moving())
+        return false;
+
     commandList.push_back( commandPtr(new putCommand(x, y)) );
 
     QString xy;
@@ -40,9 +57,14 @@ void gtp::put(go::color color, int x, int y){
         write( QString("play black %1\n").arg(xy) );
     else
         write( QString("play white %1\n").arg(xy) );
+
+    return true;
 }
 
-void gtp::wait(){
+bool gtp::wait(){
+    if (moving())
+        return false;
+
     if (yourColor_ == go::black){
         commandList.push_back( commandPtr(new genmoveCommand(go::white)) );
         write( "genmove white\n" );
@@ -51,6 +73,8 @@ void gtp::wait(){
         commandList.push_back( commandPtr(new genmoveCommand(go::black)) );
         write( "genmove black\n" );
     }
+
+    return true;
 }
 
 void gtp::quit(){
@@ -87,13 +111,14 @@ void gtp::gtpRead(){
         QString msg = s.mid(p+1);
         int index = s.mid(1, p-1).toInt();
 
-        if (commandList[index]->status == eMove)
-            moving_ = false;
-
-        if (status != '=')
+        if (status != '='){
+            commandList[index]->status = eFailure;
             continue;
+        }
+        else
+            commandList[index]->status = eSuccess;
 
-        if (commandList[index]->status == eMove){
+        if (commandList[index]->kind == eMove){
             moveCommand* cmd = (moveCommand*)commandList[index].get();
             boardWidget_->addStoneNodeCommand(cmd->x, cmd->y);
             if (isGameEnd()){
@@ -102,7 +127,7 @@ void gtp::gtpRead(){
             }
             wait();
         }
-        else if (commandList[index]->status == eGen){
+        else if (commandList[index]->kind == eGen){
             if (msg == "resign"){
                 QMessageBox::information(boardWidget_, APPNAME, tr("Computer resign."));
                 isResign_ = true;
@@ -118,12 +143,12 @@ void gtp::gtpRead(){
             if (isGameEnd())
                 deadList();
         }
-        else if (commandList[index]->status == ePut){
+        else if (commandList[index]->kind == ePut){
             const go::nodePtr& root = boardWidget_->getData().root;
             putCommand* cmd = (putCommand*)commandList[index].get();
             boardWidget_->addStone(root, go::point(cmd->x, cmd->y), go::black);
         }
-        else if (commandList[index]->status == eDeadList){
+        else if (commandList[index]->kind == eDeadList){
             const BoardWidget::BoardBuffer& buffer = boardWidget_->getBuffer();
             QStringList deadStones = msg.split(QRegExp("[ \n]"));
             foreach(QString stone, deadStones){
@@ -160,4 +185,11 @@ bool gtp::stringToPosition(const QString& buf, int& x, int& y){
     y = ysize - buf.mid(1).toInt();
 
     return x >= 0 && x < xsize && y >= 0 && y < ysize;
+}
+
+bool gtp::moving() const{
+    if (commandList.isEmpty())
+        return false;
+
+    return commandList.last()->status == eProcessing;
 }
