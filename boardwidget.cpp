@@ -100,7 +100,8 @@ BoardWidget::BoardWidget(QWidget *parent) :
     showCoordinatesI(false),
     showMarker(true),
     showBranchMoves(true),
-    reproductionSpeed(1300),
+    stepsOfFastMove(FAST_MOVE_STEPS),
+    autoReplayInterval(AUTO_REPLAY_INTERVAL),
     editMode(eAlternateMove),
     backupEditMode(eAlternateMove),
     tutorMode(eNoTutor),
@@ -345,8 +346,8 @@ void BoardWidget::readSettings(){
     showMoveNumberCount = settings.value("marker/moveNumber", 0).toInt();
 
     // navigation
-//    stepsOfFastMove = settings.value("navigation/stepsOfFastMove", 10).toInt();
-    reproductionSpeed = settings.value("navigation/reproductionSpeed", 1300).toInt();
+    stepsOfFastMove    = settings.value("navigation/stepsOfFastMove", FAST_MOVE_STEPS).toInt();
+    autoReplayInterval = settings.value("navigation/autoReplayInterval", AUTO_REPLAY_INTERVAL).toInt();
 
     // sound
     playSound = settings.value("sound/play", 1).toBool();
@@ -2678,7 +2679,7 @@ void BoardWidget::autoReplay(){
     if (autoReplayTimer.isActive())
         autoReplayTimer.stop();
     else
-        autoReplayTimer.start(1300);
+        autoReplayTimer.start( autoReplayInterval );
 }
 
 void BoardWidget::autoReplayTimer_timeout(){

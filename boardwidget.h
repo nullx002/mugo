@@ -318,7 +318,8 @@ private:
     bool showCoordinatesI;
     bool showMarker;
     bool showBranchMoves;
-    int  reproductionSpeed;
+    int  stepsOfFastMove;
+    int  autoReplayInterval;
     eEditMode editMode;
     eEditMode backupEditMode;
     eTutorMode tutorMode;
