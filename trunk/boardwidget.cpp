@@ -100,6 +100,7 @@ BoardWidget::BoardWidget(QWidget *parent) :
     showCoordinatesI(false),
     showMarker(true),
     showBranchMoves(true),
+    reproductionSpeed(1300),
     editMode(eAlternateMove),
     backupEditMode(eAlternateMove),
     tutorMode(eNoTutor),
@@ -342,6 +343,10 @@ void BoardWidget::readSettings(){
     labelType = settings.value("marker/labelType").toInt();
     showMoveNumber = settings.value("marker/showMoveNumber", true).toBool();
     showMoveNumberCount = settings.value("marker/moveNumber", 0).toInt();
+
+    // navigation
+//    stepsOfFastMove = settings.value("navigation/stepsOfFastMove", 10).toInt();
+    reproductionSpeed = settings.value("navigation/reproductionSpeed", 1300).toInt();
 
     // sound
     playSound = settings.value("sound/play", 1).toBool();
