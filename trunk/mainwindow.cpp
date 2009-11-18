@@ -3345,5 +3345,7 @@ void MainWindow::on_actionAutomaticReplay_triggered(){
 }
 
 void MainWindow::automaticReplay_ended(){
-    ui->actionAutomaticReplay->setChecked( false );
+    BoardWidget* board = qobject_cast<BoardWidget*>(sender());
+    if (boardWidget == board)
+        ui->actionAutomaticReplay->setChecked( false );
 }

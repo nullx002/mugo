@@ -3,7 +3,7 @@
 
 
 #define APPNAME "mugo"
-#define VERSION "0.14.4"
+#define VERSION "0.14.5"
 #define AUTHOR   "nsase"
 
 #define SGF_LINEWIDTH 60
@@ -19,6 +19,8 @@
 #define FOCUS_WHITE_COLOR QColor(255, 0, 0)
 #define FOCUS_BLACK_COLOR QColor(255, 0, 0)
 #define BRANCH_COLOR QColor(00, 0, 255)
+#define FAST_MOVE_STEPS 10
+#define AUTO_REPLAY_INTERVAL 1300
 #define SAVE_NAME "%DT%_%PB%_%PW%"
 
 

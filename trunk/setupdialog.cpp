@@ -54,6 +54,10 @@ SetupDialog::SetupDialog(QWidget *parent) :
     // markers/label
     m_ui->labelTypeComboBox->setCurrentIndex( settings.value("marker/labelType").toInt() );
 
+    // navigation
+    m_ui->stepsOfFastMoveSpinBox->setValue( settings.value("navigation/stepsOfFastMove", FAST_MOVE_STEPS).toInt() );
+    m_ui->reproductionSpeedSpinBox->setValue( settings.value("navigation/autoReplayInterval", AUTO_REPLAY_INTERVAL).toInt() );
+
     // sound
     m_ui->soundTypeComboBox->setCurrentIndex( settings.value("sound/type").toInt() );
     m_ui->soundPathEdit->setText( settings.value("sound/path").toString() );
@@ -108,8 +112,8 @@ void SetupDialog::accept(){
     settings.setValue("marker/labelType", m_ui->labelTypeComboBox->currentIndex());
 
     // navigation
-//    settings.setValue("navigation/stepsOfFastMove", m_ui->xxx->value());
-    settings.setValue("navigation/reproductionSpeed", m_ui->reproductionSpeedSpinBox->value());
+    settings.setValue("navigation/stepsOfFastMove", m_ui->stepsOfFastMoveSpinBox->value());
+    settings.setValue("navigation/autoReplayInterval", m_ui->reproductionSpeedSpinBox->value());
 
     // sound
     settings.setValue("sound/type", m_ui->soundTypeComboBox->currentIndex());
