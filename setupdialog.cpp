@@ -107,6 +107,10 @@ void SetupDialog::accept(){
     settings.setValue("marker/branchColor", branchColor);
     settings.setValue("marker/labelType", m_ui->labelTypeComboBox->currentIndex());
 
+    // navigation
+//    settings.setValue("navigation/stepsOfFastMove", m_ui->xxx->value());
+    settings.setValue("navigation/reproductionSpeed", m_ui->reproductionSpeedSpinBox->value());
+
     // sound
     settings.setValue("sound/type", m_ui->soundTypeComboBox->currentIndex());
     settings.setValue("sound/path", m_ui->soundPathEdit->text());
