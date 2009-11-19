@@ -17,32 +17,32 @@
         <translation type="unfinished">碁盤</translation>
     </message>
     <message>
-        <location filename="boardwidget.cpp" line="617"/>
+        <location filename="boardwidget.cpp" line="623"/>
         <source>%1(%2)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="boardwidget.cpp" line="677"/>
+        <location filename="boardwidget.cpp" line="683"/>
         <source>Figure %1</source>
         <translation type="unfinished">第 %1 譜</translation>
     </message>
     <message>
-        <location filename="boardwidget.cpp" line="922"/>
+        <location filename="boardwidget.cpp" line="928"/>
         <source>Rotate SGF</source>
         <translation type="unfinished">回転</translation>
     </message>
     <message>
-        <location filename="boardwidget.cpp" line="930"/>
+        <location filename="boardwidget.cpp" line="936"/>
         <source>Flip SGF Horizontally</source>
         <translation type="unfinished">左右に反転</translation>
     </message>
     <message>
-        <location filename="boardwidget.cpp" line="938"/>
+        <location filename="boardwidget.cpp" line="944"/>
         <source>Flip SGF Vertically</source>
         <translation type="unfinished">上下に反転</translation>
     </message>
     <message>
-        <location filename="boardwidget.cpp" line="2186"/>
+        <location filename="boardwidget.cpp" line="2192"/>
         <source>Input Label</source>
         <translation type="unfinished">ラベルを入力</translation>
     </message>
@@ -928,7 +928,7 @@ Do you want to save your changes?</source>
     <message>
         <location filename="mainwindow.ui" line="1811"/>
         <source>Automatic Replay</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">自動再生</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="802"/>
@@ -1478,7 +1478,7 @@ Do you want to save your changes?</source>
     <name>SetupDialog</name>
     <message>
         <location filename="setupdialog.ui" line="32"/>
-        <location filename="setupdialog.ui" line="73"/>
+        <location filename="setupdialog.ui" line="78"/>
         <source>Board</source>
         <translation type="unfinished">碁盤</translation>
     </message>
@@ -1489,119 +1489,140 @@ Do you want to save your changes?</source>
     </message>
     <message>
         <location filename="setupdialog.ui" line="42"/>
-        <location filename="setupdialog.ui" line="402"/>
+        <location filename="setupdialog.ui" line="407"/>
         <source>Markers</source>
         <oldsource>Marker</oldsource>
         <translation type="unfinished">マーカー</translation>
     </message>
     <message>
         <location filename="setupdialog.ui" line="47"/>
-        <location filename="setupdialog.ui" line="551"/>
+        <location filename="setupdialog.ui" line="556"/>
+        <source>Navigation</source>
+        <translation type="unfinished">ナビゲーション</translation>
+    </message>
+    <message>
+        <location filename="setupdialog.ui" line="52"/>
+        <location filename="setupdialog.ui" line="631"/>
         <source>Sound</source>
         <translation type="unfinished">サウンド</translation>
     </message>
     <message>
-        <location filename="setupdialog.ui" line="52"/>
-        <location filename="setupdialog.ui" line="626"/>
+        <location filename="setupdialog.ui" line="57"/>
+        <location filename="setupdialog.ui" line="706"/>
         <source>Save</source>
         <translation type="unfinished">保存</translation>
-    </message>
-    <message>
-        <location filename="setupdialog.ui" line="87"/>
-        <location filename="setupdialog.ui" line="230"/>
-        <location filename="setupdialog.ui" line="316"/>
-        <source>Default Image</source>
-        <translation type="unfinished">標準の画像</translation>
-    </message>
-    <message>
-        <location filename="setupdialog.ui" line="495"/>
-        <source>Label Type</source>
-        <translation type="unfinished">ラベルの種類</translation>
-    </message>
-    <message>
-        <location filename="setupdialog.ui" line="503"/>
-        <source>A,B,C...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="setupdialog.ui" line="508"/>
-        <source>a,b,c...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="setupdialog.ui" line="513"/>
-        <source>1,2,3...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message utf8="true">
-        <location filename="setupdialog.ui" line="518"/>
-        <source>ア,イ,ウ...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message utf8="true">
-        <location filename="setupdialog.ui" line="523"/>
-        <source>イ,ロ,ハ...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="setupdialog.ui" line="565"/>
-        <source>Default Sound</source>
-        <translation type="unfinished">標準のサウンド</translation>
-    </message>
-    <message>
-        <location filename="setupdialog.ui" line="632"/>
-        <source>Default FileName</source>
-        <translation type="unfinished">ファイル名</translation>
     </message>
     <message>
         <location filename="setupdialog.ui" line="92"/>
         <location filename="setupdialog.ui" line="235"/>
         <location filename="setupdialog.ui" line="321"/>
-        <location filename="setupdialog.ui" line="570"/>
-        <source>Select File</source>
-        <translation type="unfinished">ファイルを指定</translation>
+        <source>Default Image</source>
+        <translation type="unfinished">標準の画像</translation>
     </message>
     <message>
-        <location filename="setupdialog.ui" line="416"/>
-        <source>Focus Triangle</source>
-        <translation type="unfinished">▲ フォーカス用の三角</translation>
+        <location filename="setupdialog.ui" line="500"/>
+        <source>Label Type</source>
+        <translation type="unfinished">ラベルの種類</translation>
     </message>
     <message>
-        <location filename="setupdialog.ui" line="421"/>
-        <source>Circle</source>
-        <translation type="unfinished">○ マル</translation>
-    </message>
-    <message>
-        <location filename="setupdialog.ui" line="426"/>
-        <source>Cross</source>
-        <translation type="unfinished">× バツ</translation>
-    </message>
-    <message>
-        <location filename="setupdialog.ui" line="431"/>
-        <source>Square</source>
-        <translation type="unfinished">□ 四角</translation>
-    </message>
-    <message>
-        <location filename="setupdialog.ui" line="436"/>
-        <source>Triangle</source>
-        <translation type="unfinished">△ 三角</translation>
-    </message>
-    <message>
-        <location filename="setupdialog.cpp" line="152"/>
-        <location filename="setupdialog.cpp" line="207"/>
-        <location filename="setupdialog.cpp" line="238"/>
-        <source>All Image Files(*.bmp *.gif *.jpg *.jpeg *.png *.tif *.tiff);;All Files(*.*)</source>
+        <location filename="setupdialog.ui" line="508"/>
+        <source>A,B,C...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="setupdialog.cpp" line="293"/>
-        <source>Sound Files(*.wav *.mp3);;All Files(*.*)</source>
+        <location filename="setupdialog.ui" line="513"/>
+        <source>a,b,c...</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="setupdialog.ui" line="518"/>
+        <source>1,2,3...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message utf8="true">
+        <location filename="setupdialog.ui" line="523"/>
+        <source>ア,イ,ウ...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message utf8="true">
+        <location filename="setupdialog.ui" line="528"/>
+        <source>イ,ロ,ハ...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="setupdialog.ui" line="562"/>
+        <source>Fast forward/rewind steps</source>
+        <translation type="unfinished">少し戻る／進むの移動量</translation>
+    </message>
+    <message>
+        <location filename="setupdialog.ui" line="585"/>
+        <source>Automatic Replay</source>
+        <translation type="unfinished">自動再生</translation>
+    </message>
+    <message>
+        <location filename="setupdialog.ui" line="591"/>
+        <source>Interval(msec)</source>
+        <translation type="unfinished">間隔（ミリ秒）</translation>
+    </message>
+    <message>
+        <location filename="setupdialog.ui" line="645"/>
+        <source>Default Sound</source>
+        <translation type="unfinished">標準のサウンド</translation>
+    </message>
+    <message>
+        <location filename="setupdialog.ui" line="712"/>
+        <source>Default FileName</source>
+        <translation type="unfinished">ファイル名</translation>
     </message>
     <message>
         <location filename="setupdialog.ui" line="97"/>
         <location filename="setupdialog.ui" line="240"/>
         <location filename="setupdialog.ui" line="326"/>
+        <location filename="setupdialog.ui" line="650"/>
+        <source>Select File</source>
+        <translation type="unfinished">ファイルを指定</translation>
+    </message>
+    <message>
+        <location filename="setupdialog.ui" line="421"/>
+        <source>Focus Triangle</source>
+        <translation type="unfinished">▲ フォーカス用の三角</translation>
+    </message>
+    <message>
+        <location filename="setupdialog.ui" line="426"/>
+        <source>Circle</source>
+        <translation type="unfinished">○ マル</translation>
+    </message>
+    <message>
+        <location filename="setupdialog.ui" line="431"/>
+        <source>Cross</source>
+        <translation type="unfinished">× バツ</translation>
+    </message>
+    <message>
+        <location filename="setupdialog.ui" line="436"/>
+        <source>Square</source>
+        <translation type="unfinished">□ 四角</translation>
+    </message>
+    <message>
+        <location filename="setupdialog.ui" line="441"/>
+        <source>Triangle</source>
+        <translation type="unfinished">△ 三角</translation>
+    </message>
+    <message>
+        <location filename="setupdialog.cpp" line="160"/>
+        <location filename="setupdialog.cpp" line="215"/>
+        <location filename="setupdialog.cpp" line="246"/>
+        <source>All Image Files(*.bmp *.gif *.jpg *.jpeg *.png *.tif *.tiff);;All Files(*.*)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="setupdialog.cpp" line="301"/>
+        <source>Sound Files(*.wav *.mp3);;All Files(*.*)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="setupdialog.ui" line="102"/>
+        <location filename="setupdialog.ui" line="245"/>
+        <location filename="setupdialog.ui" line="331"/>
         <source>Fill Color</source>
         <translation type="unfinished">単色</translation>
     </message>
@@ -1611,74 +1632,74 @@ Do you want to save your changes?</source>
         <translation type="unfinished">設定</translation>
     </message>
     <message>
-        <location filename="setupdialog.ui" line="176"/>
+        <location filename="setupdialog.ui" line="181"/>
         <source>Background in Tutor</source>
         <translation type="unfinished">棋譜並べ時の背景色</translation>
     </message>
     <message>
-        <location filename="setupdialog.ui" line="159"/>
+        <location filename="setupdialog.ui" line="164"/>
         <source>Background Color</source>
         <translation type="unfinished">背景色</translation>
     </message>
     <message>
-        <location filename="setupdialog.ui" line="79"/>
-        <location filename="setupdialog.ui" line="222"/>
-        <location filename="setupdialog.ui" line="308"/>
-        <location filename="setupdialog.ui" line="408"/>
-        <location filename="setupdialog.ui" line="557"/>
+        <location filename="setupdialog.ui" line="84"/>
+        <location filename="setupdialog.ui" line="227"/>
+        <location filename="setupdialog.ui" line="313"/>
+        <location filename="setupdialog.ui" line="413"/>
+        <location filename="setupdialog.ui" line="637"/>
         <source>Type</source>
         <translation type="unfinished">種類</translation>
     </message>
     <message>
-        <location filename="setupdialog.ui" line="105"/>
-        <location filename="setupdialog.ui" line="248"/>
-        <location filename="setupdialog.ui" line="334"/>
+        <location filename="setupdialog.ui" line="110"/>
+        <location filename="setupdialog.ui" line="253"/>
+        <location filename="setupdialog.ui" line="339"/>
         <source>Color</source>
         <translation type="unfinished">色</translation>
     </message>
     <message>
-        <location filename="setupdialog.ui" line="122"/>
-        <location filename="setupdialog.ui" line="268"/>
-        <location filename="setupdialog.ui" line="354"/>
-        <location filename="setupdialog.ui" line="578"/>
+        <location filename="setupdialog.ui" line="127"/>
+        <location filename="setupdialog.ui" line="273"/>
+        <location filename="setupdialog.ui" line="359"/>
+        <location filename="setupdialog.ui" line="658"/>
         <source>Path</source>
         <translation type="unfinished">ファイル</translation>
     </message>
     <message>
-        <location filename="setupdialog.ui" line="141"/>
-        <location filename="setupdialog.ui" line="287"/>
-        <location filename="setupdialog.ui" line="373"/>
-        <location filename="setupdialog.ui" line="597"/>
+        <location filename="setupdialog.ui" line="146"/>
+        <location filename="setupdialog.ui" line="292"/>
+        <location filename="setupdialog.ui" line="378"/>
+        <location filename="setupdialog.ui" line="677"/>
         <source>...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="setupdialog.ui" line="153"/>
+        <location filename="setupdialog.ui" line="158"/>
         <source>Background</source>
         <translation type="unfinished">背景</translation>
     </message>
     <message>
-        <location filename="setupdialog.ui" line="216"/>
+        <location filename="setupdialog.ui" line="221"/>
         <source>White Stone</source>
         <translation type="unfinished">白石</translation>
     </message>
     <message>
-        <location filename="setupdialog.ui" line="299"/>
+        <location filename="setupdialog.ui" line="304"/>
         <source>Black Stone</source>
         <translation type="unfinished">黒石</translation>
     </message>
     <message>
-        <location filename="setupdialog.ui" line="444"/>
+        <location filename="setupdialog.ui" line="449"/>
         <source>Color (White Stone)</source>
         <translation type="unfinished">色（白石）</translation>
     </message>
     <message>
-        <location filename="setupdialog.ui" line="461"/>
+        <location filename="setupdialog.ui" line="466"/>
         <source>Color (Black Stone)</source>
         <translation type="unfinished">色（黒石）</translation>
     </message>
     <message>
-        <location filename="setupdialog.ui" line="478"/>
+        <location filename="setupdialog.ui" line="483"/>
         <source>Branch Color</source>
         <translation type="unfinished">分岐の色</translation>
     </message>
