@@ -112,6 +112,8 @@ private:
     void alertLanguageChanged();
     QString getDefaultSaveName() const;
 
+    void readSettings();
+
     Ui::MainWindow *ui;
     QMap<BoardWidget*, TabData> tabDatas;
     TabData* tabData;
@@ -140,6 +142,8 @@ private:
     QList<QAction*> codecActions;
     QList<const char*> codecNames;
     QTextCodec* defaultCodec;
+
+    int stepsOfFastMove;
 
     QString OPEN_FILTER;
 

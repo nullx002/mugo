@@ -37,6 +37,7 @@ MainWindow::MainWindow(QWidget *parent)
     , undoGroup(this)
     , countTerritoryMode(false)
     , playWithComputerMode(false)
+    , stepsOfFastMove(FAST_MOVE_STEPS)
 {
     ui->setupUi(this);
 
@@ -276,6 +277,8 @@ MainWindow::MainWindow(QWidget *parent)
     setGeometry(x(), y(), settings.value("width", WIN_W).toInt(), settings.value("height", WIN_H).toInt());
     restoreState( settings.value("docksState").toByteArray() );
     ui->collectionWidget->header()->restoreState( settings.value("collectionState").toByteArray() );
+
+    readSettings();
 
     // command line
     QStringList args = qApp->arguments();
@@ -1138,7 +1141,7 @@ void MainWindow::on_actionFastRewind_triggered(){
     if (node->parent() == NULL)
         return;
 
-    for (int i=0; i<10; ++i){
+    for (int i=0; i<stepsOfFastMove; ++i){
         if (node->parent())
             node = node->parent();
         else
@@ -1177,7 +1180,7 @@ void MainWindow::on_actionFastForward_triggered(){
     go::nodeList::const_iterator iter = qFind(nodeList.begin(), nodeList.end(), boardWidget->getCurrentNode());
 
     go::nodePtr node = boardWidget->getCurrentNode();
-    for (int i=0; i<10; ++i)
+    for (int i=0; i<stepsOfFastMove; ++i)
         if (iter != nodeList.end() && ++iter != nodeList.end())
             node = *iter;
         else
@@ -1713,11 +1716,7 @@ void MainWindow::on_actionOptions_triggered(){
     if (dlg.exec() != QDialog::Accepted)
         return;
 
-    for (int i=0; i<ui->boardTabWidget->count(); ++i){
-        BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->widget(i));
-        board->readSettings();
-        board->repaintBoard();
-    }
+    readSettings();
 }
 
 /**
@@ -1730,12 +1729,7 @@ void MainWindow::on_actionClearSettings_triggered(){
 
     QSettings settings;
     settings.clear();
-
-    for (int i=0; i<ui->boardTabWidget->count(); ++i){
-        BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->widget(i));
-        board->readSettings();
-        board->repaintBoard();
-    }
+    readSettings();
 }
 
 /**
@@ -3348,4 +3342,18 @@ void MainWindow::automaticReplay_ended(){
     BoardWidget* board = qobject_cast<BoardWidget*>(sender());
     if (boardWidget == board)
         ui->actionAutomaticReplay->setChecked( false );
+}
+
+void MainWindow::readSettings(){
+    QSettings settings;
+
+    stepsOfFastMove = settings.value("navigation/stepsOfFastMove", FAST_MOVE_STEPS).toInt();
+
+    for (int i=0; i<ui->boardTabWidget->count(); ++i){
+        BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->widget(i));
+        if (board){
+            board->readSettings();
+            board->repaintBoard();
+        }
+    }
 }
