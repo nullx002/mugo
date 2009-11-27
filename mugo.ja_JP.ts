@@ -316,7 +316,7 @@ mugo automatically counts territories.</oldsource>
     <message>
         <location filename="mainwindow.cpp" line="1928"/>
         <source>Are you sure you want to resign?</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">投了しますか？</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="2295"/>
@@ -918,7 +918,7 @@ Do you want to save your changes?</source>
     <message>
         <location filename="mainwindow.ui" line="1795"/>
         <source>Resign</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">投了</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="1803"/>

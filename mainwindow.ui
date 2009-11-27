@@ -601,9 +601,9 @@
     </layout>
    </widget>
   </widget>
-  <widget class="QToolBar" name="gameToolBar">
+  <widget class="QToolBar" name="playGameToolBar">
    <property name="windowTitle">
-    <string>Game ToolBar</string>
+    <string>Play ToolBar</string>
    </property>
    <attribute name="toolBarArea">
     <enum>TopToolBarArea</enum>
