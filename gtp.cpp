@@ -129,7 +129,7 @@ void gtp::gtpRead(){
         }
         else if (commandList[index]->kind == eGen){
             if (msg == "resign"){
-                QMessageBox::information(boardWidget_, APPNAME, tr("Computer resign."));
+                QMessageBox::information(boardWidget_, APPNAME, tr("Computer resigns."));
                 isResign_ = true;
                 quit();
                 emit gameEnded();
