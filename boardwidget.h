@@ -119,6 +119,7 @@ public:
     const BoardBuffer& getBuffer(){ return board; }
     void getCaptured(int& black, int& white) const{ black = capturedBlack; white = capturedWhite; }
     int  getMoveNumber() const{ return currentMoveNumber; }
+    bool forward(int n);
 
     // command
     void undo();
