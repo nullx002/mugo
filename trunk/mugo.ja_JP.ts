@@ -924,7 +924,7 @@ Do you want to save your changes?</source>
     <message>
         <location filename="mainwindow.ui" line="1803"/>
         <source>undo</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">待った</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="1811"/>

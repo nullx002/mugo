@@ -179,7 +179,7 @@ void BoardWidget::mouseMoveEvent(QMouseEvent* e){
     int x = e->x() - (width() / 2 - offscreenBuffer1.width() / 2);
     int y = e->y() - (height() / 2 - offscreenBuffer1.height() / 2);
 
-    if (editMode == ePlayGame && (color != playGame->yourColor() || playGame->moving() || currentNode != nodeList.back()))
+    if (editMode == ePlayGame && (color != playGame->yourColor() || playGame->moving()))
         return;
 
     bool black;
@@ -207,7 +207,7 @@ void BoardWidget::mouseMoveEvent(QMouseEvent* e){
 void BoardWidget::wheelEvent(QWheelEvent* e){
     QWidget::wheelEvent(e);
 
-    if (tutorMode != eNoTutor)
+    if (tutorMode != eNoTutor || editMode == ePlayGame)
         return;
 
     go::nodeList::iterator iter = qFind(nodeList.begin(), nodeList.end(), currentNode);
@@ -812,6 +812,29 @@ void BoardWidget::setRoot(go::informationPtr& info){
     undoStack.clear();
 }
 
+bool BoardWidget::forward(int n){
+    go::nodeList::const_iterator iter = qFind(nodeList.begin(), nodeList.end(), currentNode);
+    if (iter == nodeList.end())
+        return false;
+
+    if (n > 0){
+        while (n > 0 && iter != nodeList.end()){
+            --n;
+            ++iter;
+        }
+        setCurrentNode(*iter);
+    }
+    else if (n < 0){
+        while (n < 0 && iter != nodeList.begin()){
+            ++n;
+            --iter;
+        }
+        setCurrentNode(*iter);
+    }
+
+    return true;
+}
+
 /**
 */
 void BoardWidget::addStoneNodeCommand(int sgfX, int sgfY){
@@ -1040,7 +1063,7 @@ void BoardWidget::setCurrentNode(go::nodePtr node){
 /**
 */
 void BoardWidget::playGameLButtonDown(int sgfX, int sgfY){
-    if (color == playGame->yourColor() && currentNode == nodeList.back())
+    if (color == playGame->yourColor())
         playGame->move(sgfX, sgfY);
 }
 

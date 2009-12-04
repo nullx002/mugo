@@ -15,8 +15,10 @@ bool gtp::undo(){
         return false;
 
     commandList.push_back( commandPtr(new undoCommand) );
+    write( QString("undo\n") );
+
     commandList.push_back( commandPtr(new undoCommand) );
-    write( QString("undo\nnundo\n") );
+    write( QString("undo\n") );
 
     return true;
 }
@@ -164,6 +166,8 @@ void gtp::gtpRead(){
             }
             emit gameEnded();
         }
+        else if (commandList[index]->kind == eUndo)
+            boardWidget_->forward(-1);
     }
 }
 
