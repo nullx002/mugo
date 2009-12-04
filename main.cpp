@@ -90,6 +90,8 @@ void Application::setMainWindow(MainWindow* win){
 
 int main(int argc, char *argv[])
 {
+    putenv( "UNICODEMAP_JP=cp932" );
+
 // is QFileOpenEvent received on macx??
     Application a(argc, argv);
 //    a.addLibraryPath( a.applicationDirPath() + "/plugins" );
