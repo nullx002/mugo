@@ -41,8 +41,6 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    ui->playGameToolBar->setVisible(false);
-
     OPEN_FILTER = tr("All Go Format(*.sgf *.ugf *.ugi *.gib *.ngf);;sgf(*.sgf);;ugf(*.ugf *.ugi);;gib(*.gib);;ngf(*.ngf);;All Files(*.*)");
 
     // hide dock view
@@ -197,6 +195,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->menuToolbars->addAction( ui->navigationToolBar->toggleViewAction() );
     ui->menuToolbars->addAction( ui->viewToolBar->toggleViewAction() );
     ui->menuToolbars->addAction( ui->collectionToolBar->toggleViewAction() );
+    ui->menuToolbars->addAction( ui->playGameToolBar->toggleViewAction() );
 
     // language menu
     QString language = settings.value("language").toString();
