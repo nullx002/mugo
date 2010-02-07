@@ -19,7 +19,7 @@ go::color PlayGame::yourColor() const{
 
 bool PlayGame::isGameEnd() const{
     const go::nodeList& nodeList = boardWidget_->getCurrentNodeList();
-    if (nodeList.size() < 2)
+    if (nodeList.size() < 3)
         return false;
 
     go::nodeList::const_iterator iter = nodeList.end();
