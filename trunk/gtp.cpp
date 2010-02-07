@@ -44,8 +44,8 @@ bool gtp::move(int x, int y){
 }
 
 bool gtp::put(go::color color, int x, int y){
-    if (moving())
-        return false;
+//    if (moving())
+//        return false;
 
     commandList.push_back( commandPtr(new putCommand(x, y)) );
 
