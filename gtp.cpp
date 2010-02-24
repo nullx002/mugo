@@ -64,8 +64,8 @@ bool gtp::put(go::color color, int x, int y){
 }
 
 bool gtp::wait(){
-    if (moving())
-        return false;
+//    if (moving())
+//        return false;
 
     if (yourColor_ == go::black){
         commandList.push_back( commandPtr(new genmoveCommand(go::white)) );
