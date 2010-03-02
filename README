@@ -1,0 +1,8 @@
+mugo
+
+mugo requires Qt framework.
+You can get Qt framework from following site:
+
+Qt web site: http://qt.nokia.com/
+Qt framework for Windows  : http://qt.nokia.com/downloads/windows-cppQt framework for Mac      : http://qt.nokia.com/downloads/mac-os-cppQt framework for Linux/X11: http://qt.nokia.com/downloads/linux-x11-cpp
+
