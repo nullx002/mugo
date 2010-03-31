@@ -191,7 +191,7 @@ public:
     int  getRotateBoard() const{ return rotateBoard_; }
     bool getFlipBoardHorizontally() const{ return flipBoardHorizontally_; }
     bool getFlipBoardVertically() const{ return flipBoardVertically_; }
-    bool whiteFirst() const{ return goData.root->isBlack(); }
+    bool whiteFirst() const{ return goData.root->nextColor == go::white; }
 
     void createBoardBuffer();
     QString toString(go::nodePtr node) const;
@@ -209,6 +209,7 @@ public:
     bool isAutoReplay() const{ return autoReplayTimer.isActive(); }
 
 signals:
+    void cleared();
     void nodeAdded(go::nodePtr parent, go::nodePtr node, bool select=false);
     void nodeDeleted(go::nodePtr node, bool deleteChildren);
     void nodeModified(go::nodePtr node);

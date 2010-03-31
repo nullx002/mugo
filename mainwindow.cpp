@@ -1546,8 +1546,7 @@ void MainWindow::on_actionPlayWithGnugo_triggered(){
         }
 
         QString param;
-        param.sprintf(" --mode gtp --boardsize %d --komi %.2f --handicap %d --level %d",
-                        dlg.size, dlg.komi, dlg.handicap, dlg.level);
+        param.sprintf(" --mode gtp");
         param = '"' + dlg.path + '"' + param;
         qDebug() << param;
 
@@ -1563,7 +1562,7 @@ void MainWindow::on_actionPlayWithGnugo_triggered(){
         }
 
         delete tabData->playGame;
-        tabData->playGame = new gtp(boardWidget, dlg.isBlack ? go::black : go::white, *tabData->gtpProcess);
+        tabData->playGame = new gtp(boardWidget, dlg.isBlack ? go::black : go::white, dlg.size, dlg.komi, dlg.handicap, dlg.level,*tabData->gtpProcess);
         connect( tabData->playGame, SIGNAL(gameEnded()), this, SLOT(playGameEnded()) );
         setPlayWithComputerMode(true);
         boardWidget->playWithComputer(tabData->playGame);
@@ -1814,6 +1813,14 @@ void MainWindow::on_boardTabWidget_currentChanged(QWidget* widget){
 
 void MainWindow::on_boardTabWidget_tabCloseRequested(int index){
     closeTab(index);
+}
+
+/**
+* Slot
+* board data was cleared.
+*/
+void MainWindow::boardCleared(){
+    setTreeData();
 }
 
 /**
@@ -2179,6 +2186,7 @@ void MainWindow::addDocument(BoardWidget* board){
     setDocument(board);
 
     // board widget
+    connect(board, SIGNAL(cleared()), this, SLOT(boardCleared()));
     connect(board, SIGNAL(nodeAdded(go::nodePtr,go::nodePtr,bool)), this, SLOT(nodeAdded(go::nodePtr,go::nodePtr,bool)));
     connect(board, SIGNAL(nodeDeleted(go::nodePtr,bool)), this, SLOT(nodeDeleted(go::nodePtr, bool)));
     connect(board, SIGNAL(nodeModified(go::nodePtr)), this, SLOT(nodeModified(go::nodePtr)));
