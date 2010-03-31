@@ -5,9 +5,17 @@
 #include "gtp.h"
 #include "gtp.h"
 
-gtp::gtp(BoardWidget* board, go::color color, QProcess& proc, QObject* parent) : PlayGame(board, color, parent), process(proc), index(0)
+gtp::gtp(BoardWidget* board, go::color color, int boardSize, const qreal& komi, int handicap, int level, QProcess& proc, QObject* parent)
+    : PlayGame(board, color, parent), process(proc), index(0)
 {
     connect(&process, SIGNAL(readyRead()), this, SLOT(gtpRead()));
+
+    commandList.push_back( commandPtr(new boardSizeCommand(boardSize)) );
+    commandList.push_back( commandPtr(new komiCommand(komi)) );
+    commandList.push_back( commandPtr(new levelCommand(level)) );
+    write( QString().sprintf("boardsize %d\n", boardSize) );
+    write( QString().sprintf("komi %f\n", komi) );
+    write( QString().sprintf("level %d\n", level) );
 }
 
 bool gtp::undo(){
@@ -168,6 +176,10 @@ void gtp::gtpRead(){
         }
         else if (commandList[index]->kind == eUndo)
             boardWidget_->forward(-1);
+        else if (commandList[index]->kind == eBoardSize){
+            boardSizeCommand* cmd = (boardSizeCommand*)commandList[index].get();
+            boardWidget_->setBoardSize( cmd->boardSize, cmd->boardSize );
+        }
     }
 }
 

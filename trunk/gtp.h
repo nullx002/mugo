@@ -8,7 +8,7 @@
 class gtp : public PlayGame{
 Q_OBJECT
 public:
-    enum eKind{ eMove, eGen, ePut, eQuit, eDeadList, eUndo };
+    enum eKind{ eBoardSize, eKomi, eLevel, eMove, eGen, ePut, eQuit, eDeadList, eUndo };
     enum eStatus{ eProcessing, eSuccess, eFailure };
 
     class command{
@@ -17,6 +17,24 @@ public:
 
             eKind kind;
             eStatus status;
+    };
+
+    class boardSizeCommand : public command{
+        public:
+            boardSizeCommand(int boardSize_) : command(eBoardSize), boardSize(boardSize_){}
+            int boardSize;
+    };
+
+    class komiCommand : public command{
+        public:
+            komiCommand(const qreal& komi_) : command(eKomi), komi(komi_){}
+            qreal komi;
+    };
+
+    class levelCommand : public command{
+        public:
+            levelCommand(int level_) : command(eLevel), level(level_){}
+            int level;
     };
 
     class moveCommand : public command{
@@ -44,7 +62,7 @@ public:
 
     typedef boost::shared_ptr<command> commandPtr;
 
-    gtp(BoardWidget* board, go::color color, QProcess& process, QObject* parent=0);
+    gtp(BoardWidget* board, go::color color, int boardSize, const qreal& komi, int handicap, int level, QProcess& process, QObject* parent=0);
 
     virtual bool undo();
 

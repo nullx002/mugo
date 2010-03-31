@@ -296,6 +296,7 @@ private slots:
     void on_actionDeleteSgfFromCollection_triggered();
 
     // Board widget
+    void boardCleared();
     void nodeAdded(go::nodePtr parent, go::nodePtr node, bool select);
     void nodeDeleted(go::nodePtr node, bool deleteChildren);
     void nodeModified(go::nodePtr node);

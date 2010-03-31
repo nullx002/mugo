@@ -763,6 +763,8 @@ void BoardWidget::clear(){
     setCurrentNode();
     repaintBoard();
     undoStack.clear();
+
+    emit cleared();
 }
 
 /**
@@ -1068,10 +1070,11 @@ void BoardWidget::playGameLButtonDown(int sgfX, int sgfY){
 }
 
 void BoardWidget::setBoardSize(int xsize, int ysize){
+    bool isWhiteFirst = whiteFirst();
     clear();
     goData.root->xsize = xsize;
     goData.root->ysize = ysize;
-    createBoardBuffer();
+    whiteFirst(isWhiteFirst);
     setCurrentNode();
 
     repaintBoard();
