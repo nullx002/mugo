@@ -89,6 +89,9 @@
     <addaction name="actionOpenURL"/>
     <addaction name="actionReload"/>
     <addaction name="separator"/>
+    <addaction name="actionCloseTab"/>
+    <addaction name="actionCloseAllTabs"/>
+    <addaction name="separator"/>
     <addaction name="actionSave"/>
     <addaction name="actionSaveAs"/>
     <addaction name="separator"/>
@@ -96,9 +99,6 @@
     <addaction name="actionExportAsciiToClipboard"/>
     <addaction name="separator"/>
     <addaction name="menuCollection"/>
-    <addaction name="separator"/>
-    <addaction name="actionCloseTab"/>
-    <addaction name="actionCloseAllTabs"/>
     <addaction name="separator"/>
     <addaction name="actionPrint"/>
     <addaction name="separator"/>
@@ -668,6 +668,16 @@
    </property>
    <property name="text">
     <string>Save &amp;Board As Picture</string>
+   </property>
+  </action>
+  <action name="actionCloseTab">
+   <property name="text">
+    <string>Close Tab</string>
+   </property>
+  </action>
+  <action name="actionCloseAllTabs">
+   <property name="text">
+    <string>Close All Tabs</string>
    </property>
   </action>
   <action name="actionExit">
@@ -1696,11 +1706,6 @@
     <string>Add Label Manually</string>
    </property>
   </action>
-  <action name="actionCloseTab">
-   <property name="text">
-    <string>Close Tab</string>
-   </property>
-  </action>
   <action name="actionResetMoveNubmerInBranch">
    <property name="checkable">
     <bool>true</bool>
@@ -1717,11 +1722,6 @@
   <action name="actionNextTab">
    <property name="text">
     <string>Next Tab</string>
-   </property>
-  </action>
-  <action name="actionCloseAllTabs">
-   <property name="text">
-    <string>Close All Tabs</string>
    </property>
   </action>
   <action name="actionCollectionExtract">
