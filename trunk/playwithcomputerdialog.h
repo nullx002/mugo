@@ -15,6 +15,7 @@ public:
 
     bool    isBlack;
     QString path;
+    QString parameter;
     int     size;
     double  komi;
     int     handicap;

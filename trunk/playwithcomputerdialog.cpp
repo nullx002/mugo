@@ -52,6 +52,7 @@ void PlayWithComputerDialog::accept(){
     size = boardSize == 0 ? 19 : (boardSize == 1 ? 13 : 9);
 
     path = m_ui->computerPathEdit->text();
+    parameter = m_ui->parameterEdit->text();
     komi = m_ui->komiSpinBox->value();
     handicap = m_ui->handicapSpinBox->value();
     level = m_ui->levelSpinBox->value();
