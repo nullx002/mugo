@@ -1545,9 +1545,7 @@ void MainWindow::on_actionPlayWithGnugo_triggered(){
             return;
         }
 
-        QString param;
-        param.sprintf(" --mode gtp");
-        param = '"' + dlg.path + '"' + param;
+        QString param = '"' + dlg.path + "\" " + dlg.parameter;
         qDebug() << param;
 
         delete tabData->gtpProcess;
