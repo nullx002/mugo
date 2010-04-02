@@ -8,7 +8,7 @@
 class gtp : public PlayGame{
 Q_OBJECT
 public:
-    enum eKind{ eBoardSize, eKomi, eLevel, eMove, eGen, ePut, eQuit, eDeadList, eUndo };
+    enum eKind{ eNone, eBoardSize, eKomi, eLevel, eMove, eGen, ePut, eQuit, eDeadList, eUndo };
     enum eStatus{ eProcessing, eSuccess, eFailure };
 
     class command{
