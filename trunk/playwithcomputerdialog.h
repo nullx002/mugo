@@ -7,12 +7,21 @@ namespace Ui {
     class PlayWithComputerDialog;
 }
 
+/**
+    setting dialog for play with go program.
+*/
 class PlayWithComputerDialog : public QDialog {
     Q_OBJECT
 public:
+    enum StartPosition{
+            eNewGame,       ///< start new game on new tab.
+            eContinueGame,  ///< resume game on current tab.
+    };
+
     PlayWithComputerDialog(QWidget *parent = 0);
     ~PlayWithComputerDialog();
 
+    // game settings
     bool    isBlack;
     QString path;
     QString parameter;
@@ -20,6 +29,9 @@ public:
     double  komi;
     int     handicap;
     int     level;
+
+    // start position
+    int     startPosition;
 
 protected:
     virtual void changeEvent(QEvent *e);

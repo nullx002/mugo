@@ -5,17 +5,42 @@
 #include "gtp.h"
 #include "gtp.h"
 
+/**
+* Constructor
+*/
 gtp::gtp(BoardWidget* board, go::color color, int boardSize, const qreal& komi, int handicap, int level, QProcess& proc, QObject* parent)
     : PlayGame(board, color, parent), process(proc), index(0)
 {
     connect(&process, SIGNAL(readyRead()), this, SLOT(gtpRead()));
 
+    // initialize
     commandList.push_back( commandPtr(new boardSizeCommand(boardSize)) );
     commandList.push_back( commandPtr(new komiCommand(komi)) );
     commandList.push_back( commandPtr(new levelCommand(level)) );
     write( QString().sprintf("boardsize %d\n", boardSize) );
     write( QString().sprintf("komi %f\n", komi) );
     write( QString().sprintf("level %d\n", level) );
+
+    // add stone if game is continued.
+/*
+    const go::nodeList& nodeList = board->getCurrentNodeList();
+    foreach (const go::nodePtr& node, nodeList){
+        int x = node->getX();
+        int y = node->getX();
+
+        QString xy;
+        if (x < 0 || y < 0)
+            xy = "PASS";
+        else
+            xy = boardWidget_->getXYString(x, y, false);
+
+        commandList.push_back( commandPtr(new command(eNone)) );
+        if (node->color == go::black)
+            write( QString("play black %1\n").arg(xy) );
+        else if (node->color == go::white)
+            write( QString("play white %1\n").arg(xy) );
+    }
+*/
 }
 
 bool gtp::undo(){

@@ -4,6 +4,9 @@
 #include "playwithcomputerdialog.h"
 #include "ui_playwithcomputerdialog.h"
 
+/**
+* constructor
+*/
 PlayWithComputerDialog::PlayWithComputerDialog(QWidget *parent) :
     QDialog(parent),
     m_ui(new Ui::PlayWithComputerDialog)
@@ -17,6 +20,7 @@ PlayWithComputerDialog::PlayWithComputerDialog(QWidget *parent) :
     m_ui->boardSizeComboBox->addItem( "13 x 13" );
     m_ui->boardSizeComboBox->addItem( "9 x 9" );
 
+    // set default value from initial file
     QSettings settings;
     m_ui->colorComboBox->setCurrentIndex( settings.value("playWithComputer/color").toInt() );
     m_ui->boardSizeComboBox->setCurrentIndex( settings.value("playWithComputer/size").toInt() );
@@ -26,6 +30,9 @@ PlayWithComputerDialog::PlayWithComputerDialog(QWidget *parent) :
     m_ui->levelSpinBox->setValue( settings.value("playWithComputer/level", 10).toInt() );
 }
 
+/**
+* destructor
+*/
 PlayWithComputerDialog::~PlayWithComputerDialog()
 {
     delete m_ui;
@@ -43,20 +50,29 @@ void PlayWithComputerDialog::changeEvent(QEvent *e)
     }
 }
 
+/**
+* event handler
+* ok button was pushed.
+*/
 void PlayWithComputerDialog::accept(){
     QDialog::accept();
 
-    isBlack = m_ui->colorComboBox->currentIndex() == 0;
+    // path of go program
+    path = m_ui->computerPathEdit->text();
 
+    // game settings
+    isBlack = m_ui->colorComboBox->currentIndex() == 0;
     int boardSize = m_ui->boardSizeComboBox->currentIndex();
     size = boardSize == 0 ? 19 : (boardSize == 1 ? 13 : 9);
-
-    path = m_ui->computerPathEdit->text();
-    parameter = m_ui->parameterEdit->text();
     komi = m_ui->komiSpinBox->value();
     handicap = m_ui->handicapSpinBox->value();
     level = m_ui->levelSpinBox->value();
+    parameter = m_ui->parameterEdit->text();
 
+    // start position
+    startPosition = m_ui->newGame->isChecked() ? eNewGame : eContinueGame;
+
+    // save dialog settings for ini file(or registry)
     QSettings settings;
     settings.setValue("playWithComputer/color", m_ui->colorComboBox->currentIndex());
     settings.setValue("playWithComputer/size", m_ui->boardSizeComboBox->currentIndex());
@@ -67,7 +83,7 @@ void PlayWithComputerDialog::accept(){
 }
 
 /**
-* browse computer go
+* browse go program.
 */
 void PlayWithComputerDialog::on_computerPathBrowse_clicked(){
     QString fname = getOpenFileName(this);

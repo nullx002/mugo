@@ -1540,25 +1540,30 @@ void MainWindow::on_actionPlayWithGnugo_triggered(){
             return;
         }
 
-        if (fileNew(dlg.size, dlg.size, dlg.handicap, dlg.komi) == false){
+        // if select new game, create new tab
+        if (dlg.startPosition == PlayWithComputerDialog::eNewGame && fileNew(dlg.size, dlg.size, dlg.handicap, dlg.komi) == false){
             ui->actionPlayWithGnugo->setChecked(false);
             return;
         }
 
+        // create new process
         QString param = '"' + dlg.path + "\" " + dlg.parameter;
         qDebug() << param;
 
         delete tabData->gtpProcess;
         tabData->gtpProcess = new QProcess(this);
         tabData->gtpProcess->start(param, QIODevice::ReadWrite|QIODevice::Text);
+
+        // if process does not launch, alert and return.
         if (tabData->gtpProcess->state() == QProcess::NotRunning){
             boardWidget->playWithComputer(NULL);
             delete tabData->gtpProcess;
             tabData->gtpProcess = NULL;
-            QMessageBox::critical(this, APPNAME, tr("Can not launch computer go."));
+            QMessageBox::critical(this, APPNAME, tr("Can not launch computer go program."));
             return;
         }
 
+        // start gtp communication
         delete tabData->playGame;
         tabData->playGame = new gtp(boardWidget, dlg.isBlack ? go::black : go::white, dlg.size, dlg.komi, dlg.handicap, dlg.level,*tabData->gtpProcess);
         connect( tabData->playGame, SIGNAL(gameEnded()), this, SLOT(playGameEnded()) );
