@@ -1541,7 +1541,8 @@ void MainWindow::on_actionPlayWithGnugo_triggered(){
         }
 
         // if select new game, create new tab
-        if (dlg.startPosition == PlayWithComputerDialog::eNewGame && fileNew(dlg.size, dlg.size, dlg.handicap, dlg.komi) == false){
+        bool isNewGame = dlg.startPosition == PlayWithComputerDialog::eNewGame;
+        if (isNewGame && fileNew(dlg.size, dlg.size, dlg.handicap, dlg.komi) == false){
             ui->actionPlayWithGnugo->setChecked(false);
             return;
         }
@@ -1565,7 +1566,7 @@ void MainWindow::on_actionPlayWithGnugo_triggered(){
 
         // start gtp communication
         delete tabData->playGame;
-        tabData->playGame = new gtp(boardWidget, dlg.isBlack ? go::black : go::white, dlg.size, dlg.komi, dlg.handicap, dlg.level,*tabData->gtpProcess);
+        tabData->playGame = new gtp(boardWidget, dlg.isBlack ? go::black : go::white, isNewGame, dlg.size, dlg.komi, dlg.handicap, dlg.level,*tabData->gtpProcess);
         connect( tabData->playGame, SIGNAL(gameEnded()), this, SLOT(playGameEnded()) );
         setPlayWithComputerMode(true);
         boardWidget->playWithComputer(tabData->playGame);

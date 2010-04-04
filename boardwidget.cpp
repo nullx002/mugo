@@ -2685,14 +2685,22 @@ void BoardWidget::playWithComputer(PlayGame* game){
         if (editMode != ePlayGame && editMode != eCountTerritory)
             backupEditMode = editMode;
         editMode = ePlayGame;
-        if (playGame->yourColor() == go::white && goData.root->handicap == 0)
-            playGame->wait();
-        else if (goData.root->handicap > 0){
-            whiteFirst(true);
-            playGame->setHandicap();
-            if (playGame->yourColor() == go::black)
+
+        if (playGame->isNewGame()){
+            if (goData.root->handicap > 0){
+                whiteFirst(true);
+                playGame->setHandicap();
+            }
+
+            if (playGame->yourColor() == go::white && goData.root->handicap == 0 || playGame->yourColor() == go::black && goData.root->handicap > 0)
                 playGame->wait();
         }
+        else{
+            qDebug("yourColor=%d, color=%d, currentColor=%d, nextColor=%d, x=%d, y=%d", playGame->yourColor(), color, currentNode->color, currentNode->nextColor, currentNode->getX(), currentNode->getY());
+            if (playGame->yourColor() != color)
+                playGame->wait();
+        }
+
     }
     else{
         editMode = backupEditMode;

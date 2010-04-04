@@ -11,8 +11,10 @@ class PlayGame : public QObject{
 Q_OBJECT
 
 public:
-    PlayGame(BoardWidget* board, go::color color, QObject *parent = 0);
+    PlayGame(BoardWidget* board, go::color color, bool newGame, QObject *parent = 0);
     virtual ~PlayGame();
+
+    bool isNewGame() const{ return isNewGame_; }
 
     virtual bool undo() = 0;
 
@@ -34,6 +36,7 @@ protected:
     BoardWidget* boardWidget_;
     go::color color_, yourColor_;
     bool isResign_;
+    bool isNewGame_;
 
 //Q_DECLARE_PRIVATE(PlayGame)
 };

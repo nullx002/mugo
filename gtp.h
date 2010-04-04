@@ -62,7 +62,7 @@ public:
 
     typedef boost::shared_ptr<command> commandPtr;
 
-    gtp(BoardWidget* board, go::color color, int boardSize, const qreal& komi, int handicap, int level, QProcess& process, QObject* parent=0);
+    gtp(BoardWidget* board, go::color color, bool newGame, int boardSize, const qreal& komi, int handicap, int level, QProcess& process, QObject* parent=0);
 
     virtual bool undo();
 

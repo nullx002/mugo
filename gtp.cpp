@@ -8,8 +8,8 @@
 /**
 * Constructor
 */
-gtp::gtp(BoardWidget* board, go::color color, int boardSize, const qreal& komi, int handicap, int level, QProcess& proc, QObject* parent)
-    : PlayGame(board, color, parent), process(proc), index(0)
+gtp::gtp(BoardWidget* board, go::color color, bool newGame, int boardSize, const qreal& komi, int handicap, int level, QProcess& proc, QObject* parent)
+    : PlayGame(board, color, newGame, parent), process(proc), index(0)
 {
     connect(&process, SIGNAL(readyRead()), this, SLOT(gtpRead()));
 
@@ -22,11 +22,13 @@ gtp::gtp(BoardWidget* board, go::color color, int boardSize, const qreal& komi, 
     write( QString().sprintf("level %d\n", level) );
 
     // add stone if game is continued.
-/*
     const go::nodeList& nodeList = board->getCurrentNodeList();
     foreach (const go::nodePtr& node, nodeList){
+        if (node == board->getCurrentNode())
+            break;
+
         int x = node->getX();
-        int y = node->getX();
+        int y = node->getY();
 
         QString xy;
         if (x < 0 || y < 0)
@@ -34,13 +36,15 @@ gtp::gtp(BoardWidget* board, go::color color, int boardSize, const qreal& komi, 
         else
             xy = boardWidget_->getXYString(x, y, false);
 
-        commandList.push_back( commandPtr(new command(eNone)) );
-        if (node->color == go::black)
+        if (node->color == go::black){
             write( QString("play black %1\n").arg(xy) );
-        else if (node->color == go::white)
+            commandList.push_back( commandPtr(new command(eNone)) );
+        }
+        else if (node->color == go::white){
             write( QString("play white %1\n").arg(xy) );
+            commandList.push_back( commandPtr(new command(eNone)) );
+        }
     }
-*/
 }
 
 bool gtp::undo(){
@@ -203,7 +207,8 @@ void gtp::gtpRead(){
             boardWidget_->forward(-1);
         else if (commandList[index]->kind == eBoardSize){
             boardSizeCommand* cmd = (boardSizeCommand*)commandList[index].get();
-            boardWidget_->setBoardSize( cmd->boardSize, cmd->boardSize );
+            if (boardWidget_->getData().root->xsize != cmd->boardSize || boardWidget_->getData().root->xsize != cmd->boardSize)
+                boardWidget_->setBoardSize( cmd->boardSize, cmd->boardSize );
         }
     }
 }
