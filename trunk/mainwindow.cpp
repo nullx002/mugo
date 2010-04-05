@@ -1579,8 +1579,7 @@ void MainWindow::on_actionPlayWithGnugo_triggered(){
     }
     else{
         QMessageBox::StandardButton ret = QMessageBox::warning(this, APPNAME,
-                                                                tr("Playing with computer can not be resumed.\n"
-                                                                   "Are you sure you want to stop playing with computer?"),
+                                                                tr("Are you sure you want to stop playing with computer?"),
                                                                 QMessageBox::Ok|QMessageBox::Cancel);
         if (ret != QMessageBox::Ok){
             ui->actionPlayWithGnugo->setChecked(true);
