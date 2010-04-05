@@ -24,9 +24,6 @@ gtp::gtp(BoardWidget* board, go::color color, bool newGame, int boardSize, const
     // add stone if game is continued.
     const go::nodeList& nodeList = board->getCurrentNodeList();
     foreach (const go::nodePtr& node, nodeList){
-        if (node == board->getCurrentNode())
-            break;
-
         int x = node->getX();
         int y = node->getY();
 
@@ -44,6 +41,9 @@ gtp::gtp(BoardWidget* board, go::color color, bool newGame, int boardSize, const
             write( QString("play white %1\n").arg(xy) );
             commandList.push_back( commandPtr(new command(eNone)) );
         }
+
+        if (node == board->getCurrentNode())
+            break;
     }
 }
 
@@ -207,7 +207,7 @@ void gtp::gtpRead(){
             boardWidget_->forward(-1);
         else if (commandList[index]->kind == eBoardSize){
             boardSizeCommand* cmd = (boardSizeCommand*)commandList[index].get();
-            if (boardWidget_->getData().root->xsize != cmd->boardSize || boardWidget_->getData().root->xsize != cmd->boardSize)
+            if (isNewGame())
                 boardWidget_->setBoardSize( cmd->boardSize, cmd->boardSize );
         }
     }

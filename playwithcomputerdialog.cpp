@@ -91,3 +91,17 @@ void PlayWithComputerDialog::on_computerPathBrowse_clicked(){
         return;
     m_ui->computerPathEdit->setText(fname);
 }
+
+void PlayWithComputerDialog::on_newGame_toggled(bool checked)
+{
+    m_ui->boardSizeComboBox->setEnabled(true);
+    m_ui->komiSpinBox->setEnabled(true);
+    m_ui->handicapSpinBox->setEnabled(true);
+}
+
+void PlayWithComputerDialog::on_resume_toggled(bool checked)
+{
+    m_ui->boardSizeComboBox->setEnabled(false);
+    m_ui->komiSpinBox->setEnabled(false);
+    m_ui->handicapSpinBox->setEnabled(false);
+}
