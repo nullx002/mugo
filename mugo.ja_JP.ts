@@ -314,12 +314,22 @@ mugo automatically counts territories.</oldsource>
         <translation type="unfinished">SGFファイルのURLを入力してください。</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1928"/>
+        <location filename="mainwindow.cpp" line="1569"/>
+        <source>Can not launch computer go program.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="1582"/>
+        <source>Are you sure you want to stop playing with computer?</source>
+        <translation type="unfinished">コンピュータとの対局を中断してもよろしいですか？</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="1939"/>
         <source>Are you sure you want to resign?</source>
         <translation type="unfinished">投了しますか？</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="2296"/>
+        <location filename="mainwindow.cpp" line="2307"/>
         <source>Downloading SGF File</source>
         <translation type="unfinished">SGFファイルのダウンロード中</translation>
     </message>
@@ -340,34 +350,32 @@ mugo automatically counts territories.</oldsource>
         <translation type="unfinished">ノード名を入力してください</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1558"/>
         <source>Can not launch computer go.</source>
-        <translation type="unfinished">プログラムを起動できません。</translation>
+        <translation type="obsolete">プログラムを起動できません。</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1570"/>
         <source>Playing with computer can not be resumed.
 Are you sure you want to stop playing with computer?</source>
-        <translation>コンピューターとの対戦を中断すると再開できませんが、終了してもよろしいですか？</translation>
+        <translation type="obsolete">コンピューターとの対戦を中断すると再開できませんが、終了してもよろしいですか？</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1648"/>
+        <location filename="mainwindow.cpp" line="1659"/>
         <source>Input new board size. board size must be between 2-52.</source>
         <translation type="unfinished">新しい盤のサイズを入力してください。盤のサイズは２～５２の範囲でなくてはいけません。</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1725"/>
+        <location filename="mainwindow.cpp" line="1736"/>
         <source>Are you sure you want to clear the configuration?</source>
         <translation type="unfinished">設定を初期値に戻しますがよろしいですか？</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1868"/>
+        <location filename="mainwindow.cpp" line="1879"/>
         <source>Dead: Black %1 White %2</source>
         <oldsource>Dead: B %1 W %2</oldsource>
         <translation type="unfinished">アゲハマ：黒 %1 白 %2</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1872"/>
+        <location filename="mainwindow.cpp" line="1883"/>
         <source>LastMove: %1(%2)</source>
         <translation type="unfinished">最終着手：%1(%2)</translation>
     </message>
@@ -377,24 +385,24 @@ Are you sure you want to stop playing with computer?</source>
         <translation type="unfinished">編集中のSGFを削除することは出来ません。</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="2001"/>
+        <location filename="mainwindow.cpp" line="2012"/>
         <source>%1 %2 (W) vs %4 %5 (B) (Result:%7)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="2173"/>
+        <location filename="mainwindow.cpp" line="2184"/>
         <source>Untitled-%1</source>
         <translation type="unfinished">無題-%1</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="2473"/>
+        <location filename="mainwindow.cpp" line="2484"/>
         <source>%1 has been modified.
 Do you want to save your changes?</source>
         <translation type="unfinished">%1は変更されています。
 変更内容を保存しますか？</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="2355"/>
+        <location filename="mainwindow.cpp" line="2366"/>
         <source>sgf(*.sgf)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -405,23 +413,23 @@ Do you want to save your changes?</source>
 変更内容を保存しますか？</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="2541"/>
+        <location filename="mainwindow.cpp" line="2552"/>
         <source>Download failed: %1.</source>
         <translation type="unfinished">ダウンロードに失敗しました： %1.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="2746"/>
+        <location filename="mainwindow.cpp" line="2757"/>
         <location filename="mainwindow.ui" line="1787"/>
         <source>Pass</source>
         <translation type="unfinished">パス</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="2756"/>
+        <location filename="mainwindow.cpp" line="2767"/>
         <source>Other</source>
         <translation type="unfinished">その他</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="3252"/>
+        <location filename="mainwindow.cpp" line="3263"/>
         <source>Changing the language requires that application be restarted.</source>
         <translation type="unfinished">言語の変更は次回起動時から有効になります。</translation>
     </message>
@@ -1365,12 +1373,12 @@ Do you want to save your changes?</source>
 <context>
     <name>PlayWithComputerDialog</name>
     <message>
-        <location filename="playwithcomputerdialog.cpp" line="13"/>
+        <location filename="playwithcomputerdialog.cpp" line="16"/>
         <source>Black</source>
         <translation type="unfinished">黒</translation>
     </message>
     <message>
-        <location filename="playwithcomputerdialog.cpp" line="14"/>
+        <location filename="playwithcomputerdialog.cpp" line="17"/>
         <source>White</source>
         <translation type="unfinished">白</translation>
     </message>
@@ -1380,47 +1388,67 @@ Do you want to save your changes?</source>
         <translation type="unfinished">コンピュータと対局する</translation>
     </message>
     <message>
-        <location filename="playwithcomputerdialog.ui" line="35"/>
+        <location filename="playwithcomputerdialog.ui" line="22"/>
+        <source>Game Settings</source>
+        <translation type="unfinished">対局設定</translation>
+    </message>
+    <message>
+        <location filename="playwithcomputerdialog.ui" line="41"/>
         <source>Board Size</source>
         <translation type="unfinished">盤のサイズ</translation>
     </message>
     <message>
-        <location filename="playwithcomputerdialog.ui" line="45"/>
+        <location filename="playwithcomputerdialog.ui" line="51"/>
         <source>Komi</source>
         <translation type="unfinished">コミ</translation>
     </message>
     <message>
-        <location filename="playwithcomputerdialog.ui" line="71"/>
+        <location filename="playwithcomputerdialog.ui" line="77"/>
         <source>Handicap</source>
         <translation type="unfinished">置石</translation>
     </message>
     <message>
-        <location filename="playwithcomputerdialog.ui" line="85"/>
+        <location filename="playwithcomputerdialog.ui" line="91"/>
         <source>Level</source>
         <translation type="unfinished">レベル</translation>
     </message>
     <message>
-        <location filename="playwithcomputerdialog.ui" line="102"/>
+        <location filename="playwithcomputerdialog.ui" line="108"/>
         <source>Computer Path</source>
         <translation type="unfinished">プログラムのパス</translation>
     </message>
     <message>
-        <location filename="playwithcomputerdialog.ui" line="114"/>
+        <location filename="playwithcomputerdialog.ui" line="120"/>
         <source>...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="playwithcomputerdialog.ui" line="123"/>
+        <location filename="playwithcomputerdialog.ui" line="129"/>
         <source>Parameter</source>
         <translation type="unfinished">パラメータ</translation>
     </message>
     <message>
-        <location filename="playwithcomputerdialog.ui" line="130"/>
+        <location filename="playwithcomputerdialog.ui" line="136"/>
         <source>--mode gtp</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="playwithcomputerdialog.ui" line="25"/>
+        <location filename="playwithcomputerdialog.ui" line="146"/>
+        <source>Start Position</source>
+        <translation type="unfinished">開始設定</translation>
+    </message>
+    <message>
+        <location filename="playwithcomputerdialog.ui" line="152"/>
+        <source>New Game</source>
+        <translation type="unfinished">新規に対局を開始する</translation>
+    </message>
+    <message>
+        <location filename="playwithcomputerdialog.ui" line="162"/>
+        <source>Continue from current position</source>
+        <translation type="unfinished">現在の局面から開始する</translation>
+    </message>
+    <message>
+        <location filename="playwithcomputerdialog.ui" line="31"/>
         <source>Your Color</source>
         <translation type="unfinished">あなたの手番</translation>
     </message>
@@ -1846,7 +1874,7 @@ Do you want to save your changes?</source>
 <context>
     <name>gtp</name>
     <message>
-        <location filename="gtp.cpp" line="142"/>
+        <location filename="gtp.cpp" line="171"/>
         <source>Computer resigns.</source>
         <oldsource>Computer resign.</oldsource>
         <translation type="unfinished">コンピュータが投了しました。</translation>
