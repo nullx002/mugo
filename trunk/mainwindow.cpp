@@ -1542,9 +1542,15 @@ void MainWindow::on_actionPlayWithGnugo_triggered(){
 
         // if select new game, create new tab
         bool isNewGame = dlg.startPosition == PlayWithComputerDialog::eNewGame;
-        if (isNewGame && fileNew(dlg.size, dlg.size, dlg.handicap, dlg.komi) == false){
-            ui->actionPlayWithGnugo->setChecked(false);
-            return;
+        if (isNewGame){
+            if (fileNew(dlg.size, dlg.size, dlg.handicap, dlg.komi) == false){
+                ui->actionPlayWithGnugo->setChecked(false);
+                return;
+            }
+        }
+        else{
+            dlg.size = boardWidget->getData().root->xsize;
+            dlg.komi = boardWidget->getData().root->komi;
         }
 
         // create new process

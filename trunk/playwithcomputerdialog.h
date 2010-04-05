@@ -42,6 +42,8 @@ private:
 
 private slots:
     void on_computerPathBrowse_clicked();
+    void on_newGame_toggled(bool checked);
+    void on_resume_toggled(bool checked);
 };
 
 #endif // PLAYWITHCOMPUTERDIALOG_H

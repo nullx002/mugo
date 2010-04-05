@@ -2696,7 +2696,6 @@ void BoardWidget::playWithComputer(PlayGame* game){
                 playGame->wait();
         }
         else{
-            qDebug("yourColor=%d, color=%d, currentColor=%d, nextColor=%d, x=%d, y=%d", playGame->yourColor(), color, currentNode->color, currentNode->nextColor, currentNode->getX(), currentNode->getY());
             if (playGame->yourColor() != color)
                 playGame->wait();
         }
