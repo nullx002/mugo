@@ -6,7 +6,7 @@
 //};
 
 
-PlayGame::PlayGame(BoardWidget* board, go::color color, bool newGame, QObject*parent) : QObject(parent), boardWidget_(board), color_(go::black), isNewGame_(newGame), yourColor_(color), isResign_(false)
+PlayGame::PlayGame(BoardWidget* board, go::color color, bool newGame, QObject*parent) : QObject(parent), boardWidget_(board), color_(go::black), yourColor_(color), isResign_(false), isNewGame_(newGame)
 {
 }
 
