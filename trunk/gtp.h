@@ -13,51 +13,59 @@ public:
 
     class command{
         public:
-            command(eKind k) : kind(k), status(eProcessing){}
+            command(gtp* parent_, eKind k) : parent(parent_), kind(k), status(eProcessing){}
+            command(gtp* parent_, eKind k, const QString& msg) : parent(parent_), kind(k), status(eProcessing){ execute(msg); }
 
+            void execute(const QString& msg){ parent->pushCommandList(msg); }
+
+            gtp*  parent;
             eKind kind;
             eStatus status;
     };
 
     class boardSizeCommand : public command{
         public:
-            boardSizeCommand(int boardSize_) : command(eBoardSize), boardSize(boardSize_){}
+            boardSizeCommand(gtp* parent, int boardSize_) : command(parent, eBoardSize, QString().sprintf("boardsize %d\n", boardSize_)), boardSize(boardSize_){}
             int boardSize;
     };
 
     class komiCommand : public command{
         public:
-            komiCommand(const qreal& komi_) : command(eKomi), komi(komi_){}
+            komiCommand(gtp* parent, const qreal& komi_) : command(parent, eKomi, QString().sprintf("komi %f\n", komi_)), komi(komi_){}
             qreal komi;
     };
 
     class levelCommand : public command{
         public:
-            levelCommand(int level_) : command(eLevel), level(level_){}
+            levelCommand(gtp* parent, int level_) : command(parent, eLevel, QString().sprintf("level %d\n", level_)), level(level_){}
             int level;
     };
 
-    class moveCommand : public command{
+    class moveBaseCommand : public command{
         public:
-            moveCommand(int x_, int y_) : command(eMove), x(x_), y(y_){}
+            moveBaseCommand(gtp* parent, eKind k, BoardWidget* boardWidget, go::color color, int x_, int y_);
             int x, y;
     };
 
-    class putCommand : public command{
+    class moveCommand : public moveBaseCommand{
         public:
-            putCommand(int x_, int y_) : command(ePut), x(x_), y(y_){}
-            int x, y;
+            moveCommand(gtp* parent, BoardWidget* boardWidget, go::color color, int x_, int y_) : moveBaseCommand(parent, eMove, boardWidget, color, x_, y_){}
+    };
+
+    class putCommand : public moveBaseCommand{
+        public:
+            putCommand(gtp* parent, BoardWidget* boardWidget, go::color color, int x_, int y_) : moveBaseCommand(parent, ePut, boardWidget, color, x_, y_){}
     };
 
     class genmoveCommand : public command{
         public:
-            genmoveCommand(go::color c) : command(eGen), color(c){}
+            genmoveCommand(gtp* parent, go::color c) : command(parent, eGen, c == go::black ? "genmove black\n" : "genmove white\n"), color(c){}
             go::color color;
     };
 
     class undoCommand : public command{
         public:
-            undoCommand() : command(eUndo){}
+            undoCommand(gtp* parent) : command(parent, eUndo, "undo\n"){}
     };
 
     typedef boost::shared_ptr<command> commandPtr;
@@ -73,15 +81,20 @@ public:
     virtual void deadList();
     virtual bool moving() const;
 
+    void pushCommandList(const QString& s);
+
 private:
-    void write(const QString& s);
+    void write();
     bool stringToPosition(const QString& buf, int& x, int& y);
+    void processCommand(QString& s);
 
     QProcess& process;
     QString   gtpBuf;
 
     int index;
     QList<commandPtr> commandList;
+    QStringList commandStringList;
+    bool commandProcessing;
 
 private slots:
     void gtpRead();
