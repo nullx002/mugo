@@ -130,7 +130,7 @@ public:
     bool moveNextStone(int sgfX, int sgfY);
 
     void addNodeCommand(go::nodePtr parent, go::nodePtr node, bool select=true);
-    void insertNodeCommand(go::nodePtr parent, go::nodePtr node, bool select=true);
+    void insertNodeCommand(go::nodePtr parent, int index, go::nodePtr node, bool select=true);
     void deleteNodeCommand(go::nodePtr node, bool deleteChildren=true);
     void setMoveNumberCommand(go::nodePtr node, int moveNumber);
     void unsetMoveNumberCommand(go::nodePtr node);
@@ -141,6 +141,7 @@ public:
     void flipSgfVerticallyCommand();
 
     void addNode(go::nodePtr parent, go::nodePtr node, bool select=true);
+    void insertNode(go::nodePtr parent, int index, go::nodePtr node, bool select=true);
     void deleteNode(go::nodePtr node, bool deleteChildren=true);
     void modifyNode(go::nodePtr node, bool recreateBoardBuffer=false);
     void pass();

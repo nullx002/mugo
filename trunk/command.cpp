@@ -26,11 +26,12 @@ void AddNodeCommand::undo(){
 /**
 * Insert Node Command
 */
-InsertNodeCommand::InsertNodeCommand(BoardWidget* _boardWidget, go::nodePtr _parentNode, go::nodePtr _childNode, bool _select, QUndoCommand* parent)
+InsertNodeCommand::InsertNodeCommand(BoardWidget* _boardWidget, go::nodePtr _parentNode, int _index, go::nodePtr _childNode, bool _select, QUndoCommand* parent)
     : QUndoCommand(parent)
     , boardWidget(_boardWidget)
     , parentNode(_parentNode)
     , childNode(_childNode)
+    , index(_index)
     , select(_select)
 {
 }
@@ -46,7 +47,7 @@ void InsertNodeCommand::redo(){
         ++iter;
     }
 
-    boardWidget->addNode(parentNode, childNode, select);
+    boardWidget->insertNode(parentNode, index, childNode, select);
 }
 
 void InsertNodeCommand::undo(){
@@ -66,12 +67,17 @@ DeleteNodeCommand::DeleteNodeCommand(BoardWidget* _boardWidget, go::nodePtr _nod
 
 void DeleteNodeCommand::redo(){
     setText( QString(tr("Delete %1")).arg( boardWidget->toString(node) ) );
+
+    go::nodeList::iterator beg = node->parent()->childNodes.begin();
+    go::nodeList::iterator del = qFind(node->parent()->childNodes.begin(), node->parent()->childNodes.end(), node);
+    index = std::distance(beg, del);
+
     boardWidget->deleteNode(node, deleteChildren);
 }
 
 void DeleteNodeCommand::undo(){
     if (deleteChildren)
-        boardWidget->addNode(node->parent(), node);
+        boardWidget->insertNode(node->parent(), index, node);
     else{
         node->parent()->childNodes.clear();
 
@@ -81,7 +87,7 @@ void DeleteNodeCommand::undo(){
             ++iter;
         }
 
-        boardWidget->addNode(node->parent(), node);
+        boardWidget->insertNode(node->parent(), index, node);
     }
 }
 

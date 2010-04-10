@@ -26,7 +26,7 @@ class InsertNodeCommand : public QUndoCommand{
     Q_DECLARE_TR_FUNCTIONS(InsertNodeCommand)
 
 public:
-    InsertNodeCommand(BoardWidget* boardWidget, go::nodePtr parentNode, go::nodePtr childNode, bool select, QUndoCommand *parent = 0);
+    InsertNodeCommand(BoardWidget* boardWidget, go::nodePtr parentNode, int index, go::nodePtr childNode, bool select, QUndoCommand *parent = 0);
     virtual void redo();
     virtual void undo();
 
@@ -34,6 +34,7 @@ private:
     BoardWidget* boardWidget;
     go::nodePtr parentNode;
     go::nodePtr childNode;
+    int  index;
     bool select;
 };
 
@@ -49,6 +50,7 @@ private:
     BoardWidget* boardWidget;
     go::nodePtr node;
     bool deleteChildren;
+    int  index;
 };
 
 class SetMoveNumberCommand : public QUndoCommand{
