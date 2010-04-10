@@ -891,11 +891,11 @@ void BoardWidget::addNodeCommand(go::nodePtr parentNode, go::nodePtr childNode, 
 
 /**
 */
-void BoardWidget::insertNodeCommand(go::nodePtr parentNode, go::nodePtr childNode, bool select){
+void BoardWidget::insertNodeCommand(go::nodePtr parentNode, int index, go::nodePtr childNode, bool select){
     if (tutorMode != eNoTutor)
         return;
 
-    undoStack.push( new InsertNodeCommand(this, parentNode, childNode, select) );
+    undoStack.push( new InsertNodeCommand(this, parentNode, index, childNode, select) );
 }
 
 /**
@@ -972,9 +972,23 @@ void BoardWidget::flipSgfVerticallyCommand(){
 }
 
 /**
+* add node at end of child list of parent node.
 */
 void BoardWidget::addNode(go::nodePtr parent, go::nodePtr node, bool select){
     parent->childNodes.push_back(node);
+    node->parent_ = parent;
+
+    setDirty(true);
+    emit nodeAdded(parent, node, select);
+
+    if (select)
+        setCurrentNode(node);
+}
+
+/**
+*/
+void BoardWidget::insertNode(go::nodePtr parent, int index, go::nodePtr node, bool select){
+    parent->childNodes.insert(parent->childNodes.begin() + index, node);
     node->parent_ = parent;
 
     setDirty(true);

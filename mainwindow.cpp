@@ -1836,8 +1836,12 @@ void MainWindow::boardCleared(){
 * Slot
 * new node was created by BoardWidget.
 */
-void MainWindow::nodeAdded(go::nodePtr /*parent*/, go::nodePtr node, bool /*select*/){
-    addTreeWidget(node, true);
+void MainWindow::nodeAdded(go::nodePtr parent, go::nodePtr node, bool /*select*/){
+    if (parent->childNodes.back() == node)
+        addTreeWidget(node, true);
+    else{
+        remakeTreeWidget( (*nodeToTreeWidget)[node->parent()] );
+    }
     setCaption();
 }
 
@@ -1846,9 +1850,9 @@ void MainWindow::nodeAdded(go::nodePtr /*parent*/, go::nodePtr node, bool /*sele
 * node was deleted by BoardWidget.
 */
 void MainWindow::nodeDeleted(go::nodePtr node, bool deleteChildren){
+    deleteTreeWidget(node, deleteChildren);
     if (node->parent())
         remakeTreeWidget( (*nodeToTreeWidget)[node->parent()] );
-    deleteTreeWidget(node, deleteChildren);
 
     setCaption();
 }
@@ -2625,20 +2629,39 @@ QTreeWidgetItem* MainWindow::addTreeWidget(go::nodePtr node, bool needRemake){
     go::nodePtr parentNode  = node->parent();
     go::nodePtr parentNode2 = getNode(parentWidget2);
 
-    bool newBranch = (parentNode2 && parentNode2->childNodes.size() > 1) ||
-                     (tabData->branchMode && parentNode && parentNode->childNodes.size() > 1) ||
-                     (!tabData->branchMode && parentNode && parentNode->childNodes.front() != node);
+    bool newBranch = false;
+    int  index = 0;
+
+    if (parentNode2 && parentNode2->childNodes.size() > 1){
+        newBranch = true;
+        go::nodeList::iterator iter = qFind(node->parent()->childNodes.begin(), node->parent()->childNodes.end(), node);
+        index = std::distance(node->parent()->childNodes.begin(), iter);
+    }
+    else if (tabData->branchMode && parentNode && parentNode->childNodes.size() > 1){
+        newBranch = true;
+        go::nodeList::iterator iter = qFind(node->parent()->childNodes.begin(), node->parent()->childNodes.end(), node);
+        index = std::distance(node->parent()->childNodes.begin(), iter);
+    }
+    else if(!tabData->branchMode && parentNode && parentNode->childNodes.front() != node){
+        newBranch = true;
+        go::nodeList::iterator iter = qFind(node->parent()->childNodes.begin(), node->parent()->childNodes.end(), node);
+        index = std::distance(node->parent()->childNodes.begin(), iter) - 1;
+    }
+
     if (newBranch){
         if (newWidget){
-            parentWidget->addChild(newWidget);
+            if (parentWidget->childCount() > index)
+                parentWidget->insertChild(index, newWidget);
+            else
+                parentWidget->addChild(newWidget);
             if (needRemake)
                 remakeTreeWidget(parentWidget);
         }
-        else if(parentWidget->indexOfChild(treeWidget) < 0){
+        else if(parentWidget->indexOfChild(treeWidget) != index){
             QTreeWidgetItem* p = treeWidget->parent() ? treeWidget->parent() : branchWidget->invisibleRootItem();
             p->removeChild(treeWidget);
-            if (parentNode->childNodes.front() == node)
-                parentWidget->insertChild(0, treeWidget);
+            if (parentWidget->childCount() > index)
+                parentWidget->insertChild(index, treeWidget);
             else
                 parentWidget->addChild(treeWidget);
         }
@@ -2735,7 +2758,7 @@ void MainWindow::deleteTreeWidgetForMap(go::nodePtr node){
     while (iter2 != node->childNodes.end()){
         NodeToTreeWidgetType::iterator iter3 = nodeToTreeWidget->find(*iter2);
         if(iter3 != nodeToTreeWidget->end())
-            if ((*iter3)->parent() == *iter)
+            if ((*iter3)->parent() == *iter || (*iter3)->parent() == (*iter)->parent())
                 deleteTreeWidgetForMap(*iter2);
 
         ++iter2;
