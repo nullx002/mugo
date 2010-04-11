@@ -18,13 +18,12 @@ go::color PlayGame::yourColor() const{
 }
 
 bool PlayGame::isGameEnd() const{
-    const go::nodeList& nodeList = boardWidget_->getCurrentNodeList();
-    if (nodeList.size() < 3)
+    const go::nodePtr& node1 = boardWidget_->getCurrentNode();
+    const go::nodePtr& node2 = node1->parent();
+
+    if ( node2 == NULL || node2->color == go::empty || node1->color == go::empty)
         return false;
 
-    go::nodeList::const_iterator iter = nodeList.end();
-    const go::nodePtr& node1 = *--iter;
-    const go::nodePtr& node2 = *--iter;
     return node1->isPass() && node2->isPass();
 }
 
