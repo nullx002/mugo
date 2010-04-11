@@ -125,8 +125,6 @@ void gtp::gtpRead(){
     QByteArray bytes = process.readAll();
     qDebug() << bytes;
     gtpBuf.append( bytes );
-
-    QStringList resList = gtpBuf.split("\n\n", QString::SkipEmptyParts);
     if (gtpBuf.size() < 4 || gtpBuf.right(2) != "\n\n")
         return;
 
@@ -139,19 +137,20 @@ void gtp::gtpRead(){
 
 void gtp::processCommand(QString& s){
     QChar status = s[0];
-    int p = s.indexOf(' ', 2);
-    QString msg = s.mid(p+1);
+//    int p = s.indexOf(' ', 2);
+//    QString msg = s.mid(p+1);
+    QString msg = s.mid(2);
 //    int index = s.mid(1, p-1).toInt();
-
-    if (status != '=')
-        return;
 
     commandPtr command = commandList.front();
     commandList.pop_front();
 
+    if (status != '=')
+        return;
+
     if (command->kind == eMove){
         moveCommand* cmd = (moveCommand*)command.get();
-        boardWidget_->addStoneNodeCommand(cmd->x, cmd->y);
+        boardWidget_->insertStoneNodeCommand(0, cmd->x, cmd->y);
         if (isGameEnd()){
             deadList();
             return;
@@ -169,7 +168,7 @@ void gtp::processCommand(QString& s){
 
         int x, y;
         if (stringToPosition(msg, x, y))
-            boardWidget_->addStoneNodeCommand(x, y);
+            boardWidget_->insertStoneNodeCommand(0, x, y);
 
         if (isGameEnd())
             deadList();

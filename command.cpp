@@ -38,15 +38,6 @@ InsertNodeCommand::InsertNodeCommand(BoardWidget* _boardWidget, go::nodePtr _par
 
 void InsertNodeCommand::redo(){
     setText( QString(tr("Insert %1")).arg( boardWidget->toString(childNode) ) );
-    childNode->childNodes += parentNode->childNodes;
-    parentNode->childNodes.clear();
-
-    go::nodeList::iterator iter = childNode->childNodes.begin();
-    while (iter != childNode->childNodes.end()){
-        (*iter)->parent_ = childNode;
-        ++iter;
-    }
-
     boardWidget->insertNode(parentNode, index, childNode, select);
 }
 
