@@ -273,6 +273,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->actionNextTab->setShortcut( QKeySequence::NextChild );
     ui->actionCopySgfToClipboard->setShortcut( QKeySequence::Copy );
     ui->actionPasteSgfToNewTab->setShortcut( QKeySequence::Paste );
+    ui->actionDeleteAfterCurrent->setShortcut( QKeySequence("Delete") );
+    ui->actionDeleteOnlyCurrent->setShortcut( QKeySequence("Ctrl+Delete") );
 
     // window settings
     setGeometry(x(), y(), settings.value("width", WIN_W).toInt(), settings.value("height", WIN_H).toInt());
@@ -323,8 +325,8 @@ void MainWindow::closeEvent(QCloseEvent* e){
 }
 
 void MainWindow::keyPressEvent(QKeyEvent* event){
-    if (event->key() == Qt::Key_Delete)
-        deleteNode(true);
+//    if (event->key() == Qt::Key_Delete)
+//        deleteNode(true);
 }
 
 void MainWindow::dragEnterEvent(QDragEnterEvent* event)
@@ -1885,6 +1887,9 @@ void MainWindow::currentNodeChanged(go::nodePtr node){
     int num = boardWidget->getMoveNumber();
     QString coord = boardWidget->getXYString(node->getX(), node->getY());
     moveNumberLabel->setText(tr("LastMove: %1(%2)").arg(num).arg(coord));
+
+    if (ui->commentWidget->hasFocus())
+        tabData->branchWidget->setFocus();
 }
 
 /**
@@ -2738,7 +2743,7 @@ void MainWindow::deleteNode(bool deleteChildren){
 void MainWindow::deleteTreeWidget(go::nodePtr node, bool deleteChildren){
     QTreeWidgetItem* treeWidget = (*nodeToTreeWidget)[node];
     go::nodeList::iterator iter = node->childNodes.begin();
-    while (deleteChildren && iter != node->childNodes.end()){
+    while (iter != node->childNodes.end()){
         QTreeWidgetItem* treeWidget2 = (*nodeToTreeWidget)[*iter];
         if (treeWidget2->parent() != treeWidget)
             deleteTreeWidget(*iter, deleteChildren);
