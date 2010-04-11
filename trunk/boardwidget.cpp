@@ -1001,18 +1001,20 @@ void BoardWidget::deleteNode(go::nodePtr node, bool deleteChildren){
 
     go::nodePtr parent = node->parent();
     if (parent){
+        if (deleteChildren == false){
+            go::nodeList::iterator iter = qFind(parent->childNodes.begin(), parent->childNodes.end(), node);
+            go::nodeList::iterator iter2 = node->childNodes.begin();
+            while (iter2 != node->childNodes.end()){
+                iter = parent->childNodes.insert(iter, *iter2);
+                (*iter)->parent_ = parent;
+                ++iter;
+                ++iter2;
+            }
+        }
+
         go::nodeList::iterator iter = qFind(parent->childNodes.begin(), parent->childNodes.end(), node);
         if (iter != parent->childNodes.end())
             parent->childNodes.erase(iter);
-
-        if (deleteChildren == false){
-            parent->childNodes += node->childNodes;
-            go::nodeList::iterator iter = node->childNodes.begin();
-            while (iter != node->childNodes.end()){
-                (*iter)->parent_ = parent;
-                ++iter;
-            }
-        }
     }
 
     setCurrentNode(parent);

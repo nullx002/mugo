@@ -67,19 +67,17 @@ void DeleteNodeCommand::redo(){
 }
 
 void DeleteNodeCommand::undo(){
-    if (deleteChildren)
-        boardWidget->insertNode(node->parent(), index, node);
-    else{
-        node->parent()->childNodes.clear();
+    if (!deleteChildren){
+        for (int i=0; i<node->childNodes.size(); ++i)
+            node->parent()->childNodes.removeAt(index + i);
 
         go::nodeList::iterator iter = node->childNodes.begin();
         while (iter != node->childNodes.end()){
             (*iter)->parent_ = node;
             ++iter;
         }
-
-        boardWidget->insertNode(node->parent(), index, node);
     }
+    boardWidget->insertNode(node->parent(), index, node);
 }
 
 SetMoveNumberCommand::SetMoveNumberCommand(BoardWidget* _boardWidget, go::nodePtr _node, int _moveNumber, QUndoCommand* parent)
