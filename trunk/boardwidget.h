@@ -126,7 +126,7 @@ public:
 
     // create stone node and insert after current node
     void addStoneNodeCommand(int sgfX, int sgfY);
-    void addStoneNodeCommand(int sgfX, int sgfY, int boardX, int boardY);
+    void insertStoneNodeCommand(int index, int sgfX, int sgfY);
     bool moveNextStone(int sgfX, int sgfY);
 
     void addNodeCommand(go::nodePtr parent, go::nodePtr node, bool select=true);

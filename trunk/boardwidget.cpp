@@ -261,7 +261,7 @@ void BoardWidget::onLButtonDown(QMouseEvent* e){
         if (moveToClicked && board[boardY][boardX].node)
             setCurrentNode( board[boardY][boardX].node );
         else
-            addStoneNodeCommand(sgfX, sgfY, boardX, boardY);
+            addStoneNodeCommand(sgfX, sgfY);
     }
     else if (tutorMode == eAutoReplay)
         return;
@@ -840,44 +840,39 @@ bool BoardWidget::forward(int n){
 /**
 */
 void BoardWidget::addStoneNodeCommand(int sgfX, int sgfY){
-    if (sgfX == -1 && sgfY == -1){
-        go::nodePtr node;
-        if (color == go::black)
-            node = go::createBlackNode(currentNode);
-        else
-            node = go::createWhiteNode(currentNode);
-
-        addNodeCommand(currentNode, node);
-    }
-    else{
-        int boardX, boardY;
-        sgfToBoardCoordinate(sgfX, sgfY, boardX, boardY);
-        addStoneNodeCommand(sgfX, sgfY, boardX, boardY);
-    }
+    insertStoneNodeCommand(-1, sgfX, sgfY);
 }
 
 /**
 */
-void BoardWidget::addStoneNodeCommand(int sgfX, int sgfY, int boardX, int boardY){
-    if (board[boardY][boardX].empty() == false)
-        return;
+void BoardWidget::insertStoneNodeCommand(int index, int sgfX, int sgfY){
+    if (sgfX >= 0 && sgfY >= 0){
+        int boardX, boardY;
+        sgfToBoardCoordinate(sgfX, sgfY, boardX, boardY);
 
-    if (moveNextStone(sgfX, sgfY))
-        return;
+        if (board[boardY][boardX].empty() == false)
+            return;
 
-    board[boardY][boardX].color = color;
-    if (isKill(boardX, boardY) == false && isDead(boardX, boardY) == true){
-        board[boardY][boardX].color = go::empty;
-        return;
+        if (moveNextStone(sgfX, sgfY))
+            return;
+
+        board[boardY][boardX].color = color;
+        if (isKill(boardX, boardY) == false && isDead(boardX, boardY) == true){
+            board[boardY][boardX].color = go::empty;
+            return;
+        }
     }
 
-    go::nodePtr n;
+    go::nodePtr node;
     if (color == go::black)
-        n = go::createBlackNode(currentNode, sgfX, sgfY);
+        node = go::createBlackNode(currentNode, sgfX, sgfY);
     else
-        n = go::createWhiteNode(currentNode, sgfX, sgfY);
+        node = go::createWhiteNode(currentNode, sgfX, sgfY);
 
-    addNodeCommand(currentNode, n);
+    if (index < 0)
+        addNodeCommand(currentNode, node);
+    else
+        insertNodeCommand(currentNode, index, node);
 }
 
 /**
