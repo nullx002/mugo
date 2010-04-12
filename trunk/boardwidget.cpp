@@ -1890,10 +1890,12 @@ void BoardWidget::eraseBackground(QPainter& p, int x, int y){
 /**
 */
 void BoardWidget::putStone(go::nodePtr node, int moveNumber){
-    if (node->nextColor != go::empty)
+    if (node->isWhite())
+        color = go::black;
+    else if (node->isBlack())
+        color = go::white;
+    else if (node->nextColor != go::empty)
         color = node->nextColor;
-    else
-        color = node->isWhite() ? go::black : go::white;
 
     go::stoneList stones;
     stones << node->emptyStones << node->blackStones << node->whiteStones;
