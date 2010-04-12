@@ -54,6 +54,16 @@ gtp::gtp(BoardWidget* board, go::color color, bool newGame, int boardSize, const
         else if (node->color == go::white)
             commandList.push_back( commandPtr(new command(this, eNone, QString("play white %1\n").arg(xy))) );
 
+        foreach(const go::stone& stone, node->blackStones){
+            xy = boardWidget_->getXYString(stone.p.x, stone.p.y, false);
+            commandList.push_back( commandPtr(new command(this, eNone, QString("play black %1\n").arg(xy))) );
+        }
+
+        foreach(const go::stone& stone, node->whiteStones){
+            xy = boardWidget_->getXYString(stone.p.x, stone.p.y, false);
+            commandList.push_back( commandPtr(new command(this, eNone, QString("play white %1\n").arg(xy))) );
+        }
+
         if (node == board->getCurrentNode())
             break;
     }
