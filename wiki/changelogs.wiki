@@ -1,6 +1,6 @@
 #summary One-sentence summary of this page.
 
-==0.14.7-1==
+==0.14.8-1==
  * add:continue game for play with computer.
  * fix:shutdown incorrectly when undo delete branch
  * fix:delete only current node did not work.
@@ -9,7 +9,7 @@
 
  * nsase <sikusiku@gmail.com>  Mon, 12 Apr 2009 13:49:00 +0900
 
-=0.14.7-1=
+==0.14.7-1==
  * fix: hadicap does not work when playing gnugo.
 
  * nsase <sikusiku@gmail.com>  Mon, 01 Mar 2009 21:50:00 +0900
