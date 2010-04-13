@@ -1,0 +1,15 @@
+mugo
+
+mugoを起動するにはQt frameworkが必要です。
+Qt frameworkは以下のサイトからダウンロード可能です。
+
+Qt web site: http://qt.nokia.com/
+Qt framework for Windows  : http://qt.nokia.com/downloads/windows-cpp
+Qt framework for Mac      : http://qt.nokia.com/downloads/mac-os-cpp
+Qt framework for Linux/X11: http://qt.nokia.com/downloads/linux-x11-cpp
+
+
+ビルド
+
+mugoをソースからビルドするには、Qt SDKとC++ Boost Librariesが必要です。
+qmakeコマンドでmugo.proからMakefileを作成し、makeコマンドでビルドしてください。
