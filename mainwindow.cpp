@@ -2429,16 +2429,20 @@ bool MainWindow::fileClose(){
 * tab close.
 */
 bool MainWindow::closeTab(int index){
+    // fileClose() will be processed to current tab(variable boardWidget, tabData)
+    // if index is not current tab, set current tab to boardWidget and tabData.
     BoardWidget* board = boardWidget;
     boardWidget = qobject_cast<BoardWidget*>(ui->boardTabWidget->widget(index));
     tabData = &tabDatas[boardWidget];
 
     if (fileClose() == false){
+        // if close file was canceled, restore boardWidget and tabData.
         boardWidget = board;
         tabData = &tabDatas[boardWidget];
         return false;
     }
 
+    // delete boardWidget's datas.
     boardWidget->clear();
     delete tabData->menuAction;
     delete tabData->gtpProcess;
@@ -2446,10 +2450,15 @@ bool MainWindow::closeTab(int index){
     delete tabData->branchWidget;
     delete tabData->countTerritoryDialog;
     tabDatas.remove(boardWidget);
-    ui->boardTabWidget->removeTab(index);
 
+    // set new active tab to boardWidget and tabData.
+    board = boardWidget;
+    ui->boardTabWidget->removeTab(index);
     boardWidget = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
     tabData = &tabDatas[boardWidget];
+
+    // delete boardWidget after QTabWidget::removeTab
+    delete board;
 
     return true;
 }
