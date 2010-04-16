@@ -24,7 +24,8 @@ SOURCES += main.cpp \
     gtp.cpp \
     printoptiondialog.cpp \
     gib.cpp \
-    ngf.cpp
+    ngf.cpp \
+    boardsizedialog.cpp
 HEADERS += mainwindow.h \
     boardwidget.h \
     godata.h \
@@ -41,7 +42,8 @@ HEADERS += mainwindow.h \
     gtp.h \
     printoptiondialog.h \
     gib.h \
-    ngf.h
+    ngf.h \
+    boardsizedialog.h
 win32:SOURCES += qtdotnetstyle.cpp
 win32:HEADERS += qtdotnetstyle.h
 FORMS += mainwindow.ui \
@@ -51,7 +53,8 @@ FORMS += mainwindow.ui \
     setupdialog.ui \
     playwithcomputerdialog.ui \
     exportasciidialog.ui \
-    printoptiondialog.ui
+    printoptiondialog.ui \
+    boardsizedialog.ui
 RESOURCES += resources.qrc
 win32:RC_FILE = mugo.rc
 mac:RC_FILE = pics/mugo.icns
