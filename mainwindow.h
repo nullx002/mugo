@@ -22,6 +22,9 @@ namespace Ui
     class MainWindow;
 }
 
+/**
+* Main Window
+*/
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -264,10 +267,6 @@ private slots:
     void on_actionTutorBothSides_triggered();
     void on_actionTutorOneSide_triggered();
     void on_actionPlaySound_triggered();
-    void on_action19x19Board_triggered();
-    void on_action13x13Board_triggered();
-    void on_action9x9Board_triggered();
-    void on_actionCustomBoardSize_triggered();
     void on_actionOptions_triggered();
     void on_actionClearSettings_triggered();
     // Tools -> Language menu

@@ -21,6 +21,7 @@
 #include "playwithcomputerdialog.h"
 #include "exportasciidialog.h"
 #include "printoptiondialog.h"
+#include "boardsizedialog.h"
 #include "ui_mainwindow.h"
 
 
@@ -277,7 +278,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->actionDeleteOnlyCurrent->setShortcut( QKeySequence("Ctrl+Delete") );
 
     // window settings
-    setGeometry(x(), y(), settings.value("width", WIN_W).toInt(), settings.value("height", WIN_H).toInt());
+    restoreGeometry( settings.value("mainwindowGeometry").toByteArray() );
     restoreState( settings.value("docksState").toByteArray() );
     ui->collectionWidget->header()->restoreState( settings.value("collectionState").toByteArray() );
 
@@ -297,8 +298,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow(){
     QSettings settings;
-    settings.setValue("width", geometry().width());
-    settings.setValue("height", geometry().height());
+    settings.setValue("mainwindowGeometry", saveGeometry());
     settings.setValue("docksState", saveState());
     settings.setValue("collectionState", ui->collectionWidget->header()->saveState());
 
@@ -363,7 +363,11 @@ void MainWindow::dropEvent(QDropEvent* event)
 * File -> New
 */
 void MainWindow::on_actionNew_triggered(){
-    fileNew();
+    BoardSizeDialog dlg(this);
+    if (dlg.exec() != QDialog::Accepted)
+        return;
+
+    fileNew(dlg.size, dlg.size);
 }
 
 /**
@@ -1630,32 +1634,9 @@ void MainWindow::on_actionPlaySound_triggered(){
 
 /**
 * Slot
-* Tools -> 19 x 19 Board
-*/
-void MainWindow::on_action19x19Board_triggered(){
-    fileNew(19, 19);
-}
-
-/**
-* Slot
-* Tools -> 13 x 13 Board
-*/
-void MainWindow::on_action13x13Board_triggered(){
-    fileNew(13, 13);
-}
-
-/**
-* Slot
-* Tools -> 9 x 9 Board
-*/
-void MainWindow::on_action9x9Board_triggered(){
-    fileNew(9, 9);
-}
-
-/**
-* Slot
 * Tools -> Custom Board Size
 */
+/*
 void MainWindow::on_actionCustomBoardSize_triggered(){
     QInputDialog dlg(this);
     dlg.setLabelText( tr("Input new board size. board size must be between 2-52.") );
@@ -1687,6 +1668,7 @@ void MainWindow::on_actionCustomBoardSize_triggered(){
         if (iH == 0 || (iH >= 2 && iH <= 52))
             fileNew(iW, iH == 0 ? iW : iH);
 }
+*/
 
 /**
 * Slot
