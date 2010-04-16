@@ -2705,7 +2705,7 @@ void BoardWidget::playWithComputer(PlayGame* game){
                 playGame->setHandicap();
             }
 
-            if (playGame->yourColor() == go::white && goData.root->handicap == 0 || playGame->yourColor() == go::black && goData.root->handicap > 0)
+            if ((playGame->yourColor() == go::white && goData.root->handicap == 0) || (playGame->yourColor() == go::black && goData.root->handicap > 0))
                 playGame->wait();
         }
         else{
