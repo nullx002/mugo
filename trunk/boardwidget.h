@@ -120,6 +120,7 @@ public:
     void getCaptured(int& black, int& white) const{ black = capturedBlack; white = capturedWhite; }
     int  getMoveNumber() const{ return currentMoveNumber; }
     bool forward(int n);
+    go::color getColor() const{ return color; };
 
     // command
     void undo();

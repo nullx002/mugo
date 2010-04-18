@@ -5,10 +5,13 @@
 #include <boost/shared_ptr.hpp>
 #include "playgame.h"
 
+/**
+* play game with program using gtp protocol.
+*/
 class gtp : public PlayGame{
 Q_OBJECT
 public:
-    enum eKind{ eNone, eBoardSize, eKomi, eLevel, eMove, eGen, ePut, eQuit, eDeadList, eUndo };
+    enum eKind{ eNone, eListCommands, eBoardSize, eKomi, eLevel, eMove, eGen, ePut, eQuit, eDeadList, eUndo };
     enum eStatus{ eProcessing, eSuccess, eFailure };
 
     class command{
@@ -70,7 +73,7 @@ public:
 
     typedef boost::shared_ptr<command> commandPtr;
 
-    gtp(BoardWidget* board, go::color color, bool newGame, int boardSize, const qreal& komi, int handicap, int level, QProcess& process, QObject* parent=0);
+    gtp(BoardWidget* board, go::color color, int boardSize, const qreal& komi, int handicap, bool newGame, int level, QProcess& process, QObject* parent=0);
 
     virtual bool undo();
 
@@ -85,6 +88,7 @@ public:
 
 private:
     void write();
+    void initialize();
     bool stringToPosition(const QString& buf, int& x, int& y);
     void processCommand(QString& s);
 
@@ -95,6 +99,8 @@ private:
     QList<commandPtr> commandList;
     QStringList commandStringList;
     bool commandProcessing;
+    int level_;
+    QStringList supportedCommandList;
 
 private slots:
     void gtpRead();

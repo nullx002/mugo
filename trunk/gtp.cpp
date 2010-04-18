@@ -26,49 +26,20 @@ gtp::moveBaseCommand::moveBaseCommand(gtp* parent, eKind k, BoardWidget* boardWi
 /**
 * Constructor
 */
-gtp::gtp(BoardWidget* board, go::color color, bool newGame, int boardSize, const qreal& komi, int handicap, int level, QProcess& proc, QObject* parent)
-    : PlayGame(board, color, newGame, parent), process(proc), index(0)
+gtp::gtp(BoardWidget* board, go::color color, int boardSize, const qreal& komi, int handicap, bool newGame, int level, QProcess& proc, QObject* parent)
+    : PlayGame(board, color, boardSize, komi, handicap, newGame, parent), process(proc), index(0)
     , commandProcessing(false)
+    , level_(level)
 {
     connect(&process, SIGNAL(readyRead()), this, SLOT(gtpRead()));
 
-    // initialize
-    commandList.push_back( commandPtr(new boardSizeCommand(this, boardSize)) );
-    commandList.push_back( commandPtr(new komiCommand(this, komi)) );
-    commandList.push_back( commandPtr(new levelCommand(this, level)) );
-
-    // add stone if game is continued.
-    const go::nodeList& nodeList = board->getCurrentNodeList();
-    foreach (const go::nodePtr& node, nodeList){
-        int x = node->getX();
-        int y = node->getY();
-
-        QString xy;
-        if (x < 0 || y < 0)
-            xy = "PASS";
-        else
-            xy = boardWidget_->getXYString(x, y, false);
-
-        if (node->color == go::black)
-            commandList.push_back( commandPtr(new command(this, eNone, QString("play black %1\n").arg(xy))) );
-        else if (node->color == go::white)
-            commandList.push_back( commandPtr(new command(this, eNone, QString("play white %1\n").arg(xy))) );
-
-        foreach(const go::stone& stone, node->blackStones){
-            xy = boardWidget_->getXYString(stone.p.x, stone.p.y, false);
-            commandList.push_back( commandPtr(new command(this, eNone, QString("play black %1\n").arg(xy))) );
-        }
-
-        foreach(const go::stone& stone, node->whiteStones){
-            xy = boardWidget_->getXYString(stone.p.x, stone.p.y, false);
-            commandList.push_back( commandPtr(new command(this, eNone, QString("play white %1\n").arg(xy))) );
-        }
-
-        if (node == board->getCurrentNode())
-            break;
-    }
+    commandList.push_back( commandPtr(new command(this, eListCommands, "list_commands\n")) );
 }
 
+/**
+* undo
+* send undo command.
+*/
 bool gtp::undo(){
     if (moving())
         return false;
@@ -79,15 +50,22 @@ bool gtp::undo(){
     return true;
 }
 
+/**
+* move stone.
+* send play black or play white command.
+*/
 bool gtp::move(int x, int y){
     if (moving())
         return false;
 
-    commandList.push_back( commandPtr(new moveCommand(this, boardWidget_, yourColor_, x, y)) );
+    commandList.push_back( commandPtr(new moveCommand(this, boardWidget_, color_, x, y)) );
 
     return true;
 }
 
+/**
+* put stone.
+*/
 bool gtp::put(go::color color, int x, int y){
 //    if (moving())
 //        return false;
@@ -97,23 +75,38 @@ bool gtp::put(go::color color, int x, int y){
     return true;
 }
 
+/**
+* wait opponent's move.
+* send genmove command.
+*/
 bool gtp::wait(){
 //    if (moving())
 //        return false;
 
-    commandList.push_back( commandPtr(new genmoveCommand(this, yourColor_ == go::white ? go::black : go::white)) );
+    commandList.push_back( commandPtr(new genmoveCommand(this, color_ == go::white ? go::black : go::white)) );
 
     return true;
 }
 
+/**
+* quit game.
+* send quit command.
+*/
 void gtp::quit(){
     commandList.push_back( commandPtr(new command(this, eQuit, "quit\n")) );
 }
 
+/**
+* get dead stones.
+* send final_status_list dead command.
+*/
 void gtp::deadList(){
     commandList.push_back( commandPtr(new command(this, eDeadList, "final_status_list dead\n")) );
 }
 
+/**
+*
+*/
 void gtp::pushCommandList(const QString& buf){
 //    QString msg = QString("%1 %2").arg(index++).arg(buf);
 //    commandStringList.push_back(msg);
@@ -121,6 +114,9 @@ void gtp::pushCommandList(const QString& buf){
     write();
 }
 
+/**
+* send gtp command to game engine.
+*/
 void gtp::write(){
     if (commandProcessing == false && commandStringList.empty() == false){
         qDebug() << commandStringList.front();
@@ -131,17 +127,24 @@ void gtp::write(){
     }
 }
 
+/**
+* received response message from game engine.
+*/
 void gtp::gtpRead(){
+    // read received message.
     QByteArray bytes = process.readAll();
     qDebug() << bytes;
     gtpBuf.append( bytes );
     if (gtpBuf.size() < 4 || gtpBuf.right(2) != "\n\n")
         return;
 
+    // process received message.
     QString s( gtpBuf.left(gtpBuf.size()-2) );
     gtpBuf.clear();
     processCommand(s);
     commandProcessing = false;
+
+    // if command stack is not empty, send next command.
     write();
 }
 
@@ -206,10 +209,9 @@ void gtp::processCommand(QString& s){
     }
     else if (command->kind == eUndo)
         boardWidget_->forward(-1);
-    else if (command->kind == eBoardSize){
-        boardSizeCommand* cmd = (boardSizeCommand*)command.get();
-        if (isNewGame())
-            boardWidget_->setBoardSize( cmd->boardSize, cmd->boardSize );
+    else if (command->kind == eListCommands){
+        supportedCommandList = s.split("\n");
+        initialize();
     }
 }
 
@@ -235,4 +237,53 @@ bool gtp::stringToPosition(const QString& buf, int& x, int& y){
 
 bool gtp::moving() const{
     return commandList.isEmpty() == false;
+}
+
+void gtp::initialize(){
+    commandList.push_back( commandPtr(new boardSizeCommand(this, boardSize_)) );
+    commandList.push_back( commandPtr(new komiCommand(this, komi_)) );
+
+    if (supportedCommandList.indexOf("level") != -1)
+        commandList.push_back( commandPtr(new levelCommand(this, level_)) );
+
+    if (isNewGame())
+        setHandicap();
+
+    // add stone if game is continued.
+    const go::nodeList& nodeList = boardWidget_->getCurrentNodeList();
+    foreach (const go::nodePtr& node, nodeList){
+        int x = node->getX();
+        int y = node->getY();
+
+        QString xy;
+        if (x < 0 || y < 0)
+            xy = "PASS";
+        else
+            xy = boardWidget_->getXYString(x, y, false);
+
+        if (node->color == go::black)
+            commandList.push_back( commandPtr(new command(this, eNone, QString("play black %1\n").arg(xy))) );
+        else if (node->color == go::white)
+            commandList.push_back( commandPtr(new command(this, eNone, QString("play white %1\n").arg(xy))) );
+
+        foreach(const go::stone& stone, node->blackStones){
+            xy = boardWidget_->getXYString(stone.p.x, stone.p.y, false);
+            commandList.push_back( commandPtr(new command(this, eNone, QString("play black %1\n").arg(xy))) );
+        }
+
+        foreach(const go::stone& stone, node->whiteStones){
+            xy = boardWidget_->getXYString(stone.p.x, stone.p.y, false);
+            commandList.push_back( commandPtr(new command(this, eNone, QString("play white %1\n").arg(xy))) );
+        }
+
+        if (node == boardWidget_->getCurrentNode())
+            break;
+    }
+
+    if (isNewGame()){
+        if ((color_ == go::white && handicap_ == 0) || (color_ == go::black && handicap_ > 0))
+            wait();
+    }
+    else if (boardWidget_->getColor() != color_)
+        wait();
 }

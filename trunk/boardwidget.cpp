@@ -179,7 +179,7 @@ void BoardWidget::mouseMoveEvent(QMouseEvent* e){
     int x = e->x() - (width() / 2 - offscreenBuffer1.width() / 2);
     int y = e->y() - (height() / 2 - offscreenBuffer1.height() / 2);
 
-    if (editMode == ePlayGame && (color != playGame->yourColor() || playGame->moving()))
+    if (editMode == ePlayGame && (color != playGame->color() || playGame->moving()))
         return;
 
     bool black;
@@ -1039,7 +1039,7 @@ void BoardWidget::modifyNode(go::nodePtr node, bool recreateBoardBuffer){
 */
 void BoardWidget::pass(){
     if (editMode == ePlayGame){
-        if (color == playGame->yourColor())
+        if (color == playGame->color())
             playGame->move(-1, -1);
     }
     else
@@ -1076,7 +1076,7 @@ void BoardWidget::setCurrentNode(go::nodePtr node){
 /**
 */
 void BoardWidget::playGameLButtonDown(int sgfX, int sgfY){
-    if (color == playGame->yourColor())
+    if (color == playGame->color())
         playGame->move(sgfX, sgfY);
 }
 
@@ -2700,23 +2700,12 @@ void BoardWidget::playWithComputer(PlayGame* game){
         editMode = ePlayGame;
 
         if (playGame->isNewGame()){
-            if (goData.root->handicap > 0){
+            if (goData.root->handicap > 0)
                 whiteFirst(true);
-                playGame->setHandicap();
-            }
-
-            if ((playGame->yourColor() == go::white && goData.root->handicap == 0) || (playGame->yourColor() == go::black && goData.root->handicap > 0))
-                playGame->wait();
         }
-        else{
-            if (playGame->yourColor() != color)
-                playGame->wait();
-        }
-
     }
-    else{
+    else
         editMode = backupEditMode;
-    }
 }
 
 void BoardWidget::autoReplay(){

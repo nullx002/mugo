@@ -1578,7 +1578,7 @@ void MainWindow::on_actionPlayWithGnugo_triggered(){
 
         // start gtp communication
         delete tabData->playGame;
-        tabData->playGame = new gtp(boardWidget, dlg.isBlack ? go::black : go::white, isNewGame, dlg.size, dlg.komi, dlg.handicap, dlg.level,*tabData->gtpProcess);
+        tabData->playGame = new gtp(boardWidget, dlg.isBlack ? go::black : go::white, dlg.size, dlg.komi, dlg.handicap, isNewGame, dlg.level,*tabData->gtpProcess);
         connect( tabData->playGame, SIGNAL(gameEnded()), this, SLOT(playGameEnded()) );
         setPlayWithComputerMode(true);
         boardWidget->playWithComputer(tabData->playGame);

@@ -11,7 +11,7 @@ class PlayGame : public QObject{
 Q_OBJECT
 
 public:
-    PlayGame(BoardWidget* board, go::color color, bool newGame, QObject *parent = 0);
+    PlayGame(BoardWidget* board, go::color color, int boardSize, const qreal& komi, int handicap, bool newGame, QObject *parent = 0);
     virtual ~PlayGame();
 
     bool isNewGame() const{ return isNewGame_; }
@@ -23,7 +23,7 @@ public:
     virtual bool wait() = 0;
     virtual bool moving() const = 0;
 
-    go::color yourColor() const;
+    go::color color() const;
     bool isGameEnd() const;
     void setHandicap();
     bool isResign() const{ return isResign_; }
@@ -34,7 +34,10 @@ signals:
 
 protected:
     BoardWidget* boardWidget_;
-    go::color color_, yourColor_;
+    go::color color_;
+    int boardSize_;
+    qreal komi_;
+    int handicap_;
     bool isResign_;
     bool isNewGame_;
 
