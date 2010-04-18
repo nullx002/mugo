@@ -6,15 +6,16 @@
 //};
 
 
-PlayGame::PlayGame(BoardWidget* board, go::color color, bool newGame, QObject*parent) : QObject(parent), boardWidget_(board), color_(go::black), yourColor_(color), isResign_(false), isNewGame_(newGame)
+PlayGame::PlayGame(BoardWidget* board, go::color color, int boardSize, const qreal& komi, int handicap, bool newGame, QObject *parent)
+    : QObject(parent), boardWidget_(board), color_(color), boardSize_(boardSize), komi_(komi), handicap_(handicap), isResign_(false), isNewGame_(newGame)
 {
 }
 
 PlayGame::~PlayGame(){
 }
 
-go::color PlayGame::yourColor() const{
-    return yourColor_;
+go::color PlayGame::color() const{
+    return color_;
 }
 
 bool PlayGame::isGameEnd() const{
@@ -29,6 +30,9 @@ bool PlayGame::isGameEnd() const{
 
 void PlayGame::setHandicap(){
     go::data& data = boardWidget_->getData();
+
+    if (handicap_ == 0)
+        return;
 
     int xpos = data.root->xsize > 9 ? 4 : 3;
     int ypos = data.root->ysize > 9 ? 4 : 3;
@@ -57,29 +61,29 @@ void PlayGame::setHandicap(){
     };
 
     QList<int> xlist, ylist;
-    for (int i=0; i<qMin(4, data.root->handicap); ++i){
+    for (int i=0; i<qMin(4, handicap_); ++i){
         xlist.push_back( x[i] );
         ylist.push_back( y[i] );
     }
 
-    if (data.root->handicap > 5){
+    if (handicap_ > 5){
         xlist.push_back( x[5] );
         xlist.push_back( x[6] );
         ylist.push_back( y[5] );
         ylist.push_back( y[6] );
     }
-    if (data.root->handicap > 7){
+    if (handicap_ > 7){
         xlist.push_back( x[7] );
         xlist.push_back( x[8] );
         ylist.push_back( y[7] );
         ylist.push_back( y[8] );
     }
 
-    if (data.root->handicap > 4 && data.root->handicap % 2 != 0){
+    if (handicap_ > 4 && handicap_ % 2 != 0){
         xlist.push_back( x[4] );
         ylist.push_back( y[4] );
     }
 
-    for (int i=0; i<data.root->handicap; ++i)
+    for (int i=0; i<handicap_; ++i)
         put(go::black, xlist[i], ylist[i]);
 }
