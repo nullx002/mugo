@@ -65,13 +65,12 @@ public:
     bool fileOpen(const QString& fname, bool guessCodec=true, bool newTab=true, bool forceOpen=false);
     bool urlOpen(const QUrl& url);
     go::fileBase* readFile(const QString& fname, QTextCodec*& codec, bool guessCodec);
-    bool fileSave();
-    bool fileSaveAs();
-    bool fileSaveAs(const QString& fname);
-    bool fileClose();
+    bool fileSave(BoardWidget* boardWidget, TabData* tabData);
+    bool fileSaveAs(BoardWidget* boardWidget, TabData* tabData);
+    bool fileSaveAs(BoardWidget* boardWidget, TabData* tabData, const QString& fname);
     bool closeTab(int index);
     bool closeAllTab();
-    bool maybeSave();
+    bool maybeSave(BoardWidget* boardWidget, TabData* tabData);
 
 protected:
     virtual void closeEvent(QCloseEvent* e);
