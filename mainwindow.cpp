@@ -307,16 +307,11 @@ MainWindow::~MainWindow(){
 }
 
 void MainWindow::closeEvent(QCloseEvent* e){
-    BoardWidget* board = boardWidget;
-
     for (int i=0; i<ui->boardTabWidget->count(); ++i){
-        boardWidget = qobject_cast<BoardWidget*>(ui->boardTabWidget->widget(i));
-        tabData = &tabDatas[boardWidget];
+        BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->widget(i));
+        TabData* tab = &tabDatas[boardWidget];
 
-        if (maybeSave() == false){
-            boardWidget = board;
-            tabData = &tabDatas[boardWidget];
-
+        if (maybeSave(board, tab) == false){
             e->ignore();
             return;
         }
@@ -402,7 +397,7 @@ void MainWindow::on_actionOpenURL_triggered(){
 * File -> Reload
 */
 void MainWindow::on_actionReload_triggered(){
-    if (maybeSave()){
+    if (maybeSave(boardWidget, tabData)){
         branchWidget->clear();
         nodeToTreeWidget->clear();
 
@@ -418,7 +413,7 @@ void MainWindow::on_actionReload_triggered(){
 * File -> Save
 */
 void MainWindow::on_actionSave_triggered(){
-    fileSave();
+    fileSave(boardWidget, tabData);
 }
 
 /**
@@ -426,7 +421,7 @@ void MainWindow::on_actionSave_triggered(){
 * File -> Save As
 */
 void MainWindow::on_actionSaveAs_triggered(){
-    fileSaveAs();
+    fileSaveAs(boardWidget, tabData);
 }
 
 /**
@@ -1813,6 +1808,8 @@ void MainWindow::on_boardTabWidget_tabCloseRequested(int index){
 * board data was cleared.
 */
 void MainWindow::boardCleared(){
+    if (sender() != boardWidget)
+        return;
     setTreeData();
 }
 
@@ -2341,19 +2338,19 @@ go::fileBase* MainWindow::readFile(const QString& fname, QTextCodec*& codec, boo
 /**
 * file save.
 */
-bool MainWindow::fileSave(){
+bool MainWindow::fileSave(BoardWidget* boardWidget, TabData* tabData){
     const QString& fileName = tabData->fileName;
     QFileInfo fi(fileName);
     if (fileName.isEmpty() || fi.suffix().compare("sgf", Qt::CaseInsensitive) != 0)
-        return fileSaveAs();
+        return fileSaveAs(boardWidget, tabData);
     else
-        return fileSaveAs(fileName);
+        return fileSaveAs(boardWidget, tabData, fileName);
 }
 
 /**
 * file saveas.
 */
-bool MainWindow::fileSaveAs(){
+bool MainWindow::fileSaveAs(BoardWidget* boardWidget, TabData* tabData){
     QString filter = tr("sgf(*.sgf)");
 
     QString defaultName;
@@ -2377,13 +2374,13 @@ bool MainWindow::fileSaveAs(){
     if (fi.suffix().isEmpty())
         fname.append(".sgf");
 
-    return fileSaveAs(fname);
+    return fileSaveAs(boardWidget, tabData, fname);
 }
 
 /**
 * file saveas.
 */
-bool MainWindow::fileSaveAs(const QString& fname){
+bool MainWindow::fileSaveAs(BoardWidget* boardWidget, TabData* tabData, const QString& fname){
     setCurrentFile(fname);
     go::sgf sgf;
     boardWidget->getData(sgf);
@@ -2398,31 +2395,16 @@ bool MainWindow::fileSaveAs(const QString& fname){
 }
 
 /**
-* file close.
-*/
-bool MainWindow::fileClose(){
-    if (maybeSave() == false)
-        return false;
-
-    return true;
-}
-
-/**
 * tab close.
 */
 bool MainWindow::closeTab(int index){
     // fileClose() will be processed to current tab(variable boardWidget, tabData)
     // if index is not current tab, set current tab to boardWidget and tabData.
-    BoardWidget* board = boardWidget;
-    boardWidget = qobject_cast<BoardWidget*>(ui->boardTabWidget->widget(index));
-    tabData = &tabDatas[boardWidget];
+    BoardWidget* boardWidget = qobject_cast<BoardWidget*>(ui->boardTabWidget->widget(index));
+    TabData*     tabData     = &tabDatas[boardWidget];
 
-    if (fileClose() == false){
-        // if close file was canceled, restore boardWidget and tabData.
-        boardWidget = board;
-        tabData = &tabDatas[boardWidget];
+    if (maybeSave(boardWidget, tabData) == false)
         return false;
-    }
 
     // delete boardWidget's datas.
     boardWidget->clear();
@@ -2433,14 +2415,9 @@ bool MainWindow::closeTab(int index){
     delete tabData->countTerritoryDialog;
     tabDatas.remove(boardWidget);
 
-    // set new active tab to boardWidget and tabData.
-    board = boardWidget;
-    ui->boardTabWidget->removeTab(index);
-    boardWidget = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
-    tabData = &tabDatas[boardWidget];
-
     // delete boardWidget after QTabWidget::removeTab
-    delete board;
+    ui->boardTabWidget->removeTab(index);
+    delete boardWidget;
 
     return true;
 }
@@ -2449,19 +2426,13 @@ bool MainWindow::closeTab(int index){
 * all tab close.
 */
 bool MainWindow::closeAllTab(){
-    BoardWidget* board = boardWidget;
-
     int count = ui->boardTabWidget->count();
     for (int i=0; i<count; ++i){
-        boardWidget = qobject_cast<BoardWidget*>(ui->boardTabWidget->widget(i));
-        tabData = &tabDatas[boardWidget];
+        BoardWidget* boardWidget = qobject_cast<BoardWidget*>(ui->boardTabWidget->widget(i));
+        TabData*     tabData     = &tabDatas[boardWidget];
 
-        if (maybeSave() == false){
-            boardWidget = board;
-            tabData = &tabDatas[boardWidget];
-
+        if (maybeSave(boardWidget, tabData) == false)
             return false;
-        }
     }
 
     for (int i=0; i<count; ++i){
@@ -2475,7 +2446,7 @@ bool MainWindow::closeAllTab(){
 
 /**
 */
-bool MainWindow::maybeSave(){
+bool MainWindow::maybeSave(BoardWidget* boardWidget, TabData* tabData){
     if (!boardWidget->isDirty())
         return true;
 
@@ -2485,7 +2456,7 @@ bool MainWindow::maybeSave(){
                                   "Do you want to save your changes?").arg(tabData->documentName),
                                QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
     if (ret == QMessageBox::Save)
-        return fileSave();
+        return fileSave(boardWidget, tabData);
     else if (ret == QMessageBox::Cancel)
         return false;
     return true;
