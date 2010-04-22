@@ -113,6 +113,7 @@ public:
 
     // get node
     go::data& getData(){ return goData; }
+    const go::data& getData() const{ return goData; }
     go::nodePtr getCurrentNode(){ return currentNode; }
     go::nodePtr findNodeFromMoveNumber(int moveNumber);
     const go::nodeList& getCurrentNodeList() const{ return nodeList; }

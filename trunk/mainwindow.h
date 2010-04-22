@@ -57,6 +57,8 @@ public:
         QProcess* gtpProcess;
     };
 
+    typedef QMap<BoardWidget*, TabData> TabDataMap;
+
     MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
@@ -65,12 +67,12 @@ public:
     bool fileOpen(const QString& fname, bool guessCodec=true, bool newTab=true, bool forceOpen=false);
     bool urlOpen(const QUrl& url);
     go::fileBase* readFile(const QString& fname, QTextCodec*& codec, bool guessCodec);
-    bool fileSave(BoardWidget* boardWidget, TabData* tabData);
-    bool fileSaveAs(BoardWidget* boardWidget, TabData* tabData);
-    bool fileSaveAs(BoardWidget* boardWidget, TabData* tabData, const QString& fname);
+    bool fileSave(BoardWidget* board);
+    bool fileSaveAs(BoardWidget* board);
+    bool fileSaveAs(BoardWidget* board, const QString& fname);
     bool closeTab(int index);
     bool closeAllTab();
-    bool maybeSave(BoardWidget* boardWidget, TabData* tabData);
+    bool maybeSave(BoardWidget* board);
 
 protected:
     virtual void closeEvent(QCloseEvent* e);
@@ -79,10 +81,12 @@ protected:
     virtual void dropEvent(QDropEvent* event);
 
 private:
+    BoardWidget* currentBoard();
+    const BoardWidget* currentBoard() const;
     void addDocument(BoardWidget* board);
     void setDocument(BoardWidget* board);
 
-    void setCurrentFile(const QString& fname);
+    void setFileName(BoardWidget* boardWidget, const QString& fname);
     void updateRecentFileActions();
 
     void setCaption();
@@ -95,15 +99,15 @@ private:
     void setMoveAnnotation(QAction* action, int annotation);
     void setNodeAnnotation(QAction* action, int annotation);
 
-    void setTreeData();
-    QTreeWidgetItem* addTreeWidget(go::nodePtr node, bool needRemake = false);
-    QTreeWidgetItem* createTreeWidget(go::nodePtr node);
-    QTreeWidgetItem* remakeTreeWidget(QTreeWidgetItem* currentWidget);
+    void setTreeData(BoardWidget* board);
+    QTreeWidgetItem* addTreeWidget(BoardWidget* board, go::nodePtr node, bool needRemake = false);
+    QTreeWidgetItem* createTreeWidget(BoardWidget* board, go::nodePtr node);
+    QTreeWidgetItem* remakeTreeWidget(BoardWidget* board, QTreeWidgetItem* currentWidget);
     void deleteNode(bool deleteNode);
-    void deleteTreeWidget(go::nodePtr node, bool deleteChildren);
-    void deleteTreeWidgetForMap(go::nodePtr node);
-    void setTreeWidget(go::nodePtr n);
-    QString createTreeText(const go::nodePtr node);
+    void deleteTreeWidget(BoardWidget* board, go::nodePtr node, bool deleteChildren);
+    void deleteTreeWidgetForMap(BoardWidget* board, go::nodePtr node);
+    void setTreeWidget(BoardWidget* board, go::nodePtr n);
+    QString createTreeText(BoardWidget* board, const go::nodePtr node);
 
     go::nodePtr getNode(QTreeWidgetItem* treeWidget);
 
@@ -117,12 +121,8 @@ private:
     void readSettings();
 
     Ui::MainWindow *ui;
-    QMap<BoardWidget*, TabData> tabDatas;
-    TabData* tabData;
+    TabDataMap tabDatas;
     QActionGroup tabMenuGroups;
-    BoardWidget* boardWidget;
-    QTreeWidget* branchWidget;
-    NodeToTreeWidgetType* nodeToTreeWidget;
     int docIndex;
 
     enum { MaxRecentFiles = 5 };

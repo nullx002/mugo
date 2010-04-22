@@ -306,12 +306,18 @@ MainWindow::~MainWindow(){
     delete http;
 }
 
+BoardWidget* MainWindow::currentBoard(){
+    return qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+}
+
+const BoardWidget* MainWindow::currentBoard() const{
+    return qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+}
+
 void MainWindow::closeEvent(QCloseEvent* e){
     for (int i=0; i<ui->boardTabWidget->count(); ++i){
         BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->widget(i));
-        TabData* tab = &tabDatas[boardWidget];
-
-        if (maybeSave(board, tab) == false){
+        if (maybeSave(board) == false){
             e->ignore();
             return;
         }
@@ -397,14 +403,15 @@ void MainWindow::on_actionOpenURL_triggered(){
 * File -> Reload
 */
 void MainWindow::on_actionReload_triggered(){
-    if (maybeSave(boardWidget, tabData)){
-        branchWidget->clear();
-        nodeToTreeWidget->clear();
+    if ( maybeSave(currentBoard()) ){
+        TabData& tabData = tabDatas[currentBoard()];
+        tabData.branchWidget->clear();
+        tabData.nodeToTree.clear();
 
-        if (!tabData->fileName.isEmpty())
-            fileOpen(tabData->fileName, false, false, true);
-        else if (!tabData->url.isEmpty())
-            urlOpen(tabData->url);
+        if (!tabData.fileName.isEmpty())
+            fileOpen(tabData.fileName, false, false, true);
+        else if (!tabData.url.isEmpty())
+            urlOpen(tabData.url);
     }
 }
 
@@ -413,7 +420,7 @@ void MainWindow::on_actionReload_triggered(){
 * File -> Save
 */
 void MainWindow::on_actionSave_triggered(){
-    fileSave(boardWidget, tabData);
+    fileSave( currentBoard() );
 }
 
 /**
@@ -421,7 +428,7 @@ void MainWindow::on_actionSave_triggered(){
 * File -> Save As
 */
 void MainWindow::on_actionSaveAs_triggered(){
-    fileSaveAs(boardWidget, tabData);
+    fileSaveAs( currentBoard() );
 }
 
 /**
@@ -449,17 +456,17 @@ void MainWindow::on_actionSaveBoardAsPicture_triggered()
             fi.setFile(fname + ".tiff");
     }
 
-    int w = boardWidget->width();
-    int h = boardWidget->height();
+    int w = currentBoard()->width();
+    int h = currentBoard()->height();
     w = h = qMin(w, h);
     QImage image(w, h, QImage::Format_RGB32);
-    boardWidget->paintBoard(&image);
-    boardWidget->paintStones(&image);
-    boardWidget->paintTerritories(&image);
+    currentBoard()->paintBoard(&image);
+    currentBoard()->paintStones(&image);
+    currentBoard()->paintTerritories(&image);
     image.save(fi.absoluteFilePath());
 
     // change image coordinate to display
-    boardWidget->repaintBoard();
+    currentBoard()->repaintBoard();
 }
 
 /**
@@ -467,7 +474,7 @@ void MainWindow::on_actionSaveBoardAsPicture_triggered()
 * File -> Export Ascii to Clipboard
 */
 void MainWindow::on_actionExportAsciiToClipboard_triggered(){
-    ExportAsciiDialog dlg(this, boardWidget->getBuffer());
+    ExportAsciiDialog dlg(this, currentBoard()->getBuffer());
     dlg.exec();
 }
 
@@ -487,10 +494,10 @@ void MainWindow::on_actionCollectionExtract_triggered(){
     sgf.set(info);
 
     fileNew();
-    boardWidget->setData(sgf);
 
-    boardWidget->setDirty(true);
-    setTreeData();
+    currentBoard()->setData(sgf);
+    currentBoard()->setDirty(true);
+    setTreeData( currentBoard() );
     setCaption();
     updateCollection();
 }
@@ -504,12 +511,14 @@ void MainWindow::on_actionCollectionImport_triggered(){
     if (fname.isEmpty())
         return;
 
-    QTextCodec* codec = tabData->codec;
+    TabData& tabData = tabDatas[currentBoard()];
+
+    QTextCodec* codec = tabData.codec;
     go::fileBase* data = readFile(fname, codec, true);
     if (data == NULL)
         return;
 
-    boardWidget->addData(*data);
+    currentBoard()->addData(*data);
     delete data;
 
     setCaption();
@@ -528,7 +537,7 @@ void MainWindow::on_actionCollectionMoveUp_triggered(){
     QVariant v = item->data(0, Qt::UserRole);
     go::informationPtr info = v.value<go::informationPtr>();
 
-    go::informationList& rootList = boardWidget->getData().rootList;
+    go::informationList& rootList = currentBoard()->getData().rootList;
     go::informationList::iterator iter = qFind(rootList.begin(), rootList.end(), info);
     if (iter == rootList.end() || iter == rootList.begin())
         return;
@@ -548,7 +557,7 @@ void MainWindow::on_actionCollectionMoveUp_triggered(){
             break;
         }
     }
-    boardWidget->setDirty(true);
+    currentBoard()->setDirty(true);
     setCaption();
 }
 
@@ -564,7 +573,7 @@ void MainWindow::on_actionCollectionMoveDown_triggered(){
     QVariant v = item->data(0, Qt::UserRole);
     go::informationPtr info = v.value<go::informationPtr>();
 
-    go::informationList& rootList = boardWidget->getData().rootList;
+    go::informationList& rootList = currentBoard()->getData().rootList;
     go::informationList::iterator iter = qFind(rootList.begin(), rootList.end(), info);
     if (iter == rootList.end() || iter+1 == rootList.end())
         return;
@@ -584,7 +593,7 @@ void MainWindow::on_actionCollectionMoveDown_triggered(){
             break;
         }
     }
-    boardWidget->setDirty(true);
+    currentBoard()->setDirty(true);
     setCaption();
 }
 
@@ -600,8 +609,8 @@ void MainWindow::on_actionDeleteSgfFromCollection_triggered(){
     QVariant v = item->data(0, Qt::UserRole);
     go::informationPtr info = v.value<go::informationPtr>();
 
-    go::informationPtr& root= boardWidget->getData().root;
-    go::informationList& rootList = boardWidget->getData().rootList;
+    go::informationPtr& root= currentBoard()->getData().root;
+    go::informationList& rootList = currentBoard()->getData().rootList;
     go::informationList::iterator iter = qFind(rootList.begin(), rootList.end(), info);
     if (*iter == root){
         QMessageBox::warning(this, QString(), tr("Remove sgf from collection failed because this sgf is editing."));
@@ -619,7 +628,7 @@ void MainWindow::on_actionDeleteSgfFromCollection_triggered(){
             item2->setText(0, QString().sprintf("%5d", no-1));
     }
 
-    boardWidget->setDirty(true);
+    currentBoard()->setDirty(true);
     setCaption();
 }
 
@@ -655,7 +664,7 @@ void MainWindow::on_actionPrint_triggered(){
     if (printDialog.exec() != QDialog::Accepted)
         return;
 
-    boardWidget->print(printer, optionDialog.printOption(), optionDialog.movesPerPage());
+    currentBoard()->print(printer, optionDialog.printOption(), optionDialog.movesPerPage());
 }
 
 /**
@@ -685,7 +694,7 @@ void MainWindow::on_actionCopySgfToClipboard_triggered(){
     QTextStream stream(&str, QIODevice::WriteOnly);
 
     go::sgf sgf;
-    sgf.set(boardWidget->getData().root);
+    sgf.set(currentBoard()->getData().root);
     sgf.saveStream(stream);
     stream.flush();
 
@@ -701,7 +710,7 @@ void MainWindow::on_actionCopyCurrentSgfToClipboard_triggered(){
     QString str("(");
     QString s;
 
-    const go::nodeList& nodeList = boardWidget->getCurrentNodeList();
+    const go::nodeList& nodeList = currentBoard()->getCurrentNodeList();
     go::nodeList::const_iterator iter = nodeList.begin();
     while (iter != nodeList.end()){
         if (s.size() > SGF_LINEWIDTH){
@@ -735,10 +744,11 @@ void MainWindow::on_actionPasteSgfToNewTab_triggered(){
     sgf.readStream(first, str.end());
 
     fileNew();
-    boardWidget->setData(sgf);
 
-    boardWidget->setDirty(true);
-    setTreeData();
+    currentBoard()->setData(sgf);
+    currentBoard()->setDirty(true);
+
+    setTreeData( currentBoard() );
     setCaption();
     updateCollection();
 }
@@ -755,9 +765,9 @@ void MainWindow::on_actionPasteSgfToCollection_triggered(){
     QString::iterator first = str.begin();
     sgf.readStream(first, str.end());
 
-    boardWidget->addData(sgf);
+    currentBoard()->addData(sgf);
 
-    setTreeData();
+    setTreeData( currentBoard() );
     setCaption();
     updateCollection();
 }
@@ -787,11 +797,11 @@ void MainWindow::on_actionPasteSgfAsBranchFromClipboard_triggered(){
 * Edit -> Game Information
 */
 void MainWindow::on_actionGameInformation_triggered(){
-    GameInformationDialog dlg(this, boardWidget->getData().root.get());
+    GameInformationDialog dlg(this, currentBoard()->getData().root.get());
     if (dlg.exec() != QDialog::Accepted)
         return;
 
-    boardWidget->setDirty(true);
+    currentBoard()->setDirty(true);
     setCaption();
     updateCollection();
 }
@@ -801,7 +811,7 @@ void MainWindow::on_actionGameInformation_triggered(){
 * Edit -> Pass
 */
 void MainWindow::on_actionPass_triggered(){
-    boardWidget->pass();
+    currentBoard()->pass();
 }
 
 /**
@@ -1013,7 +1023,7 @@ void MainWindow::on_actionHotspot_triggered(){
 * Edit -> Move Number -> Set
 */
 void MainWindow::on_actionSetMoveNumber_triggered(){
-    go::nodePtr node = boardWidget->getCurrentNode();
+    go::nodePtr node = currentBoard()->getCurrentNode();
     if (!node->isStone())
         return;
 
@@ -1027,7 +1037,7 @@ void MainWindow::on_actionSetMoveNumber_triggered(){
     if (dlg.exec() != QDialog::Accepted)
         return;
 
-    boardWidget->setMoveNumberCommand(node, dlg.intValue());
+    currentBoard()->setMoveNumberCommand(node, dlg.intValue());
 }
 
 /**
@@ -1035,8 +1045,8 @@ void MainWindow::on_actionSetMoveNumber_triggered(){
 * Edit -> Move Number -> Unset
 */
 void MainWindow::on_actionUnsetMoveNumber_triggered(){
-    go::nodePtr node = boardWidget->getCurrentNode();
-    boardWidget->unsetMoveNumberCommand(node);
+    go::nodePtr node = currentBoard()->getCurrentNode();
+    currentBoard()->unsetMoveNumberCommand(node);
 }
 
 /**
@@ -1044,13 +1054,13 @@ void MainWindow::on_actionUnsetMoveNumber_triggered(){
 * Edit -> Edit Node Name
 */
 void MainWindow::on_actionEditNodeName_triggered(){
-    go::nodePtr node = boardWidget->getCurrentNode();
+    go::nodePtr node = currentBoard()->getCurrentNode();
     QInputDialog dlg(this);
     dlg.setLabelText( tr("Input node name") );
     dlg.setTextValue(node->name);
     if (dlg.exec() != QDialog::Accepted)
         return;
-    boardWidget->setNodeNameCommand(node, dlg.textValue());
+    currentBoard()->setNodeNameCommand(node, dlg.textValue());
 }
 
 /**
@@ -1059,9 +1069,9 @@ void MainWindow::on_actionEditNodeName_triggered(){
 */
 void MainWindow::on_actionWhiteFirst_triggered(){
     if (ui->actionWhiteFirst->isChecked())
-        boardWidget->whiteFirst(true);
+        currentBoard()->whiteFirst(true);
     else
-        boardWidget->whiteFirst(false);
+        currentBoard()->whiteFirst(false);
 }
 
 /**
@@ -1069,7 +1079,7 @@ void MainWindow::on_actionWhiteFirst_triggered(){
 * Edit -> Rotate SGF Clockwise
 */
 void MainWindow::on_actionRotateSgfClockwise_triggered(){
-    boardWidget->rotateSgfCommand();
+    currentBoard()->rotateSgfCommand();
 }
 
 /**
@@ -1077,7 +1087,7 @@ void MainWindow::on_actionRotateSgfClockwise_triggered(){
 * Edit -> Flip SGF Holizontally
 */
 void MainWindow::on_actionFlipSgfHorizontally_triggered(){
-    boardWidget->flipSgfHorizontallyCommand();
+    currentBoard()->flipSgfHorizontallyCommand();
 }
 
 /**
@@ -1085,7 +1095,7 @@ void MainWindow::on_actionFlipSgfHorizontally_triggered(){
 * Edit -> Flip SGF Vertically
 */
 void MainWindow::on_actionFlipSgfVertically_triggered(){
-    boardWidget->flipSgfVerticallyCommand();
+    currentBoard()->flipSgfVerticallyCommand();
 }
 
 /**
@@ -1097,15 +1107,16 @@ void MainWindow::setEncoding(){
 }
 
 void MainWindow::setEncoding(QAction* action, bool saveToDefault){
-    tabData->encode = action;
+    TabData& tabData = tabDatas[currentBoard()];
+    tabData.encode = action;
     for (int i=0; i<codecActions.size(); ++i){
         if (codecActions[i] == action){
-            tabData->codec = QTextCodec::codecForName( codecNames[i] );
+            tabData.codec = QTextCodec::codecForName( codecNames[i] );
 
-            if (tabData->codec){
-                qDebug() << "change codec to " << tabData->codec->name();
+            if (tabData.codec){
+                qDebug() << "change codec to " << tabData.codec->name();
                 if (saveToDefault){
-                    defaultCodec = tabData->codec;
+                    defaultCodec = tabData.codec;
                     QSettings().setValue("codec", defaultCodec->name());
                 }
             }
@@ -1131,7 +1142,7 @@ void MainWindow::setEncoding(QTextCodec* codec){
 * Traverse -> First Move
 */
 void MainWindow::on_actionMoveFirst_triggered(){
-    boardWidget->setCurrentNode( boardWidget->getData().root );
+    currentBoard()->setCurrentNode( currentBoard()->getData().root );
 }
 
 /**
@@ -1139,7 +1150,7 @@ void MainWindow::on_actionMoveFirst_triggered(){
 * Traverse -> Fast Rewind
 */
 void MainWindow::on_actionFastRewind_triggered(){
-    go::nodePtr node = boardWidget->getCurrentNode();
+    go::nodePtr node = currentBoard()->getCurrentNode();
     if (node->parent() == NULL)
         return;
 
@@ -1149,7 +1160,7 @@ void MainWindow::on_actionFastRewind_triggered(){
         else
             break;
     }
-    boardWidget->setCurrentNode(node);
+    currentBoard()->setCurrentNode(node);
 }
 
 /**
@@ -1157,9 +1168,9 @@ void MainWindow::on_actionFastRewind_triggered(){
 * Traverse -> Previous Move
 */
 void MainWindow::on_actionPreviousMove_triggered(){
-    go::nodePtr node = boardWidget->getCurrentNode();
+    go::nodePtr node = currentBoard()->getCurrentNode();
     if (node->parent())
-        boardWidget->setCurrentNode(node->parent());
+        currentBoard()->setCurrentNode(node->parent());
 }
 
 /**
@@ -1167,10 +1178,10 @@ void MainWindow::on_actionPreviousMove_triggered(){
 * Traverse -> Next Move
 */
 void MainWindow::on_actionNextMove_triggered(){
-    const go::nodeList& nodeList = boardWidget->getCurrentNodeList();
-    go::nodeList::const_iterator iter = qFind(nodeList.begin(), nodeList.end(), boardWidget->getCurrentNode());
+    const go::nodeList& nodeList = currentBoard()->getCurrentNodeList();
+    go::nodeList::const_iterator iter = qFind(nodeList.begin(), nodeList.end(), currentBoard()->getCurrentNode());
     if (iter != nodeList.end() && ++iter != nodeList.end())
-        boardWidget->setCurrentNode( *iter );
+        currentBoard()->setCurrentNode( *iter );
 }
 
 /**
@@ -1178,17 +1189,17 @@ void MainWindow::on_actionNextMove_triggered(){
 * Traverse -> Fast Forward
 */
 void MainWindow::on_actionFastForward_triggered(){
-    const go::nodeList& nodeList = boardWidget->getCurrentNodeList();
-    go::nodeList::const_iterator iter = qFind(nodeList.begin(), nodeList.end(), boardWidget->getCurrentNode());
+    const go::nodeList& nodeList = currentBoard()->getCurrentNodeList();
+    go::nodeList::const_iterator iter = qFind(nodeList.begin(), nodeList.end(), currentBoard()->getCurrentNode());
 
-    go::nodePtr node = boardWidget->getCurrentNode();
+    go::nodePtr node = currentBoard()->getCurrentNode();
     for (int i=0; i<stepsOfFastMove; ++i)
         if (iter != nodeList.end() && ++iter != nodeList.end())
             node = *iter;
         else
             break;
 
-    boardWidget->setCurrentNode(node);
+    currentBoard()->setCurrentNode(node);
 }
 
 /**
@@ -1196,9 +1207,9 @@ void MainWindow::on_actionFastForward_triggered(){
 * Traverse -> Move Last
 */
 void MainWindow::on_actionMoveLast_triggered(){
-    const go::nodeList& nodeList = boardWidget->getCurrentNodeList();
+    const go::nodeList& nodeList = currentBoard()->getCurrentNodeList();
     go::nodePtr node = nodeList.back();
-    boardWidget->setCurrentNode(node);
+    currentBoard()->setCurrentNode(node);
 }
 
 /**
@@ -1206,13 +1217,13 @@ void MainWindow::on_actionMoveLast_triggered(){
 * Traverse -> Back to parent
 */
 void MainWindow::on_actionBackToParent_triggered(){
-    go::nodePtr node = boardWidget->getCurrentNode();
+    go::nodePtr node = currentBoard()->getCurrentNode();
     while(node->parent()){
         node = node->parent();
         if (node->childNodes.size() > 1)
             break;
     }
-    boardWidget->setCurrentNode( node );
+    currentBoard()->setCurrentNode( node );
 }
 
 /**
@@ -1220,7 +1231,7 @@ void MainWindow::on_actionBackToParent_triggered(){
 * Traverse -> Previous Branch
 */
 void MainWindow::on_actionPreviousBranch_triggered(){
-    go::nodePtr node   = boardWidget->getCurrentNode();
+    go::nodePtr node   = currentBoard()->getCurrentNode();
     go::nodePtr parent = node->parent();
     while(parent){
         if (parent->childNodes.size() > 1)
@@ -1236,7 +1247,7 @@ void MainWindow::on_actionPreviousBranch_triggered(){
     if (iter == parent->childNodes.begin())
         return;
 
-    boardWidget->setCurrentNode( *--iter );
+    currentBoard()->setCurrentNode( *--iter );
 }
 
 /**
@@ -1244,7 +1255,7 @@ void MainWindow::on_actionPreviousBranch_triggered(){
 * Traverse -> Next Branch
 */
 void MainWindow::on_actionNextBranch_triggered(){
-    go::nodePtr node   = boardWidget->getCurrentNode();
+    go::nodePtr node   = currentBoard()->getCurrentNode();
     go::nodePtr parent = node->parent();
     while(parent){
         if (parent->childNodes.size() > 1)
@@ -1260,7 +1271,7 @@ void MainWindow::on_actionNextBranch_triggered(){
     if (++iter == parent->childNodes.end())
         return;
 
-    boardWidget->setCurrentNode( *iter );
+    currentBoard()->setCurrentNode( *iter );
 }
 
 /**
@@ -1274,9 +1285,9 @@ void MainWindow::on_actionJumpToMoveNumber_triggered(){
     if (dlg.exec() != QDialog::Accepted)
         return;
 
-    go::nodePtr node = boardWidget->findNodeFromMoveNumber( dlg.intValue() );
+    go::nodePtr node = currentBoard()->findNodeFromMoveNumber( dlg.intValue() );
     if (node)
-        boardWidget->setCurrentNode(node);
+        currentBoard()->setCurrentNode(node);
 }
 
 /**
@@ -1284,7 +1295,7 @@ void MainWindow::on_actionJumpToMoveNumber_triggered(){
 * Traverse -> jump to clicked
 */
 void MainWindow::on_actionJumpToClicked_triggered(){
-    boardWidget->setMoveToClicked( ui->actionJumpToClicked->isChecked() );
+    currentBoard()->setMoveToClicked( ui->actionJumpToClicked->isChecked() );
 }
 
 /**
@@ -1293,7 +1304,7 @@ void MainWindow::on_actionJumpToClicked_triggered(){
 */
 void MainWindow::on_actionShowMoveNumber_triggered(){
     ui->menuShowMoveNumber->menuAction()->setChecked( ui->actionShowMoveNumber->isChecked() );
-    boardWidget->setShowMoveNumber( ui->actionShowMoveNumber->isChecked() );
+    currentBoard()->setShowMoveNumber( ui->actionShowMoveNumber->isChecked() );
 
     QSettings settings;
     settings.setValue("marker/showMoveNumber", ui->actionShowMoveNumber->isChecked());
@@ -1304,10 +1315,11 @@ void MainWindow::on_actionShowMoveNumber_triggered(){
 * View -> Move Number -> Reset move number in branch.
 */
 void MainWindow::on_actionResetMoveNubmerInBranch_triggered(){
+    TabData& tabData = tabDatas[currentBoard()];
     if (ui->actionResetMoveNubmerInBranch->isChecked())
-        boardWidget->setMoveNumberMode(tabData->branchMode ? BoardWidget::eResetInBranch : BoardWidget::eResetInVariation );
+        currentBoard()->setMoveNumberMode(tabData.branchMode ? BoardWidget::eResetInBranch : BoardWidget::eResetInVariation );
     else
-        boardWidget->setMoveNumberMode( BoardWidget::eSequential );
+        currentBoard()->setMoveNumberMode( BoardWidget::eSequential );
 }
 
 /**
@@ -1324,7 +1336,7 @@ void MainWindow::on_actionShowMoveNumber_parent_triggered(){
 * View -> Move Number-> No Move Number
 */
 void MainWindow::on_actionNoMoveNumber_triggered(){
-    boardWidget->setShowMoveNumberCount(0);
+    currentBoard()->setShowMoveNumberCount(0);
 
     QSettings settings;
     settings.setValue("marker/moveNumber", 0);
@@ -1335,7 +1347,7 @@ void MainWindow::on_actionNoMoveNumber_triggered(){
 * View -> Move Number-> Last 1 move
 */
 void MainWindow::on_actionLast1Move_triggered(){
-    boardWidget->setShowMoveNumberCount(1);
+    currentBoard()->setShowMoveNumberCount(1);
 
     QSettings settings;
     settings.setValue("marker/moveNumber", 1);
@@ -1346,7 +1358,7 @@ void MainWindow::on_actionLast1Move_triggered(){
 * View -> Move Number-> Last 2 moves
 */
 void MainWindow::on_actionLast2Moves_triggered(){
-    boardWidget->setShowMoveNumberCount(2);
+    currentBoard()->setShowMoveNumberCount(2);
 
     QSettings settings;
     settings.setValue("marker/moveNumber", 2);
@@ -1357,7 +1369,7 @@ void MainWindow::on_actionLast2Moves_triggered(){
 * View -> Move Number-> Last 5 moves
 */
 void MainWindow::on_actionLast5Moves_triggered(){
-    boardWidget->setShowMoveNumberCount(5);
+    currentBoard()->setShowMoveNumberCount(5);
 
     QSettings settings;
     settings.setValue("marker/moveNumber", 5);
@@ -1368,7 +1380,7 @@ void MainWindow::on_actionLast5Moves_triggered(){
 * View -> Move Number-> Last 10 moves
 */
 void MainWindow::on_actionLast10Moves_triggered(){
-    boardWidget->setShowMoveNumberCount(10);
+    currentBoard()->setShowMoveNumberCount(10);
 
     QSettings settings;
     settings.setValue("marker/moveNumber", 10);
@@ -1379,7 +1391,7 @@ void MainWindow::on_actionLast10Moves_triggered(){
 * View -> Move Number-> Last 20 moves
 */
 void MainWindow::on_actionLast20Moves_triggered(){
-    boardWidget->setShowMoveNumberCount(20);
+    currentBoard()->setShowMoveNumberCount(20);
 
     QSettings settings;
     settings.setValue("marker/moveNumber", 20);
@@ -1390,7 +1402,7 @@ void MainWindow::on_actionLast20Moves_triggered(){
 * View -> Move Number-> Last 50 moves
 */
 void MainWindow::on_actionLast50Moves_triggered(){
-    boardWidget->setShowMoveNumberCount(50);
+    currentBoard()->setShowMoveNumberCount(50);
 
     QSettings settings;
     settings.setValue("marker/moveNumber", 50);
@@ -1401,7 +1413,7 @@ void MainWindow::on_actionLast50Moves_triggered(){
 * View -> Move Number-> All Moves
 */
 void MainWindow::on_actionAllMoves_triggered(){
-    boardWidget->setShowMoveNumberCount(-1);
+    currentBoard()->setShowMoveNumberCount(-1);
 
     QSettings settings;
     settings.setValue("marker/moveNumber", -1);
@@ -1412,7 +1424,7 @@ void MainWindow::on_actionAllMoves_triggered(){
 * View -> Show Coordinates
 */
 void MainWindow::on_actionShowCoordinate_triggered(){
-    boardWidget->setShowCoordinates( ui->actionShowCoordinate->isChecked() );
+    currentBoard()->setShowCoordinates( ui->actionShowCoordinate->isChecked() );
 
     QSettings settings;
     settings.setValue("view/showCoordinate", ui->actionShowCoordinate->isChecked());
@@ -1423,13 +1435,13 @@ void MainWindow::on_actionShowCoordinate_triggered(){
 * View -> Show Coordinates with I
 */
 void MainWindow::on_actionShowCoordinateI_triggered(){
-    boardWidget->setShowCoordinatesWithI( ui->actionShowCoordinateI->isChecked() );
+    currentBoard()->setShowCoordinatesWithI( ui->actionShowCoordinateI->isChecked() );
 
-    go::nodePtr currentNode = boardWidget->getCurrentNode();
+    go::nodePtr currentNode = currentBoard()->getCurrentNode();
 
-    setTreeData();
+    setTreeData(currentBoard());
 
-    boardWidget->setCurrentNode(currentNode);
+    currentBoard()->setCurrentNode(currentNode);
 
     QSettings settings;
     settings.setValue("view/showCoordinateWithI", ui->actionShowCoordinateI->isChecked());
@@ -1440,7 +1452,7 @@ void MainWindow::on_actionShowCoordinateI_triggered(){
 * View -> Show Marker
 */
 void MainWindow::on_actionShowMarker_triggered(){
-    boardWidget->setShowMarker( ui->actionShowMarker->isChecked() );
+    currentBoard()->setShowMarker( ui->actionShowMarker->isChecked() );
 
     QSettings settings;
     settings.setValue("marker/showMarker", ui->actionShowMarker->isChecked());
@@ -1451,7 +1463,7 @@ void MainWindow::on_actionShowMarker_triggered(){
 * View -> Show Branch Moves
 */
 void MainWindow::on_actionShowBranchMoves_triggered(){
-    boardWidget->setShowBranchMoves( ui->actionShowBranchMoves->isChecked() );
+    currentBoard()->setShowBranchMoves( ui->actionShowBranchMoves->isChecked() );
 
     QSettings settings;
     settings.setValue("marker/showBranchMoves", ui->actionShowMarker->isChecked());
@@ -1462,18 +1474,20 @@ void MainWindow::on_actionShowBranchMoves_triggered(){
 * View -> Branch Mode
 */
 void MainWindow::on_actionBranchMode_triggered(){
-    tabData->branchMode = ui->actionBranchMode->isChecked();
+    TabData& tabData = tabDatas[currentBoard()];
 
-    go::nodePtr currentNode = boardWidget->getCurrentNode();
-    QTreeWidgetItem* currentItem = branchWidget->currentItem();
+    tabData.branchMode = ui->actionBranchMode->isChecked();
 
-    remakeTreeWidget( branchWidget->topLevelItem(0) );
+    go::nodePtr currentNode = currentBoard()->getCurrentNode();
+    QTreeWidgetItem* currentItem = tabData.branchWidget->currentItem();
+
+    remakeTreeWidget( currentBoard(), tabData.branchWidget->topLevelItem(0) );
 
 //    boardWidget->setCurrentNode(current);
-    branchWidget->setCurrentItem(currentItem);
+    tabData.branchWidget->setCurrentItem(currentItem);
 
-    BoardWidget::eMoveNumberMode moveNumberMode = tabData->branchMode ? BoardWidget::eResetInBranch : BoardWidget::eResetInVariation;
-    boardWidget->setMoveNumberMode( ui->actionResetMoveNubmerInBranch->isChecked() ? moveNumberMode : BoardWidget::eSequential );
+    BoardWidget::eMoveNumberMode moveNumberMode = tabData.branchMode ? BoardWidget::eResetInBranch : BoardWidget::eResetInVariation;
+    currentBoard()->setMoveNumberMode( ui->actionResetMoveNubmerInBranch->isChecked() ? moveNumberMode : BoardWidget::eSequential );
 }
 
 /**
@@ -1481,7 +1495,7 @@ void MainWindow::on_actionBranchMode_triggered(){
 * View -> Rotate Clockwise
 */
 void MainWindow::on_actionRotateBoardClockwise_triggered(){
-    ui->actionRotateBoardClockwise->setChecked( boardWidget->rotateBoard() != 0 );
+    ui->actionRotateBoardClockwise->setChecked( currentBoard()->rotateBoard() != 0 );
 }
 
 /**
@@ -1489,7 +1503,7 @@ void MainWindow::on_actionRotateBoardClockwise_triggered(){
 * View -> Flip Horizontally
 */
 void MainWindow::on_actionFlipBoardHorizontally_triggered(){
-    boardWidget->flipBoardHorizontally( ui->actionFlipBoardHorizontally->isChecked() );
+    currentBoard()->flipBoardHorizontally( ui->actionFlipBoardHorizontally->isChecked() );
 }
 
 /**
@@ -1497,7 +1511,7 @@ void MainWindow::on_actionFlipBoardHorizontally_triggered(){
 * View -> Flip Vertically
 */
 void MainWindow::on_actionFlipBoardVertically_triggered(){
-    boardWidget->flipBoardVertically( ui->actionFlipBoardVertically->isChecked() );
+    currentBoard()->flipBoardVertically( ui->actionFlipBoardVertically->isChecked() );
 }
 
 /**
@@ -1505,7 +1519,7 @@ void MainWindow::on_actionFlipBoardVertically_triggered(){
 * View -> Reset Board
 */
 void MainWindow::on_actionResetBoard_triggered(){
-    boardWidget->resetBoard();
+    currentBoard()->resetBoard();
     ui->actionRotateBoardClockwise->setChecked(false);
     ui->actionFlipBoardHorizontally->setChecked(false);
     ui->actionFlipBoardVertically->setChecked(false);
@@ -1518,15 +1532,16 @@ void MainWindow::on_actionResetBoard_triggered(){
 void MainWindow::on_actionCountTerritory_triggered(){
     if (ui->actionCountTerritory->isChecked()){
         setCountTerritoryMode();
-        tabData->countTerritoryDialog->setInformationNode( boardWidget->getData().root.get() );
-        tabData->countTerritoryDialog->show();
+        TabData& tabData = tabDatas[currentBoard()];
+        tabData.countTerritoryDialog->setInformationNode( currentBoard()->getData().root.get() );
+        tabData.countTerritoryDialog->show();
     }
     else{
         setCountTerritoryMode(false);
         setCaption();
     }
 
-    boardWidget->setCountTerritoryMode(ui->actionCountTerritory->isChecked());
+    currentBoard()->setCountTerritoryMode(ui->actionCountTerritory->isChecked());
 }
 
 /**
@@ -1550,33 +1565,34 @@ void MainWindow::on_actionPlayWithGnugo_triggered(){
             }
         }
         else{
-            dlg.size = boardWidget->getData().root->xsize;
-            dlg.komi = boardWidget->getData().root->komi;
+            dlg.size = currentBoard()->getData().root->xsize;
+            dlg.komi = currentBoard()->getData().root->komi;
         }
 
         // create new process
         QString param = '"' + dlg.path + "\" " + dlg.parameter;
         qDebug() << param;
 
-        delete tabData->gtpProcess;
-        tabData->gtpProcess = new QProcess(this);
-        tabData->gtpProcess->start(param, QIODevice::ReadWrite|QIODevice::Text);
+        TabData& tabData = tabDatas[currentBoard()];
+        delete tabData.gtpProcess;
+        tabData.gtpProcess = new QProcess(this);
+        tabData.gtpProcess->start(param, QIODevice::ReadWrite|QIODevice::Text);
 
         // if process does not launch, alert and return.
-        if (tabData->gtpProcess->state() == QProcess::NotRunning){
-            boardWidget->playWithComputer(NULL);
-            delete tabData->gtpProcess;
-            tabData->gtpProcess = NULL;
+        if (tabData.gtpProcess->state() == QProcess::NotRunning){
+            currentBoard()->playWithComputer(NULL);
+            delete tabData.gtpProcess;
+            tabData.gtpProcess = NULL;
             QMessageBox::critical(this, APPNAME, tr("Can not launch computer go program."));
             return;
         }
 
         // start gtp communication
-        delete tabData->playGame;
-        tabData->playGame = new gtp(boardWidget, dlg.isBlack ? go::black : go::white, dlg.size, dlg.komi, dlg.handicap, isNewGame, dlg.level,*tabData->gtpProcess);
-        connect( tabData->playGame, SIGNAL(gameEnded()), this, SLOT(playGameEnded()) );
+        delete tabData.playGame;
+        tabData.playGame = new gtp(currentBoard(), dlg.isBlack ? go::black : go::white, dlg.size, dlg.komi, dlg.handicap, isNewGame, dlg.level,*tabData.gtpProcess);
+        connect( tabData.playGame, SIGNAL(gameEnded()), this, SLOT(playGameEnded()) );
         setPlayWithComputerMode(true);
-        boardWidget->playWithComputer(tabData->playGame);
+        currentBoard()->playWithComputer(tabData.playGame);
     }
     else{
         QMessageBox::StandardButton ret = QMessageBox::warning(this, APPNAME,
@@ -1597,11 +1613,11 @@ void MainWindow::on_actionPlayWithGnugo_triggered(){
 */
 void MainWindow::on_actionTutorBothSides_triggered(){
     if (ui->actionTutorBothSides->isChecked()){
-        boardWidget->setTutorMode(BoardWidget::eTutorBothSides);
+        currentBoard()->setTutorMode(BoardWidget::eTutorBothSides);
         ui->actionTutorOneSide->setChecked(false);
     }
     else
-        boardWidget->setTutorMode(BoardWidget::eNoTutor);
+        currentBoard()->setTutorMode(BoardWidget::eNoTutor);
 }
 
 /**
@@ -1610,11 +1626,11 @@ void MainWindow::on_actionTutorBothSides_triggered(){
 */
 void MainWindow::on_actionTutorOneSide_triggered(){
     if (ui->actionTutorOneSide->isChecked()){
-        boardWidget->setTutorMode(BoardWidget::eTutorOneSide);
+        currentBoard()->setTutorMode(BoardWidget::eTutorOneSide);
         ui->actionTutorBothSides->setChecked(false);
     }
     else
-        boardWidget->setTutorMode(BoardWidget::eNoTutor);
+        currentBoard()->setTutorMode(BoardWidget::eNoTutor);
 }
 
 /**
@@ -1624,7 +1640,7 @@ void MainWindow::on_actionTutorOneSide_triggered(){
 void MainWindow::on_actionPlaySound_triggered(){
     QSettings setting;
     setting.setValue("sound/play", ui->actionPlaySound->isChecked());
-    boardWidget->setPlaySound( ui->actionPlaySound->isChecked() );
+    currentBoard()->setPlaySound( ui->actionPlaySound->isChecked() );
 }
 
 /**
@@ -1774,25 +1790,21 @@ void MainWindow::on_boardTabWidget_currentChanged(QWidget* widget){
         return;
     }
 
-    boardWidget = qobject_cast<BoardWidget*>(widget);
-    tabData = &tabDatas[boardWidget];
-    branchWidget = tabData->branchWidget;
-    nodeToTreeWidget = &tabData->nodeToTree;
-
-    QMap<BoardWidget*, TabData>::iterator iter = tabDatas.begin();
+    BoardWidget* board = qobject_cast<BoardWidget*>(widget);
+    TabDataMap::iterator iter = tabDatas.begin();
     while (iter != tabDatas.end()){
-        iter->branchWidget->setVisible(iter.key() == boardWidget);
+        iter->branchWidget->setVisible(iter.key() == board);
         iter->countTerritoryDialog->setVisible(false);
         ++iter;
     }
 
-    branchWidget->setFocus(Qt::OtherFocusReason);
-    tabData->menuAction->setChecked(true);
+    board->setFocus(Qt::OtherFocusReason);
+    tabDatas[board].menuAction->setChecked(true);
 
     // undo
-    undoGroup.setActiveStack(boardWidget->getUndoStack());
+    undoGroup.setActiveStack(board->getUndoStack());
 
-    ui->commentWidget->setPlainText(boardWidget->getCurrentNode()->comment);
+    ui->commentWidget->setPlainText(board->getCurrentNode()->comment);
 
     setCaption();
     updateMenu();
@@ -1808,9 +1820,8 @@ void MainWindow::on_boardTabWidget_tabCloseRequested(int index){
 * board data was cleared.
 */
 void MainWindow::boardCleared(){
-    if (sender() != boardWidget)
-        return;
-    setTreeData();
+    BoardWidget* board = qobject_cast<BoardWidget*>(sender());
+    setTreeData(board);
 }
 
 /**
@@ -1818,11 +1829,11 @@ void MainWindow::boardCleared(){
 * new node was created by BoardWidget.
 */
 void MainWindow::nodeAdded(go::nodePtr parent, go::nodePtr node, bool /*select*/){
+    BoardWidget* board = qobject_cast<BoardWidget*>(sender());
     if (parent->childNodes.back() == node)
-        addTreeWidget(node, true);
-    else{
-        remakeTreeWidget( (*nodeToTreeWidget)[node->parent()] );
-    }
+        addTreeWidget(board, node, true);
+    else
+        remakeTreeWidget( board, tabDatas[board].nodeToTree[node->parent()] );
     setCaption();
 }
 
@@ -1831,10 +1842,10 @@ void MainWindow::nodeAdded(go::nodePtr parent, go::nodePtr node, bool /*select*/
 * node was deleted by BoardWidget.
 */
 void MainWindow::nodeDeleted(go::nodePtr node, bool deleteChildren){
-    deleteTreeWidget(node, deleteChildren);
+    BoardWidget* board = qobject_cast<BoardWidget*>(sender());
+    deleteTreeWidget(board, node, deleteChildren);
     if (node->parent())
-        remakeTreeWidget( (*nodeToTreeWidget)[node->parent()] );
-
+        remakeTreeWidget( board, tabDatas[board].nodeToTree[node->parent()] );
     setCaption();
 }
 
@@ -1842,12 +1853,14 @@ void MainWindow::nodeDeleted(go::nodePtr node, bool deleteChildren){
 * Slot
 */
 void MainWindow::nodeModified(go::nodePtr node){
+    BoardWidget* board = qobject_cast<BoardWidget*>(sender());
+
     setCaption();
 
-    QTreeWidgetItem* treeWidget = (*nodeToTreeWidget)[node];
+    QTreeWidgetItem* treeWidget = tabDatas[board].nodeToTree[node];
     if (treeWidget == NULL)
         return;
-    treeWidget->setText(0, createTreeText(node));
+    treeWidget->setText(0, createTreeText(board, node));
 }
 
 /**
@@ -1855,20 +1868,22 @@ void MainWindow::nodeModified(go::nodePtr node){
 * current node was changed by BoardWidget.
 */
 void MainWindow::currentNodeChanged(go::nodePtr node){
-    setTreeWidget(node);
+    BoardWidget* board = qobject_cast<BoardWidget*>(sender());
+
+    setTreeWidget(board, node);
     ui->commentWidget->setPlainText(node->comment);
     setAnnotation(node->annotation, node->moveAnnotation, node->nodeAnnotation);
 
     int b, w;
-    boardWidget->getCaptured(b, w);
+    board->getCaptured(b, w);
     capturedLabel->setText(tr("Dead: Black %1 White %2").arg(b).arg(w));
 
-    int num = boardWidget->getMoveNumber();
-    QString coord = boardWidget->getXYString(node->getX(), node->getY());
+    int num = board->getMoveNumber();
+    QString coord = board->getXYString(node->getX(), node->getY());
     moveNumberLabel->setText(tr("LastMove: %1(%2)").arg(num).arg(coord));
 
     if (ui->commentWidget->hasFocus())
-        tabData->branchWidget->setFocus();
+        tabDatas[board].branchWidget->setFocus();
 }
 
 /**
@@ -1876,7 +1891,7 @@ void MainWindow::currentNodeChanged(go::nodePtr node){
 * comment dock widget was showed or hid.
 */
 void MainWindow::updateTerritory(int alive_b, int alive_w, int dead_b, int dead_w, int capturedBlack, int capturedWhite, int blackTerritory, int whiteTerritory, double komi){
-    tabData->countTerritoryDialog->setScore(alive_b, alive_w, dead_b, dead_w, capturedBlack, capturedWhite, blackTerritory, whiteTerritory, komi);
+    tabDatas[currentBoard()].countTerritoryDialog->setScore(alive_b, alive_w, dead_b, dead_w, capturedBlack, capturedWhite, blackTerritory, whiteTerritory, komi);
 }
 
 /**
@@ -1885,9 +1900,24 @@ void MainWindow::updateTerritory(int alive_b, int alive_w, int dead_b, int dead_
 */
 void MainWindow::branchWidgetCurrentItemChanged(QTreeWidgetItem* current, QTreeWidgetItem* /*previous*/){
     if (current == NULL){
-        boardWidget->setCurrentNode();
+        currentBoard()->setCurrentNode();
         return;
     }
+
+    QTreeWidget* branchWidget = current->treeWidget();
+    BoardWidget* boardWidget = NULL;
+    TabDataMap::iterator iter = tabDatas.begin();
+    while (iter != tabDatas.end()){
+        TabData& data = iter.value();
+        if (data.branchWidget == branchWidget){
+            boardWidget = iter.key();
+            break;
+        }
+        ++iter;
+    }
+
+    if (boardWidget == NULL)
+        return;
 
     QVariant v = current->data(0, Qt::UserRole);
     go::nodePtr n = v.value<go::nodePtr>();
@@ -1899,7 +1929,7 @@ void MainWindow::branchWidgetCurrentItemChanged(QTreeWidgetItem* current, QTreeW
 * Slot
 */
 void MainWindow::playGameEnded(){
-    bool resign = tabData->playGame->isResign();
+    bool resign = tabDatas[currentBoard()].playGame->isResign();
 
     ui->actionPlayWithGnugo->setChecked(false);
     endGame();
@@ -1927,7 +1957,7 @@ void MainWindow::on_actionGameResign_triggered(){
     if (QMessageBox::warning(this, QString(), tr("Are you sure you want to resign?"), QMessageBox::Ok|QMessageBox::Cancel) != QMessageBox::Ok)
         return;
 
-    tabData->playGame->setResign(true);
+    tabDatas[currentBoard()].playGame->setResign(true);
     playGameEnded();
 }
 
@@ -1935,7 +1965,7 @@ void MainWindow::on_actionGameResign_triggered(){
 * Slot
 */
 void MainWindow::on_actionGameUndo_triggered(){
-    boardWidget->undo();
+    currentBoard()->undo();
 }
 
 /**
@@ -1943,8 +1973,8 @@ void MainWindow::on_actionGameUndo_triggered(){
 * comment was modified.
 */
 void MainWindow::on_commentWidget_textChanged(){
-    go::nodePtr currentNode = boardWidget->getCurrentNode();
-    boardWidget->setCommentCommand(currentNode, ui->commentWidget->toPlainText());
+    go::nodePtr currentNode = currentBoard()->getCurrentNode();
+    currentBoard()->setCommentCommand(currentNode, ui->commentWidget->toPlainText());
 }
 
 /*
@@ -1966,11 +1996,11 @@ void MainWindow::on_collectionWidget_itemActivated(QTreeWidgetItem* item, int /*
 
     QVariant v = item->data(0, Qt::UserRole);
     go::informationPtr info = v.value<go::informationPtr>();
-    boardWidget->setRoot(info);
-    setTreeData();
+    currentBoard()->setRoot(info);
+    setTreeData( currentBoard() );
     setCaption();
 
-    branchWidget->setFocus(Qt::OtherFocusReason);
+    currentBoard()->setFocus(Qt::OtherFocusReason);
 }
 
 /**
@@ -1991,7 +2021,7 @@ void MainWindow::scoreDialogClosed(int){
 * if game information has player info, set player name to window text.
 */
 void MainWindow::setCaption(){
-    go::informationPtr gameInfo = boardWidget->getData().root;
+    go::informationPtr gameInfo = currentBoard()->getData().root;
     bool hasPlayerInfo = !gameInfo->whitePlayer.isEmpty() || !gameInfo->whiteRank.isEmpty() ||
                             !gameInfo->blackPlayer.isEmpty() || !gameInfo->blackRank.isEmpty();
 
@@ -2005,7 +2035,7 @@ void MainWindow::setCaption(){
                         .arg(gameInfo->result);
 
     if (!hasPlayerInfo)
-        caption = tabData->documentName;
+        caption = tabDatas[currentBoard()].documentName;
 
     if (!gameInfo->gameName.isEmpty()){
         caption.append(" - ");
@@ -2016,7 +2046,7 @@ void MainWindow::setCaption(){
         caption.append(gameInfo->event);
     }
 
-    if (boardWidget->isDirty())
+    if (currentBoard()->isDirty())
         caption.append(" *");
 
     caption.append(" - ");
@@ -2024,13 +2054,13 @@ void MainWindow::setCaption(){
 
     setWindowTitle(caption);
 
-    QString docName = tabData->documentName;
-    if (boardWidget->isDirty())
+    QString docName = tabDatas[currentBoard()].documentName;
+    if (currentBoard()->isDirty())
         docName.append(" *");
-    int tabIndex = ui->boardTabWidget->indexOf(boardWidget);
+    int tabIndex = ui->boardTabWidget->indexOf(currentBoard());
     ui->boardTabWidget->setTabText(tabIndex, docName);
 
-    tabData->menuAction->setText(docName);
+    tabDatas[currentBoard()].menuAction->setText(docName);
 }
 
 /**
@@ -2038,6 +2068,9 @@ void MainWindow::setCaption(){
 void MainWindow::updateMenu(){
     setCountTerritoryMode( false );
     setPlayWithComputerMode( false );
+
+    BoardWidget* boardWidget = currentBoard();
+    TabData* tabData = &tabDatas[boardWidget];
 
     if (tabData->fileName.isEmpty())
         ui->actionReload->setEnabled(false);
@@ -2135,7 +2168,7 @@ void MainWindow::updateMenu(){
 void MainWindow::updateCollection(){
     int no = 0;
     ui->collectionWidget->clear();
-    foreach(const go::informationPtr& info, boardWidget->getData().rootList){
+    foreach(const go::informationPtr& info, currentBoard()->getData().rootList){
         QStringList strs;
 
         QString noStr;
@@ -2150,7 +2183,7 @@ void MainWindow::updateCollection(){
         item->setData(0, Qt::UserRole, v);
         ui->collectionWidget->addTopLevelItem(item);
 
-        if (boardWidget->getData().root == info){
+        if (currentBoard()->getData().root == info){
             ui->collectionWidget->setCurrentItem(item);
             ui->collectionWidget->scrollToItem(item);
         }
@@ -2218,7 +2251,7 @@ bool MainWindow::fileNew(int xsize, int ysize, int handicap, double komi){
 
     setEncoding(defaultCodec);
 
-    setTreeData();
+    setTreeData(board);
     updateCollection();
 
     return true;
@@ -2240,7 +2273,7 @@ bool MainWindow::fileOpen(){
 */
 bool MainWindow::fileOpen(const QString& fname, bool guessCodec, bool newTab, bool forceOpen){
     if (!forceOpen){
-        QMap<BoardWidget*, TabData>::iterator iter = tabDatas.begin();
+        TabDataMap::iterator iter = tabDatas.begin();
         while (iter != tabDatas.end()){
             if (iter->fileName.compare(fname, Qt::CaseInsensitive) == 0){
                 ui->boardTabWidget->setCurrentWidget(iter.key());
@@ -2250,13 +2283,13 @@ bool MainWindow::fileOpen(const QString& fname, bool guessCodec, bool newTab, bo
         }
     }
 
-    QTextCodec* codec = newTab == true ? defaultCodec : tabData->codec;
+    QTextCodec* codec = newTab == true ? defaultCodec : tabDatas[currentBoard()].codec;
 
     go::fileBase* data = readFile(fname, codec, guessCodec);
     if (data == NULL)
         return false;
 
-    BoardWidget* board = boardWidget;
+    BoardWidget* board = currentBoard();
     if (newTab){
         board = new BoardWidget;
         addDocument(board);
@@ -2264,8 +2297,8 @@ bool MainWindow::fileOpen(const QString& fname, bool guessCodec, bool newTab, bo
     board->setData(*data);
     delete data;
 
-    setCurrentFile(fname);
-    setTreeData();
+    setFileName(board, fname);
+    setTreeData(board);
     setCaption();
     updateCollection();
 
@@ -2277,14 +2310,15 @@ bool MainWindow::fileOpen(const QString& fname, bool guessCodec, bool newTab, bo
 }
 
 bool MainWindow::urlOpen(const QUrl& url){
-    tabData->url = url;
-    tabData->fileName.clear();
+    tabDatas[currentBoard()].url = url;
+    tabDatas[currentBoard()].fileName.clear();
     QString fname = url.toString();
     int p = fname.lastIndexOf('/');
     if (p >= 0)
-        tabData->documentName = fname.mid(p+1);
+        tabDatas[currentBoard()].documentName = fname.mid(p+1);
 
-    QHttp::ConnectionMode mode = url.scheme().toLower() == "https" ? QHttp::ConnectionModeHttps : QHttp::ConnectionModeHttp;
+    QHttp::ConnectionMode mode =
+    url.scheme().toLower() == "https" ? QHttp::ConnectionModeHttps : QHttp::ConnectionModeHttp;
     http->setHost(url.host(), mode, url.port() == -1 ? 0 : url.port());
 
     QByteArray path = QUrl::toPercentEncoding(url.path(), "!$&'()*+,;=:@/");
@@ -2338,28 +2372,29 @@ go::fileBase* MainWindow::readFile(const QString& fname, QTextCodec*& codec, boo
 /**
 * file save.
 */
-bool MainWindow::fileSave(BoardWidget* boardWidget, TabData* tabData){
-    const QString& fileName = tabData->fileName;
+bool MainWindow::fileSave(BoardWidget* boardWidget){
+    const QString& fileName = tabDatas[boardWidget].fileName;
     QFileInfo fi(fileName);
     if (fileName.isEmpty() || fi.suffix().compare("sgf", Qt::CaseInsensitive) != 0)
-        return fileSaveAs(boardWidget, tabData);
+        return fileSaveAs(boardWidget);
     else
-        return fileSaveAs(boardWidget, tabData, fileName);
+        return fileSaveAs(boardWidget, fileName);
 }
 
 /**
 * file saveas.
 */
-bool MainWindow::fileSaveAs(BoardWidget* boardWidget, TabData* tabData){
+bool MainWindow::fileSaveAs(BoardWidget* boardWidget){
     QString filter = tr("sgf(*.sgf)");
 
+    TabData& tabData = tabDatas[boardWidget];
     QString defaultName;
-    if (!tabData->fileName.isEmpty())
-        defaultName = tabData->fileName;
+    if (!tabData.fileName.isEmpty())
+        defaultName = tabData.fileName;
     else{
         defaultName = getDefaultSaveName();
         if (defaultName.isEmpty())
-            defaultName = tabData->documentName;
+            defaultName = tabData.documentName;
     }
 
     QFileInfo fi(defaultName);
@@ -2374,17 +2409,17 @@ bool MainWindow::fileSaveAs(BoardWidget* boardWidget, TabData* tabData){
     if (fi.suffix().isEmpty())
         fname.append(".sgf");
 
-    return fileSaveAs(boardWidget, tabData, fname);
+    return fileSaveAs(boardWidget, fname);
 }
 
 /**
 * file saveas.
 */
-bool MainWindow::fileSaveAs(BoardWidget* boardWidget, TabData* tabData, const QString& fname){
-    setCurrentFile(fname);
+bool MainWindow::fileSaveAs(BoardWidget* boardWidget, const QString& fname){
+    setFileName(boardWidget, fname);
     go::sgf sgf;
     boardWidget->getData(sgf);
-    sgf.save(fname, tabData->codec);
+    sgf.save(fname, tabDatas[boardWidget].codec);
     boardWidget->setDirty(false);
 
     setCaption();
@@ -2403,7 +2438,7 @@ bool MainWindow::closeTab(int index){
     BoardWidget* boardWidget = qobject_cast<BoardWidget*>(ui->boardTabWidget->widget(index));
     TabData*     tabData     = &tabDatas[boardWidget];
 
-    if (maybeSave(boardWidget, tabData) == false)
+    if (maybeSave(boardWidget) == false)
         return false;
 
     // delete boardWidget's datas.
@@ -2429,9 +2464,7 @@ bool MainWindow::closeAllTab(){
     int count = ui->boardTabWidget->count();
     for (int i=0; i<count; ++i){
         BoardWidget* boardWidget = qobject_cast<BoardWidget*>(ui->boardTabWidget->widget(i));
-        TabData*     tabData     = &tabDatas[boardWidget];
-
-        if (maybeSave(boardWidget, tabData) == false)
+        if (maybeSave(boardWidget) == false)
             return false;
     }
 
@@ -2446,17 +2479,17 @@ bool MainWindow::closeAllTab(){
 
 /**
 */
-bool MainWindow::maybeSave(BoardWidget* boardWidget, TabData* tabData){
+bool MainWindow::maybeSave(BoardWidget* boardWidget){
     if (!boardWidget->isDirty())
         return true;
 
     QMessageBox::StandardButton ret =
     QMessageBox::warning(this, APPNAME,
                                tr("%1 has been modified.\n"
-                                  "Do you want to save your changes?").arg(tabData->documentName),
+                                  "Do you want to save your changes?").arg(tabDatas[boardWidget].documentName),
                                QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
     if (ret == QMessageBox::Save)
-        return fileSave(boardWidget, tabData);
+        return fileSave(boardWidget);
     else if (ret == QMessageBox::Cancel)
         return false;
     return true;
@@ -2464,19 +2497,19 @@ bool MainWindow::maybeSave(BoardWidget* boardWidget, TabData* tabData){
 
 /**
 */
-void MainWindow::setCurrentFile(const QString& fname){
-    tabData->fileName = fname;
-    tabData->documentName = QFileInfo(fname).fileName();
-    tabData->url.clear();
+void MainWindow::setFileName(BoardWidget* boardWidget, const QString& fname){
+    tabDatas[boardWidget].fileName = fname;
+    tabDatas[boardWidget].documentName = QFileInfo(fname).fileName();
+    tabDatas[boardWidget].url.clear();
 
 #if defined(Q_WS_WIN)
-    tabData->fileName.replace("\\", "/");
+    tabDatas[boardWidget].fileName.replace("\\", "/");
 #endif
 
     QSettings settings;
     QStringList files = settings.value("recentFileList").toStringList();
-    files.removeAll(tabData->fileName);
-    files.prepend(tabData->fileName);
+    files.removeAll(tabDatas[boardWidget].fileName);
+    files.prepend(tabDatas[boardWidget].fileName);
     while (files.size() > MaxRecentFiles)
         files.removeLast();
     settings.setValue("recentFileList", files);
@@ -2553,9 +2586,9 @@ void MainWindow::openUrlDone(bool error){
     sgf.read(downloadBuff, defaultCodec, true);
 
     downloadBuff.clear();
-    boardWidget->setData(sgf);
+    currentBoard()->setData(sgf);
 
-    setTreeData();
+    setTreeData(currentBoard());
     setCaption();
     updateCollection();
 }
@@ -2577,22 +2610,24 @@ void MainWindow::onTabChangeRequest(){
 
 /**
 */
-void MainWindow::setTreeData(){
-    branchWidget->clear();
-    nodeToTreeWidget->clear();
+void MainWindow::setTreeData(BoardWidget* board){
+    TabData& tabData = tabDatas[board];
+    tabData.branchWidget->clear();
+    tabData.nodeToTree.clear();
 
-    addTreeWidget(boardWidget->getData().root);
-    boardWidget->setCurrentNode();
-    boardWidget->repaint();
+    addTreeWidget(board, board->getData().root);
+    board->setCurrentNode();
+    board->repaint();
 }
 
-QTreeWidgetItem* MainWindow::addTreeWidget(go::nodePtr node, bool needRemake){
-    QTreeWidgetItem* treeWidget = (*nodeToTreeWidget)[node];
+QTreeWidgetItem* MainWindow::addTreeWidget(BoardWidget* board, go::nodePtr node, bool needRemake){
+    TabData& tabData = tabDatas[board];
+    QTreeWidgetItem* treeWidget = tabData.nodeToTree[node];
     QTreeWidgetItem* newWidget  = NULL;
     if (treeWidget == NULL)
-        newWidget = createTreeWidget(node);
-    QTreeWidgetItem* parentWidget  = (node->parent() && (*nodeToTreeWidget)[node->parent()]) ? (*nodeToTreeWidget)[node->parent()] : branchWidget->invisibleRootItem();
-    QTreeWidgetItem* parentWidget2 = parentWidget->parent() ? parentWidget->parent() : branchWidget->invisibleRootItem();
+        newWidget = createTreeWidget(board, node);
+    QTreeWidgetItem* parentWidget  = (node->parent() && tabData.nodeToTree[node->parent()]) ? tabData.nodeToTree[node->parent()] : tabData.branchWidget->invisibleRootItem();
+    QTreeWidgetItem* parentWidget2 = parentWidget->parent() ? parentWidget->parent() : tabData.branchWidget->invisibleRootItem();
     go::nodePtr parentNode  = node->parent();
     go::nodePtr parentNode2 = getNode(parentWidget2);
 
@@ -2604,12 +2639,12 @@ QTreeWidgetItem* MainWindow::addTreeWidget(go::nodePtr node, bool needRemake){
         go::nodeList::iterator iter = qFind(node->parent()->childNodes.begin(), node->parent()->childNodes.end(), node);
         index = std::distance(node->parent()->childNodes.begin(), iter);
     }
-    else if (tabData->branchMode && parentNode && parentNode->childNodes.size() > 1){
+    else if (tabData.branchMode && parentNode && parentNode->childNodes.size() > 1){
         newBranch = true;
         go::nodeList::iterator iter = qFind(node->parent()->childNodes.begin(), node->parent()->childNodes.end(), node);
         index = std::distance(node->parent()->childNodes.begin(), iter);
     }
-    else if(!tabData->branchMode && parentNode && parentNode->childNodes.front() != node){
+    else if(!tabData.branchMode && parentNode && parentNode->childNodes.front() != node){
         newBranch = true;
         go::nodeList::iterator iter = qFind(node->parent()->childNodes.begin(), node->parent()->childNodes.end(), node);
         index = std::distance(node->parent()->childNodes.begin(), iter) - 1;
@@ -2622,10 +2657,10 @@ QTreeWidgetItem* MainWindow::addTreeWidget(go::nodePtr node, bool needRemake){
             else
                 parentWidget->addChild(newWidget);
             if (needRemake)
-                remakeTreeWidget(parentWidget);
+                remakeTreeWidget(board, parentWidget);
         }
         else if(parentWidget->indexOfChild(treeWidget) != index){
-            QTreeWidgetItem* p = treeWidget->parent() ? treeWidget->parent() : branchWidget->invisibleRootItem();
+            QTreeWidgetItem* p = treeWidget->parent() ? treeWidget->parent() : tabData.branchWidget->invisibleRootItem();
             p->removeChild(treeWidget);
             if (parentWidget->childCount() > index)
                 parentWidget->insertChild(index, treeWidget);
@@ -2638,30 +2673,30 @@ QTreeWidgetItem* MainWindow::addTreeWidget(go::nodePtr node, bool needRemake){
             int index = parentWidget2->indexOfChild(parentWidget);
             parentWidget2->insertChild(index+1, newWidget);
             if (needRemake)
-                remakeTreeWidget(parentWidget2);
+                remakeTreeWidget(board, parentWidget2);
         }
         else if(parentWidget2->indexOfChild(treeWidget) < 0){
-            QTreeWidgetItem* p = treeWidget->parent() ? treeWidget->parent() : branchWidget->invisibleRootItem();
+            QTreeWidgetItem* p = treeWidget->parent() ? treeWidget->parent() : tabData.branchWidget->invisibleRootItem();
             bool isselected = treeWidget->isSelected();
             p->removeChild(treeWidget);
             parentWidget2->addChild(treeWidget);
             if (isselected)
-                branchWidget->setCurrentItem(treeWidget);
+                tabData.branchWidget->setCurrentItem(treeWidget);
         }
     }
 
     go::nodeList::iterator iter = node->childNodes.begin();
     while (iter != node->childNodes.end()){
-        addTreeWidget(*iter);
+        addTreeWidget(board, *iter);
         ++iter;
     }
 
     return treeWidget;
 }
 
-QTreeWidgetItem* MainWindow::createTreeWidget(go::nodePtr node){
+QTreeWidgetItem* MainWindow::createTreeWidget(BoardWidget* board, go::nodePtr node){
     // Create TreeItem Widget
-    QTreeWidgetItem* nodeWidget = new QTreeWidgetItem( QStringList(createTreeText(node)) );
+    QTreeWidgetItem* nodeWidget = new QTreeWidgetItem( QStringList(createTreeText(board, node)) );
 
     static QIcon treeIconGreen(":/res/green_64.png");
     static QIcon treeIconBlack(":/res/black_64.png");
@@ -2670,7 +2705,7 @@ QTreeWidgetItem* MainWindow::createTreeWidget(go::nodePtr node){
     QVariant v;
     v.setValue(node);
     nodeWidget->setData(0, Qt::UserRole, v);
-    (*nodeToTreeWidget)[node] = nodeWidget;
+    tabDatas[board].nodeToTree[node] = nodeWidget;
 
     // Set Icon to TreeItem Widget
     if (node->isStone() && node->isBlack())
@@ -2683,13 +2718,13 @@ QTreeWidgetItem* MainWindow::createTreeWidget(go::nodePtr node){
     return nodeWidget;
 }
 
-QTreeWidgetItem* MainWindow::remakeTreeWidget(QTreeWidgetItem* treeWidget){
+QTreeWidgetItem* MainWindow::remakeTreeWidget(BoardWidget* board, QTreeWidgetItem* treeWidget){
     go::nodePtr node = getNode(treeWidget);
     if (node == NULL)
         return NULL;
     go::nodeList::iterator iter = node->childNodes.begin();
     while (iter != node->childNodes.end()){
-        addTreeWidget(*iter);
+        addTreeWidget(board, *iter);
         ++iter;
     }
     return NULL;
@@ -2699,54 +2734,55 @@ void MainWindow::deleteNode(bool deleteChildren){
     if (countTerritoryMode || playWithComputerMode)
         return;
 
-    boardWidget->deleteNodeCommand( boardWidget->getCurrentNode(), deleteChildren );
+    currentBoard()->deleteNodeCommand( currentBoard()->getCurrentNode(), deleteChildren );
 }
 
-void MainWindow::deleteTreeWidget(go::nodePtr node, bool deleteChildren){
-    QTreeWidgetItem* treeWidget = (*nodeToTreeWidget)[node];
+void MainWindow::deleteTreeWidget(BoardWidget* board, go::nodePtr node, bool deleteChildren){
+    QTreeWidgetItem* treeWidget = tabDatas[board].nodeToTree[node];
     go::nodeList::iterator iter = node->childNodes.begin();
     while (iter != node->childNodes.end()){
-        QTreeWidgetItem* treeWidget2 = (*nodeToTreeWidget)[*iter];
+        QTreeWidgetItem* treeWidget2 = tabDatas[board].nodeToTree[*iter];
         if (treeWidget2->parent() != treeWidget)
-            deleteTreeWidget(*iter, deleteChildren);
+            deleteTreeWidget(board, *iter, deleteChildren);
         ++iter;
     }
 
-    deleteTreeWidgetForMap(node);
+    deleteTreeWidgetForMap(board, node);
     delete treeWidget;
 }
 
-void MainWindow::deleteTreeWidgetForMap(go::nodePtr node){
-    NodeToTreeWidgetType::iterator iter = nodeToTreeWidget->find(node);
-    if(iter == nodeToTreeWidget->end())
+void MainWindow::deleteTreeWidgetForMap(BoardWidget* board, go::nodePtr node){
+    NodeToTreeWidgetType& nodeToTree = tabDatas[board].nodeToTree;
+    NodeToTreeWidgetType::iterator iter = nodeToTree.find(node);
+    if(iter == nodeToTree.end())
         return;
 
     go::nodeList::iterator iter2 = node->childNodes.begin();
     while (iter2 != node->childNodes.end()){
-        NodeToTreeWidgetType::iterator iter3 = nodeToTreeWidget->find(*iter2);
-        if(iter3 != nodeToTreeWidget->end())
+        NodeToTreeWidgetType::iterator iter3 = nodeToTree.find(*iter2);
+        if(iter3 != nodeToTree.end())
             if ((*iter3)->parent() == *iter || (*iter3)->parent() == (*iter)->parent())
-                deleteTreeWidgetForMap(*iter2);
+                deleteTreeWidgetForMap(board, *iter2);
 
         ++iter2;
     }
 
-    nodeToTreeWidget->erase(iter);
+    nodeToTree.erase(iter);
 }
 
-void MainWindow::setTreeWidget(go::nodePtr n){
-    NodeToTreeWidgetType::iterator iter = nodeToTreeWidget->find(n);
-    if (iter != nodeToTreeWidget->end())
-        branchWidget->setCurrentItem( iter.value() );
+void MainWindow::setTreeWidget(BoardWidget* board, go::nodePtr n){
+    NodeToTreeWidgetType::iterator iter = tabDatas[board].nodeToTree.find(n);
+    if (iter != tabDatas[board].nodeToTree.end())
+        tabDatas[board].branchWidget->setCurrentItem( iter.value() );
 }
 
-QString MainWindow::createTreeText(const go::nodePtr node){
+QString MainWindow::createTreeText(BoardWidget* board, const go::nodePtr node){
     QString s;
     if (node->isStone()){
         if (node->isPass())
             s.append( tr("Pass") );
         else
-            s.append( boardWidget->getXYString(node->getX(), node->getY()) );
+            s.append( board->getXYString(node->getX(), node->getY()) );
     }
 
     if (!s.isEmpty())
@@ -2796,7 +2832,7 @@ void MainWindow::setEditMode(QAction* action, BoardWidget::eEditMode editMode){
             connect( ui->menuStoneMarkers->menuAction(), SIGNAL(triggered()), this, SLOT(on_actionDeleteMarker_triggered()) );
     }
 
-    boardWidget->setEditMode(editMode);
+    currentBoard()->setEditMode(editMode);
 }
 
 void MainWindow::setAnnotation(int annotation, int moveAnnotation, int nodeAnnotation){
@@ -2833,7 +2869,7 @@ void MainWindow::setAnnotation(int annotation, int moveAnnotation, int nodeAnnot
 }
 
 void MainWindow::setAnnotation(QAction* action, int annotation){
-    boardWidget->setAnnotation(action->isChecked() ? annotation : 0);
+    currentBoard()->setAnnotation(action->isChecked() ? annotation : 0);
 }
 
 void MainWindow::setMoveAnnotation(QAction* action, int annotation){
@@ -2851,7 +2887,7 @@ void MainWindow::setMoveAnnotation(QAction* action, int annotation){
         if (actions[i] != action)
             actions[i]->setChecked( false );
 
-    boardWidget->setMoveAnnotation(action->isChecked() ? annotation : 0);
+    currentBoard()->setMoveAnnotation(action->isChecked() ? annotation : 0);
 }
 
 void MainWindow::setNodeAnnotation(QAction* action, int annotation){
@@ -2869,7 +2905,7 @@ void MainWindow::setNodeAnnotation(QAction* action, int annotation){
         if (actions[i] != action)
             actions[i]->setChecked( false );
 
-    boardWidget->setNodeAnnotation(action->isChecked() ? annotation : 0);
+    currentBoard()->setNodeAnnotation(action->isChecked() ? annotation : 0);
 }
 
 void MainWindow::setCountTerritoryMode(bool on){
@@ -3030,7 +3066,7 @@ void MainWindow::setCountTerritoryMode(bool on){
         redoAction,
     };
     static int N = sizeof(act) / sizeof(act[0]);
-    QVector<bool>& status = tabData->countTerritoryMenuStatus;
+    QVector<bool>& status = tabDatas[currentBoard()].countTerritoryMenuStatus;
     if (status.size() < N){
         status.resize(N);
         qFill(status, true);
@@ -3045,7 +3081,7 @@ void MainWindow::setCountTerritoryMode(bool on){
             act[i]->setEnabled( status[i] );
 
     ui->commentWidget->setEnabled( !on );
-    branchWidget->setEnabled( !on );
+    tabDatas[currentBoard()].branchWidget->setEnabled( !on );
     ui->undoView->setEnabled( !on );
     ui->collectionWidget->setEnabled( !on );
 }
@@ -3209,7 +3245,7 @@ void MainWindow::setPlayWithComputerMode(bool on){
         redoAction,
     };
     static int N = sizeof(act) / sizeof(act[0]);
-    QVector<bool>& status = tabData->countTerritoryMenuStatus;
+    QVector<bool>& status = tabDatas[currentBoard()].countTerritoryMenuStatus;
     if (status.size() < N){
         status.resize(N);
         qFill(status, true);
@@ -3231,21 +3267,21 @@ void MainWindow::setPlayWithComputerMode(bool on){
         ui->actionGamePass->setEnabled(false);
         ui->actionGameResign->setEnabled(false);
         ui->actionGameUndo->setEnabled(false);
-        undoGroup.setActiveStack(boardWidget->getUndoStack());
+        undoGroup.setActiveStack(currentBoard()->getUndoStack());
         for (int i=0; i<N; ++i)
             act[i]->setEnabled( status[i] );
     }
 
     ui->commentWidget->setEnabled( !on );
-    branchWidget->setEnabled( !on );
+    tabDatas[currentBoard()].branchWidget->setEnabled( !on );
     ui->undoView->setEnabled( !on );
     ui->collectionWidget->setEnabled( !on );
 }
 
 void MainWindow::endGame(){
-    tabData->gtpProcess->close();
+    tabDatas[currentBoard()].gtpProcess->close();
 
-    boardWidget->playWithComputer(NULL);
+    currentBoard()->playWithComputer(NULL);
     setPlayWithComputerMode(false);
 }
 
@@ -3265,7 +3301,7 @@ QString MainWindow::getDefaultSaveName() const{
 
     QString saveName = QSettings().value("saveName", SAVE_NAME).toString();
 
-    go::informationPtr i = boardWidget->getData().root;
+    go::informationPtr i = currentBoard()->getData().root;
     QString date = i->date;
     date.replace("/", "-");
 
@@ -3342,13 +3378,13 @@ QString getSaveFileName(QWidget* parent, const QString& caption, const QString& 
 }
 
 void MainWindow::on_actionAutomaticReplay_triggered(){
-    boardWidget->autoReplay();
-    ui->actionAutomaticReplay->setChecked( boardWidget->isAutoReplay() );
+    currentBoard()->autoReplay();
+    ui->actionAutomaticReplay->setChecked( currentBoard()->isAutoReplay() );
 }
 
 void MainWindow::automaticReplay_ended(){
     BoardWidget* board = qobject_cast<BoardWidget*>(sender());
-    if (boardWidget == board)
+    if (currentBoard() == board)
         ui->actionAutomaticReplay->setChecked( false );
 }
 
