@@ -94,14 +94,14 @@ void PlayWithComputerDialog::on_computerPathBrowse_clicked(){
 
 void PlayWithComputerDialog::on_newGame_toggled(bool checked)
 {
-    m_ui->boardSizeComboBox->setEnabled(true);
-    m_ui->komiSpinBox->setEnabled(true);
-    m_ui->handicapSpinBox->setEnabled(true);
+    m_ui->boardSizeComboBox->setEnabled(checked);
+    m_ui->komiSpinBox->setEnabled(checked);
+    m_ui->handicapSpinBox->setEnabled(checked);
 }
 
 void PlayWithComputerDialog::on_resume_toggled(bool checked)
 {
-    m_ui->boardSizeComboBox->setEnabled(false);
-    m_ui->komiSpinBox->setEnabled(false);
-    m_ui->handicapSpinBox->setEnabled(false);
+    m_ui->boardSizeComboBox->setEnabled(checked == false);
+    m_ui->komiSpinBox->setEnabled(checked == false);
+    m_ui->handicapSpinBox->setEnabled(checked == false);
 }

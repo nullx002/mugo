@@ -1550,6 +1550,7 @@ void MainWindow::on_actionCountTerritory_triggered(){
 */
 void MainWindow::on_actionPlayWithGnugo_triggered(){
     if (ui->actionPlayWithGnugo->isChecked()){
+        // start new game.
         PlayWithComputerDialog dlg(this);
         if (dlg.exec() != QDialog::Accepted){
             ui->actionPlayWithGnugo->setChecked(false);
@@ -1595,6 +1596,7 @@ void MainWindow::on_actionPlayWithGnugo_triggered(){
         currentBoard()->playWithComputer(tabData.playGame);
     }
     else{
+        // stop playing game.
         QMessageBox::StandardButton ret = QMessageBox::warning(this, APPNAME,
                                                                 tr("Are you sure you want to stop playing with computer?"),
                                                                 QMessageBox::Ok|QMessageBox::Cancel);

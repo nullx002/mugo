@@ -2,6 +2,7 @@
 #define GTP_H
 
 #include <QProcess>
+#include <QTemporaryFile>
 #include <boost/shared_ptr.hpp>
 #include "playgame.h"
 
@@ -11,7 +12,7 @@
 class gtp : public PlayGame{
 Q_OBJECT
 public:
-    enum eKind{ eNone, eListCommands, eBoardSize, eKomi, eLevel, eMove, eGen, ePut, eQuit, eDeadList, eUndo };
+    enum eKind{ eNone, eListCommands, eLoadSgf, eBoardSize, eKomi, eLevel, eMove, eGen, ePut, eQuit, eDeadList, eUndo };
     enum eStatus{ eProcessing, eSuccess, eFailure };
 
     class command{
@@ -91,6 +92,8 @@ private:
     void initialize();
     bool stringToPosition(const QString& buf, int& x, int& y);
     void processCommand(QString& s);
+    void restoreSgf();
+    bool loadSgf();
 
     QProcess& process;
     QString   gtpBuf;
@@ -101,9 +104,11 @@ private:
     bool commandProcessing;
     int level_;
     QStringList supportedCommandList;
+    QTemporaryFile tempFile;
 
 private slots:
-    void gtpRead();
+    void on_gtp_read();
+    void on_gtp_finished(int exitCode, QProcess::ExitStatus exitStatus);
 };
 
 #endif // GTP_H
