@@ -33,7 +33,7 @@ public:
     typedef QMap<go::nodePtr, QTreeWidgetItem*> NodeToTreeWidgetType;
 
     struct TabData{
-        TabData() : branchMode(false), countTerritoryDialog(NULL), playGame(NULL), gtpProcess(NULL){}
+        TabData() : branchMode(false), countTerritoryDialog(NULL), playGame(NULL){}
 
         QAction* menuAction;
 
@@ -54,7 +54,6 @@ public:
         CountTerritoryDialog* countTerritoryDialog;
 
         PlayGame* playGame;
-        QProcess* gtpProcess;
     };
 
     typedef QMap<BoardWidget*, TabData> TabDataMap;
@@ -73,6 +72,7 @@ public:
     bool closeTab(int index);
     bool closeAllTab();
     bool maybeSave(BoardWidget* board);
+    bool stopGame(BoardWidget* boardWidget);
 
 protected:
     virtual void closeEvent(QCloseEvent* e);
@@ -113,7 +113,7 @@ private:
 
     void setCountTerritoryMode(bool on=true);
     void setPlayWithComputerMode(bool on=true);
-    void endGame();
+    void endGame(BoardWidget* board);
 
     void alertLanguageChanged();
     QString getDefaultSaveName() const;
@@ -317,7 +317,7 @@ private slots:
     void openUrlCancel();
 
     // play a game
-    void playGameEnded();
+    void playGameEnded(PlayGame* game);
     void on_actionGamePass_triggered();
     void on_actionGameResign_triggered();
     void on_actionGameUndo_triggered();

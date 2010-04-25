@@ -20,17 +20,20 @@ public:
 
     virtual bool move(int x, int y) = 0;
     virtual bool put(go::color c, int x, int y) = 0;
+    virtual void quit() = 0;
     virtual bool wait() = 0;
     virtual bool moving() const = 0;
 
     go::color color() const;
     bool isGameEnd() const;
     void setHandicap();
+    bool isAbort() const{ return isAbort_; }
+    void setAbort(bool abort){ isAbort_ = abort; }
     bool isResign() const{ return isResign_; }
     void setResign(bool resign){ isResign_ = resign; }
 
 signals:
-    void gameEnded();
+    void gameEnded(PlayGame*);
 
 protected:
     BoardWidget* boardWidget_;
@@ -38,6 +41,7 @@ protected:
     int boardSize_;
     qreal komi_;
     int handicap_;
+    bool isAbort_;
     bool isResign_;
     bool isNewGame_;
 

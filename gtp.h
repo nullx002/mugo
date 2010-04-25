@@ -74,7 +74,8 @@ public:
 
     typedef boost::shared_ptr<command> commandPtr;
 
-    gtp(BoardWidget* board, go::color color, int boardSize, const qreal& komi, int handicap, bool newGame, int level, QProcess& process, QObject* parent=0);
+    gtp(BoardWidget* board, go::color color, int boardSize, const qreal& komi, int handicap, bool newGame, int level, QProcess* process, QObject* parent=0);
+    ~gtp();
 
     virtual bool undo();
 
@@ -87,6 +88,8 @@ public:
 
     void pushCommandList(const QString& s);
 
+    QProcess* getProcess(){ return process; }
+
 private:
     void write();
     void initialize();
@@ -95,7 +98,7 @@ private:
     void restoreSgf();
     bool loadSgf();
 
-    QProcess& process;
+    QProcess* process;
     QString   gtpBuf;
 
     int index;
