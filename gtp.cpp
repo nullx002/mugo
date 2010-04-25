@@ -31,7 +31,8 @@ gtp::gtp(BoardWidget* board, go::color color, int boardSize, const qreal& komi, 
     , commandProcessing(false)
     , level_(level)
 {
-    connect(&process, SIGNAL(readyRead()), this, SLOT(gtpRead()));
+    connect(&process, SIGNAL(readyRead()), this, SLOT(on_gtp_read()));
+    connect(&process, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(on_gtp_finished()));
 
     commandList.push_back( commandPtr(new command(this, eListCommands, "list_commands\n")) );
 }
@@ -130,7 +131,7 @@ void gtp::write(){
 /**
 * received response message from game engine.
 */
-void gtp::gtpRead(){
+void gtp::on_gtp_read(){
     // read received message.
     QByteArray bytes = process.readAll();
     qDebug() << bytes;
@@ -148,6 +149,15 @@ void gtp::gtpRead(){
     write();
 }
 
+/**
+* game engine was finished
+*/
+void gtp::on_gtp_finished(int exitCode, QProcess::ExitStatus exitStatus){
+}
+
+/**
+* process received message.
+*/
 void gtp::processCommand(QString& s){
     QChar status = s[0];
 //    int p = s.indexOf(' ', 2);
@@ -213,8 +223,13 @@ void gtp::processCommand(QString& s){
         supportedCommandList = s.split("\n");
         initialize();
     }
+    else if (command->kind == eLoadSgf)
+        tempFile.remove();
 }
 
+/**
+* get position from gtp message.
+*/
 bool gtp::stringToPosition(const QString& buf, int& x, int& y){
     if (buf.size() < 2)
         return false;
@@ -235,10 +250,15 @@ bool gtp::stringToPosition(const QString& buf, int& x, int& y){
     return x >= 0 && x < xsize && y >= 0 && y < ysize;
 }
 
+/**
+*/
 bool gtp::moving() const{
     return commandList.isEmpty() == false;
 }
 
+/**
+* init game engine.
+*/
 void gtp::initialize(){
     commandList.push_back( commandPtr(new boardSizeCommand(this, boardSize_)) );
     commandList.push_back( commandPtr(new komiCommand(this, komi_)) );
@@ -246,10 +266,25 @@ void gtp::initialize(){
     if (supportedCommandList.indexOf("level") != -1)
         commandList.push_back( commandPtr(new levelCommand(this, level_)) );
 
-    if (isNewGame())
+    if (isNewGame()){
         setHandicap();
+        if ((color_ == go::white && handicap_ == 0) || (color_ == go::black && handicap_ > 0))
+            wait();
+    }
+    else{
+        restoreSgf();
+        if (boardWidget_->getColor() != color_)
+            wait();
+    }
+}
 
-    // add stone if game is continued.
+/**
+* restore board if continue game
+*/
+void gtp::restoreSgf(){
+    if (loadSgf())
+        return;
+
     const go::nodeList& nodeList = boardWidget_->getCurrentNodeList();
     foreach (const go::nodePtr& node, nodeList){
         int x = node->getX();
@@ -279,11 +314,50 @@ void gtp::initialize(){
         if (node == boardWidget_->getCurrentNode())
             break;
     }
+}
 
-    if (isNewGame()){
-        if ((color_ == go::white && handicap_ == 0) || (color_ == go::black && handicap_ > 0))
-            wait();
+/**
+* load sgf file to gtp engine if supported.
+*/
+bool gtp::loadSgf(){
+    if (supportedCommandList.indexOf("loadsgf") == -1)
+        return false;
+
+    if (tempFile.open() == false)
+        return false;
+    tempFile.write( QString().sprintf("(;GM[1]SZ[%d]KM[%.1f]", boardSize_, komi_).toAscii() );
+
+    const go::nodeList& nodeList = boardWidget_->getCurrentNodeList();
+    foreach (const go::nodePtr& node, nodeList){
+        int x = node->getX();
+        int y = node->getY();
+
+        if (node->color == go::black || node->color == go::white){
+            tempFile.write( node->color == go::black ? ";B" : ";W" );
+            if (x < 0 || y < 0)
+                tempFile.write("[]");
+            else
+                tempFile.write( QString().sprintf("[%c%c]", char(x < 26 ? 'a' + x : 'A' + x), char(y < 26 ? 'a' + y : 'A' + y)).toAscii() );
+        }
+
+        foreach(const go::stone& stone, node->blackStones){
+            tempFile.write( QString().sprintf("AB[%c%c]", char(stone.p.x < 26 ? 'a' + stone.p.x : 'A' + stone.p.x), char(stone.p.y < 26 ? 'a' + stone.p.y : 'A' + stone.p.y)).toAscii() );
+        }
+
+        foreach(const go::stone& stone, node->whiteStones){
+            tempFile.write( QString().sprintf("AW[%c%c]", char(stone.p.x < 26 ? 'a' + stone.p.x : 'A' + stone.p.x), char(stone.p.y < 26 ? 'a' + stone.p.y : 'A' + stone.p.y)).toAscii() );
+        }
+
+        if (node == boardWidget_->getCurrentNode())
+            break;
     }
-    else if (boardWidget_->getColor() != color_)
-        wait();
+
+    QDir tempPath = QDir::tempPath();
+    QString str = "loadsgf " + tempPath.absoluteFilePath(tempFile.fileName()) + "\n";
+    tempFile.write(")");
+    tempFile.close();
+
+    commandList.push_back( commandPtr(new command(this, eLoadSgf, str)) );
+
+    return true;
 }
