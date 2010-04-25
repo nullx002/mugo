@@ -325,7 +325,7 @@ void MainWindow::closeEvent(QCloseEvent* e){
     e->accept();
 }
 
-void MainWindow::keyPressEvent(QKeyEvent* event){
+void MainWindow::keyPressEvent(QKeyEvent* /*event*/){
 //    if (event->key() == Qt::Key_Delete)
 //        deleteNode(true);
 }
@@ -1575,37 +1575,29 @@ void MainWindow::on_actionPlayWithGnugo_triggered(){
         qDebug() << param;
 
         TabData& tabData = tabDatas[currentBoard()];
-        delete tabData.gtpProcess;
-        tabData.gtpProcess = new QProcess(this);
-        tabData.gtpProcess->start(param, QIODevice::ReadWrite|QIODevice::Text);
+        QProcess* gtpProcess = new QProcess(this);
+        gtpProcess->start(param, QIODevice::ReadWrite|QIODevice::Text);
 
         // if process does not launch, alert and return.
-        if (tabData.gtpProcess->state() == QProcess::NotRunning){
-            currentBoard()->playWithComputer(NULL);
-            delete tabData.gtpProcess;
-            tabData.gtpProcess = NULL;
+        if (gtpProcess->state() == QProcess::NotRunning){
+            delete gtpProcess;
             QMessageBox::critical(this, APPNAME, tr("Can not launch computer go program."));
             return;
         }
 
         // start gtp communication
         delete tabData.playGame;
-        tabData.playGame = new gtp(currentBoard(), dlg.isBlack ? go::black : go::white, dlg.size, dlg.komi, dlg.handicap, isNewGame, dlg.level,*tabData.gtpProcess);
-        connect( tabData.playGame, SIGNAL(gameEnded()), this, SLOT(playGameEnded()) );
+        tabData.playGame = new gtp(currentBoard(), dlg.isBlack ? go::black : go::white, dlg.size, dlg.komi, dlg.handicap, isNewGame, dlg.level, gtpProcess);
+        connect( tabData.playGame, SIGNAL(gameEnded(PlayGame*)), this, SLOT(playGameEnded(PlayGame*)) );
         setPlayWithComputerMode(true);
         currentBoard()->playWithComputer(tabData.playGame);
     }
     else{
         // stop playing game.
-        QMessageBox::StandardButton ret = QMessageBox::warning(this, APPNAME,
-                                                                tr("Are you sure you want to stop playing with computer?"),
-                                                                QMessageBox::Ok|QMessageBox::Cancel);
-        if (ret != QMessageBox::Ok){
+        if (stopGame(currentBoard()) == false){
             ui->actionPlayWithGnugo->setChecked(true);
             return;
         }
-
-        endGame();
     }
 }
 
@@ -1930,13 +1922,32 @@ void MainWindow::branchWidgetCurrentItemChanged(QTreeWidgetItem* current, QTreeW
 /**
 * Slot
 */
-void MainWindow::playGameEnded(){
-    bool resign = tabDatas[currentBoard()].playGame->isResign();
+void MainWindow::playGameEnded(PlayGame* game){
+    BoardWidget* boardWidget = NULL;
+    TabData* tabData = NULL;
+    TabDataMap::iterator iter = tabDatas.begin();
+    while (iter != tabDatas.end()){
+        TabData& data = iter.value();
+        if (data.playGame == game){
+            boardWidget = iter.key();
+            tabData = &iter.value();
+            break;
+        }
+        ++iter;
+    }
+
+    if (tabData == NULL || tabData->playGame == NULL)
+        return;
+
+    bool abort  = tabData->playGame->isAbort();
+    bool resign = tabData->playGame->isResign();
+    endGame(boardWidget);
+
+    if (boardWidget != currentBoard())
+        return;
 
     ui->actionPlayWithGnugo->setChecked(false);
-    endGame();
-
-    if( !resign ){
+    if( !abort && !resign ){
         ui->actionCountTerritory->setChecked(true);
         on_actionCountTerritory_triggered();
 
@@ -1960,14 +1971,19 @@ void MainWindow::on_actionGameResign_triggered(){
         return;
 
     tabDatas[currentBoard()].playGame->setResign(true);
-    playGameEnded();
+    tabDatas[currentBoard()].playGame->quit();
+    endGame(currentBoard());
 }
 
 /**
 * Slot
 */
 void MainWindow::on_actionGameUndo_triggered(){
-    currentBoard()->undo();
+    go::nodePtr node = currentBoard()->getCurrentNode();
+    for (int i=0; i<2 && node; ++i)
+        node = node->parent();
+    if (node)
+        currentBoard()->undo();
 }
 
 /**
@@ -2446,7 +2462,6 @@ bool MainWindow::closeTab(int index){
     // delete boardWidget's datas.
     boardWidget->clear();
     delete tabData->menuAction;
-    delete tabData->gtpProcess;
     delete tabData->playGame;
     delete tabData->branchWidget;
     delete tabData->countTerritoryDialog;
@@ -2482,6 +2497,9 @@ bool MainWindow::closeAllTab(){
 /**
 */
 bool MainWindow::maybeSave(BoardWidget* boardWidget){
+    if (stopGame(boardWidget) == false)
+        return false;
+
     if (!boardWidget->isDirty())
         return true;
 
@@ -3280,11 +3298,12 @@ void MainWindow::setPlayWithComputerMode(bool on){
     ui->collectionWidget->setEnabled( !on );
 }
 
-void MainWindow::endGame(){
-    tabDatas[currentBoard()].gtpProcess->close();
+void MainWindow::endGame(BoardWidget* board){
+    board->playWithComputer(NULL);
+    tabDatas[board].playGame = NULL;
 
-    currentBoard()->playWithComputer(NULL);
-    setPlayWithComputerMode(false);
+    if (board == currentBoard())
+        setPlayWithComputerMode(false);
 }
 
 void MainWindow::alertLanguageChanged(){
@@ -3402,4 +3421,22 @@ void MainWindow::readSettings(){
             board->repaintBoard();
         }
     }
+}
+
+bool MainWindow::stopGame(BoardWidget* boardWidget){
+    if (tabDatas[boardWidget].playGame == NULL)
+        return true;
+
+    QMessageBox::StandardButton ret = QMessageBox::warning(this, APPNAME,
+                                                tr("Are you sure you want to stop playing with computer?"),
+                                                QMessageBox::Ok|QMessageBox::Cancel);
+
+    if (ret != QMessageBox::Ok)
+        return false;
+
+    tabDatas[boardWidget].playGame->setAbort(true);
+    tabDatas[boardWidget].playGame->quit();
+    endGame(boardWidget);
+
+    return true;
 }

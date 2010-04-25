@@ -7,7 +7,7 @@
 
 
 PlayGame::PlayGame(BoardWidget* board, go::color color, int boardSize, const qreal& komi, int handicap, bool newGame, QObject *parent)
-    : QObject(parent), boardWidget_(board), color_(color), boardSize_(boardSize), komi_(komi), handicap_(handicap), isResign_(false), isNewGame_(newGame)
+    : QObject(parent), boardWidget_(board), color_(color), boardSize_(boardSize), komi_(komi), handicap_(handicap), isAbort_(true), isResign_(false), isNewGame_(newGame)
 {
 }
 

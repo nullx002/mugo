@@ -26,15 +26,27 @@ gtp::moveBaseCommand::moveBaseCommand(gtp* parent, eKind k, BoardWidget* boardWi
 /**
 * Constructor
 */
-gtp::gtp(BoardWidget* board, go::color color, int boardSize, const qreal& komi, int handicap, bool newGame, int level, QProcess& proc, QObject* parent)
-    : PlayGame(board, color, boardSize, komi, handicap, newGame, parent), process(proc), index(0)
+gtp::gtp(BoardWidget* board, go::color color, int boardSize, const qreal& komi, int handicap, bool newGame, int level, QProcess* proc, QObject* parent)
+    : PlayGame(board, color, boardSize, komi, handicap, newGame, parent)
+    , process(proc)
+    , index(0)
     , commandProcessing(false)
     , level_(level)
 {
-    connect(&process, SIGNAL(readyRead()), this, SLOT(on_gtp_read()));
-    connect(&process, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(on_gtp_finished()));
+    connect(process, SIGNAL(readyRead()), this, SLOT(on_gtp_read()));
+    connect(process, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(on_gtp_finished(int, QProcess::ExitStatus)));
 
     commandList.push_back( commandPtr(new command(this, eListCommands, "list_commands\n")) );
+}
+
+/**
+* Destructor
+*/
+gtp::~gtp(){
+    if (process){
+        process->disconnect();
+        delete process;
+    }
 }
 
 /**
@@ -123,7 +135,7 @@ void gtp::write(){
         qDebug() << commandStringList.front();
 
         commandProcessing = true;
-        process.write( commandStringList.front().toAscii() );
+        process->write( commandStringList.front().toAscii() );
         commandStringList.pop_front();
     }
 }
@@ -133,7 +145,7 @@ void gtp::write(){
 */
 void gtp::on_gtp_read(){
     // read received message.
-    QByteArray bytes = process.readAll();
+    QByteArray bytes = process->readAll();
     qDebug() << bytes;
     gtpBuf.append( bytes );
     if (gtpBuf.size() < 4 || gtpBuf.right(2) != "\n\n")
@@ -146,13 +158,20 @@ void gtp::on_gtp_read(){
     commandProcessing = false;
 
     // if command stack is not empty, send next command.
-    write();
+    if (process->isOpen())
+        write();
 }
 
 /**
 * game engine was finished
 */
 void gtp::on_gtp_finished(int exitCode, QProcess::ExitStatus exitStatus){
+    if (isAbort_)
+        emit gameEnded(this);
+
+    delete process;
+    process = NULL;
+    delete this;
 }
 
 /**
@@ -165,6 +184,9 @@ void gtp::processCommand(QString& s){
     QString msg = s.mid(2);
 //    int index = s.mid(1, p-1).toInt();
 
+    if (commandList.isEmpty())
+        return;
+
     commandPtr command = commandList.front();
     commandList.pop_front();
 
@@ -175,7 +197,9 @@ void gtp::processCommand(QString& s){
         moveCommand* cmd = (moveCommand*)command.get();
         boardWidget_->insertStoneNodeCommand(0, cmd->x, cmd->y);
         if (isGameEnd()){
+            isAbort_ = false;
             deadList();
+            quit();
             return;
         }
         wait();
@@ -183,9 +207,10 @@ void gtp::processCommand(QString& s){
     else if (command->kind == eGen){
         if (msg == "resign"){
             QMessageBox::information(boardWidget_, APPNAME, tr("Computer resigns."));
+            isAbort_ = false;
             isResign_ = true;
             quit();
-            emit gameEnded();
+            emit gameEnded(this);
             return;
         }
 
@@ -193,8 +218,11 @@ void gtp::processCommand(QString& s){
         if (stringToPosition(msg, x, y))
             boardWidget_->insertStoneNodeCommand(0, x, y);
 
-        if (isGameEnd())
+        if (isGameEnd()){
+            isAbort_ = false;
             deadList();
+            quit();
+        }
     }
     else if (command->kind == ePut){
         const go::nodePtr& root = boardWidget_->getData().root;
@@ -215,7 +243,7 @@ void gtp::processCommand(QString& s){
             if (!buffer[by][bx].blackTerritory() && !buffer[by][bx].whiteTerritory())
                 boardWidget_->addTerritory(bx, by);
         }
-        emit gameEnded();
+        emit gameEnded(this);
     }
     else if (command->kind == eUndo)
         boardWidget_->forward(-1);
