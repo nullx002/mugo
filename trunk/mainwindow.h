@@ -302,7 +302,10 @@ private slots:
     void updateTerritory(int alive_b, int alive_w, int dead_b, int dead_w, int capturedBlack, int capturedWhite, int blackTerritory, int whiteTerritory, double komi);
 
     // Branch widget
-    void branchWidgetCurrentItemChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous);
+    void branchWidget_currentItemChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous);
+    void branchWidget_customContextMenuRequested(const QPoint& pos);
+    void on_actionBranchMoveUp_triggered();
+    void on_actionBranchMoveDown_triggered();
 
     // Comment widget
     void on_commentWidget_textChanged();

@@ -1892,7 +1892,7 @@ void MainWindow::updateTerritory(int alive_b, int alive_w, int dead_b, int dead_
 * Slot
 * node was changed on branch tree view.
 */
-void MainWindow::branchWidgetCurrentItemChanged(QTreeWidgetItem* current, QTreeWidgetItem* /*previous*/){
+void MainWindow::branchWidget_currentItemChanged(QTreeWidgetItem* current, QTreeWidgetItem* /*previous*/){
     if (current == NULL){
         currentBoard()->setCurrentNode();
         return;
@@ -1917,6 +1917,58 @@ void MainWindow::branchWidgetCurrentItemChanged(QTreeWidgetItem* current, QTreeW
     go::nodePtr n = v.value<go::nodePtr>();
 
     boardWidget->setCurrentNode(n);
+}
+
+/**
+* Slot
+* context menu for branch widget
+*/
+void MainWindow::branchWidget_customContextMenuRequested(const QPoint& pos){
+    QTreeWidget* tree = qobject_cast<QTreeWidget*>( sender() );
+    QTreeWidgetItem* current = tree->currentItem();
+    if (current == NULL)
+        return;
+
+    QVariant v = current->data(0, Qt::UserRole);
+    go::nodePtr n = v.value<go::nodePtr>();
+    if ( dynamic_cast<go::informationNode*>(n.get()) != NULL ){
+        QMenu menu(this);
+        menu.addAction( ui->actionGameInformation );
+        menu.exec( tree->mapToGlobal(pos) );
+    }
+    else{
+        QMenu menu(this);
+        menu.addAction( ui->actionEditNodeName );
+        menu.addMenu( ui->menuAnnotation );
+        menu.addMenu( ui->menuEditMoveNumber );
+        menu.addSeparator();
+        menu.addAction( ui->actionDeleteAfterCurrent );
+        menu.addAction( ui->actionDeleteOnlyCurrent );
+
+/*
+        if (n->parent()->childNodes.size() > 1){
+            menu.addSeparator();
+            menu.addAction(ui->actionBranchMoveUp);
+            menu.addAction(ui->actionBranchMoveDown);
+        }
+*/
+
+        menu.exec( tree->mapToGlobal(pos) );
+    }
+}
+
+/**
+* Slot
+* current branch move up
+*/
+void MainWindow::on_actionBranchMoveUp_triggered(){
+}
+
+/**
+* Slot
+* current branch move down
+*/
+void MainWindow::on_actionBranchMoveDown_triggered(){
 }
 
 /**
@@ -2210,6 +2262,8 @@ void MainWindow::updateCollection(){
 
 void MainWindow::addDocument(BoardWidget* board){
     QTreeWidget* tree = new QTreeWidget(ui->branchDockWidgetContents);
+    connect( tree, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(branchWidget_customContextMenuRequested(const QPoint&)) );
+    tree->setContextMenuPolicy(Qt::CustomContextMenu);
     tree->setHeaderHidden(true);
     tree->setIndentation(17);
     ui->branchLayout->addWidget(tree);
@@ -2243,7 +2297,7 @@ void MainWindow::addDocument(BoardWidget* board){
     connect(board, SIGNAL(automaticReplayEnded()), this, SLOT(automaticReplay_ended()));
 
     // branch widget
-    connect(tree, SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)), this, SLOT(branchWidgetCurrentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)));
+    connect(tree, SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)), this, SLOT(branchWidget_currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)));
 }
 
 void MainWindow::setDocument(BoardWidget* board){
