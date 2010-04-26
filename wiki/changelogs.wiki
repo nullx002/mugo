@@ -1,14 +1,14 @@
 #summary One-sentence summary of this page.
 
 ==0.15.0==
-  add: context menu for branch view.
-  chg: show new document dialog at file new event.
-  chg: send list_commands first, and not send level command if game engine does not support level command.
-  chg: use loadsgf command if engine supporting it.
-  fix: active tab was cleared when non-active tab is closed.
-  fix: gnugo moves in background-tab, but put stone to active tab.
+ * add: context menu for branch view.
+ * chg: show new document dialog at file new event.
+ * chg: send list_commands first, and not send level command if game engine does not support level command.
+ * chg: use loadsgf command if engine supporting it.
+ * fix: active tab was cleared when non-active tab is closed.
+ * fix: gnugo moves in background-tab, but put stone to active tab.
 
- -- nsase <sikusiku@gmail.com>  Mon, 26 Apr 2010 23:49:00 +0900
+ * nsase <sikusiku@gmail.com>  Mon, 26 Apr 2010 23:49:00 +0900
 
 ==0.14.8==
  * add:continue game for play with computer.
