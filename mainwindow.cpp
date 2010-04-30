@@ -1564,6 +1564,11 @@ void MainWindow::on_actionPlayWithGnugo_triggered(){
                 ui->actionPlayWithGnugo->setChecked(false);
                 return;
             }
+            QString engineName = QFileInfo(dlg.path).baseName();
+            currentBoard()->getData().root->blackPlayer = dlg.isBlack ? "User" : engineName;
+            currentBoard()->getData().root->whitePlayer = dlg.isBlack ? engineName : "User";
+            setCaption();
+            updateCollection();
         }
         else{
             dlg.size = currentBoard()->getData().root->xsize;
