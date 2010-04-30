@@ -82,7 +82,8 @@ public:
     virtual bool move(int x, int y);
     virtual bool put(go::color c, int x, int y);
     virtual bool wait();
-    virtual void quit();
+    virtual void quit(bool resign);
+    virtual void abort();
     virtual void deadList();
     virtual bool moving() const;
 

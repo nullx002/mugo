@@ -1,5 +1,4 @@
 #include <QDebug>
-#include <QMessageBox>
 #include "appdef.h"
 #include "boardwidget.h"
 #include "gtp.h"
@@ -105,7 +104,19 @@ bool gtp::wait(){
 * quit game.
 * send quit command.
 */
-void gtp::quit(){
+void gtp::quit(bool resign){
+    isResign_ = resign;
+    isAbort_  = false;
+    commandList.push_back( commandPtr(new command(this, eQuit, "quit\n")) );
+}
+
+/**
+* abort game.
+* send quit command.
+*/
+void gtp::abort(){
+    isResign_ = false;
+    isAbort_  = true;
     commandList.push_back( commandPtr(new command(this, eQuit, "quit\n")) );
 }
 
@@ -114,7 +125,8 @@ void gtp::quit(){
 * send final_status_list dead command.
 */
 void gtp::deadList(){
-    commandList.push_back( commandPtr(new command(this, eDeadList, "final_status_list dead\n")) );
+    if (supportedCommandList.indexOf("final_status_list") != -1)
+        commandList.push_back( commandPtr(new command(this, eDeadList, "final_status_list dead\n")) );
 }
 
 /**
@@ -166,8 +178,7 @@ void gtp::on_gtp_read(){
 * game engine was finished
 */
 void gtp::on_gtp_finished(int exitCode, QProcess::ExitStatus exitStatus){
-    if (isAbort_)
-        emit gameEnded(this);
+    emit gameEnded();
 
     delete process;
     process = NULL;
@@ -197,20 +208,16 @@ void gtp::processCommand(QString& s){
         moveCommand* cmd = (moveCommand*)command.get();
         boardWidget_->insertStoneNodeCommand(0, cmd->x, cmd->y);
         if (isGameEnd()){
-            isAbort_ = false;
             deadList();
-            quit();
+            quit(false);
             return;
         }
         wait();
     }
     else if (command->kind == eGen){
         if (msg == "resign"){
-            QMessageBox::information(boardWidget_, APPNAME, tr("Computer resigns."));
-            isAbort_ = false;
-            isResign_ = true;
-            quit();
-            emit gameEnded(this);
+            winner_ = color_;
+            quit(true);
             return;
         }
 
@@ -219,9 +226,8 @@ void gtp::processCommand(QString& s){
             boardWidget_->insertStoneNodeCommand(0, x, y);
 
         if (isGameEnd()){
-            isAbort_ = false;
             deadList();
-            quit();
+            quit(false);
         }
     }
     else if (command->kind == ePut){
@@ -243,7 +249,6 @@ void gtp::processCommand(QString& s){
             if (!buffer[by][bx].blackTerritory() && !buffer[by][bx].whiteTerritory())
                 boardWidget_->addTerritory(bx, by);
         }
-        emit gameEnded(this);
     }
     else if (command->kind == eUndo)
         boardWidget_->forward(-1);
