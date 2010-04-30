@@ -1531,13 +1531,13 @@ void MainWindow::on_actionResetBoard_triggered(){
 */
 void MainWindow::on_actionCountTerritory_triggered(){
     if (ui->actionCountTerritory->isChecked()){
-        setCountTerritoryMode();
+        setCountTerritoryMode( currentBoard(), true );
         TabData& tabData = tabDatas[currentBoard()];
         tabData.countTerritoryDialog->setInformationNode( currentBoard()->getData().root.get() );
         tabData.countTerritoryDialog->show();
     }
     else{
-        setCountTerritoryMode(false);
+        setCountTerritoryMode( currentBoard(), false);
         setCaption();
     }
 
@@ -1588,8 +1588,8 @@ void MainWindow::on_actionPlayWithGnugo_triggered(){
         // start gtp communication
         delete tabData.playGame;
         tabData.playGame = new gtp(currentBoard(), dlg.isBlack ? go::black : go::white, dlg.size, dlg.komi, dlg.handicap, isNewGame, dlg.level, gtpProcess);
-        connect( tabData.playGame, SIGNAL(gameEnded(PlayGame*)), this, SLOT(playGameEnded(PlayGame*)) );
-        setPlayWithComputerMode(true);
+        connect( tabData.playGame, SIGNAL(gameEnded()), this, SLOT(playGameEnded()) );
+        setPlayWithComputerMode(currentBoard(), true);
         currentBoard()->playWithComputer(tabData.playGame);
     }
     else{
@@ -1974,7 +1974,9 @@ void MainWindow::on_actionBranchMoveDown_triggered(){
 /**
 * Slot
 */
-void MainWindow::playGameEnded(PlayGame* game){
+void MainWindow::playGameEnded(){
+    PlayGame* game = qobject_cast<PlayGame*>( sender() );
+
     BoardWidget* boardWidget = NULL;
     TabData* tabData = NULL;
     TabDataMap::iterator iter = tabDatas.begin();
@@ -2006,6 +2008,14 @@ void MainWindow::playGameEnded(PlayGame* game){
         setCaption();
         updateCollection();
     }
+    else if (resign){
+        boardWidget->getData().root->result = game->winner() == go::white ? "W+R" : "B+R";
+        if (game->winner() == game->color())
+            QMessageBox::information(boardWidget, APPNAME, tr("Computer resigns."));
+
+        setCaption();
+        updateCollection();
+    }
 }
 
 /**
@@ -2022,9 +2032,9 @@ void MainWindow::on_actionGameResign_triggered(){
     if (QMessageBox::warning(this, QString(), tr("Are you sure you want to resign?"), QMessageBox::Ok|QMessageBox::Cancel) != QMessageBox::Ok)
         return;
 
-    tabDatas[currentBoard()].playGame->setResign(true);
-    tabDatas[currentBoard()].playGame->quit();
-    endGame(currentBoard());
+    PlayGame* game = tabDatas[currentBoard()].playGame;
+    game->winner( game->color() == go::black ? go::white : go::black );
+    game->quit(true);
 }
 
 /**
@@ -2136,8 +2146,8 @@ void MainWindow::setCaption(){
 /**
 */
 void MainWindow::updateMenu(){
-    setCountTerritoryMode( false );
-    setPlayWithComputerMode( false );
+    setCountTerritoryMode( currentBoard(), false );
+    setPlayWithComputerMode( currentBoard(), false );
 
     BoardWidget* boardWidget = currentBoard();
     TabData* tabData = &tabDatas[boardWidget];
@@ -2216,7 +2226,7 @@ void MainWindow::updateMenu(){
     ui->actionTutorOneSide->setChecked( boardWidget->getTutorMode() == BoardWidget::eTutorOneSide );
 
     if (boardWidget->getEditMode() == BoardWidget::eCountTerritory){
-        setCountTerritoryMode(true);
+        setCountTerritoryMode(currentBoard(), true);
         ui->actionCountTerritory->setChecked(true);
         tabData->countTerritoryDialog->setVisible(true);
     }
@@ -2226,7 +2236,7 @@ void MainWindow::updateMenu(){
     }
 
     if (boardWidget->getEditMode() == BoardWidget::ePlayGame){
-        setPlayWithComputerMode(true);
+        setPlayWithComputerMode(currentBoard(), true);
         ui->actionPlayWithGnugo->setChecked( true );
     }
     else
@@ -2982,7 +2992,7 @@ void MainWindow::setNodeAnnotation(QAction* action, int annotation){
     currentBoard()->setNodeAnnotation(action->isChecked() ? annotation : 0);
 }
 
-void MainWindow::setCountTerritoryMode(bool on){
+void MainWindow::setCountTerritoryMode(BoardWidget* board, bool on){
     countTerritoryMode = on;
 
     static QAction* act[] = {
@@ -3140,7 +3150,7 @@ void MainWindow::setCountTerritoryMode(bool on){
         redoAction,
     };
     static int N = sizeof(act) / sizeof(act[0]);
-    QVector<bool>& status = tabDatas[currentBoard()].countTerritoryMenuStatus;
+    QVector<bool>& status = tabDatas[board].countTerritoryMenuStatus;
     if (status.size() < N){
         status.resize(N);
         qFill(status, true);
@@ -3154,13 +3164,15 @@ void MainWindow::setCountTerritoryMode(bool on){
         for (int i=0; i<N; ++i)
             act[i]->setEnabled( status[i] );
 
-    ui->commentWidget->setEnabled( !on );
-    tabDatas[currentBoard()].branchWidget->setEnabled( !on );
-    ui->undoView->setEnabled( !on );
-    ui->collectionWidget->setEnabled( !on );
+    if (board == currentBoard()){
+        ui->commentWidget->setEnabled( !on );
+        tabDatas[currentBoard()].branchWidget->setEnabled( !on );
+        ui->undoView->setEnabled( !on );
+        ui->collectionWidget->setEnabled( !on );
+    }
 }
 
-void MainWindow::setPlayWithComputerMode(bool on){
+void MainWindow::setPlayWithComputerMode(BoardWidget* board, bool on){
     playWithComputerMode = on;
 
     static QAction* act[] = {
@@ -3319,7 +3331,7 @@ void MainWindow::setPlayWithComputerMode(bool on){
         redoAction,
     };
     static int N = sizeof(act) / sizeof(act[0]);
-    QVector<bool>& status = tabDatas[currentBoard()].countTerritoryMenuStatus;
+    QVector<bool>& status = tabDatas[board].countTerritoryMenuStatus;
     if (status.size() < N){
         status.resize(N);
         qFill(status, true);
@@ -3341,23 +3353,24 @@ void MainWindow::setPlayWithComputerMode(bool on){
         ui->actionGamePass->setEnabled(false);
         ui->actionGameResign->setEnabled(false);
         ui->actionGameUndo->setEnabled(false);
-        undoGroup.setActiveStack(currentBoard()->getUndoStack());
+        if (board == currentBoard())
+            undoGroup.setActiveStack(board->getUndoStack());
         for (int i=0; i<N; ++i)
             act[i]->setEnabled( status[i] );
     }
 
-    ui->commentWidget->setEnabled( !on );
-    tabDatas[currentBoard()].branchWidget->setEnabled( !on );
-    ui->undoView->setEnabled( !on );
-    ui->collectionWidget->setEnabled( !on );
+    if (board == currentBoard()){
+        ui->commentWidget->setEnabled( !on );
+        tabDatas[board].branchWidget->setEnabled( !on );
+        ui->undoView->setEnabled( !on );
+        ui->collectionWidget->setEnabled( !on );
+    }
 }
 
 void MainWindow::endGame(BoardWidget* board){
     board->playWithComputer(NULL);
     tabDatas[board].playGame = NULL;
-
-    if (board == currentBoard())
-        setPlayWithComputerMode(false);
+    setPlayWithComputerMode(board, false);
 }
 
 void MainWindow::alertLanguageChanged(){
@@ -3488,9 +3501,7 @@ bool MainWindow::stopGame(BoardWidget* boardWidget){
     if (ret != QMessageBox::Ok)
         return false;
 
-    tabDatas[boardWidget].playGame->setAbort(true);
-    tabDatas[boardWidget].playGame->quit();
-    endGame(boardWidget);
+    tabDatas[boardWidget].playGame->abort();
 
     return true;
 }

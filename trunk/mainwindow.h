@@ -111,8 +111,8 @@ private:
 
     go::nodePtr getNode(QTreeWidgetItem* treeWidget);
 
-    void setCountTerritoryMode(bool on=true);
-    void setPlayWithComputerMode(bool on=true);
+    void setCountTerritoryMode(BoardWidget* board, bool on);
+    void setPlayWithComputerMode(BoardWidget* board, bool on);
     void endGame(BoardWidget* board);
 
     void alertLanguageChanged();
@@ -320,7 +320,7 @@ private slots:
     void openUrlCancel();
 
     // play a game
-    void playGameEnded(PlayGame* game);
+    void playGameEnded();
     void on_actionGamePass_triggered();
     void on_actionGameResign_triggered();
     void on_actionGameUndo_triggered();

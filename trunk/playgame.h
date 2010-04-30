@@ -20,7 +20,8 @@ public:
 
     virtual bool move(int x, int y) = 0;
     virtual bool put(go::color c, int x, int y) = 0;
-    virtual void quit() = 0;
+    virtual void quit(bool resign) = 0;
+    virtual void abort() = 0;
     virtual bool wait() = 0;
     virtual bool moving() const = 0;
 
@@ -31,9 +32,11 @@ public:
     void setAbort(bool abort){ isAbort_ = abort; }
     bool isResign() const{ return isResign_; }
     void setResign(bool resign){ isResign_ = resign; }
+    void winner(go::color color){ winner_ = color; }
+    go::color winner() const{ return winner_; }
 
 signals:
-    void gameEnded(PlayGame*);
+    void gameEnded();
 
 protected:
     BoardWidget* boardWidget_;
@@ -44,6 +47,7 @@ protected:
     bool isAbort_;
     bool isResign_;
     bool isNewGame_;
+    go::color winner_;
 
 //Q_DECLARE_PRIVATE(PlayGame)
 };
