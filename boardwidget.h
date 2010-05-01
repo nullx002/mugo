@@ -24,7 +24,10 @@ namespace Ui {
     class BoardWidget;
 }
 
-
+/**
+* class Sound
+* play sound using phonon or MCI(windows).
+*/
 class Sound{
 public:
     Sound(QWidget* parent_);
@@ -44,7 +47,10 @@ public:
 #endif
 };
 
-
+/**
+* class BoardWidget
+* Qt Widget for goban.
+*/
 class BoardWidget : public QWidget {
     Q_OBJECT
     Q_DISABLE_COPY(BoardWidget)
@@ -85,13 +91,8 @@ public:
 //    void setReadOnly(bool v){ readOnly = v; }
 
     // draw
-    void repaintBoard(bool board=true, bool stones=true);
+    void paintBoard();
     void paintBoard(QPaintDevice* pd);
-    void paintBoard(QPainter& p, qreal pointSize=8.0);
-    void paintStones(QPaintDevice* pd);
-    void paintStones(QPainter& p);
-    void paintTerritories(QPaintDevice* pd);
-    void paintTerritories(QPainter& p);
     void print(QPrinter&, int option, int movesPerPage);
     void print(QPrinter& printer, QPainter& p, int option, int movePerPage, BoardBuffer& buf);
     void print(QPrinter& printer, QPainter& p, const go::nodeList& node, int& page, int& fig, int& moveNumber, int& moveNumberInPage, int option, int movePerPage, BoardBuffer& buf, QString& rangai);
@@ -159,14 +160,14 @@ public:
 
     // set option
     void setEditMode(eEditMode editMode){ this->editMode = backupEditMode = editMode; }
-    void setTutorMode(eTutorMode tutorMode){ this->tutorMode = tutorMode; repaintBoard(); }
-    void setShowMoveNumber(bool visible){ showMoveNumber = visible; repaintBoard(); }
-    void setShowMoveNumberCount(int number){ showMoveNumberCount = number; repaintBoard(); }
-    void setMoveNumberMode(eMoveNumberMode mode){ moveNumberMode = mode; createBoardBuffer(); repaintBoard(); }
-    void setShowCoordinates(bool visible){ showCoordinates = visible; repaintBoard(); }
-    void setShowCoordinatesWithI(bool withI){ showCoordinatesI = withI; repaintBoard(); }
-    void setShowMarker(bool visible){ showMarker = visible; repaintBoard(); }
-    void setShowBranchMoves(bool visible){ showBranchMoves = visible; repaintBoard(); }
+    void setTutorMode(eTutorMode tutorMode){ this->tutorMode = tutorMode; paintBoard(); }
+    void setShowMoveNumber(bool visible){ showMoveNumber = visible; paintBoard(); }
+    void setShowMoveNumberCount(int number){ showMoveNumberCount = number; paintBoard(); }
+    void setMoveNumberMode(eMoveNumberMode mode){ moveNumberMode = mode; createBoardBuffer(); paintBoard(); }
+    void setShowCoordinates(bool visible){ showCoordinates = visible; paintBoard(); }
+    void setShowCoordinatesWithI(bool withI){ showCoordinatesI = withI; paintBoard(); }
+    void setShowMarker(bool visible){ showMarker = visible; paintBoard(); }
+    void setShowBranchMoves(bool visible){ showBranchMoves = visible; paintBoard(); }
     void setAnnotation(int annotation){ currentNode->annotation = annotation; modifyNode(currentNode); }
     void setMoveAnnotation(int annotation){ currentNode->moveAnnotation = annotation; modifyNode(currentNode); }
     void setNodeAnnotation(int annotation){ currentNode->nodeAnnotation = annotation; modifyNode(currentNode); }
@@ -235,9 +236,10 @@ protected:
     void playGameLButtonDown(int sgfX, int sgfY);
 
     // draw
-    void drawBoard(QPainter& p);
-    void drawCoordinates(QPainter& p);
-    void drawStonesAndMarker(QPainter& p);
+    void drawBoard(QPainter& p, qreal pointSize, bool showCoordinates);
+    void drawBoardImage(QPainter& p, bool showCoordinates);
+    void drawCoordinates(QPainter& p, bool showCoordinates);
+    void drawStonesAndMarkers(QPainter& p);
     void drawStones(QPainter& p);
     void drawBranchMoves(QPainter& p, go::nodeList::iterator first, go::nodeList::iterator last);
     void drawCross(QPainter& p, go::markList::iterator first, go::markList::iterator last);
@@ -342,8 +344,8 @@ private:
     QColor  boardColor, blackColor, whiteColor, bgColor, tutorColor;
     QColor  focusWhiteColor, focusBlackColor, branchColor;
 
-    int width_;
-    int height_;
+    int paintWidth;
+    int paintHeight;
     int boxSize;
     int xsize;
     int ysize;

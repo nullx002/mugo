@@ -248,7 +248,7 @@ void BoardWidget::resizeEvent(QResizeEvent* e){
 
     int w = qMin(e->size().width(), e->size().height());
     offscreenBuffer1 = QPixmap(w, w);
-    repaintBoard();
+    paintBoard();
 }
 
 /**
@@ -403,17 +403,11 @@ void BoardWidget::readSettings(){
 
 /**
 */
-void BoardWidget::repaintBoard(bool board, bool stones){
+void BoardWidget::paintBoard(){
     if (offscreenBuffer1.isNull())
         return;
 
     paintBoard(&offscreenBuffer1);
-
-    if (stones){
-        paintStones(&offscreenBuffer1);
-        paintTerritories(&offscreenBuffer1);
-    }
-
     offscreenBuffer2 = QPixmap();
     repaint();
 }
@@ -422,71 +416,26 @@ void BoardWidget::repaintBoard(bool board, bool stones){
 */
 void BoardWidget::paintBoard(QPaintDevice* pd){
     QPainter p(pd);
+
+    paintWidth  = pd->width();
+    paintHeight = pd->height();
+
     p.setRenderHints(QPainter::Antialiasing/*|QPainter::TextAntialiasing|QPainter::SmoothPixmapTransform*/);
-
-    width_  = pd->width();
-    height_ = pd->height();
-
-    paintBoard(p);
-}
-
-void BoardWidget::paintBoard(QPainter& p, qreal pointSize){
-
     QFont font;
-    font.setPointSizeF(pointSize);
     font.setStyleHint(QFont::SansSerif);
     font.setWeight(QFont::Normal);
     font.setStyleStrategy(QFont::PreferAntialias);
-
     p.setFont(font);
-    p.setPen(Qt::black);
 
     if (boardType >= 0){
         if (tutorMode != eNoTutor)
-            p.fillRect(0, 0, width_, height_, tutorColor);
+            p.fillRect(0, 0, pd->width(), pd->height(), tutorColor);
         else
-            p.fillRect(0, 0, width_, height_, bgColor);
+            p.fillRect(0, 0, pd->width(), pd->height(), bgColor);
     }
 
-    drawBoard(p);
-    drawCoordinates(p);
-}
-
-/**
-*/
-void BoardWidget::paintStones(QPaintDevice* pd){
-    QPainter p(pd);
-//    p.setRenderHints(QPainter::Antialiasing/*|QPainter::TextAntialiasing|QPainter::SmoothPixmapTransform*/);
-
-    width_  = pd->width();
-    height_ = pd->height();
-
-    paintStones(p);
-}
-
-void BoardWidget::paintStones(QPainter& p){
-    QFont font;
-    font.setStyleHint(QFont::SansSerif);
-    font.setWeight(QFont::Normal);
-    font.setStyleStrategy(QFont::PreferAntialias);
-    p.setFont(font);
-
-    drawStonesAndMarker(p);
-}
-
-/**
-*/
-void BoardWidget::paintTerritories(QPaintDevice* pd){
-    QPainter p(pd);
-    p.setRenderHints(QPainter::Antialiasing/*|QPainter::TextAntialiasing|QPainter::SmoothPixmapTransform*/);
-
-    width_  = pd->width();
-    height_ = pd->height();
-
-    paintTerritories(p);
-}
-
-void BoardWidget::paintTerritories(QPainter& p){
+    drawBoard(p, 8.0, showCoordinates);
+    drawStonesAndMarkers(p);
     drawTerritories(p);
 }
 
@@ -509,8 +458,8 @@ void BoardWidget::print(QPrinter& printer, int option, int movesPerPage){
     qSwap(showMoveNumber, showNumber_);
     qSwap(showMoveNumberCount, moveNumber_);
 
-    width_  = printer.width();
-    height_ = printer.height();
+    paintWidth  = printer.width();
+    paintHeight = printer.height();
 
     for (int i=0; i<printer.numCopies(); ++i){
         board.clear();
@@ -531,7 +480,7 @@ void BoardWidget::print(QPrinter& printer, int option, int movesPerPage){
     qSwap(showMoveNumberCount, moveNumber_);
 
     createBoardBuffer();
-    repaintBoard();
+    paintBoard();
 }
 
 void BoardWidget::print(QPrinter& printer, QPainter& p, int option, int movePerPage, BoardBuffer& buf){
@@ -711,11 +660,11 @@ void BoardWidget::printCaption(QPrinter& printer, QPainter& p, int fig){
     transform.translate(0, r.bottom() + 5);
     p.setTransform(transform);
 
-    height_ -= 25 + r.height();
-    if (height_ > width_)
-        height_ = width_;
+    paintHeight -= 25 + r.height();
+    if (paintHeight > paintWidth)
+        paintHeight = paintWidth;
     else
-        width_ = height_;
+        paintWidth = paintHeight;
 }
 
 void BoardWidget::printRangai(QPrinter& printer, QPainter& p, QString& rangai, int page){
@@ -753,10 +702,10 @@ void BoardWidget::newPage(QPrinter& printer, QPainter& p, int& moveNumberInPage,
     printHeader(printer, p, page);
     printFooter(printer, p, page);
 
-    height_ = footerRect.top() - headerRect.bottom();
+    paintHeight = footerRect.top() - headerRect.bottom();
 
     printCaption(printer, p, fig);
-    paintBoard(p, 15.0);
+    drawBoard(p, 15.0, showCoordinates);
 
     moveNumberInPage = 0;
     buf = board;
@@ -784,7 +733,7 @@ void BoardWidget::clear(){
     capturedBlack = 0;
     capturedWhite = 0;
     setCurrentNode();
-    repaintBoard();
+    paintBoard();
     undoStack.clear();
 
     emit cleared();
@@ -802,10 +751,9 @@ void BoardWidget::setData(const go::fileBase& data){
     clear();
     data.get(goData);
     createBoardBuffer();
-    repaintBoard(true, false);
+    paintBoard();
     nodeList.clear();
     setCurrentNode();
-//    repaintBoard();
 }
 
 /**
@@ -833,7 +781,7 @@ void BoardWidget::setRoot(go::informationPtr& info){
     goData.root = info;
     nodeList.clear();
     setCurrentNode();
-    repaintBoard();
+    paintBoard();
     undoStack.clear();
 }
 
@@ -1053,7 +1001,7 @@ void BoardWidget::deleteNode(go::nodePtr node, bool deleteChildren){
 void BoardWidget::modifyNode(go::nodePtr node, bool recreateBoardBuffer){
     if (recreateBoardBuffer)
         createBoardBuffer();
-    repaintBoard(false);
+    paintBoard();
     setDirty(true);
     emit nodeModified(node);
 }
@@ -1092,7 +1040,7 @@ void BoardWidget::setCurrentNode(go::nodePtr node){
     if (playSound && node->isStone())
         stoneSound.play();
 
-    repaintBoard(false);
+    paintBoard();
     emit currentNodeChanged(currentNode);
 }
 
@@ -1111,7 +1059,7 @@ void BoardWidget::setBoardSize(int xsize, int ysize){
     whiteFirst(isWhiteFirst);
     setCurrentNode();
 
-    repaintBoard();
+    paintBoard();
 }
 
 void BoardWidget::rotateSgf(go::nodePtr node, QUndoCommand* command){
@@ -1225,7 +1173,7 @@ int  BoardWidget::rotateBoard(){
         rotateBoard_ = 0;
 
     createBoardBuffer();
-    repaintBoard();
+    paintBoard();
 
     return rotateBoard_;
 }
@@ -1234,14 +1182,14 @@ void BoardWidget::flipBoardHorizontally(bool flip){
     flipBoardHorizontally_ = flip;
 
     createBoardBuffer();
-    repaintBoard();
+    paintBoard();
 }
 
 void BoardWidget::flipBoardVertically(bool flip){
     flipBoardVertically_ = flip;
 
     createBoardBuffer();
-    repaintBoard();
+    paintBoard();
 }
 
 void BoardWidget::resetBoard(){
@@ -1250,7 +1198,7 @@ void BoardWidget::resetBoard(){
     flipBoardVertically_ = false;
 
     createBoardBuffer();
-    repaintBoard();
+    paintBoard();
 }
 
 /**
@@ -1348,22 +1296,37 @@ void BoardWidget::createBoardBuffer(){
     }
 }
 
-/**
-*/
-void BoardWidget::drawBoard(QPainter& p){
+void BoardWidget::drawBoard(QPainter& p, qreal pointSize, bool showCoordinates){
     p.save();
 
-    QRectF coordRect = p.boundingRect(QRectF(0.0, 0.0, 1.0, 1.0), Qt::AlignCenter, "999999");
-    int w = static_cast<int>( (width_  - (showCoordinates ? coordRect.width() : 0.0)) / xsize );
-    int h = static_cast<int>( (height_ - (showCoordinates ? coordRect.width() : 0.0)) / ysize );
+    QFont font = p.font();
+    font.setPointSizeF(pointSize);
+
+    p.setFont(font);
+    p.setPen(Qt::black);
+
+    drawBoardImage(p, showCoordinates);
+    drawCoordinates(p, showCoordinates);
+
+    p.restore();
+}
+
+/**
+*/
+void BoardWidget::drawBoardImage(QPainter& p, bool showCoordinates){
+    p.save();
+
+    QRectF coordRect = p.boundingRect(QRectF(0.0, 0.0, 1.0, 1.0), Qt::AlignCenter, "99999");
+    int w = static_cast<int>( (paintWidth  - (showCoordinates ? coordRect.width() : 0.0)) / xsize );
+    int h = static_cast<int>( (paintHeight - (showCoordinates ? coordRect.width() : 0.0)) / ysize );
     boxSize = qMin(w, h);
     w = boxSize * (xsize - 1);
     h = boxSize * (ysize - 1);
     int margin = int(boxSize * 0.5);
 
-    int l = (width_ - w) / 2;
+    int l = (paintWidth - w) / 2;
     int r = l + boxSize * (xsize - 1);
-    int t = (height_ - h) / 2;
+    int t = (paintHeight - h) / 2;
     int b = t + boxSize * (ysize - 1);
 
     // create board and stone image
@@ -1462,7 +1425,7 @@ void BoardWidget::getStartPosition(QList<int>& star, int size){
 
 /**
 */
-void BoardWidget::drawCoordinates(QPainter& p){
+void BoardWidget::drawCoordinates(QPainter& p, bool showCoordinates){
     if (showCoordinates == false)
         return;
 
@@ -1509,7 +1472,7 @@ void BoardWidget::drawCoordinates(QPainter& p){
 
 /**
 */
-void BoardWidget::drawStonesAndMarker(QPainter& p){
+void BoardWidget::drawStonesAndMarkers(QPainter& p){
     p.save();
 
     QFont font(p.font());
@@ -1529,8 +1492,6 @@ void BoardWidget::drawStonesAndMarker(QPainter& p){
     drawSquare(p, currentNode->squares.begin(), currentNode->squares.end());
     drawSelect(p, currentNode->selects.begin(), currentNode->selects.end());
     drawCharacter(p, currentNode->characters.begin(), currentNode->characters.end());
-//    drawTerritories(p, currentNode->blackTerritories.begin(), currentNode->blackTerritories.end());
-//    drawTerritories(p, currentNode->whiteTerritories.begin(), currentNode->whiteTerritories.end());
 
     if (showMoveNumber && showMoveNumberCount == 0)
         if (currentNode->isStone())
@@ -2460,7 +2421,7 @@ void BoardWidget::setCountTerritoryMode(bool countMode){
         createBoardBuffer();
     }
 
-    repaintBoard();
+    paintBoard();
 }
 
 void BoardWidget::whiteFirst(bool whiteFirst){
@@ -2576,7 +2537,7 @@ void BoardWidget::addTerritory(int x, int y){
         unsetTerritory(x, y);
 
     countTerritory();
-    repaintBoard(false);
+    paintBoard(false);
 }
 
 void BoardWidget::setTerritory(int x, int y, int c){
