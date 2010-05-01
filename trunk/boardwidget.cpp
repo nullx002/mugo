@@ -85,6 +85,9 @@ namespace{
     const int kana_iroha_size = sizeof(kana_iroha) / sizeof(kana_iroha[0]);
 }
 
+/**
+* Constructor
+*/
 BoardWidget::BoardWidget(QWidget *parent) :
     QWidget(parent),
     m_ui(new Ui::BoardWidget),
@@ -125,12 +128,17 @@ BoardWidget::BoardWidget(QWidget *parent) :
     setCurrentNode(goData.root);
 }
 
+/**
+* Destructor
+*/
 BoardWidget::~BoardWidget()
 {
     delete m_ui;
 }
 
 /**
+* changeEvent
+* created by wizard.
 */
 void BoardWidget::changeEvent(QEvent *e)
 {
@@ -145,6 +153,8 @@ void BoardWidget::changeEvent(QEvent *e)
 }
 
 /**
+* paintEvent
+* copy offscreen buffer to display
 */
 void BoardWidget::paintEvent(QPaintEvent* e){
     QWidget::paintEvent(e);
@@ -156,12 +166,15 @@ void BoardWidget::paintEvent(QPaintEvent* e){
     else
         p.fillRect(0, 0, p.device()->width(), p.device()->height(), bgColor);
 
-    int x = width() / 2 - offscreenBuffer3.width() / 2;
-    int y = height() / 2 - offscreenBuffer3.height() / 2;
-    p.drawPixmap(x, y, offscreenBuffer3);
+    QPixmap& buffer = offscreenBuffer2.isNull() ? offscreenBuffer1 : offscreenBuffer2;
+    int x = width() / 2 - buffer.width() / 2;
+    int y = height() / 2 - buffer.height() / 2;
+    p.drawPixmap(x, y, buffer);
 }
 
 /**
+* mouseReleaseEvent
+* put stone, add marker or undo
 */
 void BoardWidget::mouseReleaseEvent(QMouseEvent* e){
     QWidget::mouseReleaseEvent(e);
@@ -173,9 +186,12 @@ void BoardWidget::mouseReleaseEvent(QMouseEvent* e){
 }
 
 /**
+* mouseMoveEvent
+* draw translucid stone on mouse pointer.
 */
 void BoardWidget::mouseMoveEvent(QMouseEvent* e){
     QWidget::mouseMoveEvent(e);
+
     int x = e->x() - (width() / 2 - offscreenBuffer1.width() / 2);
     int y = e->y() - (height() / 2 - offscreenBuffer1.height() / 2);
 
@@ -193,8 +209,8 @@ void BoardWidget::mouseMoveEvent(QMouseEvent* e){
     int bx = (int)floor( qreal(x - xlines[0] + boxSize / 2) / boxSize );
     int by = (int)floor( qreal(y - ylines[0] + boxSize / 2) / boxSize );
 
-    offscreenBuffer3 = offscreenBuffer2.copy();
-    QPainter p(&offscreenBuffer3);
+    offscreenBuffer2 = offscreenBuffer1.copy();
+    QPainter p(&offscreenBuffer2);
 
     if (! (bx < 0 || bx >= xlines.size() || by < 0 || by >= ylines.size() || board[by][bx].color != go::empty) )
         drawStone(p, bx, by, black ? go::black : go::white, 0.5);
@@ -203,6 +219,8 @@ void BoardWidget::mouseMoveEvent(QMouseEvent* e){
 }
 
 /**
+* wheelEvent
+* move next or previous node.
 */
 void BoardWidget::wheelEvent(QWheelEvent* e){
     QWidget::wheelEvent(e);
@@ -221,6 +239,10 @@ void BoardWidget::wheelEvent(QWheelEvent* e){
     }
 }
 
+/**
+* resizeEvent
+* resize offscreen buffer and redraw.
+*/
 void BoardWidget::resizeEvent(QResizeEvent* e){
     QWidget::resizeEvent(e);
 
@@ -230,6 +252,7 @@ void BoardWidget::resizeEvent(QResizeEvent* e){
 }
 
 /**
+* mouse left button down
 */
 void BoardWidget::onLButtonDown(QMouseEvent* e){
     int x = e->x() - (width() / 2 - offscreenBuffer1.width() / 2);
@@ -276,6 +299,8 @@ void BoardWidget::onLButtonDown(QMouseEvent* e){
 }
 
 /**
+* mouse right button down.
+* undo if alternate move.
 */
 void BoardWidget::onRButtonDown(QMouseEvent*){
     if (editMode == eAlternateMove)
@@ -283,6 +308,7 @@ void BoardWidget::onRButtonDown(QMouseEvent*){
 }
 
 /**
+* undo
 */
 void BoardWidget::undo(){
     if (editMode == eAlternateMove)
@@ -381,17 +407,14 @@ void BoardWidget::repaintBoard(bool board, bool stones){
     if (offscreenBuffer1.isNull())
         return;
 
-    if (board)
-        paintBoard(&offscreenBuffer1);
+    paintBoard(&offscreenBuffer1);
 
     if (stones){
-        offscreenBuffer2 = offscreenBuffer1.copy();
-        paintStones(&offscreenBuffer2);
-        paintTerritories(&offscreenBuffer2);
+        paintStones(&offscreenBuffer1);
+        paintTerritories(&offscreenBuffer1);
     }
 
-    offscreenBuffer3 = offscreenBuffer2.copy();
-
+    offscreenBuffer2 = QPixmap();
     repaint();
 }
 
