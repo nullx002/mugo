@@ -22,6 +22,7 @@
 #include "exportasciidialog.h"
 #include "printoptiondialog.h"
 #include "boardsizedialog.h"
+#include "saveimagedialog.h"
 #include "ui_mainwindow.h"
 
 
@@ -435,33 +436,14 @@ void MainWindow::on_actionSaveAs_triggered(){
 * Slot
 * File -> Save Board As Picture
 */
-void MainWindow::on_actionSaveBoardAsPicture_triggered()
-{
-    QString selectedFilter;
-    QString fname = getSaveFileName(this, QString(), QString(),
-        tr("PNG image(*.png);;Bitmap image(*.bmp);;JPEG image(*.jpeg *.jpg);;TIFF image(*.tiff *.tif)"),
-        &selectedFilter);
-    if (fname.isEmpty())
+void MainWindow::on_actionSaveBoardAsPicture_triggered(){
+    SaveImageDialog dlg(this);
+    if (dlg.exec() != QDialog::Accepted)
         return;
 
-    QFileInfo fi(fname);
-    if (fi.suffix().isEmpty()){
-        if (selectedFilter.indexOf("*.png") >= 0)
-            fi.setFile(fname + ".png");
-        else if (selectedFilter.indexOf("*.bmp") >= 0)
-            fi.setFile(fname + ".bmp");
-        else if (selectedFilter.indexOf("*.jpg") >= 0)
-            fi.setFile(fname + ".jpg");
-        else if (selectedFilter.indexOf("*.tiff") >= 0)
-            fi.setFile(fname + ".tiff");
-    }
-
-    int w = currentBoard()->width();
-    int h = currentBoard()->height();
-    w = h = qMin(w, h);
-    QImage image(w, h, QImage::Format_RGB32);
-    currentBoard()->paintBoard(&image);
-    image.save(fi.absoluteFilePath());
+    QImage image(dlg.imageSize, dlg.imageSize, QImage::Format_RGB32);
+    currentBoard()->paintBoard(&image, dlg.showCoordinate, dlg.monochrome);
+    image.save( dlg.fileInfo.absoluteFilePath() );
 }
 
 /**
