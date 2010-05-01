@@ -92,7 +92,7 @@ public:
 
     // draw
     void paintBoard();
-    void paintBoard(QPaintDevice* pd);
+    void paintBoard(QPaintDevice* pd, bool showCoordinate, bool monochrome);
     void print(QPrinter&, int option, int movesPerPage);
     void print(QPrinter& printer, QPainter& p, int option, int movePerPage, BoardBuffer& buf);
     void print(QPrinter& printer, QPainter& p, const go::nodeList& node, int& page, int& fig, int& moveNumber, int& moveNumberInPage, int option, int movePerPage, BoardBuffer& buf, QString& rangai);

@@ -402,20 +402,39 @@ void BoardWidget::readSettings(){
 }
 
 /**
+* paint board to boardWidget
 */
 void BoardWidget::paintBoard(){
     if (offscreenBuffer1.isNull())
         return;
 
-    paintBoard(&offscreenBuffer1);
+    paintBoard(&offscreenBuffer1, showCoordinates, false);
     offscreenBuffer2 = QPixmap();
     repaint();
 }
 
 /**
+* paint board to paint device.
 */
-void BoardWidget::paintBoard(QPaintDevice* pd){
+void BoardWidget::paintBoard(QPaintDevice* pd, bool showCoordinate, bool monochrome){
     QPainter p(pd);
+
+    int boardType_ = -1;
+    int blackType_ = -1;
+    int whiteType_ = -1;
+    QColor blackColor_ = Qt::black;
+    QColor whiteColor_ = Qt::white;
+    QColor focusBlackColor_ = Qt::white;
+    QColor focusWhiteColor_ = Qt::black;
+    if (monochrome){
+        qSwap(boardType, boardType_);
+        qSwap(blackType, blackType_);
+        qSwap(whiteType, whiteType_);
+        qSwap(blackColor, blackColor_);
+        qSwap(whiteColor, whiteColor_);
+        qSwap(focusBlackColor, focusBlackColor_);
+        qSwap(focusWhiteColor, focusWhiteColor_);
+    }
 
     paintWidth  = pd->width();
     paintHeight = pd->height();
@@ -433,10 +452,26 @@ void BoardWidget::paintBoard(QPaintDevice* pd){
         else
             p.fillRect(0, 0, pd->width(), pd->height(), bgColor);
     }
+    else
+        p.fillRect(0, 0, pd->width(), pd->height(), Qt::white);
 
-    drawBoard(p, 8.0, showCoordinates);
+    drawBoard(p, 8.0, showCoordinate);
     drawStonesAndMarkers(p);
     drawTerritories(p);
+
+    if (monochrome){
+        qSwap(boardType, boardType_);
+        qSwap(blackType, blackType_);
+        qSwap(whiteType, whiteType_);
+        qSwap(blackColor, blackColor_);
+        qSwap(whiteColor, whiteColor_);
+        qSwap(focusBlackColor, focusBlackColor_);
+        qSwap(focusWhiteColor, focusWhiteColor_);
+    }
+
+    // if pd is not offscreen buffer, redraw offscreenBuffer1 because reset buffer for boardWidget control.
+    if (pd != &offscreenBuffer1)
+        paintBoard();
 }
 
 /**
@@ -451,12 +486,20 @@ void BoardWidget::print(QPrinter& printer, int option, int movesPerPage){
     int  blackType_  = -1;
     bool showNumber_ = true;
     int  moveNumber_ = -1;
+    QColor blackColor_ = Qt::black;
+    QColor whiteColor_ = Qt::white;
+    QColor focusBlackColor_ = Qt::white;
+    QColor focusWhiteColor_ = Qt::black;
 
     qSwap(boardType, boardType_);
     qSwap(whiteType, whiteType_);
     qSwap(blackType, blackType_);
     qSwap(showMoveNumber, showNumber_);
     qSwap(showMoveNumberCount, moveNumber_);
+    qSwap(blackColor, blackColor_);
+    qSwap(whiteColor, whiteColor_);
+    qSwap(focusBlackColor, focusBlackColor_);
+    qSwap(focusWhiteColor, focusWhiteColor_);
 
     paintWidth  = printer.width();
     paintHeight = printer.height();
@@ -478,6 +521,10 @@ void BoardWidget::print(QPrinter& printer, int option, int movesPerPage){
     qSwap(blackType, blackType_);
     qSwap(showMoveNumber, showNumber_);
     qSwap(showMoveNumberCount, moveNumber_);
+    qSwap(blackColor, blackColor_);
+    qSwap(whiteColor, whiteColor_);
+    qSwap(focusBlackColor, focusBlackColor_);
+    qSwap(focusWhiteColor, focusWhiteColor_);
 
     createBoardBuffer();
     paintBoard();
@@ -1535,7 +1582,7 @@ void BoardWidget::drawStones(QPainter& p){
             p.setFont(font);
 
             QString s = QString("%1").arg(board[y][x].number);
-            p.setPen( board[y][x].number == currentMoveNumber ? Qt::red : board[y][x].black() ? Qt::white : Qt::black );
+            p.setPen( board[y][x].number == currentMoveNumber ? board[y][x].black() ? focusBlackColor : focusWhiteColor : board[y][x].black() ? Qt::white : Qt::black );
             p.drawText(QRectF(xlines[x] - boxSize * 0.5, ylines[y] - boxSize * 0.5, boxSize, boxSize), Qt::AlignCenter, s);
         }
     }
@@ -2537,7 +2584,7 @@ void BoardWidget::addTerritory(int x, int y){
         unsetTerritory(x, y);
 
     countTerritory();
-    paintBoard(false);
+    paintBoard();
 }
 
 void BoardWidget::setTerritory(int x, int y, int c){
