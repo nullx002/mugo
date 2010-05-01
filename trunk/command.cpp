@@ -229,11 +229,11 @@ void RotateSgfCommand::redo(){
     setText(commandName);
 
     boardWidget->createBoardBuffer();
-    boardWidget->repaintBoard();
+    boardWidget->paintBoard();
 }
 
 void RotateSgfCommand::undo(){
     QUndoCommand::undo();
     boardWidget->createBoardBuffer();
-    boardWidget->repaintBoard();
+    boardWidget->paintBoard();
 }

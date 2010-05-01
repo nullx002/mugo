@@ -461,12 +461,7 @@ void MainWindow::on_actionSaveBoardAsPicture_triggered()
     w = h = qMin(w, h);
     QImage image(w, h, QImage::Format_RGB32);
     currentBoard()->paintBoard(&image);
-    currentBoard()->paintStones(&image);
-    currentBoard()->paintTerritories(&image);
     image.save(fi.absoluteFilePath());
-
-    // change image coordinate to display
-    currentBoard()->repaintBoard();
 }
 
 /**
@@ -3490,7 +3485,7 @@ void MainWindow::readSettings(){
         BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->widget(i));
         if (board){
             board->readSettings();
-            board->repaintBoard();
+            board->paintBoard();
         }
     }
 }
