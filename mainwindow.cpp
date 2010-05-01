@@ -1771,10 +1771,10 @@ void MainWindow::on_boardTabWidget_currentChanged(QWidget* widget){
     while (iter != tabDatas.end()){
         iter->branchWidget->setVisible(iter.key() == board);
         iter->countTerritoryDialog->setVisible(false);
+        if (iter.key() == board)
+            iter->branchWidget->setFocus();
         ++iter;
     }
-
-    board->setFocus(Qt::OtherFocusReason);
     tabDatas[board].menuAction->setChecked(true);
 
     // undo
@@ -1858,7 +1858,7 @@ void MainWindow::currentNodeChanged(go::nodePtr node){
     QString coord = board->getXYString(node->getX(), node->getY());
     moveNumberLabel->setText(tr("LastMove: %1(%2)").arg(num).arg(coord));
 
-    if (ui->commentWidget->hasFocus())
+    if (tabDatas[board].branchWidget->hasFocus() == false)
         tabDatas[board].branchWidget->setFocus();
 }
 
@@ -2062,7 +2062,7 @@ void MainWindow::on_collectionWidget_itemActivated(QTreeWidgetItem* item, int /*
     setTreeData( currentBoard() );
     setCaption();
 
-    currentBoard()->setFocus(Qt::OtherFocusReason);
+    tabDatas[currentBoard()].branchWidget->setFocus();
 }
 
 /**
