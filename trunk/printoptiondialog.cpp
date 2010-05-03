@@ -28,6 +28,16 @@ PrintOptionDialog::PrintOptionDialog(QWidget *parent) :
     int movesPerPage = settings.value("print/movesPerPage", 50).toInt();
     m_ui->activeBranchMovesPerPage->setValue(movesPerPage);
     m_ui->allBranchMovesPerPage->setValue(movesPerPage);
+    m_ui->showCoordinate->setChecked( settings.value("print/showCoordinate" , true).toBool() );
+    QFont font = settings.value("print/font", QFont()).value<QFont>();
+    m_ui->fontComboBox->setCurrentFont(font);
+    m_ui->fontSizeComboBox->setCurrentIndex(font.pointSize() - 8);
+    m_ui->headerLeftEdit->setText  ( settings.value("print/headerLeft"  , "%GN% %PW%(W) vs %PB%(B)").toString() );
+    m_ui->headerCenterEdit->setText( settings.value("print/headerCenter", "").toString() );
+    m_ui->headerRightEdit->setText ( settings.value("print/headerRight" , "%datetime%").toString() );
+    m_ui->footerLeftEdit->setText  ( settings.value("print/footerLeft"  , "%file%").toString() );
+    m_ui->footerCenterEdit->setText( settings.value("print/footerCenter", "").toString() );
+    m_ui->footerRightEdit->setText ( settings.value("print/footerRight" , "%page%").toString() );
 }
 
 PrintOptionDialog::~PrintOptionDialog()
@@ -72,9 +82,27 @@ void PrintOptionDialog::accept()
     else
         movesPerPage_ = 0;
 
+    showCoordinate_ = m_ui->showCoordinate->isChecked();
+    font_ = m_ui->fontComboBox->currentFont();
+    font_.setPointSize( m_ui->fontSizeComboBox->currentText().toInt() );
+
+    headerLeftFormat_   = m_ui->headerLeftEdit->text();
+    headerCenterFormat_ = m_ui->headerCenterEdit->text();
+    headerRightFormat_  = m_ui->headerRightEdit->text();
+    footerLeftFormat_   = m_ui->footerLeftEdit->text();
+    footerCenterFormat_ = m_ui->footerCenterEdit->text();
+    footerRightFormat_  = m_ui->footerRightEdit->text();
 
     QSettings settings;
     settings.setValue("print/type", printOption_);
     if (movesPerPage_ != 0)
         settings.setValue("print/movesPerPage", movesPerPage_);
+    settings.setValue("print/showCoordinate", showCoordinate_);
+    settings.setValue("print/font", font_);
+    settings.setValue("print/headerLeft", headerLeftFormat_);
+    settings.setValue("print/headerCenter", headerCenterFormat_);
+    settings.setValue("print/headerRight", headerRightFormat_);
+    settings.setValue("print/footerLeft", footerLeftFormat_);
+    settings.setValue("print/footerCenter", footerCenterFormat_);
+    settings.setValue("print/footerRight", footerRightFormat_);
 }

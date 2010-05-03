@@ -25,9 +25,11 @@
 
 
 #include <QFileDialog>
+#include <QMap>
+#include "godata.h"
 QString getOpenFileName(QWidget* parent = 0, const QString& caption = QString(), const QString& dir = QString(), const QString& filter = QString(), QString* selectedFilter = 0, QFileDialog::Options options = 0);
 QString getSaveFileName(QWidget* parent = 0, const QString& caption = QString(), const QString& dir = QString(), const QString& filter = QString(), QString* selectedFilter = 0, QFileDialog::Options options = 0);
-
+int replaceSgfProperty(const go::data* data, const QString& in, QString& out, QMap<QString, QString> addProps = QMap<QString, QString>());
 
 #if defined(Q_WS_WIN)
 #   define strcasecmp _stricmp

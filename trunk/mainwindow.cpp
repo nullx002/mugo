@@ -636,7 +636,18 @@ void MainWindow::on_actionPrint_triggered(){
     PrintOptionDialog optionDialog(this);
     if (optionDialog.exec() != QDialog::Accepted)
         return;
-    currentBoard()->setPrintOption(optionDialog.printOption(), optionDialog.movesPerPage());
+    currentBoard()->setPrintOption(
+                        optionDialog.printOption(),
+                        optionDialog.movesPerPage(),
+                        optionDialog.showCoordinate(),
+                        optionDialog.font(),
+                        tabDatas[currentBoard()].fileName,
+                        optionDialog.headerLeftFormat(),
+                        optionDialog.headerCenterFormat(),
+                        optionDialog.headerRightFormat(),
+                        optionDialog.footerLeftFormat(),
+                        optionDialog.footerCenterFormat(),
+                        optionDialog.footerRightFormat());
 
     // create printer object.
     QPrinter            printer( QPrinter::ScreenResolution );
@@ -3423,6 +3434,47 @@ QString MainWindow::getDefaultSaveName() const{
     return saveName;
 }
 
+void MainWindow::on_actionAutomaticReplay_triggered(){
+    currentBoard()->autoReplay();
+    ui->actionAutomaticReplay->setChecked( currentBoard()->isAutoReplay() );
+}
+
+void MainWindow::automaticReplay_ended(){
+    BoardWidget* board = qobject_cast<BoardWidget*>(sender());
+    if (currentBoard() == board)
+        ui->actionAutomaticReplay->setChecked( false );
+}
+
+void MainWindow::readSettings(){
+    QSettings settings;
+
+    stepsOfFastMove = settings.value("navigation/stepsOfFastMove", FAST_MOVE_STEPS).toInt();
+
+    for (int i=0; i<ui->boardTabWidget->count(); ++i){
+        BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->widget(i));
+        if (board){
+            board->readSettings();
+            board->paintBoard();
+        }
+    }
+}
+
+bool MainWindow::stopGame(BoardWidget* boardWidget){
+    if (tabDatas[boardWidget].playGame == NULL)
+        return true;
+
+    QMessageBox::StandardButton ret = QMessageBox::warning(this, APPNAME,
+                                                tr("Are you sure you want to stop playing with computer?"),
+                                                QMessageBox::Ok|QMessageBox::Cancel);
+
+    if (ret != QMessageBox::Ok)
+        return false;
+
+    tabDatas[boardWidget].playGame->abort();
+
+    return true;
+}
+
 QString getOpenFileName(QWidget* parent, const QString& caption, const QString& dir, const QString& filter, QString* selectedFilter, QFileDialog::Options options){
 #if defined(Q_WS_X11)
     QFileDialog dlg(parent, caption, dir, filter);
@@ -3466,43 +3518,41 @@ QString getSaveFileName(QWidget* parent, const QString& caption, const QString& 
 #endif
 }
 
-void MainWindow::on_actionAutomaticReplay_triggered(){
-    currentBoard()->autoReplay();
-    ui->actionAutomaticReplay->setChecked( currentBoard()->isAutoReplay() );
-}
+int replaceSgfProperty(const go::data* data, const QString& in, QString& out, QMap<QString, QString> addProps){
+    QDateTime dt = QDateTime::currentDateTime();
+    addProps.insert("datetime", dt.toString(Qt::DefaultLocaleShortDate));
+    addProps.insert("date", dt.date().toString(Qt::DefaultLocaleShortDate));
+    addProps.insert("time", dt.time().toString(Qt::DefaultLocaleShortDate));
 
-void MainWindow::automaticReplay_ended(){
-    BoardWidget* board = qobject_cast<BoardWidget*>(sender());
-    if (currentBoard() == board)
-        ui->actionAutomaticReplay->setChecked( false );
-}
+    int num = 0;
+    out = in;
 
-void MainWindow::readSettings(){
-    QSettings settings;
+    go::sgf::node node;
+    node.set(data->root);
 
-    stepsOfFastMove = settings.value("navigation/stepsOfFastMove", FAST_MOVE_STEPS).toInt();
+    int i = 0;
+    while ((i = out.indexOf(QRegExp("%.+%"), i)) >= 0){
+        int j = out.indexOf('%', i+1);
+        QString prop = out.mid(i+1, j-i-1);
+        QMap<QString, QString>::iterator iter1 = addProps.find(prop);
+        if (iter1 != addProps.end()){
+            out.replace(i, j-i+1, iter1.value());
+            i = i + iter1.value().size();
+            ++num;
+        }
+        else{
+            go::sgf::propertyType::const_iterator iter2 = node.getProperty().find(prop);
+            QString value;
+            if (iter2 != node.getProperty().end())
+                foreach(const QString& v, iter2.value())
+                    value.append(v);
+            out.replace(i, j-i+1, value);
+            i = i + value.size();
+            if (value.isEmpty() == false)
+                ++num;
 
-    for (int i=0; i<ui->boardTabWidget->count(); ++i){
-        BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->widget(i));
-        if (board){
-            board->readSettings();
-            board->paintBoard();
         }
     }
-}
 
-bool MainWindow::stopGame(BoardWidget* boardWidget){
-    if (tabDatas[boardWidget].playGame == NULL)
-        return true;
-
-    QMessageBox::StandardButton ret = QMessageBox::warning(this, APPNAME,
-                                                tr("Are you sure you want to stop playing with computer?"),
-                                                QMessageBox::Ok|QMessageBox::Cancel);
-
-    if (ret != QMessageBox::Ok)
-        return false;
-
-    tabDatas[boardWidget].playGame->abort();
-
-    return true;
+    return num;
 }
