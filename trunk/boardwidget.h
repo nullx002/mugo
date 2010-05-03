@@ -93,10 +93,9 @@ public:
     // draw
     void paintBoard();
     void paintBoard(QPaintDevice* pd, bool showCoordinate, bool monochrome);
-    void print(QPrinter&, int option, int movesPerPage);
-    void print(QPrinter& printer, QPainter& p, int option, int movePerPage, BoardBuffer& buf);
-    void print(QPrinter& printer, QPainter& p, const go::nodeList& node, int& page, int& fig, int& moveNumber, int& moveNumberInPage, int option, int movePerPage, BoardBuffer& buf, QString& rangai);
-    void print(QPrinter& printer, QPainter& p, go::nodePtr node, int& page, int& fig, int& moveNumber, int& moveNumberInPage, int option, int movePerPage, BoardBuffer& buf, QString& rangai);
+    void print(QPrinter& printer, QPainter& p, BoardBuffer& buf);
+    void print(QPrinter& printer, QPainter& p, const go::nodeList& node, int& page, int& fig, int& moveNumber, int& moveNumberInPage, BoardBuffer& buf, QString& rangai);
+    void print(QPrinter& printer, QPainter& p, go::nodePtr node, int& page, int& fig, int& moveNumber, int& moveNumberInPage, BoardBuffer& buf, QString& rangai);
     void print(QPrinter& printer, QPainter& p, go::nodePtr node, int page, int& moveNumber, int& moveNumberInPage, BoardBuffer& buf, QString& rangai);
     void printHeader(QPrinter& printer, QPainter& p, int& page);
     void printFooter(QPrinter& printer, QPainter& p, int& page);
@@ -181,6 +180,7 @@ public:
     void setStoneSoundPath(const QString& path){ stoneSound.setCurrentSource(path); }
     void setCountTerritoryMode(bool countMode);
     void whiteFirst(bool whiteFirst);
+    void setPrintOption(int type, int movesPerPage){ printType = type; printMovesPerPage = movesPerPage; }
 
     // get option
     eEditMode  getEditMode() const{ return editMode; }
@@ -211,6 +211,10 @@ public:
     void playWithComputer(PlayGame* game);
     void autoReplay();
     bool isAutoReplay() const{ return autoReplayTimer.isActive(); }
+
+public slots:
+    void print(QPrinter* printer);
+    void autoReplayTimer_timeout();  //< auto replay
 
 signals:
     void cleared();
@@ -364,9 +368,9 @@ private:
     // play a game
     PlayGame* playGame;
 
-private slots:
-    // auto replay
-    void autoReplayTimer_timeout();
+    // print option;
+    int printType;
+    int printMovesPerPage;
 };
 
 
