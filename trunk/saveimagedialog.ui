@@ -108,6 +108,14 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>fileNameEdit</tabstop>
+  <tabstop>fileBrowseButton</tabstop>
+  <tabstop>imageSizeSpinBox</tabstop>
+  <tabstop>coordinateCheckBox</tabstop>
+  <tabstop>monochromeCheckBox</tabstop>
+  <tabstop>buttonBox</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>
