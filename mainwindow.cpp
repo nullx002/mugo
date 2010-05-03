@@ -10,6 +10,7 @@
 #include <QPrintDialog>
 #include <QPrintPreviewDialog>
 #include <QProgressDialog>
+#include <QDateTime>
 #include "appdef.h"
 #include "sgf.h"
 #include "ugf.h"
@@ -1561,6 +1562,7 @@ void MainWindow::on_actionPlayWithGnugo_triggered(){
             QString engineName = QFileInfo(dlg.path).baseName();
             currentBoard()->getData().root->blackPlayer = dlg.isBlack ? "User" : engineName;
             currentBoard()->getData().root->whitePlayer = dlg.isBlack ? engineName : "User";
+            currentBoard()->getData().root->date = QDateTime::currentDateTime().toString( Qt::DefaultLocaleShortDate );
             setCaption();
             updateCollection();
         }
