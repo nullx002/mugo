@@ -93,15 +93,10 @@ public:
     // draw
     void paintBoard();
     void paintBoard(QPaintDevice* pd, bool showCoordinate, bool monochrome);
+
+    // print
     void print(QPrinter& printer, QPainter& p, BoardBuffer& buf);
-    void print(QPrinter& printer, QPainter& p, const go::nodeList& node, int& page, int& fig, int& moveNumber, int& moveNumberInPage, BoardBuffer& buf, QString& rangai);
-    void print(QPrinter& printer, QPainter& p, go::nodePtr node, int& page, int& fig, int& moveNumber, int& moveNumberInPage, BoardBuffer& buf, QString& rangai);
-    void print(QPrinter& printer, QPainter& p, go::nodePtr node, int page, int& moveNumber, int& moveNumberInPage, BoardBuffer& buf, QString& rangai);
-    void printHeader(QPrinter& printer, QPainter& p, int& page);
-    void printFooter(QPrinter& printer, QPainter& p, int& page);
-    void printCaption(QPrinter& printer, QPainter& p, int fig);
-    void printRangai(QPrinter& printer, QPainter& p, QString& rangai, int page);
-    void newPage(QPrinter& printer, QPainter& p, int& moveNumberInPage, BoardBuffer& buf, int& page, int& fig);
+    void setPrintOption(int type, int movesPerPage, bool showCoordinate, const QFont& font, const QString& fileName, const QString& headerLeftFormat, const QString& headerCenterFormat, const QString& headerRightFormat, const QString& footerLeftFormat, const QString& footerCenterFormat, const QString& footerRightFormat);
 
     // set/get data
     void clear();
@@ -180,7 +175,6 @@ public:
     void setStoneSoundPath(const QString& path){ stoneSound.setCurrentSource(path); }
     void setCountTerritoryMode(bool countMode);
     void whiteFirst(bool whiteFirst);
-    void setPrintOption(int type, int movesPerPage){ printType = type; printMovesPerPage = movesPerPage; }
 
     // get option
     eEditMode  getEditMode() const{ return editMode; }
@@ -266,6 +260,18 @@ protected:
     QPainterPath createCrossPath() const;
     QPainterPath createSquarePath() const;
     QPainterPath createTrianglePath() const;
+
+    // print
+    void printNodeList(QPrinter& printer, QPainter& p, const go::nodeList& node, int& page, int& fig, int& startNumber, int& endNumber, int& moveNumberInPage, BoardBuffer& buf, QString& rangai, QStringList& comments);
+    void printBranch(QPrinter& printer, QPainter& p, go::nodePtr node, int& page, int& fig, int& startNumber, int& endNumber, int& moveNumberInPage, BoardBuffer& buf, QString& rangai, QStringList& comments);
+    void printNode(QPrinter& printer, QPainter& p, go::nodePtr node, int page, int& moveNumber, int& moveNumberInPage, BoardBuffer& buf, QString& rangai, QStringList& comments);
+    void printHeader(QPrinter& printer, QPainter& p, int& page);
+    void printFooter(QPrinter& printer, QPainter& p, int& page);
+    void printTitle(QPrinter& printer, QPainter& p, int& page);
+    void printCaption(QPrinter& printer, QPainter& p, int fig, int startNumber, int endNumber, bool draw);
+    void printRangai(QPrinter& printer, QPainter& p, int& page, int& fig, int& startNumber, int& endNumber, int& moveNumberInPage, QString& rangai, QStringList& comments);
+    void printBoard(QPrinter& printer, QPainter& p, BoardBuffer& buf, int& page, int& fig);
+    void newPage(QPrinter& printer, QPainter& p, int& page, int& fig, int& moveNumberInPage);
 
     // buffer
     void putStone(go::nodePtr n, int moveNumber);
@@ -371,6 +377,15 @@ private:
     // print option;
     int printType;
     int printMovesPerPage;
+    bool    printShowCoordinate;
+    QFont   printFont;
+    QString printFileName;
+    QString headerLeftFormat;
+    QString headerCenterFormat;
+    QString headerRightFormat;
+    QString footerLeftFormat;
+    QString footerCenterFormat;
+    QString footerRightFormat;
 };
 
 

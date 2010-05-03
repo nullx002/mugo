@@ -478,9 +478,9 @@ void BoardWidget::paintBoard(QPaintDevice* pd, bool showCoordinate, bool monochr
 * print
 */
 void BoardWidget::print(QPrinter* printer){
-    int  boardType_  = -1;
-    int  whiteType_  = -1;
-    int  blackType_  = -1;
+    int  boardType_  = -1;    // black and white
+    int  whiteType_  = -1;    // fill color
+    int  blackType_  = -1;    // fill color
     bool showNumber_ = true;
     int  moveNumber_ = -1;
     QColor blackColor_ = Qt::black;
@@ -531,42 +531,57 @@ void BoardWidget::print(QPrinter* printer){
 void BoardWidget::print(QPrinter& printer, QPainter& p, BoardBuffer& buf){
     p.save();
 
-    int moveNumber = 0;
+    p.setFont( printFont );
+
+    int startNumber = 1;
+    int endNumber = 0;
     int moveNumberInPage = 0;
     QString rangai;
+    QStringList comments;
 
     int page = 0;
     int fig = 0;
-    newPage(printer, p, moveNumberInPage, buf, page, fig);
+    newPage(printer, p, page, fig, moveNumberInPage);
+    printBoard(printer, p, buf, page, fig);
 
     if (printType < 3){
-        print(printer, p, nodeList, page, fig, moveNumber, moveNumberInPage, buf, rangai);
+        printNodeList(printer, p, nodeList, page, fig, startNumber, endNumber, moveNumberInPage, buf, rangai, comments);
     }
     else{
         go::nodePtr node = goData.root;
-        print(printer, p, node, page, fig, moveNumber, moveNumberInPage, buf, rangai);
+        printBranch(printer, p, node, page, fig, startNumber, endNumber, moveNumberInPage, buf, rangai, comments);
     }
 
-    printRangai(printer, p, rangai, page);
+    printRangai(printer, p, page, fig, startNumber, endNumber, moveNumberInPage, rangai, comments);
 
     p.restore();
 }
 
-void BoardWidget::print(QPrinter& printer, QPainter& p, const go::nodeList& nodeList, int& page, int& fig, int& moveNumber, int& moveNumberInPage, BoardBuffer& buf, QString& rangai){
-    foreach (go::nodePtr node, nodeList){
-        print(printer, p, node, page, moveNumber, moveNumberInPage, buf, rangai);
+/**
+* print node list
+*
+* print for:
+*   current board
+*
+*
+*/
+void BoardWidget::printNodeList(QPrinter& printer, QPainter& p, const go::nodeList& nodeList, int& page, int& fig, int& startNumber, int& endNumber, int& moveNumberInPage, BoardBuffer& buf, QString& rangai, QStringList& comments){
+    foreach (const go::nodePtr& node, nodeList){
+        printNode(printer, p, node, page, endNumber, moveNumberInPage, buf, rangai, comments);
 
         if (printType == 0 && node == currentNode)
             break;
         else if (printType == 2 && moveNumberInPage == printMovesPerPage){
-            printRangai(printer, p, rangai, page);
-            newPage(printer, p, moveNumberInPage, buf, page, fig);
+            printRangai(printer, p, page, fig, startNumber, endNumber, moveNumberInPage, rangai, comments);
+            newPage(printer, p, page, fig, moveNumberInPage);
+            printBoard(printer, p, buf, page, fig);
+            startNumber = endNumber + 1;
         }
     }
 }
 
-void BoardWidget::print(QPrinter& printer, QPainter& p, go::nodePtr node, int& page, int& fig, int& moveNumber, int& moveNumberInPage, BoardBuffer& buf, QString& rangai){
-    print(printer, p, node, page, moveNumber, moveNumberInPage, buf, rangai);
+void BoardWidget::printBranch(QPrinter& printer, QPainter& p, go::nodePtr node, int& page, int& fig, int& startNumber, int& endNumber, int& moveNumberInPage, BoardBuffer& buf, QString& rangai, QStringList& comments){
+    printNode(printer, p, node, page, endNumber, moveNumberInPage, buf, rangai, comments);
 
     go::nodeList::iterator iter = node->childNodes.begin();
     if (iter == node->childNodes.end())
@@ -579,28 +594,41 @@ void BoardWidget::print(QPrinter& printer, QPainter& p, go::nodePtr node, int& p
         buf2   = buf;
     }
 
-    while (++iter != node->childNodes.end()){
-        int moveNumber2 = 0;
-        int moveNumberInPage2 = 0;
+    int startNumber2 = startNumber;
+    int endNumber2   = endNumber;
+    int moveNumberInPage2 = moveNumberInPage;
 
-        printRangai(printer, p, rangai, page);
-        newPage(printer, p, moveNumberInPage, buf, page, fig);
-        print(printer, p, *iter, page, fig, moveNumber2, moveNumberInPage2, buf, rangai);
+    while (++iter != node->childNodes.end()){
+        printRangai(printer, p, page, fig, startNumber, endNumber, moveNumberInPage, rangai, comments);
+
+        startNumber = 1;
+        endNumber   = 0;
+        moveNumberInPage = 0;
+
+        newPage(printer, p, page, fig, moveNumberInPage);
+        printBoard(printer, p, buf, page, fig);
+        printBranch(printer, p, *iter, page, fig, startNumber, endNumber, moveNumberInPage, buf, rangai, comments);
 
         board = board2;
         buf   = buf2;
     }
 
     if ( craeteNewPage ){
-        printRangai(printer, p, rangai, page);
-        newPage(printer, p, moveNumberInPage, buf, page, fig);
+        printRangai(printer, p, page, fig, startNumber, endNumber, moveNumberInPage, rangai, comments);
+        newPage(printer, p, page, fig, moveNumberInPage2);
+        printBoard(printer, p, buf, page, fig);
+        startNumber2 = endNumber2 + 1;
     }
 
+    startNumber = startNumber2;
+    endNumber   = endNumber2;
+    moveNumberInPage = moveNumberInPage2;
+
     iter = node->childNodes.begin();
-    print(printer, p, *iter, page, fig, moveNumber, moveNumberInPage, buf, rangai);
+    printBranch(printer, p, *iter, page, fig, startNumber, endNumber, moveNumberInPage, buf, rangai, comments);
 }
 
-void BoardWidget::print(QPrinter& printer, QPainter& p, go::nodePtr node, int page, int& moveNumber, int& moveNumberInPage, BoardBuffer& buf, QString& rangai){
+void BoardWidget::printNode(QPrinter& printer, QPainter& p, go::nodePtr node, int page, int& moveNumber, int& moveNumberInPage, BoardBuffer& buf, QString& rangai, QStringList& comments){
     p.save();
 
     QFont font( p.font() );
@@ -643,24 +671,35 @@ void BoardWidget::print(QPrinter& printer, QPainter& p, go::nodePtr node, int pa
         }
     }
 
+    if (node->comment.isEmpty() == false)
+        comments.push_back( QString( tr("Move %1: ") ).arg(moveNumber).append(node->comment) );
+
     p.restore();
 }
 
-void BoardWidget::printHeader(QPrinter& printer, QPainter& p, int& /*page*/){
+void BoardWidget::printHeader(QPrinter& printer, QPainter& p, int& page){
     p.save();
 
-    QFont f(p.font());
-    f.setPointSizeF(8.5);
-    p.setFont(f);
+    QMap<QString, QString> props;
+    props.insert("file", printFileName);
+    props.insert("page", QString::number(page));
 
-    QString header = QString("%5 %1 %2 (W) vs %3 %4 (B)").arg(goData.root->whitePlayer).arg(goData.root->whiteRank).arg(goData.root->blackPlayer).arg(goData.root->blackRank).arg(goData.root->gameName);
-    QRect r = p.boundingRect(0, 0, printer.width(), 0, Qt::AlignTop|Qt::AlignHCenter, header);
+    QRect r = p.boundingRect(0, 0, printer.width(), 0, Qt::AlignTop|Qt::AlignHCenter, "AAA");
     headerRect.setRect(0, 0, printer.width(), r.height()+5);
 
-    p.drawText(headerRect, Qt::AlignTop|Qt::AlignHCenter, header);
+    QString header1, header2, header3;
+    replaceSgfProperty(&goData, headerLeftFormat,   header1, props);
+    replaceSgfProperty(&goData, headerCenterFormat, header2, props);
+    replaceSgfProperty(&goData, headerRightFormat,  header3, props);
+
+    p.drawText(headerRect, Qt::AlignTop|Qt::AlignLeft,    header1);
+    p.drawText(headerRect, Qt::AlignTop|Qt::AlignHCenter, header2);
+    p.drawText(headerRect, Qt::AlignTop|Qt::AlignRight,   header3);
 
     p.setPen( QPen(Qt::gray, 2) );
     p.drawLine( 0, headerRect.bottom(), printer.width(), headerRect.bottom() );
+
+    headerRect.setBottom( headerRect.bottom() + 10 );
 
     p.restore();
 }
@@ -668,36 +707,85 @@ void BoardWidget::printHeader(QPrinter& printer, QPainter& p, int& /*page*/){
 void BoardWidget::printFooter(QPrinter& printer, QPainter& p, int& page){
     p.save();
 
-    QFont f(p.font());
-    f.setPointSizeF(8.5);
-    p.setFont(f);
+    QMap<QString, QString> props;
+    props.insert("file", printFileName);
+    props.insert("page", QString::number(page));
 
-    QDateTime time = QDateTime::currentDateTime();
-    QString footer = time.toString(Qt::DefaultLocaleLongDate);
-    QRect r = p.boundingRect(0, 0, printer.width(), 0, Qt::AlignBottom|Qt::AlignRight, footer);
+    QRect r = p.boundingRect(0, 0, printer.width(), 0, Qt::AlignBottom|Qt::AlignHCenter, "AAA");
     footerRect.setRect(0, printer.height()-r.height()-5, printer.width(), r.height()+5);
 
-    p.drawText(footerRect, Qt::AlignBottom|Qt::AlignRight, footer);
+    QString footer1, footer2, footer3;
+    replaceSgfProperty(&goData, footerLeftFormat,   footer1, props);
+    replaceSgfProperty(&goData, footerCenterFormat, footer2, props);
+    replaceSgfProperty(&goData, footerRightFormat,  footer3, props);
 
-    footer.sprintf("%d", page);
-    p.drawText(footerRect, Qt::AlignBottom|Qt::AlignLeft, footer);
+    p.drawText(footerRect, Qt::AlignBottom|Qt::AlignLeft,    footer1);
+    p.drawText(footerRect, Qt::AlignBottom|Qt::AlignHCenter, footer2);
+    p.drawText(footerRect, Qt::AlignBottom|Qt::AlignRight,   footer3);
 
     p.setPen( QPen(Qt::gray, 2) );
     p.drawLine(0, footerRect.top(), printer.width(), footerRect.top());
 
+    footerRect.setTop( footerRect.top() - 10);
+
     p.restore();
 }
 
-void BoardWidget::printCaption(QPrinter& printer, QPainter& p, int fig){
+void BoardWidget::printTitle(QPrinter& printer, QPainter& p, int& page){
+    p.save();
+
+    QMap<QString, QString> props;
+    props.insert("file", printFileName);
+    props.insert("page", QString::number(page));
+
+    QFont f(p.font());
+    f.setPointSizeF( printFont.pointSizeF() * 1.5 );
+    p.setFont(f);
+
+    QRect r = p.boundingRect(0, 0, printer.width(), 0, Qt::AlignTop|Qt::AlignLeft, "AAA");
+    headerRect.setRect(0, headerRect.bottom(), printer.width(), r.height()+7);
+    p.drawText(headerRect, Qt::AlignTop|Qt::AlignLeft, goData.root->gameName);
+
+    f.setPointSizeF( printFont.pointSizeF() );
+    p.setFont(f);
+
+    int center = headerRect.width() / 2;
+    int space  = 80;
+    r = p.boundingRect(0, 0, 0, 0, Qt::AlignTop|Qt::AlignLeft, "AAA");
+    headerRect.setRect( 0, headerRect.bottom(), printer.width(), r.height()+5 );
+    p.drawText(0, headerRect.top(), center, headerRect.height(), Qt::AlignTop|Qt::AlignLeft, "Black");
+    p.drawText(space, headerRect.top(), center-space, headerRect.height(), Qt::AlignTop|Qt::AlignLeft, goData.root->blackPlayer);
+    p.drawText(center, headerRect.top(), headerRect.width()-center, headerRect.height(), Qt::AlignTop|Qt::AlignLeft, "White");
+    p.drawText(center+space, headerRect.top(), headerRect.width()-center-space, headerRect.height(), Qt::AlignTop|Qt::AlignLeft, goData.root->whitePlayer);
+
+    headerRect.setRect( 0, headerRect.bottom(), printer.width(), r.height()+5 );
+    p.drawText(0, headerRect.top(), center, headerRect.height(), Qt::AlignTop|Qt::AlignLeft, "Date");
+    p.drawText(space, headerRect.top(), center-space, headerRect.height(), Qt::AlignTop|Qt::AlignLeft, goData.root->date);
+    p.drawText(center, headerRect.top(), headerRect.width()-center, headerRect.height(), Qt::AlignTop|Qt::AlignLeft, "Result");
+    p.drawText(center+space, headerRect.top(), headerRect.width()-center-space, headerRect.height(), Qt::AlignTop|Qt::AlignLeft, goData.root->result);
+
+    p.setPen( QPen(Qt::gray, 2) );
+    p.drawLine( 0, headerRect.bottom(), printer.width(), headerRect.bottom() );
+
+    headerRect.setBottom( headerRect.bottom() + 10);
+
+    p.restore();
+}
+
+void BoardWidget::printCaption(QPrinter& printer, QPainter& p, int fig, int startNumber, int endNumber, bool draw){
+    p.setTransform(QTransform());
+
     p.save();
 
     QFont f(p.font());
-    f.setPointSizeF(14);
+    f.setPointSizeF( printFont.pointSizeF() * 1.5 );
     p.setFont(f);
 
-    QString text = QString( tr("Figure %1") ).arg(fig);
-    QRect r;
-    p.drawText(0, headerRect.bottom() + 20, printer.width(), printer.height(), Qt::AlignHCenter, text, &r);
+    QString text = QString( tr("Figure %1 (%2 - %3)") ).arg(fig).arg(startNumber).arg(endNumber);
+    QRect r = p.boundingRect(0, headerRect.bottom()+5, qMin(paintHeight, paintWidth), printer.height(), Qt::AlignHCenter, text);
+
+    if (draw == true)
+        p.drawText(r, Qt::AlignHCenter, text);
 
     p.restore();
 
@@ -705,34 +793,69 @@ void BoardWidget::printCaption(QPrinter& printer, QPainter& p, int fig){
     transform.translate(0, r.bottom() + 5);
     p.setTransform(transform);
 
-    paintHeight -= 25 + r.height();
-    if (paintHeight > paintWidth)
-        paintHeight = paintWidth;
-    else
-        paintWidth = paintHeight;
+    if (draw == false){
+        paintHeight -= 25 + r.height();
+        if (paintHeight > paintWidth)
+            paintHeight = paintWidth;
+        else
+            paintWidth = paintHeight;
+    }
 }
 
-void BoardWidget::printRangai(QPrinter& printer, QPainter& p, QString& rangai, int page){
+void BoardWidget::printRangai(QPrinter& printer, QPainter& p, int& page, int& fig, int& startNumber, int& endNumber, int& moveNumberInPage, QString& rangai, QStringList& comments){
     if (printer.printRange() == QPrinter::PageRange && (page < printer.fromPage() || page > printer.toPage()))
         return;
 
+    printCaption(printer, p, fig, startNumber, endNumber, true);
+
     p.save();
 
-    QFont f(p.font());
-    f.setPointSizeF(12);
-    p.setFont(f);
+    QRect r, r2;
+    if (printer.height() > printer.width()){
+        r.setRect(0, coordinatesRect.bottom() + 10, printer.width(), printer.height() - coordinatesRect.bottom() - 10);
+        p.drawText(r, Qt::TextWordWrap|Qt::AlignLeft, rangai, &r2);
+    }
+    else{
+        r.setRect(coordinatesRect.right() + 15, 0, printer.width() - coordinatesRect.right() - 10, coordinatesRect.height());
+        p.drawText(r, Qt::TextWordWrap|Qt::AlignLeft, rangai, &r2);
+    }
 
-    if (printer.height() > printer.width())
-        p.drawText(0, coordinatesRect.bottom() + 10, printer.width(), printer.height(), Qt::TextWordWrap|Qt::AlignHCenter, rangai);
-    else
-        p.drawText(coordinatesRect.right() + 10, 0, printer.width() - coordinatesRect.right() - 10, coordinatesRect.height(), Qt::TextWordWrap|Qt::AlignHCenter, rangai);
+    if (rangai.isEmpty() == false)
+        r.setTop( r2.bottom() + 10 );
+
+    foreach(const QString comment, comments){
+        QRect test = p.boundingRect(r, Qt::AlignLeft, comment);
+        if (test.bottom() > footerRect.top() - p.transform().dy()){
+            newPage(printer, p, page, fig, moveNumberInPage);
+            r.setRect( 0, headerRect.bottom(), printer.width(), paintHeight );
+        }
+        QRect r2;
+        p.drawText(r.left(), r.top(), printer.width() - r.left(), printer.height()-r.top(), Qt::TextWordWrap|Qt::AlignLeft, comment, &r2);
+        r.moveTop( r2.bottom() + 10 );
+    }
 
     p.restore();
 
     rangai.clear();
+    comments.clear();
 }
 
-void BoardWidget::newPage(QPrinter& printer, QPainter& p, int& moveNumberInPage, BoardBuffer& buf, int& page, int& fig){
+void BoardWidget::printBoard(QPrinter& printer, QPainter& p, BoardBuffer& buf, int& page, int& fig){
+    printCaption(printer, p, fig, 0, 0, false);
+    drawBoard(p, 14.0, printShowCoordinate);
+
+    buf = board;
+    for (int y=0; y<board.size(); ++y){
+        for (int x=0; x<board[y].size(); ++x){
+            if (board[y][x].black())
+                drawStone(p, x, y, go::black);
+            else if (board[y][x].white())
+                drawStone(p, x, y, go::white);
+        }
+    }
+}
+
+void BoardWidget::newPage(QPrinter& printer, QPainter& p, int& page, int& fig, int& moveNumberInPage){
     ++page;
     ++fig;
 
@@ -747,21 +870,28 @@ void BoardWidget::newPage(QPrinter& printer, QPainter& p, int& moveNumberInPage,
     printHeader(printer, p, page);
     printFooter(printer, p, page);
 
-    paintHeight = footerRect.top() - headerRect.bottom();
-
-    printCaption(printer, p, fig);
-    drawBoard(p, 15.0, showCoordinates);
+    static int paintHeightForFirstPage;
+    if (page == 1 || page == printer.fromPage()){
+        printTitle(printer, p, page);
+        paintHeightForFirstPage = footerRect.top() - headerRect.bottom();
+    }
+    paintHeight = paintHeightForFirstPage;
 
     moveNumberInPage = 0;
-    buf = board;
-    for (int y=0; y<board.size(); ++y){
-        for (int x=0; x<board[y].size(); ++x){
-            if (board[y][x].black())
-                drawStone(p, x, y, go::black);
-            else if (board[y][x].white())
-                drawStone(p, x, y, go::white);
-        }
-    }
+}
+
+void BoardWidget::setPrintOption(int type, int movesPerPage, bool showCoordinate, const QFont& font, const QString& fileName, const QString& headerLeftFormat_, const QString& headerCenterFormat_, const QString& headerRightFormat_, const QString& footerLeftFormat_, const QString& footerCenterFormat_, const QString& footerRightFormat_){
+    printType = type;
+    printMovesPerPage   = movesPerPage;
+    printShowCoordinate = showCoordinate;
+    printFont           = font;
+    printFileName       = fileName;
+    headerLeftFormat    = headerLeftFormat_;
+    headerCenterFormat  = headerCenterFormat_;
+    headerRightFormat   = headerRightFormat_;
+    footerLeftFormat    = footerLeftFormat_;
+    footerCenterFormat  = footerCenterFormat_;
+    footerRightFormat   = footerRightFormat_;
 }
 
 /**
