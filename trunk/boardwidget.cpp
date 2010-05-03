@@ -1418,8 +1418,9 @@ void BoardWidget::drawBoardImage(QPainter& p, bool showCoordinates){
     // horizontal line
     ylines.clear();
     for (int i=0; i<ysize; ++i){
-//        pen.setWidth( i == 0 || i == ysize-1 ? 2 : 1 );
-//        p.setPen(pen);
+        QPen pen = p.pen();
+        pen.setWidth( i == 0 || i == ysize-1 ? 2 : 1 );
+        p.setPen(pen);
 
         int y = t + i * boxSize;
         p.drawLine(l, y, r, y);
@@ -1429,8 +1430,9 @@ void BoardWidget::drawBoardImage(QPainter& p, bool showCoordinates){
     // vertical line
     xlines.clear();
     for (int i=0; i<xsize; ++i){
-//        pen.setWidth( i == 0 || i == xsize-1 ? 2 : 1 );
-//        p.setPen(pen);
+        QPen pen = p.pen();
+        pen.setWidth( i == 0 || i == xsize-1 ? 2 : 1 );
+        p.setPen(pen);
 
         int x = l + i * boxSize;
         p.drawLine(x, t, x, b);
