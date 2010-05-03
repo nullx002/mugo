@@ -8,6 +8,7 @@
 #include <QHttp>
 #include <QPrinter>
 #include <QPrintDialog>
+#include <QPrintPreviewDialog>
 #include <QProgressDialog>
 #include "appdef.h"
 #include "sgf.h"
@@ -630,18 +631,34 @@ void MainWindow::on_actionCloseAllTabs_triggered(){
 * File -> Print
 */
 void MainWindow::on_actionPrint_triggered(){
+    // show print options.
     PrintOptionDialog optionDialog(this);
     if (optionDialog.exec() != QDialog::Accepted)
         return;
+    currentBoard()->setPrintOption(optionDialog.printOption(), optionDialog.movesPerPage());
 
-//    QPrinter printer(QPrinter::HighResolution);
-    QPrinter printer(QPrinter::ScreenResolution);
+    // create printer object.
+    QPrinter            printer( QPrinter::ScreenResolution );
+    QPrintPreviewDialog preview( &printer, currentBoard() );
+    connect( &preview, SIGNAL(paintRequested(QPrinter*)), currentBoard(), SLOT(print(QPrinter*)) );
 
-    QPrintDialog printDialog(&printer, this);
-    if (printDialog.exec() != QDialog::Accepted)
-        return;
+    // restore print settings.
+    QSettings settings;
+    qreal left   = settings.value("print/marginLeft", 0).toDouble();
+    qreal top    = settings.value("print/marginTop", 0).toDouble();
+    qreal right  = settings.value("print/marginRight", 0).toDouble();
+    qreal bottom = settings.value("print/marginBottom", 0).toDouble();
+    printer.setPageMargins(left, top, right, bottom, QPrinter::DevicePixel);
 
-    currentBoard()->print(printer, optionDialog.printOption(), optionDialog.movesPerPage());
+    // show preview dialog
+    preview.exec();
+
+    // save print settings
+    printer.getPageMargins(&left, &top, &right, &bottom, QPrinter::DevicePixel);
+    settings.setValue("print/marginLeft", left);
+    settings.setValue("print/marginTop", top);
+    settings.setValue("print/marginRight", right);
+    settings.setValue("print/marginBottom", bottom);
 }
 
 /**

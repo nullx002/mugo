@@ -477,10 +477,7 @@ void BoardWidget::paintBoard(QPaintDevice* pd, bool showCoordinate, bool monochr
 /**
 * print
 */
-void BoardWidget::print(QPrinter& printer, int option, int movesPerPage){
-    QPainter p;
-    p.begin(&printer);
-
+void BoardWidget::print(QPrinter* printer){
     int  boardType_  = -1;
     int  whiteType_  = -1;
     int  blackType_  = -1;
@@ -501,17 +498,18 @@ void BoardWidget::print(QPrinter& printer, int option, int movesPerPage){
     qSwap(focusBlackColor, focusBlackColor_);
     qSwap(focusWhiteColor, focusWhiteColor_);
 
-    paintWidth  = printer.width();
-    paintHeight = printer.height();
+    paintWidth  = printer->width();
+    paintHeight = printer->height();
 
-    for (int i=0; i<printer.numCopies(); ++i){
+    QPainter p(printer);
+    for (int i=0; i<printer->numCopies(); ++i){
         board.clear();
         board.resize(ysize);
         for(int i=0; i<ysize; ++i)
             board[i].resize(xsize);
         BoardBuffer buf = board;
 
-        print( printer, p, option, movesPerPage, buf );
+        print( *printer, p, buf );
     }
 
     p.end();
@@ -530,7 +528,7 @@ void BoardWidget::print(QPrinter& printer, int option, int movesPerPage){
     paintBoard();
 }
 
-void BoardWidget::print(QPrinter& printer, QPainter& p, int option, int movePerPage, BoardBuffer& buf){
+void BoardWidget::print(QPrinter& printer, QPainter& p, BoardBuffer& buf){
     p.save();
 
     int moveNumber = 0;
@@ -541,12 +539,12 @@ void BoardWidget::print(QPrinter& printer, QPainter& p, int option, int movePerP
     int fig = 0;
     newPage(printer, p, moveNumberInPage, buf, page, fig);
 
-    if (option < 3){
-        print(printer, p, nodeList, page, fig, moveNumber, moveNumberInPage, option, movePerPage, buf, rangai);
+    if (printType < 3){
+        print(printer, p, nodeList, page, fig, moveNumber, moveNumberInPage, buf, rangai);
     }
     else{
         go::nodePtr node = goData.root;
-        print(printer, p, node, page, fig, moveNumber, moveNumberInPage, option, movePerPage, buf, rangai);
+        print(printer, p, node, page, fig, moveNumber, moveNumberInPage, buf, rangai);
     }
 
     printRangai(printer, p, rangai, page);
@@ -554,27 +552,27 @@ void BoardWidget::print(QPrinter& printer, QPainter& p, int option, int movePerP
     p.restore();
 }
 
-void BoardWidget::print(QPrinter& printer, QPainter& p, const go::nodeList& nodeList, int& page, int& fig, int& moveNumber, int& moveNumberInPage, int option, int movePerPage, BoardBuffer& buf, QString& rangai){
+void BoardWidget::print(QPrinter& printer, QPainter& p, const go::nodeList& nodeList, int& page, int& fig, int& moveNumber, int& moveNumberInPage, BoardBuffer& buf, QString& rangai){
     foreach (go::nodePtr node, nodeList){
         print(printer, p, node, page, moveNumber, moveNumberInPage, buf, rangai);
 
-        if (option == 0 && node == currentNode)
+        if (printType == 0 && node == currentNode)
             break;
-        else if (option == 2 && moveNumberInPage == movePerPage){
+        else if (printType == 2 && moveNumberInPage == printMovesPerPage){
             printRangai(printer, p, rangai, page);
             newPage(printer, p, moveNumberInPage, buf, page, fig);
         }
     }
 }
 
-void BoardWidget::print(QPrinter& printer, QPainter& p, go::nodePtr node, int& page, int& fig, int& moveNumber, int& moveNumberInPage, int option, int movePerPage, BoardBuffer& buf, QString& rangai){
+void BoardWidget::print(QPrinter& printer, QPainter& p, go::nodePtr node, int& page, int& fig, int& moveNumber, int& moveNumberInPage, BoardBuffer& buf, QString& rangai){
     print(printer, p, node, page, moveNumber, moveNumberInPage, buf, rangai);
 
     go::nodeList::iterator iter = node->childNodes.begin();
     if (iter == node->childNodes.end())
         return;
 
-    bool craeteNewPage = node->childNodes.size() > 1 || (option == 4 && moveNumberInPage == movePerPage);
+    bool craeteNewPage = node->childNodes.size() > 1 || (printType == 4 && moveNumberInPage == printMovesPerPage);
     BoardBuffer board2, buf2;
     if ( craeteNewPage ){
         board2 = board;
@@ -587,7 +585,7 @@ void BoardWidget::print(QPrinter& printer, QPainter& p, go::nodePtr node, int& p
 
         printRangai(printer, p, rangai, page);
         newPage(printer, p, moveNumberInPage, buf, page, fig);
-        print(printer, p, *iter, page, fig, moveNumber2, moveNumberInPage2, option, movePerPage, buf, rangai);
+        print(printer, p, *iter, page, fig, moveNumber2, moveNumberInPage2, buf, rangai);
 
         board = board2;
         buf   = buf2;
@@ -599,7 +597,7 @@ void BoardWidget::print(QPrinter& printer, QPainter& p, go::nodePtr node, int& p
     }
 
     iter = node->childNodes.begin();
-    print(printer, p, *iter, page, fig, moveNumber, moveNumberInPage, option, movePerPage, buf, rangai);
+    print(printer, p, *iter, page, fig, moveNumber, moveNumberInPage, buf, rangai);
 }
 
 void BoardWidget::print(QPrinter& printer, QPainter& p, go::nodePtr node, int page, int& moveNumber, int& moveNumberInPage, BoardBuffer& buf, QString& rangai){
