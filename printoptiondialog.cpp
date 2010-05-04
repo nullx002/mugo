@@ -32,7 +32,7 @@ PrintOptionDialog::PrintOptionDialog(QWidget *parent) :
     QFont font = settings.value("print/font", QFont()).value<QFont>();
     m_ui->fontComboBox->setCurrentFont(font);
     m_ui->fontSizeComboBox->setCurrentIndex(font.pointSize() - 8);
-    m_ui->headerLeftEdit->setText  ( settings.value("print/headerLeft"  , "%GN% %PW%(W) vs %PB%(B)").toString() );
+    m_ui->headerLeftEdit->setText  ( settings.value("print/headerLeft"  , "%GN% %PB% %BR%(B) vs %PW% %WR%(W)").toString() );
     m_ui->headerCenterEdit->setText( settings.value("print/headerCenter", "").toString() );
     m_ui->headerRightEdit->setText ( settings.value("print/headerRight" , "%datetime%").toString() );
     m_ui->footerLeftEdit->setText  ( settings.value("print/footerLeft"  , "%file%").toString() );

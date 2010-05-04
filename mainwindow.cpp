@@ -2119,7 +2119,7 @@ void MainWindow::setCaption(){
 
     QString caption;
     if (hasPlayerInfo)
-        caption = tr("%1 %2 (W) vs %4 %5 (B) (Result:%7)")
+        caption = tr("%1 %2(W) vs %3 %4(B) Result:%5")
                         .arg(gameInfo->whitePlayer)
                         .arg(gameInfo->whiteRank)
                         .arg(gameInfo->blackPlayer)
