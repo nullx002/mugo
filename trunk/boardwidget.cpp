@@ -744,7 +744,10 @@ void BoardWidget::printTitle(QPrinter& printer, QPainter& p, int& page){
 
     QRect r = p.boundingRect(0, 0, printer.width(), 0, Qt::AlignTop|Qt::AlignLeft, "AAA");
     headerRect.setRect(0, headerRect.bottom(), printer.width(), r.height()+7);
-    p.drawText(headerRect, Qt::AlignTop|Qt::AlignLeft, goData.root->gameName);
+    if (goData.root->gameName.isEmpty() == false)
+        p.drawText(headerRect, Qt::AlignTop|Qt::AlignLeft, goData.root->gameName);
+    else if (goData.root->event.isEmpty() == false)
+        p.drawText(headerRect, Qt::AlignTop|Qt::AlignLeft, goData.root->event);
 
     f.setPointSizeF( printFont.pointSizeF() );
     p.setFont(f);
@@ -753,15 +756,15 @@ void BoardWidget::printTitle(QPrinter& printer, QPainter& p, int& page){
     int space  = 80;
     r = p.boundingRect(0, 0, 0, 0, Qt::AlignTop|Qt::AlignLeft, "AAA");
     headerRect.setRect( 0, headerRect.bottom(), printer.width(), r.height()+5 );
-    p.drawText(0, headerRect.top(), center, headerRect.height(), Qt::AlignTop|Qt::AlignLeft, "Black");
-    p.drawText(space, headerRect.top(), center-space, headerRect.height(), Qt::AlignTop|Qt::AlignLeft, goData.root->blackPlayer);
-    p.drawText(center, headerRect.top(), headerRect.width()-center, headerRect.height(), Qt::AlignTop|Qt::AlignLeft, "White");
-    p.drawText(center+space, headerRect.top(), headerRect.width()-center-space, headerRect.height(), Qt::AlignTop|Qt::AlignLeft, goData.root->whitePlayer);
+    p.drawText(0, headerRect.top(), center, headerRect.height(), Qt::AlignTop|Qt::AlignLeft, tr("Black"));
+    p.drawText(space, headerRect.top(), center-space, headerRect.height(), Qt::AlignTop|Qt::AlignLeft, goData.root->blackPlayer + " " + goData.root->blackRank);
+    p.drawText(center, headerRect.top(), headerRect.width()-center, headerRect.height(), Qt::AlignTop|Qt::AlignLeft, tr("White"));
+    p.drawText(center+space, headerRect.top(), headerRect.width()-center-space, headerRect.height(), Qt::AlignTop|Qt::AlignLeft, goData.root->whitePlayer + " " + goData.root->whiteRank);
 
     headerRect.setRect( 0, headerRect.bottom(), printer.width(), r.height()+5 );
-    p.drawText(0, headerRect.top(), center, headerRect.height(), Qt::AlignTop|Qt::AlignLeft, "Date");
+    p.drawText(0, headerRect.top(), center, headerRect.height(), Qt::AlignTop|Qt::AlignLeft, tr("Date"));
     p.drawText(space, headerRect.top(), center-space, headerRect.height(), Qt::AlignTop|Qt::AlignLeft, goData.root->date);
-    p.drawText(center, headerRect.top(), headerRect.width()-center, headerRect.height(), Qt::AlignTop|Qt::AlignLeft, "Result");
+    p.drawText(center, headerRect.top(), headerRect.width()-center, headerRect.height(), Qt::AlignTop|Qt::AlignLeft, tr("Result"));
     p.drawText(center+space, headerRect.top(), headerRect.width()-center-space, headerRect.height(), Qt::AlignTop|Qt::AlignLeft, goData.root->result);
 
     p.setPen( QPen(Qt::gray, 2) );
