@@ -61,47 +61,47 @@
         <translation type="unfinished">%1手：</translation>
     </message>
     <message>
-        <location filename="boardwidget.cpp" line="756"/>
+        <location filename="boardwidget.cpp" line="759"/>
         <source>Black</source>
         <translation type="unfinished">黒</translation>
     </message>
     <message>
-        <location filename="boardwidget.cpp" line="758"/>
+        <location filename="boardwidget.cpp" line="761"/>
         <source>White</source>
         <translation type="unfinished">白</translation>
     </message>
     <message>
-        <location filename="boardwidget.cpp" line="762"/>
+        <location filename="boardwidget.cpp" line="765"/>
         <source>Date</source>
         <translation type="unfinished">日付</translation>
     </message>
     <message>
-        <location filename="boardwidget.cpp" line="764"/>
+        <location filename="boardwidget.cpp" line="767"/>
         <source>Result</source>
         <translation type="unfinished">結果</translation>
     </message>
     <message>
-        <location filename="boardwidget.cpp" line="784"/>
+        <location filename="boardwidget.cpp" line="787"/>
         <source>Figure %1 (%2 - %3)</source>
         <translation type="unfinished">第 %1 譜 （%2 ～ %3）</translation>
     </message>
     <message>
-        <location filename="boardwidget.cpp" line="1092"/>
+        <location filename="boardwidget.cpp" line="1095"/>
         <source>Rotate SGF</source>
         <translation type="unfinished">回転</translation>
     </message>
     <message>
-        <location filename="boardwidget.cpp" line="1100"/>
+        <location filename="boardwidget.cpp" line="1103"/>
         <source>Flip SGF Horizontally</source>
         <translation type="unfinished">左右に反転</translation>
     </message>
     <message>
-        <location filename="boardwidget.cpp" line="1108"/>
+        <location filename="boardwidget.cpp" line="1111"/>
         <source>Flip SGF Vertically</source>
         <translation type="unfinished">上下に反転</translation>
     </message>
     <message>
-        <location filename="boardwidget.cpp" line="2394"/>
+        <location filename="boardwidget.cpp" line="2397"/>
         <source>Input Label</source>
         <translation type="unfinished">ラベルを入力</translation>
     </message>
@@ -1740,12 +1740,12 @@ Do you want to save your changes?</source>
         <source>1,2,3...</source>
         <translation type="unfinished"></translation>
     </message>
-    <message utf8="true">
+    <message>
         <location filename="setupdialog.ui" line="523"/>
         <source>ア,イ,ウ...</source>
         <translation type="unfinished"></translation>
     </message>
-    <message utf8="true">
+    <message>
         <location filename="setupdialog.ui" line="528"/>
         <source>イ,ロ,ハ...</source>
         <translation type="unfinished"></translation>
