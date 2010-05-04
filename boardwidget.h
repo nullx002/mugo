@@ -253,7 +253,7 @@ protected:
     void drawCurrentMark(QPainter& p, go::nodePtr node);
     void drawStone(QPainter& p, int boardX, int boardY, go::color, qreal opacity=1.0);
     void drawDim(QPainter& p, int boardX, int boardY);
-    void eraseBackground(QPainter& p, int x, int y);
+    void eraseImage(QPainter& p, int boardX, int boardY);
     void getStartPosition(QList<int>& star, int size);
     QPainterPath createFocusTrianglePath() const;
     QPainterPath createCirclePath() const;

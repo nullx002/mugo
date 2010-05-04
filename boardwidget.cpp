@@ -1734,7 +1734,7 @@ void BoardWidget::drawBranchMoves(QPainter& p, go::nodeList::iterator first, go:
         int boardX, boardY;
         sgfToBoardCoordinate((*first)->getX(), (*first)->getY(), boardX, boardY);
         if (boardX >= 0 && boardX < xsize && boardY >= 0 && boardY < ysize){
-            eraseBackground(p, boardX, boardY);
+            eraseImage(p, boardX, boardY);
             p.drawText(xlines[boardX] - boxSize, ylines[boardY] - boxSize, boxSize * 2, boxSize * 2, Qt::AlignCenter, s);
             ++s[0];
         }
@@ -1800,12 +1800,11 @@ void BoardWidget::drawCharacter(QPainter& p, go::markList::iterator first, go::m
             int y = ylines[boardY];
 
             stoneInfo& info = board[boardY][boardX];
-            if (info.empty()){
+            if (info.empty())
                 p.setPen( Qt::black );
-                eraseBackground(p, boardX, boardY);
-            }
             else
                 p.setPen( info.black() ? Qt::white : Qt::black );
+            eraseImage(p, boardX, boardY);
 
             p.drawText(x-boxSize, y-boxSize, boxSize*2, boxSize*2, Qt::AlignCenter, first->s);
         }
@@ -1841,12 +1840,11 @@ void BoardWidget::drawPath(QPainter& p, const QPainterPath& path, int boardX, in
     p.save();
 
     stoneInfo& info = board[boardY][boardX];
-    if (info.empty()){
+    if (info.empty())
         p.setPen( QPen(Qt::black, 2) );
-        eraseBackground(p, boardX, boardY);
-    }
     else
         p.setPen( info.black() ? QPen(Qt::white, 2) : QPen(Qt::black, 2) );
+    eraseImage(p, boardX, boardY);
 
     int x = xlines[boardX];
     int y = ylines[boardY];
@@ -2033,6 +2031,7 @@ void BoardWidget::drawStone(QPainter& p, int bx, int by, go::color color, qreal 
 
     p.restore();
 }
+
 /**
 */
 void BoardWidget::drawDim(QPainter& p, int bx, int by){
@@ -2042,10 +2041,15 @@ void BoardWidget::drawDim(QPainter& p, int bx, int by){
 
 /**
 */
-void BoardWidget::eraseBackground(QPainter& p, int x, int y){
-    int dx = xlines[x] - boxSize / 2;
-    int dy = ylines[y] - boxSize / 2;
-    p.drawPixmap(dx, dy, boardImage2, dx - boardRect.left(), dy - boardRect.top(), boxSize, boxSize);
+void BoardWidget::eraseImage(QPainter& p, int boardX, int boardY){
+    stoneInfo& info = board[boardY][boardX];
+    if (info.empty()){
+        int dx = xlines[boardX] - boxSize / 2;
+        int dy = ylines[boardY] - boxSize / 2;
+        p.drawPixmap(dx, dy, boardImage2, dx - boardRect.left(), dy - boardRect.top(), boxSize, boxSize);
+    }
+    else
+        drawStone(p, boardX, boardY, info.black() ? go::black : go::white);
 }
 
 /**
