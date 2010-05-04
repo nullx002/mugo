@@ -2,50 +2,25 @@
 
 = Introduction =
 
-Add your content here.
-
+Mugo is go editing program and GUI interface for GTP engine.
+ * English and Japanese UI support.
+ * supported formats:
+   * read: sgf/ugf/ngf/gib
+   * save: sgf
+ * sgf collection support.
+ * branch view.
+ * print.
+ * tabbed interface.
 
 = Details =
-
-== Language ==
-English and Japanese UI support.
-
-英語と日本語をサポートしています。
-
-== Supported SGF Properties ==
-
-=== Move Properties ===
-B, W
-
-=== Setup Properties ===
-AB, AW, AE
-
-=== Node Annotation Properties ===
-C, N, DM, GB, GW, HO, UC
-
-=== Move Annotation Properties ===
-TE, BM, DO, IT
-
-=== Markup Properties ===
-LB, MA, CR, SQ, TR
-
-=== Root Properties ===
-AP, SZ
-
-=== Game Info Properties ===
-PB, BR, BT, PW, WR, WT, RE, TM, OT, GN, EV, RO, DT, PC, GC, US, SO, ON, AN, CP
-
-=== Timing Properties ===
-
-=== Miscellaneous Properties　===
 
 
 = Screen Shot =
 http://sikusiku.sakura.ne.jp/mugo/0.13.0/mugo-win.png<br/>
 (mugo 0.13.0 on windows)
 
-http://sikusiku.sakura.ne.jp/mugo/0.13.0/mugo-linux.png<br/>
-(mugo 0.13.1 on linux, japanese menu, open ugf)
+http://sikusiku.sakura.ne.jp/mugo/1.0.0/mugo-linux.png<br/>
+(mugo 1.0.0 on linux, japanese menu, open sgf collection)
 
 http://sikusiku.sakura.ne.jp/mugo/0.13.0/mugo-mac.png<br/>
 (mugo 0.13.1 on mac)
