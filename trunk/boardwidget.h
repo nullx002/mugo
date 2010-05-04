@@ -268,7 +268,7 @@ protected:
     void printHeader(QPrinter& printer, QPainter& p, int& page);
     void printFooter(QPrinter& printer, QPainter& p, int& page);
     void printTitle(QPrinter& printer, QPainter& p, int& page);
-    void printCaption(QPrinter& printer, QPainter& p, int fig, int startNumber, int endNumber, bool draw);
+    void printCaption(QPrinter& printer, QPainter& p, int& fig, int startNumber, int endNumber, bool draw);
     void printRangai(QPrinter& printer, QPainter& p, int& page, int& fig, int& startNumber, int& endNumber, int& moveNumberInPage, QString& rangai, QStringList& comments);
     void printBoard(QPrinter& printer, QPainter& p, BoardBuffer& buf, int& page, int& fig);
     void newPage(QPrinter& printer, QPainter& p, int& page, int& fig, int& moveNumberInPage);
