@@ -288,7 +288,7 @@ MainWindow::MainWindow(QWidget *parent)
     readSettings();
 
     // command line
-    QStringList args = qApp->arguments();
+    QStringList args = QApplication::arguments();
     if (args.size() > 1)
         for (int i=1; i<args.size(); ++i)
             fileOpen(args[i]);

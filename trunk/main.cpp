@@ -53,7 +53,7 @@ bool installTranslator(QApplication& a, QTranslator& translator, const QString& 
 
 class Application : public QApplication{
 public:
-    Application(int argc, char** argv) : QApplication(argc, argv), mainWindow(NULL){}
+    Application(int& argc, char** argv) : QApplication(argc, argv), mainWindow(NULL){}
     virtual ~Application();
 
 #if defined(Q_WS_MAC)
