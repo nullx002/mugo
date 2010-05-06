@@ -26,7 +26,12 @@ SOURCES += main.cpp \
     gib.cpp \
     ngf.cpp \
     boardsizedialog.cpp \
-    saveimagedialog.cpp
+    saveimagedialog.cpp \
+    qtsingleapplication.cpp \
+    qtlockedfile_win.cpp \
+    qtlockedfile_unix.cpp \
+    qtlockedfile.cpp \
+    qtlocalpeer.cpp
 HEADERS += mainwindow.h \
     boardwidget.h \
     godata.h \
@@ -45,7 +50,11 @@ HEADERS += mainwindow.h \
     gib.h \
     ngf.h \
     boardsizedialog.h \
-    saveimagedialog.h
+    saveimagedialog.h \
+    qtsingleapplication.h \
+    qtlockedfile.h \
+    qtlocalpeer.h \
+    mugoapp.h
 win32:SOURCES += qtdotnetstyle.cpp
 win32:HEADERS += qtdotnetstyle.h
 FORMS += mainwindow.ui \
