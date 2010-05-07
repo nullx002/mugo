@@ -96,7 +96,7 @@ public:
 
     // print
     void print(QPrinter& printer, QPainter& p, BoardBuffer& buf);
-    void setPrintOption(int type, int movesPerPage, bool showCoordinate, const QFont& font, const QString& fileName, const QString& headerLeftFormat, const QString& headerCenterFormat, const QString& headerRightFormat, const QString& footerLeftFormat, const QString& footerCenterFormat, const QString& footerRightFormat);
+    void setPrintOption(int type, int movesPerPage, bool showCoordinate, bool includeComments, const QFont& font, const QString& fileName, const QString& headerLeftFormat, const QString& headerCenterFormat, const QString& headerRightFormat, const QString& footerLeftFormat, const QString& footerCenterFormat, const QString& footerRightFormat);
 
     // set/get data
     void clear();
@@ -378,6 +378,7 @@ private:
     int printType;
     int printMovesPerPage;
     bool    printShowCoordinate;
+    bool    printIncludeComments;
     QFont   printFont;
     QString printFileName;
     QString headerLeftFormat;
