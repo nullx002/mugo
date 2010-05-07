@@ -77,6 +77,11 @@ void Application::received(const QString& msg){
     foreach(const QString& f, files)
         if (f.isEmpty() == false)
             mainWindow->fileOpen(f);
+
+#ifdef Q_WS_WIN
+    // Is not highlighted on taskbar automatically?
+    ::SetActiveWindow( mainWindow->winId() );
+#endif
 }
 
 void Application::setMainWindow(MainWindow* win){
