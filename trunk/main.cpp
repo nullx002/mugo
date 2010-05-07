@@ -70,6 +70,9 @@ bool Application::event(QEvent* e){
 #endif
 
 void Application::received(const QString& msg){
+    if (mainWindow == NULL)
+        return;
+
     QStringList files = msg.split("\n");
     foreach(const QString& f, files)
         if (f.isEmpty() == false)
