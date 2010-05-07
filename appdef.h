@@ -3,7 +3,7 @@
 
 
 #define APPNAME "mugo"
-#define VERSION "1.0.0"
+#define VERSION "1.0.1"
 #define AUTHOR   "nsase"
 
 #define SGF_LINEWIDTH 60
