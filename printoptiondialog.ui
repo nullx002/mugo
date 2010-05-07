@@ -118,6 +118,16 @@
        </widget>
       </item>
       <item>
+       <widget class="QCheckBox" name="includeComments">
+        <property name="text">
+         <string>Includes Comments</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
        <layout class="QHBoxLayout" name="horizontalLayout_3">
         <item>
          <widget class="QFontComboBox" name="fontComboBox"/>
@@ -283,6 +293,7 @@
   <tabstop>printAllBranchesN</tabstop>
   <tabstop>allBranchMovesPerPage</tabstop>
   <tabstop>showCoordinate</tabstop>
+  <tabstop>includeComments</tabstop>
   <tabstop>fontComboBox</tabstop>
   <tabstop>fontSizeComboBox</tabstop>
   <tabstop>headerLeftEdit</tabstop>

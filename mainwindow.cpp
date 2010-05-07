@@ -640,6 +640,7 @@ void MainWindow::on_actionPrint_triggered(){
                         optionDialog.printOption(),
                         optionDialog.movesPerPage(),
                         optionDialog.showCoordinate(),
+                        optionDialog.includeComments(),
                         optionDialog.font(),
                         tabDatas[currentBoard()].fileName,
                         optionDialog.headerLeftFormat(),

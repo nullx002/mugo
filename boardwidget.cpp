@@ -671,7 +671,7 @@ void BoardWidget::printNode(QPrinter& printer, QPainter& p, go::nodePtr node, in
         }
     }
 
-    if (node->comment.isEmpty() == false)
+    if (printIncludeComments && node->comment.isEmpty() == false)
         comments.push_back( QString( tr("Move %1: ") ).arg(moveNumber).append(node->comment) );
 
     p.restore();
@@ -882,18 +882,19 @@ void BoardWidget::newPage(QPrinter& printer, QPainter& p, int& page, int& fig, i
     moveNumberInPage = 0;
 }
 
-void BoardWidget::setPrintOption(int type, int movesPerPage, bool showCoordinate, const QFont& font, const QString& fileName, const QString& headerLeftFormat_, const QString& headerCenterFormat_, const QString& headerRightFormat_, const QString& footerLeftFormat_, const QString& footerCenterFormat_, const QString& footerRightFormat_){
+void BoardWidget::setPrintOption(int type, int movesPerPage, bool showCoordinate, bool includeComments, const QFont& font, const QString& fileName, const QString& headerLeftFormat_, const QString& headerCenterFormat_, const QString& headerRightFormat_, const QString& footerLeftFormat_, const QString& footerCenterFormat_, const QString& footerRightFormat_){
     printType = type;
-    printMovesPerPage   = movesPerPage;
-    printShowCoordinate = showCoordinate;
-    printFont           = font;
-    printFileName       = fileName;
-    headerLeftFormat    = headerLeftFormat_;
-    headerCenterFormat  = headerCenterFormat_;
-    headerRightFormat   = headerRightFormat_;
-    footerLeftFormat    = footerLeftFormat_;
-    footerCenterFormat  = footerCenterFormat_;
-    footerRightFormat   = footerRightFormat_;
+    printMovesPerPage    = movesPerPage;
+    printShowCoordinate  = showCoordinate;
+    printIncludeComments = includeComments;
+    printFont            = font;
+    printFileName        = fileName;
+    headerLeftFormat     = headerLeftFormat_;
+    headerCenterFormat   = headerCenterFormat_;
+    headerRightFormat    = headerRightFormat_;
+    footerLeftFormat     = footerLeftFormat_;
+    footerCenterFormat   = footerCenterFormat_;
+    footerRightFormat    = footerRightFormat_;
 }
 
 /**
