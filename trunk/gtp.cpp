@@ -28,9 +28,29 @@ gtp::moveBaseCommand::moveBaseCommand(gtp* parent, eKind k, BoardWidget* boardWi
 gtp::gtp(BoardWidget* board, go::color color, int boardSize, const qreal& komi, int handicap, bool newGame, int level, QProcess* proc, QObject* parent)
     : PlayGame(board, color, boardSize, komi, handicap, newGame, parent)
     , process(proc)
+    , initialized(false)
     , index(0)
     , commandProcessing(false)
     , level_(level)
+    , isKilled(false)
+{
+    connect(process, SIGNAL(readyRead()), this, SLOT(on_gtp_read()));
+    connect(process, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(on_gtp_finished(int, QProcess::ExitStatus)));
+
+    commandList.push_back( commandPtr(new command(this, eListCommands, "list_commands\n")) );
+}
+
+/**
+* Constructor
+*/
+gtp::gtp(QProcess* proc, QObject* parent)
+    : PlayGame(parent)
+    , process(proc)
+    , initialized(false)
+    , index(0)
+    , commandProcessing(false)
+    , level_(0)
+    , isKilled(false)
 {
     connect(process, SIGNAL(readyRead()), this, SLOT(on_gtp_read()));
     connect(process, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(on_gtp_finished(int, QProcess::ExitStatus)));
@@ -56,10 +76,12 @@ bool gtp::undo(){
     if (moving())
         return false;
 
-    commandList.push_back( commandPtr(new undoCommand(this)) );
-    commandList.push_back( commandPtr(new undoCommand(this)) );
-
-    return true;
+    if (supportedCommandList.indexOf("undo") != -1){
+        commandList.push_back( commandPtr(new command(this, eUndo, "undo\n")) );
+        commandList.push_back( commandPtr(new command(this, eUndo, "undo\n")) );
+        return true;
+    }
+    return false;
 }
 
 /**
@@ -104,29 +126,94 @@ bool gtp::wait(){
 * quit game.
 * send quit command.
 */
-void gtp::quit(bool resign){
+bool gtp::quit(bool resign){
     isResign_ = resign;
     isAbort_  = false;
-    commandList.push_back( commandPtr(new command(this, eQuit, "quit\n")) );
+    if (!initialized || supportedCommandList.indexOf("quit") != -1){
+        commandList.push_back( commandPtr(new command(this, eQuit, "quit\n")) );
+        return true;
+    }
+    return false;
 }
 
 /**
 * abort game.
 * send quit command.
 */
-void gtp::abort(){
+bool gtp::abort(){
     isResign_ = false;
     isAbort_  = true;
-    commandList.push_back( commandPtr(new command(this, eQuit, "quit\n")) );
+    if (!initialized || supportedCommandList.indexOf("quit") != -1){
+        commandList.push_back( commandPtr(new command(this, eQuit, "quit\n")) );
+        return true;
+    }
+    return false;
+}
+
+/**
+* kill porcess
+* send quit command.
+*/
+void gtp::kill(){
+    isKilled = true;
+    process->close();
 }
 
 /**
 * get dead stones.
 * send final_status_list dead command.
 */
-void gtp::deadList(){
-    if (supportedCommandList.indexOf("final_status_list") != -1)
+bool gtp::deadList(){
+    if (!initialized || supportedCommandList.indexOf("final_status_list") != -1){
         commandList.push_back( commandPtr(new command(this, eDeadList, "final_status_list dead\n")) );
+        return true;
+    }
+    return false;
+}
+
+/**
+* get name
+*/
+bool gtp::name(){
+    if (!initialized || supportedCommandList.indexOf("name") != -1){
+        commandList.push_back( commandPtr(new command(this, eName, "name\n")) );
+        return true;
+    }
+    return false;
+}
+
+/**
+* get version
+*/
+bool gtp::version(){
+    if (!initialized || supportedCommandList.indexOf("version") != -1){
+        commandList.push_back( commandPtr(new command(this, eVersion, "version\n")) );
+        return true;
+    }
+    return false;
+}
+
+/**
+* set board size
+*/
+bool gtp::boardSize(int size){
+// mogo can process boardsize command, but mogo doesn't list this command.
+//    if (!initialized || supportedCommandList.indexOf("boardsize") != -1){
+        commandList.push_back( commandPtr(new command(this, eBoardSize, QString().sprintf("boardsize %d\n", size))) );
+        return true;
+//    }
+//    return false;
+}
+
+/**
+* set komi
+*/
+bool gtp::komi(double komi){
+    if (!initialized || supportedCommandList.indexOf("komi") != -1){
+        commandList.push_back( commandPtr(new command(this, eKomi, QString().sprintf("komi %f\n", komi))) );
+        return true;
+    }
+    return false;
 }
 
 /**
@@ -178,9 +265,11 @@ void gtp::on_gtp_read(){
 * game engine was finished
 */
 void gtp::on_gtp_finished(int exitCode, QProcess::ExitStatus exitStatus){
-    emit gameEnded();
-
-    delete process;
+    if (!isKilled){  // crashed when delete process after kill process.
+        emit gameEnded();
+        process->disconnect();
+        delete process;
+    }
     process = NULL;
     delete this;
 }
@@ -256,6 +345,10 @@ void gtp::processCommand(QString& s){
         supportedCommandList = s.split("\n");
         initialize();
     }
+    else if (command->kind == eName)
+        emit getName(msg);
+    else if (command->kind == eVersion)
+        emit getVersion(msg);
     else if (command->kind == eLoadSgf)
         tempFile.remove();
 }
@@ -293,8 +386,12 @@ bool gtp::moving() const{
 * init game engine.
 */
 void gtp::initialize(){
-    commandList.push_back( commandPtr(new boardSizeCommand(this, boardSize_)) );
-    commandList.push_back( commandPtr(new komiCommand(this, komi_)) );
+    initialized = true;
+    if (boardWidget_ == NULL)
+        return;
+
+    boardSize(boardSize_);
+    komi(komi_);
 
     if (supportedCommandList.indexOf("level") != -1)
         commandList.push_back( commandPtr(new levelCommand(this, level_)) );

@@ -31,7 +31,9 @@ SOURCES += main.cpp \
     qtlockedfile_win.cpp \
     qtlockedfile_unix.cpp \
     qtlockedfile.cpp \
-    qtlocalpeer.cpp
+    qtlocalpeer.cpp \
+    enginelistdialog.cpp \
+    enginelist.cpp
 HEADERS += mainwindow.h \
     boardwidget.h \
     godata.h \
@@ -54,7 +56,9 @@ HEADERS += mainwindow.h \
     qtsingleapplication.h \
     qtlockedfile.h \
     qtlocalpeer.h \
-    mugoapp.h
+    mugoapp.h \
+    enginelistdialog.h \
+    enginelist.h
 win32:SOURCES += qtdotnetstyle.cpp
 win32:HEADERS += qtdotnetstyle.h
 FORMS += mainwindow.ui \
@@ -66,7 +70,8 @@ FORMS += mainwindow.ui \
     exportasciidialog.ui \
     printoptiondialog.ui \
     boardsizedialog.ui \
-    saveimagedialog.ui
+    saveimagedialog.ui \
+    enginelistdialog.ui
 RESOURCES += resources.qrc
 win32:RC_FILE = mugo.rc
 mac:RC_FILE = pics/mugo.icns

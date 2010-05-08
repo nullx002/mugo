@@ -1555,12 +1555,12 @@ void MainWindow::on_actionCountTerritory_triggered(){
 * Slot
 * Tools -> play with computer
 */
-void MainWindow::on_actionPlayWithGnugo_triggered(){
-    if (ui->actionPlayWithGnugo->isChecked()){
+void MainWindow::on_actionPlayWithComputer_triggered(){
+    if (ui->actionPlayWithComputer->isChecked()){
         // start new game.
         PlayWithComputerDialog dlg(this);
         if (dlg.exec() != QDialog::Accepted){
-            ui->actionPlayWithGnugo->setChecked(false);
+            ui->actionPlayWithComputer->setChecked(false);
             return;
         }
 
@@ -1568,12 +1568,12 @@ void MainWindow::on_actionPlayWithGnugo_triggered(){
         bool isNewGame = dlg.startPosition == PlayWithComputerDialog::eNewGame;
         if (isNewGame){
             if (fileNew(dlg.size, dlg.size, dlg.handicap, dlg.komi) == false){
-                ui->actionPlayWithGnugo->setChecked(false);
+                ui->actionPlayWithComputer->setChecked(false);
                 return;
             }
-            QString engineName = QFileInfo(dlg.path).baseName();
-            currentBoard()->getData().root->blackPlayer = dlg.isBlack ? "User" : engineName;
-            currentBoard()->getData().root->whitePlayer = dlg.isBlack ? engineName : "User";
+//            QString engineName = QFileInfo(dlg.path).baseName();
+            currentBoard()->getData().root->blackPlayer = dlg.isBlack ? "User" : dlg.name;
+            currentBoard()->getData().root->whitePlayer = dlg.isBlack ? dlg.name : "User";
             currentBoard()->getData().root->date = QDateTime::currentDateTime().toString( Qt::DefaultLocaleShortDate );
             setCaption();
             updateCollection();
@@ -1584,7 +1584,7 @@ void MainWindow::on_actionPlayWithGnugo_triggered(){
         }
 
         // create new process
-        QString param = '"' + dlg.path + "\" " + dlg.parameter;
+        QString param = '"' + dlg.path + "\" " + dlg.parameters;
         qDebug() << param;
 
         TabData& tabData = tabDatas[currentBoard()];
@@ -1608,7 +1608,7 @@ void MainWindow::on_actionPlayWithGnugo_triggered(){
     else{
         // stop playing game.
         if (stopGame(currentBoard()) == false){
-            ui->actionPlayWithGnugo->setChecked(true);
+            ui->actionPlayWithComputer->setChecked(true);
             return;
         }
     }
@@ -2013,7 +2013,7 @@ void MainWindow::playGameEnded(){
     if (boardWidget != currentBoard())
         return;
 
-    ui->actionPlayWithGnugo->setChecked(false);
+    ui->actionPlayWithComputer->setChecked(false);
     if( !abort && !resign ){
         ui->actionCountTerritory->setChecked(true);
         on_actionCountTerritory_triggered();
@@ -2250,10 +2250,10 @@ void MainWindow::updateMenu(){
 
     if (boardWidget->getEditMode() == BoardWidget::ePlayGame){
         setPlayWithComputerMode(currentBoard(), true);
-        ui->actionPlayWithGnugo->setChecked( true );
+        ui->actionPlayWithComputer->setChecked( true );
     }
     else
-        ui->actionPlayWithGnugo->setChecked( false );
+        ui->actionPlayWithComputer->setChecked( false );
 }
 
 /**
@@ -3129,7 +3129,7 @@ void MainWindow::setCountTerritoryMode(BoardWidget* board, bool on){
         ui->actionResetBoard,
 
 //        ui->actionCountTerritory,
-        ui->actionPlayWithGnugo,
+        ui->actionPlayWithComputer,
         ui->actionAutomaticReplay,
         ui->actionTutorBothSides,
         ui->actionTutorOneSide,
@@ -3351,7 +3351,7 @@ void MainWindow::setPlayWithComputerMode(BoardWidget* board, bool on){
     }
 
     if (on){
-        ui->actionPlayWithGnugo->setChecked(true);
+        ui->actionPlayWithComputer->setChecked(true);
         ui->actionGamePass->setEnabled(true);
         ui->actionGameResign->setEnabled(true);
         ui->actionGameUndo->setEnabled(true);
@@ -3362,7 +3362,7 @@ void MainWindow::setPlayWithComputerMode(BoardWidget* board, bool on){
         }
     }
     else{
-        ui->actionPlayWithGnugo->setChecked(false);
+        ui->actionPlayWithComputer->setChecked(false);
         ui->actionGamePass->setEnabled(false);
         ui->actionGameResign->setEnabled(false);
         ui->actionGameUndo->setEnabled(false);
@@ -3471,7 +3471,8 @@ bool MainWindow::stopGame(BoardWidget* boardWidget){
     if (ret != QMessageBox::Ok)
         return false;
 
-    tabDatas[boardWidget].playGame->abort();
+    if (tabDatas[boardWidget].playGame->abort() == false)
+        tabDatas[boardWidget].playGame->kill();
 
     return true;
 }

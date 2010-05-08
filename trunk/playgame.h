@@ -11,6 +11,7 @@ class PlayGame : public QObject{
 Q_OBJECT
 
 public:
+    PlayGame(QObject *parent = 0);
     PlayGame(BoardWidget* board, go::color color, int boardSize, const qreal& komi, int handicap, bool newGame, QObject *parent = 0);
     virtual ~PlayGame();
 
@@ -20,8 +21,9 @@ public:
 
     virtual bool move(int x, int y) = 0;
     virtual bool put(go::color c, int x, int y) = 0;
-    virtual void quit(bool resign) = 0;
-    virtual void abort() = 0;
+    virtual bool quit(bool resign) = 0;
+    virtual bool abort() = 0;
+    virtual void kill() = 0;
     virtual bool wait() = 0;
     virtual bool moving() const = 0;
 

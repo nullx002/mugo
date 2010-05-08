@@ -2,6 +2,8 @@
 #include <QSettings>
 #include "appdef.h"
 #include "playwithcomputerdialog.h"
+#include "enginelistdialog.h"
+#include "enginelist.h"
 #include "ui_playwithcomputerdialog.h"
 
 /**
@@ -24,10 +26,11 @@ PlayWithComputerDialog::PlayWithComputerDialog(QWidget *parent) :
     QSettings settings;
     m_ui->colorComboBox->setCurrentIndex( settings.value("playWithComputer/color").toInt() );
     m_ui->boardSizeComboBox->setCurrentIndex( settings.value("playWithComputer/size").toInt() );
-    m_ui->computerPathEdit->setText( settings.value("playWithComputer/path").toString() );
     m_ui->komiSpinBox->setValue( settings.value("playWithComputer/komi", 6.5).toDouble() );
     m_ui->handicapSpinBox->setValue( settings.value("playWithComputer/handicap").toInt() );
     m_ui->levelSpinBox->setValue( settings.value("playWithComputer/level", 10).toInt() );
+
+    updateEngineList();
 }
 
 /**
@@ -57,9 +60,6 @@ void PlayWithComputerDialog::changeEvent(QEvent *e)
 void PlayWithComputerDialog::accept(){
     QDialog::accept();
 
-    // path of go program
-    path = m_ui->computerPathEdit->text();
-
     // game settings
     isBlack = m_ui->colorComboBox->currentIndex() == 0;
     int boardSize = m_ui->boardSizeComboBox->currentIndex();
@@ -67,7 +67,14 @@ void PlayWithComputerDialog::accept(){
     komi = m_ui->komiSpinBox->value();
     handicap = m_ui->handicapSpinBox->value();
     level = m_ui->levelSpinBox->value();
-    parameter = m_ui->parameterEdit->text();
+
+    // engine settings
+    int engine = m_ui->engineComboBox->currentIndex();
+    EngineList engineList;
+    engineList.load();
+    name = engineList.engines[engine].name;
+    path = engineList.engines[engine].path;
+    parameters = engineList.engines[engine].parameters;
 
     // start position
     startPosition = m_ui->newGame->isChecked() ? eNewGame : eContinueGame;
@@ -76,32 +83,52 @@ void PlayWithComputerDialog::accept(){
     QSettings settings;
     settings.setValue("playWithComputer/color", m_ui->colorComboBox->currentIndex());
     settings.setValue("playWithComputer/size", m_ui->boardSizeComboBox->currentIndex());
-    settings.setValue("playWithComputer/path", path);
     settings.setValue("playWithComputer/komi", komi);
     settings.setValue("playWithComputer/handicap", handicap);
     settings.setValue("playWithComputer/level", level);
+    settings.setValue("playWithComputer/defaultEngine", engine);
 }
 
 /**
-* browse go program.
+* edit engines button is clicked.
+* show manage engine dialog.
 */
-void PlayWithComputerDialog::on_computerPathBrowse_clicked(){
-    QString fname = getOpenFileName(this);
-    if (fname.isEmpty())
+void PlayWithComputerDialog::on_editEngineButton_clicked(){
+    EngineListDialog dlg(this);
+    if (dlg.exec() != QDialog::Accepted)
         return;
-    m_ui->computerPathEdit->setText(fname);
+
+    updateEngineList();
 }
 
-void PlayWithComputerDialog::on_newGame_toggled(bool checked)
-{
+/**
+* new game radio button is toggled.
+*/
+void PlayWithComputerDialog::on_newGame_toggled(bool checked){
     m_ui->boardSizeComboBox->setEnabled(checked);
     m_ui->komiSpinBox->setEnabled(checked);
     m_ui->handicapSpinBox->setEnabled(checked);
 }
 
-void PlayWithComputerDialog::on_resume_toggled(bool checked)
-{
+/**
+* resume radio button is toggled.
+*/
+void PlayWithComputerDialog::on_resume_toggled(bool checked){
     m_ui->boardSizeComboBox->setEnabled(checked == false);
     m_ui->komiSpinBox->setEnabled(checked == false);
     m_ui->handicapSpinBox->setEnabled(checked == false);
+}
+
+/**
+*/
+void PlayWithComputerDialog::updateEngineList(){
+    m_ui->engineComboBox->clear();
+
+    EngineList engineList;
+    engineList.load();
+    foreach(const Engine& e, engineList.engines){
+        m_ui->engineComboBox->addItem( e.name );
+    }
+    int index = QSettings().value("playWithComputer/defaultEngine", 0).toInt();
+    m_ui->engineComboBox->setCurrentIndex( m_ui->engineComboBox->count() > index ? index : 0 );
 }

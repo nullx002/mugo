@@ -190,6 +190,71 @@ mugo automatically counts territories.</oldsource>
     </message>
 </context>
 <context>
+    <name>EngineListDialog</name>
+    <message>
+        <location filename="enginelistdialog.cpp" line="89"/>
+        <source>Can not launch computer go program.</source>
+        <translation type="unfinished">囲碁プログラムを起動できませんでした。</translation>
+    </message>
+    <message>
+        <location filename="enginelistdialog.ui" line="14"/>
+        <source>Engine Settings</source>
+        <translation type="unfinished">エンジン設定</translation>
+    </message>
+    <message>
+        <location filename="enginelistdialog.ui" line="29"/>
+        <location filename="enginelistdialog.ui" line="162"/>
+        <source>Name</source>
+        <translation type="unfinished">名前</translation>
+    </message>
+    <message>
+        <location filename="enginelistdialog.ui" line="34"/>
+        <source>Path</source>
+        <translation type="unfinished">パス</translation>
+    </message>
+    <message>
+        <location filename="enginelistdialog.ui" line="39"/>
+        <location filename="enginelistdialog.ui" line="152"/>
+        <source>Parameters</source>
+        <translation type="unfinished">パラメータ</translation>
+    </message>
+    <message>
+        <location filename="enginelistdialog.ui" line="62"/>
+        <source>Up</source>
+        <translation type="unfinished">上</translation>
+    </message>
+    <message>
+        <location filename="enginelistdialog.ui" line="73"/>
+        <source>Down</source>
+        <translation type="unfinished">下</translation>
+    </message>
+    <message>
+        <location filename="enginelistdialog.ui" line="84"/>
+        <source>Delete</source>
+        <translation type="unfinished">削除</translation>
+    </message>
+    <message>
+        <location filename="enginelistdialog.ui" line="117"/>
+        <source>Program Path</source>
+        <translation type="unfinished">プログラムのパス</translation>
+    </message>
+    <message>
+        <location filename="enginelistdialog.ui" line="129"/>
+        <source>...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="enginelistdialog.ui" line="139"/>
+        <source>Add</source>
+        <translation type="unfinished">追加</translation>
+    </message>
+    <message>
+        <location filename="enginelistdialog.ui" line="177"/>
+        <source>Get Name</source>
+        <translation type="unfinished">名前を取得</translation>
+    </message>
+</context>
+<context>
     <name>ExportAsciiDialog</name>
     <message>
         <location filename="exportasciidialog.cpp" line="14"/>
@@ -1297,7 +1362,8 @@ Do you want to save your changes?</source>
     </message>
     <message>
         <location filename="mainwindow.ui" line="1567"/>
-        <source>Play with gnugo</source>
+        <source>Play with Computer</source>
+        <oldsource>Play with gnugo</oldsource>
         <translation type="unfinished">gnugoと対局</translation>
     </message>
     <message>
@@ -1412,12 +1478,12 @@ Do you want to save your changes?</source>
 <context>
     <name>PlayWithComputerDialog</name>
     <message>
-        <location filename="playwithcomputerdialog.cpp" line="16"/>
+        <location filename="playwithcomputerdialog.cpp" line="18"/>
         <source>Black</source>
         <translation type="unfinished">黒</translation>
     </message>
     <message>
-        <location filename="playwithcomputerdialog.cpp" line="17"/>
+        <location filename="playwithcomputerdialog.cpp" line="19"/>
         <source>White</source>
         <translation type="unfinished">白</translation>
     </message>
@@ -1452,37 +1518,35 @@ Do you want to save your changes?</source>
         <translation type="unfinished">レベル</translation>
     </message>
     <message>
-        <location filename="playwithcomputerdialog.ui" line="108"/>
+        <location filename="playwithcomputerdialog.ui" line="111"/>
+        <source>Engine Settings</source>
+        <translation type="unfinished">プログラム設定</translation>
+    </message>
+    <message>
+        <location filename="playwithcomputerdialog.ui" line="126"/>
+        <source>&amp;Edit</source>
+        <translation type="unfinished">編集(&amp;E)</translation>
+    </message>
+    <message>
         <source>Computer Path</source>
-        <translation type="unfinished">プログラムのパス</translation>
+        <translation type="obsolete">プログラムのパス</translation>
     </message>
     <message>
-        <location filename="playwithcomputerdialog.ui" line="120"/>
-        <source>...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="playwithcomputerdialog.ui" line="129"/>
         <source>Parameter</source>
-        <translation type="unfinished">パラメータ</translation>
+        <translation type="obsolete">パラメータ</translation>
     </message>
     <message>
         <location filename="playwithcomputerdialog.ui" line="136"/>
-        <source>--mode gtp</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="playwithcomputerdialog.ui" line="146"/>
         <source>Start Position</source>
         <translation type="unfinished">開始設定</translation>
     </message>
     <message>
-        <location filename="playwithcomputerdialog.ui" line="152"/>
+        <location filename="playwithcomputerdialog.ui" line="142"/>
         <source>New Game</source>
         <translation type="unfinished">新規に対局を開始する</translation>
     </message>
     <message>
-        <location filename="playwithcomputerdialog.ui" line="162"/>
+        <location filename="playwithcomputerdialog.ui" line="152"/>
         <source>Continue from current position</source>
         <translation type="unfinished">現在の局面から開始する</translation>
     </message>
@@ -1749,12 +1813,12 @@ Do you want to save your changes?</source>
         <source>1,2,3...</source>
         <translation type="unfinished"></translation>
     </message>
-    <message utf8="true">
+    <message>
         <location filename="setupdialog.ui" line="523"/>
         <source>ア,イ,ウ...</source>
         <translation type="unfinished"></translation>
     </message>
-    <message utf8="true">
+    <message>
         <location filename="setupdialog.ui" line="528"/>
         <source>イ,ロ,ハ...</source>
         <translation type="unfinished"></translation>

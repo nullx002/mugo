@@ -261,7 +261,7 @@ private slots:
 
     // Tools menu
     void on_actionCountTerritory_triggered();
-    void on_actionPlayWithGnugo_triggered();
+    void on_actionPlayWithComputer_triggered();
     void on_actionAutomaticReplay_triggered();
     void on_actionTutorBothSides_triggered();
     void on_actionTutorOneSide_triggered();

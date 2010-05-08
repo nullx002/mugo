@@ -23,12 +23,15 @@ public:
 
     // game settings
     bool    isBlack;
-    QString path;
-    QString parameter;
     int     size;
     double  komi;
     int     handicap;
     int     level;
+
+    // engine settings
+    QString name;
+    QString path;
+    QString parameters;
 
     // start position
     int     startPosition;
@@ -38,10 +41,12 @@ protected:
     virtual void accept();
 
 private:
+    void updateEngineList();
+
     Ui::PlayWithComputerDialog *m_ui;
 
 private slots:
-    void on_computerPathBrowse_clicked();
+    void on_editEngineButton_clicked();
     void on_newGame_toggled(bool checked);
     void on_resume_toggled(bool checked);
 };
