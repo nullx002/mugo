@@ -262,8 +262,8 @@ void gtp::estimateScore(){
     if (supportedCommandList.indexOf("initial_influence") != -1){
         commandList.push_back( commandPtr(new command(this, eInitialInfluence, "initial_influence", "black territory_value")) );
         commandList.push_back( commandPtr(new command(this, eInitialInfluence, "initial_influence", "white territory_value")) );
+        write();
     }
-    abort();
 }
 
 /**
