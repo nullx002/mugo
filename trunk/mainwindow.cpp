@@ -1601,7 +1601,7 @@ void MainWindow::on_actionPlayWithComputer_triggered(){
         // start gtp communication
         delete tabData.playGame;
         tabData.playGame = new gtp(currentBoard(), dlg.isBlack ? go::black : go::white, dlg.size, dlg.komi, dlg.handicap, isNewGame, dlg.level, gtpProcess);
-        connect( tabData.playGame, SIGNAL(gameEnded()), this, SLOT(playGameEnded()) );
+        connect( tabData.playGame, SIGNAL(gameEnded()), this, SLOT(on_playGame_gameEnded()) );
         setPlayWithComputerMode(currentBoard(), true);
         currentBoard()->playWithComputer(tabData.playGame);
     }
@@ -1987,7 +1987,7 @@ void MainWindow::on_actionBranchMoveDown_triggered(){
 /**
 * Slot
 */
-void MainWindow::playGameEnded(){
+void MainWindow::on_playGame_gameEnded(){
     PlayGame* game = qobject_cast<PlayGame*>( sender() );
 
     BoardWidget* boardWidget = NULL;

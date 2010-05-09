@@ -79,7 +79,7 @@ void EngineListDialog::on_browseButton_clicked(){
 void EngineListDialog::on_getNameButton_clicked(){
     // set default parameters.
     QFileInfo finfo( m_ui->pathEdit->text() );
-    if (finfo.baseName().compare("gnugo", Qt::CaseInsensitive) == 0){
+    if (finfo.baseName().indexOf("gnugo", 0, Qt::CaseInsensitive) == 0 || finfo.baseName().indexOf("aya", 0, Qt::CaseInsensitive) == 0){
         const QString& param = m_ui->parametersEdit->text();
         if (param.indexOf("--mode") == -1){
             if (param.isEmpty())
@@ -96,18 +96,16 @@ void EngineListDialog::on_getNameButton_clicked(){
 
     QString path = '"' + m_ui->pathEdit->text() + "\" " + m_ui->parametersEdit->text();
     process_ = new QProcess(this); // auto delete
-    process_->start(path, QIODevice::ReadWrite);
+    process_->start(path, QIODevice::ReadWrite|QIODevice::Text);
     if (process_->state() == QProcess::NotRunning){
         QMessageBox::critical(this, APPNAME, tr("Can not launch computer go program."));
         return;
     }
     gtp_ = new gtp(process_); // auto delete
+    connect(gtp_, SIGNAL(initialized()), SLOT(on_gtp_initialized()));
     connect(gtp_, SIGNAL(gameEnded()), SLOT(on_gtp_ended()));
     connect(gtp_, SIGNAL(getName(const QString&)), SLOT(on_gtp_name(const QString&)));
     connect(gtp_, SIGNAL(getVersion(const QString&)), SLOT(on_gtp_version(const QString&)));
-    gtp_->name();
-    gtp_->version();
-    gtp_->abort();
 }
 
 /**
@@ -116,15 +114,31 @@ void EngineListDialog::on_getNameButton_clicked(){
 */
 void EngineListDialog::on_pathEdit_textChanged(QString s){
     m_ui->getNameButton->setEnabled( s.isEmpty() == false );
-    m_ui->addButton->setEnabled( s.isEmpty() == false && m_ui->nameEdit->text().isEmpty() == false );
+
+    QTreeWidgetItem* item = m_ui->engineList->currentItem();
+    if (item == NULL)
+        return;
+    item->setText(1, s);
+}
+
+/**
+* parameters edit changed
+*/
+void EngineListDialog::on_parametersEdit_textChanged(QString s){
+    QTreeWidgetItem* item = m_ui->engineList->currentItem();
+    if (item == NULL)
+        return;
+    item->setText(2, s);
 }
 
 /**
 * name canged
 */
 void EngineListDialog::on_nameEdit_textChanged(QString s){
-    // if name is empty, add button is disable.
-    m_ui->addButton->setEnabled( s.isEmpty() == false && m_ui->pathEdit->text().isEmpty() == false );
+    QTreeWidgetItem* item = m_ui->engineList->currentItem();
+    if (item == NULL)
+        return;
+    item->setText(0, s);
 }
 
 /**
@@ -162,6 +176,15 @@ void EngineListDialog::on_downButton_clicked(){
 }
 
 /**
+* nwe button clicked.
+*/
+void EngineListDialog::on_newButton_clicked(){
+    QTreeWidgetItem* item = new QTreeWidgetItem( QStringList("(New Engine)") );
+    m_ui->engineList->addTopLevelItem(item);
+    m_ui->engineList->setCurrentItem(item);
+}
+
+/**
 * delete button clicked
 */
 void EngineListDialog::on_deleteButton_clicked(){
@@ -171,26 +194,27 @@ void EngineListDialog::on_deleteButton_clicked(){
     delete item;
 }
 
-/**
-* add button clicked
-*/
-void EngineListDialog::on_addButton_clicked(){
-    QTreeWidgetItem* item = new QTreeWidgetItem(
-        QStringList()
-            << m_ui->nameEdit->text()
-            << m_ui->pathEdit->text()
-            << m_ui->parametersEdit->text()
-    );
-    m_ui->engineList->addTopLevelItem(item);
-}
-
 void EngineListDialog::on_engineList_currentItemChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous){
+    m_ui->nameEdit->setEnabled(current != NULL);
+    m_ui->browseButton->setEnabled(current != NULL);
+    m_ui->pathEdit->setEnabled(current != NULL);
+    m_ui->parametersEdit->setEnabled(current != NULL);
+
     if (current == NULL)
         return;
 
     m_ui->nameEdit->setText( current->text(0) );
     m_ui->pathEdit->setText( current->text(1) );
     m_ui->parametersEdit->setText( current->text(2) );
+}
+
+/**
+* gtp class was initialized
+*/
+void EngineListDialog::on_gtp_initialized(){
+    gtp_->name();
+    gtp_->version();
+    gtp_->abort();
 }
 
 /**
@@ -202,15 +226,14 @@ void EngineListDialog::on_gtp_ended(){
 }
 
 /**
-* gtp name received
+* name received from gtp
 */
 void EngineListDialog::on_gtp_name(const QString& name){
     m_ui->nameEdit->setText(name);
-    m_ui->addButton->setEnabled( m_ui->nameEdit->text().isEmpty() == false && m_ui->pathEdit->text().isEmpty() == false );
 }
 
 /**
-* version received
+* version received from gtp
 */
 void EngineListDialog::on_gtp_version(const QString& version){
     m_ui->nameEdit->setText( m_ui->nameEdit->text() + ' ' + version );

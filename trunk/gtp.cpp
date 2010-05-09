@@ -28,7 +28,6 @@ gtp::moveBaseCommand::moveBaseCommand(gtp* parent, eKind k, BoardWidget* boardWi
 gtp::gtp(BoardWidget* board, go::color color, int boardSize, const qreal& komi, int handicap, bool newGame, int level, QProcess* proc, QObject* parent)
     : PlayGame(board, color, boardSize, komi, handicap, newGame, parent)
     , process(proc)
-    , initialized(false)
     , index(0)
     , commandProcessing(false)
     , level_(level)
@@ -46,7 +45,6 @@ gtp::gtp(BoardWidget* board, go::color color, int boardSize, const qreal& komi, 
 gtp::gtp(QProcess* proc, QObject* parent)
     : PlayGame(parent)
     , process(proc)
-    , initialized(false)
     , index(0)
     , commandProcessing(false)
     , level_(0)
@@ -129,7 +127,7 @@ bool gtp::wait(){
 bool gtp::quit(bool resign){
     isResign_ = resign;
     isAbort_  = false;
-    if (!initialized || supportedCommandList.indexOf("quit") != -1){
+    if (supportedCommandList.indexOf("quit") != -1){
         commandList.push_back( commandPtr(new command(this, eQuit, "quit\n")) );
         return true;
     }
@@ -143,7 +141,7 @@ bool gtp::quit(bool resign){
 bool gtp::abort(){
     isResign_ = false;
     isAbort_  = true;
-    if (!initialized || supportedCommandList.indexOf("quit") != -1){
+    if (supportedCommandList.indexOf("quit") != -1){
         commandList.push_back( commandPtr(new command(this, eQuit, "quit\n")) );
         return true;
     }
@@ -164,7 +162,7 @@ void gtp::kill(){
 * send final_status_list dead command.
 */
 bool gtp::deadList(){
-    if (!initialized || supportedCommandList.indexOf("final_status_list") != -1){
+    if (supportedCommandList.indexOf("final_status_list") != -1){
         commandList.push_back( commandPtr(new command(this, eDeadList, "final_status_list dead\n")) );
         return true;
     }
@@ -175,7 +173,7 @@ bool gtp::deadList(){
 * get name
 */
 bool gtp::name(){
-    if (!initialized || supportedCommandList.indexOf("name") != -1){
+    if (supportedCommandList.indexOf("name") != -1){
         commandList.push_back( commandPtr(new command(this, eName, "name\n")) );
         return true;
     }
@@ -186,7 +184,7 @@ bool gtp::name(){
 * get version
 */
 bool gtp::version(){
-    if (!initialized || supportedCommandList.indexOf("version") != -1){
+    if (supportedCommandList.indexOf("version") != -1){
         commandList.push_back( commandPtr(new command(this, eVersion, "version\n")) );
         return true;
     }
@@ -209,7 +207,7 @@ bool gtp::boardSize(int size){
 * set komi
 */
 bool gtp::komi(double komi){
-    if (!initialized || supportedCommandList.indexOf("komi") != -1){
+    if (supportedCommandList.indexOf("komi") != -1){
         commandList.push_back( commandPtr(new command(this, eKomi, QString().sprintf("komi %f\n", komi))) );
         return true;
     }
@@ -265,8 +263,8 @@ void gtp::on_gtp_read(){
 * game engine was finished
 */
 void gtp::on_gtp_finished(int exitCode, QProcess::ExitStatus exitStatus){
+    emit gameEnded();
     if (!isKilled){  // crashed when delete process after kill process.
-        emit gameEnded();
         process->disconnect();
         delete process;
     }
@@ -386,7 +384,7 @@ bool gtp::moving() const{
 * init game engine.
 */
 void gtp::initialize(){
-    initialized = true;
+    emit initialized();
     if (boardWidget_ == NULL)
         return;
 
