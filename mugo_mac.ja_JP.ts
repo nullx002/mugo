@@ -123,60 +123,60 @@ mugo automatically counts territories.</oldsource>
 地が自動で計算されます。</translation>
     </message>
     <message>
-        <location filename="countterritorydialog.cpp" line="46"/>
+        <location filename="countterritorydialog.cpp" line="53"/>
         <source>Black: %1 = %2(territories) + %3(captured)</source>
         <translation type="unfinished">黒： %1 = %2(地) + %3(アゲハマ)</translation>
     </message>
     <message>
-        <location filename="countterritorydialog.cpp" line="47"/>
+        <location filename="countterritorydialog.cpp" line="54"/>
         <source>White: %1 = %2(territories) + %3(captured) + %4(komi)</source>
         <translation type="unfinished">白： %1 = %2(地) + %3(アゲハマ) + %4(コミ)</translation>
     </message>
     <message>
-        <location filename="countterritorydialog.cpp" line="51"/>
-        <location filename="countterritorydialog.cpp" line="77"/>
+        <location filename="countterritorydialog.cpp" line="58"/>
+        <location filename="countterritorydialog.cpp" line="84"/>
         <source>W+%1</source>
         <translation type="unfinished">白%1目勝ち</translation>
     </message>
     <message>
-        <location filename="countterritorydialog.cpp" line="53"/>
-        <location filename="countterritorydialog.cpp" line="79"/>
+        <location filename="countterritorydialog.cpp" line="60"/>
+        <location filename="countterritorydialog.cpp" line="86"/>
         <source>B+%1</source>
         <translation type="unfinished">黒%1目勝ち</translation>
     </message>
     <message>
-        <location filename="countterritorydialog.cpp" line="55"/>
-        <location filename="countterritorydialog.cpp" line="81"/>
+        <location filename="countterritorydialog.cpp" line="62"/>
+        <location filename="countterritorydialog.cpp" line="88"/>
         <source>Draw</source>
         <translation type="unfinished">持碁</translation>
     </message>
     <message>
-        <location filename="countterritorydialog.cpp" line="57"/>
+        <location filename="countterritorydialog.cpp" line="64"/>
         <source>Japanese Rule</source>
         <translation type="unfinished">日本ルール</translation>
     </message>
     <message>
-        <location filename="countterritorydialog.cpp" line="67"/>
+        <location filename="countterritorydialog.cpp" line="74"/>
         <source>Black: %1 = %2(point) - %3(komi) / 2</source>
         <translation type="unfinished">黒： %1 = %2(ポイント) - %3(コミ) / 2</translation>
     </message>
     <message>
-        <location filename="countterritorydialog.cpp" line="68"/>
+        <location filename="countterritorydialog.cpp" line="75"/>
         <source>White: %1 = %2(point) + %3(komi) / 2</source>
         <translation type="unfinished">白： %1 = %2(ポイント) + %3(コミ) / 2</translation>
     </message>
     <message>
-        <location filename="countterritorydialog.cpp" line="71"/>
+        <location filename="countterritorydialog.cpp" line="78"/>
         <source>Black: %1 = %2(point) + %3(komi) / 2</source>
         <translation type="unfinished">黒： %1 = %2(ポイント) + %3(コミ) / 2</translation>
     </message>
     <message>
-        <location filename="countterritorydialog.cpp" line="72"/>
+        <location filename="countterritorydialog.cpp" line="79"/>
         <source>White: %1 = %2(point) - %3(komi) / 2</source>
         <translation type="unfinished">白： %1 = %2(ポイント) - %3(コミ) / 2</translation>
     </message>
     <message>
-        <location filename="countterritorydialog.cpp" line="83"/>
+        <location filename="countterritorydialog.cpp" line="90"/>
         <source>Chinese Rule</source>
         <translation type="unfinished">中国ルール</translation>
     </message>
@@ -192,7 +192,14 @@ mugo automatically counts territories.</oldsource>
 <context>
     <name>EngineListDialog</name>
     <message>
-        <location filename="enginelistdialog.cpp" line="89"/>
+        <location filename="enginelistdialog.cpp" line="33"/>
+        <location filename="enginelistdialog.cpp" line="171"/>
+        <location filename="enginelistdialog.ui" line="256"/>
+        <source>Use Analysis</source>
+        <translation type="unfinished">解析に使用する</translation>
+    </message>
+    <message>
+        <location filename="enginelistdialog.cpp" line="112"/>
         <source>Can not launch computer go program.</source>
         <translation type="unfinished">囲碁プログラムを起動できませんでした。</translation>
     </message>
@@ -202,54 +209,63 @@ mugo automatically counts territories.</oldsource>
         <translation type="unfinished">エンジン設定</translation>
     </message>
     <message>
-        <location filename="enginelistdialog.ui" line="29"/>
-        <location filename="enginelistdialog.ui" line="162"/>
+        <location filename="enginelistdialog.ui" line="35"/>
+        <location filename="enginelistdialog.ui" line="217"/>
         <source>Name</source>
         <translation type="unfinished">名前</translation>
     </message>
     <message>
-        <location filename="enginelistdialog.ui" line="34"/>
+        <location filename="enginelistdialog.ui" line="40"/>
         <source>Path</source>
         <translation type="unfinished">パス</translation>
     </message>
     <message>
-        <location filename="enginelistdialog.ui" line="39"/>
-        <location filename="enginelistdialog.ui" line="152"/>
+        <location filename="enginelistdialog.ui" line="45"/>
+        <location filename="enginelistdialog.ui" line="203"/>
         <source>Parameters</source>
         <translation type="unfinished">パラメータ</translation>
     </message>
     <message>
-        <location filename="enginelistdialog.ui" line="62"/>
+        <location filename="enginelistdialog.ui" line="50"/>
+        <source>Remarks</source>
+        <translation type="unfinished">備考</translation>
+    </message>
+    <message>
+        <location filename="enginelistdialog.ui" line="79"/>
         <source>Up</source>
         <translation type="unfinished">上</translation>
     </message>
     <message>
-        <location filename="enginelistdialog.ui" line="73"/>
+        <location filename="enginelistdialog.ui" line="99"/>
         <source>Down</source>
         <translation type="unfinished">下</translation>
     </message>
     <message>
-        <location filename="enginelistdialog.ui" line="84"/>
+        <location filename="enginelistdialog.ui" line="119"/>
+        <source>New</source>
+        <translation type="unfinished">新規</translation>
+    </message>
+    <message>
+        <location filename="enginelistdialog.ui" line="139"/>
         <source>Delete</source>
         <translation type="unfinished">削除</translation>
     </message>
     <message>
-        <location filename="enginelistdialog.ui" line="117"/>
+        <location filename="enginelistdialog.ui" line="175"/>
         <source>Program Path</source>
         <translation type="unfinished">プログラムのパス</translation>
     </message>
     <message>
-        <location filename="enginelistdialog.ui" line="129"/>
+        <location filename="enginelistdialog.ui" line="194"/>
         <source>...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="enginelistdialog.ui" line="139"/>
         <source>Add</source>
-        <translation type="unfinished">追加</translation>
+        <translation type="obsolete">追加</translation>
     </message>
     <message>
-        <location filename="enginelistdialog.ui" line="177"/>
+        <location filename="enginelistdialog.ui" line="242"/>
         <source>Get Name</source>
         <translation type="unfinished">名前を取得</translation>
     </message>
@@ -423,118 +439,123 @@ mugo automatically counts territories.</oldsource>
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="mainwindow.cpp" line="48"/>
+        <location filename="mainwindow.cpp" line="50"/>
         <source>All Go Format(*.sgf *.ugf *.ugi *.gib *.ngf);;sgf(*.sgf);;ugf(*.ugf *.ugi);;gib(*.gib);;ngf(*.ngf);;All Files(*.*)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="251"/>
+        <location filename="mainwindow.cpp" line="253"/>
         <source>Captured</source>
         <translation type="unfinished">アゲハマ</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="394"/>
+        <location filename="mainwindow.cpp" line="396"/>
         <source>Enter the URL of a SGF file.</source>
         <translation type="unfinished">SGFファイルのURLを入力してください。</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1597"/>
+        <location filename="mainwindow.cpp" line="1583"/>
+        <source>Please setup the engine.</source>
+        <translation type="unfinished">先に対局プログラムの設定を行ってください。</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="1629"/>
         <source>Can not launch computer go program.</source>
         <translation type="unfinished">囲碁プログラムを起動できませんでした。</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="2027"/>
+        <location filename="mainwindow.cpp" line="2059"/>
         <source>Computer resigns.</source>
         <translation type="unfinished">コンピュータが投了しました。</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="3468"/>
+        <location filename="mainwindow.cpp" line="3553"/>
         <source>Are you sure you want to stop playing with computer?</source>
         <translation type="unfinished">コンピュータとの対局を中断してもよろしいですか？</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="2045"/>
+        <location filename="mainwindow.cpp" line="2077"/>
         <source>Are you sure you want to resign?</source>
         <translation type="unfinished">投了しますか？</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="2424"/>
+        <location filename="mainwindow.cpp" line="2459"/>
         <source>Downloading SGF File</source>
         <translation type="unfinished">SGFファイルのダウンロード中</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1039"/>
-        <location filename="mainwindow.cpp" line="1291"/>
+        <location filename="mainwindow.cpp" line="1041"/>
+        <location filename="mainwindow.cpp" line="1293"/>
         <source>Input move number</source>
         <translation type="unfinished">着手番号を入力してください</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1066"/>
+        <location filename="mainwindow.cpp" line="1068"/>
         <source>Input node name</source>
         <translation type="unfinished">ノード名を入力してください</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1738"/>
+        <location filename="mainwindow.cpp" line="1770"/>
         <source>Are you sure you want to clear the configuration?</source>
         <translation type="unfinished">設定を初期値に戻しますがよろしいですか？</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1886"/>
+        <location filename="mainwindow.cpp" line="1918"/>
         <source>Dead: Black %1 White %2</source>
         <oldsource>Dead: B %1 W %2</oldsource>
         <translation type="unfinished">アゲハマ：黒 %1 白 %2</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1890"/>
+        <location filename="mainwindow.cpp" line="1922"/>
         <source>LastMove: %1(%2)</source>
         <translation type="unfinished">最終着手：%1(%2)</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="595"/>
+        <location filename="mainwindow.cpp" line="597"/>
         <source>Remove sgf from collection failed because this sgf is editing.</source>
         <translation type="unfinished">編集中のSGFを削除することは出来ません。</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="2123"/>
+        <location filename="mainwindow.cpp" line="2158"/>
         <source>%1 %2(W) vs %3 %4(B) Result:%5</source>
         <oldsource>W:%1 %2 vs B:%3 %4 Result:%5</oldsource>
         <translation type="unfinished">白番：%1 %2　対　黒番：%3 %4　結果：%5</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="2300"/>
+        <location filename="mainwindow.cpp" line="2335"/>
         <source>Untitled-%1</source>
         <translation type="unfinished">無題-%1</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="2585"/>
+        <location filename="mainwindow.cpp" line="2619"/>
         <source>%1 has been modified.
 Do you want to save your changes?</source>
         <translation type="unfinished">%1は変更されています。
 変更内容を保存しますか？</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="2483"/>
+        <location filename="mainwindow.cpp" line="2518"/>
         <source>sgf(*.sgf)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="2653"/>
+        <location filename="mainwindow.cpp" line="2687"/>
         <source>Download failed: %1.</source>
         <translation type="unfinished">ダウンロードに失敗しました： %1.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="2880"/>
-        <location filename="mainwindow.ui" line="1782"/>
+        <location filename="mainwindow.cpp" line="2914"/>
+        <location filename="mainwindow.ui" line="1783"/>
         <source>Pass</source>
         <translation type="unfinished">パス</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="2890"/>
+        <location filename="mainwindow.cpp" line="2924"/>
         <source>Other</source>
         <translation type="unfinished">その他</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="3390"/>
+        <location filename="mainwindow.cpp" line="3426"/>
         <source>Changing the language requires that application be restarted.</source>
         <translation type="unfinished">言語の変更は次回起動時から有効になります。</translation>
     </message>
@@ -577,7 +598,7 @@ Do you want to save your changes?</source>
         <translation type="unfinished">注釈</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="246"/>
+        <location filename="mainwindow.cpp" line="248"/>
         <location filename="mainwindow.ui" line="252"/>
         <source>Move Number</source>
         <translation type="unfinished">着手番号</translation>
@@ -588,7 +609,7 @@ Do you want to save your changes?</source>
         <translation>表示</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="320"/>
+        <location filename="mainwindow.ui" line="321"/>
         <source>Toolbars</source>
         <translation type="unfinished">ツールバー</translation>
     </message>
@@ -609,23 +630,23 @@ Do you want to save your changes?</source>
         <translation>言語</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="309"/>
+        <location filename="mainwindow.ui" line="310"/>
         <source>&amp;Help</source>
         <translation>ヘルプ</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="316"/>
+        <location filename="mainwindow.ui" line="317"/>
         <source>&amp;Window</source>
         <translation>ウィンドウ</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="463"/>
+        <location filename="mainwindow.ui" line="464"/>
         <source>Comment View</source>
         <oldsource>Comment Window</oldsource>
         <translation type="unfinished">コメント ビュー</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="488"/>
+        <location filename="mainwindow.ui" line="489"/>
         <source>Branch View</source>
         <oldsource>Branch Window</oldsource>
         <translation type="unfinished">分岐 ビュー</translation>
@@ -636,121 +657,121 @@ Do you want to save your changes?</source>
         <translation type="unfinished">最近使ったファイル</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="512"/>
+        <location filename="mainwindow.ui" line="513"/>
         <source>Undo View</source>
         <oldsource>Undo Window</oldsource>
         <translation type="unfinished">アンドゥ ビュー</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="619"/>
+        <location filename="mainwindow.ui" line="620"/>
         <source>&amp;New</source>
         <translation>新規</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="651"/>
+        <location filename="mainwindow.ui" line="652"/>
         <source>&amp;Save</source>
         <translation>保存</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="656"/>
+        <location filename="mainwindow.ui" line="657"/>
         <source>Save &amp;As...</source>
         <translation>別名で保存...</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="680"/>
+        <location filename="mainwindow.ui" line="681"/>
         <source>E&amp;xit</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="721"/>
+        <location filename="mainwindow.ui" line="722"/>
         <source>&amp;Delete After Current</source>
         <translation type="unfinished">現在のノード以降を削除</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1040"/>
+        <location filename="mainwindow.ui" line="1041"/>
         <source>UTF-8</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1048"/>
+        <location filename="mainwindow.ui" line="1049"/>
         <source>Japanese (Shift_JIS)</source>
         <translation type="unfinished">日本語 (Shift_JIS)</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1072"/>
+        <location filename="mainwindow.ui" line="1073"/>
         <source>Korean (EUC-KR)</source>
         <translation type="unfinished">韓国語 (EUC-KR)</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1056"/>
+        <location filename="mainwindow.ui" line="1057"/>
         <source>Japanese (ISO-2022-JP)</source>
         <oldsource>Japanese (JIS)</oldsource>
         <translation type="unfinished">日本語 (ISO-2022-JP)</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1064"/>
+        <location filename="mainwindow.ui" line="1065"/>
         <source>Japanese (EUC)</source>
         <translation type="unfinished">日本語 (EUC-JP)</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="665"/>
+        <location filename="mainwindow.ui" line="666"/>
         <source>Export &amp;Board as Image</source>
         <oldsource>Save &amp;Board As Picture</oldsource>
         <translation type="unfinished">画像を出力する</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1657"/>
+        <location filename="mainwindow.ui" line="1658"/>
         <source>&amp;About...</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="712"/>
+        <location filename="mainwindow.ui" line="713"/>
         <source>Game &amp;Information</source>
         <oldsource>Game Information</oldsource>
         <translation type="unfinished">ゲーム情報</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1397"/>
+        <location filename="mainwindow.ui" line="1398"/>
         <source>No Move Number</source>
         <translation type="unfinished">表示しない</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1405"/>
+        <location filename="mainwindow.ui" line="1406"/>
         <source>Last 1 Move</source>
         <translation type="unfinished">最後の着手番号のみ表示</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1413"/>
+        <location filename="mainwindow.ui" line="1414"/>
         <source>Last 2 Moves</source>
         <translation type="unfinished">最後から２個の着手番号を表示</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1421"/>
+        <location filename="mainwindow.ui" line="1422"/>
         <source>Last 5 Moves</source>
         <translation type="unfinished">最後から５個の着手番号を表示</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1429"/>
+        <location filename="mainwindow.ui" line="1430"/>
         <source>Last 10 Moves</source>
         <translation type="unfinished">最後から１０個の着手番号を表示</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1437"/>
+        <location filename="mainwindow.ui" line="1438"/>
         <source>Last 20 Moves</source>
         <translation type="unfinished">最後から２０個の着手番号を表示</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1445"/>
+        <location filename="mainwindow.ui" line="1446"/>
         <source>Last 50 Moves</source>
         <translation type="unfinished">最後から５０個の着手番号を表示</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1453"/>
+        <location filename="mainwindow.ui" line="1454"/>
         <source>All Moves</source>
         <translation type="unfinished">すべての着手番号を表示</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="795"/>
+        <location filename="mainwindow.ui" line="796"/>
         <source>Add Label</source>
         <translation type="unfinished">ラベルを追加</translation>
     </message>
@@ -760,335 +781,340 @@ Do you want to save your changes?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="408"/>
+        <location filename="mainwindow.ui" line="409"/>
         <source>Edit Toolbar</source>
         <translation type="unfinished">編集 ツールバー</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="566"/>
+        <location filename="mainwindow.ui" line="567"/>
         <source>No</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="571"/>
+        <location filename="mainwindow.ui" line="572"/>
         <source>Black</source>
         <translation type="unfinished">黒</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="576"/>
+        <location filename="mainwindow.ui" line="577"/>
         <source>White</source>
         <translation type="unfinished">白</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="581"/>
+        <location filename="mainwindow.ui" line="582"/>
         <source>Name</source>
         <translation type="unfinished">名前</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="586"/>
+        <location filename="mainwindow.ui" line="587"/>
         <source>Date</source>
         <translation type="unfinished">日付</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="591"/>
+        <location filename="mainwindow.ui" line="592"/>
         <source>Result</source>
         <translation type="unfinished">結果</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="601"/>
+        <location filename="mainwindow.ui" line="602"/>
         <source>Play ToolBar</source>
         <oldsource>Game ToolBar</oldsource>
         <translation type="unfinished">対局ツールバー</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="685"/>
+        <location filename="mainwindow.ui" line="686"/>
         <source>Copy SGF to Clipboard</source>
         <translation type="unfinished">SGFをクリップボードにコピー</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="690"/>
+        <location filename="mainwindow.ui" line="691"/>
         <source>Copy Current Branch to Clipboard</source>
         <translation type="unfinished">現在の分岐をクリップボードにコピー</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="695"/>
+        <location filename="mainwindow.ui" line="696"/>
         <source>Paste SGF to New Tab</source>
         <translation type="unfinished">SGFを新規タブにペースト</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="700"/>
+        <location filename="mainwindow.ui" line="701"/>
         <source>Paste SGF as Branch from Clipboard</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1080"/>
+        <location filename="mainwindow.ui" line="1081"/>
         <source>Cyrillic (KOI8-R)</source>
         <translation type="unfinished">キリル文字 (KOI8-R)</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1088"/>
+        <location filename="mainwindow.ui" line="1089"/>
         <source>Cyrillic/Ukrainian (KOI8-U)</source>
         <translation type="unfinished">キリル文字/ウクライナ語 (KOI8-U)</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1096"/>
+        <location filename="mainwindow.ui" line="1097"/>
         <source>Central European (Windows-1250)</source>
         <translation type="unfinished">中欧 (Windows-1250)</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1104"/>
+        <location filename="mainwindow.ui" line="1105"/>
         <source>Cyrillic (Windows-1251)</source>
         <translation type="unfinished">キリル文字 (Windows-1251)</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1112"/>
+        <location filename="mainwindow.ui" line="1113"/>
         <source>Western (Windows-1252)</source>
         <translation type="unfinished">西欧 (Windows-1252)</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1120"/>
+        <location filename="mainwindow.ui" line="1121"/>
         <source>Greek (Windows-1253)</source>
         <translation type="unfinished">ギリシャ語 (Windows-1253)</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1128"/>
+        <location filename="mainwindow.ui" line="1129"/>
         <source>Turkish (Windows-1254)</source>
         <translation type="unfinished">トルコ語 (Windows-1254)</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1136"/>
+        <location filename="mainwindow.ui" line="1137"/>
         <source>Hebrew (Windows-1255)</source>
         <translation type="unfinished">ヘブライ語 (Windows-1255)</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1144"/>
+        <location filename="mainwindow.ui" line="1145"/>
         <source>Arabic (Windows-1256)</source>
         <translation type="unfinished">アラビア語 (Windows-1256)</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1152"/>
+        <location filename="mainwindow.ui" line="1153"/>
         <source>Baltic (Windows-1257)</source>
         <translation type="unfinished">バルト語 (Windows-1257)</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1160"/>
+        <location filename="mainwindow.ui" line="1161"/>
         <source>Vietnamese (Windows-1258)</source>
         <translation type="unfinished">ベトナム語 (Windows-1258)</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1168"/>
+        <location filename="mainwindow.ui" line="1169"/>
         <source>Western (ISO-8859-1)</source>
         <translation type="unfinished">西欧 (ISO-8859-1)</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1176"/>
+        <location filename="mainwindow.ui" line="1177"/>
         <source>Central European (ISO-8859-2)</source>
         <translation type="unfinished">中欧 (ISO-8859-2)</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1184"/>
+        <location filename="mainwindow.ui" line="1185"/>
         <source>South European (ISO-8859-3)</source>
         <translation type="unfinished">南欧 (ISO-8859-3)</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1192"/>
+        <location filename="mainwindow.ui" line="1193"/>
         <source>Baltic (ISO-8859-4)</source>
         <translation type="unfinished">バルト語 (ISO-8859-4)</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1200"/>
+        <location filename="mainwindow.ui" line="1201"/>
         <source>Cyrillic (ISO-8859-5)</source>
         <translation type="unfinished">キリル文字 (ISO-8859-5)</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1208"/>
+        <location filename="mainwindow.ui" line="1209"/>
         <source>Arabic (ISO-8859-6)</source>
         <translation type="unfinished">アラビア語 (ISO-8859-6)</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1216"/>
+        <location filename="mainwindow.ui" line="1217"/>
         <source>Greek (ISO-8859-7)</source>
         <translation type="unfinished">ギリシャ語 (ISO-8859-7)</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1224"/>
+        <location filename="mainwindow.ui" line="1225"/>
         <source>Hebrew Visual (ISO-8859-8)</source>
         <translation type="unfinished">ヘブライ語 (ISO-8859-8)</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1232"/>
+        <location filename="mainwindow.ui" line="1233"/>
         <source>Turkish (ISO-8859-9)</source>
         <translation type="unfinished">トルコ語 (ISO-8859-9)</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1240"/>
+        <location filename="mainwindow.ui" line="1241"/>
         <source>Nordic (ISO-8859-10)</source>
         <translation type="unfinished">北欧 (ISO-8859-10)</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1248"/>
+        <location filename="mainwindow.ui" line="1249"/>
         <source>Thai (ISO-8859-11)</source>
         <translation type="unfinished">タイ語 (ISO-8859-11)</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1256"/>
+        <location filename="mainwindow.ui" line="1257"/>
         <source>Baltic (ISO-8859-13)</source>
         <translation type="unfinished">バルト語 (ISO-8859-13)</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1264"/>
+        <location filename="mainwindow.ui" line="1265"/>
         <source>Celtic (ISO-8859-14)</source>
         <translation type="unfinished">ケルト語 (ISO-8859-14)</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1272"/>
+        <location filename="mainwindow.ui" line="1273"/>
         <source>Western (ISO-8859-15)</source>
         <translation type="unfinished">西欧 (ISO-8859-15)</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1280"/>
+        <location filename="mainwindow.ui" line="1281"/>
         <source>Romanian (ISO-8859-16)</source>
         <translation type="unfinished">ルーマニア語 (ISO-8859-16)</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1305"/>
+        <location filename="mainwindow.ui" line="1306"/>
         <source>Move First</source>
         <translation type="unfinished">最初へ移動</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1575"/>
+        <location filename="mainwindow.ui" line="1576"/>
         <source>Tutor Both Sides</source>
         <translation type="unfinished">棋譜並べ</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1689"/>
+        <location filename="mainwindow.ui" line="1690"/>
         <source>&amp;Print</source>
         <translation type="unfinished">印刷</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1701"/>
+        <location filename="mainwindow.ui" line="1702"/>
         <source>Add Label Manually</source>
         <translation type="unfinished">ラベルを手入力</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="670"/>
+        <location filename="mainwindow.ui" line="1822"/>
+        <source>Estimate Score</source>
+        <translation type="unfinished">形勢判断</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.ui" line="671"/>
         <source>Close Tab</source>
         <translation type="unfinished">タブを閉じる</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1709"/>
+        <location filename="mainwindow.ui" line="1710"/>
         <source>Reset Move Nubmer in Branch</source>
         <translation type="unfinished">分岐時に着手番号をリセット</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1714"/>
+        <location filename="mainwindow.ui" line="1715"/>
         <source>Previous Tab</source>
         <translation type="unfinished">前のタブ</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1719"/>
+        <location filename="mainwindow.ui" line="1720"/>
         <source>Next Tab</source>
         <translation type="unfinished">次のタブ</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="675"/>
+        <location filename="mainwindow.ui" line="676"/>
         <source>Close All Tabs</source>
         <translation type="unfinished">すべてのタブを閉じる</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1728"/>
+        <location filename="mainwindow.ui" line="1729"/>
         <source>Extract</source>
         <translation type="unfinished">抽出</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1737"/>
-        <location filename="mainwindow.ui" line="1811"/>
+        <location filename="mainwindow.ui" line="1738"/>
+        <location filename="mainwindow.ui" line="1812"/>
         <source>Move Up</source>
         <translation type="unfinished">上に移動</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1746"/>
-        <location filename="mainwindow.ui" line="1816"/>
+        <location filename="mainwindow.ui" line="1747"/>
+        <location filename="mainwindow.ui" line="1817"/>
         <source>Move Down</source>
         <translation type="unfinished">下に移動</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1755"/>
+        <location filename="mainwindow.ui" line="1756"/>
         <source>Delete SGF</source>
         <translation type="unfinished">SGFの削除</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1760"/>
+        <location filename="mainwindow.ui" line="1761"/>
         <source>Paste SGF to Collection</source>
         <translation type="unfinished">SGFをコレクションにペースト</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1769"/>
+        <location filename="mainwindow.ui" line="1770"/>
         <source>Import</source>
         <translation type="unfinished">インポート</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1774"/>
+        <location filename="mainwindow.ui" line="1775"/>
         <source>Clear Settings</source>
         <translation type="unfinished">初期設定に戻す</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1790"/>
+        <location filename="mainwindow.ui" line="1791"/>
         <source>Resign</source>
         <translation type="unfinished">投了</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1798"/>
+        <location filename="mainwindow.ui" line="1799"/>
         <source>undo</source>
         <translation type="unfinished">待った</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1806"/>
+        <location filename="mainwindow.ui" line="1807"/>
         <source>Automatic Replay</source>
         <translation type="unfinished">自動再生</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="807"/>
+        <location filename="mainwindow.ui" line="808"/>
         <source>Add Circle</source>
         <translation type="unfinished">丸を追加</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="819"/>
+        <location filename="mainwindow.ui" line="820"/>
         <source>Add Cross</source>
         <translation type="unfinished">バツを追加</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="831"/>
+        <location filename="mainwindow.ui" line="832"/>
         <source>Add Square</source>
         <translation type="unfinished">四角を追加</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="843"/>
+        <location filename="mainwindow.ui" line="844"/>
         <source>Add Triangle</source>
         <translation type="unfinished">三角を追加</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="855"/>
+        <location filename="mainwindow.ui" line="856"/>
         <source>Delete Marker</source>
         <translation type="unfinished">マーカーを削除</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="747"/>
+        <location filename="mainwindow.ui" line="748"/>
         <source>Alternate Move</source>
         <translation type="unfinished">交互に着手</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1666"/>
+        <location filename="mainwindow.ui" line="1667"/>
         <source>About Qt...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1680"/>
+        <location filename="mainwindow.ui" line="1681"/>
         <source>Delete Only Current</source>
         <translation type="unfinished">現在のノードを削除</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1288"/>
+        <location filename="mainwindow.ui" line="1289"/>
         <source>Chinese Simplified (GB2312)</source>
         <translation type="unfinished">簡体字中国語 (GB2312)</translation>
     </message>
@@ -1098,37 +1124,37 @@ Do you want to save your changes?</source>
         <translation type="unfinished">着手番号</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="628"/>
+        <location filename="mainwindow.ui" line="629"/>
         <source>&amp;Open...</source>
         <translation type="unfinished">開く...</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="730"/>
+        <location filename="mainwindow.ui" line="731"/>
         <source>&amp;Pass</source>
         <translation type="unfinished">パス</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1296"/>
+        <location filename="mainwindow.ui" line="1297"/>
         <source>Chinese Traditional (Big5)</source>
         <translation type="unfinished">繁体字中国語 (Big5)</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="759"/>
+        <location filename="mainwindow.ui" line="760"/>
         <source>Add Black Stone</source>
         <translation type="unfinished">黒石を追加</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="771"/>
+        <location filename="mainwindow.ui" line="772"/>
         <source>Add White Stone</source>
         <translation type="unfinished">白石を追加</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="783"/>
+        <location filename="mainwindow.ui" line="784"/>
         <source>Add Empty</source>
         <translation type="unfinished">空白を追加</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="642"/>
+        <location filename="mainwindow.ui" line="643"/>
         <source>&amp;Reload</source>
         <translation>再読み込み</translation>
     </message>
@@ -1138,314 +1164,314 @@ Do you want to save your changes?</source>
         <translation type="unfinished">コレクション</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="386"/>
+        <location filename="mainwindow.ui" line="387"/>
         <source>Collection Toolbar</source>
         <translation type="unfinished">コレクション ツールバー</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="534"/>
+        <location filename="mainwindow.ui" line="535"/>
         <source>Collection View</source>
         <oldsource>Collection Window</oldsource>
         <translation type="unfinished">コレクション ビュー</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="863"/>
+        <location filename="mainwindow.ui" line="864"/>
         <source>Good Move</source>
         <translation>好手</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="871"/>
+        <location filename="mainwindow.ui" line="872"/>
         <source>Very Good Move</source>
         <translation type="unfinished">絶好手</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="879"/>
+        <location filename="mainwindow.ui" line="880"/>
         <source>Bad Move</source>
         <translation type="unfinished">悪手</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="887"/>
+        <location filename="mainwindow.ui" line="888"/>
         <source>Very Bad Move</source>
         <translation type="unfinished">大悪手</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="895"/>
+        <location filename="mainwindow.ui" line="896"/>
         <source>Doubtful Move</source>
         <translation type="unfinished">疑問手</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="903"/>
+        <location filename="mainwindow.ui" line="904"/>
         <source>Even</source>
         <translation type="unfinished">互角</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="911"/>
+        <location filename="mainwindow.ui" line="912"/>
         <source>Good for Black</source>
         <translation>黒やや良し</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="919"/>
+        <location filename="mainwindow.ui" line="920"/>
         <source>Very Good for Black</source>
         <translation type="unfinished">黒良し</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="927"/>
+        <location filename="mainwindow.ui" line="928"/>
         <source>Good for White</source>
         <translation>白やや良し</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="935"/>
+        <location filename="mainwindow.ui" line="936"/>
         <source>Very Good for White</source>
         <translation type="unfinished">白良し</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="943"/>
+        <location filename="mainwindow.ui" line="944"/>
         <source>Unclear</source>
         <translation type="unfinished">形勢不明</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="951"/>
+        <location filename="mainwindow.ui" line="952"/>
         <source>Hotspot</source>
         <translation>天王山</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="735"/>
+        <location filename="mainwindow.ui" line="736"/>
         <source>Edit Node Name</source>
         <translation type="unfinished">ノード名の変更</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="959"/>
+        <location filename="mainwindow.ui" line="960"/>
         <source>Interesting Move</source>
         <translation type="unfinished">趣向</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1314"/>
+        <location filename="mainwindow.ui" line="1315"/>
         <source>Fast Rewind</source>
         <translation type="unfinished">少し戻る</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1323"/>
+        <location filename="mainwindow.ui" line="1324"/>
         <source>Previous Move</source>
         <translation type="unfinished">一手戻る</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1332"/>
+        <location filename="mainwindow.ui" line="1333"/>
         <source>Next Move</source>
         <translation type="unfinished">一手進む</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1341"/>
+        <location filename="mainwindow.ui" line="1342"/>
         <source>Fast Forward</source>
         <translation type="unfinished">少し進む</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1350"/>
+        <location filename="mainwindow.ui" line="1351"/>
         <source>Move Last</source>
         <translation type="unfinished">最後へ移動</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1359"/>
+        <location filename="mainwindow.ui" line="1360"/>
         <source>Back to Parent</source>
         <translation type="unfinished">親ノードへ移動</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1368"/>
+        <location filename="mainwindow.ui" line="1369"/>
         <source>Previous Branch</source>
         <translation type="unfinished">前の分岐へ移動</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1377"/>
+        <location filename="mainwindow.ui" line="1378"/>
         <source>Next Branch</source>
         <translation type="unfinished">次の分岐へ移動</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1600"/>
+        <location filename="mainwindow.ui" line="1601"/>
         <source>19 x 19 Board</source>
         <translation type="unfinished">１９路盤</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1605"/>
+        <location filename="mainwindow.ui" line="1606"/>
         <source>13 x 13 Board</source>
         <translation type="unfinished">１３路盤</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1610"/>
+        <location filename="mainwindow.ui" line="1611"/>
         <source>9 x 9 Board</source>
         <translation type="unfinished">９路盤</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="338"/>
+        <location filename="mainwindow.ui" line="339"/>
         <source>Main Toolbar</source>
         <translation type="unfinished">メイン ツールバー</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="432"/>
+        <location filename="mainwindow.ui" line="433"/>
         <source>Navigation Toolbar</source>
         <translation type="unfinished">移動 ツールバー</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1671"/>
+        <location filename="mainwindow.ui" line="1672"/>
         <source>Export Ascii to &amp;Clipboard</source>
         <oldsource>Export Ascii to Clipboard</oldsource>
         <translation type="unfinished">テキスト碁盤をクリップボードに出力</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="633"/>
+        <location filename="mainwindow.ui" line="634"/>
         <source>Open &amp;URL...</source>
         <oldsource>Open URL...</oldsource>
         <translation type="unfinished">URLを開く...</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1389"/>
+        <location filename="mainwindow.ui" line="1390"/>
         <source>Show Move Number</source>
         <translation type="unfinished">着手番号を表示</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1464"/>
+        <location filename="mainwindow.ui" line="1465"/>
         <source>Show Coordinate</source>
         <translation type="unfinished">座標を表示</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1483"/>
+        <location filename="mainwindow.ui" line="1484"/>
         <source>Show Marker</source>
         <translation type="unfinished">マーカーを表示</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1494"/>
+        <location filename="mainwindow.ui" line="1495"/>
         <source>Show Branch Moves</source>
         <translation type="unfinished">分岐を表示</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="363"/>
+        <location filename="mainwindow.ui" line="364"/>
         <source>View Toolbar</source>
         <oldsource>Option Toolbar</oldsource>
         <translation type="unfinished">表示 ツールバー</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="968"/>
+        <location filename="mainwindow.ui" line="969"/>
         <source>Rotate SGF &amp;Clockwise</source>
         <oldsource>Rotate SGF Clockwise</oldsource>
         <translation type="unfinished">右に90度回転</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="977"/>
+        <location filename="mainwindow.ui" line="978"/>
         <source>Flip SGF &amp;Horizontally</source>
         <oldsource>Flip SGF Horizontally</oldsource>
         <translation type="unfinished">左右に反転</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="986"/>
+        <location filename="mainwindow.ui" line="987"/>
         <source>Flip SGF &amp;Vertically</source>
         <oldsource>Flip SGF Vertically</oldsource>
         <translation type="unfinished">上下に反転</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="995"/>
+        <location filename="mainwindow.ui" line="996"/>
         <source>Jump To Move Number</source>
         <translation type="unfinished">指定番号へ移動</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1007"/>
+        <location filename="mainwindow.ui" line="1008"/>
         <source>Jump To Clicked</source>
         <translation type="unfinished">クリックした石へ移動</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1595"/>
+        <location filename="mainwindow.ui" line="1596"/>
         <source>Play &amp;Sound</source>
         <translation type="unfinished">サウンドを鳴らす</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1648"/>
+        <location filename="mainwindow.ui" line="1649"/>
         <source>&amp;Options...</source>
         <oldsource>&amp;Options..</oldsource>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1567"/>
+        <location filename="mainwindow.ui" line="1568"/>
         <source>Play with Computer</source>
         <oldsource>Play with gnugo</oldsource>
         <translation type="unfinished">コンピュータと対局</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1029"/>
+        <location filename="mainwindow.ui" line="1030"/>
         <source>&amp;White First</source>
         <oldsource>White First</oldsource>
         <translation type="unfinished">白が先手</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1012"/>
+        <location filename="mainwindow.ui" line="1013"/>
         <source>Set Move Number</source>
         <translation type="unfinished">着手番号の設定</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1017"/>
+        <location filename="mainwindow.ui" line="1018"/>
         <source>Unset Move Number</source>
         <translation type="unfinished">着手番号を解除</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1472"/>
+        <location filename="mainwindow.ui" line="1473"/>
         <source>Show Coordinate With &amp;I</source>
         <oldsource>Show Coordinate With I</oldsource>
         <translation type="unfinished">座標に Ｉ を表示する</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1506"/>
+        <location filename="mainwindow.ui" line="1507"/>
         <source>&amp;Branch Mode</source>
         <oldsource>Branch Mode</oldsource>
         <translation type="unfinished">分岐モード</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1518"/>
+        <location filename="mainwindow.ui" line="1519"/>
         <source>Rotate &amp;Clockwise</source>
         <oldsource>Rotate Clockwise</oldsource>
         <translation type="unfinished">右に90度回転</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1530"/>
+        <location filename="mainwindow.ui" line="1531"/>
         <source>Flip &amp;Horizontally</source>
         <oldsource>Flip Horizontally</oldsource>
         <translation type="unfinished">左右に反転</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1542"/>
+        <location filename="mainwindow.ui" line="1543"/>
         <source>Flip &amp;Vertically</source>
         <oldsource>Flip Vertically</oldsource>
         <translation type="unfinished">上下に反転</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1551"/>
+        <location filename="mainwindow.ui" line="1552"/>
         <source>&amp;Reset Board</source>
         <oldsource>Reset Board</oldsource>
         <translation type="unfinished">盤を戻す</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1583"/>
+        <location filename="mainwindow.ui" line="1584"/>
         <source>Tutor One Side</source>
         <translation type="unfinished">棋譜並べ（自動応手）</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1615"/>
+        <location filename="mainwindow.ui" line="1616"/>
         <source>Custom Board Size</source>
         <translation type="unfinished">盤の大きさを自由に設定</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1559"/>
+        <location filename="mainwindow.ui" line="1560"/>
         <source>&amp;Count Territory</source>
         <oldsource>Count Territory</oldsource>
         <translation type="unfinished">地合計算</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1623"/>
+        <location filename="mainwindow.ui" line="1624"/>
         <source>System Default</source>
         <translation type="unfinished">システム設定</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1631"/>
+        <location filename="mainwindow.ui" line="1632"/>
         <source>English</source>
         <translation type="unfinished">英語</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1639"/>
+        <location filename="mainwindow.ui" line="1640"/>
         <source>Japanese</source>
         <translation type="unfinished">日本語</translation>
     </message>
@@ -1487,42 +1513,42 @@ Do you want to save your changes?</source>
         <translation type="unfinished">白</translation>
     </message>
     <message>
-        <location filename="playwithcomputerdialog.ui" line="14"/>
+        <location filename="playwithcomputerdialog.ui" line="20"/>
         <source>Play with Computer</source>
         <translation type="unfinished">コンピュータと対局する</translation>
     </message>
     <message>
-        <location filename="playwithcomputerdialog.ui" line="22"/>
+        <location filename="playwithcomputerdialog.ui" line="28"/>
         <source>Game Settings</source>
         <translation type="unfinished">対局設定</translation>
     </message>
     <message>
-        <location filename="playwithcomputerdialog.ui" line="41"/>
+        <location filename="playwithcomputerdialog.ui" line="47"/>
         <source>Board Size</source>
         <translation type="unfinished">盤のサイズ</translation>
     </message>
     <message>
-        <location filename="playwithcomputerdialog.ui" line="51"/>
+        <location filename="playwithcomputerdialog.ui" line="57"/>
         <source>Komi</source>
         <translation type="unfinished">コミ</translation>
     </message>
     <message>
-        <location filename="playwithcomputerdialog.ui" line="77"/>
+        <location filename="playwithcomputerdialog.ui" line="83"/>
         <source>Handicap</source>
         <translation type="unfinished">置石</translation>
     </message>
     <message>
-        <location filename="playwithcomputerdialog.ui" line="91"/>
+        <location filename="playwithcomputerdialog.ui" line="97"/>
         <source>Level</source>
         <translation type="unfinished">レベル</translation>
     </message>
     <message>
-        <location filename="playwithcomputerdialog.ui" line="111"/>
+        <location filename="playwithcomputerdialog.ui" line="117"/>
         <source>Engine Settings</source>
         <translation type="unfinished">プログラム設定</translation>
     </message>
     <message>
-        <location filename="playwithcomputerdialog.ui" line="126"/>
+        <location filename="playwithcomputerdialog.ui" line="132"/>
         <source>&amp;Edit</source>
         <translation type="unfinished">編集</translation>
     </message>
@@ -1535,22 +1561,22 @@ Do you want to save your changes?</source>
         <translation type="obsolete">パラメータ</translation>
     </message>
     <message>
-        <location filename="playwithcomputerdialog.ui" line="136"/>
+        <location filename="playwithcomputerdialog.ui" line="142"/>
         <source>Start Position</source>
         <translation type="unfinished">開始設定</translation>
     </message>
     <message>
-        <location filename="playwithcomputerdialog.ui" line="142"/>
+        <location filename="playwithcomputerdialog.ui" line="148"/>
         <source>New Game</source>
         <translation type="unfinished">新規に対局を開始する</translation>
     </message>
     <message>
-        <location filename="playwithcomputerdialog.ui" line="152"/>
+        <location filename="playwithcomputerdialog.ui" line="158"/>
         <source>Continue from current position</source>
         <translation type="unfinished">現在の局面から開始する</translation>
     </message>
     <message>
-        <location filename="playwithcomputerdialog.ui" line="31"/>
+        <location filename="playwithcomputerdialog.ui" line="37"/>
         <source>Your Color</source>
         <translation type="unfinished">あなたの手番</translation>
     </message>
@@ -1812,12 +1838,12 @@ Do you want to save your changes?</source>
         <source>1,2,3...</source>
         <translation type="unfinished"></translation>
     </message>
-    <message>
+    <message utf8="true">
         <location filename="setupdialog.ui" line="523"/>
         <source>ア,イ,ウ...</source>
         <translation type="unfinished"></translation>
     </message>
-    <message>
+    <message utf8="true">
         <location filename="setupdialog.ui" line="528"/>
         <source>イ,ロ,ハ...</source>
         <translation type="unfinished"></translation>

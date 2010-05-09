@@ -22,8 +22,14 @@
         <bool>false</bool>
        </property>
        <property name="columnCount">
-        <number>3</number>
+        <number>4</number>
        </property>
+       <attribute name="headerDefaultSectionSize">
+        <number>155</number>
+       </attribute>
+       <attribute name="headerDefaultSectionSize">
+        <number>155</number>
+       </attribute>
        <column>
         <property name="text">
          <string>Name</string>
@@ -37,6 +43,11 @@
        <column>
         <property name="text">
          <string>Parameters</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Remarks</string>
         </property>
        </column>
       </widget>
@@ -68,7 +79,7 @@
           <string>Up</string>
          </property>
          <property name="icon">
-          <iconset>
+          <iconset resource="resources.qrc">
            <normaloff>:/res/collectionup.png</normaloff>:/res/collectionup.png</iconset>
          </property>
          <property name="toolButtonStyle">
@@ -88,7 +99,7 @@
           <string>Down</string>
          </property>
          <property name="icon">
-          <iconset>
+          <iconset resource="resources.qrc">
            <normaloff>:/res/collectiondown.png</normaloff>:/res/collectiondown.png</iconset>
          </property>
          <property name="toolButtonStyle">
@@ -108,7 +119,7 @@
           <string>New</string>
          </property>
          <property name="icon">
-          <iconset>
+          <iconset resource="resources.qrc">
            <normaloff>:/res/filenew.png</normaloff>:/res/filenew.png</iconset>
          </property>
          <property name="toolButtonStyle">
@@ -128,7 +139,7 @@
           <string>Delete</string>
          </property>
          <property name="icon">
-          <iconset>
+          <iconset resource="resources.qrc">
            <normaloff>:/res/removeself.png</normaloff>:/res/removeself.png</iconset>
          </property>
          <property name="toolButtonStyle">
@@ -221,6 +232,12 @@
          <property name="enabled">
           <bool>false</bool>
          </property>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="text">
           <string>Get Name</string>
          </property>
@@ -229,6 +246,16 @@
       </layout>
      </item>
     </layout>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="analysisCheckBox">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="text">
+      <string>Use Analysis</string>
+     </property>
+    </widget>
    </item>
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">
@@ -242,7 +269,23 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <tabstops>
+  <tabstop>engineList</tabstop>
+  <tabstop>upButton</tabstop>
+  <tabstop>downButton</tabstop>
+  <tabstop>newButton</tabstop>
+  <tabstop>deleteButton</tabstop>
+  <tabstop>pathEdit</tabstop>
+  <tabstop>browseButton</tabstop>
+  <tabstop>parametersEdit</tabstop>
+  <tabstop>nameEdit</tabstop>
+  <tabstop>getNameButton</tabstop>
+  <tabstop>analysisCheckBox</tabstop>
+  <tabstop>buttonBox</tabstop>
+ </tabstops>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>buttonBox</sender>

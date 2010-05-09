@@ -55,7 +55,7 @@ class BoardWidget : public QWidget {
     Q_OBJECT
     Q_DISABLE_COPY(BoardWidget)
 public:
-    enum eEditMode{ eAlternateMove, eAddBlack, eAddWhite, eAddEmpty, eLabelMark, eManualMark, eCrossMark, eCircleMark, eSquareMark, eTriangleMark, eDeleteMarker, eCountTerritory, ePlayGame };
+    enum eEditMode{ eAlternateMove, eAddBlack, eAddWhite, eAddEmpty, eLabelMark, eManualMark, eCrossMark, eCircleMark, eSquareMark, eTriangleMark, eDeleteMarker, eFinalScore, ePlayGame };
     enum eTutorMode{ eNoTutor, eTutorBothSides, eTutorOneSide, eAutoReplay };
     enum eMoveNumberMode{ eSequential, eResetInBranch, eResetInVariation };
 
@@ -112,7 +112,7 @@ public:
     go::nodePtr getCurrentNode(){ return currentNode; }
     go::nodePtr findNodeFromMoveNumber(int moveNumber);
     const go::nodeList& getCurrentNodeList() const{ return nodeList; }
-    const BoardBuffer& getBuffer(){ return board; }
+    BoardBuffer& getBuffer(){ return board; }
     void getCaptured(int& black, int& white) const{ black = capturedBlack; white = capturedWhite; }
     int  getMoveNumber() const{ return currentMoveNumber; }
     bool forward(int n);
@@ -173,7 +173,7 @@ public:
     void resetBoard();
     void setPlaySound(bool play){ playSound = play; }
     void setStoneSoundPath(const QString& path){ stoneSound.setCurrentSource(path); }
-    void setCountTerritoryMode(bool countMode);
+    void setFinalScoreMode(bool mode);
     void whiteFirst(bool whiteFirst);
 
     // get option
@@ -200,11 +200,12 @@ public:
     QString getXYString(int x, int y, bool showI) const;
     void boardToSgfCoordinate(int boardX, int boardY, int& sgfX, int& sgfY);
     void sgfToBoardCoordinate(int sgfX, int sgfY, int& boardX, int& boardY);
-    void addTerritory(int x, int y);
+    void reverseTerritory(int x, int y);
 
     void playWithComputer(PlayGame* game);
     void autoReplay();
     bool isAutoReplay() const{ return autoReplayTimer.isActive(); }
+    void estimateScore();
 
 public slots:
     void print(QPrinter* printer);
@@ -282,14 +283,16 @@ protected:
     bool isKill(int x, int y);
     void dead(int* tmp);
 
-    // territory
-    void countTerritory();
-    void whichTerritory(int x, int y, char* tmp, int& c);
+    // Score
     void setTerritory(int x, int y, int c);
     void unsetTerritory(int x, int y);
-    void getCountTerritory(int& alive_b, int& alive_w, int& dead_b, int& dead_w, int& bt, int& wt);
-    bool checkDame(int x, int  y);
-    bool checkDame(int c, int x1, int  y1, int x2, int  y2);
+    bool isDame(int x, int  y);
+    bool isDame(int c, int x1, int  y1, int x2, int  y2);
+
+    // Final Score
+    void finalScore();
+    void whichTerritory(int x, int y, char* tmp, int& c);
+    void getFinalScore(int& alive_b, int& alive_w, int& dead_b, int& dead_w, int& bt, int& wt);
     bool hasTerritory(int x1, int  y1, int x2, int  y2);
     bool hasTerritory(go::color c1, go::color c2, char* tmp, int x, int  y);
 

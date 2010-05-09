@@ -14,17 +14,27 @@ EngineListDialog::EngineListDialog(QWidget *parent)
     , m_ui(new Ui::EngineListDialog)
     , process_(NULL)
     , gtp_(NULL)
+    , analysis_(NULL)
 {
     m_ui->setupUi(this);
+
+/*
+    int w = m_ui->engineList->header()->width();
+    m_ui->engineList->header()->resizeSection(0, w * 0.15);
+    m_ui->engineList->header()->resizeSection(1, w * 0.35);
+    m_ui->engineList->header()->resizeSection(2, w * 0.35);
+*/
 
     EngineList enginelist;
     enginelist.load();
 
     foreach (const Engine& e, enginelist.engines){
         QTreeWidgetItem* item = new QTreeWidgetItem(
-            QStringList() << e.name << e.path << e.parameters
+            QStringList() << e.name << e.path << e.parameters << (e.analysis ? tr("Use Analysis") : "")
         );
         m_ui->engineList->addTopLevelItem(item);
+        if (e.analysis)
+            analysis_ = item;
     }
 }
 
@@ -54,6 +64,7 @@ void EngineListDialog::accept(){
         e.name = item->text(0);
         e.path = item->text(1);
         e.parameters = item->text(2);
+        e.analysis = item == analysis_;
         enginelist.engines.push_back(e);
     }
 
@@ -102,10 +113,10 @@ void EngineListDialog::on_getNameButton_clicked(){
         return;
     }
     gtp_ = new gtp(process_); // auto delete
-    connect(gtp_, SIGNAL(initialized()), SLOT(on_gtp_initialized()));
     connect(gtp_, SIGNAL(gameEnded()), SLOT(on_gtp_ended()));
     connect(gtp_, SIGNAL(getName(const QString&)), SLOT(on_gtp_name(const QString&)));
     connect(gtp_, SIGNAL(getVersion(const QString&)), SLOT(on_gtp_version(const QString&)));
+    gtp_->abort();
 }
 
 /**
@@ -139,6 +150,25 @@ void EngineListDialog::on_nameEdit_textChanged(QString s){
     if (item == NULL)
         return;
     item->setText(0, s);
+}
+
+/**
+* analysis checkbox toggled
+*/
+void EngineListDialog::on_analysisCheckBox_toggled(bool checked){
+    QTreeWidgetItem* item = m_ui->engineList->currentItem();
+    if (item == NULL)
+        return;
+
+    if (checked == true){
+        if (analysis_)
+            analysis_->setText(3, "");
+        analysis_ = item;
+    }
+    else if (item == analysis_)
+        analysis_ = NULL;
+
+    item->setText(3, checked ? tr("Use Analysis") : "");
 }
 
 /**
@@ -199,6 +229,7 @@ void EngineListDialog::on_engineList_currentItemChanged(QTreeWidgetItem* current
     m_ui->browseButton->setEnabled(current != NULL);
     m_ui->pathEdit->setEnabled(current != NULL);
     m_ui->parametersEdit->setEnabled(current != NULL);
+    m_ui->analysisCheckBox->setEnabled(current != NULL);
 
     if (current == NULL)
         return;
@@ -206,15 +237,7 @@ void EngineListDialog::on_engineList_currentItemChanged(QTreeWidgetItem* current
     m_ui->nameEdit->setText( current->text(0) );
     m_ui->pathEdit->setText( current->text(1) );
     m_ui->parametersEdit->setText( current->text(2) );
-}
-
-/**
-* gtp class was initialized
-*/
-void EngineListDialog::on_gtp_initialized(){
-    gtp_->name();
-    gtp_->version();
-    gtp_->abort();
+    m_ui->analysisCheckBox->setChecked(current == analysis_);
 }
 
 /**

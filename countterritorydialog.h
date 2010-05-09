@@ -20,6 +20,7 @@ public:
 
 protected:
     virtual void changeEvent(QEvent *e);
+    virtual void done(int r);
     virtual void accept();
 
 private:

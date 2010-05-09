@@ -1,6 +1,7 @@
 #include <QDebug>
 #include <QSettings>
 #include <QMessageBox>
+#include <QMessageBox>
 #include <QInputDialog>
 #include <QtAlgorithms>
 #include <QClipboard>
@@ -25,6 +26,7 @@
 #include "printoptiondialog.h"
 #include "boardsizedialog.h"
 #include "saveimagedialog.h"
+#include "enginelist.h"
 #include "ui_mainwindow.h"
 
 
@@ -1548,7 +1550,37 @@ void MainWindow::on_actionCountTerritory_triggered(){
         setCaption();
     }
 
-    currentBoard()->setCountTerritoryMode(ui->actionCountTerritory->isChecked());
+    currentBoard()->setFinalScoreMode(ui->actionCountTerritory->isChecked());
+}
+
+/**
+* Slot
+* Tools -> Estimate Score
+*/
+void MainWindow::on_actionEstimateScore_triggered(){
+    EngineList engineList;
+    engineList.load();
+    foreach (const Engine& e, engineList.engines){
+        if (e.analysis != true)
+            continue;
+
+        TabData& tabData = tabDatas[currentBoard()];
+
+        QString param = '"' + e.path + "\" " + e.parameters;
+        QProcess* process = new QProcess(this);
+        process->start(param, QIODevice::ReadWrite|QIODevice::Text);
+        go::informationPtr root = currentBoard()->getData().root;
+        tabData.estimate = new gtp(currentBoard(), process);
+        connect(tabData.estimate, SIGNAL(scoreEstimated(BoardWidget*, const QVector< QVector<double> >&)), SLOT(on_gtp_estimated(BoardWidget*, const QVector< QVector<double> >&)));
+        tabData.estimate->setMode(gtp::eEstimateScore);
+        tabData.countTerritoryDialog->setInformationNode(NULL);
+        tabData.countTerritoryDialog->exec();
+        if (tabData.estimate)
+            tabData.estimate->kill();
+        return;
+    }
+
+    QMessageBox::warning(this, QString(), tr("Please setup the engine."));
 }
 
 /**
@@ -1599,8 +1631,8 @@ void MainWindow::on_actionPlayWithComputer_triggered(){
         }
 
         // start gtp communication
-        delete tabData.playGame;
-        tabData.playGame = new gtp(currentBoard(), dlg.isBlack ? go::black : go::white, dlg.size, dlg.komi, dlg.handicap, isNewGame, dlg.level, gtpProcess);
+        gtp* gtp_ = new gtp(currentBoard(), dlg.isBlack ? go::black : go::white, isNewGame, dlg.level, gtpProcess);
+        tabData.playGame = gtp_;
         connect( tabData.playGame, SIGNAL(gameEnded()), this, SLOT(on_playGame_gameEnded()) );
         setPlayWithComputerMode(currentBoard(), true);
         currentBoard()->playWithComputer(tabData.playGame);
@@ -2101,6 +2133,9 @@ void MainWindow::on_collectionWidget_itemActivated(QTreeWidgetItem* item, int /*
 * score dialog was closed
 */
 void MainWindow::scoreDialogClosed(int){
+    if ( ui->actionCountTerritory->isChecked() == false )
+        return;
+
     ui->actionCountTerritory->setChecked(false);
     on_actionCountTerritory_triggered();
 
@@ -2202,7 +2237,7 @@ void MainWindow::updateMenu(){
         case BoardWidget::eDeleteMarker:
             setEditMode(ui->actionDeleteMarker, BoardWidget::eDeleteMarker);
             break;
-        case BoardWidget::eCountTerritory:
+        case BoardWidget::eFinalScore:
         case BoardWidget::ePlayGame:
             break;
     };
@@ -2238,7 +2273,7 @@ void MainWindow::updateMenu(){
     ui->actionTutorBothSides->setChecked( boardWidget->getTutorMode() == BoardWidget::eTutorBothSides );
     ui->actionTutorOneSide->setChecked( boardWidget->getTutorMode() == BoardWidget::eTutorOneSide );
 
-    if (boardWidget->getEditMode() == BoardWidget::eCountTerritory){
+    if (boardWidget->getEditMode() == BoardWidget::eFinalScore){
         setCountTerritoryMode(currentBoard(), true);
         ui->actionCountTerritory->setChecked(true);
         tabData->countTerritoryDialog->setVisible(true);
@@ -2539,7 +2574,6 @@ bool MainWindow::closeTab(int index){
     // delete boardWidget's datas.
     boardWidget->clear();
     delete tabData->menuAction;
-    delete tabData->playGame;
     delete tabData->branchWidget;
     delete tabData->countTerritoryDialog;
     tabDatas.remove(boardWidget);
@@ -3129,6 +3163,7 @@ void MainWindow::setCountTerritoryMode(BoardWidget* board, bool on){
         ui->actionResetBoard,
 
 //        ui->actionCountTerritory,
+        ui->actionEstimateScore,
         ui->actionPlayWithComputer,
         ui->actionAutomaticReplay,
         ui->actionTutorBothSides,
@@ -3309,6 +3344,7 @@ void MainWindow::setPlayWithComputerMode(BoardWidget* board, bool on){
         ui->actionResetBoard,
 
         ui->actionCountTerritory,
+        ui->actionEstimateScore,
 //        ui->actionPlayWithGnugo,
         ui->actionAutomaticReplay,
         ui->actionTutorBothSides,
@@ -3446,6 +3482,55 @@ void MainWindow::automaticReplay_ended(){
         ui->actionAutomaticReplay->setChecked( false );
 }
 
+void MainWindow::on_gtp_estimated(BoardWidget* board, const QVector< QVector<double> >& territories){
+    TabData& tabData = tabDatas[board];
+    tabData.estimate = NULL;
+
+    // udpate board buffer
+    BoardWidget::BoardBuffer& buf = board->getBuffer();
+    for (int y=0; y<territories.size(); ++y){
+        if (y >= buf.size())
+            break;
+
+        for (int x=0; x<territories[y].size(); ++x){
+            if (x >= buf[y].size())
+                break;
+
+            if (territories[y][x] <= -0.5)
+                buf[y][x].color |= go::blackTerritory;
+            else if (territories[y][x] >= 0.5)
+                buf[y][x].color |= go::whiteTerritory;
+        }
+    }
+
+    // count score
+    int alive_b=0, alive_w=0, dead_b=0, dead_w=0, blackTerritory=0, whiteTerritory=0;
+    for (int y=0; y<buf.size(); ++y){
+        for (int x=0; x<buf[y].size(); ++x){
+            if (buf[y][x].blackTerritory()){
+                ++blackTerritory;
+                if (buf[y][x].white())
+                    ++dead_w;
+            }
+            else if (buf[y][x].whiteTerritory()){
+                ++whiteTerritory;
+                if (buf[y][x].black())
+                    ++dead_b;
+            }
+            else if (buf[y][x].black())
+                ++alive_b;
+            else if (buf[y][x].white())
+                ++alive_w;
+        }
+    }
+
+    int capturedBlack, capturedWhite;
+    board->getCaptured(capturedBlack, capturedWhite);
+
+    tabData.countTerritoryDialog->setScore(alive_b, alive_w, dead_b, dead_w, capturedBlack, capturedWhite, blackTerritory, whiteTerritory, board->getData().root->komi);
+    board->paintBoard();
+}
+
 void MainWindow::readSettings(){
     QSettings settings;
 
@@ -3471,7 +3556,9 @@ bool MainWindow::stopGame(BoardWidget* boardWidget){
     if (ret != QMessageBox::Ok)
         return false;
 
-    if (tabDatas[boardWidget].playGame->abort() == false)
+    if (tabDatas[boardWidget].playGame->isInitialized())
+        tabDatas[boardWidget].playGame->abort();
+    else
         tabDatas[boardWidget].playGame->kill();
 
     return true;
