@@ -16,7 +16,6 @@ public:
     int printOption() const{ return printOption_; }
     int movesPerPage() const{ return movesPerPage_; }
     bool showCoordinate() const{ return showCoordinate_; }
-    bool includeComments() const{ return includeComments_; }
     const QFont& font() const{ return font_; }
     const QString& headerLeftFormat() const{ return headerLeftFormat_; }
     const QString& headerCenterFormat() const{ return headerCenterFormat_; }
@@ -36,7 +35,6 @@ private:
     int printOption_;
     int movesPerPage_;
     bool  showCoordinate_;
-    bool  includeComments_;
     QFont font_;
     QString headerLeftFormat_;
     QString headerCenterFormat_;

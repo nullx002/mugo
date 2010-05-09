@@ -96,7 +96,7 @@ public:
 
     // print
     void print(QPrinter& printer, QPainter& p, BoardBuffer& buf);
-    void setPrintOption(int type, int movesPerPage, bool showCoordinate, bool includeComments, const QFont& font, const QString& fileName, const QString& headerLeftFormat, const QString& headerCenterFormat, const QString& headerRightFormat, const QString& footerLeftFormat, const QString& footerCenterFormat, const QString& footerRightFormat);
+    void setPrintOption(int type, int movesPerPage, bool showCoordinate, const QFont& font, const QString& fileName, const QString& headerLeftFormat, const QString& headerCenterFormat, const QString& headerRightFormat, const QString& footerLeftFormat, const QString& footerCenterFormat, const QString& footerRightFormat);
 
     // set/get data
     void clear();
@@ -268,7 +268,7 @@ protected:
     void printHeader(QPrinter& printer, QPainter& p, int& page);
     void printFooter(QPrinter& printer, QPainter& p, int& page);
     void printTitle(QPrinter& printer, QPainter& p, int& page);
-    void printCaption(QPrinter& printer, QPainter& p, int& fig, int startNumber, int endNumber, bool draw);
+    void printCaption(QPrinter& printer, QPainter& p, int fig, int startNumber, int endNumber, bool draw);
     void printRangai(QPrinter& printer, QPainter& p, int& page, int& fig, int& startNumber, int& endNumber, int& moveNumberInPage, QString& rangai, QStringList& comments);
     void printBoard(QPrinter& printer, QPainter& p, BoardBuffer& buf, int& page, int& fig);
     void newPage(QPrinter& printer, QPainter& p, int& page, int& fig, int& moveNumberInPage);
@@ -378,7 +378,6 @@ private:
     int printType;
     int printMovesPerPage;
     bool    printShowCoordinate;
-    bool    printIncludeComments;
     QFont   printFont;
     QString printFileName;
     QString headerLeftFormat;

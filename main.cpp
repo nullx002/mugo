@@ -1,3 +1,9 @@
+#include <QtGui/QApplication>
+#ifdef Q_WS_WIN
+#  include "qtdotnetstyle.h"
+#elif defined(Q_WS_MAC)
+#   include <QFileOpenEvent>
+#endif
 #include <QDebug>
 #include <QSettings>
 #include <QTranslator>
@@ -5,13 +11,7 @@
 #include <QTextCodec>
 #include <QDir>
 #include <QMessageBox>
-#ifdef Q_WS_WIN
-#  include "qtdotnetstyle.h"
-#elif defined(Q_WS_MAC)
-#   include <QFileOpenEvent>
-#endif
 #include "appdef.h"
-#include "mugoapp.h"
 #include "mainwindow.h"
 
 
@@ -51,6 +51,21 @@ bool installTranslator(QApplication& a, QTranslator& translator, const QString& 
 }
 
 
+class Application : public QApplication{
+public:
+    Application(int argc, char** argv) : QApplication(argc, argv), mainWindow(NULL){}
+    virtual ~Application();
+
+#if defined(Q_WS_MAC)
+    bool event(QEvent*);
+#endif
+
+    void setMainWindow(MainWindow* win);
+
+private:
+    MainWindow* mainWindow;
+};
+
 Application::~Application(){
 }
 
@@ -64,28 +79,12 @@ bool Application::event(QEvent* e){
         }
 
         default:
-            return QtSingleApplication::event(e);
+            return QApplication::event(e);
     }
 }
 #endif
 
-void Application::received(const QString& msg){
-    if (mainWindow == NULL)
-        return;
-
-    QStringList files = msg.split("\n");
-    foreach(const QString& f, files)
-        if (f.isEmpty() == false)
-            mainWindow->fileOpen(f);
-
-#ifdef Q_WS_WIN
-    // Is not highlighted on taskbar automatically?
-    ::SetActiveWindow( mainWindow->winId() );
-#endif
-}
-
 void Application::setMainWindow(MainWindow* win){
-    setActivationWindow(win);
     mainWindow = win;
 }
 
@@ -95,14 +94,6 @@ int main(int argc, char *argv[])
 
 // is QFileOpenEvent received on macx??
     Application a(argc, argv);
-
-    QStringList args = a.arguments();
-    QString param;
-    for(int i=1; i<args.size(); ++i)
-        param.append(args[i]).append("\n");
-    if (a.sendMessage(param))
-        return 0;
-
 //    a.addLibraryPath( a.applicationDirPath() + "/plugins" );
     a.setOrganizationName(AUTHOR);
     a.setApplicationName(APPNAME);

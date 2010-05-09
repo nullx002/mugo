@@ -671,7 +671,7 @@ void BoardWidget::printNode(QPrinter& printer, QPainter& p, go::nodePtr node, in
         }
     }
 
-    if (printIncludeComments && node->comment.isEmpty() == false)
+    if (node->comment.isEmpty() == false)
         comments.push_back( QString( tr("Move %1: ") ).arg(moveNumber).append(node->comment) );
 
     p.restore();
@@ -775,7 +775,7 @@ void BoardWidget::printTitle(QPrinter& printer, QPainter& p, int& page){
     p.restore();
 }
 
-void BoardWidget::printCaption(QPrinter& printer, QPainter& p, int& fig, int startNumber, int endNumber, bool draw){
+void BoardWidget::printCaption(QPrinter& printer, QPainter& p, int fig, int startNumber, int endNumber, bool draw){
     p.setTransform(QTransform());
 
     p.save();
@@ -784,7 +784,7 @@ void BoardWidget::printCaption(QPrinter& printer, QPainter& p, int& fig, int sta
     f.setPointSizeF( printFont.pointSizeF() * 1.5 );
     p.setFont(f);
 
-    QString text = QString( tr("Figure %1 (%2 - %3)") ).arg(draw ? ++fig : fig+1).arg(startNumber).arg(endNumber);
+    QString text = QString( tr("Figure %1 (%2 - %3)") ).arg(fig).arg(startNumber).arg(endNumber);
     QRect r = p.boundingRect(0, headerRect.bottom()+5, qMin(paintHeight, paintWidth), printer.height(), Qt::AlignHCenter, text);
 
     if (draw == true)
@@ -860,6 +860,7 @@ void BoardWidget::printBoard(QPrinter& printer, QPainter& p, BoardBuffer& buf, i
 
 void BoardWidget::newPage(QPrinter& printer, QPainter& p, int& page, int& fig, int& moveNumberInPage){
     ++page;
+    ++fig;
 
     if (printer.printRange() == QPrinter::PageRange && (page < printer.fromPage() || page > printer.toPage()))
         return;
@@ -882,19 +883,18 @@ void BoardWidget::newPage(QPrinter& printer, QPainter& p, int& page, int& fig, i
     moveNumberInPage = 0;
 }
 
-void BoardWidget::setPrintOption(int type, int movesPerPage, bool showCoordinate, bool includeComments, const QFont& font, const QString& fileName, const QString& headerLeftFormat_, const QString& headerCenterFormat_, const QString& headerRightFormat_, const QString& footerLeftFormat_, const QString& footerCenterFormat_, const QString& footerRightFormat_){
+void BoardWidget::setPrintOption(int type, int movesPerPage, bool showCoordinate, const QFont& font, const QString& fileName, const QString& headerLeftFormat_, const QString& headerCenterFormat_, const QString& headerRightFormat_, const QString& footerLeftFormat_, const QString& footerCenterFormat_, const QString& footerRightFormat_){
     printType = type;
-    printMovesPerPage    = movesPerPage;
-    printShowCoordinate  = showCoordinate;
-    printIncludeComments = includeComments;
-    printFont            = font;
-    printFileName        = fileName;
-    headerLeftFormat     = headerLeftFormat_;
-    headerCenterFormat   = headerCenterFormat_;
-    headerRightFormat    = headerRightFormat_;
-    footerLeftFormat     = footerLeftFormat_;
-    footerCenterFormat   = footerCenterFormat_;
-    footerRightFormat    = footerRightFormat_;
+    printMovesPerPage   = movesPerPage;
+    printShowCoordinate = showCoordinate;
+    printFont           = font;
+    printFileName       = fileName;
+    headerLeftFormat    = headerLeftFormat_;
+    headerCenterFormat  = headerCenterFormat_;
+    headerRightFormat   = headerRightFormat_;
+    footerLeftFormat    = footerLeftFormat_;
+    footerCenterFormat  = footerCenterFormat_;
+    footerRightFormat   = footerRightFormat_;
 }
 
 /**

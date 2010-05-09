@@ -12,7 +12,7 @@
 class gtp : public PlayGame{
 Q_OBJECT
 public:
-    enum eKind{ eNone, eListCommands, eName, eVersion, eLoadSgf, eBoardSize, eKomi, eLevel, eMove, eGen, ePut, eQuit, eDeadList, eUndo };
+    enum eKind{ eNone, eListCommands, eLoadSgf, eBoardSize, eKomi, eLevel, eMove, eGen, ePut, eQuit, eDeadList, eUndo };
     enum eStatus{ eProcessing, eSuccess, eFailure };
 
     class command{
@@ -25,6 +25,18 @@ public:
             gtp*  parent;
             eKind kind;
             eStatus status;
+    };
+
+    class boardSizeCommand : public command{
+        public:
+            boardSizeCommand(gtp* parent, int boardSize_) : command(parent, eBoardSize, QString().sprintf("boardsize %d\n", boardSize_)), boardSize(boardSize_){}
+            int boardSize;
+    };
+
+    class komiCommand : public command{
+        public:
+            komiCommand(gtp* parent, const qreal& komi_) : command(parent, eKomi, QString().sprintf("komi %f\n", komi_)), komi(komi_){}
+            qreal komi;
     };
 
     class levelCommand : public command{
@@ -55,36 +67,29 @@ public:
             go::color color;
     };
 
+    class undoCommand : public command{
+        public:
+            undoCommand(gtp* parent) : command(parent, eUndo, "undo\n"){}
+    };
+
     typedef boost::shared_ptr<command> commandPtr;
 
     gtp(BoardWidget* board, go::color color, int boardSize, const qreal& komi, int handicap, bool newGame, int level, QProcess* process, QObject* parent=0);
-    gtp(QProcess* process, QObject* parent=0);
     ~gtp();
 
     virtual bool undo();
+
     virtual bool move(int x, int y);
     virtual bool put(go::color c, int x, int y);
     virtual bool wait();
-    virtual bool quit(bool resign);
-    virtual bool abort();
-    virtual void kill();
-    virtual bool deadList();
+    virtual void quit(bool resign);
+    virtual void abort();
+    virtual void deadList();
     virtual bool moving() const;
-
-    bool name();
-    bool version();
-    bool boardSize(int size);
-    bool komi(double komi);
 
     void pushCommandList(const QString& s);
 
     QProcess* getProcess(){ return process; }
-
-signals:
-    void initialized();
-    void getName(const QString&);
-    void getVersion(const QString&);
-    void invalidResponseReceived(const QString&);
 
 private:
     void write();
@@ -102,7 +107,6 @@ private:
     QStringList commandStringList;
     bool commandProcessing;
     int level_;
-    bool isKilled;
     QStringList supportedCommandList;
     QTemporaryFile tempFile;
 

@@ -29,7 +29,6 @@ PrintOptionDialog::PrintOptionDialog(QWidget *parent) :
     m_ui->activeBranchMovesPerPage->setValue(movesPerPage);
     m_ui->allBranchMovesPerPage->setValue(movesPerPage);
     m_ui->showCoordinate->setChecked( settings.value("print/showCoordinate" , true).toBool() );
-    m_ui->includeComments->setChecked( settings.value("print/includeComments" , true).toBool() );
     QFont font = settings.value("print/font", QFont()).value<QFont>();
     m_ui->fontComboBox->setCurrentFont(font);
     m_ui->fontSizeComboBox->setCurrentIndex(font.pointSize() - 8);
@@ -83,8 +82,7 @@ void PrintOptionDialog::accept()
     else
         movesPerPage_ = 0;
 
-    showCoordinate_  = m_ui->showCoordinate->isChecked();
-    includeComments_ = m_ui->includeComments->isChecked();
+    showCoordinate_ = m_ui->showCoordinate->isChecked();
     font_ = m_ui->fontComboBox->currentFont();
     font_.setPointSize( m_ui->fontSizeComboBox->currentText().toInt() );
 
@@ -100,7 +98,6 @@ void PrintOptionDialog::accept()
     if (movesPerPage_ != 0)
         settings.setValue("print/movesPerPage", movesPerPage_);
     settings.setValue("print/showCoordinate", showCoordinate_);
-    settings.setValue("print/includeComments", includeComments_);
     settings.setValue("print/font", font_);
     settings.setValue("print/headerLeft", headerLeftFormat_);
     settings.setValue("print/headerCenter", headerCenterFormat_);

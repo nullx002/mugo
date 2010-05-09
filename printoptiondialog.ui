@@ -23,7 +23,7 @@
       <item>
        <widget class="QRadioButton" name="printActiveBoard">
         <property name="text">
-         <string>Print current board</string>
+         <string>Print current board.</string>
         </property>
         <property name="checked">
          <bool>true</bool>
@@ -33,7 +33,7 @@
       <item>
        <widget class="QRadioButton" name="printActiveBranch">
         <property name="text">
-         <string>Print active branch</string>
+         <string>Print active branch.</string>
         </property>
        </widget>
       </item>
@@ -42,7 +42,7 @@
         <item>
          <widget class="QRadioButton" name="printActiveBranchN">
           <property name="text">
-           <string>Print active branch, Number of moves per page</string>
+           <string>Print active branch, Number of moves per page.</string>
           </property>
          </widget>
         </item>
@@ -67,7 +67,7 @@
       <item>
        <widget class="QRadioButton" name="printAllBranches">
         <property name="text">
-         <string>Print all branches</string>
+         <string>Print all branches.</string>
         </property>
        </widget>
       </item>
@@ -76,7 +76,7 @@
         <item>
          <widget class="QRadioButton" name="printAllBranchesN">
           <property name="text">
-           <string>Print all branches, Number of moves per page</string>
+           <string>Print all branches, Number of moves per page.</string>
           </property>
          </widget>
         </item>
@@ -111,16 +111,6 @@
        <widget class="QCheckBox" name="showCoordinate">
         <property name="text">
          <string>Show Coordinate</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QCheckBox" name="includeComments">
-        <property name="text">
-         <string>Includes Comments</string>
         </property>
         <property name="checked">
          <bool>true</bool>
@@ -293,7 +283,6 @@
   <tabstop>printAllBranchesN</tabstop>
   <tabstop>allBranchMovesPerPage</tabstop>
   <tabstop>showCoordinate</tabstop>
-  <tabstop>includeComments</tabstop>
   <tabstop>fontComboBox</tabstop>
   <tabstop>fontSizeComboBox</tabstop>
   <tabstop>headerLeftEdit</tabstop>
