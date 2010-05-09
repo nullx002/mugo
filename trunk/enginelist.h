@@ -9,6 +9,7 @@ class Engine{
         QString path;
         QString parameters;
         QString name;
+        bool    analysis;
 };
 
 class EngineList{

@@ -288,10 +288,10 @@ void BoardWidget::onLButtonDown(QMouseEvent* e){
     }
     else if (tutorMode == eAutoReplay)
         return;
-    else if (editMode == eCountTerritory){
-        addTerritory(boardX, boardY);
+    else if (editMode == eFinalScore){
+        reverseTerritory(boardX, boardY);
         int alive_b=0, alive_w=0, dead_b=0, dead_w=0, bt=0, wt=0;
-        getCountTerritory(alive_b, alive_w, dead_b, dead_w, bt, wt);
+        getFinalScore(alive_b, alive_w, dead_b, dead_w, bt, wt);
         emit updateTerritory(alive_b, alive_w, dead_b, dead_w, capturedBlack, capturedWhite, bt, wt, goData.root->komi);
     }
     else
@@ -1199,7 +1199,7 @@ void BoardWidget::pass(){
 * public slot
 */
 void BoardWidget::setCurrentNode(go::nodePtr node){
-    if (editMode == eCountTerritory)
+    if (editMode == eFinalScore)
         return;
 
     if (node == NULL)
@@ -1887,7 +1887,7 @@ void BoardWidget::drawTerritories(QPainter& p){
 
     for (int by=0; by<ysize; ++by){
         for (int bx=0; bx<xsize; ++bx){
-            if (!board[by][bx].territory() && (editMode != eCountTerritory || !board[by][bx].empty()))
+            if (!board[by][bx].territory() && (editMode != eFinalScore || !board[by][bx].empty()))
                 continue;
 
             int x = xlines[bx];
@@ -2590,14 +2590,14 @@ void BoardWidget::sgfToBoardCoordinate(int sgfX, int sgfY, int& boardX, int& boa
         boardY = ysize - boardY - 1;
 }
 
-void BoardWidget::setCountTerritoryMode(bool countMode){
-    if (countMode){
-        if (editMode != ePlayGame && editMode != eCountTerritory)
+void BoardWidget::setFinalScoreMode(bool mode){
+    if (mode){
+        if (editMode != ePlayGame && editMode != eFinalScore)
             backupEditMode = editMode;
-        editMode = eCountTerritory;
-        countTerritory();
+        editMode = eFinalScore;
+        finalScore();
         int alive_b=0, alive_w=0, dead_b=0, dead_w=0, bt=0, wt=0;
-        getCountTerritory(alive_b, alive_w, dead_b, dead_w, bt, wt);
+        getFinalScore(alive_b, alive_w, dead_b, dead_w, bt, wt);
         emit updateTerritory(alive_b, alive_w, dead_b, dead_w, capturedBlack, capturedWhite, bt, wt, goData.root->komi);
     }
     else{
@@ -2613,7 +2613,7 @@ void BoardWidget::whiteFirst(bool whiteFirst){
     createBoardBuffer();
 }
 
-void BoardWidget::countTerritory(){
+void BoardWidget::finalScore(){
     char* tmp = new char[xsize * ysize];
 
     for (int y=0; y<ysize; ++y){
@@ -2631,7 +2631,7 @@ void BoardWidget::countTerritory(){
     for (int y=0; y<ysize; ++y){
         for (int x=0; x<xsize; ++x){
             if ((board[y][x].blackTerritory() || board[y][x].whiteTerritory())){
-                if (checkDame(x, y))
+                if (isDame(x, y))
                     board[y][x].color = (board[y][x].color & (go::black|go::white)) | go::dame;
             }
         }
@@ -2674,6 +2674,10 @@ void BoardWidget::countTerritory(){
     } while (changed);
 }
 
+void BoardWidget::estimateScore(){
+
+}
+
 void BoardWidget::whichTerritory(int x, int y, char* tmp, int& c){
     if (tmp[y*xsize+x] != 0)
         return;
@@ -2712,7 +2716,7 @@ void BoardWidget::whichTerritory(int x, int y, char* tmp, int& c){
         whichTerritory(x+1, y, tmp, c);
 }
 
-void BoardWidget::addTerritory(int x, int y){
+void BoardWidget::reverseTerritory(int x, int y){
     if (board[y][x].white() && !board[y][x].blackTerritory() && !board[y][x].dame())
         setTerritory(x, y, go::blackTerritory);
     else if (board[y][x].black() && !board[y][x].whiteTerritory() && !board[y][x].dame())
@@ -2720,7 +2724,7 @@ void BoardWidget::addTerritory(int x, int y){
     else if ( (board[y][x].white() || board[y][x].black()) && (board[y][x].blackTerritory() || board[y][x].whiteTerritory() ||  board[y][x].dame()) )
         unsetTerritory(x, y);
 
-    countTerritory();
+    finalScore();
     paintBoard();
 }
 
@@ -2762,7 +2766,7 @@ void BoardWidget::unsetTerritory(int x, int y){
         unsetTerritory(x+1, y);
 }
 
-void BoardWidget::getCountTerritory(int& alive_b, int& alive_w, int& dead_b, int& dead_w, int& bt, int& wt){
+void BoardWidget::getFinalScore(int& alive_b, int& alive_w, int& dead_b, int& dead_w, int& bt, int& wt){
     for (int y=0; y<ysize; ++y){
         for (int x=0; x<xsize; ++x){
             if (board[y][x].blackTerritory()){
@@ -2789,12 +2793,12 @@ void BoardWidget::getCountTerritory(int& alive_b, int& alive_w, int& dead_b, int
     }
 }
 
-bool BoardWidget::checkDame(int x, int y){
+bool BoardWidget::isDame(int x, int y){
     int c = board[y][x].color;
-    return checkDame(c, x-1, y-1, x+1, y-1) || checkDame(c, x+1, y-1, x+1, y+1) || checkDame(c, x-1, y+1, x+1, y+1) || checkDame(c, x-1, y-1, x-1, y+1) || checkDame(c, x-1, y-1, x+1, y+1) || checkDame(c, x+1, y-1, x-1, y+1);
+    return isDame(c, x-1, y-1, x+1, y-1) || isDame(c, x+1, y-1, x+1, y+1) || isDame(c, x-1, y+1, x+1, y+1) || isDame(c, x-1, y-1, x-1, y+1) || isDame(c, x-1, y-1, x+1, y+1) || isDame(c, x+1, y-1, x-1, y+1);
 }
 
-bool BoardWidget::checkDame(int c, int x1, int y1, int x2, int y2){
+bool BoardWidget::isDame(int c, int x1, int y1, int x2, int y2){
     bool area1 = x1 >= 0 && x1 < xsize && y1 >= 0 && y1 < ysize;
     bool area2 = x2 >= 0 && x2 < xsize && y2 >= 0 && y2 < ysize;
     if (!area1 && !area2)
@@ -2863,7 +2867,7 @@ bool BoardWidget::hasTerritory(go::color c1, go::color c2, char* tmp, int x, int
 void BoardWidget::playWithComputer(PlayGame* game){
     playGame = game;
     if (playGame){
-        if (editMode != ePlayGame && editMode != eCountTerritory)
+        if (editMode != ePlayGame && editMode != eFinalScore)
             backupEditMode = editMode;
         editMode = ePlayGame;
 

@@ -9,8 +9,8 @@ EngineList::EngineList()
 void EngineList::save(){
     QStringList list;
     foreach (const Engine& e, engines){
-        list << e.name << e.path << e.parameters
-            << "" << "" << "" << "" << "" << "" << "";  // reserve
+        list << e.name << e.path << e.parameters << QString::number(e.analysis)
+            << "" << "" << "" << "" << "" << "";  // reserve
     }
 
     QSettings settings;
@@ -28,6 +28,7 @@ void EngineList::load(){
         e.name = list[i*10];
         e.path = list[i*10+1];
         e.parameters = list[i*10+2];
+        e.analysis   = list[i*10+3].toInt();
         engines.push_back(e);
     }
 }

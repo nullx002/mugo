@@ -7,6 +7,7 @@
 #include <QActionGroup>
 #include "boardwidget.h"
 #include "countterritorydialog.h"
+#include "gtp.h"
 
 class QTextCodec;
 class QTreeWidget;
@@ -54,6 +55,7 @@ public:
         CountTerritoryDialog* countTerritoryDialog;
 
         PlayGame* playGame;
+        gtp* estimate;
     };
 
     typedef QMap<BoardWidget*, TabData> TabDataMap;
@@ -261,6 +263,7 @@ private slots:
 
     // Tools menu
     void on_actionCountTerritory_triggered();
+    void on_actionEstimateScore_triggered();
     void on_actionPlayWithComputer_triggered();
     void on_actionAutomaticReplay_triggered();
     void on_actionTutorBothSides_triggered();
@@ -330,6 +333,9 @@ private slots:
 
     // auto replay
     void automaticReplay_ended();
+
+    // estimate score
+    void on_gtp_estimated(BoardWidget* board, const QVector< QVector<double> >& territories);
 };
 
 #endif // MAINWINDOW_H

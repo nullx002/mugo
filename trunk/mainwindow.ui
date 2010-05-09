@@ -65,7 +65,7 @@
      <x>0</x>
      <y>0</y>
      <width>937</width>
-     <height>24</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -292,6 +292,7 @@
      <addaction name="actionLanguageJapanese"/>
     </widget>
     <addaction name="actionCountTerritory"/>
+    <addaction name="actionEstimateScore"/>
     <addaction name="actionPlayWithComputer"/>
     <addaction name="separator"/>
     <addaction name="actionAutomaticReplay"/>
@@ -1814,6 +1815,11 @@
   <action name="actionBranchMoveDown">
    <property name="text">
     <string>Move Down</string>
+   </property>
+  </action>
+  <action name="actionEstimateScore">
+   <property name="text">
+    <string>Estimate Score</string>
    </property>
   </action>
  </widget>

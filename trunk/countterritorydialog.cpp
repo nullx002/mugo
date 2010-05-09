@@ -26,13 +26,20 @@ void CountTerritoryDialog::changeEvent(QEvent *e)
     }
 }
 
+void CountTerritoryDialog::done(int r){
+    QDialog::done(r);
+    m_ui->scoreTextEdit->clear();
+}
+
 void CountTerritoryDialog::accept(){
-    if (scorej > 0)
-        informationNode->result = QString("W+%1").arg(scorej);
-    else if (scorej < 0)
-        informationNode->result = QString("B+%1").arg(scorej * -1);
-    else
-        informationNode->result = "Draw";
+    if (informationNode){
+        if (scorej > 0)
+            informationNode->result = QString("W+%1").arg(scorej);
+        else if (scorej < 0)
+            informationNode->result = QString("B+%1").arg(scorej * -1);
+        else
+            informationNode->result = "Draw";
+    }
 
     QDialog::accept();
 }
