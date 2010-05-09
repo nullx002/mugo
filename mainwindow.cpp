@@ -1555,12 +1555,12 @@ void MainWindow::on_actionCountTerritory_triggered(){
 * Slot
 * Tools -> play with computer
 */
-void MainWindow::on_actionPlayWithComputer_triggered(){
-    if (ui->actionPlayWithComputer->isChecked()){
+void MainWindow::on_actionPlayWithGnugo_triggered(){
+    if (ui->actionPlayWithGnugo->isChecked()){
         // start new game.
         PlayWithComputerDialog dlg(this);
         if (dlg.exec() != QDialog::Accepted){
-            ui->actionPlayWithComputer->setChecked(false);
+            ui->actionPlayWithGnugo->setChecked(false);
             return;
         }
 
@@ -1568,12 +1568,12 @@ void MainWindow::on_actionPlayWithComputer_triggered(){
         bool isNewGame = dlg.startPosition == PlayWithComputerDialog::eNewGame;
         if (isNewGame){
             if (fileNew(dlg.size, dlg.size, dlg.handicap, dlg.komi) == false){
-                ui->actionPlayWithComputer->setChecked(false);
+                ui->actionPlayWithGnugo->setChecked(false);
                 return;
             }
-//            QString engineName = QFileInfo(dlg.path).baseName();
-            currentBoard()->getData().root->blackPlayer = dlg.isBlack ? "User" : dlg.name;
-            currentBoard()->getData().root->whitePlayer = dlg.isBlack ? dlg.name : "User";
+            QString engineName = QFileInfo(dlg.path).baseName();
+            currentBoard()->getData().root->blackPlayer = dlg.isBlack ? "User" : engineName;
+            currentBoard()->getData().root->whitePlayer = dlg.isBlack ? engineName : "User";
             currentBoard()->getData().root->date = QDateTime::currentDateTime().toString( Qt::DefaultLocaleShortDate );
             setCaption();
             updateCollection();
@@ -1584,7 +1584,7 @@ void MainWindow::on_actionPlayWithComputer_triggered(){
         }
 
         // create new process
-        QString param = '"' + dlg.path + "\" " + dlg.parameters;
+        QString param = '"' + dlg.path + "\" " + dlg.parameter;
         qDebug() << param;
 
         TabData& tabData = tabDatas[currentBoard()];
@@ -1601,14 +1601,14 @@ void MainWindow::on_actionPlayWithComputer_triggered(){
         // start gtp communication
         delete tabData.playGame;
         tabData.playGame = new gtp(currentBoard(), dlg.isBlack ? go::black : go::white, dlg.size, dlg.komi, dlg.handicap, isNewGame, dlg.level, gtpProcess);
-        connect( tabData.playGame, SIGNAL(gameEnded()), this, SLOT(on_playGame_gameEnded()) );
+        connect( tabData.playGame, SIGNAL(gameEnded()), this, SLOT(playGameEnded()) );
         setPlayWithComputerMode(currentBoard(), true);
         currentBoard()->playWithComputer(tabData.playGame);
     }
     else{
         // stop playing game.
         if (stopGame(currentBoard()) == false){
-            ui->actionPlayWithComputer->setChecked(true);
+            ui->actionPlayWithGnugo->setChecked(true);
             return;
         }
     }
@@ -1987,7 +1987,7 @@ void MainWindow::on_actionBranchMoveDown_triggered(){
 /**
 * Slot
 */
-void MainWindow::on_playGame_gameEnded(){
+void MainWindow::playGameEnded(){
     PlayGame* game = qobject_cast<PlayGame*>( sender() );
 
     BoardWidget* boardWidget = NULL;
@@ -2013,7 +2013,7 @@ void MainWindow::on_playGame_gameEnded(){
     if (boardWidget != currentBoard())
         return;
 
-    ui->actionPlayWithComputer->setChecked(false);
+    ui->actionPlayWithGnugo->setChecked(false);
     if( !abort && !resign ){
         ui->actionCountTerritory->setChecked(true);
         on_actionCountTerritory_triggered();
@@ -2250,10 +2250,10 @@ void MainWindow::updateMenu(){
 
     if (boardWidget->getEditMode() == BoardWidget::ePlayGame){
         setPlayWithComputerMode(currentBoard(), true);
-        ui->actionPlayWithComputer->setChecked( true );
+        ui->actionPlayWithGnugo->setChecked( true );
     }
     else
-        ui->actionPlayWithComputer->setChecked( false );
+        ui->actionPlayWithGnugo->setChecked( false );
 }
 
 /**
@@ -3129,7 +3129,7 @@ void MainWindow::setCountTerritoryMode(BoardWidget* board, bool on){
         ui->actionResetBoard,
 
 //        ui->actionCountTerritory,
-        ui->actionPlayWithComputer,
+        ui->actionPlayWithGnugo,
         ui->actionAutomaticReplay,
         ui->actionTutorBothSides,
         ui->actionTutorOneSide,
@@ -3351,7 +3351,7 @@ void MainWindow::setPlayWithComputerMode(BoardWidget* board, bool on){
     }
 
     if (on){
-        ui->actionPlayWithComputer->setChecked(true);
+        ui->actionPlayWithGnugo->setChecked(true);
         ui->actionGamePass->setEnabled(true);
         ui->actionGameResign->setEnabled(true);
         ui->actionGameUndo->setEnabled(true);
@@ -3362,7 +3362,7 @@ void MainWindow::setPlayWithComputerMode(BoardWidget* board, bool on){
         }
     }
     else{
-        ui->actionPlayWithComputer->setChecked(false);
+        ui->actionPlayWithGnugo->setChecked(false);
         ui->actionGamePass->setEnabled(false);
         ui->actionGameResign->setEnabled(false);
         ui->actionGameUndo->setEnabled(false);
@@ -3471,8 +3471,7 @@ bool MainWindow::stopGame(BoardWidget* boardWidget){
     if (ret != QMessageBox::Ok)
         return false;
 
-    if (tabDatas[boardWidget].playGame->abort() == false)
-        tabDatas[boardWidget].playGame->kill();
+    tabDatas[boardWidget].playGame->abort();
 
     return true;
 }

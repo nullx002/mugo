@@ -6,11 +6,6 @@
 //};
 
 
-PlayGame::PlayGame(QObject *parent)
-    : QObject(parent), boardWidget_(NULL), color_(go::empty), boardSize_(9), komi_(6.5), handicap_(0), isAbort_(true), isResign_(false), isNewGame_(true)
-{
-}
-
 PlayGame::PlayGame(BoardWidget* board, go::color color, int boardSize, const qreal& komi, int handicap, bool newGame, QObject *parent)
     : QObject(parent), boardWidget_(board), color_(color), boardSize_(boardSize), komi_(komi), handicap_(handicap), isAbort_(true), isResign_(false), isNewGame_(newGame)
 {
