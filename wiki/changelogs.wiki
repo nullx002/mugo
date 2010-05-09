@@ -7,7 +7,7 @@
 
 ==1.0.0==
  * add: print preview dialog.
- * add: header/footer string on print option dialog.
+ * add: header/footer string, font setting on print option dialog.
  * add: export image dialog.
  * chg: set current time to game information when playing with computer.
  * chg: set player name when playing with computer.
