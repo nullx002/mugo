@@ -72,9 +72,11 @@ void PlayWithComputerDialog::accept(){
     int engine = m_ui->engineComboBox->currentIndex();
     EngineList engineList;
     engineList.load();
-    name = engineList.engines[engine].name;
-    path = engineList.engines[engine].path;
-    parameters = engineList.engines[engine].parameters;
+    if (engine >= 0 && engine < engineList.engines.size()){
+        name = engineList.engines[engine].name;
+        path = engineList.engines[engine].path;
+        parameters = engineList.engines[engine].parameters;
+    }
 
     // start position
     startPosition = m_ui->newGame->isChecked() ? eNewGame : eContinueGame;
@@ -129,6 +131,10 @@ void PlayWithComputerDialog::updateEngineList(){
     foreach(const Engine& e, engineList.engines){
         m_ui->engineComboBox->addItem( e.name );
     }
+
     int index = QSettings().value("playWithComputer/defaultEngine", 0).toInt();
-    m_ui->engineComboBox->setCurrentIndex( m_ui->engineComboBox->count() > index ? index : 0 );
+    if (index < 0 || index >= m_ui->engineComboBox->count())
+        index = 0;
+    if (m_ui->engineComboBox->count() > 0)
+        m_ui->engineComboBox->setCurrentIndex(index);
 }

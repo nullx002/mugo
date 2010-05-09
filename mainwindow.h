@@ -320,10 +320,10 @@ private slots:
     void openUrlCancel();
 
     // play a game
-    void playGameEnded();
     void on_actionGamePass_triggered();
     void on_actionGameResign_triggered();
     void on_actionGameUndo_triggered();
+    void on_playGame_gameEnded();
 
     // tab change
     void onTabChangeRequest();

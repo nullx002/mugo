@@ -81,8 +81,10 @@ public:
     QProcess* getProcess(){ return process; }
 
 signals:
+    void initialized();
     void getName(const QString&);
     void getVersion(const QString&);
+    void invalidResponseReceived(const QString&);
 
 private:
     void write();
@@ -95,7 +97,6 @@ private:
     QProcess* process;
     QString   gtpBuf;
 
-    bool initialized;
     int index;
     QList<commandPtr> commandList;
     QStringList commandStringList;

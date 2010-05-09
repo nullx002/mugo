@@ -440,7 +440,7 @@ mugo automatically counts territories.</oldsource>
     <message>
         <location filename="mainwindow.cpp" line="1597"/>
         <source>Can not launch computer go program.</source>
-        <translation type="unfinished">碁のプログラムを起動できませんでした。</translation>
+        <translation type="unfinished">囲碁プログラムを起動できませんでした。</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="2027"/>
@@ -1364,7 +1364,7 @@ Do you want to save your changes?</source>
         <location filename="mainwindow.ui" line="1567"/>
         <source>Play with Computer</source>
         <oldsource>Play with gnugo</oldsource>
-        <translation type="unfinished">gnugoと対局</translation>
+        <translation type="unfinished">コンピュータと対局</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="1029"/>
