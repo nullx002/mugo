@@ -3496,10 +3496,18 @@ void MainWindow::on_gtp_estimated(BoardWidget* board, const QVector< QVector<dou
             if (x >= buf[y].size())
                 break;
 
-            if (territories[y][x] <= -0.5)
-                buf[y][x].color |= go::blackTerritory;
-            else if (territories[y][x] >= 0.5)
-                buf[y][x].color |= go::whiteTerritory;
+            if (territories[y][x] <= -0.7){
+                if ( buf[y][x].color & go::whiteTerritory)
+                    buf[y][x].color &= ~go::whiteTerritory;
+                else
+                    buf[y][x].color |= go::blackTerritory;
+            }
+            else if (territories[y][x] >= 0.7){
+                if ( buf[y][x].color & go::blackTerritory)
+                    buf[y][x].color &= ~go::blackTerritory;
+                else
+                    buf[y][x].color |= go::whiteTerritory;
+            }
         }
     }
 
@@ -3529,6 +3537,9 @@ void MainWindow::on_gtp_estimated(BoardWidget* board, const QVector< QVector<dou
 
     tabData.countTerritoryDialog->setScore(alive_b, alive_w, dead_b, dead_w, capturedBlack, capturedWhite, blackTerritory, whiteTerritory, board->getData().root->komi);
     board->paintBoard();
+
+    gtp* gtp_ = qobject_cast<gtp*>( sender() );
+    gtp_->abort();
 }
 
 void MainWindow::readSettings(){
