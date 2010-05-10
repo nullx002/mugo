@@ -37,9 +37,9 @@ gtp::gtp(BoardWidget* board, go::color color, bool newGame, int level, QProcess*
 {
     connect(process, SIGNAL(readyRead()), this, SLOT(on_gtp_read()));
     connect(process, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(on_gtp_finished(int, QProcess::ExitStatus)));
-    list_commands();
     name();
     version();
+    list_commands();
 }
 
 /**
@@ -57,9 +57,9 @@ gtp::gtp(BoardWidget* board, QProcess* proc, QObject* parent)
 {
     connect(process, SIGNAL(readyRead()), this, SLOT(on_gtp_read()));
     connect(process, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(on_gtp_finished(int, QProcess::ExitStatus)));
-    list_commands();
     name();
     version();
+    list_commands();
 }
 
 /**
@@ -77,9 +77,9 @@ gtp::gtp(QProcess* proc, QObject* parent)
 {
     connect(process, SIGNAL(readyRead()), this, SLOT(on_gtp_read()));
     connect(process, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(on_gtp_finished(int, QProcess::ExitStatus)));
-    list_commands();
     name();
     version();
+    list_commands();
 }
 
 /**
@@ -390,10 +390,14 @@ void gtp::processCommand(QString& s){
         supportedCommandList = s.split("\n");
         initialize();
     }
-    else if (command->kind == eName)
+    else if (command->kind == eName){
+        name_ = msg;
         emit getName(msg);
-    else if (command->kind == eVersion)
+    }
+    else if (command->kind == eVersion){
+        version_ = msg;
         emit getVersion(msg);
+    }
     else if (command->kind == eLoadSgf)
         tempFile.remove();
     else if (command->kind == eInitialInfluence)
@@ -497,6 +501,8 @@ void gtp::restoreSgf(){
 * load sgf file to gtp engine if supported.
 */
 bool gtp::loadSgf(){
+    if (name_.compare("fuego", Qt::CaseInsensitive) == 0)  // fuego returns loadsgf at list_commands, but fuego freeze in loadsgf.
+        return false;
     if (supportedCommandList.indexOf("loadsgf") == -1)
         return false;
 
