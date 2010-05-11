@@ -1,3 +1,7 @@
+mugo (1.1.0-1) unstable; urgency=low
+  add: engine sttings on play with computer dialog.
+  add: estimate score.
+
 mugo (1.0.1-1) unstable; urgency=low
   add: include comments on print option dialog.
   chg: allowing only single instance of an application.
