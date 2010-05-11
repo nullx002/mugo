@@ -1,5 +1,9 @@
 #summary One-sentence summary of this page.
 
+==1.1.0==
+ * add: engine sttings on play with computer dialog.
+ * add: estimate score.
+
 ==1.0.1==
  * add: include comments on print option dialog.
  * chg: allowing only single instance of an application.
