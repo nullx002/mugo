@@ -16,8 +16,8 @@ Mugo is go editing program and GUI interface for GTP engine.
 
 
 = Screen Shot =
-http://sikusiku.sakura.ne.jp/mugo/0.13.0/mugo-win.png<br/>
-(mugo 0.13.0 on windows)
+http://sikusiku.sakura.ne.jp/mugo/1.1.0/mugo-win.png<br/>
+(mugo 1.1.0 on windows, open Kogo's Joseki Dictionary)
 
 http://sikusiku.sakura.ne.jp/mugo/1.0.0/mugo-linux.png<br/>
 (mugo 1.0.0 on linux, japanese menu, open sgf collection)
