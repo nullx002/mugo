@@ -1,3 +1,20 @@
+/*
+    mugo, sgf editor.
+    Copyright (C) 2009-2010 nsase.
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 #include <QDebug>
 #include <QSettings>
 #include <QMessageBox>
@@ -1808,7 +1825,7 @@ void MainWindow::on_actionNextTab_triggered(){
 * Help -> About
 */
 void MainWindow::on_actionAbout_triggered(){
-    QMessageBox::about(this, APPNAME, tr(APPNAME " version " VERSION "\n\nCopyright 2009 " AUTHOR));
+    QMessageBox::about(this, APPNAME, tr("<html><p>%1 version %2</p><p>Copyright 2009-2010 %3</p><p><a href=\"http://code.google.com/p/mugo/\">http://code.google.com/p/mugo/</a></p></html>").arg(APPNAME).arg(VERSION).arg(AUTHOR));
 }
 
 /**
