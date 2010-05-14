@@ -1,5 +1,6 @@
 = 印刷 =
-[http://sikusiku.sakura.ne.jp/mugo/manual/jp/print.png]
+[http://sikusiku.sakura.ne.jp/mugo/manual/jp/print1.png]
+[http://sikusiku.sakura.ne.jp/mugo/manual/jp/print2.png]
 
 =ファイル名や印刷でのマクロに関して=
 
