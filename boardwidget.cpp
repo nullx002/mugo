@@ -37,7 +37,8 @@
 #   define usleep(X) Sleep(X/1000)
 
     QString Sound::fileName;
-    MCI_OPEN_PARMS Sound::mop = {0};
+    MCI_OPEN_PARMSW Sound::mopw = {0};
+    MCI_OPEN_PARMSA Sound::mopa = {0};
 #else
 #   include <unistd.h>
 #endif
@@ -45,6 +46,10 @@
 Sound::Sound(QWidget* parent_) : parent(parent_){
 #if defined(Q_WS_WIN)
     lastClock = 0;
+
+    memset(&versionInfo, 0, sizeof(versionInfo));
+    versionInfo.dwOSVersionInfoSize = sizeof(versionInfo);
+    GetVersionEx(&versionInfo);
 #else
     media = Phonon::createPlayer(Phonon::NotificationCategory);
 #endif
@@ -63,13 +68,24 @@ void Sound::setCurrentSource(const QString& source){
         return;
 
     fileName = source;
-    if (mop.wDeviceID != 0)
-        mciSendCommand(mop.wDeviceID, MCI_CLOSE, 0, 0);
 
-    memset(&mop, 0, sizeof(mop));
-    mop.lpstrDeviceType  = L"WaveAudio";
-    mop.lpstrElementName = (WCHAR*)source.utf16();
-    mciSendCommand(0, MCI_OPEN, MCI_OPEN_TYPE|MCI_OPEN_ELEMENT, (DWORD)&mop);
+    if (versionInfo.dwMajorVersion >= 5){
+        if (mopw.wDeviceID != 0)
+            mciSendCommandW(mopw.wDeviceID, MCI_CLOSE, 0, 0);
+        memset(&mopw, 0, sizeof(mopw));
+        mopw.lpstrDeviceType  = L"WaveAudio";
+        mopw.lpstrElementName = (WCHAR*)source.utf16();
+        mciSendCommandW(0, MCI_OPEN, MCI_OPEN_TYPE|MCI_OPEN_ELEMENT, (DWORD)&mopw);
+    }
+    else{
+        if (mopa.wDeviceID != 0)
+            mciSendCommandA(mopa.wDeviceID, MCI_CLOSE, 0, 0);
+        memset(&mopa, 0, sizeof(mopa));
+        mopa.lpstrDeviceType  = "WaveAudio";
+        QByteArray local8 = source.toLocal8Bit();
+        mopa.lpstrElementName = local8.constData();
+        mciSendCommandA(0, MCI_OPEN, MCI_OPEN_TYPE|MCI_OPEN_ELEMENT, (DWORD)&mopa);
+    }
 #else
     media->setCurrentSource(source);
 #endif
@@ -78,11 +94,22 @@ void Sound::setCurrentSource(const QString& source){
 void Sound::play(){
 #if defined(Q_WS_WIN)
     DWORD currentClock = GetTickCount();
-    if (mop.wDeviceID && currentClock - lastClock > 200){
-        mciSendCommand(mop.wDeviceID, MCI_STOP, 0, 0);
-        mciSendCommand(mop.wDeviceID, MCI_SEEK, MCI_SEEK_TO_START, 0);
-        mciSendCommand(mop.wDeviceID, MCI_PLAY, 0, 0);
-        lastClock = currentClock;
+    
+    if (versionInfo.dwMajorVersion >= 5){
+        if (mopw.wDeviceID && currentClock - lastClock > 200){
+            mciSendCommandW(mopw.wDeviceID, MCI_STOP, 0, 0);
+            mciSendCommandW(mopw.wDeviceID, MCI_SEEK, MCI_SEEK_TO_START, 0);
+            mciSendCommandW(mopw.wDeviceID, MCI_PLAY, 0, 0);
+            lastClock = currentClock;
+        }
+    }
+    else{
+        if (mopa.wDeviceID && currentClock - lastClock > 200){
+            mciSendCommandA(mopa.wDeviceID, MCI_STOP, 0, 0);
+            mciSendCommandA(mopa.wDeviceID, MCI_SEEK, MCI_SEEK_TO_START, 0);
+            mciSendCommandA(mopa.wDeviceID, MCI_PLAY, 0, 0);
+            lastClock = currentClock;
+        }
     }
 #else
     if (media->currentTime() == media->totalTime()){

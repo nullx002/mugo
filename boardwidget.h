@@ -58,7 +58,9 @@ public:
 #if defined(Q_WS_WIN)
     double lastClock;
     static QString fileName;
-    static MCI_OPEN_PARMS mop;
+    static MCI_OPEN_PARMSW mopw;
+    static MCI_OPEN_PARMSA mopa;
+    OSVERSIONINFO versionInfo;
 #else
     Phonon::MediaObject* media;
 #endif
