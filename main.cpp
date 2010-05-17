@@ -68,9 +68,25 @@ bool installTranslator(QApplication& a, QTranslator& translator, const QString& 
 }
 
 
+/**
+* Constructor
+*/
+Application::Application(int argc, char** argv) : QtSingleApplication(argc, argv), mainWindow(NULL){
+    if (style())
+        defaultStyle_ = style()->objectName();
+    connect(this, SIGNAL(messageReceived(const QString&)), SLOT(received(const QString&)));
+}
+
+/**
+* Destructor
+*/
 Application::~Application(){
 }
 
+/**
+* event
+* in mac, filename is not set to argc/argv
+*/
 #if defined(Q_WS_MAC)
 bool Application::event(QEvent* e){
     switch(e->type()){
@@ -86,6 +102,9 @@ bool Application::event(QEvent* e){
 }
 #endif
 
+/**
+* receive message from other instance.
+*/
 void Application::received(const QString& msg){
     if (mainWindow == NULL)
         return;
@@ -101,6 +120,9 @@ void Application::received(const QString& msg){
 #endif
 }
 
+/**
+* set main window
+*/
 void Application::setMainWindow(MainWindow* win){
     setActivationWindow(win);
     mainWindow = win;
@@ -124,12 +146,17 @@ int main(int argc, char *argv[])
     a.setOrganizationName(AUTHOR);
     a.setApplicationName(APPNAME);
     a.setApplicationVersion(VERSION);
-#ifdef Q_WS_WIN
-    a.setStyle( new QtDotNetStyle(QtDotNetStyle::Standard) );
-#endif
 
-    // Load translation
+    // window style
     QSettings settings;
+    QString style = settings.value("style").toString();
+    if (style.isEmpty() == false)
+        a.setStyle(style);
+#ifdef Q_WS_WIN
+    else
+        a.setStyle( new QtDotNetStyle(QtDotNetStyle::Standard) );
+#endif
+    // Load translation
     QString locale = settings.value("language").toString();
     if (locale.isEmpty())
         locale = QLocale::system().name();

@@ -57,6 +57,11 @@
          <string>Save</string>
         </property>
        </item>
+       <item>
+        <property name="text">
+         <string>Window</string>
+        </property>
+       </item>
       </widget>
      </item>
      <item>
@@ -68,7 +73,7 @@
         <enum>QFrame::Plain</enum>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>6</number>
        </property>
        <widget class="QWidget" name="boardPage">
         <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -731,6 +736,22 @@
             </size>
            </property>
           </spacer>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="windowPage">
+        <layout class="QVBoxLayout" name="verticalLayout_8">
+         <item>
+          <widget class="QGroupBox" name="windowStyleGroupBox">
+           <property name="title">
+            <string>Window Style</string>
+           </property>
+           <layout class="QHBoxLayout" name="horizontalLayout_6">
+            <item>
+             <widget class="QListWidget" name="windowStyleList"/>
+            </item>
+           </layout>
+          </widget>
          </item>
         </layout>
        </widget>
