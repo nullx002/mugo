@@ -26,9 +26,7 @@ class MainWindow;
 class Application : public QtSingleApplication{
 Q_OBJECT
 public:
-    Application(int argc, char** argv) : QtSingleApplication(argc, argv), mainWindow(NULL){
-        connect(this, SIGNAL(messageReceived(const QString&)), SLOT(received(const QString&)));
-    }
+    Application(int argc, char** argv);
     virtual ~Application();
 
 #if defined(Q_WS_MAC)
@@ -37,11 +35,14 @@ public:
 
     void setMainWindow(MainWindow* win);
 
+    const QString& defaultStyle() const{ return defaultStyle_; }
+
 public slots:
     void received(const QString& msg);
 
 private:
     MainWindow* mainWindow;
+    QString defaultStyle_;
 };
 
 

@@ -4,7 +4,7 @@
 <context>
     <name>AddNodeCommand</name>
     <message>
-        <location filename="command.cpp" line="18"/>
+        <location filename="command.cpp" line="35"/>
         <source>Add %1</source>
         <translation type="unfinished">%1に追加</translation>
     </message>
@@ -51,57 +51,57 @@
         <translation type="unfinished">碁盤</translation>
     </message>
     <message>
-        <location filename="boardwidget.cpp" line="666"/>
+        <location filename="boardwidget.cpp" line="710"/>
         <source>%1(%2)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="boardwidget.cpp" line="675"/>
+        <location filename="boardwidget.cpp" line="719"/>
         <source>Move %1: </source>
         <translation type="unfinished">%1手：</translation>
     </message>
     <message>
-        <location filename="boardwidget.cpp" line="759"/>
+        <location filename="boardwidget.cpp" line="803"/>
         <source>Black</source>
         <translation type="unfinished">黒</translation>
     </message>
     <message>
-        <location filename="boardwidget.cpp" line="761"/>
+        <location filename="boardwidget.cpp" line="805"/>
         <source>White</source>
         <translation type="unfinished">白</translation>
     </message>
     <message>
-        <location filename="boardwidget.cpp" line="765"/>
+        <location filename="boardwidget.cpp" line="809"/>
         <source>Date</source>
         <translation type="unfinished">日付</translation>
     </message>
     <message>
-        <location filename="boardwidget.cpp" line="767"/>
+        <location filename="boardwidget.cpp" line="811"/>
         <source>Result</source>
         <translation type="unfinished">結果</translation>
     </message>
     <message>
-        <location filename="boardwidget.cpp" line="787"/>
+        <location filename="boardwidget.cpp" line="831"/>
         <source>Figure %1 (%2 - %3)</source>
         <translation type="unfinished">第 %1 譜 （%2 ～ %3）</translation>
     </message>
     <message>
-        <location filename="boardwidget.cpp" line="1095"/>
+        <location filename="boardwidget.cpp" line="1139"/>
         <source>Rotate SGF</source>
         <translation type="unfinished">回転</translation>
     </message>
     <message>
-        <location filename="boardwidget.cpp" line="1103"/>
+        <location filename="boardwidget.cpp" line="1147"/>
         <source>Flip SGF Horizontally</source>
         <translation type="unfinished">左右に反転</translation>
     </message>
     <message>
-        <location filename="boardwidget.cpp" line="1111"/>
+        <location filename="boardwidget.cpp" line="1155"/>
         <source>Flip SGF Vertically</source>
         <translation type="unfinished">上下に反転</translation>
     </message>
     <message>
-        <location filename="boardwidget.cpp" line="2397"/>
+        <location filename="boardwidget.cpp" line="2441"/>
         <source>Input Label</source>
         <translation type="unfinished">ラベルを入力</translation>
     </message>
@@ -123,60 +123,60 @@ mugo automatically counts territories.</oldsource>
 地が自動で計算されます。</translation>
     </message>
     <message>
-        <location filename="countterritorydialog.cpp" line="53"/>
+        <location filename="countterritorydialog.cpp" line="70"/>
         <source>Black: %1 = %2(territories) + %3(captured)</source>
         <translation type="unfinished">黒： %1 = %2(地) + %3(アゲハマ)</translation>
     </message>
     <message>
-        <location filename="countterritorydialog.cpp" line="54"/>
+        <location filename="countterritorydialog.cpp" line="71"/>
         <source>White: %1 = %2(territories) + %3(captured) + %4(komi)</source>
         <translation type="unfinished">白： %1 = %2(地) + %3(アゲハマ) + %4(コミ)</translation>
     </message>
     <message>
-        <location filename="countterritorydialog.cpp" line="58"/>
-        <location filename="countterritorydialog.cpp" line="84"/>
+        <location filename="countterritorydialog.cpp" line="75"/>
+        <location filename="countterritorydialog.cpp" line="101"/>
         <source>W+%1</source>
         <translation type="unfinished">白%1目勝ち</translation>
     </message>
     <message>
-        <location filename="countterritorydialog.cpp" line="60"/>
-        <location filename="countterritorydialog.cpp" line="86"/>
+        <location filename="countterritorydialog.cpp" line="77"/>
+        <location filename="countterritorydialog.cpp" line="103"/>
         <source>B+%1</source>
         <translation type="unfinished">黒%1目勝ち</translation>
     </message>
     <message>
-        <location filename="countterritorydialog.cpp" line="62"/>
-        <location filename="countterritorydialog.cpp" line="88"/>
+        <location filename="countterritorydialog.cpp" line="79"/>
+        <location filename="countterritorydialog.cpp" line="105"/>
         <source>Draw</source>
         <translation type="unfinished">持碁</translation>
     </message>
     <message>
-        <location filename="countterritorydialog.cpp" line="64"/>
+        <location filename="countterritorydialog.cpp" line="81"/>
         <source>Japanese Rule</source>
         <translation type="unfinished">日本ルール</translation>
     </message>
     <message>
-        <location filename="countterritorydialog.cpp" line="74"/>
+        <location filename="countterritorydialog.cpp" line="91"/>
         <source>Black: %1 = %2(point) - %3(komi) / 2</source>
         <translation type="unfinished">黒： %1 = %2(ポイント) - %3(コミ) / 2</translation>
     </message>
     <message>
-        <location filename="countterritorydialog.cpp" line="75"/>
+        <location filename="countterritorydialog.cpp" line="92"/>
         <source>White: %1 = %2(point) + %3(komi) / 2</source>
         <translation type="unfinished">白： %1 = %2(ポイント) + %3(コミ) / 2</translation>
     </message>
     <message>
-        <location filename="countterritorydialog.cpp" line="78"/>
+        <location filename="countterritorydialog.cpp" line="95"/>
         <source>Black: %1 = %2(point) + %3(komi) / 2</source>
         <translation type="unfinished">黒： %1 = %2(ポイント) + %3(コミ) / 2</translation>
     </message>
     <message>
-        <location filename="countterritorydialog.cpp" line="79"/>
+        <location filename="countterritorydialog.cpp" line="96"/>
         <source>White: %1 = %2(point) - %3(komi) / 2</source>
         <translation type="unfinished">白： %1 = %2(ポイント) - %3(コミ) / 2</translation>
     </message>
     <message>
-        <location filename="countterritorydialog.cpp" line="90"/>
+        <location filename="countterritorydialog.cpp" line="107"/>
         <source>Chinese Rule</source>
         <translation type="unfinished">中国ルール</translation>
     </message>
@@ -184,7 +184,7 @@ mugo automatically counts territories.</oldsource>
 <context>
     <name>DeleteNodeCommand</name>
     <message>
-        <location filename="command.cpp" line="60"/>
+        <location filename="command.cpp" line="77"/>
         <source>Delete %1</source>
         <translation type="unfinished">%1を削除</translation>
     </message>
@@ -192,14 +192,14 @@ mugo automatically counts territories.</oldsource>
 <context>
     <name>EngineListDialog</name>
     <message>
-        <location filename="enginelistdialog.cpp" line="33"/>
-        <location filename="enginelistdialog.cpp" line="171"/>
+        <location filename="enginelistdialog.cpp" line="50"/>
+        <location filename="enginelistdialog.cpp" line="188"/>
         <location filename="enginelistdialog.ui" line="256"/>
         <source>Use Analysis</source>
         <translation type="unfinished">解析に使用する</translation>
     </message>
     <message>
-        <location filename="enginelistdialog.cpp" line="112"/>
+        <location filename="enginelistdialog.cpp" line="129"/>
         <source>Can not launch computer go program.</source>
         <translation type="unfinished">囲碁プログラムを起動できませんでした。</translation>
     </message>
@@ -273,12 +273,12 @@ mugo automatically counts territories.</oldsource>
 <context>
     <name>ExportAsciiDialog</name>
     <message>
-        <location filename="exportasciidialog.cpp" line="14"/>
+        <location filename="exportasciidialog.cpp" line="31"/>
         <source>English</source>
         <translation type="unfinished">英語</translation>
     </message>
     <message>
-        <location filename="exportasciidialog.cpp" line="15"/>
+        <location filename="exportasciidialog.cpp" line="32"/>
         <source>Japanese</source>
         <translation type="unfinished">日本語</translation>
     </message>
@@ -431,7 +431,7 @@ mugo automatically counts territories.</oldsource>
 <context>
     <name>InsertNodeCommand</name>
     <message>
-        <location filename="command.cpp" line="40"/>
+        <location filename="command.cpp" line="57"/>
         <source>Insert %1</source>
         <translation type="unfinished">%1を挿入</translation>
     </message>
@@ -439,123 +439,128 @@ mugo automatically counts territories.</oldsource>
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="mainwindow.cpp" line="50"/>
+        <location filename="mainwindow.cpp" line="67"/>
         <source>All Go Format(*.sgf *.ugf *.ugi *.gib *.ngf);;sgf(*.sgf);;ugf(*.ugf *.ugi);;gib(*.gib);;ngf(*.ngf);;All Files(*.*)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="253"/>
+        <location filename="mainwindow.cpp" line="270"/>
         <source>Captured</source>
         <translation type="unfinished">アゲハマ</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="396"/>
+        <location filename="mainwindow.cpp" line="413"/>
         <source>Enter the URL of a SGF file.</source>
         <translation type="unfinished">SGFファイルのURLを入力してください。</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1583"/>
+        <location filename="mainwindow.cpp" line="1600"/>
         <source>Please setup the engine.</source>
         <translation type="unfinished">先に対局プログラムの設定を行ってください。</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1629"/>
+        <location filename="mainwindow.cpp" line="1646"/>
         <source>Can not launch computer go program.</source>
         <translation type="unfinished">囲碁プログラムを起動できませんでした。</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="2059"/>
+        <location filename="mainwindow.cpp" line="1828"/>
+        <source>&lt;html&gt;&lt;p&gt;%1 version %2&lt;/p&gt;&lt;p&gt;Copyright 2009-2010 %3&lt;/p&gt;&lt;p&gt;&lt;a href=&quot;http://code.google.com/p/mugo/&quot;&gt;http://code.google.com/p/mugo/&lt;/a&gt;&lt;/p&gt;&lt;/html&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="2076"/>
         <source>Computer resigns.</source>
         <translation type="unfinished">コンピュータが投了しました。</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="3553"/>
+        <location filename="mainwindow.cpp" line="3581"/>
         <source>Are you sure you want to stop playing with computer?</source>
         <translation type="unfinished">コンピュータとの対局を中断してもよろしいですか？</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="2077"/>
+        <location filename="mainwindow.cpp" line="2094"/>
         <source>Are you sure you want to resign?</source>
         <translation type="unfinished">投了しますか？</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="2459"/>
+        <location filename="mainwindow.cpp" line="2476"/>
         <source>Downloading SGF File</source>
         <translation type="unfinished">SGFファイルのダウンロード中</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1041"/>
-        <location filename="mainwindow.cpp" line="1293"/>
+        <location filename="mainwindow.cpp" line="1058"/>
+        <location filename="mainwindow.cpp" line="1310"/>
         <source>Input move number</source>
         <translation type="unfinished">着手番号を入力してください</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1068"/>
+        <location filename="mainwindow.cpp" line="1085"/>
         <source>Input node name</source>
         <translation type="unfinished">ノード名を入力してください</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1770"/>
+        <location filename="mainwindow.cpp" line="1787"/>
         <source>Are you sure you want to clear the configuration?</source>
         <translation type="unfinished">設定を初期値に戻しますがよろしいですか？</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1918"/>
+        <location filename="mainwindow.cpp" line="1935"/>
         <source>Dead: Black %1 White %2</source>
         <oldsource>Dead: B %1 W %2</oldsource>
         <translation type="unfinished">アゲハマ：黒 %1 白 %2</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1922"/>
+        <location filename="mainwindow.cpp" line="1939"/>
         <source>LastMove: %1(%2)</source>
         <translation type="unfinished">最終着手：%1(%2)</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="597"/>
+        <location filename="mainwindow.cpp" line="614"/>
         <source>Remove sgf from collection failed because this sgf is editing.</source>
         <translation type="unfinished">編集中のSGFを削除することは出来ません。</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="2158"/>
+        <location filename="mainwindow.cpp" line="2175"/>
         <source>%1 %2(W) vs %3 %4(B) Result:%5</source>
         <oldsource>W:%1 %2 vs B:%3 %4 Result:%5</oldsource>
         <translation type="unfinished">白番：%1 %2　対　黒番：%3 %4　結果：%5</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="2335"/>
+        <location filename="mainwindow.cpp" line="2352"/>
         <source>Untitled-%1</source>
         <translation type="unfinished">無題-%1</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="2619"/>
+        <location filename="mainwindow.cpp" line="2636"/>
         <source>%1 has been modified.
 Do you want to save your changes?</source>
         <translation type="unfinished">%1は変更されています。
 変更内容を保存しますか？</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="2518"/>
+        <location filename="mainwindow.cpp" line="2535"/>
         <source>sgf(*.sgf)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="2687"/>
+        <location filename="mainwindow.cpp" line="2704"/>
         <source>Download failed: %1.</source>
         <translation type="unfinished">ダウンロードに失敗しました： %1.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="2914"/>
+        <location filename="mainwindow.cpp" line="2931"/>
         <location filename="mainwindow.ui" line="1783"/>
         <source>Pass</source>
         <translation type="unfinished">パス</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="2924"/>
+        <location filename="mainwindow.cpp" line="2941"/>
         <source>Other</source>
         <translation type="unfinished">その他</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="3426"/>
+        <location filename="mainwindow.cpp" line="3443"/>
         <source>Changing the language requires that application be restarted.</source>
         <translation type="unfinished">言語の変更は次回起動時から有効になります。</translation>
     </message>
@@ -598,7 +603,7 @@ Do you want to save your changes?</source>
         <translation type="unfinished">注釈</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="248"/>
+        <location filename="mainwindow.cpp" line="265"/>
         <location filename="mainwindow.ui" line="252"/>
         <source>Move Number</source>
         <translation type="unfinished">着手番号</translation>
@@ -1479,7 +1484,7 @@ Do you want to save your changes?</source>
 <context>
     <name>MoveMarkCommand</name>
     <message>
-        <location filename="command.cpp" line="212"/>
+        <location filename="command.cpp" line="229"/>
         <source>Move Mark %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1487,7 +1492,7 @@ Do you want to save your changes?</source>
 <context>
     <name>MovePositionCommand</name>
     <message>
-        <location filename="command.cpp" line="172"/>
+        <location filename="command.cpp" line="189"/>
         <source>Move Position %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1495,7 +1500,7 @@ Do you want to save your changes?</source>
 <context>
     <name>MoveStoneCommand</name>
     <message>
-        <location filename="command.cpp" line="193"/>
+        <location filename="command.cpp" line="210"/>
         <source>Move Stone %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1503,12 +1508,12 @@ Do you want to save your changes?</source>
 <context>
     <name>PlayWithComputerDialog</name>
     <message>
-        <location filename="playwithcomputerdialog.cpp" line="18"/>
+        <location filename="playwithcomputerdialog.cpp" line="35"/>
         <source>Black</source>
         <translation type="unfinished">黒</translation>
     </message>
     <message>
-        <location filename="playwithcomputerdialog.cpp" line="19"/>
+        <location filename="playwithcomputerdialog.cpp" line="36"/>
         <source>White</source>
         <translation type="unfinished">白</translation>
     </message>
@@ -1714,7 +1719,7 @@ Do you want to save your changes?</source>
 <context>
     <name>SaveImageDialog</name>
     <message>
-        <location filename="saveimagedialog.cpp" line="76"/>
+        <location filename="saveimagedialog.cpp" line="93"/>
         <source>PNG image(*.png);;Bitmap image(*.bmp);;JPEG image(*.jpeg *.jpg);;TIFF image(*.tiff *.tif)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1752,7 +1757,7 @@ Do you want to save your changes?</source>
 <context>
     <name>SetCommentCommand</name>
     <message>
-        <location filename="command.cpp" line="152"/>
+        <location filename="command.cpp" line="169"/>
         <source>Set Comment %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1760,7 +1765,7 @@ Do you want to save your changes?</source>
 <context>
     <name>SetMoveNumberCommand</name>
     <message>
-        <location filename="command.cpp" line="93"/>
+        <location filename="command.cpp" line="110"/>
         <source>Set Move Number %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1768,7 +1773,7 @@ Do you want to save your changes?</source>
 <context>
     <name>SetNodeNameCommand</name>
     <message>
-        <location filename="command.cpp" line="132"/>
+        <location filename="command.cpp" line="149"/>
         <source>Set Node Name %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1777,7 +1782,7 @@ Do you want to save your changes?</source>
     <name>SetupDialog</name>
     <message>
         <location filename="setupdialog.ui" line="32"/>
-        <location filename="setupdialog.ui" line="78"/>
+        <location filename="setupdialog.ui" line="83"/>
         <source>Board</source>
         <translation type="unfinished">碁盤</translation>
     </message>
@@ -1788,140 +1793,155 @@ Do you want to save your changes?</source>
     </message>
     <message>
         <location filename="setupdialog.ui" line="42"/>
-        <location filename="setupdialog.ui" line="407"/>
+        <location filename="setupdialog.ui" line="412"/>
         <source>Markers</source>
         <oldsource>Marker</oldsource>
         <translation type="unfinished">マーカー</translation>
     </message>
     <message>
         <location filename="setupdialog.ui" line="47"/>
-        <location filename="setupdialog.ui" line="556"/>
+        <location filename="setupdialog.ui" line="561"/>
         <source>Navigation</source>
         <translation type="unfinished">ナビゲーション</translation>
     </message>
     <message>
         <location filename="setupdialog.ui" line="52"/>
-        <location filename="setupdialog.ui" line="631"/>
+        <location filename="setupdialog.ui" line="636"/>
         <source>Sound</source>
         <translation type="unfinished">サウンド</translation>
     </message>
     <message>
         <location filename="setupdialog.ui" line="57"/>
-        <location filename="setupdialog.ui" line="706"/>
+        <location filename="setupdialog.ui" line="711"/>
         <source>Save</source>
         <translation type="unfinished">保存</translation>
     </message>
     <message>
-        <location filename="setupdialog.ui" line="92"/>
-        <location filename="setupdialog.ui" line="235"/>
-        <location filename="setupdialog.ui" line="321"/>
-        <source>Default Image</source>
-        <translation type="unfinished">標準の画像</translation>
-    </message>
-    <message>
-        <location filename="setupdialog.ui" line="500"/>
-        <source>Label Type</source>
-        <translation type="unfinished">ラベルの種類</translation>
-    </message>
-    <message>
-        <location filename="setupdialog.ui" line="508"/>
-        <source>A,B,C...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="setupdialog.ui" line="513"/>
-        <source>a,b,c...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="setupdialog.ui" line="518"/>
-        <source>1,2,3...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message utf8="true">
-        <location filename="setupdialog.ui" line="523"/>
-        <source>ア,イ,ウ...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message utf8="true">
-        <location filename="setupdialog.ui" line="528"/>
-        <source>イ,ロ,ハ...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="setupdialog.ui" line="562"/>
-        <source>Fast forward/rewind steps</source>
-        <translation type="unfinished">少し戻る／進むの移動量</translation>
-    </message>
-    <message>
-        <location filename="setupdialog.ui" line="585"/>
-        <source>Automatic Replay</source>
-        <translation type="unfinished">自動再生</translation>
-    </message>
-    <message>
-        <location filename="setupdialog.ui" line="591"/>
-        <source>Interval(msec)</source>
-        <translation type="unfinished">間隔（ミリ秒）</translation>
-    </message>
-    <message>
-        <location filename="setupdialog.ui" line="645"/>
-        <source>Default Sound</source>
-        <translation type="unfinished">標準のサウンド</translation>
-    </message>
-    <message>
-        <location filename="setupdialog.ui" line="712"/>
-        <source>Default FileName</source>
-        <translation type="unfinished">ファイル名</translation>
+        <location filename="setupdialog.ui" line="62"/>
+        <source>Window</source>
+        <translation type="unfinished">ウィンドウ</translation>
     </message>
     <message>
         <location filename="setupdialog.ui" line="97"/>
         <location filename="setupdialog.ui" line="240"/>
         <location filename="setupdialog.ui" line="326"/>
+        <source>Default Image</source>
+        <translation type="unfinished">標準の画像</translation>
+    </message>
+    <message>
+        <location filename="setupdialog.ui" line="505"/>
+        <source>Label Type</source>
+        <translation type="unfinished">ラベルの種類</translation>
+    </message>
+    <message>
+        <location filename="setupdialog.ui" line="513"/>
+        <source>A,B,C...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="setupdialog.ui" line="518"/>
+        <source>a,b,c...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="setupdialog.ui" line="523"/>
+        <source>1,2,3...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message utf8="true">
+        <location filename="setupdialog.ui" line="528"/>
+        <source>ア,イ,ウ...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message utf8="true">
+        <location filename="setupdialog.ui" line="533"/>
+        <source>イ,ロ,ハ...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="setupdialog.ui" line="567"/>
+        <source>Fast forward/rewind steps</source>
+        <translation type="unfinished">少し戻る／進むの移動量</translation>
+    </message>
+    <message>
+        <location filename="setupdialog.ui" line="590"/>
+        <source>Automatic Replay</source>
+        <translation type="unfinished">自動再生</translation>
+    </message>
+    <message>
+        <location filename="setupdialog.ui" line="596"/>
+        <source>Interval(msec)</source>
+        <translation type="unfinished">間隔（ミリ秒）</translation>
+    </message>
+    <message>
         <location filename="setupdialog.ui" line="650"/>
-        <source>Select File</source>
-        <translation type="unfinished">ファイルを指定</translation>
+        <source>Default Sound</source>
+        <translation type="unfinished">標準のサウンド</translation>
     </message>
     <message>
-        <location filename="setupdialog.ui" line="421"/>
-        <source>Focus Triangle</source>
-        <translation type="unfinished">▲ フォーカス用の三角</translation>
+        <location filename="setupdialog.ui" line="717"/>
+        <source>Default FileName</source>
+        <translation type="unfinished">ファイル名</translation>
     </message>
     <message>
-        <location filename="setupdialog.ui" line="426"/>
-        <source>Circle</source>
-        <translation type="unfinished">○ マル</translation>
-    </message>
-    <message>
-        <location filename="setupdialog.ui" line="431"/>
-        <source>Cross</source>
-        <translation type="unfinished">× バツ</translation>
-    </message>
-    <message>
-        <location filename="setupdialog.ui" line="436"/>
-        <source>Square</source>
-        <translation type="unfinished">□ 四角</translation>
-    </message>
-    <message>
-        <location filename="setupdialog.ui" line="441"/>
-        <source>Triangle</source>
-        <translation type="unfinished">△ 三角</translation>
-    </message>
-    <message>
-        <location filename="setupdialog.cpp" line="160"/>
-        <location filename="setupdialog.cpp" line="215"/>
-        <location filename="setupdialog.cpp" line="246"/>
-        <source>All Image Files(*.bmp *.gif *.jpg *.jpeg *.png *.tif *.tiff);;All Files(*.*)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="setupdialog.cpp" line="301"/>
-        <source>Sound Files(*.wav *.mp3);;All Files(*.*)</source>
-        <translation type="unfinished"></translation>
+        <location filename="setupdialog.ui" line="747"/>
+        <source>Window Style</source>
+        <translation type="unfinished">ウィンドウスタイル</translation>
     </message>
     <message>
         <location filename="setupdialog.ui" line="102"/>
         <location filename="setupdialog.ui" line="245"/>
         <location filename="setupdialog.ui" line="331"/>
+        <location filename="setupdialog.ui" line="655"/>
+        <source>Select File</source>
+        <translation type="unfinished">ファイルを指定</translation>
+    </message>
+    <message>
+        <location filename="setupdialog.ui" line="426"/>
+        <source>Focus Triangle</source>
+        <translation type="unfinished">▲ フォーカス用の三角</translation>
+    </message>
+    <message>
+        <location filename="setupdialog.ui" line="431"/>
+        <source>Circle</source>
+        <translation type="unfinished">○ マル</translation>
+    </message>
+    <message>
+        <location filename="setupdialog.ui" line="436"/>
+        <source>Cross</source>
+        <translation type="unfinished">× バツ</translation>
+    </message>
+    <message>
+        <location filename="setupdialog.ui" line="441"/>
+        <source>Square</source>
+        <translation type="unfinished">□ 四角</translation>
+    </message>
+    <message>
+        <location filename="setupdialog.ui" line="446"/>
+        <source>Triangle</source>
+        <translation type="unfinished">△ 三角</translation>
+    </message>
+    <message>
+        <location filename="setupdialog.cpp" line="91"/>
+        <source>Default</source>
+        <translation type="unfinished">デフォルト</translation>
+    </message>
+    <message>
+        <location filename="setupdialog.cpp" line="215"/>
+        <location filename="setupdialog.cpp" line="270"/>
+        <location filename="setupdialog.cpp" line="301"/>
+        <source>All Image Files(*.bmp *.gif *.jpg *.jpeg *.png *.tif *.tiff);;All Files(*.*)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="setupdialog.cpp" line="356"/>
+        <source>Sound Files(*.wav *.mp3);;All Files(*.*)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="setupdialog.ui" line="107"/>
+        <location filename="setupdialog.ui" line="250"/>
+        <location filename="setupdialog.ui" line="336"/>
         <source>Fill Color</source>
         <translation type="unfinished">単色</translation>
     </message>
@@ -1931,74 +1951,74 @@ Do you want to save your changes?</source>
         <translation type="unfinished">設定</translation>
     </message>
     <message>
-        <location filename="setupdialog.ui" line="181"/>
+        <location filename="setupdialog.ui" line="186"/>
         <source>Background in Tutor</source>
         <translation type="unfinished">棋譜並べ時の背景色</translation>
     </message>
     <message>
-        <location filename="setupdialog.ui" line="164"/>
+        <location filename="setupdialog.ui" line="169"/>
         <source>Background Color</source>
         <translation type="unfinished">背景色</translation>
     </message>
     <message>
-        <location filename="setupdialog.ui" line="84"/>
-        <location filename="setupdialog.ui" line="227"/>
-        <location filename="setupdialog.ui" line="313"/>
-        <location filename="setupdialog.ui" line="413"/>
-        <location filename="setupdialog.ui" line="637"/>
+        <location filename="setupdialog.ui" line="89"/>
+        <location filename="setupdialog.ui" line="232"/>
+        <location filename="setupdialog.ui" line="318"/>
+        <location filename="setupdialog.ui" line="418"/>
+        <location filename="setupdialog.ui" line="642"/>
         <source>Type</source>
         <translation type="unfinished">種類</translation>
     </message>
     <message>
-        <location filename="setupdialog.ui" line="110"/>
-        <location filename="setupdialog.ui" line="253"/>
-        <location filename="setupdialog.ui" line="339"/>
+        <location filename="setupdialog.ui" line="115"/>
+        <location filename="setupdialog.ui" line="258"/>
+        <location filename="setupdialog.ui" line="344"/>
         <source>Color</source>
         <translation type="unfinished">色</translation>
     </message>
     <message>
-        <location filename="setupdialog.ui" line="127"/>
-        <location filename="setupdialog.ui" line="273"/>
-        <location filename="setupdialog.ui" line="359"/>
-        <location filename="setupdialog.ui" line="658"/>
+        <location filename="setupdialog.ui" line="132"/>
+        <location filename="setupdialog.ui" line="278"/>
+        <location filename="setupdialog.ui" line="364"/>
+        <location filename="setupdialog.ui" line="663"/>
         <source>Path</source>
         <translation type="unfinished">ファイル</translation>
     </message>
     <message>
-        <location filename="setupdialog.ui" line="146"/>
-        <location filename="setupdialog.ui" line="292"/>
-        <location filename="setupdialog.ui" line="378"/>
-        <location filename="setupdialog.ui" line="677"/>
+        <location filename="setupdialog.ui" line="151"/>
+        <location filename="setupdialog.ui" line="297"/>
+        <location filename="setupdialog.ui" line="383"/>
+        <location filename="setupdialog.ui" line="682"/>
         <source>...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="setupdialog.ui" line="158"/>
+        <location filename="setupdialog.ui" line="163"/>
         <source>Background</source>
         <translation type="unfinished">背景</translation>
     </message>
     <message>
-        <location filename="setupdialog.ui" line="221"/>
+        <location filename="setupdialog.ui" line="226"/>
         <source>White Stone</source>
         <translation type="unfinished">白石</translation>
     </message>
     <message>
-        <location filename="setupdialog.ui" line="304"/>
+        <location filename="setupdialog.ui" line="309"/>
         <source>Black Stone</source>
         <translation type="unfinished">黒石</translation>
     </message>
     <message>
-        <location filename="setupdialog.ui" line="449"/>
+        <location filename="setupdialog.ui" line="454"/>
         <source>Color (White Stone)</source>
         <translation type="unfinished">色（白石）</translation>
     </message>
     <message>
-        <location filename="setupdialog.ui" line="466"/>
+        <location filename="setupdialog.ui" line="471"/>
         <source>Color (Black Stone)</source>
         <translation type="unfinished">色（黒石）</translation>
     </message>
     <message>
-        <location filename="setupdialog.ui" line="483"/>
+        <location filename="setupdialog.ui" line="488"/>
         <source>Branch Color</source>
         <translation type="unfinished">分岐の色</translation>
     </message>
@@ -2006,7 +2026,7 @@ Do you want to save your changes?</source>
 <context>
     <name>UnsetMoveNumberCommand</name>
     <message>
-        <location filename="command.cpp" line="112"/>
+        <location filename="command.cpp" line="129"/>
         <source>Unset Move Number %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2014,7 +2034,7 @@ Do you want to save your changes?</source>
 <context>
     <name>go::informationNode</name>
     <message>
-        <location filename="godata.cpp" line="137"/>
+        <location filename="godata.cpp" line="154"/>
         <source>GameInfo</source>
         <translation type="unfinished">ゲーム情報</translation>
     </message>
@@ -2022,107 +2042,107 @@ Do you want to save your changes?</source>
 <context>
     <name>go::node</name>
     <message>
-        <location filename="godata.cpp" line="66"/>
+        <location filename="godata.cpp" line="83"/>
         <source>Add Empty</source>
         <translation type="unfinished">空白を追加</translation>
     </message>
     <message>
-        <location filename="godata.cpp" line="69"/>
+        <location filename="godata.cpp" line="86"/>
         <source>Add White</source>
         <translation type="unfinished">白石を追加</translation>
     </message>
     <message>
-        <location filename="godata.cpp" line="72"/>
+        <location filename="godata.cpp" line="89"/>
         <source>Add Black</source>
         <translation type="unfinished">黒石を追加</translation>
     </message>
     <message>
-        <location filename="godata.cpp" line="78"/>
+        <location filename="godata.cpp" line="95"/>
         <source>Mark</source>
         <translation type="unfinished">マーク</translation>
     </message>
     <message>
-        <location filename="godata.cpp" line="81"/>
+        <location filename="godata.cpp" line="98"/>
         <source>BlackTerritories</source>
         <translation type="unfinished">黒地</translation>
     </message>
     <message>
-        <location filename="godata.cpp" line="84"/>
+        <location filename="godata.cpp" line="101"/>
         <source>WhiteTerritories</source>
         <translation type="unfinished">白地</translation>
     </message>
     <message>
-        <location filename="godata.cpp" line="63"/>
+        <location filename="godata.cpp" line="80"/>
         <source>Comment</source>
         <translation type="unfinished">コメント</translation>
     </message>
     <message>
-        <location filename="godata.cpp" line="75"/>
+        <location filename="godata.cpp" line="92"/>
         <source>Dim</source>
         <translation type="unfinished">グレー領域</translation>
     </message>
     <message>
-        <location filename="godata.cpp" line="87"/>
+        <location filename="godata.cpp" line="104"/>
         <source>Good Move</source>
         <translation type="unfinished">好手</translation>
     </message>
     <message>
-        <location filename="godata.cpp" line="89"/>
+        <location filename="godata.cpp" line="106"/>
         <source>Very Good Move</source>
         <translation type="unfinished">絶好手</translation>
     </message>
     <message>
-        <location filename="godata.cpp" line="91"/>
+        <location filename="godata.cpp" line="108"/>
         <source>Bad Move</source>
         <translation type="unfinished">悪手</translation>
     </message>
     <message>
-        <location filename="godata.cpp" line="93"/>
+        <location filename="godata.cpp" line="110"/>
         <source>Very Bad Move</source>
         <translation type="unfinished">大悪手</translation>
     </message>
     <message>
-        <location filename="godata.cpp" line="95"/>
+        <location filename="godata.cpp" line="112"/>
         <source>Doubtful Move</source>
         <translation type="unfinished">疑問手</translation>
     </message>
     <message>
-        <location filename="godata.cpp" line="97"/>
+        <location filename="godata.cpp" line="114"/>
         <source>Interesting Move</source>
         <translation type="unfinished">趣向</translation>
     </message>
     <message>
-        <location filename="godata.cpp" line="100"/>
+        <location filename="godata.cpp" line="117"/>
         <source>Even</source>
         <translation type="unfinished">互角</translation>
     </message>
     <message>
-        <location filename="godata.cpp" line="102"/>
+        <location filename="godata.cpp" line="119"/>
         <source>Good for Black</source>
         <translation type="unfinished">黒やや良し</translation>
     </message>
     <message>
-        <location filename="godata.cpp" line="104"/>
+        <location filename="godata.cpp" line="121"/>
         <source>Very Good for Black</source>
         <translation type="unfinished">黒良し</translation>
     </message>
     <message>
-        <location filename="godata.cpp" line="106"/>
+        <location filename="godata.cpp" line="123"/>
         <source>Good for White</source>
         <translation type="unfinished">白やや良し</translation>
     </message>
     <message>
-        <location filename="godata.cpp" line="108"/>
+        <location filename="godata.cpp" line="125"/>
         <source>Very Good for White</source>
         <translation type="unfinished">白良し</translation>
     </message>
     <message>
-        <location filename="godata.cpp" line="110"/>
+        <location filename="godata.cpp" line="127"/>
         <source>Unclear</source>
         <translation type="unfinished">形勢不明</translation>
     </message>
     <message>
-        <location filename="godata.cpp" line="113"/>
+        <location filename="godata.cpp" line="130"/>
         <source>Hotspot</source>
         <translation type="unfinished">天王山</translation>
     </message>

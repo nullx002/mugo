@@ -18,10 +18,15 @@
 #include <QDebug>
 #include <QColorDialog>
 #include <QSettings>
+#include <QStyleFactory>
 #include "appdef.h"
+#include "mugoapp.h"
 #include "setupdialog.h"
 #include "ui_setupdialog.h"
 #include "appdef.h"
+#ifdef Q_WS_WIN
+#  include "qtdotnetstyle.h"
+#endif
 
 SetupDialog::SetupDialog(QWidget *parent) :
     QDialog(parent),
@@ -81,6 +86,19 @@ SetupDialog::SetupDialog(QWidget *parent) :
 
     // save name
     m_ui->saveNameEdit->setText( settings.value("saveName", SAVE_NAME).toString() );
+
+    // window style
+    m_ui->windowStyleList->addItem( tr("Default") );
+    m_ui->windowStyleList->addItems( QStyleFactory::keys() );
+    QString style = settings.value("style").toString();
+    if (style.isEmpty())
+        m_ui->windowStyleList->setCurrentRow(0);
+    else
+        for (int i=0; i<m_ui->windowStyleList->count(); ++i)
+            if (m_ui->windowStyleList->item(i)->text() == style){
+                m_ui->windowStyleList->setCurrentRow(i);
+                break;
+            }
 }
 
 SetupDialog::~SetupDialog()
@@ -138,6 +156,26 @@ void SetupDialog::accept(){
 
     // save name
     settings.setValue("saveName", m_ui->saveNameEdit->text());
+
+    // window style
+    QString oldStyle = settings.value("style").toString();
+    QString newStyle = m_ui->windowStyleList->currentItem()->text();
+    int style = m_ui->windowStyleList->currentRow();
+    if (style == 0)
+        settings.remove("style");
+    else
+        settings.setValue("style", newStyle);
+
+    if (style == 0)
+#if defined(Q_WS_WIN)
+        qApp->setStyle( new QtDotNetStyle(QtDotNetStyle::Standard) );
+#elif defined(Q_WS_MAC)
+        qApp->setStyle( "macintosh" );
+#else
+        qApp->setStyle( qobject_cast<Application*>(qApp)->defaultStyle() );
+#endif
+    else if (oldStyle != newStyle)
+        qApp->setStyle(newStyle);
 }
 
 /**
