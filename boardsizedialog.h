@@ -40,7 +40,8 @@ public:
     BoardSizeDialog(QWidget *parent = 0);
     ~BoardSizeDialog();
 
-    int size;
+    int xsize;
+    int ysize;
 
 protected:
     virtual void changeEvent(QEvent *e);
@@ -51,6 +52,7 @@ private:
 
 private slots:
     void on_radioCustomButton_toggled(bool checked);
+    void on_radioRectangularButton_toggled(bool checked);
 };
 
 #endif // BOARDSIZEDIALOG_H

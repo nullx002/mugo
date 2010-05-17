@@ -51,13 +51,17 @@ void BoardSizeDialog::accept()
 {
     QDialog::accept();
     if (ui->radio19Button->isChecked())
-        size = 19;
+        xsize = ysize = 19;
     else if (ui->radio13Button->isChecked())
-        size = 13;
+        xsize = ysize = 13;
     else if (ui->radio9Button->isChecked())
-        size = 9;
-    else
-        size = ui->customSpinBox->value();
+        xsize = ysize = 9;
+    else if (ui->radioCustomButton->isChecked())
+        xsize = ysize = ui->customSpinBox->value();
+    else{
+        xsize = ui->xsizeSpinBox->value();
+        ysize = ui->ysizeSpinBox->value();
+    }
 }
 
 /**
@@ -68,4 +72,15 @@ void BoardSizeDialog::on_radioCustomButton_toggled(bool checked)
 {
     // if custom radio button is checked, enable custom spin button.
     ui->customSpinBox->setEnabled(checked);
+}
+
+/**
+* slot
+* rectangular radio button was toggled.
+*/
+void BoardSizeDialog::on_radioRectangularButton_toggled(bool checked)
+{
+    // row count and column count spin box is enabled if rectangular radio button is checked.
+    ui->xsizeSpinBox->setEnabled(checked);
+    ui->ysizeSpinBox->setEnabled(checked);
 }

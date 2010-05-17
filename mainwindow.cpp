@@ -390,7 +390,7 @@ void MainWindow::on_actionNew_triggered(){
     if (dlg.exec() != QDialog::Accepted)
         return;
 
-    fileNew(dlg.size, dlg.size);
+    fileNew(dlg.xsize, dlg.ysize);
 }
 
 /**
