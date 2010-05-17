@@ -38,9 +38,19 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="boardsizedialog.ui" line="50"/>
+        <location filename="boardsizedialog.ui" line="52"/>
         <source>Custom Board Size</source>
         <translation type="unfinished">盤の大きさを自由に設定</translation>
+    </message>
+    <message>
+        <location filename="boardsizedialog.ui" line="85"/>
+        <source>Rectangular Board Size</source>
+        <translation type="unfinished">長方形の盤を作成</translation>
+    </message>
+    <message>
+        <location filename="boardsizedialog.ui" line="120"/>
+        <source>x</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1734,22 +1744,22 @@ Do you want to save your changes?</source>
         <translation type="unfinished">ファイル名</translation>
     </message>
     <message>
-        <location filename="saveimagedialog.ui" line="37"/>
+        <location filename="saveimagedialog.ui" line="43"/>
         <source>&amp;Browse...</source>
         <translation type="unfinished">参照...</translation>
     </message>
     <message>
-        <location filename="saveimagedialog.ui" line="46"/>
+        <location filename="saveimagedialog.ui" line="52"/>
         <source>Image Size</source>
         <translation type="unfinished">画像サイズ</translation>
     </message>
     <message>
-        <location filename="saveimagedialog.ui" line="70"/>
+        <location filename="saveimagedialog.ui" line="76"/>
         <source>Show Coordinate</source>
         <translation type="unfinished">座標を表示</translation>
     </message>
     <message>
-        <location filename="saveimagedialog.ui" line="80"/>
+        <location filename="saveimagedialog.ui" line="86"/>
         <source>black and white</source>
         <translation type="unfinished">白黒</translation>
     </message>

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>376</width>
-    <height>480</height>
+    <height>503</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -48,11 +48,11 @@
         </item>
         <item>
          <widget class="QSpinBox" name="activeBranchMovesPerPage">
-          <property name="maximumSize">
-           <size>
-            <width>50</width>
-            <height>16777215</height>
-           </size>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
           </property>
           <property name="maximum">
            <number>1000</number>
@@ -82,11 +82,11 @@
         </item>
         <item>
          <widget class="QSpinBox" name="allBranchMovesPerPage">
-          <property name="maximumSize">
-           <size>
-            <width>50</width>
-            <height>16777215</height>
-           </size>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
           </property>
           <property name="maximum">
            <number>1000</number>
@@ -134,11 +134,11 @@
         </item>
         <item>
          <widget class="QComboBox" name="fontSizeComboBox">
-          <property name="maximumSize">
-           <size>
-            <width>50</width>
-            <height>16777215</height>
-           </size>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
           </property>
           <item>
            <property name="text">
