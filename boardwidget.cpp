@@ -680,43 +680,41 @@ void BoardWidget::printNode(QPrinter& printer, QPainter& p, go::nodePtr node, in
         ++moveNumber;
         ++moveNumberInPage;
 
-        if ( !( printer.printRange() == QPrinter::PageRange && (page < printer.fromPage() || page > printer.toPage()) ) ){
-            int bx, by;
-            sgfToBoardCoordinate(node->position.x, node->position.y, bx, by);
-            board[by][bx].color  = node->color;
-            board[by][bx].number = moveNumber;
-            removeDeadStones(bx, by);
+        int bx, by;
+        sgfToBoardCoordinate(node->position.x, node->position.y, bx, by);
+        board[by][bx].color  = node->color;
+        board[by][bx].number = moveNumber;
+        removeDeadStones(bx, by);
 
-            if (buf[by][bx].empty()){
-                drawStone(p, bx, by, node->color);
-                buf[by][bx].color  = node->color;
-                buf[by][bx].number = moveNumber;
+        if (buf[by][bx].empty()){
+            drawStone(p, bx, by, node->color);
+            buf[by][bx].color  = node->color;
+            buf[by][bx].number = moveNumber;
 
-                if (moveNumber < 10)
-                    font.setPointSizeF(boxSize * 0.41);
-                else if (moveNumber < 99)
-                    font.setPointSizeF(boxSize * 0.38);
-                else
-                    font.setPointSizeF(boxSize * 0.35);
+            if (moveNumber < 10)
+                font.setPointSizeF(boxSize * 0.41);
+            else if (moveNumber < 99)
+                font.setPointSizeF(boxSize * 0.38);
+            else
+                font.setPointSizeF(boxSize * 0.35);
 
-                font.setWeight(QFont::Black);
-                p.setFont(font);
+            font.setWeight(QFont::Black);
+            p.setFont(font);
 
-                QString s = QString("%1").arg(moveNumber);
-                p.setPen( node->isBlack() ? Qt::white : Qt::black );
-                p.drawText(xlines[bx] - boxSize, ylines[by] - boxSize, boxSize * 2, boxSize * 2, Qt::AlignCenter, s);
-            }
-            else{
-                QString s = QString( tr("%1(%2)") ).arg(moveNumber).arg( getXYString(bx, by) );
-                if (!rangai.isEmpty())
-                    rangai.append(", ");
-                rangai.append(s);
-            }
+            QString s = QString("%1").arg(moveNumber);
+            p.setPen( node->isBlack() ? Qt::white : Qt::black );
+            p.drawText(xlines[bx] - boxSize, ylines[by] - boxSize, boxSize * 2, boxSize * 2, Qt::AlignCenter, s);
+        }
+        else{
+            QString s = QString( tr("%1(%2)") ).arg(moveNumber).arg( getXYString(bx, by) );
+            if (!rangai.isEmpty())
+                rangai.append(", ");
+            rangai.append(s);
         }
     }
 
     if (printIncludeComments && node->comment.isEmpty() == false)
-        comments.push_back( QString( tr("Move %1: ") ).arg(moveNumber).append(node->comment) );
+        comments.push_back( tr("Move %1: " ).arg(moveNumber).append(node->comment) );
 
     p.restore();
 }
@@ -850,9 +848,6 @@ void BoardWidget::printCaption(QPrinter& printer, QPainter& p, int& fig, int sta
 }
 
 void BoardWidget::printRangai(QPrinter& printer, QPainter& p, int& page, int& fig, int& startNumber, int& endNumber, int& moveNumberInPage, QString& rangai, QStringList& comments){
-    if (printer.printRange() == QPrinter::PageRange && (page < printer.fromPage() || page > printer.toPage()))
-        return;
-
     printCaption(printer, p, fig, startNumber, endNumber, true);
 
     p.save();
@@ -878,6 +873,7 @@ void BoardWidget::printRangai(QPrinter& printer, QPainter& p, int& page, int& fi
         }
         QRect r2;
         p.drawText(r.left(), r.top(), printer.width() - r.left(), printer.height()-r.top(), Qt::TextWordWrap|Qt::AlignLeft, comment, &r2);
+
         r.moveTop( r2.bottom() + 10 );
     }
 
@@ -904,11 +900,9 @@ void BoardWidget::printBoard(QPrinter& printer, QPainter& p, BoardBuffer& buf, i
 
 void BoardWidget::newPage(QPrinter& printer, QPainter& p, int& page, int& fig, int& moveNumberInPage){
     ++page;
+    moveNumberInPage = 0;
 
-    if (printer.printRange() == QPrinter::PageRange && (page < printer.fromPage() || page > printer.toPage()))
-        return;
-
-    if (page > 1 && page > printer.fromPage())
+    if (page > 1)
         printer.newPage();
 
     p.setTransform( QTransform() );
@@ -917,13 +911,11 @@ void BoardWidget::newPage(QPrinter& printer, QPainter& p, int& page, int& fig, i
     printFooter(printer, p, page);
 
     static int paintHeightForFirstPage;
-    if (page == 1 || page == printer.fromPage()){
+    if (page == 1){
         printTitle(printer, p, page);
         paintHeightForFirstPage = footerRect.top() - headerRect.bottom();
     }
     paintHeight = paintHeightForFirstPage;
-
-    moveNumberInPage = 0;
 }
 
 void BoardWidget::setPrintOption(int type, int movesPerPage, bool showCoordinate, bool includeComments, const QFont& font, const QString& fileName, const QString& headerLeftFormat_, const QString& headerCenterFormat_, const QString& headerRightFormat_, const QString& footerLeftFormat_, const QString& footerCenterFormat_, const QString& footerRightFormat_){
