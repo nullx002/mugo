@@ -29,6 +29,14 @@ public:
     Application(int argc, char** argv);
     virtual ~Application();
 
+    // translation
+    void    loadTranslation(QString locale);
+    bool    installTranslator(QTranslator* translator, const QString& path, QString file);
+    QString getTranslationPath();
+
+    // window style
+    void    setWindowStyle(const QString& style);
+
 #if defined(Q_WS_MAC)
     bool event(QEvent*);
 #endif
@@ -41,7 +49,9 @@ public slots:
     void received(const QString& msg);
 
 private:
-    MainWindow* mainWindow;
+    MainWindow*  mainWindow;
+    QTranslator* qtTranslator;
+    QTranslator* myTranslator;
     QString defaultStyle_;
 };
 

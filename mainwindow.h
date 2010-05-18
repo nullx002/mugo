@@ -94,6 +94,7 @@ public:
     bool stopGame(BoardWidget* boardWidget);
 
 protected:
+    virtual void changeEvent(QEvent* e);
     virtual void closeEvent(QCloseEvent* e);
     virtual void keyPressEvent(QKeyEvent* event);
     virtual void dragEnterEvent(QDragEnterEvent* event);
