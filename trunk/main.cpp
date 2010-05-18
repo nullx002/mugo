@@ -32,7 +32,85 @@
 #include "mainwindow.h"
 
 
-QString getTranslationPath(){
+/**
+* Constructor
+*/
+Application::Application(int argc, char** argv)
+    : QtSingleApplication(argc, argv)
+    , mainWindow(NULL)
+    , qtTranslator(NULL)
+    , myTranslator(NULL){
+    if (style())
+        defaultStyle_ = style()->objectName();
+//    a.addLibraryPath( a.applicationDirPath() + "/plugins" );
+
+    setOrganizationName(AUTHOR);
+    setApplicationName(APPNAME);
+    setApplicationVersion(VERSION);
+
+    connect(this, SIGNAL(messageReceived(const QString&)), SLOT(received(const QString&)));
+}
+
+/**
+* Destructor
+*/
+Application::~Application(){
+}
+
+/**
+* find translation file and install.
+*/
+void Application::loadTranslation(QString locale){
+    // if translator is installed, remove first.
+    if (qtTranslator){
+        removeTranslator(qtTranslator);
+        delete qtTranslator;
+    }
+    if (myTranslator){
+        removeTranslator(myTranslator);
+        delete myTranslator;
+    }
+
+    // Load translation
+    if (locale.isEmpty())
+        locale = QLocale::system().name();
+
+    // application's translation path
+    QString translationPath = getTranslationPath();
+
+    // qt translation
+    qtTranslator = new QTranslator;
+    if (installTranslator(qtTranslator, QLibraryInfo::location(QLibraryInfo::TranslationsPath), "qt_" + locale) == false)
+        if (installTranslator(qtTranslator, translationPath, "qt_" + locale) == false){
+            delete qtTranslator;
+            qtTranslator = NULL;
+        }
+
+    // application translation
+    myTranslator = new QTranslator;
+    if (installTranslator(myTranslator, translationPath, "mugo." + locale) == false){
+        delete myTranslator;
+        myTranslator = NULL;
+    }
+}
+
+/**
+* install translator
+*/
+bool Application::installTranslator(QTranslator* translator, const QString& path, QString file){
+    if (translator->load(file, path) == false){
+        file = file.toLower();
+        if (translator->load(file, path) == false)
+            return false;
+    }
+    QtSingleApplication::installTranslator(translator);
+    return true;
+}
+
+/**
+* get translation path
+*/
+QString Application::getTranslationPath(){
     QString appPath = qApp->applicationDirPath();
     QStringList pathList;
 
@@ -46,41 +124,30 @@ QString getTranslationPath(){
     pathList << QFileInfo(appPath + "/../Resources/translations/").absolutePath()
              << "./translations";
 #endif
-    QStringList::iterator iter = pathList.begin();
-    while (iter != pathList.end()){
-        QDir dir(*iter);
-        if (dir.exists())
-            return *iter;
-        ++iter;
+
+    foreach( const QString& path, pathList){
+        QDir dir(path);
+        if ( QDir(path).exists() )
+            return path;
     }
 
     return "./";
 }
 
-bool installTranslator(QApplication& a, QTranslator& translator, const QString& path, QString file){
-    if (translator.load(file, path) == false){
-        file = file.toLower();
-        if (translator.load(file, path) == false)
-            return false;
-    }
-    a.installTranslator(&translator);
-    return true;
-}
-
-
 /**
-* Constructor
+* set window style
 */
-Application::Application(int argc, char** argv) : QtSingleApplication(argc, argv), mainWindow(NULL){
-    if (style())
-        defaultStyle_ = style()->objectName();
-    connect(this, SIGNAL(messageReceived(const QString&)), SLOT(received(const QString&)));
-}
-
-/**
-* Destructor
-*/
-Application::~Application(){
+void Application::setWindowStyle(const QString& style){
+    if (style.isEmpty() == false)
+        setStyle(style);
+    else
+#if defined(Q_WS_WIN)
+        setStyle( new QtDotNetStyle(QtDotNetStyle::Standard) );
+#elif defined(Q_WS_MAC)
+        setStyle( "macintosh" );
+#else
+        setStyle( defaultStyle_ );
+#endif
 }
 
 /**
@@ -128,13 +195,17 @@ void Application::setMainWindow(MainWindow* win){
     mainWindow = win;
 }
 
+/**
+* entory point
+*/
 int main(int argc, char *argv[])
 {
     putenv( "UNICODEMAP_JP=cp932" );
 
-// is QFileOpenEvent received on macx??
+    // application
     Application a(argc, argv);
 
+    // if 2nd instance, file open in 1st instance.
     QStringList args = a.arguments();
     QString param;
     for(int i=1; i<args.size(); ++i)
@@ -142,43 +213,22 @@ int main(int argc, char *argv[])
     if (a.sendMessage(param))
         return 0;
 
-//    a.addLibraryPath( a.applicationDirPath() + "/plugins" );
-    a.setOrganizationName(AUTHOR);
-    a.setApplicationName(APPNAME);
-    a.setApplicationVersion(VERSION);
+    // settings
+    QSettings settings;
 
     // window style
-    QSettings settings;
-    QString style = settings.value("style").toString();
-    if (style.isEmpty() == false)
-        a.setStyle(style);
-#ifdef Q_WS_WIN
-    else
-        a.setStyle( new QtDotNetStyle(QtDotNetStyle::Standard) );
-#endif
+    a.setWindowStyle( settings.value("style").toString() );
+
     // Load translation
-    QString locale = settings.value("language").toString();
-    if (locale.isEmpty())
-        locale = QLocale::system().name();
+    a.loadTranslation( settings.value("language").toString() );
 
-    // application's translation path
-    QTranslator appTranslator;
-    QString translationPath = getTranslationPath();
-
-    // qt translation
-    QTranslator qtTranslator;
-    if (installTranslator(a, qtTranslator, QLibraryInfo::location(QLibraryInfo::TranslationsPath), "qt_" + locale) == false)
-        installTranslator(a, qtTranslator, translationPath, "qt_" + locale);
-
-    // application translation
-    QTranslator myTranslator;
-    installTranslator(a, myTranslator, translationPath, "mugo." + locale);
-
+    // set codecs
 //    QTextCodec::setCodecForCStrings( QTextCodec::codecForLocale() );
 //    QTextCodec::setCodecForTr( QTextCodec::codecForLocale() );
     QTextCodec::setCodecForCStrings( QTextCodec::codecForName("UTF-8") );
     QTextCodec::setCodecForTr( QTextCodec::codecForName("UTF-8") );
 
+    // create main window
     MainWindow m;
     m.show();
     a.setMainWindow(&m);

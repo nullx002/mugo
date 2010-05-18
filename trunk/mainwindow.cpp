@@ -30,6 +30,7 @@
 #include <QProgressDialog>
 #include <QDateTime>
 #include "appdef.h"
+#include "mugoapp.h"
 #include "sgf.h"
 #include "ugf.h"
 #include "gib.h"
@@ -334,6 +335,18 @@ BoardWidget* MainWindow::currentBoard(){
 
 const BoardWidget* MainWindow::currentBoard() const{
     return qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+}
+
+void MainWindow::changeEvent(QEvent *e)
+{
+    QMainWindow::changeEvent(e);
+    switch (e->type()) {
+    case QEvent::LanguageChange:
+        ui->retranslateUi(this);
+        break;
+    default:
+        break;
+    }
 }
 
 void MainWindow::closeEvent(QCloseEvent* e){
@@ -1745,6 +1758,7 @@ void MainWindow::on_actionLanguageSystemDefault_triggered(){
     QSettings settings;
     settings.remove("language");
     alertLanguageChanged();
+//    qobject_cast<Application*>(qApp)->loadTranslation( QString() );
 }
 
 /**
@@ -1755,6 +1769,7 @@ void MainWindow::on_actionLanguageEnglish_triggered(){
     QSettings settings;
     settings.setValue("language", "en");
     alertLanguageChanged();
+//    qobject_cast<Application*>(qApp)->loadTranslation("en");
 }
 
 /**
@@ -1765,6 +1780,7 @@ void MainWindow::on_actionLanguageJapanese_triggered(){
     QSettings settings;
     settings.setValue("language", "ja_JP");
     alertLanguageChanged();
+//    qobject_cast<Application*>(qApp)->loadTranslation("ja_JP");
 }
 
 /**

@@ -165,17 +165,7 @@ void SetupDialog::accept(){
         settings.remove("style");
     else
         settings.setValue("style", newStyle);
-
-    if (style == 0)
-#if defined(Q_WS_WIN)
-        qApp->setStyle( new QtDotNetStyle(QtDotNetStyle::Standard) );
-#elif defined(Q_WS_MAC)
-        qApp->setStyle( "macintosh" );
-#else
-        qApp->setStyle( qobject_cast<Application*>(qApp)->defaultStyle() );
-#endif
-    else if (oldStyle != newStyle)
-        qApp->setStyle(newStyle);
+    qobject_cast<Application*>(qApp)->setWindowStyle(style ? newStyle : "");
 }
 
 /**
