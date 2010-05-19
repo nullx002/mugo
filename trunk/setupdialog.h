@@ -38,7 +38,7 @@ private:
     Ui::SetupDialog *m_ui;
 
     // board
-    QColor boardColor, whiteColor, blackColor, bgColor, tutorColor;
+    QColor boardColor, whiteColor, blackColor, coordinateColor, bgColor, tutorColor;
 
     // markers
     QColor focusWhiteColor, focusBlackColor, branchColor;
@@ -50,6 +50,7 @@ private slots:
     void on_boardTypeComboBox_currentIndexChanged(int index);
     void on_boardColorButton_clicked();
     void on_boardPathButton_clicked();
+    void on_coordinateColorButton_clicked();
     void on_bgColorButton_clicked();
     void on_bgTutorColorButton_clicked();
 

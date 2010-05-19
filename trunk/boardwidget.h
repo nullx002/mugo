@@ -373,7 +373,7 @@ private:
     QPixmap black1, black2;
     QPixmap white1, white2;
     QPixmap boardImage1, boardImage2;
-    QColor  boardColor, blackColor, whiteColor, bgColor, tutorColor;
+    QColor  boardColor, blackColor, whiteColor, coordinateColor, bgColor, tutorColor;
     QColor  focusWhiteColor, focusBlackColor, branchColor;
 
     int paintWidth;

@@ -370,6 +370,7 @@ void BoardWidget::readSettings(){
     // board
     boardType  = settings.value("board/boardType").toInt();
     boardColor = settings.value("board/boardColor", BOARD_COLOR).value<QColor>();
+    coordinateColor = settings.value("board/coordinateColor", COORDINATE_COLOR).value<QColor>();
     bgColor    = settings.value("board/bgColor", BG_COLOR).value<QColor>();
     tutorColor = settings.value("board/bgTutorColor", BG_TUTOR_COLOR).value<QColor>();
     if (boardType == 0){
@@ -1646,6 +1647,8 @@ void BoardWidget::drawCoordinates(QPainter& p, bool showCoordinates){
         return;
 
     p.save();
+
+    p.setPen( coordinateColor );
 
     QRect r = p.boundingRect(0, 0, 1, 1, Qt::AlignCenter, "999");
 

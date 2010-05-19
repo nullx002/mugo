@@ -42,6 +42,10 @@ SetupDialog::SetupDialog(QWidget *parent) :
     m_ui->boardColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(boardColor.red()).arg(boardColor.green()).arg(boardColor.blue()) );
     m_ui->boardPathEdit->setText( settings.value("board/boardPath").toString() );
 
+    // board/coordinat ecolor
+    coordinateColor = settings.value("board/coordinateColor", COORDINATE_COLOR).value<QColor>();
+    m_ui->coordinateColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(coordinateColor.red()).arg(coordinateColor.green()).arg(coordinateColor.blue()) );
+
     // board/background
     bgColor = settings.value("board/bgColor", BG_COLOR).value<QColor>();
     m_ui->bgColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(bgColor.red()).arg(bgColor.green()).arg(bgColor.blue()) );
@@ -127,6 +131,7 @@ void SetupDialog::accept(){
     settings.setValue("board/boardType", m_ui->boardTypeComboBox->currentIndex());
     settings.setValue("board/boardColor", boardColor);
     settings.setValue("board/boardPath", m_ui->boardPathEdit->text());
+    settings.setValue("board/coordinateColor", coordinateColor);
     settings.setValue("board/bgColor", bgColor);
     settings.setValue("board/bgTutorColor", tutorColor);
 
@@ -205,6 +210,19 @@ void SetupDialog::on_boardPathButton_clicked(){
     QString fname = getOpenFileName(this, QString(), QString(), tr("All Image Files(*.bmp *.gif *.jpg *.jpeg *.png *.tif *.tiff);;All Files(*.*)"));
     if (!fname.isEmpty())
         m_ui->boardPathEdit->setText(fname);
+}
+
+/**
+* slot
+* coordinate color button clicked
+*/
+void SetupDialog::on_coordinateColorButton_clicked(){
+    QColorDialog dlg(coordinateColor, this);
+    dlg.setCurrentColor(coordinateColor);
+    if (dlg.exec() != QDialog::Accepted)
+        return;
+    coordinateColor = dlg.selectedColor();
+    m_ui->coordinateColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(coordinateColor.red()).arg(coordinateColor.green()).arg(coordinateColor.blue()) );
 }
 
 /**
