@@ -31,6 +31,7 @@
 #define BOARD_COLOR QColor(255, 200, 100)
 #define WHITE_COLOR QColor(255, 255, 255)
 #define BLACK_COLOR QColor(0, 0, 0)
+#define COORDINATE_COLOR QColor(0, 0, 0)
 #define BG_COLOR QColor(255, 255, 255)
 #define BG_TUTOR_COLOR QColor(85, 175, 127)
 #define FOCUS_WHITE_COLOR QColor(255, 0, 0)
