@@ -1,3 +1,11 @@
+mugo (1.1.1-1) unstable; urgency=low
+  add: coordinae color on option dialog
+  add: rectangular board size on new document dialog.
+  add: style selector on option dialog.
+  fix: does not play sound on windows 9x (not tested)
+
+ -- nsase <sikusiku@gmail.com>  Thu, 20 May 2010 00:42:00 +0900
+
 mugo (1.1.0-1) unstable; urgency=low
   add: engine sttings on play with computer dialog.
   add: estimate score.
