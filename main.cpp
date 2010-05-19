@@ -21,6 +21,7 @@
 #include <QLibraryInfo>
 #include <QTextCodec>
 #include <QDir>
+#include <QStyle>
 #include <QMessageBox>
 #ifdef Q_WS_WIN
 #  include "qtdotnetstyle.h"
