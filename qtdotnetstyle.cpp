@@ -1216,11 +1216,14 @@ void QtDotNetStylePrivate::updatePalette()
     default:
         menuFrameColor = currentPal.dark().color().lighter(108);
         menuSeparatorColor = currentPal.background().color().darker(110);
+        menuBackgroundColor = currentPal.base().color().darker(102);
+/*
         menuBackgroundColor = currentPal.light().color();
         menuBackgroundColor.setHsv(
             menuBackgroundColor.hue(),
             3 * menuBackgroundColor.saturation()/8 ,
             250);
+*/
         break;
     }
 }
