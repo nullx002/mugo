@@ -1,7 +1,12 @@
 #summary One-sentence summary of this page.
 
+==1.1.1==
+ * add: coordinae color on option dialog
+ * add: rectangular board size on new document dialog.
+ * add: style selector on option dialog.
+
 ==1.1.0==
- * add: engine sttings on play with computer dialog.
+ * add: engine settings on play with computer dialog.
  * add: estimate score.
 
 ==1.0.1==
@@ -17,7 +22,7 @@
  * chg: set player name when playing with computer.
  * chg: move number is not displayed on marker.
  * chg: use heavy line to outer frame.
- * chg: set focus to branchWidget when active tab is changed or node changed.
+ * chg: set focus to branch tree when active tab is changed or node changed.
  * fix: if engine does not support final_status_list, mugo crashed when end game.
 
 ==0.15.0==
