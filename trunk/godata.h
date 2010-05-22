@@ -173,8 +173,6 @@ public:
     explicit informationNode(nodePtr parent=nodePtr());
     ~informationNode();
 
-    virtual bool isStone() const{ return false; }
-
     virtual QString nodeName() const;
 
     void initialize();
