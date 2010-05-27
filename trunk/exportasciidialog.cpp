@@ -121,7 +121,7 @@ void ExportAsciiDialog::createJapaneseAscii(bool isMono){
     const char* monospace   = "\xef\xbc\xad\xef\xbc\xb3\x20\xe3\x82\xb4\xe3\x82\xb7\xe3\x83\x83\xe3\x82\xaf"; // ms gothic
     const char* propotional = "\xef\xbc\xad\xef\xbc\xb3\x20\xef\xbc\xb0\xe3\x82\xb4\xe3\x82\xb7\xe3\x83\x83\xe3\x82\xaf"; // ms p-gothic
 #elif defined(Q_WS_MAC)
-    const char* monospace   = "Osaka\xe2\xe7\xad\x89\xe5\xb9\x85"; // Osaka-tohaba
+    const char* monospace   = "Osaka\342\210\222\347\255\211\345\271\205"; // Osaka-tohaba
     const char* propotional = "Osaka"; // Osaka
 #else
     const char* monospace   = "Osaka\xe2\xe7\xad\x89\xe5\xb9\x85"; // Osaka-tohaba
