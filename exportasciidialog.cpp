@@ -28,9 +28,6 @@ ExportAsciiDialog::ExportAsciiDialog(QWidget *parent, const BoardWidget::BoardBu
 {
     m_ui->setupUi(this);
 
-    m_ui->typeComboBox->addItem( tr("English") );
-    m_ui->typeComboBox->addItem( tr("Japanese") );
-
     QSettings setting;
     int language = setting.value("asciiboard/language").toInt();
     m_ui->typeComboBox->setCurrentIndex( language );
@@ -74,7 +71,7 @@ void ExportAsciiDialog::createAscii(int index){
     if (index == 0)
         createEnglishAscii();
     else
-        createJapaneseAscii();
+        createJapaneseAscii(index == 1);
 }
 
 void ExportAsciiDialog::createEnglishAscii(){
@@ -119,14 +116,20 @@ void ExportAsciiDialog::createEnglishAscii(){
     m_ui->asciiTextEdit->setPlainText(s);
 }
 
-void ExportAsciiDialog::createJapaneseAscii(){
+void ExportAsciiDialog::createJapaneseAscii(bool isMono){
 #ifdef Q_WS_WIN
-    QFont f("\xef\xbc\xad\xef\xbc\xb3\x20\xe3\x82\xb4\xe3\x82\xb7\xe3\x83\x83\xe3\x82\xaf", 8);  // ms gothic
-    m_ui->asciiTextEdit->setFont(f);
+    const char* monospace   = "\xef\xbc\xad\xef\xbc\xb3\x20\xe3\x82\xb4\xe3\x82\xb7\xe3\x83\x83\xe3\x82\xaf"; // ms gothic
+    const char* propotional = "\xef\xbc\xad\xef\xbc\xb3\x20\xef\xbc\xb0\xe3\x82\xb4\xe3\x82\xb7\xe3\x83\x83\xe3\x82\xaf"; // ms p-gothic
 #elif defined(Q_WS_MAC)
-    QFont f("Osaka−\xe7\xad\x89\xe5\xb9\x85", 8);
-    m_ui->asciiTextEdit->setFont(f);
+    const char* monospace   = "Osaka\xe2\xe7\xad\x89\xe5\xb9\x85"; // Osaka-tohaba
+    const char* propotional = "Osaka"; // Osaka
+#else
+    const char* monospace   = "Osaka\xe2\xe7\xad\x89\xe5\xb9\x85"; // Osaka-tohaba
+    const char* propotional = "Osaka\xe2\xe7\xad\x89\xe5\xb9\x85"; //
 #endif
+
+    QFont f(isMono ? monospace : propotional, 8);
+    m_ui->asciiTextEdit->setFont(f);
 
     QByteArray s;
     s.reserve(boardBuffer.size() + 2 * boardBuffer[0].size() * 3);
@@ -137,17 +140,27 @@ void ExportAsciiDialog::createJapaneseAscii(){
     const char* header[] = {"\xef\xbc\xa1","\xef\xbc\xa2","\xef\xbc\xa3","\xef\xbc\xa4","\xef\xbc\xa5","\xef\xbc\xa6","\xef\xbc\xa7","\xef\xbc\xa8","\xef\xbc\xaa","\xef\xbc\xab","\xef\xbc\xac","\xef\xbc\xad","\xef\xbc\xae","\xef\xbc\xaf","\xef\xbc\xb0","\xef\xbc\xb1","\xef\xbc\xb2","\xef\xbc\xb3","\xef\xbc\xb4","\xef\xbc\xb5","\xef\xbc\xb6","\xef\xbc\xb7","\xef\xbc\xb8","\xef\xbc\xb9","\xef\xbc\xba"};
     int headerNum = sizeof(header)/sizeof(header[0]);
 
-    s.append("　");
+    // 2byte space
+    if (isMono)
+        s.append("\xe3\x80\x80");
+    else
+        s.append("\xef\xbc\xbf");
+
     for (int i=0, j=0; i<boardBuffer[0].size(); ++i, ++j){
         if (j >= headerNum)
             j = 0;
         s.push_back( header[j] );
+        if (isMono == false)
+            s.push_back(' ');
     }
 
     s.push_back('\n');
 
     for (int y=0; y<boardBuffer.size(); ++y){
-        s.append( QString("%1").arg(boardBuffer.size() - y, 2) );
+        if (isMono)
+            s.append( QString().sprintf("%2d", boardBuffer.size() - y) );
+        else
+            s.append( QString().sprintf("%02d", boardBuffer.size() - y) );
 
         const char** b = y == 0 ? top : y == boardBuffer.size() - 1 ? bottom : center;
 
@@ -168,14 +181,24 @@ void ExportAsciiDialog::createJapaneseAscii(){
             }
         }
 
-        s.append( QString("%1\n").arg(boardBuffer.size() - y, 2) );
+        if (isMono)
+            s.append( QString().sprintf("%2d\n", boardBuffer.size() - y) );
+        else
+            s.append( QString().sprintf("%02d\n", boardBuffer.size() - y) );
     }
 
-    s.append("　");
+    // 2byte space
+    if (isMono)
+        s.append("\xe3\x80\x80");
+    else
+        s.append("\xef\xbc\xbf");
+
     for (int i=0, j=0; i<boardBuffer[0].size(); ++i, ++j){
         if (j >= headerNum)
             j = 0;
         s.push_back( header[j] );
+        if (isMono == false)
+            s.push_back(' ');
     }
 
     m_ui->asciiTextEdit->setPlainText(s);

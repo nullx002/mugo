@@ -202,9 +202,9 @@ mugo automatically counts territories.</oldsource>
 <context>
     <name>EngineListDialog</name>
     <message>
+        <location filename="enginelistdialog.ui" line="256"/>
         <location filename="enginelistdialog.cpp" line="50"/>
         <location filename="enginelistdialog.cpp" line="188"/>
-        <location filename="enginelistdialog.ui" line="256"/>
         <source>Use Analysis</source>
         <translation type="unfinished">解析に使用する</translation>
     </message>
@@ -271,10 +271,6 @@ mugo automatically counts territories.</oldsource>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Add</source>
-        <translation type="obsolete">追加</translation>
-    </message>
-    <message>
         <location filename="enginelistdialog.ui" line="242"/>
         <source>Get Name</source>
         <translation type="unfinished">名前を取得</translation>
@@ -283,14 +279,20 @@ mugo automatically counts territories.</oldsource>
 <context>
     <name>ExportAsciiDialog</name>
     <message>
-        <location filename="exportasciidialog.cpp" line="31"/>
+        <location filename="exportasciidialog.ui" line="21"/>
         <source>English</source>
         <translation type="unfinished">英語</translation>
     </message>
     <message>
-        <location filename="exportasciidialog.cpp" line="32"/>
-        <source>Japanese</source>
-        <translation type="unfinished">日本語</translation>
+        <location filename="exportasciidialog.ui" line="26"/>
+        <source>Japanese (monospaced)</source>
+        <oldsource>Japanese (monospace)</oldsource>
+        <translation type="unfinished">日本語 （等幅フォント）</translation>
+    </message>
+    <message>
+        <location filename="exportasciidialog.ui" line="31"/>
+        <source>Japanese (propotional)</source>
+        <translation type="unfinished">日本語 （プロポーショナルフォント）</translation>
     </message>
     <message>
         <location filename="exportasciidialog.ui" line="14"/>
@@ -559,8 +561,8 @@ Do you want to save your changes?</source>
         <translation type="unfinished">ダウンロードに失敗しました： %1.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="2947"/>
         <location filename="mainwindow.ui" line="1783"/>
+        <location filename="mainwindow.cpp" line="2947"/>
         <source>Pass</source>
         <translation type="unfinished">パス</translation>
     </message>
@@ -613,8 +615,8 @@ Do you want to save your changes?</source>
         <translation type="unfinished">注釈</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="266"/>
         <location filename="mainwindow.ui" line="252"/>
+        <location filename="mainwindow.cpp" line="266"/>
         <source>Move Number</source>
         <translation type="unfinished">着手番号</translation>
     </message>
@@ -1566,14 +1568,6 @@ Do you want to save your changes?</source>
         <location filename="playwithcomputerdialog.ui" line="132"/>
         <source>&amp;Edit</source>
         <translation type="unfinished">編集</translation>
-    </message>
-    <message>
-        <source>Computer Path</source>
-        <translation type="obsolete">プログラムのパス</translation>
-    </message>
-    <message>
-        <source>Parameter</source>
-        <translation type="obsolete">パラメータ</translation>
     </message>
     <message>
         <location filename="playwithcomputerdialog.ui" line="142"/>
