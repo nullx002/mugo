@@ -15,7 +15,23 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QComboBox" name="typeComboBox"/>
+    <widget class="QComboBox" name="typeComboBox">
+     <item>
+      <property name="text">
+       <string>English</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Japanese (monospaced)</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Japanese (propotional)</string>
+      </property>
+     </item>
+    </widget>
    </item>
    <item>
     <widget class="QPlainTextEdit" name="asciiTextEdit">
