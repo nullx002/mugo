@@ -42,9 +42,9 @@ public:
 
     int xsize;
     int ysize;
+    double komi;
 
 protected:
-    virtual void changeEvent(QEvent *e);
     virtual void accept();
 
 private:

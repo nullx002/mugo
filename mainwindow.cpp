@@ -403,7 +403,7 @@ void MainWindow::on_actionNew_triggered(){
     if (dlg.exec() != QDialog::Accepted)
         return;
 
-    fileNew(dlg.xsize, dlg.ysize);
+    fileNew(dlg.xsize, dlg.ysize, 0, dlg.komi);
 }
 
 /**
