@@ -104,7 +104,7 @@ bool Application::installTranslator(QTranslator* translator, const QString& path
         if (translator->load(file, path) == false)
             return false;
     }
-    QtSingleApplication::installTranslator(translator);
+    QCoreApplication::installTranslator(translator);
     return true;
 }
 
@@ -127,7 +127,6 @@ QString Application::getTranslationPath(){
 #endif
 
     foreach( const QString& path, pathList){
-        QDir dir(path);
         if ( QDir(path).exists() )
             return path;
     }

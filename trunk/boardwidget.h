@@ -72,10 +72,9 @@ public:
 */
 class BoardWidget : public QWidget {
     Q_OBJECT
-    Q_DISABLE_COPY(BoardWidget)
 public:
-    enum eEditMode{ eAlternateMove, eAddBlack, eAddWhite, eAddEmpty, eLabelMark, eManualMark, eCrossMark, eCircleMark, eSquareMark, eTriangleMark, eDeleteMarker, eFinalScore, ePlayGame };
-    enum eTutorMode{ eNoTutor, eTutorBothSides, eTutorOneSide, eAutoReplay };
+    enum eEditMode{ eAlternateMove, eAddBlack, eAddWhite, eAddEmpty, eLabelMark, eManualMark, eCrossMark, eCircleMark, eSquareMark, eTriangleMark, eDeleteMarker,
+                    eFinalScore, ePlayGame, eTutorBothSides, eTutorOneSide, eAutoReplay };
     enum eMoveNumberMode{ eSequential, eResetInBranch, eResetInVariation };
 
     struct stoneInfo{
@@ -117,25 +116,31 @@ public:
     void print(QPrinter& printer, QPainter& p, BoardBuffer& buf);
     void setPrintOption(int type, int movesPerPage, bool showCoordinate, bool includeComments, const QFont& font, const QString& fileName, const QString& headerLeftFormat, const QString& headerCenterFormat, const QString& headerRightFormat, const QString& footerLeftFormat, const QString& footerCenterFormat, const QString& footerRightFormat);
 
+    // dirty flag
+    bool isDirty() const{ return dirty; }
+    void setDirty(bool dirty){ this->dirty = dirty; }
+
     // set/get data
     void clear();
     void getData(go::fileBase& data);
     void setData(const go::fileBase& data);
     void addData(const go::fileBase& data);
-    void insertData(const go::nodePtr node, const go::fileBase& data);
+//    void insertData(const go::nodePtr node, const go::fileBase& data);
     void setRoot(go::informationPtr& info);
 
     // get node
     go::data& getData(){ return goData; }
     const go::data& getData() const{ return goData; }
+    const go::nodeList& getCurrentNodeList() const{ return nodeList; }
     go::nodePtr getCurrentNode(){ return currentNode; }
     go::nodePtr findNodeFromMoveNumber(int moveNumber);
-    const go::nodeList& getCurrentNodeList() const{ return nodeList; }
     BoardBuffer& getBuffer(){ return board; }
+
+    go::color getColor() const{ return color; }
     void getCaptured(int& black, int& white) const{ black = capturedBlack; white = capturedWhite; }
     int  getMoveNumber() const{ return currentMoveNumber; }
     bool forward(int n);
-    go::color getColor() const{ return color; }
+    bool forward(int sgfX, int sgfY);
 
     // command
     void undo();
@@ -143,11 +148,14 @@ public:
     // create stone node and insert after current node
     void addStoneNodeCommand(int sgfX, int sgfY);
     void insertStoneNodeCommand(int index, int sgfX, int sgfY);
-    bool moveNextStone(int sgfX, int sgfY);
+    void addMarkCommand(int sgfX, int sgfY, bool ctrl);
 
     void addNodeCommand(go::nodePtr parent, go::nodePtr node, bool select=true);
     void insertNodeCommand(go::nodePtr parent, int index, go::nodePtr node, bool select=true);
     void deleteNodeCommand(go::nodePtr node, bool deleteChildren=true);
+    void addStoneCommand(go::nodePtr node, int sgfX, int sgfY, go::color color);
+    void addMarkCommand(go::nodePtr node, int sgfX, int sgfY, go::mark::eType type, const QString& label=QString());
+    void deleteMarkCommand(go::nodePtr node, int sgfX, int sgfY);
     void setMoveNumberCommand(go::nodePtr node, int moveNumber);
     void unsetMoveNumberCommand(go::nodePtr node);
     void setNodeNameCommand(go::nodePtr node, const QString& nodeName);
@@ -162,18 +170,10 @@ public:
     void modifyNode(go::nodePtr node, bool recreateBoardBuffer=false);
     void pass();
     void setCurrentNode(go::nodePtr node = go::nodePtr());
-    void addStone(go::nodePtr node, const go::point& sgfPoint, go::color color);
-    void addStone(go::nodePtr node, const go::point& sgfPoint, const go::point& boardPoint, go::color color);
-    void addEmpty(go::nodePtr node, const go::point& sgfPoint);
-    void addEmpty(go::nodePtr node, const go::point& sgfPoint, const go::point& boardPoint);
 
-    // dirty flag
-    bool isDirty() const{ return dirty; }
-    void setDirty(bool dirty){ this->dirty = dirty; }
-
-    // set option
-    void setEditMode(eEditMode editMode){ this->editMode = backupEditMode = editMode; }
-    void setTutorMode(eTutorMode tutorMode){ this->tutorMode = tutorMode; paintBoard(); }
+    // set options
+    void setEditMode(eEditMode editMode);
+    void resetEditMode(){ editMode = backupEditMode; repaint(); }
     void setShowMoveNumber(bool visible){ showMoveNumber = visible; paintBoard(); }
     void setShowMoveNumberCount(int number){ showMoveNumberCount = number; paintBoard(); }
     void setMoveNumberMode(eMoveNumberMode mode){ moveNumberMode = mode; createBoardBuffer(); paintBoard(); }
@@ -195,9 +195,8 @@ public:
     void setFinalScoreMode(bool mode);
     void whiteFirst(bool whiteFirst);
 
-    // get option
+    // get options
     eEditMode  getEditMode() const{ return editMode; }
-    eTutorMode getTutorMode() const{ return tutorMode; }
     bool getShowMoveNumber() const{ return showMoveNumber; }
     int  getShowMoveNumberCount() const{ return showMoveNumberCount; }
     eMoveNumberMode getMoveNumberMode() const{ return moveNumberMode; }
@@ -260,13 +259,13 @@ protected:
     void drawStonesAndMarkers(QPainter& p);
     void drawStones(QPainter& p);
     void drawBranchMoves(QPainter& p, go::nodeList::iterator first, go::nodeList::iterator last);
-    void drawCross(QPainter& p, go::markList::iterator first, go::markList::iterator last);
-    void drawTriangle(QPainter& p, go::markList::iterator first, go::markList::iterator last);
-    void drawCircle(QPainter& p, go::markList::iterator first, go::markList::iterator last);
-    void drawSquare(QPainter& p, go::markList::iterator first, go::markList::iterator last);
-    void drawSelect(QPainter& p, go::markList::iterator first, go::markList::iterator last);
-    void drawCharacter(QPainter& p, go::markList::iterator first, go::markList::iterator last);
-    void drawMark(QPainter& p, const QPainterPath& path, go::markList::iterator first, go::markList::iterator last, bool fill=false);
+    void drawCross(QPainter& p, const go::mark& mark);
+    void drawTriangle(QPainter& p, const go::mark& mark);
+    void drawCircle(QPainter& p, const go::mark& mark);
+    void drawSquare(QPainter& p, const go::mark& mark);
+    void drawSelect(QPainter& p, const go::mark& mark);
+    void drawCharacter(QPainter& p, const go::mark& mark);
+    void drawMark(QPainter& p, const QPainterPath& path, const go::mark& mark, bool fill=false);
     void drawPath(QPainter& p, const QPainterPath& path, int boardX, int boardY);
     void fillPath(QPainter& p, const QPainterPath& path, int boardX, int boardY);
     void drawTerritories(QPainter& p);
@@ -319,8 +318,8 @@ protected:
     void createNodeList();
     void addMark(int sgfX, int sgfY, int boardX, int boardY, bool ctrl);
     void addMark(go::markList& markList, const go::mark& mark);
-    void addCharacter(go::markList& markList, const go::point& p);
-    void addManualEntry(go::markList& markList, const go::point& p);
+    QString createMarkCharacter(go::markList& markList);
+    QString createMarkManually(go::markList& markList);
     bool removeMark(go::markList& markList, const go::point& p);
     bool removeStone(go::stoneList& stoneList, const go::point& sp, const go::point& bp);
     void rotateSgf(go::nodePtr node, QUndoCommand* command);
@@ -360,7 +359,6 @@ private:
     int  autoReplayInterval;
     eEditMode editMode;
     eEditMode backupEditMode;
-    eTutorMode tutorMode;
     bool moveToClicked;
     int  rotateBoard_;
     bool flipBoardHorizontally_;

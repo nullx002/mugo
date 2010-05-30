@@ -82,7 +82,7 @@ bool ugf::get(go::data& data) const{
     data.root->comment = first->comment;
     markerList::const_iterator marker = first->markers.begin();
     while (marker != first->markers.end()){
-        data.root->characters.push_back( go::mark(marker->x, marker->y, marker->str) );
+        data.root->marks.push_back( go::mark(marker->x, marker->y, marker->str) );
         ++marker;
     }
 
@@ -349,7 +349,7 @@ bool ugf::get(dataList::const_iterator first, dataList::const_iterator last, go:
 
     markerList::const_iterator marker = first->markers.begin();
     while (marker != first->markers.end()){
-        node->characters.push_back( go::mark(marker->x, marker->y, marker->str) );
+        node->marks.push_back( go::mark(marker->x, marker->y, marker->str) );
         ++marker;
     }
 
