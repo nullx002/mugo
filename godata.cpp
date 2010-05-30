@@ -57,7 +57,25 @@ nodePtr createWhiteNode(nodePtr parent, int x, int y){
 
 
 
-node::node(nodePtr p_) : parent_(p_), annotation(eNoAnnotation), moveAnnotation(eNoAnnotation), nodeAnnotation(eNoAnnotation), color(go::empty), nextColor(go::empty), moveNumber(-1){
+node::node()
+    : annotation(eNoAnnotation)
+    , moveAnnotation(eNoAnnotation)
+    , nodeAnnotation(eNoAnnotation)
+    , color(go::empty)
+    , nextColor(go::empty)
+    , moveNumber(-1)
+{
+}
+
+node::node(nodePtr p_)
+    : parent_(p_)
+    , annotation(eNoAnnotation)
+    , moveAnnotation(eNoAnnotation)
+    , nodeAnnotation(eNoAnnotation)
+    , color(go::empty)
+    , nextColor(go::empty)
+    , moveNumber(-1)
+{
 }
 
 void node::clear(){
@@ -91,7 +109,7 @@ QString node::toString() const{
     if (!dims.empty())
         str += QString(" %1").arg( tr("Dim") );
 
-    if (!crosses.empty() || !triangles.empty() || !squares.empty() || !circles.empty() || !characters.empty())
+    if (!marks.empty())
         str += QString(" %1").arg( tr("Mark") );
 
     if (!blackTerritories.empty())

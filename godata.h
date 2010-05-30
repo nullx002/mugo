@@ -112,6 +112,7 @@ public:
         eUnclear,
     };
 
+    node();
     explicit node(nodePtr parent);
     virtual ~node(){  clear();  }
 
@@ -140,12 +141,7 @@ public:
     nodeWPtr  parent_;
     nodeList  childNodes;
     QString   name;
-    markList  crosses;
-    markList  triangles;
-    markList  circles;
-    markList  squares;
-    markList  selects;
-    markList  characters;
+    markList  marks;
     markList  blackTerritories;
     markList  whiteTerritories;
     markList  dims;
