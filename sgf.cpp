@@ -184,17 +184,17 @@ bool sgf::node::get(go::nodePtr n, const QString& key, const QStringList& values
 
     // mark
     else if (key == "MA" || key == "M")
-        addMark(n->marks, values, mark::eCross);
+        addMark(n->crosses, values, mark::eCross);
     else if (key == "TR")
-        addMark(n->marks, values, mark::eTriangle);
+        addMark(n->triangles, values, mark::eTriangle);
     else if (key == "CR")
-        addMark(n->marks, values, mark::eCircle);
+        addMark(n->circles, values, mark::eCircle);
     else if (key == "SQ")
-        addMark(n->marks, values, mark::eSquare);
+        addMark(n->squares, values, mark::eSquare);
     else if (key == "SL")
-        addMark(n->marks, values, mark::eSelect);
+        addMark(n->selects, values, mark::eSelect);
     else if (key == "LB")
-        addMark(n->marks, values);
+        addMark(n->characters, values);
     else if (key == "TB")
         addMark(n->blackTerritories, values, mark::eBlackTerritory);
     else if (key == "TW")
@@ -297,7 +297,12 @@ bool sgf::node::set(const go::nodePtr n){
 */
 
     // marker
-    set(n->marks);
+    set(n->crosses);
+    set(n->circles);
+    set(n->triangles);
+    set(n->squares);
+    set(n->selects);
+    set(n->characters);
     set(n->blackTerritories);
     set(n->whiteTerritories);
     set(n->emptyStones);

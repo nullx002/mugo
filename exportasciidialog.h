@@ -33,7 +33,7 @@ public:
 
     void createAscii(int index);
     void createEnglishAscii();
-    void createJapaneseAscii(bool isMono);
+    void createJapaneseAscii();
     bool isStar(int x, int y);
 
 public slots:

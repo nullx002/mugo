@@ -112,7 +112,6 @@ public:
         eUnclear,
     };
 
-    node();
     explicit node(nodePtr parent);
     virtual ~node(){  clear();  }
 
@@ -141,7 +140,12 @@ public:
     nodeWPtr  parent_;
     nodeList  childNodes;
     QString   name;
-    markList  marks;
+    markList  crosses;
+    markList  triangles;
+    markList  circles;
+    markList  squares;
+    markList  selects;
+    markList  characters;
     markList  blackTerritories;
     markList  whiteTerritories;
     markList  dims;
@@ -168,6 +172,8 @@ class informationNode : public node{
 public:
     explicit informationNode(nodePtr parent=nodePtr());
     ~informationNode();
+
+    virtual bool isStone() const{ return false; }
 
     virtual QString nodeName() const;
 

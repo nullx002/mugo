@@ -17,7 +17,7 @@
 */
 #include <QDebug>
 #include "command.h"
-#include "boardwidget.h"
+
 
 /**
 * Add Node Command
@@ -32,7 +32,7 @@ AddNodeCommand::AddNodeCommand(BoardWidget* _boardWidget, go::nodePtr _parentNod
 }
 
 void AddNodeCommand::redo(){
-    setText( tr("Add %1").arg( boardWidget->toString(childNode) ) );
+    setText( QString(tr("Add %1")).arg( boardWidget->toString(childNode) ) );
     boardWidget->addNode(parentNode, childNode, select);
 }
 
@@ -54,7 +54,7 @@ InsertNodeCommand::InsertNodeCommand(BoardWidget* _boardWidget, go::nodePtr _par
 }
 
 void InsertNodeCommand::redo(){
-    setText( tr("Insert %1").arg( boardWidget->toString(childNode) ) );
+    setText( QString(tr("Insert %1")).arg( boardWidget->toString(childNode) ) );
     boardWidget->insertNode(parentNode, index, childNode, select);
 }
 
@@ -74,7 +74,7 @@ DeleteNodeCommand::DeleteNodeCommand(BoardWidget* _boardWidget, go::nodePtr _nod
 }
 
 void DeleteNodeCommand::redo(){
-    setText( tr("Delete %1").arg( boardWidget->toString(node) ) );
+    setText( QString(tr("Delete %1")).arg( boardWidget->toString(node) ) );
 
     go::nodeList::iterator beg = node->parent()->childNodes.begin();
     go::nodeList::iterator del = qFind(node->parent()->childNodes.begin(), node->parent()->childNodes.end(), node);
@@ -97,235 +97,6 @@ void DeleteNodeCommand::undo(){
     boardWidget->insertNode(node->parent(), index, node);
 }
 
-/**
-*/
-AddStoneCommand::AddStoneCommand(BoardWidget* _boardWidget, go::nodePtr _node, int _x, int _y, go::color c, QUndoCommand* parent)
-    : QUndoCommand(parent)
-    , boardWidget(_boardWidget)
-    , node(_node)
-    , x(_x)
-    , y(_y)
-    , color(c)
-{
-}
-
-void AddStoneCommand::redo(){
-    setText( tr("Add Stone") );
-
-/*
-    if (removeStone(node->emptyStones, sp, bp) || removeStone(node->blackStones, sp, bp) || removeStone(node->whiteStones, sp, bp)){
-        modifyNode(node);
-        return;
-    }
-*/
-
-    go::nodePtr stoneNode( node->isStone() ? go::nodePtr(new go::node(node)) : node );
-
-    if (color == go::black)
-        node->blackStones.push_back( go::stone(x, y, color) );
-    else if (color == go::white)
-        node->whiteStones.push_back( go::stone(x, y, color) );
-    else
-        node->emptyStones.push_back( go::stone(x, y, color) );
-
-    boardWidget->modifyNode(node, true);
-}
-
-void AddStoneCommand::undo(){
-    if (color == go::black)
-        node->blackStones.pop_back();
-    else if (color == go::white)
-        node->whiteStones.pop_back();
-    else
-        node->emptyStones.pop_back();
-
-    boardWidget->modifyNode(node, true);
-}
-
-/**
-*/
-DeleteStoneCommand::DeleteStoneCommand(BoardWidget* _boardWidget, go::nodePtr _node, int _x, int _y, QUndoCommand* parent)
-    : QUndoCommand(parent)
-    , boardWidget(_boardWidget)
-    , node(_node)
-    , x(_x)
-    , y(_y)
-{
-}
-
-void DeleteStoneCommand::redo(){
-    setText( tr("Delete Stone") );
-
-    remove(node->blackStones, blackEraseList, blackPosList);
-    remove(node->whiteStones, whiteEraseList, whitePosList);
-    remove(node->emptyStones, emptyEraseList, emptyPosList);
-
-    boardWidget->modifyNode(node, true);
-}
-
-void DeleteStoneCommand::undo(){
-    add(node->blackStones, blackEraseList, blackPosList);
-    add(node->whiteStones, whiteEraseList, whitePosList);
-    add(node->emptyStones, emptyEraseList, emptyPosList);
-
-    boardWidget->modifyNode(node, true);
-}
-
-void DeleteStoneCommand::add(go::stoneList& stones, go::stoneList& eraseList, QList<int>& posList){
-    go::point p(x, y);
-    int i = 0;
-    foreach(const go::stone& stone, eraseList){
-        stones.insert(posList[i], stone);
-        ++i;
-    }
-}
-
-void DeleteStoneCommand::remove(go::stoneList& stones, go::stoneList& eraseList, QList<int>& posList){
-    eraseList.clear();
-    posList.clear();
-
-    go::point p(x, y);
-    go::stoneList::iterator iter = stones.begin();
-    int i = 0;
-    while (iter != stones.end()){
-        if (iter->p == p){
-            eraseList.push_back(*iter);
-            posList.push_back(i);
-            iter = stones.erase(iter);
-            if (iter == stones.end())
-                break;
-        }
-        ++iter;
-        ++i;
-    }
-}
-
-/**
-* Add Mark Command
-*/
-AddMarkCommand::AddMarkCommand(BoardWidget* _boardWidget, go::nodePtr _node, int _x, int _y, go::mark::eType t, const QString& _label, QUndoCommand* parent)
-    : QUndoCommand(parent)
-    , boardWidget(_boardWidget)
-    , node(_node)
-    , x(_x)
-    , y(_y)
-    , type(t)
-    , label(_label)
-{
-}
-
-void AddMarkCommand::redo(){
-    setText( tr("Add Mark") );
-
-    markAdded = false;
-    eraseList.clear();
-
-    bool removeMark = false;
-    go::point p(x, y);
-    go::markList::iterator iter = node->marks.begin();
-    while (iter != node->marks.end()){
-        if (iter->p == p){
-            if (iter->t == type)
-                removeMark = true;
-            eraseList.push_back(*iter);
-            iter = node->marks.erase(iter);
-            if (iter == node->marks.end())
-                break;
-        }
-        ++iter;
-    }
-
-    if (removeMark == false){
-        if (type == go::mark::eCharacter)
-            node->marks.push_back( go::mark(p, label) );
-        else
-            node->marks.push_back( go::mark(p, type) );
-        markAdded = true;
-    }
-    boardWidget->modifyNode(node);
-}
-
-void AddMarkCommand::undo(){
-    if (markAdded)
-        node->marks.pop_back();
-
-    foreach(const go::mark& m, eraseList){
-        node->marks.push_back(m);
-    }
-    boardWidget->modifyNode(node);
-}
-
-/**
-* Delete Mark Command
-*/
-DeleteMarkCommand::DeleteMarkCommand(BoardWidget* _boardWidget, go::nodePtr _node, int _x, int _y, QUndoCommand* parent)
-    : QUndoCommand(parent)
-    , boardWidget(_boardWidget)
-    , node(_node)
-    , x(_x)
-    , y(_y)
-{
-}
-
-void DeleteMarkCommand::redo(){
-    setText( tr("Delete Mark") );
-
-    markEraseList.clear();
-    markPosList.clear();
-    emptyEraseList.clear();
-    emptyPosList.clear();
-    blackEraseList.clear();
-    blackPosList.clear();
-    whiteEraseList.clear();
-    whitePosList.clear();
-
-    remove(node->marks, markEraseList, markPosList);
-    remove(node->emptyStones, emptyEraseList, emptyPosList);
-    remove(node->blackStones, blackEraseList, blackPosList);
-    remove(node->whiteStones, whiteEraseList, whitePosList);
-
-    boardWidget->modifyNode(node, true);
-}
-
-void DeleteMarkCommand::undo(){
-    add(node->marks, markEraseList, markPosList);
-    add(node->emptyStones, emptyEraseList, emptyPosList);
-    add(node->blackStones, blackEraseList, blackPosList);
-    add(node->whiteStones, whiteEraseList, whitePosList);
-
-    boardWidget->modifyNode(node, true);
-}
-
-template<class Container, class EraseList, class PosList>
-void DeleteMarkCommand::add(Container& c, EraseList& eraseList, PosList& posList){
-    go::point p(x, y);
-    int i = 0;
-    typename EraseList::iterator iter = eraseList.begin();
-    while (iter != eraseList.end()){
-        c.insert(posList[i], *iter);
-        ++iter;
-        ++i;
-    }
-}
-
-template<class Container, class EraseList, class PosList>
-void DeleteMarkCommand::remove(Container& c, EraseList& eraseList, PosList& posList){
-    go::point p(x, y);
-    int i = 0;
-    typename Container::iterator iter = c.begin();
-    while (iter != c.end()){
-        if (iter->p == p){
-            posList.push_back(i);
-            eraseList.push_back(*iter);
-            iter = c.erase(iter);
-            if (iter == c.end())
-                break;
-        }
-        ++iter;
-        ++i;
-    }
-}
-
 SetMoveNumberCommand::SetMoveNumberCommand(BoardWidget* _boardWidget, go::nodePtr _node, int _moveNumber, QUndoCommand* parent)
     : QUndoCommand(parent)
     , boardWidget(_boardWidget)
@@ -336,7 +107,7 @@ SetMoveNumberCommand::SetMoveNumberCommand(BoardWidget* _boardWidget, go::nodePt
 }
 
 void SetMoveNumberCommand::redo(){
-    setText( tr("Set Move Number %1").arg( boardWidget->toString(node) ) );
+    setText( QString(tr("Set Move Number %1")).arg( boardWidget->toString(node) ) );
     node->moveNumber = moveNumber;
     boardWidget->modifyNode(node);
 }
@@ -375,7 +146,7 @@ SetNodeNameCommand::SetNodeNameCommand(BoardWidget* _boardWidget, go::nodePtr _n
 }
 
 void SetNodeNameCommand::redo(){
-    setText( tr("Set Node Name %1").arg( boardWidget->toString(node) ) );
+    setText( QString(tr("Set Node Name %1")).arg( boardWidget->toString(node) ) );
     node->name = nodeName;
     boardWidget->modifyNode(node);
 }
@@ -395,7 +166,7 @@ SetCommentCommand::SetCommentCommand(BoardWidget* _boardWidget, go::nodePtr _nod
 }
 
 void SetCommentCommand::redo(){
-    setText( tr("Set Comment %1").arg( boardWidget->toString(node) ) );
+    setText( QString(tr("Set Comment %1")).arg( boardWidget->toString(node) ) );
     node->comment = comment;
     boardWidget->modifyNode(node);
 }
@@ -415,7 +186,7 @@ MovePositionCommand::MovePositionCommand(BoardWidget* _boardWidget, go::nodePtr 
 }
 
 void MovePositionCommand::redo(){
-    setText( tr("Move Position %1").arg( boardWidget->toString(node) ) );
+    setText( QString(tr("Move Position %1")).arg( boardWidget->toString(node) ) );
     node->position.x = pos.x;
     node->position.y = pos.y;
 }
@@ -436,7 +207,7 @@ MoveStoneCommand::MoveStoneCommand(BoardWidget* _boardWidget, go::nodePtr _node,
 }
 
 void MoveStoneCommand::redo(){
-    setText( tr("Move Stone %1").arg( boardWidget->toString(node) ) );
+    setText( QString(tr("Move Stone %1")).arg( boardWidget->toString(node) ) );
     stone->p = pos;
 }
 
@@ -455,7 +226,7 @@ MoveMarkCommand::MoveMarkCommand(BoardWidget* _boardWidget, go::nodePtr _node, g
 }
 
 void MoveMarkCommand::redo(){
-    setText( tr("Move Mark %1").arg( boardWidget->toString(node) ) );
+    setText( QString(tr("Move Mark %1")).arg( boardWidget->toString(node) ) );
     mark->p = pos;
 }
 

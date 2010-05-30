@@ -403,7 +403,7 @@ void MainWindow::on_actionNew_triggered(){
     if (dlg.exec() != QDialog::Accepted)
         return;
 
-    fileNew(dlg.xsize, dlg.ysize, 0, dlg.komi);
+    fileNew(dlg.xsize, dlg.ysize);
 }
 
 /**
@@ -1682,11 +1682,11 @@ void MainWindow::on_actionPlayWithComputer_triggered(){
 */
 void MainWindow::on_actionTutorBothSides_triggered(){
     if (ui->actionTutorBothSides->isChecked()){
-        currentBoard()->setEditMode(BoardWidget::eTutorBothSides);
+        currentBoard()->setTutorMode(BoardWidget::eTutorBothSides);
         ui->actionTutorOneSide->setChecked(false);
     }
     else
-        currentBoard()->resetEditMode();
+        currentBoard()->setTutorMode(BoardWidget::eNoTutor);
 }
 
 /**
@@ -1695,11 +1695,11 @@ void MainWindow::on_actionTutorBothSides_triggered(){
 */
 void MainWindow::on_actionTutorOneSide_triggered(){
     if (ui->actionTutorOneSide->isChecked()){
-        currentBoard()->setEditMode(BoardWidget::eTutorOneSide);
+        currentBoard()->setTutorMode(BoardWidget::eTutorOneSide);
         ui->actionTutorBothSides->setChecked(false);
     }
     else
-        currentBoard()->resetEditMode();
+        currentBoard()->setTutorMode(BoardWidget::eNoTutor);
 }
 
 /**
@@ -2169,12 +2169,6 @@ void MainWindow::scoreDialogClosed(int){
     if ( ui->actionCountTerritory->isChecked() == false )
         return;
 
-/*
-    go::nodePtr newNode( new go::node() );
-    go::nodePtr current = currentBoard()->getCurrentNode();
-    currentBoard()->addNodeCommand(current, newNode, true);
-*/
-
     ui->actionCountTerritory->setChecked(false);
     on_actionCountTerritory_triggered();
 
@@ -2278,9 +2272,6 @@ void MainWindow::updateMenu(){
             break;
         case BoardWidget::eFinalScore:
         case BoardWidget::ePlayGame:
-        case BoardWidget::eTutorBothSides:
-        case BoardWidget::eTutorOneSide:
-        case BoardWidget::eAutoReplay:
             break;
     };
 
@@ -2312,8 +2303,8 @@ void MainWindow::updateMenu(){
 
     ui->actionBranchMode->setChecked( tabData->branchMode );
     ui->actionAutomaticReplay->setChecked( boardWidget->isAutoReplay() );
-    ui->actionTutorBothSides->setChecked( boardWidget->getEditMode() == BoardWidget::eTutorBothSides );
-    ui->actionTutorOneSide->setChecked( boardWidget->getEditMode() == BoardWidget::eTutorOneSide );
+    ui->actionTutorBothSides->setChecked( boardWidget->getTutorMode() == BoardWidget::eTutorBothSides );
+    ui->actionTutorOneSide->setChecked( boardWidget->getTutorMode() == BoardWidget::eTutorOneSide );
 
     if (boardWidget->getEditMode() == BoardWidget::eFinalScore){
         setCountTerritoryMode(currentBoard(), true);
@@ -3004,8 +2995,6 @@ void MainWindow::setEditMode(QAction* action, BoardWidget::eEditMode editMode){
         else if (action == ui->actionDeleteMarker)
             connect( ui->menuStoneMarkers->menuAction(), SIGNAL(triggered()), this, SLOT(on_actionDeleteMarker_triggered()) );
     }
-    ui->actionTutorBothSides->setChecked(false);
-    ui->actionTutorOneSide->setChecked(false);
 
     currentBoard()->setEditMode(editMode);
 }

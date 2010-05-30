@@ -16,7 +16,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include <QDebug>
-#include <QSettings>
 #include "boardsizedialog.h"
 #include "ui_boardsizedialog.h"
 
@@ -25,39 +24,23 @@ BoardSizeDialog::BoardSizeDialog(QWidget *parent) :
     ui(new Ui::BoardSizeDialog)
 {
     ui->setupUi(this);
-
-    // get board settings.
-    QSettings settings;
-    xsize = settings.value("xsize", 19).toInt();
-    ysize = settings.value("ysize", 19).toInt();
-    komi  = settings.value("komi", 6.5).toDouble();
-
-    // check board size radio button
-    if (xsize == ysize){
-      if (xsize == 19)
-            ui->radio19Button->setChecked(true);
-        else if (xsize == ysize && xsize == 13)
-            ui->radio13Button->setChecked(true);
-        else if (xsize == ysize && xsize == 9)
-            ui->radio9Button->setChecked(true);
-        else{
-            ui->radioCustomButton->setChecked(true);
-            ui->customSpinBox->setValue(xsize);
-        }
-    }
-    else{
-        ui->radioRectangularButton->setChecked(true);
-        ui->xsizeSpinBox->setValue(xsize);
-        ui->ysizeSpinBox->setValue(ysize);
-    }
-
-    // set komi
-    ui->komiSpinBox->setValue(komi);
 }
 
 BoardSizeDialog::~BoardSizeDialog()
 {
     delete ui;
+}
+
+void BoardSizeDialog::changeEvent(QEvent *e)
+{
+    QDialog::changeEvent(e);
+    switch (e->type()) {
+    case QEvent::LanguageChange:
+        ui->retranslateUi(this);
+        break;
+    default:
+        break;
+    }
 }
 
 /**
@@ -75,17 +58,10 @@ void BoardSizeDialog::accept()
         xsize = ysize = 9;
     else if (ui->radioCustomButton->isChecked())
         xsize = ysize = ui->customSpinBox->value();
-    else if (ui->radioRectangularButton->isChecked()){
+    else{
         xsize = ui->xsizeSpinBox->value();
         ysize = ui->ysizeSpinBox->value();
     }
-
-    komi = ui->komiSpinBox->value();
-
-    QSettings settings;
-    settings.setValue("komi",  komi);
-    settings.setValue("xsize", xsize);
-    settings.setValue("ysize", ysize);
 }
 
 /**

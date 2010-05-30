@@ -20,10 +20,8 @@
 
 
 #include <QUndoCommand>
-#include <QString>
+#include "boardwidget.h"
 #include "godata.h"
-
-class BoardWidget;
 
 
 class AddNodeCommand : public QUndoCommand{
@@ -70,94 +68,6 @@ private:
     go::nodePtr node;
     bool deleteChildren;
     int  index;
-};
-
-class AddStoneCommand : public QUndoCommand{
-    Q_DECLARE_TR_FUNCTIONS(AddMarkCommand)
-
-public:
-    AddStoneCommand(BoardWidget* boardWidget, go::nodePtr node, int x, int y, go::color color, QUndoCommand *parent = 0);
-    virtual void redo();
-    virtual void undo();
-
-private:
-    BoardWidget* boardWidget;
-    go::nodePtr node;
-    int x;
-    int y;
-    go::color color;
-};
-
-class DeleteStoneCommand : public QUndoCommand{
-    Q_DECLARE_TR_FUNCTIONS(DeleteStoneCommand)
-
-public:
-    DeleteStoneCommand(BoardWidget* boardWidget, go::nodePtr node, int x, int y, QUndoCommand *parent = 0);
-    virtual void redo();
-    virtual void undo();
-
-private:
-    void add(go::stoneList& stones, go::stoneList& eraseList, QList<int>& posList);
-    void remove(go::stoneList& stones, go::stoneList& eraseList, QList<int>& posList);
-
-    BoardWidget* boardWidget;
-    go::nodePtr node;
-    int x;
-    int y;
-    go::stoneList blackEraseList;
-    QList<int> blackPosList;
-    go::stoneList whiteEraseList;
-    QList<int> whitePosList;
-    go::stoneList emptyEraseList;
-    QList<int> emptyPosList;
-};
-
-class AddMarkCommand : public QUndoCommand{
-    Q_DECLARE_TR_FUNCTIONS(AddMarkCommand)
-
-public:
-    AddMarkCommand(BoardWidget* boardWidget, go::nodePtr node, int x, int y, go::mark::eType type, const QString& label, QUndoCommand *parent = 0);
-    virtual void redo();
-    virtual void undo();
-
-private:
-    BoardWidget* boardWidget;
-    go::nodePtr node;
-    int x;
-    int y;
-    go::mark::eType type;
-    QString label;
-    go::markList eraseList;
-    bool markAdded;
-};
-
-class DeleteMarkCommand : public QUndoCommand{
-    Q_DECLARE_TR_FUNCTIONS(DeleteMarkCommand)
-
-public:
-    DeleteMarkCommand(BoardWidget* boardWidget, go::nodePtr node, int x, int y, QUndoCommand *parent = 0);
-    virtual void redo();
-    virtual void undo();
-
-private:
-    template<class Container, class EraseList, class PosList>
-    void DeleteMarkCommand::add(Container& c, EraseList& eraseList, PosList& posList);
-
-    template<class Container, class EraseList, class PosList>
-    void DeleteMarkCommand::remove(Container& c, EraseList& eraseList, PosList& posList);
-
-    BoardWidget* boardWidget;
-    go::nodePtr node;
-    int x;
-    int y;
-    go::markList markEraseList;
-    QList<int> markPosList;
-    go::stoneList emptyEraseList;
-    QList<int> emptyPosList;
-    go::stoneList blackEraseList;
-    QList<int> blackPosList;
-    go::stoneList whiteEraseList;
-    QList<int> whitePosList;
 };
 
 class SetMoveNumberCommand : public QUndoCommand{

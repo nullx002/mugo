@@ -150,6 +150,7 @@ BoardWidget::BoardWidget(QWidget *parent) :
     autoReplayInterval(AUTO_REPLAY_INTERVAL),
     editMode(eAlternateMove),
     backupEditMode(eAlternateMove),
+    tutorMode(eNoTutor),
     moveToClicked(false),
     rotateBoard_(0),
     flipBoardHorizontally_(false),
@@ -204,7 +205,7 @@ void BoardWidget::paintEvent(QPaintEvent* e){
 
     QPainter p(this);
 
-    if (editMode == eTutorBothSides || editMode == eTutorOneSide)
+    if (tutorMode != eNoTutor)
         p.fillRect(0, 0, p.device()->width(), p.device()->height(), tutorColor);
     else
         p.fillRect(0, 0, p.device()->width(), p.device()->height(), bgColor);
@@ -242,7 +243,7 @@ void BoardWidget::mouseMoveEvent(QMouseEvent* e){
         return;
 
     bool black;
-    if (editMode == eAlternateMove || editMode == ePlayGame || editMode == eTutorBothSides || editMode == eTutorOneSide)
+    if (editMode == eAlternateMove || editMode == ePlayGame || tutorMode == eTutorBothSides || tutorMode == eTutorOneSide)
         black = color == go::black;
     else if (editMode == eAddBlack || editMode == eAddWhite)
         black = editMode == eAddBlack;
@@ -268,7 +269,7 @@ void BoardWidget::mouseMoveEvent(QMouseEvent* e){
 void BoardWidget::wheelEvent(QWheelEvent* e){
     QWidget::wheelEvent(e);
 
-    if (editMode == eTutorBothSides || editMode == eTutorOneSide || editMode == ePlayGame)
+    if (tutorMode != eNoTutor || editMode == ePlayGame)
         return;
 
     go::nodeList::iterator iter = qFind(nodeList.begin(), nodeList.end(), currentNode);
@@ -312,10 +313,10 @@ void BoardWidget::onLButtonDown(QMouseEvent* e){
 
     if (editMode == ePlayGame)
         playGameLButtonDown(sgfX, sgfY);
-    else if (editMode == eTutorBothSides)
-        forward(sgfX, sgfY);
-    else if (editMode == eTutorOneSide){
-        if (forward(sgfX, sgfY)){
+    else if (tutorMode == eTutorBothSides)
+        moveNextStone(sgfX, sgfY);
+    else if (tutorMode == eTutorOneSide){
+        if (moveNextStone(sgfX, sgfY)){
             go::nodeList::iterator iter = qFind(nodeList.begin(), nodeList.end(), currentNode);
             if (iter != nodeList.end() && ++iter != nodeList.end()){
                 usleep(500000);
@@ -329,7 +330,7 @@ void BoardWidget::onLButtonDown(QMouseEvent* e){
         else
             addStoneNodeCommand(sgfX, sgfY);
     }
-    else if (editMode == eAutoReplay)
+    else if (tutorMode == eAutoReplay)
         return;
     else if (editMode == eFinalScore){
         reverseTerritory(boardX, boardY);
@@ -338,7 +339,7 @@ void BoardWidget::onLButtonDown(QMouseEvent* e){
         emit updateTerritory(alive_b, alive_w, dead_b, dead_w, capturedBlack, capturedWhite, bt, wt, goData.root->komi);
     }
     else
-        addMarkCommand(sgfX, sgfY, e->modifiers() & Qt::ControlModifier);
+        addMark(sgfX, sgfY, boardX, boardY, e->modifiers() & Qt::ControlModifier);
 }
 
 /**
@@ -452,7 +453,6 @@ void BoardWidget::paintBoard(){
     if (offscreenBuffer1.isNull())
         return;
 
-    offscreenBuffer1.fill(Qt::transparent);
     paintBoard(&offscreenBuffer1, showCoordinates, false);
     offscreenBuffer2 = QPixmap();
     repaint();
@@ -490,6 +490,15 @@ void BoardWidget::paintBoard(QPaintDevice* pd, bool showCoordinate, bool monochr
     font.setWeight(QFont::Normal);
     font.setStyleStrategy(QFont::PreferAntialias);
     p.setFont(font);
+
+    if (boardType >= 0){
+        if (tutorMode != eNoTutor)
+            p.fillRect(0, 0, pd->width(), pd->height(), tutorColor);
+        else
+            p.fillRect(0, 0, pd->width(), pd->height(), bgColor);
+    }
+    else
+        p.fillRect(0, 0, pd->width(), pd->height(), Qt::white);
 
     drawBoard(p, 8.0, showCoordinate);
     drawStonesAndMarkers(p);
@@ -972,7 +981,6 @@ void BoardWidget::addData(const go::fileBase& data){
     setDirty(true);
 }
 
-/*
 void BoardWidget::insertData(const go::nodePtr node, const go::fileBase& data){
     go::data d;
     data.get(d);
@@ -983,7 +991,6 @@ void BoardWidget::insertData(const go::nodePtr node, const go::fileBase& data){
     createNodeList();
     setDirty(true);
 }
-*/
 
 void BoardWidget::setRoot(go::informationPtr& info){
     goData.root = info;
@@ -1032,7 +1039,7 @@ void BoardWidget::insertStoneNodeCommand(int index, int sgfX, int sgfY){
         if (board[boardY][boardX].empty() == false)
             return;
 
-        if (forward(sgfX, sgfY))
+        if (moveNextStone(sgfX, sgfY))
             return;
 
         board[boardY][boardX].color = color;
@@ -1054,67 +1061,10 @@ void BoardWidget::insertStoneNodeCommand(int index, int sgfX, int sgfY){
         insertNodeCommand(currentNode, index, node);
 }
 
-void BoardWidget::addMarkCommand(int sgfX, int sgfY, bool ctrl){
-    int boardX, boardY;
-    sgfToBoardCoordinate(sgfX, sgfY, boardX, boardY);
-
-    switch (editMode){
-        case eAlternateMove:
-            return;
-
-        case eAddBlack:
-            addStoneCommand(currentNode, sgfX, sgfY, go::black);
-            break;
-
-        case eAddWhite:
-            addStoneCommand(currentNode, sgfX, sgfY, go::white);
-            break;
-
-        case eAddEmpty:
-            addStoneCommand(currentNode, sgfX, sgfY, go::empty);
-            break;
-
-        case eLabelMark:{
-            QString label = createMarkCharacter(currentNode->marks);
-            addMarkCommand(currentNode, sgfX, sgfY, go::mark::eCharacter, label);
-            break;
-        }
-
-        case eManualMark:{
-            QString label = createMarkManually(currentNode->marks);
-            addMarkCommand(currentNode, sgfX, sgfY, go::mark::eCharacter, label);
-            break;
-        }
-
-        case eCircleMark:
-            addMarkCommand(currentNode, sgfX, sgfY, go::mark::eCircle);
-            break;
-
-        case eCrossMark:
-            addMarkCommand(currentNode, sgfX, sgfY, go::mark::eCross);
-            break;
-
-        case eSquareMark:
-            addMarkCommand(currentNode, sgfX, sgfY, go::mark::eSquare);
-            break;
-
-        case eTriangleMark:
-            addMarkCommand(currentNode, sgfX, sgfY, go::mark::eTriangle);
-            break;
-
-        case eDeleteMarker:
-            deleteMarkCommand(currentNode, sgfX, sgfY);
-            break;
-
-        default:
-            return;
-    }
-}
-
 /**
 */
 void BoardWidget::addNodeCommand(go::nodePtr parentNode, go::nodePtr childNode, bool select){
-    if (editMode == eTutorBothSides || editMode == eTutorOneSide)
+    if (tutorMode != eNoTutor)
         return;
 
     undoStack.push( new AddNodeCommand(this, parentNode, childNode, select) );
@@ -1123,7 +1073,7 @@ void BoardWidget::addNodeCommand(go::nodePtr parentNode, go::nodePtr childNode, 
 /**
 */
 void BoardWidget::insertNodeCommand(go::nodePtr parentNode, int index, go::nodePtr childNode, bool select){
-    if (editMode == eTutorBothSides || editMode == eTutorOneSide)
+    if (tutorMode != eNoTutor)
         return;
 
     undoStack.push( new InsertNodeCommand(this, parentNode, index, childNode, select) );
@@ -1132,96 +1082,12 @@ void BoardWidget::insertNodeCommand(go::nodePtr parentNode, int index, go::nodeP
 /**
 */
 void BoardWidget::deleteNodeCommand(go::nodePtr node, bool deleteChildren){
-    if (editMode == eTutorBothSides || editMode == eTutorOneSide)
+    if (tutorMode != eNoTutor)
         return;
     else if( node == goData.root )
         return;
 
     undoStack.push( new DeleteNodeCommand(this, node, deleteChildren) );
-}
-
-/**
-*/
-void BoardWidget::addStoneCommand(go::nodePtr node, int sgfX, int sgfY, go::color color){
-    int boardX, boardY;
-    sgfToBoardCoordinate(sgfX, sgfY, boardX, boardY);
-
-    go::point p(sgfX, sgfY);
-    foreach(const go::stone& stone, node->emptyStones){
-        if (stone.p == p){
-            undoStack.push( new DeleteStoneCommand(this, node, sgfX, sgfY) );
-            return;
-        }
-    }
-    foreach(const go::stone& stone, node->blackStones){
-        if (stone.p == p){
-            undoStack.push( new DeleteStoneCommand(this, node, sgfX, sgfY) );
-            return;
-        }
-    }
-    foreach(const go::stone& stone, node->whiteStones){
-        if (stone.p == p){
-            undoStack.push( new DeleteStoneCommand(this, node, sgfX, sgfY) );
-            return;
-        }
-    }
-
-    if (color != go::empty && board[boardY][boardX].empty() == false)
-        return;
-
-    go::nodePtr stoneNode( node->isStone() ? go::nodePtr(new go::node(node)) : node );
-    if (stoneNode != node)
-        addNodeCommand(node, stoneNode);
-
-    undoStack.push( new AddStoneCommand(this, stoneNode, sgfX, sgfY, color) );
-}
-
-/**
-*/
-void BoardWidget::addMarkCommand(go::nodePtr node, int sgfX, int sgfY, go::mark::eType type, const QString& label){
-    switch (type){
-        case go::mark::eCross:
-        case go::mark::eCircle:
-        case go::mark::eSquare:
-        case go::mark::eTriangle:
-        case go::mark::eSelect:
-        case go::mark::eCharacter:
-            undoStack.push( new AddMarkCommand(this, node, sgfX, sgfY, type, label) );
-            break;
-
-        default:
-            return;
-    }
-}
-
-/**
-*/
-void BoardWidget::deleteMarkCommand(go::nodePtr node, int sgfX, int sgfY){
-    go::point p(sgfX, sgfY);
-    foreach(const go::mark& mark, node->marks){
-        if (mark.p == p){
-            undoStack.push( new DeleteMarkCommand(this, node, sgfX, sgfY) );
-            return;
-        }
-    }
-    foreach(const go::stone& stone, node->emptyStones){
-        if (stone.p == p){
-            undoStack.push( new DeleteMarkCommand(this, node, sgfX, sgfY) );
-            return;
-        }
-    }
-    foreach(const go::stone& stone, node->blackStones){
-        if (stone.p == p){
-            undoStack.push( new DeleteMarkCommand(this, node, sgfX, sgfY) );
-            return;
-        }
-    }
-    foreach(const go::stone& stone, node->whiteStones){
-        if (stone.p == p){
-            undoStack.push( new DeleteMarkCommand(this, node, sgfX, sgfY) );
-            return;
-        }
-    }
 }
 
 /**
@@ -1426,7 +1292,11 @@ void BoardWidget::rotateSgf(go::nodePtr node, QUndoCommand* command){
     rotateStoneSgf(node, node->emptyStones, command);
     rotateStoneSgf(node, node->blackStones, command);
     rotateStoneSgf(node, node->whiteStones, command);
-    rotateMarkSgf(node, node->marks, command);
+    rotateMarkSgf(node, node->crosses, command);
+    rotateMarkSgf(node, node->squares, command);
+    rotateMarkSgf(node, node->triangles, command);
+    rotateMarkSgf(node, node->circles, command);
+    rotateMarkSgf(node, node->characters, command);
     rotateMarkSgf(node, node->blackTerritories, command);
     rotateMarkSgf(node, node->whiteTerritories, command);
 }
@@ -1474,7 +1344,11 @@ void BoardWidget::flipSgf(go::nodePtr node, int xsize, int ysize, QUndoCommand* 
     flipStoneSgf(node, node->emptyStones, xsize, ysize, command);
     flipStoneSgf(node, node->blackStones, xsize, ysize, command);
     flipStoneSgf(node, node->whiteStones, xsize, ysize, command);
-    flipMarkSgf(node, node->marks, xsize, ysize, command);
+    flipMarkSgf(node, node->crosses, xsize, ysize, command);
+    flipMarkSgf(node, node->squares, xsize, ysize, command);
+    flipMarkSgf(node, node->triangles, xsize, ysize, command);
+    flipMarkSgf(node, node->circles, xsize, ysize, command);
+    flipMarkSgf(node, node->characters, xsize, ysize, command);
     flipMarkSgf(node, node->blackTerritories, xsize, ysize, command);
     flipMarkSgf(node, node->whiteTerritories, xsize, ysize, command);
 }
@@ -1507,14 +1381,6 @@ void BoardWidget::flipMarkSgf(go::nodePtr node, go::markList& markList, int xsiz
 
         ++iter;
     }
-}
-
-void BoardWidget::setEditMode(eEditMode editMode){
-    if (this->editMode <= eDeleteMarker)
-        backupEditMode = this->editMode;
-    this->editMode = editMode;
-
-    repaint();
 }
 
 int  BoardWidget::rotateBoard(){
@@ -1839,20 +1705,12 @@ void BoardWidget::drawStonesAndMarkers(QPainter& p){
     if (currentNode->childNodes.size() > 1)
         drawBranchMoves(p, currentNode->childNodes.begin(), currentNode->childNodes.end());
 
-    foreach(const go::mark& m, currentNode->marks){
-        if (m.t == go::mark::eCross)
-            drawCross(p, m);
-        else if (m.t == go::mark::eTriangle)
-            drawTriangle(p, m);
-        else if (m.t == go::mark::eCircle)
-            drawCircle(p, m);
-        else if (m.t == go::mark::eSquare)
-            drawSquare(p, m);
-        else if (m.t == go::mark::eSelect)
-            drawSelect(p, m);
-        else if (m.t == go::mark::eCharacter)
-            drawCharacter(p, m);
-    }
+    drawCross(p, currentNode->crosses.begin(), currentNode->crosses.end());
+    drawTriangle(p, currentNode->triangles.begin(), currentNode->triangles.end());
+    drawCircle(p, currentNode->circles.begin(), currentNode->circles.end());
+    drawSquare(p, currentNode->squares.begin(), currentNode->squares.end());
+    drawSelect(p, currentNode->selects.begin(), currentNode->selects.end());
+    drawCharacter(p, currentNode->characters.begin(), currentNode->characters.end());
 
     if (showMoveNumber && showMoveNumberCount == 0)
         if (currentNode->isStone())
@@ -1930,42 +1788,42 @@ void BoardWidget::drawBranchMoves(QPainter& p, go::nodeList::iterator first, go:
 
 /**
 */
-void BoardWidget::drawCross(QPainter& p, const go::mark& mark){
+void BoardWidget::drawCross(QPainter& p, go::markList::iterator first, go::markList::iterator last){
     QPainterPath path = createCrossPath();
-    drawMark(p, path, mark);
+    drawMark(p, path, first, last);
 }
 
 /**
 */
-void BoardWidget::drawTriangle(QPainter& p, const go::mark& mark){
+void BoardWidget::drawTriangle(QPainter& p, go::markList::iterator first, go::markList::iterator last){
     QPainterPath path = createTrianglePath();
-    drawMark(p, path, mark);
+    drawMark(p, path, first, last);
 }
 
 /**
 */
-void BoardWidget::drawCircle(QPainter& p, const go::mark& mark){
+void BoardWidget::drawCircle(QPainter& p, go::markList::iterator first, go::markList::iterator last){
     QPainterPath path = createCirclePath();
-    drawMark(p, path, mark);
+    drawMark(p, path, first, last);
 }
 
 /**
 */
-void BoardWidget::drawSquare(QPainter& p, const go::mark& mark){
+void BoardWidget::drawSquare(QPainter& p, go::markList::iterator first, go::markList::iterator last){
     QPainterPath path = createSquarePath();
-    drawMark(p, path, mark);
+    drawMark(p, path, first, last);
 }
 
 /**
 */
-void BoardWidget::drawSelect(QPainter& p, const go::mark& mark){
+void BoardWidget::drawSelect(QPainter& p, go::markList::iterator first, go::markList::iterator last){
     QPainterPath path = createSquarePath();
-    drawMark(p, path, mark, true);
+    drawMark(p, path, first, last, true);
 }
 
 /**
 */
-void BoardWidget::drawCharacter(QPainter& p, const go::mark& mark){
+void BoardWidget::drawCharacter(QPainter& p, go::markList::iterator first, go::markList::iterator last){
     if (showMarker == false)
         return;
 
@@ -1975,21 +1833,24 @@ void BoardWidget::drawCharacter(QPainter& p, const go::mark& mark){
     font.setWeight(QFont::Black);
     p.setFont(font);
 
-    int boardX, boardY;
-    sgfToBoardCoordinate(mark.p.x, mark.p.y, boardX, boardY);
+    while (first != last){
+        int boardX, boardY;
+        sgfToBoardCoordinate(first->p.x, first->p.y, boardX, boardY);
 
-    if (boardX >= 0 && boardX < xsize && boardY >= 0 && boardY < ysize){
-        int x = xlines[boardX];
-        int y = ylines[boardY];
+        if (boardX >= 0 && boardX < xsize && boardY >= 0 && boardY < ysize){
+            int x = xlines[boardX];
+            int y = ylines[boardY];
 
-        stoneInfo& info = board[boardY][boardX];
-        if (info.empty())
-            p.setPen( Qt::black );
-        else
-            p.setPen( info.black() ? Qt::white : Qt::black );
-        eraseImage(p, boardX, boardY);
+            stoneInfo& info = board[boardY][boardX];
+            if (info.empty())
+                p.setPen( Qt::black );
+            else
+                p.setPen( info.black() ? Qt::white : Qt::black );
+            eraseImage(p, boardX, boardY);
 
-        p.drawText(x-boxSize, y-boxSize, boxSize*2, boxSize*2, Qt::AlignCenter, mark.s);
+            p.drawText(x-boxSize, y-boxSize, boxSize*2, boxSize*2, Qt::AlignCenter, first->s);
+        }
+        ++first;
     }
 
     p.restore();
@@ -1997,18 +1858,21 @@ void BoardWidget::drawCharacter(QPainter& p, const go::mark& mark){
 
 /**
 */
-void BoardWidget::drawMark(QPainter& p, const QPainterPath& path, const go::mark& mark, bool fill){
+void BoardWidget::drawMark(QPainter& p, const QPainterPath& path, go::markList::iterator first, go::markList::iterator last, bool fill){
     if (showMarker == false)
         return;
 
-    int boardX, boardY;
-    sgfToBoardCoordinate(mark.p.x, mark.p.y, boardX, boardY);
+    while (first != last){
+        int boardX, boardY;
+        sgfToBoardCoordinate(first->p.x, first->p.y, boardX, boardY);
 
-    if (boardX >= 0 && boardX < xsize && boardY >= 0 && boardY < ysize){
-        if (fill)
-            fillPath(p, path, boardX, boardY);
-        else
-            drawPath(p, path, boardX, boardY);
+        if (boardX >= 0 && boardX < xsize && boardY >= 0 && boardY < ysize){
+            if (fill)
+                fillPath(p, path, boardX, boardY);
+            else
+                drawPath(p, path, boardX, boardY);
+        }
+        ++first;
     }
 }
 
@@ -2399,7 +2263,7 @@ void BoardWidget::dead(int* tmp){
 
 /**
 */
-bool BoardWidget::forward(int sgfX, int sgfY){
+bool BoardWidget::moveNextStone(int sgfX, int sgfY){
     go::nodeList::iterator iter = currentNode->childNodes.begin();
     while (iter != currentNode->childNodes.end()){
         if ((*iter)->getX() == sgfX && (*iter)->getY() == sgfY){
@@ -2412,11 +2276,129 @@ bool BoardWidget::forward(int sgfX, int sgfY){
     return false;
 }
 
-QString BoardWidget::createMarkCharacter(go::markList& markList){
+/**
+*/
+void BoardWidget::addMark(int sgfX, int sgfY, int boardX, int boardY, bool ctrl){
+    switch (editMode){
+        case eAlternateMove:
+            return;
+
+        case eAddBlack:
+            addStone(currentNode, go::point(sgfX, sgfY), go::point(boardX, boardY), go::black);
+            break;
+
+        case eAddWhite:
+            addStone(currentNode, go::point(sgfX, sgfY), go::point(boardX, boardY), go::white);
+            break;
+
+        case eAddEmpty:
+            addEmpty(currentNode, go::point(sgfX, sgfY), go::point(boardX, boardY));
+            break;
+
+        case eLabelMark:
+        case eManualMark:{
+            go::point p(sgfX, sgfY);
+            removeMark(currentNode->circles, p);
+            removeMark(currentNode->crosses, p);
+            removeMark(currentNode->squares, p);
+            removeMark(currentNode->triangles, p);
+            if (editMode == eLabelMark && !ctrl)
+                addCharacter(currentNode->characters, p);
+            else
+                addManualEntry(currentNode->characters, p);
+            modifyNode(currentNode);
+            break;
+        }
+
+        case eCircleMark:{
+            go::mark mark(sgfX, sgfY, go::mark::eCircle);
+            addMark(currentNode->circles, mark);
+            removeMark(currentNode->crosses, mark.p);
+            removeMark(currentNode->squares, mark.p);
+            removeMark(currentNode->triangles, mark.p);
+            removeMark(currentNode->characters, mark.p);
+            modifyNode(currentNode);
+            break;
+        }
+
+        case eCrossMark:{
+            go::mark mark(sgfX, sgfY, go::mark::eCross);
+            removeMark(currentNode->circles, mark.p);
+            addMark(currentNode->crosses, mark);
+            removeMark(currentNode->squares, mark.p);
+            removeMark(currentNode->triangles, mark.p);
+            removeMark(currentNode->characters, mark.p);
+            modifyNode(currentNode);
+            break;
+        }
+
+        case eSquareMark:{
+            go::mark mark(sgfX, sgfY, go::mark::eSquare);
+            removeMark(currentNode->circles, mark.p);
+            removeMark(currentNode->crosses, mark.p);
+            addMark(currentNode->squares, mark);
+            removeMark(currentNode->triangles, mark.p);
+            removeMark(currentNode->characters, mark.p);
+            modifyNode(currentNode);
+            break;
+        }
+
+        case eTriangleMark:{
+            go::mark mark(sgfX, sgfY, go::mark::eTriangle);
+            removeMark(currentNode->circles, mark.p);
+            removeMark(currentNode->crosses, mark.p);
+            removeMark(currentNode->squares, mark.p);
+            addMark(currentNode->triangles, mark);
+            removeMark(currentNode->characters, mark.p);
+            modifyNode(currentNode);
+            break;
+        }
+
+        case eDeleteMarker:{
+            go::point p(sgfX, sgfY);
+            removeMark(currentNode->circles, p);
+            removeMark(currentNode->crosses, p);
+            removeMark(currentNode->squares, p);
+            removeMark(currentNode->triangles, p);
+            removeMark(currentNode->characters, p);
+            removeStone(currentNode->emptyStones, p, go::point(boardX, boardY));
+            removeStone(currentNode->blackStones, p, go::point(boardX, boardY));
+            removeStone(currentNode->whiteStones, p, go::point(boardX, boardY));
+            modifyNode(currentNode);
+            break;
+        }
+
+        default:
+            return;
+    };
+}
+
+void BoardWidget::addMark(go::markList& markList, const go::mark& mark){
+    go::markList::iterator iter = markList.begin();
+    while (iter != markList.end()){
+        if (iter->p == mark.p){
+            markList.erase(iter);
+            return;
+        }
+        ++iter;
+    }
+
+    markList.push_back(mark);
+}
+
+void BoardWidget::addCharacter(go::markList& markList, const go::point& p){
+    go::markList::iterator iter1 = markList.begin();
+    while (iter1 != markList.end()){
+        if (iter1->p == p){
+            markList.erase(iter1);
+            return;
+        }
+        ++iter1;
+    }
+
     QStringList marks;
     foreach(go::mark m, markList)
-        if (m.t == go::mark::eCharacter)
-            marks.push_back(m.s);
+        marks.push_back(m.s);
     qSort(marks);
 
     int c = 'A';
@@ -2447,12 +2429,24 @@ QString BoardWidget::createMarkCharacter(go::markList& markList){
         if ((labelType == 3 && c == katakana_size) || (labelType == 4 && c == kana_iroha_size))
             break;
     }
-
-    return s;
+    markList.push_back(go::mark(p, s));
 }
 
-QString BoardWidget::createMarkManually(go::markList& markList){
-    return QInputDialog::getText(this, QString(), tr("Input Label"));
+void BoardWidget::addManualEntry(go::markList& markList, const go::point& p){
+    QString label = QInputDialog::getText(this, QString(), tr("Input Label"));
+    if (label.isEmpty())
+        return;
+
+    go::markList::iterator iter = markList.begin();
+    while (iter != markList.end()){
+        if (iter->p == p){
+            markList.erase(iter);
+            return;
+        }
+        ++iter;
+    }
+
+    markList.push_back( go::mark(p, label) );
 }
 
 bool BoardWidget::removeMark(go::markList& markList, const go::point& p){
@@ -2467,10 +2461,82 @@ bool BoardWidget::removeMark(go::markList& markList, const go::point& p){
     return false;
 }
 
+void BoardWidget::addStone(go::nodePtr node, const go::point& sgfPoint, go::color color){
+    go::point boardPoint;
+    sgfToBoardCoordinate(sgfPoint.x, sgfPoint.y, boardPoint.x, boardPoint.y);
+    addStone(node, sgfPoint, boardPoint, color);
+}
+
+void BoardWidget::addStone(go::nodePtr node, const go::point& sp, const go::point& bp, go::color c){
+    if (removeStone(node->emptyStones, sp, bp) || removeStone(node->blackStones, sp, bp) || removeStone(node->whiteStones, sp, bp)){
+        modifyNode(node);
+        return;
+    }
+
+    if (!board[bp.y][bp.x].empty())
+        return;
+
+    go::nodePtr stoneNode( node->isStone() ? go::nodePtr(new go::node(node)) : node );
+
+    if (c == go::empty)
+        stoneNode->emptyStones.push_back( go::stone(sp, c) );
+    else if (c == go::black)
+        stoneNode->blackStones.push_back( go::stone(sp, c) );
+    else
+        stoneNode->whiteStones.push_back( go::stone(sp, c) );
+
+    board[bp.y][bp.x].color = c;
+    board[bp.y][bp.x].number = 0;
+
+    if (stoneNode == node)
+        modifyNode(node);
+    else
+        addNodeCommand(node, stoneNode);
+}
+
+void BoardWidget::addEmpty(go::nodePtr node, const go::point& sgfPoint){
+    go::point boardPoint;
+    sgfToBoardCoordinate(sgfPoint.x, sgfPoint.y, boardPoint.x, boardPoint.y);
+    addEmpty(node, sgfPoint, boardPoint);
+}
+
+void BoardWidget::addEmpty(go::nodePtr node, const go::point& sp, const go::point& bp){
+    if (removeStone(node->emptyStones, sp, bp) || removeStone(node->blackStones, sp, bp) || removeStone(node->whiteStones, sp, bp)){
+        modifyNode(node);
+        return;
+    }
+
+    if (board[bp.y][bp.x].empty())
+        return;
+
+    go::nodePtr stoneNode( node->isStone() ? go::nodePtr(new go::node(node)) : node );
+
+    stoneNode->emptyStones.push_back( go::stone(sp, go::empty) );
+    board[bp.y][bp.x].color = go::empty;
+    board[bp.y][bp.x].number = 0;
+
+    if (stoneNode == node)
+        modifyNode(node);
+    else
+        addNodeCommand(node, stoneNode);
+}
+
+bool BoardWidget::removeStone(go::stoneList& stoneList, const go::point& sp, const go::point& bp){
+    go::stoneList::iterator iter = stoneList.begin();
+    while (iter != stoneList.end()){
+        if (iter->p == sp) {
+            stoneList.erase(iter);
+            board[bp.y][bp.x].color = go::empty;
+            board[bp.y][bp.x].number = 0;
+            return true;
+        }
+        ++iter;
+    }
+    return false;
+}
+
 QString BoardWidget::toString(go::nodePtr node) const{
-    if (node->isStone() == false)
-        return "Other";
-    else if (node->isPass())
+    if (node->isPass())
         return "Pass";
     else
         return getXYString(node->position.x, node->position.y);

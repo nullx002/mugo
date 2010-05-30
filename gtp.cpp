@@ -384,7 +384,7 @@ void gtp::processCommand(QString& s){
     else if (command->kind == ePut){
         const go::nodePtr& root = boardWidget_->getData().root;
         putCommand* cmd = (putCommand*)command.get();
-        boardWidget_->addStoneCommand(root, cmd->x, cmd->y, go::black);
+        boardWidget_->addStone(root, go::point(cmd->x, cmd->y), go::black);
     }
     else if (command->kind == eDeadList){
         const BoardWidget::BoardBuffer& buffer = boardWidget_->getBuffer();
