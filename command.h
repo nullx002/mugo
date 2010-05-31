@@ -141,10 +141,10 @@ public:
 
 private:
     template<class Container, class EraseList, class PosList>
-    void DeleteMarkCommand::add(Container& c, EraseList& eraseList, PosList& posList);
+    void add(Container& c, EraseList& eraseList, PosList& posList);
 
     template<class Container, class EraseList, class PosList>
-    void DeleteMarkCommand::remove(Container& c, EraseList& eraseList, PosList& posList);
+    void remove(Container& c, EraseList& eraseList, PosList& posList);
 
     BoardWidget* boardWidget;
     go::nodePtr node;
