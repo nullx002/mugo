@@ -26,8 +26,14 @@ class SgfDocument : public Document
 {
     Q_OBJECT
 public:
-    SgfDocument(QObject* parent=NULL);
+    SgfDocument(QTextCodec* codec, QObject* parent=NULL);
     virtual ~SgfDocument(){};
+
+    // open
+    bool open(const QString& fname, bool guessCodec);
+
+    // save
+    bool save(const QString& fname);
 
     // command
     void addNodeCommand(Go::NodePtr parentNode, Go::NodePtr node);

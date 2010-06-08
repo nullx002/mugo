@@ -174,7 +174,7 @@ void BoardWidget::onLButtonDown(QMouseEvent* e){
 /**
     RightButton Down
 */
-void BoardWidget::onRButtonDown(QMouseEvent* e){
+void BoardWidget::onRButtonDown(QMouseEvent* /*e*/){
 }
 
 /**

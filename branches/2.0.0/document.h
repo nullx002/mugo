@@ -20,7 +20,7 @@
 
 #include <QObject>
 #include <QString>
-#include <QFileInfo>
+#include <QTextCodec>
 
 class QUndoStack;
 
@@ -33,22 +33,29 @@ class Document : public QObject
     Q_OBJECT
 public:
     // Constructor
-    Document(QObject* parent=NULL);
+    Document(QTextCodec* codec, QObject* parent=NULL);
     virtual ~Document();
+
+    // open
+    virtual bool open(const QString& fname, bool guessCodec) = 0;
+
+    // save
+    virtual bool save(const QString& fname) = 0;
 
     // Get
     QUndoStack* getUndoStack(){ return undoStack; }
-    const QString& getName() const{ return name; }
-    const QFileInfo& getFileInfo() const{ return fileInfo; }
+    const QString& getDocName() const{ return docName; }
+    const QString& getFileName() const{ return fileName; }
 
     // Set
-    void setName(const QString& name_){ name = name_; }
-    void setFileInfo(const QFileInfo fi){ fileInfo = fi; }
+    void setDocName(const QString& name){ docName = name; }
+    void setFileName(const QString& fname){ fileName = fname; }
 
 protected:
     QUndoStack* undoStack;
-    QString     name;
-    QFileInfo   fileInfo;
+    QTextCodec* codec;
+    QString     docName;
+    QString     fileName;
 };
 
 #endif // DOCUMENT_H

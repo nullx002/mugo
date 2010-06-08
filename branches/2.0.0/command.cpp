@@ -17,7 +17,7 @@
 */
 #include <QDebug>
 #include "command.h"
-#include "SgfDocument.h"
+#include "sgfdocument.h"
 
 /**
 * Add Node Command

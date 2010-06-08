@@ -15,14 +15,60 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#include <QFileInfo>
+#include <boost/scoped_ptr.hpp>
 #include "sgfdocument.h"
+#include "sgf.h"
 #include "command.h"
 
-SgfDocument::SgfDocument(QObject* parent)
-    : Document(parent)
+SgfDocument::SgfDocument(QTextCodec* codec, QObject* parent)
+    : Document(codec, parent)
 {
     Go::NodePtr node = Go::createInformationNode(Go::NodePtr());
     gameList.push_back(node);
+}
+
+/**
+  open
+*/
+bool SgfDocument::open(const QString& fname, bool guessCodec){
+    QFileInfo fi(fname);
+    boost::scoped_ptr<Go::FileBase> fileBase;
+/*
+    if (fi.suffix().compare("ugf", Qt::CaseInsensitive) == 0)
+    else if (fi.suffix().compare("ngf", Qt::CaseInsensitive) == 0)
+    else if (fi.suffix().compare("gib", Qt::CaseInsensitive) == 0)
+    else
+*/
+        fileBase.reset( new Go::Sgf );
+
+    if (fileBase->read(fname, codec, guessCodec) == false)
+        return false;
+
+    gameList.clear();
+    fileBase->get(gameList);
+
+    docName  = fi.fileName();
+    fileName = fname;
+
+    return true;
+}
+
+/**
+  save
+*/
+bool SgfDocument::save(const QString& fname){
+    Go::Sgf sgf;
+    if (sgf.set(gameList) == false)
+        return false;
+    if (sgf.save(fname, codec) == false)
+        return false;
+
+    QFileInfo fi(fname);
+    docName  = fi.fileName();
+    fileName = fname;
+
+    return true;
 }
 
 /**

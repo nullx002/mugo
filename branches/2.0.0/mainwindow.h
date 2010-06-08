@@ -27,6 +27,7 @@ class QTreeWidget;
 class QTreeWidgetItem;
 class QStandardItemModel;
 class BoardWidget;
+class Document;
 class SgfDocument;
 
 
@@ -60,6 +61,9 @@ protected:
     void setKeyboardShortcut();
     void fileNew(int xsize=19, int ysize=19, double komi=6.5, int handicap=0);
     bool fileOpen(const QString& fname);
+    bool fileSave(Document*);
+    bool fileSaveAs(Document*);
+    bool fileSaveAs(Document* doc, const QString& fname);
     bool closeTab(int index);
     void addDocument(BoardWidget* board);
     void createBranchWidget(BoardWidget* board, QTreeWidgetItem* parent1, QTreeWidgetItem* parent2, Go::NodePtr parentNode, Go::NodePtr node);

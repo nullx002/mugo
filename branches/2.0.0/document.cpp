@@ -21,9 +21,10 @@
 /**
   Constructor
 */
-Document::Document(QObject* parent)
+Document::Document(QTextCodec* codec_, QObject* parent)
     : QObject(parent)
     , undoStack(new QUndoStack())
+    , codec(codec_)
 {
 }
 

@@ -133,8 +133,12 @@ void MainWindow::setKeyboardShortcut(){
 */
 void MainWindow::fileNew(int xsize, int ysize, double komi, int handicap)
 {
-    SgfDocument* doc = new SgfDocument(this);
-    doc->setName( tr("Untitled-%1").arg(++docID) );
+    SgfDocument* doc = new SgfDocument(defaultCodec, this);
+    doc->gameList[0]->gameInformation->xsize = xsize;
+    doc->gameList[0]->gameInformation->ysize = ysize;
+    doc->gameList[0]->gameInformation->komi  = komi;
+    doc->gameList[0]->gameInformation->handicap = handicap;
+    doc->setDocName( tr("Untitled-%1").arg(++docID) );
     BoardWidget* board = new BoardWidget(doc, this);
     addDocument(board);
 }
@@ -144,25 +148,48 @@ void MainWindow::fileNew(int xsize, int ysize, double komi, int handicap)
 */
 bool MainWindow::fileOpen(const QString& fname)
 {
-    Go::NodeList gameList;
-
-    QFileInfo fi(fname);
-    if (fi.suffix().compare("sgf", Qt::CaseInsensitive) == 0){
-        Go::Sgf sgf;
-        if (sgf.read(fname, defaultCodec, true) == false){
-            QMessageBox::critical(this, QString(), tr("File open error: %1").arg(fname));
-            return false;
-        }
-        sgf.get(gameList);
+    SgfDocument* doc = new SgfDocument(defaultCodec, this);
+    if (doc->open(fname, true) == false){
+        QMessageBox::critical(this, QString(), tr("File open error: %1").arg(fname));
+        delete doc;
+        return false;
     }
-
-    SgfDocument* doc = new SgfDocument(this);
-    doc->setName(fi.fileName());
-    doc->setFileInfo(fi);
-    doc->gameList = gameList;
     BoardWidget* board = new BoardWidget(doc, this);
     addDocument(board);
 
+    return true;
+}
+
+/**
+    save
+*/
+bool MainWindow::fileSave(Document* doc){
+    if (doc->getFileName().isEmpty())
+        fileSaveAs(doc);
+
+    if (doc->save(doc->getFileName()) == false){
+        QMessageBox::critical(this, QString(), tr("File save error: %1").arg(doc->getFileName()));
+        return false;
+    }
+    return true;
+}
+
+/**
+    save
+*/
+bool MainWindow::fileSaveAs(Document* doc){
+    QString filter = "Smart Game Format (*.sgf);;All Files (*.*)";
+    QString fname = QFileDialog::getSaveFileName(this, QString(), QString(doc->getDocName()), filter, NULL);
+    if (fname.isEmpty())
+        return false;
+
+    QFileInfo fi(fname);
+    if (fi.suffix().isEmpty())
+        fi.setFile( fname + ".sgf" );
+    if (doc->save(fi.absoluteFilePath()) == false){
+        QMessageBox::critical(this, QString(), tr("File save error: %1").arg(fname));
+        return false;
+    }
     return true;
 }
 
@@ -245,7 +272,7 @@ void MainWindow::addDocument(BoardWidget* board)
     connect(board, SIGNAL(currentNodeChanged(Go::NodePtr)), SLOT(on_boardWidget_currentNodeChanged(Go::NodePtr)));
 
     // create new tab
-    int n = ui->boardTabWidget->addTab(board, board->document()->getName());
+    int n = ui->boardTabWidget->addTab(board, board->document()->getDocName());
     ui->boardTabWidget->setCurrentIndex(n);
 }
 
@@ -348,7 +375,10 @@ void MainWindow::on_actionOpen_triggered()
 */
 void MainWindow::on_actionSave_triggered()
 {
-
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+            return;
+    fileSave(board->document());
 }
 
 /**
@@ -357,7 +387,10 @@ void MainWindow::on_actionSave_triggered()
 */
 void MainWindow::on_actionSaveAs_triggered()
 {
-
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+            return;
+    fileSaveAs(board->document());
 }
 
 /**
@@ -449,10 +482,14 @@ void MainWindow::on_boardTabWidget_tabCloseRequested(int index)
   Slot
   current item changed in branch widget.
 */
-void MainWindow::on_branchWidget_currentItemChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous){
+void MainWindow::on_branchWidget_currentItemChanged(QTreeWidgetItem* current, QTreeWidgetItem* /*previous*/){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+            return;
+
     QVariant v = current->data(0, Qt::UserRole);
     Go::NodePtr node = v.value<Go::NodePtr>();
     if (node == NULL)
         return;
-    currentBoard()->setCurrentNode(node);
+    board->setCurrentNode(node);
 }
