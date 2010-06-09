@@ -16,6 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include <QDebug>
+#include "mugoapp.h"
 #include "sgf.h"
 
 namespace Go{
@@ -166,10 +167,23 @@ bool Sgf::readNodeValue(QString::iterator& first, QString::iterator last, QStrin
 }
 
 bool Sgf::saveStream(QTextStream& stream){
+    foreach (NodePtr game, gameList){
+/*
+        if (codec){
+            foreach (NodePtr info, game->getChildNodes()){
+                info->setProperty("CA", QStringList(codec->name()));
+            }
+        }
+*/
+        writeNode(stream, game);
+    }
+
     return true;
 }
 
 bool Sgf::get(Go::NodeList& gameList) const{
+    gameList.clear();
+
     foreach(NodePtr sgfGame, this->gameList){
         Go::NodePtr goGame;
         get(sgfGame, goGame);
@@ -208,7 +222,52 @@ Go::NodePtr Sgf::get(NodePtr& sgfNode, Go::NodePtr& goNode) const{
 }
 
 bool Sgf::set(Go::NodeList& gameList){
+    this->gameList.clear();
+
+    foreach(Go::NodePtr game, gameList){
+        NodePtr sgfGame(new Node());
+        set(sgfGame, game);
+        this->gameList.push_back(sgfGame);
+    }
+
     return true;
+}
+
+bool Sgf::set(NodePtr& sgfNode, Go::NodePtr goNode){
+    NodePtr newNode(new Node);
+    newNode->set( goNode );
+    sgfNode->childNodes.push_back(newNode);
+
+    if (goNode->childNodes.size() > 1){
+        NodePtr branchNode(new Node);
+        sgfNode->childNodes.push_back(branchNode);
+
+        foreach(const Go::NodePtr& childNode, goNode->childNodes)
+            set(branchNode, childNode);
+    }
+    else if (goNode->childNodes.size() == 1)
+        set(sgfNode, goNode->childNodes.front());
+
+    return true;
+}
+
+void Sgf::writeNode(QTextStream& stream, QString& s, NodePtr node){
+    QString s;
+    if (node->childNodes.empty() == false){
+        s.push_back('(');
+        foreach(NodePtr childNode, node->childNodes){
+            writeNode(stream, childNode);
+        }
+    }
+    else{
+        QString s2 = node->toString();
+        if (s.isEmpty() == false && s.size() + s2.size() > lineWidth){
+            stream << '\n';
+            s.clear();
+        }
+        stream << s2;
+        s.append(s2);
+    }
 }
 
 bool Sgf::positionToInt(const QString& pos, int& x, int& y, QString* str){
@@ -249,6 +308,18 @@ bool Sgf::positionToIntList(const QString& pos, QList<int>& xList, QList<int>& y
     return true;
 }
 
+QString Sgf::positionToString(int x, int y, const QString* s){
+    QString buf;
+    if (s)
+        buf.sprintf("%c%c:%s", x + (x < 27 ? 'a' : 'A' - 27), y + (y < 27 ? 'a' : 'A' - 27), (const char*)s->toAscii());
+    else
+        buf.sprintf("%c%c", x + (x < 27 ? 'a' : 'A' - 27), y + (y < 27 ? 'a' : 'A' - 27));
+    return buf;
+}
+
+QString Sgf::positionToString(const Go::Point& p, const QString* s){
+    return positionToString(p.x, p.y, s);
+}
 
 
 bool Sgf::Node::get(Go::NodePtr& node) const{
@@ -426,7 +497,155 @@ void Sgf::Node::addStone(Go::StoneList& stoneList, const QString& key, const QSt
     }
 }
 
+bool Sgf::Node::set(const Go::NodePtr& n){
+    if (n->gameInformation){
+        properties["GM"].push_back("1");
+        properties["FF"].push_back("4");
+        properties["AP"].push_back(APP_NAME ":" APP_VERSION);
+        if (n->gameInformation->xsize == n->gameInformation->ysize)
+            properties["SZ"].push_back( QString("%1").arg(n->gameInformation->xsize) );
+        else
+            properties["SZ"].push_back( QString("%1:%2").arg(n->gameInformation->xsize).arg(n->gameInformation->ysize) );
+        properties["KM"].push_back( QString("%1").arg(n->gameInformation->komi) );
 
+        if (n->gameInformation->handicap != 0)   properties["HA"].push_back( QString("%1").arg(n->gameInformation->handicap) );
+        if (!n->gameInformation->rule.isEmpty()) properties["RU"].push_back( n->gameInformation->rule );
+
+        if (!n->gameInformation->whitePlayer.isEmpty()) properties["PW"].push_back( n->gameInformation->whitePlayer );
+        if (!n->gameInformation->whiteRank.isEmpty())   properties["WR"].push_back( n->gameInformation->whiteRank );
+        if (!n->gameInformation->whiteTeam.isEmpty())   properties["WT"].push_back( n->gameInformation->whiteTeam );
+        if (!n->gameInformation->blackPlayer.isEmpty()) properties["PB"].push_back( n->gameInformation->blackPlayer );
+        if (!n->gameInformation->blackRank.isEmpty())   properties["BR"].push_back( n->gameInformation->blackRank );
+        if (!n->gameInformation->blackTeam.isEmpty())   properties["BT"].push_back( n->gameInformation->blackTeam );
+        if (!n->gameInformation->result.isEmpty())      properties["RE"].push_back( n->gameInformation->result );
+        if (!n->gameInformation->time.isEmpty())        properties["TM"].push_back( n->gameInformation->time );
+        if (!n->gameInformation->overTime.isEmpty())    properties["OT"].push_back( n->gameInformation->overTime );
+
+        if (!n->gameInformation->date.isEmpty())        properties["DT"].push_back( n->gameInformation->date );
+        if (!n->gameInformation->gameName.isEmpty())    properties["GN"].push_back( n->gameInformation->gameName );
+        if (!n->gameInformation->round.isEmpty())       properties["RO"].push_back( n->gameInformation->round );
+        if (!n->gameInformation->place.isEmpty())       properties["PC"].push_back( n->gameInformation->place );
+        if (!n->gameInformation->event.isEmpty())       properties["EV"].push_back( n->gameInformation->event );
+
+        if (!n->gameInformation->gameComment.isEmpty()) properties["GC"].push_back( n->gameInformation->gameComment );
+        if (!n->gameInformation->annotation.isEmpty())  properties["AN"].push_back( n->gameInformation->annotation );
+        if (!n->gameInformation->copyright.isEmpty())   properties["CP"].push_back( n->gameInformation->copyright );
+        if (!n->gameInformation->opening.isEmpty())     properties["ON"].push_back( n->gameInformation->opening );
+        if (!n->gameInformation->source.isEmpty())      properties["SO"].push_back( n->gameInformation->source );
+        if (!n->gameInformation->user.isEmpty())        properties["US"].push_back( n->gameInformation->user );
+    }
+
+    if (n->isStone()){
+        QString str;
+        if (!n->isPass())
+            str = positionToString(n->position.x, n->position.y);
+        PropertyType::key_type key = n->isBlack() ? "B" : "W";
+        properties[key].push_back(str);
+
+        if (n->moveNumber > 0)
+            properties["MN"].push_back( QString("%1").arg(n->moveNumber) );
+    }
+
+    if (!n->name.isEmpty())
+        properties["N"].push_back(n->name);
+    if (!n->comment.isEmpty())
+        properties["C"].push_back(n->comment);
+
+/*
+    if (n->nextColor == Go::black)
+        properties["PL"].push_back("B");
+    else if (n->nextColor == Go::white)
+        properties["PL"].push_back("W");
+*/
+
+    // marker
+    set(n->marks);
+    set(n->blackTerritories);
+    set(n->whiteTerritories);
+    set(n->emptyStones);
+    set(n->blackStones);
+    set(n->whiteStones);
+    set(n->dims);
+
+    if (n->moveAnnotation == Go::Node::goodMove)
+        properties["TE"].push_back("1");
+    if (n->moveAnnotation == Go::Node::veryGoodMove)
+        properties["TE"].push_back("2");
+    else if (n->moveAnnotation == Go::Node::badMove)
+        properties["BM"].push_back("1");
+    else if (n->moveAnnotation == Go::Node::veryBadMove)
+        properties["BM"].push_back("2");
+    else if (n->moveAnnotation == Go::Node::doubtfulMove)
+        properties["DO"].push_back("");
+    else if (n->moveAnnotation == Go::Node::interestingMove)
+        properties["IT"].push_back("");
+
+    if (n->nodeAnnotation == Go::Node::even)
+        properties["DM"].push_back("1");
+    else if (n->nodeAnnotation == Go::Node::goodForBlack)
+        properties["GB"].push_back("1");
+    else if (n->nodeAnnotation == Go::Node::veryGoodForBlack)
+        properties["GB"].push_back("2");
+    else if (n->nodeAnnotation == Go::Node::goodForWhite)
+        properties["GW"].push_back("1");
+    else if (n->nodeAnnotation == Go::Node::veryGoodForWhite)
+        properties["GW"].push_back("2");
+    else if (n->nodeAnnotation == Go::Node::unclear)
+        properties["UC"].push_back("1");
+
+    if (n->annotation == Go::Node::hotspot)
+        properties["HO"].push_back("1");
+
+    return false;
+}
+
+bool Sgf::Node::set(const Go::MarkList& markList){
+    foreach (const Go::Mark& mark, markList){
+        switch (mark.type){
+            case Go::Mark::cross:
+                properties["MA"].push_back( positionToString(mark.position) );
+                break;
+            case Go::Mark::circle:
+                properties["CR"].push_back( positionToString(mark.position) );
+                break;
+            case Go::Mark::square:
+                properties["SQ"].push_back( positionToString(mark.position) );
+                break;
+            case Go::Mark::triangle:
+                properties["TR"].push_back( positionToString(mark.position) );
+                break;
+            case Go::Mark::select:
+                properties["SL"].push_back( positionToString(mark.position) );
+                break;
+            case Go::Mark::character:
+                properties["LB"].push_back( positionToString(mark.position, &mark.text) );
+                break;
+            case Go::Mark::blackTerritory:
+                properties["TB"].push_back( positionToString(mark.position) );
+                break;
+            case Go::Mark::whiteTerritory:
+                properties["TW"].push_back( positionToString(mark.position) );
+                break;
+            case Go::Mark::dim:
+                properties["DD"].push_back( positionToString(mark.position) );
+                break;
+        };
+    }
+
+    return true;
+}
+
+bool Sgf::Node::set(const Go::StoneList& stoneList){
+    foreach (const Go::Stone& stone, stoneList){
+        if (stone.isBlack())
+            properties["AB"].push_back( positionToString(stone.position) );
+        else if (stone.isWhite())
+            properties["AW"].push_back( positionToString(stone.position) );
+        else if (stone.isEmpty())
+            properties["AE"].push_back( positionToString(stone.position) );
+    }
+    return true;
+}
 
 
 #if 0

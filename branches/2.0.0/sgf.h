@@ -36,16 +36,21 @@ public:
     class Node{
         public:
             bool get(Go::NodePtr& node) const;
+            bool set(const Go::NodePtr& node);
+
+            PropertyType properties;
+            NodeList childNodes;
+
+        protected:
             bool get(const QString& key, const QStringList& values, Go::NodePtr& node) const;
-
             Go::GameInformationPtr getInformation(Go::NodePtr& node) const;
-
             void addMark(Go::MarkList& markList, const QStringList& values) const;
             void addMark(Go::MarkList& markList, const QStringList& values, Go::Mark::Type type) const;
             void addStone(Go::StoneList& stoneList, const QString& key, const QStringList& values) const;
 
-            PropertyType properties;
-            NodeList childNodes;
+            bool set();
+            bool set(const Go::MarkList& markList);
+            bool set(const Go::StoneList& stoneList);
     };
 
     // read
@@ -71,8 +76,13 @@ protected:
     // sgf to internal data
     Go::NodePtr get(NodePtr& sgfNode, Go::NodePtr& goNode) const;
 
+    // internal data to sgf
+    bool set(NodePtr& sgfNode, Go::NodePtr goNode);
+
     static bool positionToInt(const QString& pos, int& x, int& y, QString* str=NULL);
     static bool positionToIntList(const QString& pos, QList<int>& x, QList<int>& y);
+    static QString positionToString(int x, int y, const QString* s=NULL);
+    static QString positionToString(const Go::Point& p, const QString* s=NULL);
 
     NodeList gameList;
 

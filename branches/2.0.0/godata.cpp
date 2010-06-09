@@ -199,20 +199,20 @@ bool FileBase::read(const QString& fname, QTextCodec* defaultCodec, bool guessCo
 }
 
 bool FileBase::read(const QByteArray& bytes, QTextCodec* defaultCodec, bool guessCodec){
-    QTextCodec* codec = guessCodec ? getCodec(bytes) : NULL;
-    if (codec)
-        qDebug() << "file codec is " << codec->name();
+    QTextCodec* codec_ = guessCodec ? getCodec(bytes) : NULL;
+    if (codec_)
+        qDebug() << "file codec is " << codec_->name();
     else if (guessCodec)
         qDebug() << "unknown codec, use default codec: " << defaultCodec->name();
     else
         qDebug() << "use default codec: " << defaultCodec->name();
 
-    codec_ = codec ? codec : defaultCodec;
-    QString s = codec_->toUnicode(bytes);
+    codec = codec_ ? codec_ : defaultCodec;
+    QString s = codec->toUnicode(bytes);
 
     // yen sign problem.
     QChar yen[2] = {0x005C, 0x00A5};
-    QByteArray byte_yen = codec_->fromUnicode(yen, 2);
+    QByteArray byte_yen = codec->fromUnicode(yen, 2);
     if (byte_yen.size() == 2 && byte_yen[0] == byte_yen[1])
         s.replace(QChar(0x00A5), QChar(0x005C));
 
@@ -220,8 +220,8 @@ bool FileBase::read(const QByteArray& bytes, QTextCodec* defaultCodec, bool gues
     return readStream(iter, s.end());
 }
 
-bool FileBase::save(const QString& fname, QTextCodec* codec){
-    codec_ = codec;
+bool FileBase::save(const QString& fname, QTextCodec* codec_){
+    codec = codec_;
 
     QFile f(fname);
     if (!f.open(QIODevice::WriteOnly))

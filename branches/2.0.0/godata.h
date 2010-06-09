@@ -217,7 +217,7 @@ public:
 
 class FileBase{
 public:
-    FileBase() : codec_(NULL){}
+    FileBase() : codec(NULL){}
     virtual ~FileBase(){}
 
     virtual bool read(const QString& fname, QTextCodec* codec, bool guessCodec);
@@ -235,7 +235,7 @@ public:
     QString readLine(QString::iterator& first, QString::iterator& last);
 
 protected:
-    QTextCodec* codec_;
+    QTextCodec* codec;
 };
 
 
