@@ -66,7 +66,8 @@ protected:
     bool fileSaveAs(Document* doc, const QString& fname);
     bool closeTab(int index);
     void addDocument(BoardWidget* board);
-    void createBranchWidget(BoardWidget* board, QTreeWidgetItem* parent1, QTreeWidgetItem* parent2, Go::NodePtr parentNode, Go::NodePtr node);
+    void createBranchWidget(BoardWidget* board, Go::NodePtr node);
+    void createBranchWidget(BoardWidget* board, QTreeWidgetItem* root, QTreeWidgetItem* parent1, QTreeWidgetItem* parent2, Go::NodePtr parentNode, Go::NodePtr node);
 //    void createBranchWidget(BoardWidget* board, QTreeWidgetItem* root, QTreeWidgetItem* parent, Go::NodePtr node, bool branch);
     QTreeWidgetItem* createBranchItem(BoardWidget* board, Go::NodePtr node);
 

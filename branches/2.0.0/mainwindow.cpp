@@ -238,7 +238,7 @@ void MainWindow::addDocument(BoardWidget* board)
 
     // initialize branch widget
     QTreeWidgetItem* dummy = new QTreeWidgetItem(QStringList(""));
-    createBranchWidget( board, dummy, dummy, Go::NodePtr(), board->getCurrentGame() );
+    createBranchWidget( board, dummy, dummy, dummy, Go::NodePtr(), board->getCurrentGame() );
     for (int i=0; i<dummy->childCount();){
         QTreeWidgetItem* item = dummy->child(i);
         dummy->removeChild(item);
@@ -279,25 +279,46 @@ void MainWindow::addDocument(BoardWidget* board)
 /**
   create branch tree widget
 */
-void MainWindow::createBranchWidget(BoardWidget* board, QTreeWidgetItem* parent1, QTreeWidgetItem* parent2, Go::NodePtr parentNode, Go::NodePtr node){
+void MainWindow::createBranchWidget(BoardWidget* board, Go::NodePtr node){
+    TabData& tabData = tabDatas[board->document()];
+    QTreeWidgetItem* parent2 = tabData.nodeToTreeItem[node];
+    QTreeWidgetItem* parent1 = parent2->parent() ? parent2->parent() : tabData.branchWidget->invisibleRootItem();
+    foreach(Go::NodePtr childNode, node->childNodes){
+        createBranchWidget(board, tabData.branchWidget->invisibleRootItem(), parent1, parent2, node, childNode);
+    }
+}
+
+/**
+  create branch tree widget
+*/
+void MainWindow::createBranchWidget(BoardWidget* board, QTreeWidgetItem* root, QTreeWidgetItem* parent1, QTreeWidgetItem* parent2, Go::NodePtr parentNode, Go::NodePtr node){
     // create tree item widget
     QTreeWidgetItem* item = createBranchItem(board, node);
+    QTreeWidgetItem* currentParent = NULL;
     if (item->parent())
-        item->parent()->removeChild(item);
+        currentParent = item->parent();
+    else if (root->indexOfChild(item) >= 0)
+        currentParent = root;
 
     Go::NodePtr parent1Node = parent1->data(0, Qt::UserRole).value<Go::NodePtr>();
     QTreeWidgetItem* parentWidget = NULL;
     if ((!parentNode || parentNode->childNodes.size() == 1) && (parent1Node == NULL || parent1Node->childNodes.size() == 1)){
-        parent1->addChild(item);
+        if (currentParent && currentParent != parent1)
+            currentParent->removeChild(item);
+        if (currentParent != parent1)
+            parent1->addChild(item);
         parentWidget = parent1;
     }
     else if (parentNode->childNodes.empty() == false){
-        parent2->addChild(item);
+        if (currentParent && currentParent != parent2)
+            currentParent->removeChild(item);
+        if (currentParent != parent2)
+            parent2->addChild(item);
         parentWidget = parent2;
     }
 
     foreach(Go::NodePtr childNode, node->childNodes){
-        createBranchWidget(board, parentWidget, item, node, childNode);
+        createBranchWidget(board, root, parentWidget, item, node, childNode);
     }
 }
 
@@ -433,12 +454,7 @@ void MainWindow::on_document_nodeAdded(Go::NodePtr node){
     BoardWidget* board = tabDatas[doc].boardWidget;
 
     // create new tree item.
-    createBranchItem(board, node);
-
-    Go::NodePtr parentNode = node->parent();
-    QTreeWidgetItem* parent2 = tabDatas[doc].nodeToTreeItem[parentNode];
-    QTreeWidgetItem* parent1 = parent2->parent() ? parent2->parent() : tabDatas[doc].branchWidget->invisibleRootItem();
-    createBranchWidget(board, parent1, parent2, parentNode, node);
+    createBranchWidget(board, node->parent());
 }
 
 /**
