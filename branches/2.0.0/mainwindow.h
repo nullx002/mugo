@@ -42,6 +42,7 @@ class MainWindow : public QMainWindow {
     Q_OBJECT
 public:
     enum BranchType{ gameMode, branchMode };
+    typedef QMap<Go::NodePtr, QTreeWidgetItem*> NodeTreeMap;
 
     class TabData{
         public:
@@ -49,7 +50,7 @@ public:
             QTreeWidget* branchWidget;
             BranchType   branchType;
             QStandardItemModel* collectionModel;
-            QMap<Go::NodePtr, QTreeWidgetItem*> nodeToTreeItem;
+            NodeTreeMap nodeToTreeItem;
     };
 
     MainWindow(const QString& fname=QString(), QWidget *parent = 0);
@@ -68,8 +69,8 @@ protected:
     void addDocument(BoardWidget* board);
     void createBranchWidget(BoardWidget* board, Go::NodePtr node);
     void createBranchWidget(BoardWidget* board, QTreeWidgetItem* root, QTreeWidgetItem* parent1, QTreeWidgetItem* parent2, Go::NodePtr parentNode, Go::NodePtr node);
-//    void createBranchWidget(BoardWidget* board, QTreeWidgetItem* root, QTreeWidgetItem* parent, Go::NodePtr node, bool branch);
     QTreeWidgetItem* createBranchItem(BoardWidget* board, Go::NodePtr node);
+    void removeFromNodeTreeMap(NodeTreeMap& map, Go::NodePtr node);
 
 private:
     Ui::MainWindow *ui;
@@ -92,6 +93,7 @@ private slots:
 
     // Document
     void on_document_nodeAdded(Go::NodePtr node);
+    void on_document_nodeDeleted(Go::NodePtr node, bool removeChild);
 
     // BoardWidget
     void on_boardWidget_currentNodeChanged(Go::NodePtr node);

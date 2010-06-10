@@ -14,7 +14,7 @@
    <string>mugo</string>
   </property>
   <property name="windowIcon">
-   <iconset>
+   <iconset resource="mugo.qrc">
     <normaloff>:/pics/mugo_128.png</normaloff>:/pics/mugo_128.png</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
@@ -101,6 +101,9 @@
     <property name="title">
      <string>&amp;Edit</string>
     </property>
+    <addaction name="separator"/>
+    <addaction name="actionDeleteAfterCurrent"/>
+    <addaction name="actionDeleteCurrentOnly"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -202,7 +205,11 @@
       <number>0</number>
      </property>
      <item>
-      <widget class="QTreeView" name="collectionView"/>
+      <widget class="QTreeView" name="collectionView">
+       <property name="editTriggers">
+        <set>QAbstractItemView::NoEditTriggers</set>
+       </property>
+      </widget>
      </item>
     </layout>
    </widget>
@@ -217,10 +224,11 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionDeleteAfterCurrent"/>
   </widget>
   <action name="actionNew">
    <property name="icon">
-    <iconset>
+    <iconset resource="mugo.qrc">
      <normaloff>:/res/filenew.png</normaloff>:/res/filenew.png</iconset>
    </property>
    <property name="text">
@@ -229,7 +237,7 @@
   </action>
   <action name="actionOpen">
    <property name="icon">
-    <iconset>
+    <iconset resource="mugo.qrc">
      <normaloff>:/res/fileopen.png</normaloff>:/res/fileopen.png</iconset>
    </property>
    <property name="text">
@@ -243,7 +251,7 @@
   </action>
   <action name="actionReload">
    <property name="icon">
-    <iconset>
+    <iconset resource="mugo.qrc">
      <normaloff>:/res/reload.png</normaloff>:/res/reload.png</iconset>
    </property>
    <property name="text">
@@ -252,7 +260,7 @@
   </action>
   <action name="actionSave">
    <property name="icon">
-    <iconset>
+    <iconset resource="mugo.qrc">
      <normaloff>:/res/filesave.png</normaloff>:/res/filesave.png</iconset>
    </property>
    <property name="text">
@@ -279,6 +287,24 @@
     <string>About Qt...</string>
    </property>
   </action>
+  <action name="actionDeleteAfterCurrent">
+   <property name="icon">
+    <iconset resource="mugo.qrc">
+     <normaloff>:/res/remove.png</normaloff>:/res/remove.png</iconset>
+   </property>
+   <property name="text">
+    <string>Delete After Current</string>
+   </property>
+  </action>
+  <action name="actionDeleteCurrentOnly">
+   <property name="icon">
+    <iconset resource="mugo.qrc">
+     <normaloff>:/res/removeself.png</normaloff>:/res/removeself.png</iconset>
+   </property>
+   <property name="text">
+    <string>Delete Current Only</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
@@ -288,6 +314,8 @@
    <header>qundoview.h</header>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="mugo.qrc"/>
+ </resources>
  <connections/>
 </ui>

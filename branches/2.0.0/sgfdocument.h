@@ -40,11 +40,13 @@ public:
 
     // operate without command
     void addNode(Go::NodePtr parentNode, Go::NodePtr node);
+    void deleteNode(Go::NodePtr node, bool removeChild);
 
     Go::NodeList gameList;
 
 signals:
     void nodeAdded(Go::NodePtr node);
+    void nodeDeleted(Go::NodePtr node, bool removeChild);
 };
 
 #endif // SGFDOCUMENT_H

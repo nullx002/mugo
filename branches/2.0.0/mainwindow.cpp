@@ -54,12 +54,10 @@ MainWindow::MainWindow(const QString& fname, QWidget *parent) :
     QAction* redoAction = undoGroup.createRedoAction(this);
     undoAction->setIcon( QIcon(":/res/undo.png") );
     redoAction->setIcon( QIcon(":/res/redo.png") );
-    ui->menuEdit->addAction(undoAction);
-    ui->menuEdit->addAction(redoAction);
-    ui->editToolBar->addAction(undoAction);
-    ui->editToolBar->addAction(redoAction);
-//    ui->menuEdit->insertAction(ui->menuEdit->actions().at(0), redoAction);
-//    ui->menuEdit->insertAction(redoAction, undoAction);
+    ui->menuEdit->insertAction(ui->menuEdit->actions().at(0), redoAction);
+    ui->menuEdit->insertAction(redoAction, undoAction);
+    ui->editToolBar->insertAction(ui->editToolBar->actions().at(0), redoAction);
+    ui->editToolBar->insertAction(redoAction, undoAction);
 
     // window -> toolbars menu
     ui->menuToolbars->addAction( ui->fileToolBar->toggleViewAction() );
@@ -267,6 +265,7 @@ void MainWindow::addDocument(BoardWidget* board)
 
     // document
     connect(board->document(), SIGNAL(nodeAdded(Go::NodePtr)), SLOT(on_document_nodeAdded(Go::NodePtr)));
+    connect(board->document(), SIGNAL(nodeDeleted(Go::NodePtr, bool)), SLOT(on_document_nodeDeleted(Go::NodePtr, bool)));
 
     // board
     connect(board, SIGNAL(currentNodeChanged(Go::NodePtr)), SLOT(on_boardWidget_currentNodeChanged(Go::NodePtr)));
@@ -369,6 +368,15 @@ QTreeWidgetItem* MainWindow::createBranchItem(BoardWidget* board, Go::NodePtr no
 }
 
 /**
+  remove node from NodeToTreeMap
+*/
+void MainWindow::removeFromNodeTreeMap(NodeTreeMap& map, Go::NodePtr node){
+    map.remove(node);
+    foreach(Go::NodePtr childNode, node->childNodes)
+        removeFromNodeTreeMap(map, childNode);
+}
+
+/**
   slot
   File -> New
 */
@@ -447,14 +455,41 @@ void MainWindow::on_actionAboutQt_triggered()
   node added
 */
 void MainWindow::on_document_nodeAdded(Go::NodePtr node){
-//    rebuildBranchWidget(node->parent());
-//nodeToTreeItem[node];
     // get document and board widget.
     SgfDocument* doc = qobject_cast<SgfDocument*>(sender());
     BoardWidget* board = tabDatas[doc].boardWidget;
 
     // create new tree item.
     createBranchWidget(board, node->parent());
+
+    // select new item
+    board->setCurrentNode(node);
+}
+
+/**
+  Slot
+  node deleted
+*/
+void MainWindow::on_document_nodeDeleted(Go::NodePtr node, bool removeChild){
+    SgfDocument* doc = qobject_cast<SgfDocument*>(sender());
+    TabData& tabData = tabDatas[doc];
+
+    QTreeWidgetItem* item = tabData.nodeToTreeItem[node];
+    if (removeChild)
+        removeFromNodeTreeMap(tabData.nodeToTreeItem, node);
+    else{
+        while (item->childCount()){
+            tabData.nodeToTreeItem.remove(node);
+            item->removeChild( item->child(0) );
+        }
+    }
+    delete item;
+
+    if (!node->parent())
+        return;
+
+    // remake tree widget
+    createBranchWidget(tabDatas[doc].boardWidget, node->parent());
 }
 
 /**
@@ -474,9 +509,11 @@ void MainWindow::on_boardWidget_currentNodeChanged(Go::NodePtr node){
 */
 void MainWindow::on_boardTabWidget_currentChanged(QWidget* widget)
 {
-    if (widget == NULL)
-        return;
     BoardWidget* boardWidget = qobject_cast<BoardWidget*>(widget);
+    if (boardWidget  == NULL){
+        undoGroup.setActiveStack(NULL);
+        return;
+    }
     TabData& tabData = tabDatas[boardWidget->document()];
 
     ui->branchStackedWidget->setCurrentWidget( tabData.branchWidget );

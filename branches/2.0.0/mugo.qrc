@@ -13,5 +13,7 @@
         <file>res/reload.png</file>
         <file>res/undo.png</file>
         <file>res/redo.png</file>
+        <file>res/remove.png</file>
+        <file>res/removeself.png</file>
     </qresource>
 </RCC>

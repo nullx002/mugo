@@ -86,3 +86,18 @@ void SgfDocument::addNode(Go::NodePtr parentNode, Go::NodePtr node){
     parentNode->childNodes.push_back(node);
     emit nodeAdded(node);
 }
+
+/**
+  delete node
+*/
+void SgfDocument::deleteNode(Go::NodePtr node, bool removeChild){
+    Go::NodePtr parent = node->parent();
+    if (!parent)
+        return;
+
+    Go::NodeList::iterator iter = qFind(parent->childNodes.begin(), parent->childNodes.end(), node);
+    if (iter == parent->childNodes.end())
+        return;
+    parent->childNodes.erase(iter);
+    emit nodeDeleted(node, removeChild);
+}

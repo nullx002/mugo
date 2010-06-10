@@ -36,4 +36,5 @@ void AddNodeCommand::redo(){
 }
 
 void AddNodeCommand::undo(){
+    document->deleteNode(node, true);
 }
