@@ -175,7 +175,8 @@ bool Sgf::saveStream(QTextStream& stream){
             }
         }
 */
-        writeNode(stream, game);
+        QString s;
+        writeNode(stream, s, game);
     }
 
     return true;
@@ -239,11 +240,11 @@ bool Sgf::set(NodePtr& sgfNode, Go::NodePtr goNode){
     sgfNode->childNodes.push_back(newNode);
 
     if (goNode->childNodes.size() > 1){
-        NodePtr branchNode(new Node);
-        sgfNode->childNodes.push_back(branchNode);
-
-        foreach(const Go::NodePtr& childNode, goNode->childNodes)
+        foreach(const Go::NodePtr& childNode, goNode->childNodes){
+            NodePtr branchNode(new Node);
+            sgfNode->childNodes.push_back(branchNode);
             set(branchNode, childNode);
+        }
     }
     else if (goNode->childNodes.size() == 1)
         set(sgfNode, goNode->childNodes.front());
@@ -252,12 +253,13 @@ bool Sgf::set(NodePtr& sgfNode, Go::NodePtr goNode){
 }
 
 void Sgf::writeNode(QTextStream& stream, QString& s, NodePtr node){
-    QString s;
     if (node->childNodes.empty() == false){
         s.push_back('(');
-        foreach(NodePtr childNode, node->childNodes){
-            writeNode(stream, childNode);
-        }
+        stream << '(';
+        foreach(NodePtr childNode, node->childNodes)
+            writeNode(stream, s, childNode);
+        s.push_back(')');
+        stream << ')';
     }
     else{
         QString s2 = node->toString();
@@ -646,6 +648,26 @@ bool Sgf::Node::set(const Go::StoneList& stoneList){
     }
     return true;
 }
+
+QString Sgf::Node::toString() const{
+    QString str(";");
+
+    PropertyType::const_iterator iter = properties.begin();
+    while (iter != properties.end()){
+        str += iter.key();
+        foreach(const QString& v, iter.value()){
+            str += "[";
+            str += v;
+            str += "]";
+        }
+
+        ++iter;
+    }
+
+    return str;
+}
+
+
 
 
 #if 0

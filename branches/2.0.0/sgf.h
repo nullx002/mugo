@@ -38,6 +38,8 @@ public:
             bool get(Go::NodePtr& node) const;
             bool set(const Go::NodePtr& node);
 
+            QString toString() const;
+
             PropertyType properties;
             NodeList childNodes;
 
@@ -53,6 +55,9 @@ public:
             bool set(const Go::StoneList& stoneList);
     };
 
+    Sgf() : lineWidth(50){
+    }
+
     // read
     virtual bool readStream(QString::iterator& first, QString::iterator last);
 
@@ -64,6 +69,9 @@ public:
 
     // internal data to sgf
     virtual bool set(Go::NodeList& gameList);
+
+    NodeList gameList;
+    int lineWidth;
 
 protected:
     // read
@@ -78,13 +86,12 @@ protected:
 
     // internal data to sgf
     bool set(NodePtr& sgfNode, Go::NodePtr goNode);
+    void writeNode(QTextStream& stream, QString& s, NodePtr node);
 
     static bool positionToInt(const QString& pos, int& x, int& y, QString* str=NULL);
     static bool positionToIntList(const QString& pos, QList<int>& x, QList<int>& y);
     static QString positionToString(int x, int y, const QString* s=NULL);
     static QString positionToString(const Go::Point& p, const QString* s=NULL);
-
-    NodeList gameList;
 
 #if 0
     enum NodeType{ unknown, root, gameInformation, branch, black, white };
