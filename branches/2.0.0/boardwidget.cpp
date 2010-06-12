@@ -32,7 +32,8 @@ BoardWidget::BoardWidget(SgfDocument* doc, QWidget *parent) :
     document_(doc),
     scene( new QGraphicsScene(this) )
 {
-//    connect( doc, SIGNAL(nodeAdded(Go::NodePtr)), SLOT(onNodeAdded(Go::NodePtr)) );
+//    connect(document_, SIGNAL(nodeAdded(Go::NodePtr)), SLOT(on_sgfdocument_nodeAdded(Go::NodePtr)));
+    connect(document_, SIGNAL(nodeDeleted(Go::NodePtr, bool)), SLOT(on_sgfdocument_nodeDeleted(Go::NodePtr, bool)));
 
     setScene(scene);
 
@@ -449,4 +450,27 @@ bool BoardWidget::inBoard(Go::NodePtr node){
         return false;
 
     return true;
+}
+
+/**
+  Slot
+  node added
+*/
+/*
+void BoardWidget::on_sgfdocument_nodeAdded(Go::NodePtr node){
+    setCurrentNode(node);
+}
+*/
+
+/**
+  Slot
+  node deleted
+*/
+void BoardWidget::on_sgfdocument_nodeDeleted(Go::NodePtr node, bool /*removeChild*/){
+    setCurrentNode(node->parent());
+    Go::NodeList::iterator iter = qFind(currentNodeList.begin(), currentNodeList.end(), node);
+    if (iter != currentNodeList.end()){
+        iter = currentNodeList.erase(iter);
+        createBuffer(true);
+    }
 }

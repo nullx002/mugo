@@ -168,7 +168,7 @@ public:
     // Constructor
     Node();
     explicit Node(NodePtr parent);
-    virtual ~Node(){  clear();  }
+    virtual ~Node();
 
     void clear();
     virtual QString toString() const;
@@ -176,7 +176,7 @@ public:
 
     // parent
     NodePtr parent() const{ return parent_.lock(); }
-    void parent(NodePtr node){ parent_ = node; }
+    void setParent(NodePtr node){ parent_ = node; }
 
 
     // get
@@ -184,8 +184,8 @@ public:
     int y() const{ return position.y; }
 
     // set
-    void x(int x){ position.x = x; }
-    void y(int y){ position.y = y; }
+    void setX(int x){ position.x = x; }
+    void setY(int y){ position.y = y; }
 
     // get node type
     virtual bool isStone() const{ return isBlack() || isWhite(); }

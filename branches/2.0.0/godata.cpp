@@ -96,6 +96,13 @@ Node::Node(NodePtr p_)
 {
 }
 
+/**
+  Destructor
+*/
+Node::~Node(){
+    clear();
+}
+
 void Node::clear(){
     parent_.reset();
     childNodes.clear();

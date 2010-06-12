@@ -20,21 +20,68 @@
 #include "sgfdocument.h"
 
 /**
-* Add Node Command
+  Constructor
 */
-AddNodeCommand::AddNodeCommand(SgfDocument* doc, Go::NodePtr parentNode_, Go::NodePtr node_, QUndoCommand* parent)
+AddNodeCommand::AddNodeCommand(SgfDocument* doc, Go::NodePtr parentNode_, Go::NodePtr node_, int index_, QUndoCommand* parent)
     : QUndoCommand(parent)
     , document(doc)
     , parentNode(parentNode_)
     , node(node_)
+    , index(index_)
 {
 }
 
+/**
+  redo add node command
+*/
 void AddNodeCommand::redo(){
     setText( tr("Add Stone") );
-    document->addNode(parentNode, node);
+    document->addNode(parentNode, node, index);
 }
 
+/**
+  undo add node command
+*/
 void AddNodeCommand::undo(){
     document->deleteNode(node, true);
+}
+
+
+/**
+  Constructor
+*/
+DeleteNodeCommand::DeleteNodeCommand(SgfDocument* doc, Go::NodePtr node_, bool removeChildren_, QUndoCommand *parent)
+    : QUndoCommand(parent)
+    , document(doc)
+    , node(node_)
+    , removeChildren(removeChildren_)
+{
+    parentNode = node->parent();
+    pos = parentNode->childNodes.indexOf(node);
+}
+
+/**
+  redo delete node command
+*/
+void DeleteNodeCommand::redo(){
+    setText( tr("Delete Stone") );
+    document->deleteNode(node, removeChildren);
+}
+
+/**
+  undo delete node command
+*/
+void DeleteNodeCommand::undo(){
+    if (removeChildren == false){
+        foreach(Go::NodePtr child, node->childNodes){
+            Go::NodeList::iterator iter = qFind(parentNode->childNodes.begin(), parentNode->childNodes.end(), child);
+            if (iter != parentNode->childNodes.end()){
+                (*iter)->setParent(node);
+                parentNode->childNodes.erase(iter);
+            }
+        }
+    }
+    document->addNode(parentNode, node, pos);
+
+
 }

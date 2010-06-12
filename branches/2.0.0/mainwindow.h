@@ -78,7 +78,7 @@ protected:
     void createBranchWidget(BoardWidget* board, Go::NodePtr node);
     void createBranchWidget(BoardWidget* board, QTreeWidgetItem* root, QTreeWidgetItem* parent1, QTreeWidgetItem* parent2, Go::NodePtr parentNode, Go::NodePtr node);
     QTreeWidgetItem* createBranchItem(BoardWidget* board, Go::NodePtr node);
-    void removeFromNodeTreeMap(NodeTreeMap& map, Go::NodePtr node);
+    void removeBranchItem(QTreeWidgetItem* parent, NodeTreeMap& map, Go::NodePtr node);
     void updateCaption();
 
 private:
@@ -101,7 +101,13 @@ private slots:
     void on_actionCloseAllTabs_triggered();
     void on_actionSave_triggered();
     void on_actionSaveAs_triggered();
+    void on_actionExportBoardAsImage_triggered();
+    void on_actionExportAsciiToClipboard_triggered();
     void on_actionExit_triggered();
+
+    // Edit Menu
+    void on_actionDeleteAfterCurrent_triggered();
+    void on_actionDeleteCurrentOnly_triggered();
 
     // Help Menu
     void on_actionAbuot_triggered();
@@ -109,7 +115,7 @@ private slots:
 
     // Document
     void on_sgfdocument_nodeAdded(Go::NodePtr node);
-    void on_sgfdocument_nodeDeleted(Go::NodePtr node, bool removeChild);
+    void on_sgfdocument_nodeDeleted(Go::NodePtr node, bool removeChildren);
 
     // BoardWidget
     void on_boardWidget_currentNodeChanged(Go::NodePtr node);

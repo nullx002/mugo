@@ -95,15 +95,26 @@ bool SgfDocument::save(const QString& fname){
   command
   add node
 */
-void SgfDocument::addNodeCommand(Go::NodePtr parentNode, Go::NodePtr node){
-    undoStack->push( new AddNodeCommand(this, parentNode, node) );
+void SgfDocument::addNodeCommand(Go::NodePtr parentNode, Go::NodePtr node, int index){
+    undoStack->push( new AddNodeCommand(this, parentNode, node, index) );
+}
+
+/**
+  command
+  add node
+*/
+void SgfDocument::deleteNodeCommand(Go::NodePtr node, bool removeChildren){
+    undoStack->push( new DeleteNodeCommand(this, node, removeChildren) );
 }
 
 /**
   add node
 */
-void SgfDocument::addNode(Go::NodePtr parentNode, Go::NodePtr node){
-    parentNode->childNodes.push_back(node);
+void SgfDocument::addNode(Go::NodePtr parentNode, Go::NodePtr node, int index){
+    if (index == -1)
+        parentNode->childNodes.push_back(node);
+    else
+        parentNode->childNodes.insert(index, node);
 
     setDirty();
     emit nodeAdded(node);
@@ -112,16 +123,22 @@ void SgfDocument::addNode(Go::NodePtr parentNode, Go::NodePtr node){
 /**
   delete node
 */
-void SgfDocument::deleteNode(Go::NodePtr node, bool removeChild){
+void SgfDocument::deleteNode(Go::NodePtr node, bool removeChildren){
     Go::NodePtr parent = node->parent();
     if (!parent)
         return;
 
     Go::NodeList::iterator iter = qFind(parent->childNodes.begin(), parent->childNodes.end(), node);
-    if (iter == parent->childNodes.end())
-        return;
+
+    if (removeChildren == false){
+        foreach(Go::NodePtr child, node->childNodes){
+            child->setParent(parent);
+            iter = parent->childNodes.insert(iter, child);
+            ++iter;
+        }
+    }
     parent->childNodes.erase(iter);
 
     setDirty();
-    emit nodeDeleted(node, removeChild);
+    emit nodeDeleted(node, removeChildren);
 }

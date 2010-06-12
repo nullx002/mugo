@@ -27,11 +27,14 @@
 class SgfDocument;
 
 
+/**
+  add node command
+*/
 class AddNodeCommand : public QUndoCommand{
     Q_DECLARE_TR_FUNCTIONS(AddNodeCommand)
 
 public:
-    AddNodeCommand(SgfDocument* doc, Go::NodePtr parentNode, Go::NodePtr node, QUndoCommand *parent = 0);
+    AddNodeCommand(SgfDocument* doc, Go::NodePtr parentNode, Go::NodePtr node, int index, QUndoCommand *parent = 0);
     virtual void redo();
     virtual void undo();
 
@@ -39,8 +42,27 @@ private:
     SgfDocument* document;
     Go::NodePtr parentNode;
     Go::NodePtr node;
+    int index;
 };
 
+/**
+  delete node command
+*/
+class DeleteNodeCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(DeleteNodeCommand)
+
+public:
+    DeleteNodeCommand(SgfDocument* doc, Go::NodePtr node, bool removeChildren, QUndoCommand *parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+private:
+    SgfDocument* document;
+    Go::NodePtr parentNode;
+    Go::NodePtr node;
+    bool removeChildren;
+    int pos;
+};
 
 
 #endif // COMMAND_H

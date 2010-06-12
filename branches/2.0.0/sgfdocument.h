@@ -37,17 +37,18 @@ public:
     bool save(const QString& fname);
 
     // command
-    void addNodeCommand(Go::NodePtr parentNode, Go::NodePtr node);
+    void addNodeCommand(Go::NodePtr parentNode, Go::NodePtr node, int index=-1);
+    void deleteNodeCommand(Go::NodePtr node, bool removeChildren);
 
     // operate without command
-    void addNode(Go::NodePtr parentNode, Go::NodePtr node);
-    void deleteNode(Go::NodePtr node, bool removeChild);
+    void addNode(Go::NodePtr parentNode, Go::NodePtr node, int index);
+    void deleteNode(Go::NodePtr node, bool removeChildren);
 
     Go::NodeList gameList;
 
 signals:
     void nodeAdded(Go::NodePtr node);
-    void nodeDeleted(Go::NodePtr node, bool removeChild);
+    void nodeDeleted(Go::NodePtr node, bool removeChildren);
 };
 
 #endif // SGFDOCUMENT_H

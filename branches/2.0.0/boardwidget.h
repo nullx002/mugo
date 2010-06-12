@@ -85,6 +85,9 @@ protected:
     bool inBoard(Go::NodePtr node);
 
 private slots:
+    // Document
+//    void on_sgfdocument_nodeAdded(Go::NodePtr node);
+    void on_sgfdocument_nodeDeleted(Go::NodePtr node, bool removeChild);
 
 private:
     SgfDocument* document_;

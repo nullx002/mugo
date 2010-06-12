@@ -420,6 +420,8 @@ bool MainWindow::closeDocument(Document* doc, bool save, bool closeTab){
     if (save && maybeSave(doc) == false)
         return false;
 
+    undoGroup.setActiveStack(NULL);
+
     ViewData& view = docManager[doc];
 
     // delete branch widget
@@ -437,7 +439,6 @@ bool MainWindow::closeDocument(Document* doc, bool save, bool closeTab){
     }
 
     // delete document
-    undoGroup.setActiveStack(NULL);
     docManager.remove(doc);
     delete doc;
 
@@ -470,9 +471,9 @@ void MainWindow::createBranchWidget(BoardWidget* board, Go::NodePtr node){
     ViewData& view = docManager[board->document()];
     QTreeWidgetItem* parent2 = view.nodeToTreeItem[node];
     QTreeWidgetItem* parent1 = parent2->parent() ? parent2->parent() : view.branchWidget->invisibleRootItem();
-    foreach(Go::NodePtr childNode, node->childNodes){
+
+    foreach(Go::NodePtr childNode, node->childNodes)
         createBranchWidget(board, view.branchWidget->invisibleRootItem(), parent1, parent2, node, childNode);
-    }
 }
 
 /**
@@ -489,24 +490,29 @@ void MainWindow::createBranchWidget(BoardWidget* board, QTreeWidgetItem* root, Q
 
     Go::NodePtr parent1Node = parent1->data(0, Qt::UserRole).value<Go::NodePtr>();
     QTreeWidgetItem* parentWidget = NULL;
+    int index = 0;
     if ((!parentNode || parentNode->childNodes.size() == 1) && (parent1Node == NULL || parent1Node->childNodes.size() == 1)){
-        if (currentParent && currentParent != parent1)
-            currentParent->removeChild(item);
-        if (currentParent != parent1)
-            parent1->addChild(item);
         parentWidget = parent1;
+        int parentIndex = parentWidget->indexOfChild(parent2);
+        if (parentIndex >= 0)
+            index = parentIndex + 1;
     }
     else if (parentNode->childNodes.empty() == false){
-        if (currentParent && currentParent != parent2)
-            currentParent->removeChild(item);
-        if (currentParent != parent2)
-            parent2->addChild(item);
         parentWidget = parent2;
+        index = parentNode->childNodes.indexOf(node);
     }
 
-    foreach(Go::NodePtr childNode, node->childNodes){
-        createBranchWidget(board, root, parentWidget, item, node, childNode);
+    if (currentParent){
+        if (currentParent != parentWidget || index != parentWidget->indexOfChild(item)){
+            currentParent->removeChild(item);
+            parentWidget->insertChild(index, item);
+        }
     }
+    else
+        parentWidget->insertChild(index, item);
+
+    foreach(Go::NodePtr childNode, node->childNodes)
+        createBranchWidget(board, root, parentWidget, item, node, childNode);
 }
 
 /**
@@ -518,8 +524,10 @@ QTreeWidgetItem* MainWindow::createBranchItem(BoardWidget* board, Go::NodePtr no
     static QIcon whiteIcon(":/res/white_128.png");
     static QIcon greenIcon(":/res/green_64.png");
 
+    ViewData& data = docManager[board->document()];
+
     // if item exist return exist item
-    QTreeWidgetItem* item = docManager[board->document()].nodeToTreeItem[node];
+    QTreeWidgetItem* item = data.nodeToTreeItem[node];
     if (item != NULL)
         return item;
 
@@ -536,7 +544,7 @@ QTreeWidgetItem* MainWindow::createBranchItem(BoardWidget* board, Go::NodePtr no
 
     // create tree item
     item = new QTreeWidgetItem(QStringList(str));
-    docManager[board->document()].nodeToTreeItem[node] = item;
+    data.nodeToTreeItem[node] = item;
 
     // set icon
     if (node->isBlack())
@@ -594,10 +602,14 @@ void MainWindow::updateCaption(){
 /**
   remove node from NodeToTreeMap
 */
-void MainWindow::removeFromNodeTreeMap(NodeTreeMap& map, Go::NodePtr node){
+void MainWindow::removeBranchItem(QTreeWidgetItem* parent, NodeTreeMap& map, Go::NodePtr node){
+    QTreeWidgetItem* item = map[node];
+    if (item->parent() == parent || item->parent() == NULL)
+        parent->removeChild(item);
     map.remove(node);
+
     foreach(Go::NodePtr childNode, node->childNodes)
-        removeFromNodeTreeMap(map, childNode);
+        removeBranchItem(parent, map, childNode);
 }
 
 /**
@@ -744,11 +756,79 @@ void MainWindow::on_actionSaveAs_triggered()
 
 /**
   Slot
+  File -> Export Image
+*/
+void MainWindow::on_actionExportBoardAsImage_triggered()
+{
+    BoardWidget* board = currentBoard();
+
+    QImage image(640, 400, QImage::Format_ARGB32);
+    QPainter p(&image);
+    board->render(&p);
+
+    QString filter = "PNG image(*.png);;Bitmap image(*.bmp);;JPEG image(*.jpeg *.jpg);;TIFF image(*.tiff *.tif)";
+    QString selectedFilter;
+    QString fname = QFileDialog::getSaveFileName(this, QString(), QString(), filter, &selectedFilter);
+    if (fname.isEmpty())
+        return;
+
+    QFileInfo fi(fname);
+    if (fi.suffix().isEmpty()){
+        if (selectedFilter.indexOf("PNG") == 0)
+            fname += ".png";
+        else if (selectedFilter.indexOf("Bitmap") == 0)
+            fname += ".bmp";
+        else if (selectedFilter.indexOf("JPEG") == 0)
+            fname += ".jpg";
+        else if (selectedFilter.indexOf("TIFF") == 0)
+            fname += ".tif";
+    }
+    image.save(fname);
+}
+
+/**
+  Slot
+  File -> Export Ascii
+*/
+void MainWindow::on_actionExportAsciiToClipboard_triggered()
+{
+}
+
+/**
+  Slot
   File -> Exit
 */
 void MainWindow::on_actionExit_triggered()
 {
     close();
+}
+
+/**
+  Slot
+  Edit -> Delete After Current
+*/
+void MainWindow::on_actionDeleteAfterCurrent_triggered()
+{
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+    SgfDocument* doc = board->document();
+
+    doc->deleteNodeCommand( board->getCurrentNode(), true );
+}
+
+/**
+  Slot
+  Edit -> Delete Current Only
+*/
+void MainWindow::on_actionDeleteCurrentOnly_triggered()
+{
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+    SgfDocument* doc = board->document();
+
+    doc->deleteNodeCommand( board->getCurrentNode(), false );
 }
 
 /**
@@ -782,7 +862,7 @@ void MainWindow::on_sgfdocument_nodeAdded(Go::NodePtr node){
     // create new tree item.
     createBranchWidget(board, node->parent());
 
-    // select new item
+    // set current node
     board->setCurrentNode(node);
 }
 
@@ -790,19 +870,27 @@ void MainWindow::on_sgfdocument_nodeAdded(Go::NodePtr node){
   Slot
   node deleted
 */
-void MainWindow::on_sgfdocument_nodeDeleted(Go::NodePtr node, bool removeChild){
+void MainWindow::on_sgfdocument_nodeDeleted(Go::NodePtr node, bool removeChildren){
     SgfDocument* doc = qobject_cast<SgfDocument*>(sender());
     ViewData& view = docManager[doc];
+    view.boardWidget->setCurrentNode(node->parent());
 
-    QTreeWidgetItem* item = view.nodeToTreeItem[node];
-    if (removeChild)
-        removeFromNodeTreeMap(view.nodeToTreeItem, node);
-    else{
-        while (item->childCount()){
-            view.nodeToTreeItem.remove(node);
-            item->removeChild( item->child(0) );
+    QTreeWidgetItem* item   = view.nodeToTreeItem[node];
+    QTreeWidgetItem* parent = item->parent() ? item->parent() : view.branchWidget->invisibleRootItem();
+
+    if (removeChildren == false){
+        int index = parent->indexOfChild(item);
+        int cnt = item->childCount();
+        for (int i=cnt-1; i>=0; --i){
+            QTreeWidgetItem* child = item->child(i);
+            item->removeChild(child);
+            parent->insertChild(index+1, child);
         }
     }
+    else
+        removeBranchItem(parent, view.nodeToTreeItem, node);
+
+    view.nodeToTreeItem.remove(node);
     delete item;
 
     if (!node->parent())
