@@ -22,6 +22,11 @@
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
 #include <QStandardItemModel>
+#include <QInputDialog>
+#include <QUrl>
+#include <QHttp>
+#include <QLabel>
+#include <QComboBox>
 #include "mugoapp.h"
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -59,6 +64,9 @@ MainWindow::MainWindow(const QString& fname, QWidget *parent) :
     ui->editToolBar->insertAction(ui->editToolBar->actions().at(0), redoAction);
     ui->editToolBar->insertAction(redoAction, undoAction);
 
+    // File -> Reload
+    ui->fileToolBar->addAction( ui->menuReload->menuAction() );
+
     // window -> toolbars menu
     ui->menuToolbars->addAction( ui->fileToolBar->toggleViewAction() );
     ui->menuToolbars->addAction( ui->editToolBar->toggleViewAction() );
@@ -76,11 +84,52 @@ MainWindow::MainWindow(const QString& fname, QWidget *parent) :
     // undo view
     ui->undoView->setGroup(&undoGroup);
 
+    // encoding
+    connect(ui->menuReload->menuAction(), SIGNAL(triggered()), SLOT(on_actionReload_triggered()));
+    QActionGroup* encodingGroup = new QActionGroup(this);
+    foreach(QAction* act, ui->menuReload->actions()){
+        encodingGroup->addAction(act);
+        connect(act, SIGNAL(triggered()), SLOT(on_actionReload_triggered()));
+    }
+    encoding[ui->actionEncodingUTF8] = QTextCodec::codecForName("UTF-8");
+    encoding[ui->actionEncodingISO8859_1] = QTextCodec::codecForName("ISO-8859-1");
+    encoding[ui->actionEncodingISO8859_2] = QTextCodec::codecForName("ISO-8859-2");
+    encoding[ui->actionEncodingISO8859_3] = QTextCodec::codecForName("ISO-8859-3");
+    encoding[ui->actionEncodingISO8859_4] = QTextCodec::codecForName("ISO-8859-4");
+    encoding[ui->actionEncodingISO8859_5] = QTextCodec::codecForName("ISO-8859-5");
+    encoding[ui->actionEncodingISO8859_6] = QTextCodec::codecForName("ISO-8859-6");
+    encoding[ui->actionEncodingISO8859_7] = QTextCodec::codecForName("ISO-8859-7");
+    encoding[ui->actionEncodingISO8859_8] = QTextCodec::codecForName("ISO-8859-8");
+    encoding[ui->actionEncodingISO8859_9] = QTextCodec::codecForName("ISO-8859-9");
+    encoding[ui->actionEncodingISO8859_10] = QTextCodec::codecForName("ISO-8859-10");
+    encoding[ui->actionEncodingISO8859_11] = QTextCodec::codecForName("TIS-620");
+    encoding[ui->actionEncodingISO8859_13] = QTextCodec::codecForName("ISO-8859-13");
+    encoding[ui->actionEncodingISO8859_14] = QTextCodec::codecForName("ISO-8859-14");
+    encoding[ui->actionEncodingISO8859_15] = QTextCodec::codecForName("ISO-8859-15");
+    encoding[ui->actionEncodingISO8859_16] = QTextCodec::codecForName("ISO-8859-16");
+    encoding[ui->actionEncodingWindows_1250] = QTextCodec::codecForName("windows-1250");
+    encoding[ui->actionEncodingWindows_1251] = QTextCodec::codecForName("windows-1251");
+    encoding[ui->actionEncodingWindows_1252] = QTextCodec::codecForName("windows-1252");
+    encoding[ui->actionEncodingWindows_1253] = QTextCodec::codecForName("windows-1253");
+    encoding[ui->actionEncodingWindows_1254] = QTextCodec::codecForName("windows-1254");
+    encoding[ui->actionEncodingWindows_1255] = QTextCodec::codecForName("windows-1255");
+    encoding[ui->actionEncodingWindows_1256] = QTextCodec::codecForName("windows-1256");
+    encoding[ui->actionEncodingWindows_1257] = QTextCodec::codecForName("windows-1257");
+    encoding[ui->actionEncodingWindows_1258] = QTextCodec::codecForName("windows-1258");
+    encoding[ui->actionEncodingKoi8_R] = QTextCodec::codecForName("KOI8-R");
+    encoding[ui->actionEncodingKoi8_U] = QTextCodec::codecForName("KOI8-U");
+    encoding[ui->actionEncodingGB2312] = QTextCodec::codecForName("GB2312");
+    encoding[ui->actionEncodingBig5] = QTextCodec::codecForName("Big5");
+    encoding[ui->actionEncodingShiftJIS] = QTextCodec::codecForName("Shift_JIS");
+    encoding[ui->actionEncodingJIS] = QTextCodec::codecForName("ISO-2022-JP");
+    encoding[ui->actionEncodingEucJP] = QTextCodec::codecForName("EUC-JP");
+    encoding[ui->actionEncodingKorean] = QTextCodec::codecForName("EUC-KR");
+
     // open or new tab
     if (fname.isEmpty())
-        fileNew();
+        fileNew(defaultCodec);
     else
-        fileOpen(fname);
+        fileOpen(defaultCodec, fname);
     ui->boardTabWidget->removeTab(0);
 }
 
@@ -108,12 +157,38 @@ void MainWindow::changeEvent(QEvent *e)
 }
 
 /**
+  changeEvent
+*/
+void MainWindow::closeEvent(QCloseEvent *e){
+    DocumentManager::iterator iter = docManager.begin();
+    while (iter != docManager.end()){
+        if (maybeSave(iter.key()) ==false){
+            e->ignore();
+            return;
+        }
+        ++iter;
+    }
+    e->accept();
+}
+
+/**
   get active board
 */
 BoardWidget* MainWindow::currentBoard(){
     QWidget* widget = ui->boardTabWidget->currentWidget();
     BoardWidget* board = qobject_cast<BoardWidget*>(widget);
     return board;
+}
+
+/**
+  get active board
+*/
+Document* MainWindow::currentDocument(){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return NULL;
+
+    return board->document();
 }
 
 /**
@@ -129,31 +204,66 @@ void MainWindow::setKeyboardShortcut(){
 /**
   file New
 */
-void MainWindow::fileNew(int xsize, int ysize, double komi, int handicap)
+void MainWindow::fileNew(QTextCodec* codec, int xsize, int ysize, double komi, int handicap)
 {
-    SgfDocument* doc = new SgfDocument(defaultCodec, this);
+    SgfDocument* doc = new SgfDocument(codec, this);
     doc->gameList[0]->gameInformation->xsize = xsize;
     doc->gameList[0]->gameInformation->ysize = ysize;
     doc->gameList[0]->gameInformation->komi  = komi;
     doc->gameList[0]->gameInformation->handicap = handicap;
     doc->setDocName( tr("Untitled-%1").arg(++docID) );
-    BoardWidget* board = new BoardWidget(doc, this);
-    addDocument(board);
+    addDocument(doc);
 }
 
 /**
   file Open
 */
-bool MainWindow::fileOpen(const QString& fname)
+bool MainWindow::fileOpen(QTextCodec* codec, const QString& fname)
 {
-    SgfDocument* doc = new SgfDocument(defaultCodec, this);
+    DocumentManager::iterator iter = docManager.begin();
+    while (iter != docManager.end()){
+        if (iter.key()->getFileName() == fname){
+            ui->boardTabWidget->setCurrentWidget( iter.value().boardWidget );
+            return true;
+        }
+        ++iter;
+    }
+
+    SgfDocument* doc = new SgfDocument(codec, this);
     if (doc->open(fname, true) == false){
         QMessageBox::critical(this, QString(), tr("File open error: %1").arg(fname));
         delete doc;
         return false;
     }
-    BoardWidget* board = new BoardWidget(doc, this);
-    addDocument(board);
+    addDocument(doc);
+
+    return true;
+}
+
+/**
+  Url Open
+*/
+bool MainWindow::urlOpen(const QUrl& url){
+    downloadURL = url;
+    downloadBuff.clear();
+
+    QHttp* http = new QHttp;
+    connect( http, SIGNAL(readyRead(const QHttpResponseHeader&)), SLOT(on_openUrl_ReadReady(const QHttpResponseHeader&)) );
+    connect( http, SIGNAL(dataReadProgress(int, int)), SLOT(on_openUrl_UrlReadProgress(int, int)) );
+    connect( http, SIGNAL(done(bool)), SLOT(on_openUrl_UrlDone(bool)) );
+
+    QHttp::ConnectionMode mode = url.scheme().toLower() == "https" ? QHttp::ConnectionModeHttps : QHttp::ConnectionModeHttp;
+    http->setHost(url.host(), mode, url.port() == -1 ? 0 : url.port());
+
+    http->get( url.encodedPath() );
+
+//    progressDialog = new QProgressDialog(tr("Downloading SGF File"), "cancel", 0, 100, this);
+//    connect(progressDialog, SIGNAL(canceled()), this, SLOT(openUrlCancel()));
+//    progressDialog->setWindowModality(Qt::WindowModal);
+//    progressDialog->show();
+//    progressDialog->setValue(0);
+
+//    ui->actionReload->setEnabled(true);
 
     return true;
 }
@@ -163,13 +273,9 @@ bool MainWindow::fileOpen(const QString& fname)
 */
 bool MainWindow::fileSave(Document* doc){
     if (doc->getFileName().isEmpty())
-        fileSaveAs(doc);
-
-    if (doc->save(doc->getFileName()) == false){
-        QMessageBox::critical(this, QString(), tr("File save error: %1").arg(doc->getFileName()));
-        return false;
-    }
-    return true;
+        return fileSaveAs(doc);
+    else
+        return fileSaveAs(doc, doc->getFileName());
 }
 
 /**
@@ -177,13 +283,52 @@ bool MainWindow::fileSave(Document* doc){
 */
 bool MainWindow::fileSaveAs(Document* doc){
     QString filter = "Smart Game Format (*.sgf);;All Files (*.*)";
+/*
     QString fname = QFileDialog::getSaveFileName(this, QString(), QString(doc->getDocName()), filter, NULL);
+    if (fname.isEmpty())
+        return false;
+*/
+
+    QFileDialog dlg(this, QString(), QString(), filter);
+    dlg.setAcceptMode(QFileDialog::AcceptSave);
+
+    QLayout* layout = dlg.layout();
+    QLabel* label = new QLabel(tr("Encoding:"), &dlg);
+    QComboBox* combo = new QComboBox(&dlg);
+    layout->addWidget(label);
+    layout->addWidget(combo);
+
+    QList<QAction*> actions;
+    foreach(QAction* act, ui->menuReload->actions()){
+        if (act->isSeparator() == false){
+            combo->addItem(act->text());
+            actions.push_back(act);
+        }
+    }
+
+    if (dlg.exec() != QDialog::Accepted)
+        return false;
+
+    if (dlg.selectedFiles().size() == 0)
+        return false;
+
+    if (combo->currentIndex() >= 0)
+        doc->setCodec(encoding[actions[combo->currentIndex()]]);
+
+    return fileSaveAs(doc, dlg.selectedFiles()[0]);
+}
+
+/**
+    save
+*/
+bool MainWindow::fileSaveAs(Document* doc, const QString& fname){
     if (fname.isEmpty())
         return false;
 
     QFileInfo fi(fname);
     if (fi.suffix().isEmpty())
         fi.setFile( fname + ".sgf" );
+
     if (doc->save(fi.absoluteFilePath()) == false){
         QMessageBox::critical(this, QString(), tr("File save error: %1").arg(fname));
         return false;
@@ -196,43 +341,34 @@ bool MainWindow::fileSaveAs(Document* doc){
 */
 bool MainWindow::closeTab(int index){
     BoardWidget* boardWidget = qobject_cast<BoardWidget*>(ui->boardTabWidget->widget(index));
-    SgfDocument* doc = boardWidget->document();
-    TabData& tabData = tabDatas[doc];
+    if (boardWidget){
+        SgfDocument* doc = boardWidget->document();
+        return closeDocument(doc);
+    }
 
-    // delete branch widget
-    ui->branchStackedWidget->removeWidget(tabDatas[doc].branchWidget);
-    delete tabData.branchWidget;
-
-    // delete collection model
-    delete tabData.collectionModel;
-
-    // delete board widget
-    ui->boardTabWidget->removeTab(index);
-    delete boardWidget;
-
-    // delete document
-    tabDatas.remove(doc);
-    delete doc;
-
-    return true;
+    return false;
 }
 
 /**
   addDocument
 */
-void MainWindow::addDocument(BoardWidget* board)
+void MainWindow::addDocument(SgfDocument* doc, BoardWidget* board)
 {
     // create widget
+    if (board == NULL)
+        board = new BoardWidget(doc, this);
+    else
+        board->setDocument(doc);
     QTreeWidget* branchWidget = new QTreeWidget;
     QStandardItemModel* model = new QStandardItemModel;
 
     // save tab data
-    TabData td;
-    td.boardWidget  = board;
-    td.branchWidget = branchWidget;
-    td.branchType   = branchMode;
-    td.collectionModel = model;
-    tabDatas[board->document()] = td;
+    ViewData view;
+    view.boardWidget  = board;
+    view.branchWidget = branchWidget;
+    view.branchType   = branchMode;
+    view.collectionModel = model;
+    docManager[doc] = view;
 
     // initialize branch widget
     QTreeWidgetItem* dummy = new QTreeWidgetItem(QStringList(""));
@@ -242,6 +378,8 @@ void MainWindow::addDocument(BoardWidget* board)
         dummy->removeChild(item);
         branchWidget->invisibleRootItem()->addChild(item);
     }
+    if (branchWidget->invisibleRootItem()->childCount() > 0)
+        branchWidget->setCurrentItem( branchWidget->invisibleRootItem()->child(0) );
 
     branchWidget->setHeaderHidden(true);
     branchWidget->setIndentation(17);
@@ -252,38 +390,88 @@ void MainWindow::addDocument(BoardWidget* board)
 
     // collection
     model->setHorizontalHeaderLabels(QStringList() << tr("White") << tr("Black") << tr("Game Name") << tr("Date") << tr("Result"));
-    Go::NodeList gameList = board->document()->gameList;
+    Go::NodeList gameList = doc->gameList;
     foreach(Go::NodePtr game, gameList){
         QList<QStandardItem*> items;
         items.push_back( new QStandardItem(game->gameInformation->whitePlayer) );
         items.push_back( new QStandardItem(game->gameInformation->blackPlayer) );
-        items.push_back( new QStandardItem(game->gameInformation->date) );
         items.push_back( new QStandardItem(game->gameInformation->gameName.isEmpty() ? game->gameInformation->event : game->gameInformation->gameName) );
+        items.push_back( new QStandardItem(game->gameInformation->date) );
         items.push_back( new QStandardItem(game->gameInformation->result) );
         model->appendRow(items);
     }
 
     // document
-    connect(board->document(), SIGNAL(nodeAdded(Go::NodePtr)), SLOT(on_document_nodeAdded(Go::NodePtr)));
-    connect(board->document(), SIGNAL(nodeDeleted(Go::NodePtr, bool)), SLOT(on_document_nodeDeleted(Go::NodePtr, bool)));
+    connect(doc, SIGNAL(nodeAdded(Go::NodePtr)), SLOT(on_sgfdocument_nodeAdded(Go::NodePtr)));
+    connect(doc, SIGNAL(nodeDeleted(Go::NodePtr, bool)), SLOT(on_sgfdocument_nodeDeleted(Go::NodePtr, bool)));
 
     // board
     connect(board, SIGNAL(currentNodeChanged(Go::NodePtr)), SLOT(on_boardWidget_currentNodeChanged(Go::NodePtr)));
 
     // create new tab
-    int n = ui->boardTabWidget->addTab(board, board->document()->getDocName());
+    int n = ui->boardTabWidget->addTab(board, doc->getDocName());
     ui->boardTabWidget->setCurrentIndex(n);
+}
+
+/**
+  closeDocument
+*/
+bool MainWindow::closeDocument(Document* doc, bool save, bool closeTab){
+    if (save && maybeSave(doc) == false)
+        return false;
+
+    ViewData& view = docManager[doc];
+
+    // delete branch widget
+    ui->branchStackedWidget->removeWidget(view.branchWidget);
+    delete view.branchWidget;
+
+    // delete collection model
+    delete view.collectionModel;
+
+    // delete board widget
+    if (closeTab){
+        int index = ui->boardTabWidget->indexOf(view.boardWidget);
+        ui->boardTabWidget->removeTab(index);
+        delete view.boardWidget;
+    }
+
+    // delete document
+    undoGroup.setActiveStack(NULL);
+    docManager.remove(doc);
+    delete doc;
+
+    return true;
+}
+
+/**
+ may be save
+*/
+bool MainWindow::maybeSave(Document* doc){
+    if (doc->isDirty() == false)
+        return true;
+
+    QMessageBox::StandardButton ret =
+                    QMessageBox::warning(this, APP_NAME,
+                        tr("%1 has been modified.\n"
+                           "Do you want to save your changes?").arg(doc->getDocName()),
+                        QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+    if (ret == QMessageBox::Save)
+        return fileSave(doc);
+    else if (ret == QMessageBox::Cancel)
+        return false;
+    return true;
 }
 
 /**
   create branch tree widget
 */
 void MainWindow::createBranchWidget(BoardWidget* board, Go::NodePtr node){
-    TabData& tabData = tabDatas[board->document()];
-    QTreeWidgetItem* parent2 = tabData.nodeToTreeItem[node];
-    QTreeWidgetItem* parent1 = parent2->parent() ? parent2->parent() : tabData.branchWidget->invisibleRootItem();
+    ViewData& view = docManager[board->document()];
+    QTreeWidgetItem* parent2 = view.nodeToTreeItem[node];
+    QTreeWidgetItem* parent1 = parent2->parent() ? parent2->parent() : view.branchWidget->invisibleRootItem();
     foreach(Go::NodePtr childNode, node->childNodes){
-        createBranchWidget(board, tabData.branchWidget->invisibleRootItem(), parent1, parent2, node, childNode);
+        createBranchWidget(board, view.branchWidget->invisibleRootItem(), parent1, parent2, node, childNode);
     }
 }
 
@@ -331,7 +519,7 @@ QTreeWidgetItem* MainWindow::createBranchItem(BoardWidget* board, Go::NodePtr no
     static QIcon greenIcon(":/res/green_64.png");
 
     // if item exist return exist item
-    QTreeWidgetItem* item = tabDatas[board->document()].nodeToTreeItem[node];
+    QTreeWidgetItem* item = docManager[board->document()].nodeToTreeItem[node];
     if (item != NULL)
         return item;
 
@@ -348,7 +536,7 @@ QTreeWidgetItem* MainWindow::createBranchItem(BoardWidget* board, Go::NodePtr no
 
     // create tree item
     item = new QTreeWidgetItem(QStringList(str));
-    tabDatas[board->document()].nodeToTreeItem[node] = item;
+    docManager[board->document()].nodeToTreeItem[node] = item;
 
     // set icon
     if (node->isBlack())
@@ -368,6 +556,42 @@ QTreeWidgetItem* MainWindow::createBranchItem(BoardWidget* board, Go::NodePtr no
 }
 
 /**
+  update caption
+*/
+void MainWindow::updateCaption(){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+    Document* doc = board->document();
+
+    Go::NodePtr game = board->getCurrentGame();
+    Go::GameInformationPtr info = game->gameInformation;
+
+    QString title;
+    if (info->blackPlayer.isEmpty() == false || info->whitePlayer.isEmpty() == false)
+        title = tr("%1 %2(W) vs %3 %4(B) Result:%5").arg(info->whitePlayer).arg(info->whiteRank).arg(info->blackPlayer).arg(info->blackRank).arg(info->result);
+    else
+        title = doc->getDocName();
+
+    if (info->gameName.isEmpty() == false)
+        title += " " + info->gameName;
+    else if (info->event.isEmpty() == false)
+        title += " " + info->event;
+
+    if (doc->isDirty())
+        title += " *";
+    title += " - " APP_NAME;
+
+    setWindowTitle(title);
+
+    int index = ui->boardTabWidget->indexOf(board);
+    if (doc->isDirty())
+        ui->boardTabWidget->setTabText(index, doc->getDocName() + " *");
+    else
+        ui->boardTabWidget->setTabText(index, doc->getDocName());
+}
+
+/**
   remove node from NodeToTreeMap
 */
 void MainWindow::removeFromNodeTreeMap(NodeTreeMap& map, Go::NodePtr node){
@@ -382,7 +606,7 @@ void MainWindow::removeFromNodeTreeMap(NodeTreeMap& map, Go::NodePtr node){
 */
 void MainWindow::on_actionNew_triggered()
 {
-    fileNew();
+    fileNew(defaultCodec);
 }
 
 /**
@@ -392,10 +616,103 @@ void MainWindow::on_actionNew_triggered()
 void MainWindow::on_actionOpen_triggered()
 {
     QString filter = "All Go Format (*.sgf *.ugf *.ugi *.ngf *.gib);;Smart Game Format (*.sgf);;ugf (*.ugf *.ugi);;ngf (*.ngf);;gib (*.gib);;All Files (*.*)";
-    QString fname = QFileDialog::getOpenFileName(this, QString(), QString(), filter, NULL);
-    if (fname.isEmpty())
+//    QString fname = QFileDialog::getOpenFileName(this, QString(), QString(), filter, NULL);
+//    if (fname.isEmpty())
+//        return;
+
+    QFileDialog dlg(this, QString(), QString(), filter);
+    dlg.setAcceptMode(QFileDialog::AcceptOpen);
+    dlg.setFileMode(QFileDialog::ExistingFile);
+
+    QLayout* layout = dlg.layout();
+    QLabel* label = new QLabel(tr("Encoding:"), &dlg);
+    QComboBox* combo = new QComboBox(&dlg);
+    layout->addWidget(label);
+    layout->addWidget(combo);
+
+    QList<QAction*> actions;
+    foreach(QAction* act, ui->menuReload->actions()){
+        if (act->isSeparator() == false){
+            combo->addItem(act->text());
+            actions.push_back(act);
+        }
+    }
+
+    if (dlg.exec() != QDialog::Accepted)
         return;
-    fileOpen(fname);
+
+    if (dlg.selectedFiles().size() == 0)
+        return;
+
+    QTextCodec* codec = combo->currentIndex() >= 0 ? encoding[actions[combo->currentIndex()]] : defaultCodec;
+    fileOpen(codec, dlg.selectedFiles()[0]);
+}
+
+/**
+  Slot
+  File -> reload
+*/
+void MainWindow::on_actionReload_triggered()
+{
+    // get action
+    QAction* act = qobject_cast<QAction*>(sender());
+    if (act == NULL)
+        return;
+
+    // get document
+    BoardWidget* board = currentBoard();
+    if (board == NULL || board->document()->getFileName().isEmpty())
+        return;
+
+    //  return if cancelled.
+    if (maybeSave(board->document()) == false)
+        return;
+
+    QTextCodec* codec = encoding.find(act) != encoding.end() ? encoding[act] : board->document()->getCodec();
+    SgfDocument* doc = new SgfDocument(codec, this);
+    if (doc->open(board->document()->getFileName(), false) == false){
+        QMessageBox::critical( this, QString(), tr("File open error: %1").arg(board->document()->getFileName()) );
+        closeDocument(board->document(), false);
+        delete doc;
+        return;
+    }
+    closeDocument(board->document(), false, false);
+    addDocument(doc, board);
+}
+
+/**
+  Slot
+  File -> open URL
+*/
+void MainWindow::on_actionOpenURL_triggered()
+{
+    QInputDialog dlg(this);
+    dlg.resize( 400, dlg.size().height() );
+    dlg.setLabelText( tr("Enter the URL of a SGF file.") );
+    if (dlg.exec() != QDialog::Accepted)
+        return;
+
+    urlOpen( QUrl(dlg.textValue()) );
+}
+
+/**
+  Slot
+  File -> Close Tab
+*/
+void MainWindow::on_actionCloseTab_triggered()
+{
+    closeTab( ui->boardTabWidget->currentIndex() );
+}
+
+/**
+  Slot
+  File -> Close All Tabs
+*/
+void MainWindow::on_actionCloseAllTabs_triggered()
+{
+    int count = ui->boardTabWidget->count();
+    for (int i=0; i<count; ++i)
+    closeTab(0);
 }
 
 /**
@@ -404,10 +721,12 @@ void MainWindow::on_actionOpen_triggered()
 */
 void MainWindow::on_actionSave_triggered()
 {
-    BoardWidget* board = currentBoard();
-    if (board == NULL)
-            return;
-    fileSave(board->document());
+    Document* doc = currentDocument();
+    if (doc == NULL)
+        return;
+
+    fileSave(doc);
+    updateCaption();
 }
 
 /**
@@ -416,10 +735,11 @@ void MainWindow::on_actionSave_triggered()
 */
 void MainWindow::on_actionSaveAs_triggered()
 {
-    BoardWidget* board = currentBoard();
-    if (board == NULL)
-            return;
-    fileSaveAs(board->document());
+    Document* doc = currentDocument();
+    if (doc == NULL)
+        return;
+    fileSaveAs(doc);
+    updateCaption();
 }
 
 /**
@@ -454,10 +774,10 @@ void MainWindow::on_actionAboutQt_triggered()
   Slot
   node added
 */
-void MainWindow::on_document_nodeAdded(Go::NodePtr node){
+void MainWindow::on_sgfdocument_nodeAdded(Go::NodePtr node){
     // get document and board widget.
     SgfDocument* doc = qobject_cast<SgfDocument*>(sender());
-    BoardWidget* board = tabDatas[doc].boardWidget;
+    BoardWidget* board = docManager[doc].boardWidget;
 
     // create new tree item.
     createBranchWidget(board, node->parent());
@@ -470,16 +790,16 @@ void MainWindow::on_document_nodeAdded(Go::NodePtr node){
   Slot
   node deleted
 */
-void MainWindow::on_document_nodeDeleted(Go::NodePtr node, bool removeChild){
+void MainWindow::on_sgfdocument_nodeDeleted(Go::NodePtr node, bool removeChild){
     SgfDocument* doc = qobject_cast<SgfDocument*>(sender());
-    TabData& tabData = tabDatas[doc];
+    ViewData& view = docManager[doc];
 
-    QTreeWidgetItem* item = tabData.nodeToTreeItem[node];
+    QTreeWidgetItem* item = view.nodeToTreeItem[node];
     if (removeChild)
-        removeFromNodeTreeMap(tabData.nodeToTreeItem, node);
+        removeFromNodeTreeMap(view.nodeToTreeItem, node);
     else{
         while (item->childCount()){
-            tabData.nodeToTreeItem.remove(node);
+            view.nodeToTreeItem.remove(node);
             item->removeChild( item->child(0) );
         }
     }
@@ -489,7 +809,7 @@ void MainWindow::on_document_nodeDeleted(Go::NodePtr node, bool removeChild){
         return;
 
     // remake tree widget
-    createBranchWidget(tabDatas[doc].boardWidget, node->parent());
+    createBranchWidget(docManager[doc].boardWidget, node->parent());
 }
 
 /**
@@ -498,9 +818,12 @@ void MainWindow::on_document_nodeDeleted(Go::NodePtr node, bool removeChild){
 */
 void MainWindow::on_boardWidget_currentNodeChanged(Go::NodePtr node){
     BoardWidget* board = qobject_cast<BoardWidget*>(sender());
-    SgfDocument* doc = board->document();
-    QTreeWidgetItem* item = tabDatas[doc].nodeToTreeItem[node];
-    tabDatas[doc].branchWidget->setCurrentItem(item);
+    Document* doc = board->document();
+    QTreeWidgetItem* item = docManager[doc].nodeToTreeItem[node];
+    if (item)
+        docManager[doc].branchWidget->setCurrentItem(item);
+
+    updateCaption();
 }
 
 /**
@@ -510,16 +833,16 @@ void MainWindow::on_boardWidget_currentNodeChanged(Go::NodePtr node){
 void MainWindow::on_boardTabWidget_currentChanged(QWidget* widget)
 {
     BoardWidget* boardWidget = qobject_cast<BoardWidget*>(widget);
-    if (boardWidget  == NULL){
-        undoGroup.setActiveStack(NULL);
+    if (boardWidget  == NULL)
         return;
-    }
-    TabData& tabData = tabDatas[boardWidget->document()];
+    ViewData& view = docManager[boardWidget->document()];
 
-    ui->branchStackedWidget->setCurrentWidget( tabData.branchWidget );
-    ui->collectionView->setModel(tabData.collectionModel);
+    ui->branchStackedWidget->setCurrentWidget( view.branchWidget );
+    ui->collectionView->setModel(view.collectionModel);
 
     undoGroup.setActiveStack(boardWidget->document()->getUndoStack());
+
+    updateCaption();
 }
 
 /**
@@ -545,4 +868,61 @@ void MainWindow::on_branchWidget_currentItemChanged(QTreeWidgetItem* current, QT
     if (node == NULL)
         return;
     board->setCurrentNode(node);
+}
+
+/**
+  Slot
+  Open URL
+*/
+void MainWindow::on_openUrl_ReadReady(const QHttpResponseHeader& resp){
+    QHttp* http = qobject_cast<QHttp*>(sender());
+
+    switch (resp.statusCode()) {
+        case 200:                   // Ok
+        case 301:                   // Moved Permanently
+        case 302:                   // Found
+        case 303:                   // See Other
+        case 307:                   // Temporary Redirect
+            // these are not error conditions
+            downloadBuff.append( http->readAll() );
+            break;
+
+        default:
+            QMessageBox::information(this, APP_NAME,
+                                     tr("Download failed: %1.")
+                                     .arg(resp.reasonPhrase()));
+            http->abort();
+            break;
+    }
+}
+
+/**
+  Slot
+  Open URL
+*/
+void MainWindow::on_openUrl_UrlReadProgress(int, int){
+}
+
+/**
+  Slot
+  Open URL
+*/
+void MainWindow::on_openUrl_UrlDone(bool error){
+    QByteArray buf = downloadBuff;
+    downloadBuff.clear();
+    sender()->deleteLater();
+
+    if (error == true)
+        return;
+
+    QString fname = downloadURL.toString();
+    int p = fname.lastIndexOf('/');
+    if (p >= 0)
+        fname = fname.mid(p+1);
+
+    SgfDocument* doc = new SgfDocument(defaultCodec);
+    if (doc->read(fname, buf, true) == false)
+        return;
+
+    addDocument(doc);
 }

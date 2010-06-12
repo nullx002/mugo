@@ -20,12 +20,14 @@
 
 #include <QMainWindow>
 #include <QUndoGroup>
+#include <QUrl>
 #include "godata.h"
 
 
 class QTreeWidget;
 class QTreeWidgetItem;
 class QStandardItemModel;
+class QHttpResponseHeader;
 class BoardWidget;
 class Document;
 class SgfDocument;
@@ -44,7 +46,7 @@ public:
     enum BranchType{ gameMode, branchMode };
     typedef QMap<Go::NodePtr, QTreeWidgetItem*> NodeTreeMap;
 
-    class TabData{
+    class ViewData{
         public:
             BoardWidget* boardWidget;
             QTreeWidget* branchWidget;
@@ -52,37 +54,51 @@ public:
             QStandardItemModel* collectionModel;
             NodeTreeMap nodeToTreeItem;
     };
+    typedef QMap<Document*, ViewData> DocumentManager;
 
     MainWindow(const QString& fname=QString(), QWidget *parent = 0);
     ~MainWindow();
 
 protected:
     void changeEvent(QEvent *e);
+    void closeEvent(QCloseEvent *e);
     BoardWidget* currentBoard();
+    Document* currentDocument();
     void setKeyboardShortcut();
-    void fileNew(int xsize=19, int ysize=19, double komi=6.5, int handicap=0);
-    bool fileOpen(const QString& fname);
+    void fileNew(QTextCodec* codec, int xsize=19, int ysize=19, double komi=6.5, int handicap=0);
+    bool fileOpen(QTextCodec* codec, const QString& fname);
+    bool urlOpen(const QUrl& url);
     bool fileSave(Document*);
     bool fileSaveAs(Document*);
     bool fileSaveAs(Document* doc, const QString& fname);
     bool closeTab(int index);
-    void addDocument(BoardWidget* board);
+    void addDocument(SgfDocument* doc, BoardWidget* board=NULL);
+    bool closeDocument(Document* doc, bool save=true, bool closeTab=true);
+    bool maybeSave(Document* doc);
     void createBranchWidget(BoardWidget* board, Go::NodePtr node);
     void createBranchWidget(BoardWidget* board, QTreeWidgetItem* root, QTreeWidgetItem* parent1, QTreeWidgetItem* parent2, Go::NodePtr parentNode, Go::NodePtr node);
     QTreeWidgetItem* createBranchItem(BoardWidget* board, Go::NodePtr node);
     void removeFromNodeTreeMap(NodeTreeMap& map, Go::NodePtr node);
+    void updateCaption();
 
 private:
     Ui::MainWindow *ui;
     QUndoGroup undoGroup;
+    QMap<QAction*, QTextCodec*> encoding;
     QTextCodec* defaultCodec;
-    QMap<SgfDocument*, TabData> tabDatas;
+    DocumentManager docManager;
     uint docID;
+    QUrl downloadURL;
+    QByteArray downloadBuff;
 
 private slots:
     // File Menu
     void on_actionNew_triggered();
     void on_actionOpen_triggered();
+    void on_actionReload_triggered();
+    void on_actionOpenURL_triggered();
+    void on_actionCloseTab_triggered();
+    void on_actionCloseAllTabs_triggered();
     void on_actionSave_triggered();
     void on_actionSaveAs_triggered();
     void on_actionExit_triggered();
@@ -92,8 +108,8 @@ private slots:
     void on_actionAboutQt_triggered();
 
     // Document
-    void on_document_nodeAdded(Go::NodePtr node);
-    void on_document_nodeDeleted(Go::NodePtr node, bool removeChild);
+    void on_sgfdocument_nodeAdded(Go::NodePtr node);
+    void on_sgfdocument_nodeDeleted(Go::NodePtr node, bool removeChild);
 
     // BoardWidget
     void on_boardWidget_currentNodeChanged(Go::NodePtr node);
@@ -104,6 +120,11 @@ private slots:
 
     // BranchWidget
     void on_branchWidget_currentItemChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous);
+
+    // Open URL
+    void on_openUrl_ReadReady(const QHttpResponseHeader&);
+    void on_openUrl_UrlReadProgress(int, int);
+    void on_openUrl_UrlDone(bool);
 };
 
 #endif // MAINWINDOW_H

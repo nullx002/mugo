@@ -50,6 +50,25 @@ bool SgfDocument::open(const QString& fname, bool guessCodec){
 
     docName  = fi.fileName();
     fileName = fname;
+    setDirty(false);
+
+    return true;
+}
+
+/**
+  read
+*/
+bool SgfDocument::read(const QString& docName, const QByteArray& bytes, bool guessCodec){
+    Go::Sgf sgf;
+    if( sgf.read(bytes, codec, guessCodec) == false)
+        return false;
+
+    gameList.clear();
+    sgf.get(gameList);
+
+    this->docName = docName;
+    fileName.clear();
+    setDirty(false);
 
     return true;
 }
@@ -67,6 +86,7 @@ bool SgfDocument::save(const QString& fname){
     QFileInfo fi(fname);
     docName  = fi.fileName();
     fileName = fname;
+    setDirty(false);
 
     return true;
 }
@@ -84,6 +104,8 @@ void SgfDocument::addNodeCommand(Go::NodePtr parentNode, Go::NodePtr node){
 */
 void SgfDocument::addNode(Go::NodePtr parentNode, Go::NodePtr node){
     parentNode->childNodes.push_back(node);
+
+    setDirty();
     emit nodeAdded(node);
 }
 
@@ -99,5 +121,7 @@ void SgfDocument::deleteNode(Go::NodePtr node, bool removeChild){
     if (iter == parent->childNodes.end())
         return;
     parent->childNodes.erase(iter);
+
+    setDirty();
     emit nodeDeleted(node, removeChild);
 }

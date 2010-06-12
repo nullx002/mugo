@@ -22,7 +22,6 @@
 #include <QGraphicsEllipseItem>
 #include <QGraphicsPixmapItem>
 #include "boardwidget.h"
-#include "ui_boardwidget.h"
 #include "sgfdocument.h"
 
 /**
@@ -30,12 +29,9 @@
 */
 BoardWidget::BoardWidget(SgfDocument* doc, QWidget *parent) :
     QGraphicsView(parent),
-    ui(new Ui::BoardWidget),
     document_(doc),
     scene( new QGraphicsScene(this) )
 {
-    ui->setupUi(this);
-
 //    connect( doc, SIGNAL(nodeAdded(Go::NodePtr)), SLOT(onNodeAdded(Go::NodePtr)) );
 
     setScene(scene);
@@ -53,7 +49,6 @@ BoardWidget::BoardWidget(SgfDocument* doc, QWidget *parent) :
 */
 BoardWidget::~BoardWidget()
 {
-    delete ui;
 }
 
 /**
@@ -176,6 +171,14 @@ void BoardWidget::onLButtonDown(QMouseEvent* e){
 */
 void BoardWidget::onRButtonDown(QMouseEvent* /*e*/){
 }
+
+/**
+  Set Document
+*/
+void BoardWidget::setDocument(SgfDocument* doc){
+    document_ = doc;
+    setCurrentGame(doc->gameList[0]);
+};
 
 /**
   Set Current Game

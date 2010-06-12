@@ -25,6 +25,7 @@ Document::Document(QTextCodec* codec_, QObject* parent)
     : QObject(parent)
     , undoStack(new QUndoStack())
     , codec(codec_)
+    , dirty(false)
 {
 }
 

@@ -24,9 +24,6 @@
 
 class SgfDocument;
 
-namespace Ui {
-    class BoardWidget;
-}
 
 /**
   BoardWidget
@@ -53,14 +50,19 @@ public:
     BoardWidget(SgfDocument* doc, QWidget *parent = 0);
     ~BoardWidget();
 
-    SgfDocument* document(){ return document_; }
 
+    // get
+    SgfDocument* document(){ return document_; }
+    Go::NodePtr getCurrentGame(){ return currentGame; }
+    Go::NodePtr getCurrentNode(){ return currentNode; }
+    Go::NodeList& getCurrentNodeList(){ return currentNodeList; }
+
+    // set
+    void setDocument(SgfDocument* doc);
     void setCurrentGame(Go::NodePtr node);
     void setCurrentNode(Go::NodePtr node);
     void forward();
     void back();
-
-    Go::NodePtr getCurrentGame(){ return currentGame; }
 
     QString getCoordinateString(Go::NodePtr node, bool showI) const;
 
@@ -85,7 +87,6 @@ protected:
 private slots:
 
 private:
-    Ui::BoardWidget *ui;
     SgfDocument* document_;
     Go::NodePtr  currentGame;
     Go::GameInformationPtr gameInformation;

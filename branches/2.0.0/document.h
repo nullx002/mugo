@@ -23,6 +23,7 @@
 #include <QTextCodec>
 
 class QUndoStack;
+class QTextCodec;
 
 
 /**
@@ -44,18 +45,23 @@ public:
 
     // Get
     QUndoStack* getUndoStack(){ return undoStack; }
+    QTextCodec* getCodec(){ return codec; }
     const QString& getDocName() const{ return docName; }
     const QString& getFileName() const{ return fileName; }
+    bool isDirty() const{ return dirty; }
 
     // Set
+    void setCodec(QTextCodec* codec){ this->codec = codec; }
     void setDocName(const QString& name){ docName = name; }
     void setFileName(const QString& fname){ fileName = fname; }
+    void setDirty(bool dirty=true){ this->dirty = dirty; }
 
 protected:
     QUndoStack* undoStack;
     QTextCodec* codec;
     QString     docName;
     QString     fileName;
+    bool        dirty;
 };
 
 #endif // DOCUMENT_H

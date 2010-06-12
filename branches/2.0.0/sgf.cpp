@@ -46,6 +46,27 @@ bool Sgf::readStream(QString::iterator& first, QString::iterator last){
 }
 
 /**
+  get codec
+*/
+QTextCodec* Sgf::getCodec(const QByteArray& a) const{
+    int s = a.indexOf("CA[");
+    if (s == -1)
+        return NULL;
+    s += 3;
+
+    int e = a.indexOf(']', s);
+    if (e == -1)
+        return NULL;
+
+    QString name = a.mid(s, e-s);
+    if (name.compare("windows-31j", Qt::CaseInsensitive) == 0)
+        return QTextCodec::codecForName("Shift_JIS");
+    else
+        return QTextCodec::codecForName(name.toAscii());
+}
+
+
+/**
   read branch
 */
 bool Sgf::readBranch(QString::iterator& first, QString::iterator last, NodePtr& node){

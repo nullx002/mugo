@@ -1,7 +1,8 @@
 # -------------------------------------------------
 # Project created by QtCreator 2010-06-04T18:33:47
 # -------------------------------------------------
-QT += network
+QT += network \
+    phonon
 TARGET = mugo2
 TEMPLATE = app
 SOURCES += main.cpp \
@@ -20,6 +21,5 @@ HEADERS += mainwindow.h \
     mugoapp.h \
     sgf.h \
     command.h
-FORMS += mainwindow.ui \
-    boardwidget.ui
+FORMS += mainwindow.ui
 RESOURCES += mugo.qrc
