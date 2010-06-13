@@ -122,8 +122,8 @@
      <property name="title">
       <string>Collection</string>
      </property>
-     <addaction name="actionCollectionExtract"/>
      <addaction name="actionCollectionImport"/>
+     <addaction name="actionCollectionExtract"/>
     </widget>
     <widget class="QMenu" name="menuRecent_Files">
      <property name="title">

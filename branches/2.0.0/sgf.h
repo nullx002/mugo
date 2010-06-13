@@ -60,7 +60,7 @@ public:
 
     // read
     virtual bool readStream(QString::iterator& first, QString::iterator last);
-    virtual QTextCodec* getCodec(const QByteArray&) const;
+    virtual QTextCodec* guessCodec(const QByteArray&) const;
 
     // save
     virtual bool saveStream(QTextStream& stream);

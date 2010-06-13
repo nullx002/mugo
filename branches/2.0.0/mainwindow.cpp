@@ -129,7 +129,7 @@ MainWindow::MainWindow(const QString& fname, QWidget *parent) :
     if (fname.isEmpty())
         fileNew(defaultCodec);
     else
-        fileOpen(defaultCodec, fname);
+        fileOpen(defaultCodec, fname, true);
     ui->boardTabWidget->removeTab(0);
 }
 
@@ -218,7 +218,7 @@ void MainWindow::fileNew(QTextCodec* codec, int xsize, int ysize, double komi, i
 /**
   file Open
 */
-bool MainWindow::fileOpen(QTextCodec* codec, const QString& fname)
+bool MainWindow::fileOpen(QTextCodec* codec, const QString& fname, bool guessCodec)
 {
     DocumentManager::iterator iter = docManager.begin();
     while (iter != docManager.end()){
@@ -230,7 +230,7 @@ bool MainWindow::fileOpen(QTextCodec* codec, const QString& fname)
     }
 
     SgfDocument* doc = new SgfDocument(codec, this);
-    if (doc->open(fname, true) == false){
+    if (doc->open(fname, guessCodec) == false){
         QMessageBox::critical(this, QString(), tr("File open error: %1").arg(fname));
         delete doc;
         return false;
@@ -282,40 +282,14 @@ bool MainWindow::fileSave(Document* doc){
     save
 */
 bool MainWindow::fileSaveAs(Document* doc){
-    QString filter = "Smart Game Format (*.sgf);;All Files (*.*)";
-/*
-    QString fname = QFileDialog::getSaveFileName(this, QString(), QString(doc->getDocName()), filter, NULL);
-    if (fname.isEmpty())
-        return false;
-*/
-
-    QFileDialog dlg(this, QString(), QString(), filter);
-    dlg.setAcceptMode(QFileDialog::AcceptSave);
-
-    QLayout* layout = dlg.layout();
-    QLabel* label = new QLabel(tr("Encoding:"), &dlg);
-    QComboBox* combo = new QComboBox(&dlg);
-    layout->addWidget(label);
-    layout->addWidget(combo);
-
-    QList<QAction*> actions;
-    foreach(QAction* act, ui->menuReload->actions()){
-        if (act->isSeparator() == false){
-            combo->addItem(act->text());
-            actions.push_back(act);
-        }
-    }
-
-    if (dlg.exec() != QDialog::Accepted)
+    QString fname;
+    QTextCodec* codec = doc->getCodec();
+    if (getSaveFileName(fname, codec) == false)
         return false;
 
-    if (dlg.selectedFiles().size() == 0)
-        return false;
+    doc->setCodec(codec);
 
-    if (combo->currentIndex() >= 0)
-        doc->setCodec(encoding[actions[combo->currentIndex()]]);
-
-    return fileSaveAs(doc, dlg.selectedFiles()[0]);
+    return fileSaveAs(doc, fname);
 }
 
 /**
@@ -613,20 +587,9 @@ void MainWindow::removeBranchItem(QTreeWidgetItem* parent, NodeTreeMap& map, Go:
 }
 
 /**
-  slot
-  File -> New
+  get open file name
 */
-void MainWindow::on_actionNew_triggered()
-{
-    fileNew(defaultCodec);
-}
-
-/**
-  Slot
-  File -> Open
-*/
-void MainWindow::on_actionOpen_triggered()
-{
+bool MainWindow::getOpenFileName(QString& fname, QTextCodec*& codec){
     QString filter = "All Go Format (*.sgf *.ugf *.ugi *.ngf *.gib);;Smart Game Format (*.sgf);;ugf (*.ugf *.ugi);;ngf (*.ngf);;gib (*.gib);;All Files (*.*)";
 //    QString fname = QFileDialog::getOpenFileName(this, QString(), QString(), filter, NULL);
 //    if (fname.isEmpty())
@@ -643,21 +606,96 @@ void MainWindow::on_actionOpen_triggered()
     layout->addWidget(combo);
 
     QList<QAction*> actions;
+    combo->addItem(tr("Auto Detect"));
+    combo->setCurrentIndex(0);
+    actions.push_back(NULL);
     foreach(QAction* act, ui->menuReload->actions()){
         if (act->isSeparator() == false){
             combo->addItem(act->text());
+            if (codec && encoding[act]->name() == codec->name())
+                combo->setCurrentIndex( combo->count() - 1 );
             actions.push_back(act);
         }
     }
 
     if (dlg.exec() != QDialog::Accepted)
-        return;
+        return false;
 
     if (dlg.selectedFiles().size() == 0)
+        return false;
+
+    fname = dlg.selectedFiles()[0];
+    codec = combo->currentIndex() >= 0 ? encoding[actions[combo->currentIndex()]] : defaultCodec;
+
+    return true;
+}
+
+/**
+  get save file name
+*/
+bool MainWindow::getSaveFileName(QString& fname, QTextCodec*& codec){
+    QString filter = "Smart Game Format (*.sgf);;All Files (*.*)";
+/*
+    QString fname = QFileDialog::getSaveFileName(this, QString(), QString(doc->getDocName()), filter, NULL);
+    if (fname.isEmpty())
+        return false;
+*/
+
+    QFileDialog dlg(this, QString(), QString(), filter);
+    dlg.setAcceptMode(QFileDialog::AcceptSave);
+
+    QLayout* layout = dlg.layout();
+    QLabel* label = new QLabel(tr("Encoding:"), &dlg);
+    QComboBox* combo = new QComboBox(&dlg);
+    layout->addWidget(label);
+    layout->addWidget(combo);
+
+    QList<QAction*> actions;
+    foreach(QAction* act, ui->menuReload->actions()){
+        if (act->isSeparator() == false){
+            combo->addItem(act->text());
+            if (encoding[act]->name() == codec->name())
+                combo->setCurrentIndex( combo->count() - 1 );
+            actions.push_back(act);
+        }
+    }
+
+    if (dlg.exec() != QDialog::Accepted)
+        return false;
+
+    if (dlg.selectedFiles().size() == 0)
+        return false;
+
+    fname = dlg.selectedFiles()[0];
+    codec = encoding[actions[combo->currentIndex()]];
+
+    return true;
+}
+
+/**
+  slot
+  File -> New
+*/
+void MainWindow::on_actionNew_triggered()
+{
+    fileNew(defaultCodec);
+}
+
+/**
+  Slot
+  File -> Open
+*/
+void MainWindow::on_actionOpen_triggered()
+{
+    QString fname;
+    QTextCodec* codec = NULL;
+    if (getOpenFileName(fname, codec) == false)
         return;
 
-    QTextCodec* codec = combo->currentIndex() >= 0 ? encoding[actions[combo->currentIndex()]] : defaultCodec;
-    fileOpen(codec, dlg.selectedFiles()[0]);
+    if (codec == NULL)
+        fileOpen(defaultCodec, fname, true);
+    else
+        fileOpen(codec, fname, false);
 }
 
 /**
@@ -752,6 +790,24 @@ void MainWindow::on_actionSaveAs_triggered()
         return;
     fileSaveAs(doc);
     updateCaption();
+}
+
+/**
+  Slot
+  File -> Collection -> Import
+*/
+void MainWindow::on_actionCollectionImport_triggered()
+{
+
+}
+
+/**
+  Slot
+  File -> Collection -> Extract
+*/
+void MainWindow::on_actionCollectionExtract_triggered()
+{
+
 }
 
 /**

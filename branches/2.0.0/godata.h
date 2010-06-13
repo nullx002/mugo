@@ -227,14 +227,13 @@ public:
     virtual bool save(const QString& fname, QTextCodec* codec);
     virtual bool saveStream(QTextStream& stream) = 0;
 
-    virtual QTextCodec* getCodec(const QByteArray&) const{ return NULL; }
+    virtual QTextCodec* guessCodec(const QByteArray&) const{ return NULL; }
 
     virtual bool get(NodeList& gameList) const = 0;
     virtual bool set(NodeList& gameList) = 0;
 
     QString readLine(QString::iterator& first, QString::iterator& last);
 
-protected:
     QTextCodec* codec;
 };
 

@@ -206,7 +206,7 @@ bool FileBase::read(const QString& fname, QTextCodec* defaultCodec, bool guessCo
 }
 
 bool FileBase::read(const QByteArray& bytes, QTextCodec* defaultCodec, bool guessCodec){
-    QTextCodec* codec_ = guessCodec ? getCodec(bytes) : NULL;
+    QTextCodec* codec_ = guessCodec ? this->guessCodec(bytes) : NULL;
     if (codec_)
         qDebug() << "file codec is " << codec_->name();
     else if (guessCodec)

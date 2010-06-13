@@ -48,7 +48,7 @@ bool Sgf::readStream(QString::iterator& first, QString::iterator last){
 /**
   get codec
 */
-QTextCodec* Sgf::getCodec(const QByteArray& a) const{
+QTextCodec* Sgf::guessCodec(const QByteArray& a) const{
     int s = a.indexOf("CA[");
     if (s == -1)
         return NULL;
@@ -189,13 +189,9 @@ bool Sgf::readNodeValue(QString::iterator& first, QString::iterator last, QStrin
 
 bool Sgf::saveStream(QTextStream& stream){
     foreach (NodePtr game, gameList){
-/*
-        if (codec){
-            foreach (NodePtr info, game->getChildNodes()){
-                info->setProperty("CA", QStringList(codec->name()));
-            }
-        }
-*/
+        if (codec)
+            if (game->childNodes.empty() == false)
+                game->childNodes[0]->properties["CA"] = QStringList(codec->name());
         QString s;
         writeNode(stream, s, game);
     }

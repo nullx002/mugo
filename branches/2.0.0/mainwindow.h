@@ -66,7 +66,7 @@ protected:
     Document* currentDocument();
     void setKeyboardShortcut();
     void fileNew(QTextCodec* codec, int xsize=19, int ysize=19, double komi=6.5, int handicap=0);
-    bool fileOpen(QTextCodec* codec, const QString& fname);
+    bool fileOpen(QTextCodec* codec, const QString& fname, bool guessCodec);
     bool urlOpen(const QUrl& url);
     bool fileSave(Document*);
     bool fileSaveAs(Document*);
@@ -80,6 +80,8 @@ protected:
     QTreeWidgetItem* createBranchItem(BoardWidget* board, Go::NodePtr node);
     void removeBranchItem(QTreeWidgetItem* parent, NodeTreeMap& map, Go::NodePtr node);
     void updateCaption();
+    bool getOpenFileName(QString& fname, QTextCodec*& codec);
+    bool getSaveFileName(QString& fname, QTextCodec*& codec);
 
 private:
     Ui::MainWindow *ui;
@@ -101,6 +103,8 @@ private slots:
     void on_actionCloseAllTabs_triggered();
     void on_actionSave_triggered();
     void on_actionSaveAs_triggered();
+    void on_actionCollectionImport_triggered();
+    void on_actionCollectionExtract_triggered();
     void on_actionExportBoardAsImage_triggered();
     void on_actionExportAsciiToClipboard_triggered();
     void on_actionExit_triggered();

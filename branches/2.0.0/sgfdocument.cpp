@@ -48,6 +48,7 @@ bool SgfDocument::open(const QString& fname, bool guessCodec){
     gameList.clear();
     fileBase->get(gameList);
 
+    codec    = fileBase->codec;
     docName  = fi.fileName();
     fileName = fname;
     setDirty(false);
@@ -66,6 +67,7 @@ bool SgfDocument::read(const QString& docName, const QByteArray& bytes, bool gue
     gameList.clear();
     sgf.get(gameList);
 
+    codec = sgf.codec;
     this->docName = docName;
     fileName.clear();
     setDirty(false);
