@@ -299,6 +299,7 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="separator"/>
    <addaction name="actionDeleteAfterCurrent"/>
   </widget>
   <widget class="QToolBar" name="collectionToolBar">

@@ -21,6 +21,7 @@
 #include <QMainWindow>
 #include <QUndoGroup>
 #include <QUrl>
+#include <QModelIndex>
 #include "godata.h"
 
 
@@ -77,6 +78,7 @@ protected:
     void addDocument(SgfDocument* doc, BoardWidget* board=NULL);
     bool closeDocument(Document* doc, bool save=true, bool closeTab=true);
     bool maybeSave(Document* doc);
+    void createBranchWidget(Document* doc);
     void createBranchWidget(BoardWidget* board, Go::NodePtr node);
     void createBranchWidget(BoardWidget* board, QTreeWidgetItem* root, QTreeWidgetItem* parent1, QTreeWidgetItem* parent2, Go::NodePtr parentNode, Go::NodePtr node);
     QTreeWidgetItem* createBranchItem(BoardWidget* board, Go::NodePtr node);
@@ -126,6 +128,7 @@ private slots:
 
     // BoardWidget
     void on_boardWidget_currentNodeChanged(Go::NodePtr node);
+    void on_boardWidget_currentGameChanged(Go::NodePtr game);
 
     // BoardTabWidget
     void on_boardTabWidget_currentChanged(QWidget* );
@@ -133,6 +136,9 @@ private slots:
 
     // BranchWidget
     void on_branchWidget_currentItemChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous);
+
+    // Collection View
+    void on_collectionView_doubleClicked(QModelIndex index);
 
     // Open URL
     void on_openUrl_ReadReady(const QHttpResponseHeader&);

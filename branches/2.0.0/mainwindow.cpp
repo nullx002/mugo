@@ -357,8 +357,11 @@ SgfDocument* MainWindow::createDocument(QTextCodec* codec, const QString& fname,
 void MainWindow::addDocument(SgfDocument* doc, BoardWidget* board)
 {
     // create widget
-    if (board == NULL)
+    if (board == NULL){
         board = new BoardWidget(doc, this);
+        connect(board, SIGNAL(currentNodeChanged(Go::NodePtr)), SLOT(on_boardWidget_currentNodeChanged(Go::NodePtr)));
+        connect(board, SIGNAL(currentGameChanged(Go::NodePtr)), SLOT(on_boardWidget_currentGameChanged(Go::NodePtr)));
+    }
     else
         board->setDocument(doc);
     QTreeWidget* branchWidget = new QTreeWidget;
@@ -373,18 +376,7 @@ void MainWindow::addDocument(SgfDocument* doc, BoardWidget* board)
     docManager[doc] = view;
 
     // initialize branch widget
-    QTreeWidgetItem* dummy = new QTreeWidgetItem(QStringList(""));
-    createBranchWidget( board, dummy, dummy, dummy, Go::NodePtr(), board->getCurrentGame() );
-    for (int i=0; i<dummy->childCount();){
-        QTreeWidgetItem* item = dummy->child(i);
-        dummy->removeChild(item);
-        branchWidget->invisibleRootItem()->addChild(item);
-    }
-    if (branchWidget->invisibleRootItem()->childCount() > 0)
-        branchWidget->setCurrentItem( branchWidget->invisibleRootItem()->child(0) );
-
-    branchWidget->setHeaderHidden(true);
-    branchWidget->setIndentation(17);
+    createBranchWidget(doc);
     ui->branchStackedWidget->addWidget(branchWidget);
     connect(branchWidget,
             SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)),
@@ -397,9 +389,6 @@ void MainWindow::addDocument(SgfDocument* doc, BoardWidget* board)
     // document
     connect(doc, SIGNAL(nodeAdded(Go::NodePtr)), SLOT(on_sgfdocument_nodeAdded(Go::NodePtr)));
     connect(doc, SIGNAL(nodeDeleted(Go::NodePtr, bool)), SLOT(on_sgfdocument_nodeDeleted(Go::NodePtr, bool)));
-
-    // board
-    connect(board, SIGNAL(currentNodeChanged(Go::NodePtr)), SLOT(on_boardWidget_currentNodeChanged(Go::NodePtr)));
 
     // create new tab
     int n = ui->boardTabWidget->addTab(board, doc->getDocName());
@@ -455,6 +444,32 @@ bool MainWindow::maybeSave(Document* doc){
     else if (ret == QMessageBox::Cancel)
         return false;
     return true;
+}
+
+/**
+  create branch tree widget
+*/
+void MainWindow::createBranchWidget(Document* doc){
+    ViewData& view = docManager[doc];
+    view.branchWidget->clear();
+    view.nodeToTreeItem.clear();
+
+    QTreeWidgetItem* dummy = new QTreeWidgetItem(QStringList(""));
+    createBranchWidget( view.boardWidget, dummy, dummy, dummy, Go::NodePtr(), view.boardWidget->getCurrentGame() );
+
+    int count = dummy->childCount();
+    for (int i=0; i<count; ++i){
+        QTreeWidgetItem* item = dummy->child(0);
+        dummy->removeChild(item);
+        view.branchWidget->invisibleRootItem()->addChild(item);
+    }
+    delete dummy;
+
+    if (view.branchWidget->invisibleRootItem()->childCount() > 0)
+        view.branchWidget->setCurrentItem( view.branchWidget->invisibleRootItem()->child(0) );
+
+    view.branchWidget->setHeaderHidden(true);
+    view.branchWidget->setIndentation(17);
 }
 
 /**
@@ -1036,7 +1051,7 @@ void MainWindow::on_sgfdocument_nodeDeleted(Go::NodePtr node, bool removeChildre
 
 /**
   Slot
-  current node is changed
+  current node changed
 */
 void MainWindow::on_boardWidget_currentNodeChanged(Go::NodePtr node){
     BoardWidget* board = qobject_cast<BoardWidget*>(sender());
@@ -1046,6 +1061,19 @@ void MainWindow::on_boardWidget_currentNodeChanged(Go::NodePtr node){
         docManager[doc].branchWidget->setCurrentItem(item);
 
     updateCaption();
+}
+
+/**
+  Slot
+  current game changed
+*/
+void MainWindow::on_boardWidget_currentGameChanged(Go::NodePtr /*game*/){
+    BoardWidget* board = qobject_cast<BoardWidget*>(sender());
+    if (board == NULL)
+        return;
+    SgfDocument* doc = board->document();
+
+    createBranchWidget(doc);
 }
 
 /**
@@ -1086,6 +1114,9 @@ void MainWindow::on_boardTabWidget_tabCloseRequested(int index)
   current item changed in branch widget.
 */
 void MainWindow::on_branchWidget_currentItemChanged(QTreeWidgetItem* current, QTreeWidgetItem* /*previous*/){
+    if (current == NULL)
+        return;
+
     BoardWidget* board = currentBoard();
     if (board == NULL)
             return;
@@ -1095,6 +1126,22 @@ void MainWindow::on_branchWidget_currentItemChanged(QTreeWidgetItem* current, QT
     if (node == NULL)
         return;
     board->setCurrentNode(node);
+}
+
+/**
+  Slot
+  collection view -> double clicked
+*/
+void MainWindow::on_collectionView_doubleClicked(QModelIndex index)
+{
+    if (index.row() < 0)
+        return;
+
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    board->setCurrentGame(board->document()->gameList[index.row()]);
 }
 
 /**
