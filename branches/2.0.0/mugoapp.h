@@ -22,10 +22,11 @@
 #include <QApplication>
 
 
-#define APP_NAME    "mugo"
-#define APP_VERSION "2.0.0"
-#define AUTHOR      "nsase"
-#define COPYRIGHT   "Copyright 2009-2010 nsase."
+#define APP_NAME     "mugo"
+#define APP_VERSION  "2.0.0"
+#define SETTING_NAME "mugo2"
+#define AUTHOR       "nsase"
+#define COPYRIGHT    "Copyright 2009-2010 nsase."
 
 
 /**

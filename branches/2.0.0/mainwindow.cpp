@@ -16,6 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include <QDebug>
+#include <QSettings>
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QTreeView>
@@ -48,11 +49,20 @@ MainWindow::MainWindow(const QString& fname, QWidget *parent) :
 {
     ui->setupUi(this);
 
+    QSettings settings(AUTHOR, SETTING_NAME);
+
     // default codec
-    defaultCodec = QTextCodec::codecForName("UTF-8");
+    defaultCodec = QTextCodec::codecForName( settings.value("defaultCodec", "UTF-8").toByteArray() );
 
     // keyboard shortcut
     setKeyboardShortcut();
+
+    // File -> Reload
+    ui->fileToolBar->addAction( ui->menuReload->menuAction() );
+
+    // File -> Collection
+    ui->collectionToolBar->insertAction(ui->collectionToolBar->actions().at(0), ui->collectionDockWidget->toggleViewAction());
+    ui->collectionDockWidget->toggleViewAction()->setIcon( QIcon(":/res/collection.png") );
 
     // Edit -> undo/redo
     QAction* undoAction = undoGroup.createUndoAction(this);
@@ -64,12 +74,10 @@ MainWindow::MainWindow(const QString& fname, QWidget *parent) :
     ui->editToolBar->insertAction(ui->editToolBar->actions().at(0), redoAction);
     ui->editToolBar->insertAction(redoAction, undoAction);
 
-    // File -> Reload
-    ui->fileToolBar->addAction( ui->menuReload->menuAction() );
-
     // window -> toolbars menu
     ui->menuToolbars->addAction( ui->fileToolBar->toggleViewAction() );
     ui->menuToolbars->addAction( ui->editToolBar->toggleViewAction() );
+    ui->menuToolbars->addAction( ui->collectionToolBar->toggleViewAction() );
 
     // window (dock view)
     ui->menuWindow->addAction( ui->commentDockWidget->toggleViewAction() );
@@ -125,6 +133,11 @@ MainWindow::MainWindow(const QString& fname, QWidget *parent) :
     encoding[ui->actionEncodingEucJP] = QTextCodec::codecForName("EUC-JP");
     encoding[ui->actionEncodingKorean] = QTextCodec::codecForName("EUC-KR");
 
+    // window settings
+    restoreGeometry( settings.value("mainwindowGeometry").toByteArray() );
+    restoreState( settings.value("docksState").toByteArray() );
+    ui->collectionView->header()->restoreState( settings.value("collectionState").toByteArray() );
+
     // open or new tab
     if (fname.isEmpty())
         fileNew(defaultCodec);
@@ -138,6 +151,11 @@ MainWindow::MainWindow(const QString& fname, QWidget *parent) :
 */
 MainWindow::~MainWindow()
 {
+    QSettings settings(AUTHOR, SETTING_NAME);
+    settings.setValue("mainwindowGeometry", saveGeometry());
+    settings.setValue("docksState", saveState());
+    settings.setValue("collectionState", ui->collectionView->header()->saveState());
+
     delete ui;
 }
 
@@ -211,7 +229,7 @@ void MainWindow::fileNew(QTextCodec* codec, int xsize, int ysize, double komi, i
     doc->gameList[0]->gameInformation->ysize = ysize;
     doc->gameList[0]->gameInformation->komi  = komi;
     doc->gameList[0]->gameInformation->handicap = handicap;
-    doc->setDocName( tr("Untitled-%1").arg(++docID) );
+    doc->setDocName( newDocumentName() );
     addDocument(doc);
 }
 
@@ -229,12 +247,9 @@ bool MainWindow::fileOpen(QTextCodec* codec, const QString& fname, bool guessCod
         ++iter;
     }
 
-    SgfDocument* doc = new SgfDocument(codec, this);
-    if (doc->open(fname, guessCodec) == false){
-        QMessageBox::critical(this, QString(), tr("File open error: %1").arg(fname));
-        delete doc;
+    SgfDocument* doc = createDocument(codec, fname, guessCodec);
+    if (doc == NULL)
         return false;
-    }
     addDocument(doc);
 
     return true;
@@ -324,7 +339,20 @@ bool MainWindow::closeTab(int index){
 }
 
 /**
-  addDocument
+  create document
+*/
+SgfDocument* MainWindow::createDocument(QTextCodec* codec, const QString& fname, bool guessCodec){
+    SgfDocument* doc = new SgfDocument(codec, this);
+    if (doc->open(fname, guessCodec) == false){
+        QMessageBox::critical(this, QString(), tr("File open error: %1").arg(fname));
+        delete doc;
+        return NULL;
+    }
+    return doc;
+}
+
+/**
+  add document
 */
 void MainWindow::addDocument(SgfDocument* doc, BoardWidget* board)
 {
@@ -364,16 +392,7 @@ void MainWindow::addDocument(SgfDocument* doc, BoardWidget* board)
 
     // collection
     model->setHorizontalHeaderLabels(QStringList() << tr("White") << tr("Black") << tr("Game Name") << tr("Date") << tr("Result"));
-    Go::NodeList gameList = doc->gameList;
-    foreach(Go::NodePtr game, gameList){
-        QList<QStandardItem*> items;
-        items.push_back( new QStandardItem(game->gameInformation->whitePlayer) );
-        items.push_back( new QStandardItem(game->gameInformation->blackPlayer) );
-        items.push_back( new QStandardItem(game->gameInformation->gameName.isEmpty() ? game->gameInformation->event : game->gameInformation->gameName) );
-        items.push_back( new QStandardItem(game->gameInformation->date) );
-        items.push_back( new QStandardItem(game->gameInformation->result) );
-        model->appendRow(items);
-    }
+    addCollectionModel(doc->gameList, model);
 
     // document
     connect(doc, SIGNAL(nodeAdded(Go::NodePtr)), SLOT(on_sgfdocument_nodeAdded(Go::NodePtr)));
@@ -673,6 +692,21 @@ bool MainWindow::getSaveFileName(QString& fname, QTextCodec*& codec){
 }
 
 /**
+  create collection mdoel
+*/
+void MainWindow::addCollectionModel(const Go::NodeList& gameList, QStandardItemModel* model){
+    foreach(Go::NodePtr game, gameList){
+        QList<QStandardItem*> items;
+        items.push_back( new QStandardItem(game->gameInformation->whitePlayer) );
+        items.push_back( new QStandardItem(game->gameInformation->blackPlayer) );
+        items.push_back( new QStandardItem(game->gameInformation->gameName.isEmpty() ? game->gameInformation->event : game->gameInformation->gameName) );
+        items.push_back( new QStandardItem(game->gameInformation->date) );
+        items.push_back( new QStandardItem(game->gameInformation->result) );
+        model->appendRow(items);
+    }
+}
+
+/**
   slot
   File -> New
 */
@@ -719,13 +753,12 @@ void MainWindow::on_actionReload_triggered()
         return;
 
     QTextCodec* codec = encoding.find(act) != encoding.end() ? encoding[act] : board->document()->getCodec();
-    SgfDocument* doc = new SgfDocument(codec, this);
-    if (doc->open(board->document()->getFileName(), false) == false){
-        QMessageBox::critical( this, QString(), tr("File open error: %1").arg(board->document()->getFileName()) );
+    SgfDocument* doc = createDocument(codec, board->document()->getFileName(), false);
+    if (doc == NULL){
         closeDocument(board->document(), false);
-        delete doc;
         return;
     }
+
     closeDocument(board->document(), false, false);
     addDocument(doc, board);
 }
@@ -798,7 +831,29 @@ void MainWindow::on_actionSaveAs_triggered()
 */
 void MainWindow::on_actionCollectionImport_triggered()
 {
+    SgfDocument* currentDoc = qobject_cast<SgfDocument*>(currentDocument());
+    if (currentDoc == NULL)
+        return;
 
+    // select file
+    QString fname;
+    QTextCodec* codec = NULL;
+    if (getOpenFileName(fname, codec) == false)
+        return;
+
+    // open document
+    SgfDocument* doc;
+    if (codec == NULL)
+        doc = createDocument(defaultCodec, fname, true);
+    else
+        doc = createDocument(codec, fname, false);
+
+    if (doc == NULL)
+        return;
+
+    // add document
+    currentDoc->gameList.append(doc->gameList);
+    addCollectionModel(doc->gameList, docManager[currentDoc].collectionModel);
 }
 
 /**
@@ -807,7 +862,30 @@ void MainWindow::on_actionCollectionImport_triggered()
 */
 void MainWindow::on_actionCollectionExtract_triggered()
 {
+    // current document
+    SgfDocument* doc = qobject_cast<SgfDocument*>(currentDocument());
+    if (doc == NULL)
+        return;
 
+    // selecting game
+    QModelIndex index = ui->collectionView->currentIndex();
+    if (index.row() < 0)
+        return;
+
+    // convert selecting game to sgf
+    Go::NodePtr game = doc->gameList[index.row()];
+    Go::NodeList gameList;
+    gameList.push_back(game);
+
+    Go::Sgf sgf;
+    sgf.set(gameList);
+    sgf.codec = doc->getCodec();
+
+    // load sgf as new document
+    SgfDocument* newDoc = new SgfDocument(doc->getCodec());
+    newDoc->set(sgf);
+    newDoc->setDocName( newDocumentName() );
+    addDocument(newDoc);
 }
 
 /**
@@ -981,8 +1059,13 @@ void MainWindow::on_boardTabWidget_currentChanged(QWidget* widget)
         return;
     ViewData& view = docManager[boardWidget->document()];
 
+    // branch tree
     ui->branchStackedWidget->setCurrentWidget( view.branchWidget );
+
+    // collection
     ui->collectionView->setModel(view.collectionModel);
+    int n = boardWidget->document()->gameList.indexOf(boardWidget->getCurrentGame());
+    ui->collectionView->setCurrentIndex( ui->collectionView->model()->index(n, 0) );
 
     undoGroup.setActiveStack(boardWidget->document()->getUndoStack());
 

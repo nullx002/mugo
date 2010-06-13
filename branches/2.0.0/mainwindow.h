@@ -72,6 +72,8 @@ protected:
     bool fileSaveAs(Document*);
     bool fileSaveAs(Document* doc, const QString& fname);
     bool closeTab(int index);
+    QString newDocumentName();
+    SgfDocument* createDocument(QTextCodec* codec, const QString& fname, bool guessCodec);
     void addDocument(SgfDocument* doc, BoardWidget* board=NULL);
     bool closeDocument(Document* doc, bool save=true, bool closeTab=true);
     bool maybeSave(Document* doc);
@@ -82,6 +84,7 @@ protected:
     void updateCaption();
     bool getOpenFileName(QString& fname, QTextCodec*& codec);
     bool getSaveFileName(QString& fname, QTextCodec*& codec);
+    void addCollectionModel(const Go::NodeList& gameList, QStandardItemModel* model);
 
 private:
     Ui::MainWindow *ui;
@@ -136,5 +139,14 @@ private slots:
     void on_openUrl_UrlReadProgress(int, int);
     void on_openUrl_UrlDone(bool);
 };
+
+
+/**
+  create new document name
+*/
+inline
+QString MainWindow::newDocumentName(){
+    return tr("Untitled-%1").arg(++docID);
+}
 
 #endif // MAINWINDOW_H

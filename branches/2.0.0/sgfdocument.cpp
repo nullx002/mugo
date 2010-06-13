@@ -45,13 +45,9 @@ bool SgfDocument::open(const QString& fname, bool guessCodec){
     if (fileBase->read(fname, codec, guessCodec) == false)
         return false;
 
-    gameList.clear();
-    fileBase->get(gameList);
-
-    codec    = fileBase->codec;
+    set(*fileBase);
     docName  = fi.fileName();
     fileName = fname;
-    setDirty(false);
 
     return true;
 }
@@ -59,16 +55,28 @@ bool SgfDocument::open(const QString& fname, bool guessCodec){
 /**
   read
 */
-bool SgfDocument::read(const QString& docName, const QByteArray& bytes, bool guessCodec){
+bool SgfDocument::read(const QString& docName_, const QByteArray& bytes, bool guessCodec){
     Go::Sgf sgf;
     if( sgf.read(bytes, codec, guessCodec) == false)
         return false;
 
-    gameList.clear();
-    sgf.get(gameList);
+    set(sgf);
+    docName = docName_;
 
-    codec = sgf.codec;
-    this->docName = docName;
+    return true;
+}
+
+/**
+  set
+*/
+bool SgfDocument::set(const Go::FileBase& fbase){
+    gameList.clear();
+    fbase.get(gameList);
+    if (gameList.empty())
+        return false;
+
+    codec = fbase.codec;
+    docName.clear();
     fileName.clear();
     setDirty(false);
 

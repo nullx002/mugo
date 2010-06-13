@@ -32,6 +32,7 @@ public:
     // open
     bool open(const QString& fname, bool guessCodec);
     bool read(const QString& docName, const QByteArray& byets, bool guessCodec);
+    bool set(const Go::FileBase& fbase);
 
     // save
     bool save(const QString& fname);

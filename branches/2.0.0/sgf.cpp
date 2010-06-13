@@ -194,6 +194,7 @@ bool Sgf::saveStream(QTextStream& stream){
                 game->childNodes[0]->properties["CA"] = QStringList(codec->name());
         QString s;
         writeNode(stream, s, game);
+        stream << "\n";
     }
 
     return true;

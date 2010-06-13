@@ -15,5 +15,10 @@
         <file>res/redo.png</file>
         <file>res/remove.png</file>
         <file>res/removeself.png</file>
+        <file>res/collection.png</file>
+        <file>res/collectiondown.png</file>
+        <file>res/collectionextract.png</file>
+        <file>res/collectionimport.png</file>
+        <file>res/collectionup.png</file>
     </qresource>
 </RCC>
