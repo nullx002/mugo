@@ -351,21 +351,34 @@ void BoardWidget::createBuffer(bool erase){
 /**
   Move next node
 */
-void BoardWidget::forward(){
+void BoardWidget::forward(int step){
     Go::NodeList::const_iterator iter = qFind(currentNodeList, currentNode);
-    if (iter == currentNodeList.end() || iter + 1 == currentNodeList.end())
+    if (iter == currentNodeList.end())
         return;
-    setCurrentNode(*++iter);
+
+    Go::NodeList::const_iterator pos = iter;
+    for (int i=0; i<step; ++i){
+        if (++iter == currentNodeList.end())
+            break;
+        pos = iter;
+    }
+    setCurrentNode(*pos);
 }
 
 /**
   Move previous node
 */
-void BoardWidget::back(){
+void BoardWidget::back(int step){
     Go::NodeList::const_iterator iter = qFind(currentNodeList, currentNode);
-    if (iter == currentNodeList.begin() || iter == currentNodeList.end())
+    if (iter == currentNodeList.end())
         return;
-    setCurrentNode(*--iter);
+
+    for (int i=0; i<step; ++i){
+        if (iter == currentNodeList.begin())
+            break;
+        --iter;
+    }
+    setCurrentNode(*iter);
 }
 
 QString BoardWidget::getCoordinateString(Go::NodePtr node, bool showI) const{

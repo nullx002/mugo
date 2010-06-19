@@ -20,5 +20,11 @@
         <file>res/collectionextract.png</file>
         <file>res/collectionimport.png</file>
         <file>res/collectionup.png</file>
+        <file>res/movefirst.png</file>
+        <file>res/fastrewind.png</file>
+        <file>res/moveprev.png</file>
+        <file>res/movelast.png</file>
+        <file>res/fastforward.png</file>
+        <file>res/movenext.png</file>
     </qresource>
 </RCC>

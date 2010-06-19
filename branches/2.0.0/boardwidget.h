@@ -61,8 +61,8 @@ public:
     void setDocument(SgfDocument* doc);
     void setCurrentGame(Go::NodePtr node);
     void setCurrentNode(Go::NodePtr node);
-    void forward();
-    void back();
+    void forward(int step=1);
+    void back(int step=1);
 
     QString getCoordinateString(Go::NodePtr node, bool showI) const;
 

@@ -130,6 +130,14 @@ private slots:
     void on_actionDeleteAfterCurrent_triggered();
     void on_actionDeleteCurrentOnly_triggered();
 
+    // Navigation Menu
+    void on_actionNavigationMoveFirst_triggered();
+    void on_actionNavigationFastRewind_triggered();
+    void on_actionNavigationMovePrevious_triggered();
+    void on_actionNavigationMoveLast_triggered();
+    void on_actionNavigationFastForward_triggered();
+    void on_actionNavigationMoveNext_triggered();
+
     // Help Menu
     void on_actionAbuot_triggered();
     void on_actionAboutQt_triggered();

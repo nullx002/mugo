@@ -992,6 +992,82 @@ void MainWindow::on_actionDeleteCurrentOnly_triggered()
 
 /**
   Slot
+  Navigation -> Move First
+*/
+void MainWindow::on_actionNavigationMoveFirst_triggered()
+{
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    const Go::NodeList& nodeList = board->getCurrentNodeList();
+    board->setCurrentNode(nodeList.front());
+}
+
+/**
+  Slot
+  Navigation -> Fast Rewind
+*/
+void MainWindow::on_actionNavigationFastRewind_triggered()
+{
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+    board->back(5);
+}
+
+/**
+  Slot
+  Navigation -> Move Next
+*/
+void MainWindow::on_actionNavigationMovePrevious_triggered()
+{
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+    board->back();
+}
+
+/**
+  Slot
+  Navigation -> Move Last
+*/
+void MainWindow::on_actionNavigationMoveLast_triggered()
+{
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    const Go::NodeList& nodeList = board->getCurrentNodeList();
+    board->setCurrentNode(nodeList.last());
+}
+
+/**
+  Slot
+  Navigation -> Fast Forward
+*/
+void MainWindow::on_actionNavigationFastForward_triggered()
+{
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+    board->forward(5);
+}
+
+/**
+  Slot
+  Navigation -> Move Next
+*/
+void MainWindow::on_actionNavigationMoveNext_triggered()
+{
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+    board->forward();
+}
+
+/**
+  Slot
   Help -> About...
 */
 void MainWindow::on_actionAbuot_triggered()
