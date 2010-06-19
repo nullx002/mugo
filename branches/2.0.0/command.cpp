@@ -19,6 +19,7 @@
 #include <QTreeView>
 #include <QStandardItemModel>
 #include "command.h"
+#include "boardwidget.h"
 #include "sgfdocument.h"
 
 /**
@@ -86,6 +87,33 @@ void DeleteNodeCommand::undo(){
     document->addNode(parentNode, node, pos);
 
 
+}
+
+/**
+  Constructor
+*/
+SetCurrentGameCommand::SetCurrentGameCommand(BoardWidget* board, Go::NodePtr game_, QUndoCommand *parent)
+    : QUndoCommand(parent)
+    , boardWidget(board)
+    , game(game_)
+{
+}
+
+/**
+  redo set current game command
+*/
+void SetCurrentGameCommand::redo(){
+    setText( tr("Set current game") );
+
+    prevGame = boardWidget->getCurrentGame();
+    boardWidget->setCurrentGame(game);
+}
+
+/**
+  undo set current game command
+*/
+void SetCurrentGameCommand::undo(){
+    boardWidget->setCurrentGame(prevGame);
 }
 
 /**

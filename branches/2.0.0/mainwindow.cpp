@@ -1090,6 +1090,8 @@ void MainWindow::on_boardWidget_currentGameChanged(Go::NodePtr /*game*/){
     SgfDocument* doc = board->document();
 
     createBranchWidget(doc);
+
+    updateCaption();
 }
 
 /**
@@ -1157,7 +1159,8 @@ void MainWindow::on_collectionView_doubleClicked(QModelIndex index)
     if (board == NULL)
         return;
 
-    board->setCurrentGame(board->document()->gameList[index.row()]);
+    Go::NodePtr game = board->document()->gameList[index.row()];
+    board->document()->getUndoStack()->push( new SetCurrentGameCommand(board, game) );
 }
 
 /**

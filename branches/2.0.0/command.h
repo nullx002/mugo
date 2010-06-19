@@ -28,6 +28,7 @@
 class QTreeView;
 class QStandardItemModel;
 class SgfDocument;
+class BoardWidget;
 
 
 /**
@@ -65,6 +66,23 @@ private:
     Go::NodePtr node;
     bool removeChildren;
     int pos;
+};
+
+/**
+  set current game command
+*/
+class SetCurrentGameCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(SetCurrentGameCommand)
+
+public:
+    SetCurrentGameCommand(BoardWidget* board, Go::NodePtr game, QUndoCommand *parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+private:
+    BoardWidget* boardWidget;
+    Go::NodePtr game;
+    Go::NodePtr prevGame;
 };
 
 /**
