@@ -41,6 +41,7 @@ BoardWidget::BoardWidget(SgfDocument* doc, QWidget *parent) :
     // create board
     shadow = scene->addRect(0, 0, 1, 1, QPen(Qt::transparent), QBrush(QColor(10, 10, 10, 130)));
     board  = scene->addRect(0, 0, 1, 1, QPen(QColor(255, 200, 100)), QBrush(QColor(255, 200, 100)));
+    board->setZValue(1);
 
     // set current game
     setCurrentGame(document()->gameList.front());
@@ -58,63 +59,7 @@ BoardWidget::~BoardWidget()
 */
 void BoardWidget::resizeEvent(QResizeEvent* e){
     scene->setSceneRect(0, 0, e->size().width(), e->size().height());
-
-    // calculate board size
-    int width  = e->size().width() - 30;
-    int height = e->size().height() - 30;
-    int x = width  / gameInformation->xsize;
-    int y = height / gameInformation->ysize;
-    int size = qMin(x, y);
-    int w = size * (gameInformation->xsize - 1);
-    int h = size * (gameInformation->ysize - 1);
-
-    x = (e->size().width() - w) / 2;
-    y = (e->size().height() - h) / 2;
-    QRect boardRect(QPoint(x-size*0.8, y-size*0.8), QPoint(x+w+size*0.8, y+w+size*0.8));
-
-    // set position of shadow.
-    shadow->setRect(boardRect.left()+4, boardRect.top()+4, boardRect.width(), boardRect.height());
-
-    // set position of board.
-    board->setRect(boardRect);
-
-    // set position of vertical lines.
-    int xx = x;
-    foreach(QGraphicsLineItem* item, vLines){
-        item->setLine(xx, y, xx, y+h);
-        xx += size;
-    }
-
-    // set position of horizontal lines.
-    int yy = y;
-    foreach(QGraphicsLineItem* item, hLines){
-        item->setLine(x, yy, x+w, yy);
-        yy += size;
-    }
-
-    // set position of stars.
-    QList<int> xpos, ypos;
-    getStarPosition(xpos, ypos);
-    for (int y=0, n=0; y<ypos.size(); ++y){
-        for (int x=0; x<xpos.size(); ++x, ++n){
-            int xx = vLines[xpos[x]]->line().x1() - 2;
-            int yy = hLines[ypos[y]]->line().y1() - 2;
-            stars[n]->setRect(xx, yy, 4, 4);
-        }
-    }
-
-    // set position of stones.
-    Go::NodeList::iterator iter = currentNodeList.begin();
-    foreach (QGraphicsItem* item, stones){
-        if (item){
-            int x = (*iter)->position.x;
-            int y = (*iter)->position.y;
-            QGraphicsEllipseItem* ellipse = dynamic_cast<QGraphicsEllipseItem*>(item);
-            if (ellipse)
-                ellipse->setRect(vLines[x]->line().x1()-size/2, hLines[y]->line().y1()-size/2, size, size);
-        }
-        ++iter;
-    }
+    setItemPositions();
 }
 
 /**
@@ -192,22 +137,45 @@ void BoardWidget::setCurrentGame(Go::NodePtr game){
     currentGame = game;
     gameInformation = currentGame->getInformation();
 
-    // create line
+    // delete lines and stars
+    foreach(QGraphicsLineItem* line, hLines)
+        scene->removeItem(line);
+    hLines.clear();
+    foreach(QGraphicsLineItem* line, vLines)
+        scene->removeItem(line);
+    vLines.clear();
+    foreach(QGraphicsEllipseItem* star, stars)
+        scene->removeItem(star);
+    stars.clear();
+
+    // create lines
     int xsize = gameInformation->xsize;
     int ysize = gameInformation->ysize;
-    for (int y=0; y<ysize; ++y)
-        hLines.push_back( scene->addLine(0, 0, 0, 0, QPen(Qt::black)) );
-    for (int x=0; x<xsize; ++x)
-        vLines.push_back( scene->addLine(0, 0, 0, 0, QPen(Qt::black)) );
+    for (int y=0; y<ysize; ++y){
+        QGraphicsLineItem* item = scene->addLine(0, 0, 0, 0, QPen(Qt::black));
+        item->setZValue(2);
+        hLines.push_back(item);
+    }
+    for (int x=0; x<xsize; ++x){
+        QGraphicsLineItem* item = scene->addLine(0, 0, 0, 0, QPen(Qt::black));
+        item->setZValue(2);
+        vLines.push_back(item);
+    }
 
-    // create star
+    // create stars
     QList<int> xpos, ypos;
     getStarPosition(xpos, ypos);
     for (int y=0; y<ypos.size(); ++y)
-        for (int x=0; x<xpos.size(); ++x)
-            stars.push_back( scene->addEllipse(x, y, 2, 2, QPen(Qt::black), QBrush(Qt::black)) );
+        for (int x=0; x<xpos.size(); ++x){
+            QGraphicsEllipseItem* item = scene->addEllipse(x, y, 2, 2, QPen(Qt::black), QBrush(Qt::black));
+            item->setZValue(2);
+            stars.push_back(item);
+        }
+
+    setItemPositions();
 
     emit currentGameChanged(currentGame);
+
     setCurrentNode(game);
 }
 
@@ -228,6 +196,70 @@ void BoardWidget::setCurrentNode(Go::NodePtr node){
         createBuffer(false);
 
     emit currentNodeChanged(currentNode);
+}
+
+/**
+  set scene items position
+*/
+void BoardWidget::setItemPositions(){
+    QRectF r = scene->sceneRect();
+
+    // calculate board size
+    int width  = r.width() - 30;
+    int height = r.height() - 30;
+    int x = width  / gameInformation->xsize;
+    int y = height / gameInformation->ysize;
+    int size = qMin(x, y);
+    int w = size * (gameInformation->xsize - 1);
+    int h = size * (gameInformation->ysize - 1);
+
+    x = (r.width() - w) / 2;
+    y = (r.height() - h) / 2;
+    QRect boardRect(QPoint(x-size*0.8, y-size*0.8), QPoint(x+w+size*0.8, y+w+size*0.8));
+
+    // set position of shadow.
+    shadow->setRect(boardRect.left()+4, boardRect.top()+4, boardRect.width(), boardRect.height());
+
+    // set position of board.
+    board->setRect(boardRect);
+
+    // set position of vertical lines.
+    int xx = x;
+    foreach(QGraphicsLineItem* item, vLines){
+        item->setLine(xx, y, xx, y+h);
+        xx += size;
+    }
+
+    // set position of horizontal lines.
+    int yy = y;
+    foreach(QGraphicsLineItem* item, hLines){
+        item->setLine(x, yy, x+w, yy);
+        yy += size;
+    }
+
+    // set position of stars.
+    QList<int> xpos, ypos;
+    getStarPosition(xpos, ypos);
+    for (int y=0, n=0; y<ypos.size(); ++y){
+        for (int x=0; x<xpos.size(); ++x, ++n){
+            int xx = vLines[xpos[x]]->line().x1() - 2;
+            int yy = hLines[ypos[y]]->line().y1() - 2;
+            stars[n]->setRect(xx, yy, 4, 4);
+        }
+    }
+
+    // set position of stones.
+    Go::NodeList::iterator iter = currentNodeList.begin();
+    foreach (QGraphicsItem* item, stones){
+        if (item){
+            int x = (*iter)->position.x;
+            int y = (*iter)->position.y;
+            QGraphicsEllipseItem* ellipse = dynamic_cast<QGraphicsEllipseItem*>(item);
+            if (ellipse)
+                ellipse->setRect(vLines[x]->line().x1()-size/2, hLines[y]->line().y1()-size/2, size, size);
+        }
+        ++iter;
+    }
 }
 
 /**
@@ -253,6 +285,7 @@ void BoardWidget::createBuffer(bool erase){
                 int sceneX = vLines[n->position.x]->line().x1() - size / 2;
                 int sceneY = hLines[n->position.y]->line().y1() - size / 2;
                 QGraphicsItem* item = scene->addEllipse( sceneX, sceneY, size, size, QPen(Qt::black), QBrush(n->color == Go::black ? Qt::black : Qt::white) );
+                item->setZValue(3);
                 stones.push_front(item);
             }
             else
@@ -270,6 +303,7 @@ void BoardWidget::createBuffer(bool erase){
                 int sceneX = vLines[n->position.x]->line().x1() - size / 2;
                 int sceneY = hLines[n->position.y]->line().y1() - size / 2;
                 QGraphicsItem* item = scene->addEllipse( sceneX, sceneY, size, size, QPen(Qt::black), QBrush(n->color == Go::black ? Qt::black : Qt::white) );
+                item->setZValue(3);
                 stones.push_back(item);
             }
             else

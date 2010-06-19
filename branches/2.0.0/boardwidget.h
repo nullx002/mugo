@@ -77,6 +77,7 @@ protected:
     void onLButtonDown(QMouseEvent* e);
     void onRButtonDown(QMouseEvent* e);
 
+    void setItemPositions();
     void createBuffer(bool erase);
     void getStarPosition(QList<int>& xpos, QList<int>& ypos);
     void killStones(int x, int y);

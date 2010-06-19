@@ -382,8 +382,7 @@ void MainWindow::addDocument(SgfDocument* doc, BoardWidget* board)
         connect(board, SIGNAL(currentNodeChanged(Go::NodePtr)), SLOT(on_boardWidget_currentNodeChanged(Go::NodePtr)));
         connect(board, SIGNAL(currentGameChanged(Go::NodePtr)), SLOT(on_boardWidget_currentGameChanged(Go::NodePtr)));
     }
-    else
-        board->setDocument(doc);
+
     QTreeWidget* branchWidget = new QTreeWidget;
     QStandardItemModel* model = new QStandardItemModel;
 
@@ -394,6 +393,10 @@ void MainWindow::addDocument(SgfDocument* doc, BoardWidget* board)
     view.branchType   = branchMode;
     view.collectionModel = model;
     docManager[doc] = view;
+
+    // set document after create view data.
+    if (board)
+        board->setDocument(doc);
 
     // initialize branch widget
     createBranchWidget(doc);
