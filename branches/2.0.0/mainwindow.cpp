@@ -34,6 +34,7 @@
 #include "boardwidget.h"
 #include "sgf.h"
 #include "sgfdocument.h"
+#include "command.h"
 
 
 Q_DECLARE_METATYPE(Go::NodePtr);
@@ -339,6 +340,25 @@ bool MainWindow::closeTab(int index){
 }
 
 /**
+ may be save
+*/
+bool MainWindow::maybeSave(Document* doc){
+    if (doc->isDirty() == false)
+        return true;
+
+    QMessageBox::StandardButton ret =
+                    QMessageBox::warning(this, APP_NAME,
+                        tr("%1 has been modified.\n"
+                           "Do you want to save your changes?").arg(doc->getDocName()),
+                        QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+    if (ret == QMessageBox::Save)
+        return fileSave(doc);
+    else if (ret == QMessageBox::Cancel)
+        return false;
+    return true;
+}
+
+/**
   create document
 */
 SgfDocument* MainWindow::createDocument(QTextCodec* codec, const QString& fname, bool guessCodec){
@@ -387,6 +407,7 @@ void MainWindow::addDocument(SgfDocument* doc, BoardWidget* board)
     addCollectionModel(doc->gameList, model);
 
     // document
+    connect(doc, SIGNAL(modified(bool)), SLOT(on_sgfdocument_modified(bool)));
     connect(doc, SIGNAL(nodeAdded(Go::NodePtr)), SLOT(on_sgfdocument_nodeAdded(Go::NodePtr)));
     connect(doc, SIGNAL(nodeDeleted(Go::NodePtr, bool)), SLOT(on_sgfdocument_nodeDeleted(Go::NodePtr, bool)));
 
@@ -424,25 +445,6 @@ bool MainWindow::closeDocument(Document* doc, bool save, bool closeTab){
     docManager.remove(doc);
     delete doc;
 
-    return true;
-}
-
-/**
- may be save
-*/
-bool MainWindow::maybeSave(Document* doc){
-    if (doc->isDirty() == false)
-        return true;
-
-    QMessageBox::StandardButton ret =
-                    QMessageBox::warning(this, APP_NAME,
-                        tr("%1 has been modified.\n"
-                           "Do you want to save your changes?").arg(doc->getDocName()),
-                        QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
-    if (ret == QMessageBox::Save)
-        return fileSave(doc);
-    else if (ret == QMessageBox::Cancel)
-        return false;
     return true;
 }
 
@@ -569,6 +571,28 @@ QTreeWidgetItem* MainWindow::createBranchItem(BoardWidget* board, Go::NodePtr no
 
     // return created item
     return item;
+}
+
+/**
+  create collection mdoel
+*/
+void MainWindow::addCollectionModel(const Go::NodeList& gameList, QStandardItemModel* model){
+    foreach(Go::NodePtr game, gameList){
+        QList<QStandardItem*> items;
+        createCollectionModelRow(game, items);
+        model->appendRow(items);
+    }
+}
+
+/**
+  create collection model row
+*/
+void MainWindow::createCollectionModelRow(const Go::NodePtr& game, QList<QStandardItem*>& items){
+    items.push_back( new QStandardItem(game->gameInformation->whitePlayer) );
+    items.push_back( new QStandardItem(game->gameInformation->blackPlayer) );
+    items.push_back( new QStandardItem(game->gameInformation->gameName.isEmpty() ? game->gameInformation->event : game->gameInformation->gameName) );
+    items.push_back( new QStandardItem(game->gameInformation->date) );
+    items.push_back( new QStandardItem(game->gameInformation->result) );
 }
 
 /**
@@ -707,21 +731,6 @@ bool MainWindow::getSaveFileName(QString& fname, QTextCodec*& codec){
 }
 
 /**
-  create collection mdoel
-*/
-void MainWindow::addCollectionModel(const Go::NodeList& gameList, QStandardItemModel* model){
-    foreach(Go::NodePtr game, gameList){
-        QList<QStandardItem*> items;
-        items.push_back( new QStandardItem(game->gameInformation->whitePlayer) );
-        items.push_back( new QStandardItem(game->gameInformation->blackPlayer) );
-        items.push_back( new QStandardItem(game->gameInformation->gameName.isEmpty() ? game->gameInformation->event : game->gameInformation->gameName) );
-        items.push_back( new QStandardItem(game->gameInformation->date) );
-        items.push_back( new QStandardItem(game->gameInformation->result) );
-        model->appendRow(items);
-    }
-}
-
-/**
   slot
   File -> New
 */
@@ -824,7 +833,6 @@ void MainWindow::on_actionSave_triggered()
         return;
 
     fileSave(doc);
-    updateCaption();
 }
 
 /**
@@ -837,7 +845,6 @@ void MainWindow::on_actionSaveAs_triggered()
     if (doc == NULL)
         return;
     fileSaveAs(doc);
-    updateCaption();
 }
 
 /**
@@ -963,7 +970,7 @@ void MainWindow::on_actionDeleteAfterCurrent_triggered()
         return;
     SgfDocument* doc = board->document();
 
-    doc->deleteNodeCommand( board->getCurrentNode(), true );
+    doc->getUndoStack()->push( new DeleteNodeCommand(doc, board->getCurrentNode(), true) );
 }
 
 /**
@@ -977,7 +984,7 @@ void MainWindow::on_actionDeleteCurrentOnly_triggered()
         return;
     SgfDocument* doc = board->document();
 
-    doc->deleteNodeCommand( board->getCurrentNode(), false );
+    doc->getUndoStack()->push( new DeleteNodeCommand(doc, board->getCurrentNode(), false) );
 }
 
 /**
@@ -997,6 +1004,14 @@ void MainWindow::on_actionAbuot_triggered()
 void MainWindow::on_actionAboutQt_triggered()
 {
     QMessageBox::aboutQt(this);
+}
+
+/**
+  Slot
+  document modified
+*/
+void MainWindow::on_sgfdocument_modified(bool){
+    updateCaption();
 }
 
 /**
@@ -1059,8 +1074,6 @@ void MainWindow::on_boardWidget_currentNodeChanged(Go::NodePtr node){
     QTreeWidgetItem* item = docManager[doc].nodeToTreeItem[node];
     if (item)
         docManager[doc].branchWidget->setCurrentItem(item);
-
-    updateCaption();
 }
 
 /**
@@ -1142,6 +1155,66 @@ void MainWindow::on_collectionView_doubleClicked(QModelIndex index)
         return;
 
     board->setCurrentGame(board->document()->gameList[index.row()]);
+}
+
+/**
+  Slot
+  Collection -> Move Up
+*/
+void MainWindow::on_actionCollectionMoveUp_triggered()
+{
+    SgfDocument* doc = qobject_cast<SgfDocument*>(currentDocument());
+    if (doc == NULL)
+        return;
+
+    QModelIndex index = ui->collectionView->currentIndex();
+    if (index.row() <= 0)
+        return;
+
+    doc->getUndoStack()->push( new MoveUpInCollectionCommand(doc, ui->collectionView, index.row()) );
+}
+
+/**
+  Slot
+  Collection -> Move Down
+*/
+void MainWindow::on_actionCollectionMoveDown_triggered()
+{
+    SgfDocument* doc = qobject_cast<SgfDocument*>(currentDocument());
+    if (doc == NULL)
+        return;
+
+    QModelIndex index = ui->collectionView->currentIndex();
+    if (index.row() < 0 || index.row() >= doc->gameList.size() - 1)
+        return;
+
+    doc->getUndoStack()->push( new MoveDownInCollectionCommand(doc, ui->collectionView, index.row()) );
+}
+
+/**
+  Slot
+  Collection -> Delete
+*/
+void MainWindow::on_actionCollectionDelete_triggered()
+{
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    SgfDocument* doc = board->document();
+    if (doc == NULL)
+        return;
+
+    QModelIndex index = ui->collectionView->currentIndex();
+    if (index.row() < 0 || index.row() >= doc->gameList.size())
+        return;
+
+    if (doc->gameList.indexOf(board->getCurrentGame()) == index.row()){
+        QMessageBox::warning(this, QString(), tr("Remove sgf from collection failed because this sgf is editing."));
+        return;
+    }
+
+    doc->getUndoStack()->push( new DeleteGameFromCollectionCommand(doc, docManager[doc].collectionModel, index.row()) );
 }
 
 /**

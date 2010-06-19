@@ -28,6 +28,7 @@
 class QTreeWidget;
 class QTreeWidgetItem;
 class QStandardItemModel;
+class QStandardItem;
 class QHttpResponseHeader;
 class BoardWidget;
 class Document;
@@ -66,6 +67,8 @@ protected:
     BoardWidget* currentBoard();
     Document* currentDocument();
     void setKeyboardShortcut();
+
+    // new, open, save, close
     void fileNew(QTextCodec* codec, int xsize=19, int ysize=19, double komi=6.5, int handicap=0);
     bool fileOpen(QTextCodec* codec, const QString& fname, bool guessCodec);
     bool urlOpen(const QUrl& url);
@@ -73,20 +76,29 @@ protected:
     bool fileSaveAs(Document*);
     bool fileSaveAs(Document* doc, const QString& fname);
     bool closeTab(int index);
+    bool maybeSave(Document* doc);
+
+    // document
     QString newDocumentName();
     SgfDocument* createDocument(QTextCodec* codec, const QString& fname, bool guessCodec);
     void addDocument(SgfDocument* doc, BoardWidget* board=NULL);
     bool closeDocument(Document* doc, bool save=true, bool closeTab=true);
-    bool maybeSave(Document* doc);
+
+    // branch widget
     void createBranchWidget(Document* doc);
     void createBranchWidget(BoardWidget* board, Go::NodePtr node);
     void createBranchWidget(BoardWidget* board, QTreeWidgetItem* root, QTreeWidgetItem* parent1, QTreeWidgetItem* parent2, Go::NodePtr parentNode, Go::NodePtr node);
     QTreeWidgetItem* createBranchItem(BoardWidget* board, Go::NodePtr node);
     void removeBranchItem(QTreeWidgetItem* parent, NodeTreeMap& map, Go::NodePtr node);
+
+    // collection view
+    void addCollectionModel(const Go::NodeList& gameList, QStandardItemModel* model);
+    void createCollectionModelRow(const Go::NodePtr& game, QList<QStandardItem*>& items);
+
     void updateCaption();
+
     bool getOpenFileName(QString& fname, QTextCodec*& codec);
     bool getSaveFileName(QString& fname, QTextCodec*& codec);
-    void addCollectionModel(const Go::NodeList& gameList, QStandardItemModel* model);
 
 private:
     Ui::MainWindow *ui;
@@ -123,6 +135,7 @@ private slots:
     void on_actionAboutQt_triggered();
 
     // Document
+    void on_sgfdocument_modified(bool dirty);
     void on_sgfdocument_nodeAdded(Go::NodePtr node);
     void on_sgfdocument_nodeDeleted(Go::NodePtr node, bool removeChildren);
 
@@ -139,6 +152,9 @@ private slots:
 
     // Collection View
     void on_collectionView_doubleClicked(QModelIndex index);
+    void on_actionCollectionMoveDown_triggered();
+    void on_actionCollectionMoveUp_triggered();
+    void on_actionCollectionDelete_triggered();
 
     // Open URL
     void on_openUrl_ReadReady(const QHttpResponseHeader&);

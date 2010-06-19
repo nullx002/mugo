@@ -102,22 +102,6 @@ bool SgfDocument::save(const QString& fname){
 }
 
 /**
-  command
-  add node
-*/
-void SgfDocument::addNodeCommand(Go::NodePtr parentNode, Go::NodePtr node, int index){
-    undoStack->push( new AddNodeCommand(this, parentNode, node, index) );
-}
-
-/**
-  command
-  add node
-*/
-void SgfDocument::deleteNodeCommand(Go::NodePtr node, bool removeChildren){
-    undoStack->push( new DeleteNodeCommand(this, node, removeChildren) );
-}
-
-/**
   add node
 */
 void SgfDocument::addNode(Go::NodePtr parentNode, Go::NodePtr node, int index){
@@ -151,4 +135,43 @@ void SgfDocument::deleteNode(Go::NodePtr node, bool removeChildren){
 
     setDirty();
     emit nodeDeleted(node, removeChildren);
+}
+
+/**
+  move up game in gamelist
+*/
+bool SgfDocument::moveUp(Go::NodePtr& game){
+    int index = gameList.indexOf(game);
+    if (index <= 0)
+        return false;
+
+    gameList.swap(index-1, index);
+    setDirty();
+    return true;
+}
+
+/**
+  move down game in gamelist
+*/
+bool SgfDocument::moveDown(Go::NodePtr& game){
+    int index = gameList.indexOf(game);
+    if (index < 0 || index >= gameList.size()-1)
+        return false;
+
+    gameList.swap(index, index+1);
+    setDirty();
+    return true;
+}
+
+/**
+  delete game in gamelist
+*/
+bool SgfDocument::deleteGame(Go::NodePtr& game){
+    Go::NodeList::iterator iter = qFind(gameList.begin(), gameList.end(), game);
+    if (iter == gameList.end())
+        return false;
+
+    gameList.erase(iter);
+    setDirty();
+    return true;
 }

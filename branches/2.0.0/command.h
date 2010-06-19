@@ -21,9 +21,12 @@
 
 #include <QUndoCommand>
 #include <QString>
+#include <QStandardItem>
 #include "godata.h"
 
 
+class QTreeView;
+class QStandardItemModel;
 class SgfDocument;
 
 
@@ -62,6 +65,65 @@ private:
     Go::NodePtr node;
     bool removeChildren;
     int pos;
+};
+
+/**
+  move up sgf in collection command
+*/
+class MoveUpInCollectionCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(MoveUpInCollectionCommand)
+
+public:
+    MoveUpInCollectionCommand(SgfDocument* doc, QTreeView* view, int row, QUndoCommand *parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+private:
+    SgfDocument* document;
+    QTreeView* view;
+    int row;
+    Go::NodePtr game;
+    bool moved;
+};
+
+/**
+  move down sgf in collection command
+*/
+class MoveDownInCollectionCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(MoveDownInCollectionCommand)
+
+public:
+    MoveDownInCollectionCommand(SgfDocument* doc, QTreeView* view, int row, QUndoCommand *parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+private:
+    SgfDocument* document;
+    QTreeView* view;
+    int row;
+    Go::NodePtr game;
+    bool moved;
+};
+
+/**
+  delete sgf from collection command
+*/
+class DeleteGameFromCollectionCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(DeleteGameInCollectionCommand)
+
+public:
+    DeleteGameFromCollectionCommand(SgfDocument* doc, QStandardItemModel* model, int row, QUndoCommand *parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+private:
+    SgfDocument* document;
+    QStandardItemModel* model;
+    int row;
+    Go::NodePtr game;
+    bool removed;
+    QList<QStandardItem*> items;
+    Go::NodeList::iterator iterator;
 };
 
 

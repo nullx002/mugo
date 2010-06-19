@@ -37,13 +37,12 @@ public:
     // save
     bool save(const QString& fname);
 
-    // command
-    void addNodeCommand(Go::NodePtr parentNode, Go::NodePtr node, int index=-1);
-    void deleteNodeCommand(Go::NodePtr node, bool removeChildren);
-
     // operate without command
     void addNode(Go::NodePtr parentNode, Go::NodePtr node, int index);
     void deleteNode(Go::NodePtr node, bool removeChildren);
+    bool moveUp(Go::NodePtr& game);
+    bool moveDown(Go::NodePtr& game);
+    bool deleteGame(Go::NodePtr& game);
 
     Go::NodeList gameList;
 

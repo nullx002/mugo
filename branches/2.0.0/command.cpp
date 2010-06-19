@@ -16,6 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include <QDebug>
+#include <QTreeView>
+#include <QStandardItemModel>
 #include "command.h"
 #include "sgfdocument.h"
 
@@ -84,4 +86,143 @@ void DeleteNodeCommand::undo(){
     document->addNode(parentNode, node, pos);
 
 
+}
+
+/**
+  Constructor
+*/
+MoveUpInCollectionCommand::MoveUpInCollectionCommand(SgfDocument* doc, QTreeView* view_, int row_, QUndoCommand *parent)
+    : QUndoCommand(parent)
+    , document(doc)
+    , view(view_)
+    , row(row_)
+    , moved(false)
+{
+    game = doc->gameList[row_];
+}
+
+/**
+  redo move up sgf in collection command
+*/
+void MoveUpInCollectionCommand::redo(){
+    setText( tr("Move up sgf in collection") );
+
+    QStandardItemModel* model = qobject_cast<QStandardItemModel*>(view->model());
+    if (model == NULL)
+        return;
+
+    QList<QStandardItem*> items = model->takeRow(row);
+    model->insertRow(row-1, items);
+    view->setCurrentIndex( model->index(row-1, 0) );
+
+    moved = document->moveUp(game);
+}
+
+/**
+  undo move up sgf in collection command
+*/
+void MoveUpInCollectionCommand::undo(){
+    if (moved == false)
+        return;
+
+    QStandardItemModel* model = qobject_cast<QStandardItemModel*>(view->model());
+    if (model == NULL)
+        return;
+
+    QList<QStandardItem*> items = model->takeRow(row-1);
+    model->insertRow(row, items);
+    view->setCurrentIndex( model->index(row, 0) );
+
+    document->moveDown(game);
+}
+
+/**
+  Constructor
+*/
+MoveDownInCollectionCommand::MoveDownInCollectionCommand(SgfDocument* doc, QTreeView* view_, int row_, QUndoCommand *parent)
+    : QUndoCommand(parent)
+    , document(doc)
+    , view(view_)
+    , row(row_)
+    , moved(false)
+{
+    game = doc->gameList[row_];
+}
+
+/**
+  redo move down sgf in collection command
+*/
+void MoveDownInCollectionCommand::redo(){
+    setText( tr("Move down sgf in collection") );
+
+    QStandardItemModel* model = qobject_cast<QStandardItemModel*>(view->model());
+    if (model == NULL)
+        return;
+
+    QList<QStandardItem*> items = model->takeRow(row);
+    model->insertRow(row+1, items);
+    view->setCurrentIndex( model->index(row+1, 0) );
+
+    moved = document->moveDown(game);
+}
+
+/**
+  undo move down sgf in collection command
+*/
+void MoveDownInCollectionCommand::undo(){
+    if (moved == false)
+        return;
+
+    QStandardItemModel* model = qobject_cast<QStandardItemModel*>(view->model());
+    if (model == NULL)
+        return;
+
+    QList<QStandardItem*> items = model->takeRow(row+1);
+    model->insertRow(row, items);
+    view->setCurrentIndex( model->index(row, 0) );
+
+    document->moveUp(game);
+}
+
+/**
+  Constructor
+*/
+DeleteGameFromCollectionCommand::DeleteGameFromCollectionCommand(SgfDocument* doc, QStandardItemModel* model_, int row_, QUndoCommand *parent)
+    : QUndoCommand(parent)
+    , document(doc)
+    , model(model_)
+    , row(row_)
+    , removed(false)
+{
+    game = doc->gameList[row_];
+}
+
+/**
+  redo delete game from collection command
+*/
+void DeleteGameFromCollectionCommand::redo(){
+    setText( tr("Delete sgf from collection") );
+
+    Go::NodeList::iterator iter = qFind(document->gameList.begin(), document->gameList.end(), game);
+    if (iter == document->gameList.end())
+        return;
+
+    iterator = document->gameList.erase(iter);
+    items = model->takeRow(row);
+
+    document->setDirty();
+    removed = true;
+}
+
+/**
+  undo delete game from collection command
+*/
+void DeleteGameFromCollectionCommand::undo(){
+    if (removed == false)
+        return;
+
+    document->gameList.insert(iterator, game);
+    model->insertRow(row, items);
+
+    document->setDirty();
 }

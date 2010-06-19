@@ -54,7 +54,7 @@ public:
     void setCodec(QTextCodec* codec){ this->codec = codec; }
     void setDocName(const QString& name){ docName = name; }
     void setFileName(const QString& fname){ fileName = fname; }
-    void setDirty(bool dirty=true){ this->dirty = dirty; }
+    void setDirty(bool dirty=true){ this->dirty = dirty; emit modified(dirty); }
 
 protected:
     QUndoStack* undoStack;
@@ -62,6 +62,9 @@ protected:
     QString     docName;
     QString     fileName;
     bool        dirty;
+
+signals:
+    void modified(bool dirty);
 };
 
 #endif // DOCUMENT_H

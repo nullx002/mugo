@@ -23,6 +23,7 @@
 #include <QGraphicsPixmapItem>
 #include "boardwidget.h"
 #include "sgfdocument.h"
+#include "command.h"
 
 /**
   Constructor
@@ -163,7 +164,7 @@ void BoardWidget::onLButtonDown(QMouseEvent* e){
     else
         return;
 
-    document()->addNodeCommand(currentNode, node);
+    document()->getUndoStack()->push( new AddNodeCommand(document(), currentNode, node, -1) );
     setCurrentNode(node);
 }
 
