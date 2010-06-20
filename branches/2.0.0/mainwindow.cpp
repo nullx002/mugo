@@ -232,6 +232,18 @@ void MainWindow::setKeyboardShortcut(){
 }
 
 /**
+  set statusbar widget
+*/
+void MainWindow::setStatusBarWidget(){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    moveNumberLabel->setText( tr("Last Move: %1").arg(board->getMoveNumber()) );
+    capturedLabel->setText( tr("Dead: White %1 Black %2").arg(board->getCapturedWhite()).arg(board->getCapturedBlack()) );
+}
+
+/**
   file New
 */
 void MainWindow::fileNew(QTextCodec* codec, int xsize, int ysize, double komi, int handicap)
@@ -668,9 +680,9 @@ void MainWindow::updateCaption(){
         title = doc->getDocName();
 
     if (info->gameName.isEmpty() == false)
-        title += " " + info->gameName;
+        title += " - " + info->gameName;
     else if (info->event.isEmpty() == false)
-        title += " " + info->event;
+        title += " - " + info->event;
 
     if (doc->isDirty())
         title += " *";
@@ -1216,10 +1228,10 @@ void MainWindow::on_boardWidget_currentNodeChanged(Go::NodePtr node){
     if (item)
         docManager[doc].branchWidget->setCurrentItem(item);
 
-    ui->commentWidget->setPlainText(node->comment);
-
-    moveNumberLabel->setText( tr("Last Move: %1").arg(board->getMoveNumber()) );
-    capturedLabel->setText( tr("Dead: White %1 Black %2").arg(board->getCapturedWhite()).arg(board->getCapturedBlack()) );
+    if (board == currentBoard()){
+        ui->commentWidget->setPlainText(node->comment);
+        setStatusBarWidget();
+    }
 }
 
 /**
@@ -1255,6 +1267,13 @@ void MainWindow::on_boardTabWidget_currentChanged(QWidget* widget)
     ui->collectionView->setModel(view.collectionModel);
     int n = boardWidget->document()->gameList.indexOf(boardWidget->getCurrentGame());
     ui->collectionView->setCurrentIndex( ui->collectionView->model()->index(n, 0) );
+
+    // comment
+    ui->commentWidget->setPlainText(boardWidget->getCurrentNode()->comment);
+
+    // status bar
+    setStatusBarWidget();
+
 
     undoGroup.setActiveStack(boardWidget->document()->getUndoStack());
 

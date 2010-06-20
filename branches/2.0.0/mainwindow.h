@@ -68,6 +68,7 @@ protected:
     BoardWidget* currentBoard();
     Document* currentDocument();
     void setKeyboardShortcut();
+    void setStatusBarWidget();
 
     // new, open, save, close
     void fileNew(QTextCodec* codec, int xsize=19, int ysize=19, double komi=6.5, int handicap=0);
