@@ -36,6 +36,8 @@ BoardWidget::BoardWidget(SgfDocument* doc, QWidget *parent) :
 //    connect(document_, SIGNAL(nodeAdded(Go::NodePtr)), SLOT(on_sgfdocument_nodeAdded(Go::NodePtr)));
     connect(document_, SIGNAL(nodeDeleted(Go::NodePtr, bool)), SLOT(on_sgfdocument_nodeDeleted(Go::NodePtr, bool)));
 
+    setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
+
     setScene(scene);
 
     // create board
@@ -249,6 +251,7 @@ void BoardWidget::setItemPositions(){
     }
 
     // set position of stones.
+    qreal s = size * 0.95;
     Go::NodeList::iterator iter = currentNodeList.begin();
     foreach (QGraphicsItem* item, stones){
         if (item){
@@ -256,7 +259,7 @@ void BoardWidget::setItemPositions(){
             int y = (*iter)->position.y;
             QGraphicsEllipseItem* ellipse = dynamic_cast<QGraphicsEllipseItem*>(item);
             if (ellipse)
-                ellipse->setRect(vLines[x]->line().x1()-size/2, hLines[y]->line().y1()-size/2, size, size);
+                ellipse->setRect(vLines[x]->line().x1()-s/2, hLines[y]->line().y1()-s/2, s, s);
         }
         ++iter;
     }

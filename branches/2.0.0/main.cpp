@@ -23,7 +23,7 @@
   Constructor
 */
 Application::Application(int& argc, char** argv) : QApplication(argc, argv){
-    setApplicationName(APP_NAME);
+    setApplicationName(SETTING_NAME);
     setApplicationVersion(APP_VERSION);
     setOrganizationDomain(AUTHOR);
 }

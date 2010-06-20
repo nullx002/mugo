@@ -197,6 +197,8 @@ bool Sgf::saveStream(QTextStream& stream){
         stream << "\n";
     }
 
+    stream.flush();
+
     return true;
 }
 
@@ -270,23 +272,28 @@ bool Sgf::set(NodePtr& sgfNode, Go::NodePtr goNode){
     return true;
 }
 
-void Sgf::writeNode(QTextStream& stream, QString& s, NodePtr node){
+void Sgf::writeNode(QTextStream& stream, QString& line, NodePtr node){
     if (node->childNodes.empty() == false){
-        s.push_back('(');
+        line.push_back('(');
         stream << '(';
         foreach(NodePtr childNode, node->childNodes)
-            writeNode(stream, s, childNode);
-        s.push_back(')');
+            writeNode(stream, line, childNode);
+        line.push_back(')');
         stream << ')';
     }
     else{
-        QString s2 = node->toString();
-        if (s.isEmpty() == false && s.size() + s2.size() > lineWidth){
-            stream << '\n';
-            s.clear();
+        QStringList strList = node->toStringList();
+        if (strList.empty() == false)
+            strList[0].insert(0, ";");
+
+        foreach(const QString& s, strList){
+            if (line.isEmpty() == false && line.size() + s.size() > lineWidth){
+                stream << '\n';
+                line.clear();
+            }
+            stream << s;
+            line.append(s);
         }
-        stream << s2;
-        s.append(s2);
     }
 }
 
@@ -667,22 +674,23 @@ bool Sgf::Node::set(const Go::StoneList& stoneList){
     return true;
 }
 
-QString Sgf::Node::toString() const{
-    QString str(";");
-
+QStringList Sgf::Node::toStringList() const{
+    QStringList strList;
     PropertyType::const_iterator iter = properties.begin();
     while (iter != properties.end()){
-        str += iter.key();
+        QString str = iter.key();
         foreach(const QString& v, iter.value()){
             str += "[";
             str += v;
             str += "]";
+            strList.push_back(str);
+            str.clear();
         }
 
         ++iter;
     }
 
-    return str;
+    return strList;
 }
 
 

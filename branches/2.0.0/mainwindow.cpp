@@ -28,6 +28,7 @@
 #include <QHttp>
 #include <QLabel>
 #include <QComboBox>
+#include <QClipboard>
 #include "mugoapp.h"
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -46,11 +47,12 @@ Q_DECLARE_METATYPE(Go::NodePtr);
 MainWindow::MainWindow(const QString& fname, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    docID(0)
+    docID(0),
+    sgfLineWidth(50)
 {
     ui->setupUi(this);
 
-    QSettings settings(AUTHOR, SETTING_NAME);
+    QSettings settings;
 
     // default codec
     defaultCodec = QTextCodec::codecForName( settings.value("defaultCodec", "UTF-8").toByteArray() );
@@ -68,6 +70,8 @@ MainWindow::MainWindow(const QString& fname, QWidget *parent) :
     // Edit -> undo/redo
     QAction* undoAction = undoGroup.createUndoAction(this);
     QAction* redoAction = undoGroup.createRedoAction(this);
+    undoAction->setShortcut(QKeySequence::Undo);
+    redoAction->setShortcut(QKeySequence::Redo);
     undoAction->setIcon( QIcon(":/res/undo.png") );
     redoAction->setIcon( QIcon(":/res/redo.png") );
     ui->menuEdit->insertAction(ui->menuEdit->actions().at(0), redoAction);
@@ -163,7 +167,7 @@ MainWindow::MainWindow(const QString& fname, QWidget *parent) :
 */
 MainWindow::~MainWindow()
 {
-    QSettings settings(AUTHOR, SETTING_NAME);
+    QSettings settings;
     settings.setValue("mainwindowGeometry", saveGeometry());
     settings.setValue("docksState", saveState());
     settings.setValue("collectionState", ui->collectionView->header()->saveState());
@@ -227,8 +231,11 @@ Document* MainWindow::currentDocument(){
 void MainWindow::setKeyboardShortcut(){
     ui->actionNew->setShortcut(QKeySequence::New);
     ui->actionOpen->setShortcut(QKeySequence::Open);
+    ui->actionCloseTab->setShortcut(QKeySequence::Close);
     ui->actionSave->setShortcut(QKeySequence::Save);
     ui->actionExit->setShortcut(QKeySequence::Quit);
+    ui->actionCopySgfToClipboard->setShortcut(QKeySequence::Copy);
+    ui->actionPasteSgfToNewTab->setShortcut(QKeySequence::Paste);
 }
 
 /**
@@ -326,9 +333,17 @@ bool MainWindow::fileSaveAs(Document* doc){
     if (getSaveFileName(fname, codec) == false)
         return false;
 
+    SgfDocument* sgfDoc = qobject_cast<SgfDocument*>(doc);
+
+    QFileInfo fi(fname);
+    if (fi.suffix().isEmpty()){
+        if (sgfDoc)
+            fi.setFile( fname + ".sgf" );
+    }
+
     doc->setCodec(codec);
 
-    return fileSaveAs(doc, fname);
+    return fileSaveAs(doc, fi.filePath());
 }
 
 /**
@@ -338,11 +353,11 @@ bool MainWindow::fileSaveAs(Document* doc, const QString& fname){
     if (fname.isEmpty())
         return false;
 
-    QFileInfo fi(fname);
-    if (fi.suffix().isEmpty())
-        fi.setFile( fname + ".sgf" );
+    SgfDocument* sgfDoc = qobject_cast<SgfDocument*>(doc);
+    if (sgfDoc)
+        sgfDoc->lineWidth = sgfLineWidth;
 
-    if (doc->save(fi.absoluteFilePath()) == false){
+    if (doc->save(fname) == false){
         QMessageBox::critical(this, QString(), tr("File save error: %1").arg(fname));
         return false;
     }
@@ -618,7 +633,7 @@ QString MainWindow::getBranchItemText(BoardWidget* board, Go::NodePtr node){
     if (str.isEmpty() == false && str[0].isSpace())
         str.remove(0, 1);
 
-    if (node->isStone() == false && node->gameInformation){
+    if (node->gameInformation){
         if (str.isEmpty())
             str = tr("Game Information");
         else
@@ -1017,6 +1032,120 @@ void MainWindow::on_actionExportAsciiToClipboard_triggered()
 void MainWindow::on_actionExit_triggered()
 {
     close();
+}
+
+/**
+  Slot
+  copy sgf to clipboard
+*/
+void MainWindow::on_actionCopySgfToClipboard_triggered()
+{
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    QString str;
+    QTextStream stream(&str, QIODevice::WriteOnly);
+
+    Go::NodeList gameList;
+    gameList.push_back(board->getCurrentGame());
+
+    Go::Sgf sgf;
+    sgf.set(gameList);
+    sgf.saveStream(stream);
+    stream.flush();
+
+    QClipboard *clipboard = QApplication::clipboard();
+    clipboard->setText(str);
+}
+
+/**
+  Slot
+  copy current branch to clipboard
+*/
+void MainWindow::on_actionCopyCurrentBranchToClipboard_triggered()
+{
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    QString str("(");
+    QString line;
+
+    const Go::NodeList& nodeList = board->getCurrentNodeList();
+    foreach(const Go::NodePtr& node, nodeList){
+        Go::Sgf::Node sgfNode;
+        sgfNode.set(node);
+
+        QStringList strList = sgfNode.toStringList();
+        if (strList.empty() == false)
+            strList[0].insert(0, ";");
+
+        foreach(const QString& s, strList){
+            if (line.isEmpty() == false && line.size() + s.size() > sgfLineWidth){
+                str += line + "\n";
+                line.clear();
+            }
+            line += s;
+        }
+    }
+
+    str.append(line);
+    str.push_back(')');
+
+    QClipboard *clipboard = QApplication::clipboard();
+    clipboard->setText(str);
+}
+
+/**
+  Slot
+  paste sgf from clipboard to new tab
+*/
+void MainWindow::on_actionPasteSgfToNewTab_triggered()
+{
+    // get clipboard text
+    QClipboard *clipboard = QApplication::clipboard();
+    QString str = clipboard->text();
+
+    // read sgf
+    Go::Sgf sgf;
+    QString::iterator first = str.begin();
+    if (sgf.readStream(first, str.end()) == false)
+        return;
+
+    // create new document
+    SgfDocument* doc = new SgfDocument(QTextCodec::codecForName("UTF-8"));
+    if (doc->read(newDocumentName(), str.toUtf8(), false) == false)
+        return;
+    addDocument(doc);
+    doc->setDirty();
+}
+
+/**
+  Slot
+  paste sgf from clipboard into collection
+*/
+void MainWindow::on_actionPasteSgfIntoCollection_triggered()
+{
+    SgfDocument* doc = qobject_cast<SgfDocument*>(currentDocument());
+    if (doc == NULL)
+        return;
+
+    QClipboard *clipboard = QApplication::clipboard();
+    QString str = clipboard->text();
+
+    Go::Sgf sgf;
+    QString::iterator first = str.begin();
+    if (sgf.readStream(first, str.end()) == false)
+        return;
+
+    Go::NodeList gameList;
+    sgf.get(gameList);
+
+    doc->gameList.append(gameList);
+    addCollectionModel(gameList, docManager[doc].collectionModel);
+
+    doc->setDirty();
 }
 
 /**

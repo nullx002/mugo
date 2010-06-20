@@ -23,6 +23,7 @@
 
 SgfDocument::SgfDocument(QTextCodec* codec, QObject* parent)
     : Document(codec, parent)
+    , lineWidth(50)
 {
     Go::NodePtr node = Go::createInformationNode(Go::NodePtr());
     gameList.push_back(node);
@@ -88,6 +89,7 @@ bool SgfDocument::set(const Go::FileBase& fbase){
 */
 bool SgfDocument::save(const QString& fname){
     Go::Sgf sgf;
+    sgf.lineWidth = lineWidth;
     if (sgf.set(gameList) == false)
         return false;
     if (sgf.save(fname, codec) == false)

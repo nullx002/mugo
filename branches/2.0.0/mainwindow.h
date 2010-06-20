@@ -114,6 +114,7 @@ private:
     QByteArray downloadBuff;
     QLabel* moveNumberLabel;
     QLabel* capturedLabel;
+    int sgfLineWidth;
 
 private slots:
     // File Menu
@@ -132,6 +133,10 @@ private slots:
     void on_actionExit_triggered();
 
     // Edit Menu
+    void on_actionCopySgfToClipboard_triggered();
+    void on_actionCopyCurrentBranchToClipboard_triggered();
+    void on_actionPasteSgfToNewTab_triggered();
+    void on_actionPasteSgfIntoCollection_triggered();
     void on_actionDeleteAfterCurrent_triggered();
     void on_actionDeleteCurrentOnly_triggered();
 

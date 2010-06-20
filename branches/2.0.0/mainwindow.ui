@@ -175,6 +175,11 @@
      <string>&amp;Edit</string>
     </property>
     <addaction name="separator"/>
+    <addaction name="actionCopySgfToClipboard"/>
+    <addaction name="actionCopyCurrentBranchToClipboard"/>
+    <addaction name="actionPasteSgfToNewTab"/>
+    <addaction name="actionPasteSgfIntoCollection"/>
+    <addaction name="separator"/>
     <addaction name="actionDeleteAfterCurrent"/>
     <addaction name="actionDeleteCurrentOnly"/>
    </widget>
@@ -340,6 +345,9 @@
       <widget class="QTreeView" name="collectionView">
        <property name="editTriggers">
         <set>QAbstractItemView::NoEditTriggers</set>
+       </property>
+       <property name="alternatingRowColors">
+        <bool>true</bool>
        </property>
        <property name="rootIsDecorated">
         <bool>false</bool>
@@ -700,22 +708,22 @@
   </action>
   <action name="actionCopySgfToClipboard">
    <property name="text">
-    <string>Copy Sgf to Clipboard</string>
+    <string>Copy SGF to clipboard</string>
    </property>
   </action>
   <action name="actionCopyCurrentBranchToClipboard">
    <property name="text">
-    <string>Copy Current Branch to Clipboard</string>
+    <string>Copy current branch to clipboard</string>
    </property>
   </action>
   <action name="actionPasteSgfToNewTab">
    <property name="text">
-    <string>PasteSgfToNewTab</string>
+    <string>Paste SGF to new tab</string>
    </property>
   </action>
-  <action name="actionPasteSgfInCollection">
+  <action name="actionPasteSgfIntoCollection">
    <property name="text">
-    <string>PasteSgfInCollection</string>
+    <string>Paste SGF into Collection</string>
    </property>
   </action>
   <action name="actionDeleteAfterCurrent">

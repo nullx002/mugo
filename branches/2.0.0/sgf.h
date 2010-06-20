@@ -38,7 +38,7 @@ public:
             bool get(Go::NodePtr& node) const;
             bool set(const Go::NodePtr& node);
 
-            QString toString() const;
+            QStringList toStringList() const;
 
             PropertyType properties;
             NodeList childNodes;

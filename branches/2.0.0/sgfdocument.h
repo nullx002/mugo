@@ -47,6 +47,7 @@ public:
     void modifyNode(Go::NodePtr& node){ setDirty(); emit nodeModified(node); }
 
     Go::NodeList gameList;
+    int lineWidth;
 
 signals:
     void nodeAdded(Go::NodePtr node);
