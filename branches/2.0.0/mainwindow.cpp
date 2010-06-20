@@ -44,11 +44,13 @@ Q_DECLARE_METATYPE(Go::NodePtr);
 /**
   Constructor
 */
-MainWindow::MainWindow(const QString& fname, QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::MainWindow),
-    docID(0),
-    sgfLineWidth(50)
+MainWindow::MainWindow(const QString& fname, QWidget *parent)
+    : QMainWindow(parent)
+    , ui(new Ui::MainWindow)
+    , tabChangeGroup(new QActionGroup(this))
+    , docID(0)
+    , sgfLineWidth(50)
+
 {
     ui->setupUi(this);
 
@@ -61,7 +63,8 @@ MainWindow::MainWindow(const QString& fname, QWidget *parent) :
     setKeyboardShortcut();
 
     // File -> Reload
-    ui->fileToolBar->addAction( ui->menuReload->menuAction() );
+    ui->fileToolBar->insertAction( ui->actionExportBoardAsImage, ui->menuReload->menuAction() );
+    ui->fileToolBar->insertSeparator( ui->actionExportBoardAsImage );
 
     // File -> Collection
     ui->collectionToolBar->insertAction(ui->collectionToolBar->actions().at(0), ui->collectionDockWidget->toggleViewAction());
@@ -82,13 +85,15 @@ MainWindow::MainWindow(const QString& fname, QWidget *parent) :
     // window -> toolbars menu
     ui->menuToolbars->addAction( ui->fileToolBar->toggleViewAction() );
     ui->menuToolbars->addAction( ui->editToolBar->toggleViewAction() );
+    ui->menuToolbars->addAction( ui->navigationToolBar->toggleViewAction() );
     ui->menuToolbars->addAction( ui->collectionToolBar->toggleViewAction() );
 
     // window (dock view)
-    ui->menuWindow->addAction( ui->commentDockWidget->toggleViewAction() );
-    ui->menuWindow->addAction( ui->branchDockWidget->toggleViewAction() );
-    ui->menuWindow->addAction( ui->collectionDockWidget->toggleViewAction() );
-    ui->menuWindow->addAction( ui->undoDockWidget->toggleViewAction() );
+    ui->menuWindow->insertAction( ui->actionPreviousTab, ui->commentDockWidget->toggleViewAction() );
+    ui->menuWindow->insertAction( ui->actionPreviousTab, ui->branchDockWidget->toggleViewAction() );
+    ui->menuWindow->insertAction( ui->actionPreviousTab, ui->collectionDockWidget->toggleViewAction() );
+    ui->menuWindow->insertAction( ui->actionPreviousTab, ui->undoDockWidget->toggleViewAction() );
+    ui->menuWindow->insertSeparator( ui->actionPreviousTab );
 
     // default view
     ui->collectionDockWidget->hide();
@@ -236,6 +241,8 @@ void MainWindow::setKeyboardShortcut(){
     ui->actionExit->setShortcut(QKeySequence::Quit);
     ui->actionCopySgfToClipboard->setShortcut(QKeySequence::Copy);
     ui->actionPasteSgfToNewTab->setShortcut(QKeySequence::Paste);
+    ui->actionPreviousTab->setShortcut(QKeySequence::PreviousChild);
+    ui->actionNextTab->setShortcut(QKeySequence::NextChild);
 }
 
 /**
@@ -361,6 +368,9 @@ bool MainWindow::fileSaveAs(Document* doc, const QString& fname){
         QMessageBox::critical(this, QString(), tr("File save error: %1").arg(fname));
         return false;
     }
+
+    docManager[doc].tabChangeAction->setText( doc->getDocName() );
+
     return true;
 }
 
@@ -457,6 +467,14 @@ void MainWindow::addDocument(SgfDocument* doc, BoardWidget* board)
     connect(doc, SIGNAL(nodeAdded(Go::NodePtr)), SLOT(on_sgfdocument_nodeAdded(Go::NodePtr)));
     connect(doc, SIGNAL(nodeDeleted(Go::NodePtr, bool)), SLOT(on_sgfdocument_nodeDeleted(Go::NodePtr, bool)));
     connect(doc, SIGNAL(nodeModified(Go::NodePtr)), SLOT(on_sgfdocument_nodeModified(Go::NodePtr)));
+
+    // create tab active action
+    view.tabChangeAction = new QAction(board);
+    view.tabChangeAction->setCheckable(true);
+    view.tabChangeAction->setText(doc->getDocName());
+    tabChangeGroup->addAction(view.tabChangeAction);
+    ui->menuWindow->addAction(view.tabChangeAction);
+    connect(view.tabChangeAction, SIGNAL(triggered()), SLOT(on_tabChangeRequest()));
 
     // create new tab
     int n = ui->boardTabWidget->addTab(board, doc->getDocName());
@@ -1252,6 +1270,47 @@ void MainWindow::on_actionNavigationMoveNext_triggered()
     board->forward();
 }
 
+
+/**
+  Slot
+  Window -> previous tab
+*/
+void MainWindow::on_actionPreviousTab_triggered()
+{
+    if (ui->boardTabWidget->count() == 0)
+        return;
+
+    int index = ui->boardTabWidget->currentIndex();
+    if (--index < 0)
+        index = ui->boardTabWidget->count() - 1;
+    ui->boardTabWidget->setCurrentIndex(index);
+}
+
+/**
+  Slot
+  Window -> next tab
+*/
+void MainWindow::on_actionNextTab_triggered()
+{
+    if (ui->boardTabWidget->count() == 0)
+        return;
+
+    int index = ui->boardTabWidget->currentIndex();
+    if (++index == ui->boardTabWidget->count())
+        index = 0;
+    ui->boardTabWidget->setCurrentIndex(index);
+}
+
+/**
+  Slot
+  Window -> tab name
+*/
+void MainWindow::on_tabChangeRequest(){
+    QWidget* widget = qobject_cast<QWidget*>(sender()->parent());
+    ui->boardTabWidget->setCurrentWidget(widget);
+}
+
+
 /**
   Slot
   Help -> About...
@@ -1388,6 +1447,9 @@ void MainWindow::on_boardTabWidget_currentChanged(QWidget* widget)
     if (boardWidget  == NULL)
         return;
     ViewData& view = docManager[boardWidget->document()];
+
+    // window menu
+    view.tabChangeAction->setChecked(true);
 
     // branch tree
     ui->branchStackedWidget->setCurrentWidget( view.branchWidget );

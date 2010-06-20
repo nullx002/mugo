@@ -26,5 +26,7 @@
         <file>res/movelast.png</file>
         <file>res/fastforward.png</file>
         <file>res/movenext.png</file>
+        <file>res/saveimage.png</file>
+        <file>res/gameinfo.png</file>
     </qresource>
 </RCC>

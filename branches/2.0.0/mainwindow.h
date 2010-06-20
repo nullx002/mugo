@@ -20,6 +20,7 @@
 
 #include <QMainWindow>
 #include <QUndoGroup>
+#include <QActionGroup>
 #include <QUrl>
 #include <QModelIndex>
 #include "godata.h"
@@ -56,6 +57,7 @@ public:
             BranchType   branchType;
             QStandardItemModel* collectionModel;
             NodeTreeMap nodeToTreeItem;
+            QAction* tabChangeAction;
     };
     typedef QMap<Document*, ViewData> DocumentManager;
 
@@ -106,6 +108,7 @@ protected:
 private:
     Ui::MainWindow *ui;
     QUndoGroup undoGroup;
+    QActionGroup* tabChangeGroup;
     QMap<QAction*, QTextCodec*> encoding;
     QTextCodec* defaultCodec;
     DocumentManager docManager;
@@ -147,6 +150,11 @@ private slots:
     void on_actionNavigationMoveLast_triggered();
     void on_actionNavigationFastForward_triggered();
     void on_actionNavigationMoveNext_triggered();
+
+    // Window Menu
+    void on_actionPreviousTab_triggered();
+    void on_actionNextTab_triggered();
+    void on_tabChangeRequest();
 
     // Help Menu
     void on_actionAbuot_triggered();
