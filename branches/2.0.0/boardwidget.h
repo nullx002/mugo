@@ -56,11 +56,14 @@ public:
     Go::NodePtr getCurrentGame(){ return currentGame; }
     Go::NodePtr getCurrentNode(){ return currentNode; }
     Go::NodeList& getCurrentNodeList(){ return currentNodeList; }
+    int getMoveNumber() const{ return moveNumber; }
+    int getCapturedBlack() const{ return capturedBlack; }
+    int getCapturedWhite() const{ return capturedWhite; }
 
     // set
     void setDocument(SgfDocument* doc);
-    void setCurrentGame(Go::NodePtr node);
-    void setCurrentNode(Go::NodePtr node);
+    void setCurrentGame(Go::NodePtr node, bool forceChange=false);
+    void setCurrentNode(Go::NodePtr node, bool forceChange=false);
     void forward(int step=1);
     void back(int step=1);
 
@@ -104,6 +107,9 @@ private:
     Go::NodePtr currentNode;
     Go::NodeList currentNodeList;
     QVector< QVector<TerritoryInfo> > boardBuffer;
+    int moveNumber;
+    int capturedBlack;
+    int capturedWhite;
 };
 
 #endif // BOARDWIDGET_H

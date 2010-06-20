@@ -30,6 +30,7 @@ class QTreeWidgetItem;
 class QStandardItemModel;
 class QStandardItem;
 class QHttpResponseHeader;
+class QLabel;
 class BoardWidget;
 class Document;
 class SgfDocument;
@@ -109,6 +110,8 @@ private:
     uint docID;
     QUrl downloadURL;
     QByteArray downloadBuff;
+    QLabel* moveNumberLabel;
+    QLabel* capturedLabel;
 
 private slots:
     // File Menu

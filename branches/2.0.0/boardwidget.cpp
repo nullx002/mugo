@@ -124,14 +124,14 @@ void BoardWidget::onRButtonDown(QMouseEvent* /*e*/){
 */
 void BoardWidget::setDocument(SgfDocument* doc){
     document_ = doc;
-    setCurrentGame(doc->gameList[0]);
+    setCurrentGame(doc->gameList[0], true);
 };
 
 /**
   Set Current Game
 */
-void BoardWidget::setCurrentGame(Go::NodePtr game){
-    if (game == currentGame)
+void BoardWidget::setCurrentGame(Go::NodePtr game, bool forceChange){
+    if (forceChange == false && game == currentGame)
         return;
 
     currentGame = game;
@@ -176,14 +176,14 @@ void BoardWidget::setCurrentGame(Go::NodePtr game){
 
     emit currentGameChanged(currentGame);
 
-    setCurrentNode(game);
+    setCurrentNode(game, forceChange);
 }
 
 /**
   Set Current Node
 */
-void BoardWidget::setCurrentNode(Go::NodePtr node){
-    if (node == currentNode)
+void BoardWidget::setCurrentNode(Go::NodePtr node, bool forceChange){
+    if (forceChange == false && node == currentNode)
         return;
 
     currentNode = node;
@@ -317,6 +317,9 @@ void BoardWidget::createBuffer(bool erase){
     for (int i=0; i<boardBuffer.size(); ++i)
         boardBuffer[i].resize(gameInformation->xsize);
 
+    moveNumber = 0;
+    capturedBlack = 0;
+    capturedWhite = 0;
     Go::NodeList::iterator node = currentNodeList.begin();
     QList<QGraphicsItem*>::iterator stone = stones.begin();
     while(node != currentNodeList.end()){
@@ -339,6 +342,8 @@ void BoardWidget::createBuffer(bool erase){
         if (*node == currentNode)
             break;
         ++node;
+
+        ++moveNumber;
     };
 
     while (stone != stones.end()){
@@ -450,6 +455,11 @@ void BoardWidget::killStones(char* buf){
     for (int y=0; y<boardBuffer.size(); ++y){
         for (int x=0; x<boardBuffer[y].size(); ++x){
             if (buf[y*gameInformation->xsize+x]){
+                if (boardBuffer[y][x].color == Go::black)
+                    ++capturedBlack;
+                else if (boardBuffer[y][x].color == Go::white)
+                    ++capturedWhite;
+
                 boardBuffer[y][x].color = Go::empty;
                 boardBuffer[y][x].stone->hide();
                 boardBuffer[y][x].stone = NULL;

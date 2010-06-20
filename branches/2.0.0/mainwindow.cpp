@@ -134,6 +134,17 @@ MainWindow::MainWindow(const QString& fname, QWidget *parent) :
     encoding[ui->actionEncodingEucJP] = QTextCodec::codecForName("EUC-JP");
     encoding[ui->actionEncodingKorean] = QTextCodec::codecForName("EUC-KR");
 
+    // status bar
+    moveNumberLabel = new QLabel;
+    moveNumberLabel->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
+    moveNumberLabel->setToolTip(tr("Move Number"));
+    ui->statusBar->addPermanentWidget(moveNumberLabel, 0);
+
+    capturedLabel = new QLabel;
+    capturedLabel->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
+    capturedLabel->setToolTip(tr("Captured"));
+    ui->statusBar->addPermanentWidget(capturedLabel, 0);
+
     // window settings
     restoreGeometry( settings.value("mainwindowGeometry").toByteArray() );
     restoreState( settings.value("docksState").toByteArray() );
@@ -376,30 +387,35 @@ SgfDocument* MainWindow::createDocument(QTextCodec* codec, const QString& fname,
 */
 void MainWindow::addDocument(SgfDocument* doc, BoardWidget* board)
 {
-    // create widget
-    if (board == NULL){
-        board = new BoardWidget(doc, this);
-        connect(board, SIGNAL(currentNodeChanged(Go::NodePtr)), SLOT(on_boardWidget_currentNodeChanged(Go::NodePtr)));
-        connect(board, SIGNAL(currentGameChanged(Go::NodePtr)), SLOT(on_boardWidget_currentGameChanged(Go::NodePtr)));
-    }
+    // tab data
+    ViewData& view = docManager[doc];
 
+    // create branch widget
     QTreeWidget* branchWidget = new QTreeWidget;
-    QStandardItemModel* model = new QStandardItemModel;
-
-    // save tab data
-    ViewData view;
-    view.boardWidget  = board;
     view.branchWidget = branchWidget;
     view.branchType   = branchMode;
-    view.collectionModel = model;
-    docManager[doc] = view;
 
-    // set document after create view data.
-    if (board)
+    // create collection model
+    QStandardItemModel* model = new QStandardItemModel;
+    view.collectionModel = model;
+
+    if (board == NULL){
+        board = new BoardWidget(doc, this);
+        view.boardWidget  = board;
+
+        connect(board, SIGNAL(currentGameChanged(Go::NodePtr)), SLOT(on_boardWidget_currentGameChanged(Go::NodePtr)));
+        connect(board, SIGNAL(currentNodeChanged(Go::NodePtr)), SLOT(on_boardWidget_currentNodeChanged(Go::NodePtr)));
+
+        board->setCurrentGame(doc->gameList.front(), true);
+    }
+    else{
+        view.boardWidget  = board;
+
+        // set document after create view data.
         board->setDocument(doc);
+    }
 
     // initialize branch widget
-    createBranchWidget(doc);
     ui->branchStackedWidget->addWidget(branchWidget);
     connect(branchWidget,
             SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)),
@@ -1153,6 +1169,9 @@ void MainWindow::on_boardWidget_currentNodeChanged(Go::NodePtr node){
     QTreeWidgetItem* item = docManager[doc].nodeToTreeItem[node];
     if (item)
         docManager[doc].branchWidget->setCurrentItem(item);
+
+    moveNumberLabel->setText( tr("Last Move: %1").arg(board->getMoveNumber()) );
+    capturedLabel->setText( tr("Dead: White %1 Black %2").arg(board->getCapturedWhite()).arg(board->getCapturedBlack()) );
 }
 
 /**
