@@ -144,5 +144,26 @@ private:
     Go::NodeList::iterator iterator;
 };
 
+/**
+  set comment command
+*/
+class SetCommentCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(SetCommentCommand)
+
+public:
+    SetCommentCommand(SgfDocument* doc, Go::NodePtr node, const QString& comment, QUndoCommand *parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+    void setComment(const QString& comment);
+    Go::NodePtr getNode(){ return node; }
+
+private:
+    SgfDocument* document;
+    Go::NodePtr  node;
+    QString      comment;
+    QString      oldComment;
+};
+
 
 #endif // COMMAND_H

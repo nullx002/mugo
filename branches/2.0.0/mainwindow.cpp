@@ -429,6 +429,7 @@ void MainWindow::addDocument(SgfDocument* doc, BoardWidget* board)
     connect(doc, SIGNAL(modified(bool)), SLOT(on_sgfdocument_modified(bool)));
     connect(doc, SIGNAL(nodeAdded(Go::NodePtr)), SLOT(on_sgfdocument_nodeAdded(Go::NodePtr)));
     connect(doc, SIGNAL(nodeDeleted(Go::NodePtr, bool)), SLOT(on_sgfdocument_nodeDeleted(Go::NodePtr, bool)));
+    connect(doc, SIGNAL(nodeModified(Go::NodePtr)), SLOT(on_sgfdocument_nodeModified(Go::NodePtr)));
 
     // create new tab
     int n = ui->boardTabWidget->addTab(board, doc->getDocName());
@@ -561,15 +562,7 @@ QTreeWidgetItem* MainWindow::createBranchItem(BoardWidget* board, Go::NodePtr no
         return item;
 
     // get node type
-    QString str;
-    if (node->isStone() == false && node->gameInformation)
-        str = tr("Game Information");
-    else if (node->isStone() == false && !node->gameInformation)
-        str = tr("Other");
-    else if (node->isStone() && node->isPass())
-        str = tr("Pass");
-    else
-        str = board->getCoordinateString(node, false);
+    QString str = getBranchItemText(board, node);
 
     // create tree item
     item = new QTreeWidgetItem(QStringList(str));
@@ -590,6 +583,37 @@ QTreeWidgetItem* MainWindow::createBranchItem(BoardWidget* board, Go::NodePtr no
 
     // return created item
     return item;
+}
+
+/**
+  get branch tree item's text
+*/
+QString MainWindow::getBranchItemText(BoardWidget* board, Go::NodePtr node){
+    QString str;
+    if (node->isStone() == false && !node->gameInformation)
+        str = tr("Other");
+    else if (node->isStone() && node->isPass())
+        str = tr("Pass");
+    else if (node->isStone())
+        str = board->getCoordinateString(node, false);
+
+    if (node->name.isEmpty() == false)
+        str += " " + node->name;
+
+    if (node->comment.isEmpty() == false)
+        str += " " + tr("Comment");
+
+    if (str.isEmpty() == false && str[0].isSpace())
+        str.remove(0, 1);
+
+    if (node->isStone() == false && node->gameInformation){
+        if (str.isEmpty())
+            str = tr("Game Information");
+        else
+            str.insert(0, tr("Info") + " ");
+    }
+
+    return str;
 }
 
 /**
@@ -618,6 +642,17 @@ void MainWindow::createCollectionModelRow(const Go::NodePtr& game, QList<QStanda
   update caption
 */
 void MainWindow::updateCaption(){
+    for (int i=0; i<ui->boardTabWidget->count(); ++i){
+        BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->widget(i));
+        if (board == NULL)
+            continue;
+
+        if (board->document()->isDirty())
+            ui->boardTabWidget->setTabText(i, board->document()->getDocName() + " *");
+        else
+            ui->boardTabWidget->setTabText(i, board->document()->getDocName());
+    }
+
     BoardWidget* board = currentBoard();
     if (board == NULL)
         return;
@@ -642,12 +677,6 @@ void MainWindow::updateCaption(){
     title += " - " APP_NAME;
 
     setWindowTitle(title);
-
-    int index = ui->boardTabWidget->indexOf(board);
-    if (doc->isDirty())
-        ui->boardTabWidget->setTabText(index, doc->getDocName() + " *");
-    else
-        ui->boardTabWidget->setTabText(index, doc->getDocName());
 }
 
 /**
@@ -1107,7 +1136,7 @@ void MainWindow::on_actionAboutQt_triggered()
 */
 void MainWindow::on_sgfdocument_modified(bool){
     updateCaption();
-}
+ }
 
 /**
   Slot
@@ -1161,6 +1190,23 @@ void MainWindow::on_sgfdocument_nodeDeleted(Go::NodePtr node, bool removeChildre
 
 /**
   Slot
+  node modified
+*/
+void MainWindow::on_sgfdocument_nodeModified(Go::NodePtr node){
+    BoardWidget* board = currentBoard();
+    if (board->getCurrentNode() == node){
+        if (node->comment != ui->commentWidget->toPlainText())
+            ui->commentWidget->setPlainText( node->comment );
+    }
+
+    SgfDocument* doc = qobject_cast<SgfDocument*>(sender());
+    QTreeWidgetItem* item = docManager[doc].nodeToTreeItem[node];
+    if (item)
+        item->setText( 0, getBranchItemText(board, node) );
+}
+
+/**
+  Slot
   current node changed
 */
 void MainWindow::on_boardWidget_currentNodeChanged(Go::NodePtr node){
@@ -1169,6 +1215,8 @@ void MainWindow::on_boardWidget_currentNodeChanged(Go::NodePtr node){
     QTreeWidgetItem* item = docManager[doc].nodeToTreeItem[node];
     if (item)
         docManager[doc].branchWidget->setCurrentItem(item);
+
+    ui->commentWidget->setPlainText(node->comment);
 
     moveNumberLabel->setText( tr("Last Move: %1").arg(board->getMoveNumber()) );
     capturedLabel->setText( tr("Dead: White %1 Black %2").arg(board->getCapturedWhite()).arg(board->getCapturedBlack()) );
@@ -1243,6 +1291,35 @@ void MainWindow::on_branchWidget_currentItemChanged(QTreeWidgetItem* current, QT
 
 /**
   Slot
+  comment edited.
+*/
+void MainWindow::on_commentWidget_textChanged(){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+            return;
+
+    SgfDocument* doc  = board->document();
+    Go::NodePtr  node = board->getCurrentNode();
+
+    if (node->comment == ui->commentWidget->toPlainText())
+        return;
+
+    static SetCommentCommand* lastCommand = NULL;
+
+    if (lastCommand && doc->getUndoStack()->canUndo()){
+        const QUndoCommand* last = doc->getUndoStack()->command( doc->getUndoStack()->count() - 1 );
+        if (last == lastCommand && node == lastCommand->getNode()){
+            lastCommand->setComment( ui->commentWidget->toPlainText() );
+            return;
+        }
+    }
+
+    lastCommand = new SetCommentCommand(doc, node, ui->commentWidget->toPlainText());
+    doc->getUndoStack()->push(lastCommand);
+}
+
+/**
+  Slot
   collection view -> double clicked
 */
 void MainWindow::on_collectionView_doubleClicked(QModelIndex index)
@@ -1255,6 +1332,9 @@ void MainWindow::on_collectionView_doubleClicked(QModelIndex index)
         return;
 
     Go::NodePtr game = board->document()->gameList[index.row()];
+    if (board->getCurrentGame() == game)
+        return;
+
     board->document()->getUndoStack()->push( new SetCurrentGameCommand(board, game) );
 }
 

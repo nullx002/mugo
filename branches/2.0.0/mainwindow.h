@@ -90,6 +90,7 @@ protected:
     void createBranchWidget(BoardWidget* board, Go::NodePtr node);
     void createBranchWidget(BoardWidget* board, QTreeWidgetItem* root, QTreeWidgetItem* parent1, QTreeWidgetItem* parent2, Go::NodePtr parentNode, Go::NodePtr node);
     QTreeWidgetItem* createBranchItem(BoardWidget* board, Go::NodePtr node);
+    QString getBranchItemText(BoardWidget* board, Go::NodePtr node);
     void removeBranchItem(QTreeWidgetItem* parent, NodeTreeMap& map, Go::NodePtr node);
 
     // collection view
@@ -149,6 +150,7 @@ private slots:
     void on_sgfdocument_modified(bool dirty);
     void on_sgfdocument_nodeAdded(Go::NodePtr node);
     void on_sgfdocument_nodeDeleted(Go::NodePtr node, bool removeChildren);
+    void on_sgfdocument_nodeModified(Go::NodePtr node);
 
     // BoardWidget
     void on_boardWidget_currentNodeChanged(Go::NodePtr node);
@@ -160,6 +162,9 @@ private slots:
 
     // BranchWidget
     void on_branchWidget_currentItemChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous);
+
+    // CommentWidget
+    void on_commentWidget_textChanged();
 
     // Collection View
     void on_collectionView_doubleClicked(QModelIndex index);

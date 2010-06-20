@@ -254,3 +254,40 @@ void DeleteGameFromCollectionCommand::undo(){
 
     document->setDirty();
 }
+
+/**
+  Constructor
+*/
+SetCommentCommand::SetCommentCommand(SgfDocument* doc, Go::NodePtr node_, const QString& comment_, QUndoCommand *parent)
+    : QUndoCommand(parent)
+    , document(doc)
+    , node(node_)
+    , comment(comment_)
+{
+    oldComment = node->comment;
+}
+
+/**
+  redo set comment command
+*/
+void SetCommentCommand::redo(){
+    setText( tr("Edit comment") );
+    node->comment = comment;
+    document->modifyNode(node);
+}
+
+/**
+  undo set comment command
+*/
+void SetCommentCommand::undo(){
+    node->comment = oldComment;
+    document->modifyNode(node);
+}
+
+/**
+  set comment text
+*/
+void SetCommentCommand::setComment(const QString& comment){
+    node->comment = this->comment = comment;
+    document->modifyNode(node);
+}

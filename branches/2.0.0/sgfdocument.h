@@ -44,11 +44,14 @@ public:
     bool moveDown(Go::NodePtr& game);
     bool deleteGame(Go::NodePtr& game);
 
+    void modifyNode(Go::NodePtr& node){ setDirty(); emit nodeModified(node); }
+
     Go::NodeList gameList;
 
 signals:
     void nodeAdded(Go::NodePtr node);
     void nodeDeleted(Go::NodePtr node, bool removeChildren);
+    void nodeModified(Go::NodePtr node);
 };
 
 #endif // SGFDOCUMENT_H
