@@ -87,6 +87,8 @@ protected:
     void killStones(char* buf);
     bool canKillStones(int x, int y, Go::Color color, char* buf);
     bool inBoard(Go::NodePtr node);
+    bool moveToChildItem(int x, int y);
+    bool createChildItem(int x, int y);
 
 private slots:
     // Document

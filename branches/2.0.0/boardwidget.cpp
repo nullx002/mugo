@@ -98,21 +98,8 @@ void BoardWidget::onLButtonDown(QMouseEvent* e){
     else if (boardBuffer[y][x].isStone())
         return;
 
-    // create node
-    Go::NodePtr node;
-    if (currentNode->nextColor == Go::black)
-        node = Go::createBlackNode(currentNode, x, y);
-    else if (currentNode->nextColor == Go::white)
-        node = Go::createWhiteNode(currentNode, x, y);
-    else if (currentNode->isBlack())
-        node = Go::createWhiteNode(currentNode, x, y);
-    else if (currentNode->isWhite())
-        node = Go::createBlackNode(currentNode, x, y);
-    else
-        return;
-
-    document()->getUndoStack()->push( new AddNodeCommand(document(), currentNode, node, -1) );
-    setCurrentNode(node);
+    if (moveToChildItem(x, y) == false)
+        createChildItem(x, y);
 }
 
 /**
@@ -509,6 +496,41 @@ bool BoardWidget::inBoard(Go::NodePtr node){
 
     if (node->position.x >= gameInformation->xsize || node->position.y >= gameInformation->ysize)
         return false;
+
+    return true;
+}
+
+/**
+*/
+bool BoardWidget::moveToChildItem(int x, int y){
+    foreach (const Go::NodePtr& node, currentNode->childNodes){
+        if (node->x() == x && node->y() == y){
+            setCurrentNode(node);
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/**
+*/
+bool BoardWidget::createChildItem(int x, int y){
+    // create node
+    Go::NodePtr node;
+    if (currentNode->nextColor == Go::black)
+        node = Go::createBlackNode(currentNode, x, y);
+    else if (currentNode->nextColor == Go::white)
+        node = Go::createWhiteNode(currentNode, x, y);
+    else if (currentNode->isBlack())
+        node = Go::createWhiteNode(currentNode, x, y);
+    else if (currentNode->isWhite())
+        node = Go::createBlackNode(currentNode, x, y);
+    else
+        return false;
+
+    document()->getUndoStack()->push( new AddNodeCommand(document(), currentNode, node, -1) );
+    setCurrentNode(node);
 
     return true;
 }
