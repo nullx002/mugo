@@ -33,7 +33,7 @@ class BoardWidget : public QGraphicsView {
 public:
     class TerritoryInfo{
         public:
-            TerritoryInfo() : color(Go::empty), territory(Go::empty){}
+            TerritoryInfo() : color(Go::empty), territory(Go::empty), moveNumber(0), stone(NULL), number(NULL){}
 
             bool isStone() const{ return color != Go::empty; }
             bool isBlack() const{ return color == Go::black; }
@@ -44,7 +44,10 @@ public:
 
             Go::Color color;
             Go::Color territory;
+            int moveNumber;
             QGraphicsItem* stone;
+            QGraphicsSimpleTextItem* number;
+
     };
 
     BoardWidget(SgfDocument* doc, QWidget *parent = 0);
@@ -80,7 +83,7 @@ protected:
     void onLButtonDown(QMouseEvent* e);
     void onRButtonDown(QMouseEvent* e);
 
-    void setItemPositions();
+    void setItemsPosition();
     void createBuffer(bool erase);
     void getStarPosition(QList<int>& xpos, QList<int>& ypos);
     void killStones(int x, int y);
@@ -106,6 +109,7 @@ private:
     QList<QGraphicsLineItem*> vLines;
     QList<QGraphicsEllipseItem*> stars;
     QList<QGraphicsItem*> stones;
+    QList<QGraphicsSimpleTextItem*> numbers;
     Go::NodePtr currentNode;
     Go::NodeList currentNodeList;
     QVector< QVector<TerritoryInfo> > boardBuffer;

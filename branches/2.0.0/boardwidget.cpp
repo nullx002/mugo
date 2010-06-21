@@ -21,6 +21,7 @@
 #include <QGraphicsRectItem>
 #include <QGraphicsEllipseItem>
 #include <QGraphicsPixmapItem>
+#include <QGraphicsSimpleTextItem>
 #include "boardwidget.h"
 #include "sgfdocument.h"
 #include "command.h"
@@ -61,7 +62,7 @@ BoardWidget::~BoardWidget()
 */
 void BoardWidget::resizeEvent(QResizeEvent* e){
     scene->setSceneRect(0, 0, e->size().width(), e->size().height());
-    setItemPositions();
+    setItemsPosition();
 }
 
 /**
@@ -161,7 +162,7 @@ void BoardWidget::setCurrentGame(Go::NodePtr game, bool forceChange){
             stars.push_back(item);
         }
 
-    setItemPositions();
+    setItemsPosition();
 
     emit currentGameChanged(currentGame);
 
@@ -190,7 +191,7 @@ void BoardWidget::setCurrentNode(Go::NodePtr node, bool forceChange){
 /**
   set scene items position
 */
-void BoardWidget::setItemPositions(){
+void BoardWidget::setItemsPosition(){
     QRectF r = scene->sceneRect();
 
     // calculate board size
@@ -237,18 +238,39 @@ void BoardWidget::setItemPositions(){
         }
     }
 
-    // set position of stones.
-    qreal s = size * 0.95;
-    Go::NodeList::iterator iter = currentNodeList.begin();
-    foreach (QGraphicsItem* item, stones){
-        if (item){
-            int x = (*iter)->position.x;
-            int y = (*iter)->position.y;
-            QGraphicsEllipseItem* ellipse = dynamic_cast<QGraphicsEllipseItem*>(item);
-            if (ellipse)
-                ellipse->setRect(vLines[x]->line().x1()-s/2, hLines[y]->line().y1()-s/2, s, s);
+    // set position of stones and move number.
+    qreal stone_size = size * 0.95;
+    int moveNumber = 0;
+    Go::NodeList::iterator node = currentNodeList.begin();
+    QList<QGraphicsItem*>::iterator stone = stones.begin();
+    QList<QGraphicsSimpleTextItem*>::iterator number = numbers.begin();
+    while(node != currentNodeList.end()){
+        int x = (*node)->x();
+        int y = (*node)->y();
+
+        QGraphicsEllipseItem* ellipse = dynamic_cast<QGraphicsEllipseItem*>(*stone);
+        if (ellipse)
+            ellipse->setRect(vLines[x]->line().x1()-stone_size/2, hLines[y]->line().y1()-stone_size/2, stone_size, stone_size);
+
+        QGraphicsSimpleTextItem* text = dynamic_cast<QGraphicsSimpleTextItem*>(*number);
+        if (text){
+            qreal number_size;
+            if (text->text().size() > 2)
+                number_size = size * 0.4;
+            else if (text->text().size() > 1)
+                number_size = size * 0.45;
+            else
+                number_size = size * 0.5;
+
+            text->setFont( QFont("Helvetica", number_size) );
+            QRectF r = text->boundingRect();
+            text->setPos(vLines[x]->line().x1()-r.width()*0.5, hLines[y]->line().y1()-r.height()*0.5);
         }
-        ++iter;
+
+        ++node;
+        ++stone;
+        ++number;
+        ++moveNumber;
     }
 }
 
@@ -257,30 +279,26 @@ void BoardWidget::setItemPositions(){
 */
 void BoardWidget::createBuffer(bool erase){
     if (erase){
-        int size = vLines[1]->line().x1() - vLines[0]->line().x1();
-
         // clear buffer
+        int size = vLines[1]->line().x1() - vLines[0]->line().x1();
         currentNodeList.clear();
+
+        // erase stone items
         foreach(QGraphicsItem* item, stones)
             if (item)
                 scene->removeItem(item);
         stones.clear();
 
+        // erase text items
+        foreach(QGraphicsSimpleTextItem* item, numbers)
+            if (item)
+                scene->removeItem(item);
+        numbers.clear();
+
         // create currentNodeList
         Go::NodePtr n = currentNode;
         while(n){
             currentNodeList.push_front(n);
-
-            if ( inBoard(n) ){
-                int sceneX = vLines[n->position.x]->line().x1() - size / 2;
-                int sceneY = hLines[n->position.y]->line().y1() - size / 2;
-                QGraphicsItem* item = scene->addEllipse( sceneX, sceneY, size, size, QPen(Qt::black), QBrush(n->color == Go::black ? Qt::black : Qt::white) );
-                item->setZValue(3);
-                stones.push_front(item);
-            }
-            else
-                stones.push_front(NULL);
-
             n = n->parent();
         }
 
@@ -288,16 +306,25 @@ void BoardWidget::createBuffer(bool erase){
         while(n->childNodes.empty() == false){
             n = n->childNodes.front();
             currentNodeList.push_back(n);
+        }
 
-            if ( inBoard(n) ){
-                int sceneX = vLines[n->position.x]->line().x1() - size / 2;
-                int sceneY = hLines[n->position.y]->line().y1() - size / 2;
-                QGraphicsItem* item = scene->addEllipse( sceneX, sceneY, size, size, QPen(Qt::black), QBrush(n->color == Go::black ? Qt::black : Qt::white) );
-                item->setZValue(3);
-                stones.push_back(item);
+        foreach(const Go::NodePtr& node, currentNodeList){
+            if ( inBoard(node) ){
+                int sceneX = vLines[node->position.x]->line().x1() - size / 2;
+                int sceneY = hLines[node->position.y]->line().y1() - size / 2;
+                QGraphicsItem* stone = scene->addEllipse( sceneX, sceneY, size, size, QPen(Qt::black), QBrush(node->color == Go::black ? Qt::black : Qt::white) );
+                stone->setZValue(3);
+                stones.push_back(stone);
+
+                QGraphicsSimpleTextItem* number = scene->addSimpleText("");
+                number->setBrush( QBrush(node->color == Go::black ? Qt::white : Qt::black) );
+                number->setZValue(4);
+                numbers.push_back(number);
             }
-            else
+            else{
                 stones.push_back(NULL);
+                numbers.push_back(NULL);
+            }
         }
     }
 
@@ -307,11 +334,13 @@ void BoardWidget::createBuffer(bool erase){
     for (int i=0; i<boardBuffer.size(); ++i)
         boardBuffer[i].resize(gameInformation->xsize);
 
+    // show or hide stones
     moveNumber = 0;
     capturedBlack = 0;
     capturedWhite = 0;
     Go::NodeList::iterator node = currentNodeList.begin();
     QList<QGraphicsItem*>::iterator stone = stones.begin();
+    QList<QGraphicsSimpleTextItem*>::iterator number = numbers.begin();
     while(node != currentNodeList.end()){
         if ( inBoard(*node) ){
             int x = (*node)->position.x;
@@ -319,9 +348,17 @@ void BoardWidget::createBuffer(bool erase){
 
             TerritoryInfo ti;
             ti.color = (*node)->color;
+            ti.moveNumber = moveNumber;
             ti.stone = *stone;
+            ti.number = *number;
+
             if (*stone)
                 (*stone)->show();
+
+            if (*number){
+                (*number)->show();
+                (*number)->setText( QString::number(moveNumber) );
+            }
 
             boardBuffer[y][x] = ti;
 
@@ -329,17 +366,27 @@ void BoardWidget::createBuffer(bool erase){
         }
 
         ++stone;
-        if (*node == currentNode)
+        ++number;
+        if (*node == currentNode){
+            ++node;
             break;
-        ++node;
+        }
 
+        ++node;
         ++moveNumber;
     };
 
-    while (stone != stones.end()){
+    int moveNumber2 = moveNumber + 1;
+    while(node != currentNodeList.end()){
         if (*stone)
             (*stone)->hide();
+        if (*number){
+            (*number)->hide();
+            (*number)->setText( QString::number(moveNumber2++) );
+        }
         ++stone;
+        ++number;
+        ++node;
     }
 }
 
@@ -453,6 +500,8 @@ void BoardWidget::killStones(char* buf){
                 boardBuffer[y][x].color = Go::empty;
                 boardBuffer[y][x].stone->hide();
                 boardBuffer[y][x].stone = NULL;
+                boardBuffer[y][x].number->hide();
+                boardBuffer[y][x].number = NULL;
             }
         }
     }
