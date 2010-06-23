@@ -39,10 +39,11 @@ public:
 
     // operate without command
     void addNode(Go::NodePtr parentNode, Go::NodePtr node, int index);
-    void deleteNode(Go::NodePtr node, bool removeChildren);
-    bool moveUp(Go::NodePtr& game);
-    bool moveDown(Go::NodePtr& game);
-    bool deleteGame(Go::NodePtr& game);
+    void deleteNode(const Go::NodePtr node, bool removeChildren);
+    bool addGame(const Go::NodePtr& game);
+    bool deleteGame(const Go::NodePtr& game);
+    bool moveUp(const Go::NodePtr& game);
+    bool moveDown(const Go::NodePtr& game);
 
     void modifyNode(Go::NodePtr& node){ setDirty(); emit nodeModified(node); }
 
@@ -53,6 +54,9 @@ signals:
     void nodeAdded(Go::NodePtr node);
     void nodeDeleted(Go::NodePtr node, bool removeChildren);
     void nodeModified(Go::NodePtr node);
+    void gameAdded(Go::NodePtr game, int index);
+    void gameDeleted(Go::NodePtr game, int index);
+    void gameMoved(Go::NodePtr game, int from, int to);
 };
 
 #endif // SGFDOCUMENT_H

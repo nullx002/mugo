@@ -119,14 +119,66 @@ void SetCurrentGameCommand::undo(){
 /**
   Constructor
 */
-MoveUpInCollectionCommand::MoveUpInCollectionCommand(SgfDocument* doc, QTreeView* view_, int row_, QUndoCommand *parent)
+AddGameListCommand::AddGameListCommand(SgfDocument* doc, Go::NodeList& gameList_, QUndoCommand *parent)
     : QUndoCommand(parent)
     , document(doc)
-    , view(view_)
-    , row(row_)
+    , gameList(gameList_)
+{
+}
+
+/**
+  redo add gamelist command
+*/
+void AddGameListCommand::redo(){
+    foreach(const Go::NodePtr& game, gameList)
+        document->addGame(game);
+}
+
+/**
+  undo add agmelist command
+*/
+void AddGameListCommand::undo(){
+    foreach(const Go::NodePtr& game, gameList)
+        document->deleteGame(game);
+}
+
+/**
+  Constructor
+*/
+DeleteGameListCommand::DeleteGameListCommand(SgfDocument* doc, Go::NodeList& gameList_, QUndoCommand *parent)
+    : QUndoCommand(parent)
+    , document(doc)
+    , gameList(gameList_)
+{
+}
+
+/**
+  redo delete game from collection command
+*/
+void DeleteGameListCommand::redo(){
+    setText( tr("Delete game from collection") );
+
+    foreach(const Go::NodePtr& game, gameList)
+        document->deleteGame(game);
+}
+
+/**
+  undo delete game from collection command
+*/
+void DeleteGameListCommand::undo(){
+    foreach(const Go::NodePtr& game, gameList)
+        document->addGame(game);
+}
+
+/**
+  Constructor
+*/
+MoveUpInCollectionCommand::MoveUpInCollectionCommand(SgfDocument* doc, Go::NodePtr& game_, QUndoCommand *parent)
+    : QUndoCommand(parent)
+    , document(doc)
+    , game(game_)
     , moved(false)
 {
-    game = doc->gameList[row_];
 }
 
 /**
@@ -134,14 +186,6 @@ MoveUpInCollectionCommand::MoveUpInCollectionCommand(SgfDocument* doc, QTreeView
 */
 void MoveUpInCollectionCommand::redo(){
     setText( tr("Move up sgf in collection") );
-
-    QStandardItemModel* model = qobject_cast<QStandardItemModel*>(view->model());
-    if (model == NULL)
-        return;
-
-    QList<QStandardItem*> items = model->takeRow(row);
-    model->insertRow(row-1, items);
-    view->setCurrentIndex( model->index(row-1, 0) );
 
     moved = document->moveUp(game);
 }
@@ -153,28 +197,18 @@ void MoveUpInCollectionCommand::undo(){
     if (moved == false)
         return;
 
-    QStandardItemModel* model = qobject_cast<QStandardItemModel*>(view->model());
-    if (model == NULL)
-        return;
-
-    QList<QStandardItem*> items = model->takeRow(row-1);
-    model->insertRow(row, items);
-    view->setCurrentIndex( model->index(row, 0) );
-
     document->moveDown(game);
 }
 
 /**
   Constructor
 */
-MoveDownInCollectionCommand::MoveDownInCollectionCommand(SgfDocument* doc, QTreeView* view_, int row_, QUndoCommand *parent)
+MoveDownInCollectionCommand::MoveDownInCollectionCommand(SgfDocument* doc, Go::NodePtr& game_, QUndoCommand *parent)
     : QUndoCommand(parent)
     , document(doc)
-    , view(view_)
-    , row(row_)
+    , game(game_)
     , moved(false)
 {
-    game = doc->gameList[row_];
 }
 
 /**
@@ -182,14 +216,6 @@ MoveDownInCollectionCommand::MoveDownInCollectionCommand(SgfDocument* doc, QTree
 */
 void MoveDownInCollectionCommand::redo(){
     setText( tr("Move down sgf in collection") );
-
-    QStandardItemModel* model = qobject_cast<QStandardItemModel*>(view->model());
-    if (model == NULL)
-        return;
-
-    QList<QStandardItem*> items = model->takeRow(row);
-    model->insertRow(row+1, items);
-    view->setCurrentIndex( model->index(row+1, 0) );
 
     moved = document->moveDown(game);
 }
@@ -201,58 +227,7 @@ void MoveDownInCollectionCommand::undo(){
     if (moved == false)
         return;
 
-    QStandardItemModel* model = qobject_cast<QStandardItemModel*>(view->model());
-    if (model == NULL)
-        return;
-
-    QList<QStandardItem*> items = model->takeRow(row+1);
-    model->insertRow(row, items);
-    view->setCurrentIndex( model->index(row, 0) );
-
     document->moveUp(game);
-}
-
-/**
-  Constructor
-*/
-DeleteGameFromCollectionCommand::DeleteGameFromCollectionCommand(SgfDocument* doc, QStandardItemModel* model_, int row_, QUndoCommand *parent)
-    : QUndoCommand(parent)
-    , document(doc)
-    , model(model_)
-    , row(row_)
-    , removed(false)
-{
-    game = doc->gameList[row_];
-}
-
-/**
-  redo delete game from collection command
-*/
-void DeleteGameFromCollectionCommand::redo(){
-    setText( tr("Delete sgf from collection") );
-
-    Go::NodeList::iterator iter = qFind(document->gameList.begin(), document->gameList.end(), game);
-    if (iter == document->gameList.end())
-        return;
-
-    iterator = document->gameList.erase(iter);
-    items = model->takeRow(row);
-
-    document->setDirty();
-    removed = true;
-}
-
-/**
-  undo delete game from collection command
-*/
-void DeleteGameFromCollectionCommand::undo(){
-    if (removed == false)
-        return;
-
-    document->gameList.insert(iterator, game);
-    model->insertRow(row, items);
-
-    document->setDirty();
 }
 
 /**

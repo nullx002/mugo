@@ -23,13 +23,13 @@
 #include <QString>
 #include <QStandardItem>
 #include "godata.h"
+#include "sgf.h"
 
 
 class QTreeView;
 class QStandardItemModel;
 class SgfDocument;
 class BoardWidget;
-
 
 /**
   add node command
@@ -86,20 +86,50 @@ private:
 };
 
 /**
+  add games command
+*/
+class AddGameListCommand: public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(AddGameListCommand)
+
+public:
+    AddGameListCommand(SgfDocument* doc, Go::NodeList& gameList, QUndoCommand *parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+private:
+    SgfDocument* document;
+    Go::NodeList gameList;
+};
+
+/**
+  delete games from gamelist command
+*/
+class DeleteGameListCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(DeleteGameCommand)
+
+public:
+    DeleteGameListCommand(SgfDocument* doc, Go::NodeList& gameList, QUndoCommand *parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+private:
+    SgfDocument* document;
+    Go::NodeList gameList;
+};
+
+/**
   move up sgf in collection command
 */
 class MoveUpInCollectionCommand : public QUndoCommand{
     Q_DECLARE_TR_FUNCTIONS(MoveUpInCollectionCommand)
 
 public:
-    MoveUpInCollectionCommand(SgfDocument* doc, QTreeView* view, int row, QUndoCommand *parent = 0);
+    MoveUpInCollectionCommand(SgfDocument* doc, Go::NodePtr& game, QUndoCommand *parent = 0);
     virtual void redo();
     virtual void undo();
 
 private:
     SgfDocument* document;
-    QTreeView* view;
-    int row;
     Go::NodePtr game;
     bool moved;
 };
@@ -111,37 +141,14 @@ class MoveDownInCollectionCommand : public QUndoCommand{
     Q_DECLARE_TR_FUNCTIONS(MoveDownInCollectionCommand)
 
 public:
-    MoveDownInCollectionCommand(SgfDocument* doc, QTreeView* view, int row, QUndoCommand *parent = 0);
+    MoveDownInCollectionCommand(SgfDocument* doc, Go::NodePtr& game, QUndoCommand *parent = 0);
     virtual void redo();
     virtual void undo();
 
 private:
     SgfDocument* document;
-    QTreeView* view;
-    int row;
     Go::NodePtr game;
     bool moved;
-};
-
-/**
-  delete sgf from collection command
-*/
-class DeleteGameFromCollectionCommand : public QUndoCommand{
-    Q_DECLARE_TR_FUNCTIONS(DeleteGameInCollectionCommand)
-
-public:
-    DeleteGameFromCollectionCommand(SgfDocument* doc, QStandardItemModel* model, int row, QUndoCommand *parent = 0);
-    virtual void redo();
-    virtual void undo();
-
-private:
-    SgfDocument* document;
-    QStandardItemModel* model;
-    int row;
-    Go::NodePtr game;
-    bool removed;
-    QList<QStandardItem*> items;
-    Go::NodeList::iterator iterator;
 };
 
 /**

@@ -946,8 +946,8 @@ void MainWindow::on_actionSaveAs_triggered()
 */
 void MainWindow::on_actionCollectionImport_triggered()
 {
-    SgfDocument* currentDoc = qobject_cast<SgfDocument*>(currentDocument());
-    if (currentDoc == NULL)
+    SgfDocument* doc = qobject_cast<SgfDocument*>(currentDocument());
+    if (doc == NULL)
         return;
 
     // select file
@@ -957,18 +957,17 @@ void MainWindow::on_actionCollectionImport_triggered()
         return;
 
     // open document
-    SgfDocument* doc;
+    SgfDocument* tmpDoc;
     if (codec == NULL)
-        doc = createDocument(defaultCodec, fname, true);
+        tmpDoc = createDocument(defaultCodec, fname, true);
     else
-        doc = createDocument(codec, fname, false);
+        tmpDoc = createDocument(codec, fname, false);
 
-    if (doc == NULL)
+    if (tmpDoc == NULL)
         return;
 
-    // add document
-    currentDoc->gameList.append(doc->gameList);
-    addCollectionModel(doc->gameList, docManager[currentDoc].collectionModel);
+    // add documents
+    doc->getUndoStack()->push( new AddGameListCommand(doc, tmpDoc->gameList) );
 }
 
 /**
@@ -1149,9 +1148,11 @@ void MainWindow::on_actionPasteSgfIntoCollection_triggered()
     if (doc == NULL)
         return;
 
+    // get clipboard text
     QClipboard *clipboard = QApplication::clipboard();
     QString str = clipboard->text();
 
+    // read sgf
     Go::Sgf sgf;
     QString::iterator first = str.begin();
     if (sgf.readStream(first, str.end()) == false)
@@ -1160,10 +1161,8 @@ void MainWindow::on_actionPasteSgfIntoCollection_triggered()
     Go::NodeList gameList;
     sgf.get(gameList);
 
-    doc->gameList.append(gameList);
-    addCollectionModel(gameList, docManager[doc].collectionModel);
-
-    doc->setDirty();
+    // add sgf into collection
+    doc->getUndoStack()->push( new AddGameListCommand(doc, gameList) );
 }
 
 /**
@@ -1562,7 +1561,7 @@ void MainWindow::on_actionCollectionMoveUp_triggered()
     if (index.row() <= 0)
         return;
 
-    doc->getUndoStack()->push( new MoveUpInCollectionCommand(doc, ui->collectionView, index.row()) );
+    doc->getUndoStack()->push( new MoveUpInCollectionCommand(doc, doc->gameList[index.row()]) );
 }
 
 /**
@@ -1579,7 +1578,7 @@ void MainWindow::on_actionCollectionMoveDown_triggered()
     if (index.row() < 0 || index.row() >= doc->gameList.size() - 1)
         return;
 
-    doc->getUndoStack()->push( new MoveDownInCollectionCommand(doc, ui->collectionView, index.row()) );
+    doc->getUndoStack()->push( new MoveDownInCollectionCommand(doc, doc->gameList[index.row()]) );
 }
 
 /**
@@ -1605,7 +1604,9 @@ void MainWindow::on_actionCollectionDelete_triggered()
         return;
     }
 
-    doc->getUndoStack()->push( new DeleteGameFromCollectionCommand(doc, docManager[doc].collectionModel, index.row()) );
+    Go::NodeList gameList;
+    gameList.push_back(doc->gameList[index.row()]);
+    doc->getUndoStack()->push( new DeleteGameListCommand(doc, gameList) );
 }
 
 /**
