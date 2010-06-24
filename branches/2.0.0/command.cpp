@@ -132,7 +132,7 @@ AddGameListCommand::AddGameListCommand(SgfDocument* doc, Go::NodeList& gameList_
 void AddGameListCommand::redo(){
     setText( tr("Add games into collection") );
     foreach(const Go::NodePtr& game, gameList)
-        document->addGame(game);
+        document->addGame(game, -1);
 }
 
 /**
@@ -159,16 +159,21 @@ DeleteGameListCommand::DeleteGameListCommand(SgfDocument* doc, Go::NodeList& gam
 void DeleteGameListCommand::redo(){
     setText( tr("Delete games from collection") );
 
-    foreach(const Go::NodePtr& game, gameList)
+    indexList.clear();
+    foreach(const Go::NodePtr& game, gameList){
+        indexList.push_back( document->gameList.indexOf(game) );
         document->deleteGame(game);
+    }
 }
 
 /**
   undo delete game from collection command
 */
 void DeleteGameListCommand::undo(){
-    foreach(const Go::NodePtr& game, gameList)
-        document->addGame(game);
+    for (int i=gameList.size()-1; i>=0; --i){
+        Go::NodePtr& game = gameList[i];
+        document->addGame(game, indexList[i]);
+    }
 }
 
 /**

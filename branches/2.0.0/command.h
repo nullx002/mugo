@@ -115,6 +115,7 @@ public:
 private:
     SgfDocument* document;
     Go::NodeList gameList;
+    QList<int> indexList;
 };
 
 /**

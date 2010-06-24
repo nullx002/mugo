@@ -142,11 +142,17 @@ void SgfDocument::deleteNode(Go::NodePtr node, bool removeChildren){
 /**
   add game into gamelist
 */
-bool SgfDocument::addGame(const Go::NodePtr& game){
-    gameList.push_back(game);
+bool SgfDocument::addGame(const Go::NodePtr& game, int index){
+    if (index == -1){
+        gameList.push_back(game);
+        index = gameList.size() - 1;
+    }
+    else
+        gameList.insert(index, game);
+
     setDirty();
 
-    emit  gameAdded(game, gameList.size()-1);
+    emit  gameAdded(game, index);
 
     return true;
 }

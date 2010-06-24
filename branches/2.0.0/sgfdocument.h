@@ -40,7 +40,7 @@ public:
     // operate without command
     void addNode(Go::NodePtr parentNode, Go::NodePtr node, int index);
     void deleteNode(const Go::NodePtr node, bool removeChildren);
-    bool addGame(const Go::NodePtr& game);
+    bool addGame(const Go::NodePtr& game, int index);
     bool deleteGame(const Go::NodePtr& game);
     bool moveUp(const Go::NodePtr& game);
     bool moveDown(const Go::NodePtr& game);

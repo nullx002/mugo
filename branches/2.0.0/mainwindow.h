@@ -97,7 +97,7 @@ protected:
     void removeBranchItem(QTreeWidgetItem* parent, NodeTreeMap& map, Go::NodePtr node);
 
     // collection view
-    void addCollectionModel(const Go::NodeList& gameList, QStandardItemModel* model);
+    void createCollectionModel(const Go::NodeList& gameList, QStandardItemModel* model);
     void createCollectionModelRow(const Go::NodePtr& game, QList<QStandardItem*>& items);
 
     void updateCaption();

@@ -460,7 +460,7 @@ void MainWindow::addDocument(SgfDocument* doc, BoardWidget* board)
 
     // collection
     model->setHorizontalHeaderLabels(QStringList() << tr("White") << tr("Black") << tr("Game Name") << tr("Date") << tr("Result"));
-    addCollectionModel(doc->gameList, model);
+    createCollectionModel(doc->gameList, model);
 
     // document
     connect(doc, SIGNAL(modified(bool)), SLOT(on_sgfdocument_modified(bool)));
@@ -667,7 +667,8 @@ QString MainWindow::getBranchItemText(BoardWidget* board, Go::NodePtr node){
 /**
   create collection mdoel
 */
-void MainWindow::addCollectionModel(const Go::NodeList& gameList, QStandardItemModel* model){
+void MainWindow::createCollectionModel(const Go::NodeList& gameList, QStandardItemModel* model){
+    model->clear();
     foreach(Go::NodePtr game, gameList){
         QList<QStandardItem*> items;
         createCollectionModelRow(game, items);
@@ -1412,22 +1413,22 @@ void MainWindow::on_sgfdocument_nodeModified(Go::NodePtr node){
   Slot
   game added to collection
 */
-void MainWindow::on_sgfdocument_gameAdded(Go::NodePtr game, int /*index*/){
+void MainWindow::on_sgfdocument_gameAdded(Go::NodePtr game, int index){
     SgfDocument* doc = qobject_cast<SgfDocument*>(sender());
     if (doc == NULL)
         return;
 
     // add game into collection model
-    Go::NodeList gameList;
-    gameList.push_back(game);
-    addCollectionModel(gameList, docManager[doc].collectionModel);
+    QList<QStandardItem*> items;
+    createCollectionModelRow(game, items);
+    docManager[doc].collectionModel->insertRow(index, items);
 }
 
 /**
   Slot
   game deleted from collection
 */
-void MainWindow::on_sgfdocument_gameDeleted(Go::NodePtr game, int index){
+void MainWindow::on_sgfdocument_gameDeleted(Go::NodePtr /*game*/, int index){
     SgfDocument* doc = qobject_cast<SgfDocument*>(sender());
     if (doc == NULL)
         return;
@@ -1440,7 +1441,7 @@ void MainWindow::on_sgfdocument_gameDeleted(Go::NodePtr game, int index){
   Slot
   game moved in collection
 */
-void MainWindow::on_sgfdocument_gameMoved(Go::NodePtr game, int from, int to){
+void MainWindow::on_sgfdocument_gameMoved(Go::NodePtr /*game*/, int from, int to){
     SgfDocument* doc = qobject_cast<SgfDocument*>(sender());
     if (doc == NULL)
         return;
