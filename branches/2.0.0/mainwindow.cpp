@@ -467,6 +467,9 @@ void MainWindow::addDocument(SgfDocument* doc, BoardWidget* board)
     connect(doc, SIGNAL(nodeAdded(Go::NodePtr)), SLOT(on_sgfdocument_nodeAdded(Go::NodePtr)));
     connect(doc, SIGNAL(nodeDeleted(Go::NodePtr, bool)), SLOT(on_sgfdocument_nodeDeleted(Go::NodePtr, bool)));
     connect(doc, SIGNAL(nodeModified(Go::NodePtr)), SLOT(on_sgfdocument_nodeModified(Go::NodePtr)));
+    connect(doc, SIGNAL(gameAdded(Go::NodePtr, int)), SLOT(on_sgfdocument_gameAdded(Go::NodePtr, int)));
+    connect(doc, SIGNAL(gameDeleted(Go::NodePtr, int)), SLOT(on_sgfdocument_gameDeleted(Go::NodePtr, int)));
+    connect(doc, SIGNAL(gameMoved(Go::NodePtr, int, int)), SLOT(on_sgfdocument_gameMoved(Go::NodePtr, int, int)));
 
     // create tab active action
     view.tabChangeAction = new QAction(board);
@@ -1000,6 +1003,7 @@ void MainWindow::on_actionCollectionExtract_triggered()
     newDoc->set(sgf);
     newDoc->setDocName( newDocumentName() );
     addDocument(newDoc);
+    newDoc->setDirty();
 }
 
 /**
@@ -1402,6 +1406,51 @@ void MainWindow::on_sgfdocument_nodeModified(Go::NodePtr node){
     QTreeWidgetItem* item = docManager[doc].nodeToTreeItem[node];
     if (item)
         item->setText( 0, getBranchItemText(board, node) );
+}
+
+/**
+  Slot
+  game added to collection
+*/
+void MainWindow::on_sgfdocument_gameAdded(Go::NodePtr game, int /*index*/){
+    SgfDocument* doc = qobject_cast<SgfDocument*>(sender());
+    if (doc == NULL)
+        return;
+
+    // add game into collection model
+    Go::NodeList gameList;
+    gameList.push_back(game);
+    addCollectionModel(gameList, docManager[doc].collectionModel);
+}
+
+/**
+  Slot
+  game deleted from collection
+*/
+void MainWindow::on_sgfdocument_gameDeleted(Go::NodePtr game, int index){
+    SgfDocument* doc = qobject_cast<SgfDocument*>(sender());
+    if (doc == NULL)
+        return;
+
+    // delete game from collection model
+    docManager[doc].collectionModel->removeRow(index);
+}
+
+/**
+  Slot
+  game moved in collection
+*/
+void MainWindow::on_sgfdocument_gameMoved(Go::NodePtr game, int from, int to){
+    SgfDocument* doc = qobject_cast<SgfDocument*>(sender());
+    if (doc == NULL)
+        return;
+
+    // move items
+    QStandardItemModel* model = docManager[doc].collectionModel;
+    QList<QStandardItem*> items = model->takeRow(from);
+    model->insertRow(to, items);
+
+    ui->collectionView->setCurrentIndex( model->index(to, 0) );
 }
 
 /**

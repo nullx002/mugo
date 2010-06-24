@@ -130,6 +130,7 @@ AddGameListCommand::AddGameListCommand(SgfDocument* doc, Go::NodeList& gameList_
   redo add gamelist command
 */
 void AddGameListCommand::redo(){
+    setText( tr("Add games into collection") );
     foreach(const Go::NodePtr& game, gameList)
         document->addGame(game);
 }
@@ -156,7 +157,7 @@ DeleteGameListCommand::DeleteGameListCommand(SgfDocument* doc, Go::NodeList& gam
   redo delete game from collection command
 */
 void DeleteGameListCommand::redo(){
-    setText( tr("Delete game from collection") );
+    setText( tr("Delete games from collection") );
 
     foreach(const Go::NodePtr& game, gameList)
         document->deleteGame(game);
