@@ -459,7 +459,6 @@ void MainWindow::addDocument(SgfDocument* doc, BoardWidget* board)
             SLOT(on_branchWidget_currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)));
 
     // collection
-    model->setHorizontalHeaderLabels(QStringList() << tr("White") << tr("Black") << tr("Game Name") << tr("Date") << tr("Result"));
     createCollectionModel(doc->gameList, model);
 
     // document
@@ -669,6 +668,8 @@ QString MainWindow::getBranchItemText(BoardWidget* board, Go::NodePtr node){
 */
 void MainWindow::createCollectionModel(const Go::NodeList& gameList, QStandardItemModel* model){
     model->clear();
+    model->setHorizontalHeaderLabels(QStringList() << tr("White") << tr("Black") << tr("Game Name") << tr("Date") << tr("Result"));
+
     foreach(Go::NodePtr game, gameList){
         QList<QStandardItem*> items;
         createCollectionModelRow(game, items);
