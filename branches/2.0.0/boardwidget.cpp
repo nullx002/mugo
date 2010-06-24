@@ -126,6 +126,7 @@ void BoardWidget::setCurrentGame(Go::NodePtr game, bool forceChange){
 
     currentGame = game;
     gameInformation = currentGame->getInformation();
+    currentNodeList.clear();
 
     // delete lines and stars
     foreach(QGraphicsLineItem* line, hLines)
@@ -388,6 +389,9 @@ void BoardWidget::createBuffer(bool erase){
         ++number;
         ++node;
     }
+
+    if (erase)
+        setItemsPosition();
 }
 
 /**
