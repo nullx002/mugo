@@ -490,7 +490,8 @@ bool MainWindow::closeDocument(Document* doc, bool save, bool closeTab){
     if (save && maybeSave(doc) == false)
         return false;
 
-    undoGroup.setActiveStack(NULL);
+    if (undoGroup.activeStack() == doc->getUndoStack())
+        undoGroup.setActiveStack(NULL);
 
     ViewData& view = docManager[doc];
 
