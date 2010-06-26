@@ -145,6 +145,7 @@ private slots:
     void on_actionPasteSgfIntoCollection_triggered();
     void on_actionDeleteAfterCurrent_triggered();
     void on_actionDeleteCurrentOnly_triggered();
+    void on_actionPass_triggered();
     void on_actionGameInformation_triggered();
 
     // Navigation Menu

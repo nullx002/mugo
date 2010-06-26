@@ -72,6 +72,7 @@ public:
     void forward(int step=1);
     void back(int step=1);
 
+    void addItem(Go::NodePtr parent, Go::NodePtr node, int index);
     QString getCoordinateString(Go::NodePtr node, bool showI) const;
 
 signals:

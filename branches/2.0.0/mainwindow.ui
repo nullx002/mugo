@@ -187,6 +187,7 @@
     <addaction name="separator"/>
     <addaction name="actionDeleteAfterCurrent"/>
     <addaction name="actionDeleteCurrentOnly"/>
+    <addaction name="actionPass"/>
    </widget>
    <widget class="QMenu" name="menuNavigation">
     <property name="title">
@@ -252,6 +253,7 @@
    </attribute>
    <addaction name="separator"/>
    <addaction name="actionDeleteAfterCurrent"/>
+   <addaction name="actionPass"/>
   </widget>
   <widget class="QToolBar" name="navigationToolBar">
    <property name="windowTitle">
@@ -769,6 +771,15 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Del</string>
+   </property>
+  </action>
+  <action name="actionPass">
+   <property name="icon">
+    <iconset resource="mugo.qrc">
+     <normaloff>:/res/pass.png</normaloff>:/res/pass.png</iconset>
+   </property>
+   <property name="text">
+    <string>Pass</string>
    </property>
   </action>
   <action name="actionNavigationMoveFirst">

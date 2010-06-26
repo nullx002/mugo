@@ -28,5 +28,6 @@
         <file>res/movenext.png</file>
         <file>res/saveimage.png</file>
         <file>res/gameinfo.png</file>
+        <file>res/pass.png</file>
     </qresource>
 </RCC>

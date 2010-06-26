@@ -1227,6 +1227,33 @@ void MainWindow::on_actionDeleteCurrentOnly_triggered()
 
 /**
   Slot
+  Edit -> Pass
+*/
+void MainWindow::on_actionPass_triggered()
+{
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    Go::NodePtr currentNode = board->getCurrentNode();
+    Go::NodePtr childNode;
+    if (currentNode->nextColor == Go::black)
+        childNode = Go::createBlackNode(currentNode);
+    else if (currentNode->nextColor == Go::white)
+        childNode = Go::createWhiteNode(currentNode);
+    else if (currentNode->color == Go::black)
+        childNode = Go::createWhiteNode(currentNode);
+    else if (currentNode->color == Go::white)
+        childNode = Go::createBlackNode(currentNode);
+    else
+        return;
+
+    board->addItem(currentNode, childNode, -1);
+    board->setCurrentNode(childNode);
+}
+
+/**
+  Slot
   Edit -> Game Information
 */
 void MainWindow::on_actionGameInformation_triggered(){

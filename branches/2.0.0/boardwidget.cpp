@@ -427,6 +427,13 @@ void BoardWidget::back(int step){
     setCurrentNode(*iter);
 }
 
+/**
+  add item
+*/
+void BoardWidget::addItem(Go::NodePtr parent, Go::NodePtr node, int index){
+    document()->getUndoStack()->push( new AddNodeCommand(document(), parent, node, index) );
+}
+
 QString BoardWidget::getCoordinateString(Go::NodePtr node, bool showI) const{
     QString str;
     Go::GameInformationPtr info = node->getInformation();
@@ -582,7 +589,7 @@ bool BoardWidget::createChildItem(int x, int y){
     else
         return false;
 
-    document()->getUndoStack()->push( new AddNodeCommand(document(), currentNode, node, -1) );
+    addItem(currentNode, node, -1);
     setCurrentNode(node);
 
     return true;
