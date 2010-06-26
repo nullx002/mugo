@@ -48,12 +48,14 @@ public:
     QTextCodec* getCodec(){ return codec; }
     const QString& getDocName() const{ return docName; }
     const QString& getFileName() const{ return fileName; }
+    const QString& getUrl() const{ return url; }
     bool isDirty() const{ return dirty; }
 
     // Set
     void setCodec(QTextCodec* codec){ this->codec = codec; }
     void setDocName(const QString& name){ docName = name; }
     void setFileName(const QString& fname){ fileName = fname; }
+    void setUrl(const QString& url){ this->url = url; }
     void setDirty(bool dirty=true){ this->dirty = dirty; emit modified(dirty); }
 
 protected:
@@ -61,6 +63,7 @@ protected:
     QTextCodec* codec;
     QString     docName;
     QString     fileName;
+    QString     url;
     bool        dirty;
 
 signals:

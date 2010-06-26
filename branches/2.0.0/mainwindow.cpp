@@ -26,6 +26,7 @@
 #include <QInputDialog>
 #include <QUrl>
 #include <QHttp>
+#include <QProgressDialog>
 #include <QLabel>
 #include <QComboBox>
 #include <QClipboard>
@@ -34,6 +35,7 @@
 #include "ui_mainwindow.h"
 #include "boardwidget.h"
 #include "gameinformationdialog.h"
+#include "exportasciidialog.h"
 #include "sgf.h"
 #include "sgfdocument.h"
 #include "command.h"
@@ -286,7 +288,7 @@ bool MainWindow::fileOpen(QTextCodec* codec, const QString& fname, bool guessCod
         ++iter;
     }
 
-    SgfDocument* doc = createDocument(codec, fname, guessCodec);
+    SgfDocument* doc = openDocument(fname, codec, guessCodec);
     if (doc == NULL)
         return false;
     addDocument(doc);
@@ -297,9 +299,10 @@ bool MainWindow::fileOpen(QTextCodec* codec, const QString& fname, bool guessCod
 /**
   Url Open
 */
-bool MainWindow::urlOpen(const QUrl& url){
+bool MainWindow::urlOpen(const QUrl& url, bool newTab){
     downloadURL = url;
     downloadBuff.clear();
+    downloadNewTab = newTab;
 
     QHttp* http = new QHttp;
     connect( http, SIGNAL(readyRead(const QHttpResponseHeader&)), SLOT(on_openUrl_ReadReady(const QHttpResponseHeader&)) );
@@ -308,14 +311,13 @@ bool MainWindow::urlOpen(const QUrl& url){
 
     QHttp::ConnectionMode mode = url.scheme().toLower() == "https" ? QHttp::ConnectionModeHttps : QHttp::ConnectionModeHttp;
     http->setHost(url.host(), mode, url.port() == -1 ? 0 : url.port());
-
     http->get( url.encodedPath() );
 
-//    progressDialog = new QProgressDialog(tr("Downloading SGF File"), "cancel", 0, 100, this);
-//    connect(progressDialog, SIGNAL(canceled()), this, SLOT(openUrlCancel()));
-//    progressDialog->setWindowModality(Qt::WindowModal);
-//    progressDialog->show();
-//    progressDialog->setValue(0);
+    progressDialog = new QProgressDialog(tr("Downloading SGF File"), "cancel", 0, 100, this);
+    connect(progressDialog, SIGNAL(canceled()), this, SLOT(on_openUrl_canceled()));
+    progressDialog->setWindowModality(Qt::WindowModal);
+    progressDialog->show();
+    progressDialog->setValue(0);
 
 //    ui->actionReload->setEnabled(true);
 
@@ -410,7 +412,7 @@ bool MainWindow::maybeSave(Document* doc){
 /**
   create document
 */
-SgfDocument* MainWindow::createDocument(QTextCodec* codec, const QString& fname, bool guessCodec){
+SgfDocument* MainWindow::openDocument(const QString& fname, QTextCodec* codec, bool guessCodec){
     SgfDocument* doc = new SgfDocument(codec, this);
     if (doc->open(fname, guessCodec) == false){
         QMessageBox::critical(this, QString(), tr("File open error: %1").arg(fname));
@@ -872,7 +874,7 @@ void MainWindow::on_actionReload_triggered()
 
     // get document
     BoardWidget* board = currentBoard();
-    if (board == NULL || board->document()->getFileName().isEmpty())
+    if (board == NULL || (board->document()->getFileName().isEmpty() && board->document()->getUrl().isEmpty()))
         return;
 
     //  return if cancelled.
@@ -880,14 +882,20 @@ void MainWindow::on_actionReload_triggered()
         return;
 
     QTextCodec* codec = encoding.find(act) != encoding.end() ? encoding[act] : board->document()->getCodec();
-    SgfDocument* doc = createDocument(codec, board->document()->getFileName(), false);
-    if (doc == NULL){
-        closeDocument(board->document(), false);
-        return;
-    }
+    if (board->document()->getFileName().isEmpty() == false){
+        SgfDocument* doc = openDocument(board->document()->getFileName(), codec, false);
+        if (doc == NULL){
+            closeDocument(board->document(), false);
+            return;
+        }
 
-    closeDocument(board->document(), false, false);
-    addDocument(doc, board);
+        closeDocument(board->document(), false, false);
+        addDocument(doc, board);
+    }
+    else if (board->document()->getUrl().isEmpty() == false){
+        board->document()->setCodec(codec);
+        urlOpen( QUrl(board->document()->getUrl()), false );
+    }
 }
 
 /**
@@ -902,7 +910,7 @@ void MainWindow::on_actionOpenURL_triggered()
     if (dlg.exec() != QDialog::Accepted)
         return;
 
-    urlOpen( QUrl(dlg.textValue()) );
+    urlOpen( QUrl(dlg.textValue()), true );
 }
 
 /**
@@ -969,9 +977,9 @@ void MainWindow::on_actionCollectionImport_triggered()
     // open document
     SgfDocument* tmpDoc;
     if (codec == NULL)
-        tmpDoc = createDocument(defaultCodec, fname, true);
+        tmpDoc = openDocument(fname, defaultCodec, true);
     else
-        tmpDoc = createDocument(codec, fname, false);
+        tmpDoc = openDocument(fname, codec, false);
 
     if (tmpDoc == NULL)
         return;
@@ -1019,7 +1027,11 @@ void MainWindow::on_actionCollectionExtract_triggered()
 */
 void MainWindow::on_actionExportBoardAsImage_triggered()
 {
+    QMessageBox::warning(this, QString(), "Not Implemented");
+/*
     BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
 
     QImage image(640, 400, QImage::Format_ARGB32);
     QPainter p(&image);
@@ -1043,6 +1055,7 @@ void MainWindow::on_actionExportBoardAsImage_triggered()
             fname += ".tif";
     }
     image.save(fname);
+*/
 }
 
 /**
@@ -1051,6 +1064,12 @@ void MainWindow::on_actionExportBoardAsImage_triggered()
 */
 void MainWindow::on_actionExportAsciiToClipboard_triggered()
 {
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    ExportAsciiDialog dlg(this, board->getBoardBuffer());
+    dlg.exec();
 }
 
 /**
@@ -1143,8 +1162,10 @@ void MainWindow::on_actionPasteSgfToNewTab_triggered()
 
     // create new document
     SgfDocument* doc = new SgfDocument(QTextCodec::codecForName("UTF-8"));
-    if (doc->read(newDocumentName(), str.toUtf8(), false) == false)
+    if (doc->read(newDocumentName(), str.toUtf8(), false) == false){
+        delete doc;
         return;
+    }
     addDocument(doc);
     doc->setDirty();
 }
@@ -1712,7 +1733,9 @@ void MainWindow::on_openUrl_ReadReady(const QHttpResponseHeader& resp){
   Slot
   Open URL
 */
-void MainWindow::on_openUrl_UrlReadProgress(int, int){
+void MainWindow::on_openUrl_UrlReadProgress(int done, int total){
+    progressDialog->setMaximum(total);
+    progressDialog->setValue(done);
 }
 
 /**
@@ -1723,18 +1746,36 @@ void MainWindow::on_openUrl_UrlDone(bool error){
     QByteArray buf = downloadBuff;
     downloadBuff.clear();
     sender()->deleteLater();
+    delete progressDialog;
 
     if (error == true)
         return;
 
-    QString fname = downloadURL.toString();
-    int p = fname.lastIndexOf('/');
+    QString docName = downloadURL.toString();
+    int p = docName.lastIndexOf('/');
     if (p >= 0)
-        fname = fname.mid(p+1);
+        docName = docName.mid(p+1);
 
-    SgfDocument* doc = new SgfDocument(defaultCodec);
-    if (doc->read(fname, buf, true) == false)
-        return;
+    if (downloadNewTab){
+        SgfDocument* doc = new SgfDocument(defaultCodec);
+        if (doc->read(docName, buf, true) == false){
+            delete doc;
+            return;
+        }
+        doc->setUrl(downloadURL.toString());
+        addDocument(doc);
+    }
+    else{
+        BoardWidget* board = currentBoard();
+        if (board == NULL)
+            return;
 
-    addDocument(doc);
+        SgfDocument* doc = new SgfDocument(board->document()->getCodec());
+        if (doc->read(docName, buf, false) == false){
+            delete doc;
+            return;
+        }
+        doc->setUrl(downloadURL.toString());
+        addDocument(doc, board);
+    }
 }

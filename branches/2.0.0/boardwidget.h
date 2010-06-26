@@ -49,6 +49,7 @@ public:
             QGraphicsSimpleTextItem* number;
 
     };
+    typedef QVector< QVector<TerritoryInfo> > BoardBuffer;
 
     BoardWidget(SgfDocument* doc, QWidget *parent = 0);
     ~BoardWidget();
@@ -62,6 +63,7 @@ public:
     int getMoveNumber() const{ return moveNumber; }
     int getCapturedBlack() const{ return capturedBlack; }
     int getCapturedWhite() const{ return capturedWhite; }
+    BoardBuffer& getBoardBuffer(){ return boardBuffer; }
 
     // set
     void setDocument(SgfDocument* doc);
@@ -112,7 +114,7 @@ private:
     QList<QGraphicsSimpleTextItem*> numbers;
     Go::NodePtr currentNode;
     Go::NodeList currentNodeList;
-    QVector< QVector<TerritoryInfo> > boardBuffer;
+    BoardBuffer boardBuffer;
     int moveNumber;
     int capturedBlack;
     int capturedWhite;

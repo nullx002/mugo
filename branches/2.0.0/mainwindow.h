@@ -31,6 +31,7 @@ class QTreeWidgetItem;
 class QStandardItemModel;
 class QStandardItem;
 class QHttpResponseHeader;
+class QProgressDialog;
 class QLabel;
 class BoardWidget;
 class Document;
@@ -75,7 +76,7 @@ protected:
     // new, open, save, close
     void fileNew(QTextCodec* codec, int xsize=19, int ysize=19, double komi=6.5, int handicap=0);
     bool fileOpen(QTextCodec* codec, const QString& fname, bool guessCodec);
-    bool urlOpen(const QUrl& url);
+    bool urlOpen(const QUrl& url, bool newTab);
     bool fileSave(Document*);
     bool fileSaveAs(Document*);
     bool fileSaveAs(Document* doc, const QString& fname);
@@ -84,7 +85,7 @@ protected:
 
     // document
     QString newDocumentName();
-    SgfDocument* createDocument(QTextCodec* codec, const QString& fname, bool guessCodec);
+    SgfDocument* openDocument(const QString& fname, QTextCodec* codec, bool guessCodec);
     void addDocument(SgfDocument* doc, BoardWidget* board=NULL);
     bool closeDocument(Document* doc, bool save=true, bool closeTab=true);
 
@@ -113,8 +114,10 @@ private:
     QTextCodec* defaultCodec;
     DocumentManager docManager;
     uint docID;
+    QProgressDialog* progressDialog;
     QUrl downloadURL;
     QByteArray downloadBuff;
+    bool downloadNewTab;
     QLabel* moveNumberLabel;
     QLabel* capturedLabel;
     int sgfLineWidth;
