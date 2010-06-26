@@ -272,3 +272,33 @@ void SetCommentCommand::setComment(const QString& comment){
     node->comment = this->comment = comment;
     document->modifyNode(node);
 }
+
+/**
+  Constructor
+*/
+SetGameInformationCommand::SetGameInformationCommand(SgfDocument* doc, Go::GameInformationPtr gameInfo_, Go::GameInformationPtr newInfo_, QUndoCommand *parent)
+    : QUndoCommand(parent)
+    , document(doc)
+    , gameInfo(gameInfo_)
+    , newInfo(newInfo_)
+    , oldInfo(new Go::GameInformation)
+{
+    *oldInfo = *gameInfo;
+}
+
+/**
+  redo set comment command
+*/
+void SetGameInformationCommand::redo(){
+    setText( tr("Set game information") );
+    *gameInfo = *newInfo;
+    document->setDirty();
+}
+
+/**
+  undo set comment command
+*/
+void SetGameInformationCommand::undo(){
+    *gameInfo = *oldInfo;
+    document->setDirty();
+}

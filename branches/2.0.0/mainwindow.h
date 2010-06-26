@@ -100,7 +100,7 @@ protected:
     void createCollectionModel(const Go::NodeList& gameList, QStandardItemModel* model);
     void createCollectionModelRow(const Go::NodePtr& game, QList<QStandardItem*>& items);
 
-    void updateCaption();
+    void updateCaption(bool updateTab);
 
     bool getOpenFileName(QString& fname, QTextCodec*& codec);
     bool getSaveFileName(QString& fname, QTextCodec*& codec);
@@ -142,6 +142,7 @@ private slots:
     void on_actionPasteSgfIntoCollection_triggered();
     void on_actionDeleteAfterCurrent_triggered();
     void on_actionDeleteCurrentOnly_triggered();
+    void on_actionGameInformation_triggered();
 
     // Navigation Menu
     void on_actionNavigationMoveFirst_triggered();

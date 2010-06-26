@@ -33,6 +33,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "boardwidget.h"
+#include "gameinformationdialog.h"
 #include "sgf.h"
 #include "sgfdocument.h"
 #include "command.h"
@@ -692,16 +693,18 @@ void MainWindow::createCollectionModelRow(const Go::NodePtr& game, QList<QStanda
 /**
   update caption
 */
-void MainWindow::updateCaption(){
-    for (int i=0; i<ui->boardTabWidget->count(); ++i){
-        BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->widget(i));
-        if (board == NULL)
-            continue;
+void MainWindow::updateCaption(bool updateTab){
+    if (updateTab){
+        for (int i=0; i<ui->boardTabWidget->count(); ++i){
+            BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->widget(i));
+            if (board == NULL)
+                continue;
 
-        if (board->document()->isDirty())
-            ui->boardTabWidget->setTabText(i, board->document()->getDocName() + " *");
-        else
-            ui->boardTabWidget->setTabText(i, board->document()->getDocName());
+            if (board->document()->isDirty())
+                ui->boardTabWidget->setTabText(i, board->document()->getDocName() + " *");
+            else
+                ui->boardTabWidget->setTabText(i, board->document()->getDocName());
+        }
     }
 
     BoardWidget* board = currentBoard();
@@ -709,8 +712,9 @@ void MainWindow::updateCaption(){
         return;
     Document* doc = board->document();
 
-    Go::NodePtr game = board->getCurrentGame();
-    Go::GameInformationPtr info = game->gameInformation;
+//    Go::NodePtr game = board->getCurrentGame();
+//    Go::GameInformationPtr info = game->gameInformation;
+    Go::GameInformationPtr info = board->getCurrentNode()->getInformation();
 
     QString title;
     if (info->blackPlayer.isEmpty() == false || info->whitePlayer.isEmpty() == false)
@@ -1202,6 +1206,21 @@ void MainWindow::on_actionDeleteCurrentOnly_triggered()
 
 /**
   Slot
+  Edit -> Game Information
+*/
+void MainWindow::on_actionGameInformation_triggered(){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    Go::NodePtr node = board->getCurrentNode();
+    GameInformationDialog dlg(this, board->document(), node->getInformation());
+    if (dlg.exec() != QDialog::Accepted)
+        return;
+}
+
+/**
+  Slot
   Navigation -> Move First
 */
 void MainWindow::on_actionNavigationMoveFirst_triggered()
@@ -1341,7 +1360,7 @@ void MainWindow::on_actionAboutQt_triggered()
   document modified
 */
 void MainWindow::on_sgfdocument_modified(bool){
-    updateCaption();
+    updateCaption(true);
  }
 
 /**
@@ -1471,6 +1490,8 @@ void MainWindow::on_boardWidget_currentNodeChanged(Go::NodePtr node){
         ui->commentWidget->setPlainText(node->comment);
         setStatusBarWidget();
     }
+
+    updateCaption(false);
 }
 
 /**
@@ -1485,7 +1506,7 @@ void MainWindow::on_boardWidget_currentGameChanged(Go::NodePtr /*game*/){
 
     createBranchWidget(doc);
 
-    updateCaption();
+    updateCaption(false);
 }
 
 /**
@@ -1519,7 +1540,7 @@ void MainWindow::on_boardTabWidget_currentChanged(QWidget* widget)
 
     undoGroup.setActiveStack(boardWidget->document()->getUndoStack());
 
-    updateCaption();
+    updateCaption(false);
 }
 
 /**

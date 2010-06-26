@@ -173,5 +173,23 @@ private:
     QString      oldComment;
 };
 
+/**
+  set game information command
+*/
+class SetGameInformationCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(SetGameInformationCommand)
+
+public:
+    SetGameInformationCommand(SgfDocument* doc, Go::GameInformationPtr gameInfo, Go::GameInformationPtr newInfo, QUndoCommand *parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+private:
+    SgfDocument* document;
+    Go::NodePtr node;
+    Go::GameInformationPtr gameInfo;
+    Go::GameInformationPtr newInfo;
+    Go::GameInformationPtr oldInfo;
+};
 
 #endif // COMMAND_H
