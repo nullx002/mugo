@@ -110,6 +110,26 @@ void BoardWidget::onRButtonDown(QMouseEvent* /*e*/){
 }
 
 /**
+  get next color
+*/
+Go::Color BoardWidget::getNextColor() const{
+    Go::NodePtr node = currentNode;
+    while(node){
+        if (node->nextColor == Go::white)
+            return Go::white;
+        else if (node->nextColor == Go::black)
+            return Go::black;
+        else if (node->color == Go::white)
+            return Go::black;
+        else if (node->color == Go::black)
+            return Go::white;
+
+        node = node->parent();
+    }
+    return Go::empty;
+}
+
+/**
   Set Document
 */
 void BoardWidget::setDocument(SgfDocument* doc){
@@ -707,15 +727,12 @@ bool BoardWidget::moveToChildItem(int x, int y){
 */
 bool BoardWidget::createChildItem(int x, int y){
     // create node
+    Go::Color nextColor = getNextColor();
     Go::NodePtr node;
-    if (currentNode->nextColor == Go::black)
+    if (nextColor == Go::black)
         node = Go::createBlackNode(currentNode, x, y);
-    else if (currentNode->nextColor == Go::white)
+    else if (nextColor == Go::white)
         node = Go::createWhiteNode(currentNode, x, y);
-    else if (currentNode->isBlack())
-        node = Go::createWhiteNode(currentNode, x, y);
-    else if (currentNode->isWhite())
-        node = Go::createBlackNode(currentNode, x, y);
     else
         return false;
 

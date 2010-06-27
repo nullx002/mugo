@@ -56,14 +56,16 @@ public:
 
 
     // get
+    const SgfDocument* document() const{ return document_; }
     SgfDocument* document(){ return document_; }
-    Go::NodePtr getCurrentGame(){ return currentGame; }
-    Go::NodePtr getCurrentNode(){ return currentNode; }
-    Go::NodeList& getCurrentNodeList(){ return currentNodeList; }
+    const Go::NodePtr& getCurrentGame() const{ return currentGame; }
+    const Go::NodePtr& getCurrentNode() const{ return currentNode; }
+    const Go::NodeList& getCurrentNodeList() const{ return currentNodeList; }
     int getMoveNumber() const{ return moveNumber; }
     int getCapturedBlack() const{ return capturedBlack; }
     int getCapturedWhite() const{ return capturedWhite; }
     BoardBuffer& getBoardBuffer(){ return boardBuffer; }
+    Go::Color getNextColor() const;
 
     // set
     void setDocument(SgfDocument* doc);
