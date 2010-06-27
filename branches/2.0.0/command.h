@@ -69,6 +69,24 @@ private:
 };
 
 /**
+  set node name command
+*/
+class SetNodeNameCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(SetNodeNameCommand)
+
+public:
+    SetNodeNameCommand(SgfDocument* doc, Go::NodePtr node, const QString& name, QUndoCommand *parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+private:
+    SgfDocument* document;
+    Go::NodePtr  node;
+    QString newName;
+    QString oldName;
+};
+
+/**
   set node annotation command
 */
 class SetNodeAnnotationCommand : public QUndoCommand{

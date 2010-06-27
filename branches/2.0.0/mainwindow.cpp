@@ -1391,6 +1391,21 @@ void MainWindow::on_actionPasteSgfIntoCollection_triggered()
 
 /**
   Slot
+  Edit -> Game Information
+*/
+void MainWindow::on_actionGameInformation_triggered(){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    Go::NodePtr node = board->getCurrentNode();
+    GameInformationDialog dlg(this, board->document(), node->getInformation());
+    if (dlg.exec() != QDialog::Accepted)
+        return;
+}
+
+/**
+  Slot
   Edit -> Delete After Current
 */
 void MainWindow::on_actionDeleteAfterCurrent_triggered()
@@ -1446,17 +1461,22 @@ void MainWindow::on_actionPass_triggered()
 
 /**
   Slot
-  Edit -> Game Information
+  Edit -> Edit Node Name
 */
-void MainWindow::on_actionGameInformation_triggered(){
+void MainWindow::on_actionEditNodeName_triggered(){
     BoardWidget* board = currentBoard();
     if (board == NULL)
         return;
 
     Go::NodePtr node = board->getCurrentNode();
-    GameInformationDialog dlg(this, board->document(), node->getInformation());
+
+    QInputDialog dlg(this);
+    dlg.setLabelText( tr("Input node name") );
+    dlg.setTextValue(node->name);
     if (dlg.exec() != QDialog::Accepted)
         return;
+
+    board->document()->getUndoStack()->push( new SetNodeNameCommand(board->document(), node, dlg.textValue()) );
 }
 
 /**

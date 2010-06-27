@@ -221,6 +221,8 @@
     <addaction name="actionDeleteCurrentOnly"/>
     <addaction name="actionPass"/>
     <addaction name="separator"/>
+    <addaction name="actionEditNodeName"/>
+    <addaction name="actionMoveNumber"/>
     <addaction name="menuMove_Annotation"/>
     <addaction name="menuNode_Annotation"/>
     <addaction name="menuAnnotation"/>
@@ -816,6 +818,16 @@
    </property>
    <property name="text">
     <string>Pass</string>
+   </property>
+  </action>
+  <action name="actionEditNodeName">
+   <property name="text">
+    <string>Edit Node Name</string>
+   </property>
+  </action>
+  <action name="actionMoveNumber">
+   <property name="text">
+    <string>Move Number</string>
    </property>
   </action>
   <action name="actionGoodMove">

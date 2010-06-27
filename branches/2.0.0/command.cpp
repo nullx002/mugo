@@ -90,6 +90,35 @@ void DeleteNodeCommand::undo(){
 /**
   Constructor
 */
+SetNodeNameCommand::SetNodeNameCommand(SgfDocument* doc, Go::NodePtr node_, const QString& name, QUndoCommand *parent)
+    : QUndoCommand(parent)
+    , document(doc)
+    , node(node_)
+    , newName(name)
+{
+    oldName = node->name;
+}
+
+/**
+  redo set node name command
+*/
+void SetNodeNameCommand::redo(){
+    setText( tr("Set Node Name") );
+    node->name = newName;
+    document->modifyNode(node);
+}
+
+/**
+  undo set node name command
+*/
+void SetNodeNameCommand::undo(){
+    node->name = oldName;
+    document->modifyNode(node);
+}
+
+/**
+  Constructor
+*/
 SetNodeAnnotationCommand::SetNodeAnnotationCommand(SgfDocument* doc, Go::NodePtr node_, Go::Node::NodeAnnotation annotation, QUndoCommand *parent)
     : QUndoCommand(parent)
     , document(doc)
