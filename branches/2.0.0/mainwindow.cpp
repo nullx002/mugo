@@ -828,6 +828,11 @@ void MainWindow::updateMenu(){
 
     Go::NodePtr node = board->getCurrentNode();
 
+    // File -> Reload
+    QAction* encodingAction = encoding.key( board->document()->getCodec() );
+    if (encodingAction)
+        encodingAction->setChecked(true);
+
     // Edit -> Annotation
     ui->actionHotspot->setChecked(node->annotation == Go::Node::hotspot);
 
