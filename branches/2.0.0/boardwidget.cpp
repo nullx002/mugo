@@ -330,9 +330,6 @@ void BoardWidget::createBuffer(bool erase){
     QList<QGraphicsSimpleTextItem*>::iterator number = numbers.begin();
     while(node != currentNodeList.end()){
         if ( inBoard(*node) ){
-            int x = (*node)->position.x;
-            int y = (*node)->position.y;
-
             if ((*node)->moveNumber > 0){
                 moveNumber = (*node)->moveNumber;
                 QList<QGraphicsSimpleTextItem*>::iterator number2 = number;
@@ -344,47 +341,35 @@ void BoardWidget::createBuffer(bool erase){
                 }
             }
 
-            TerritoryInfo ti;
-            ti.color = (*node)->color;
-            ti.moveNumber = moveNumber;
-            ti.stone = *stone;
-            ti.number = *number;
-
-            if (*stone)
-                (*stone)->show();
-
-            if (*number){
-                (*number)->show();
-                (*number)->setText( QString::number(moveNumber) );
-            }
-
-            boardBuffer[y][x] = ti;
-
-            killStones(x, y);
+            addStoneToBuffer((*node)->position.x, (*node)->position.y, (*node)->color, moveNumber, *stone, *number);
+            killStones((*node)->position.x, (*node)->position.y);
         }
 
         // add black stones
         QList<QGraphicsItem*>::iterator bstone = bstones->begin();
-        foreach(const Go::Stone& s, (*node)->blackStones){
-            TerritoryInfo ti;
-            ti.color = s.color;
-            ti.stone = *bstone;
-            boardBuffer[s.position.y][s.position.x] = ti;
-
-            (*bstone)->show();
+        foreach(const Go::Stone& stone, (*node)->blackStones){
+            addStoneToBuffer(stone.position.x, stone.position.y, stone.color, 0, *bstone, NULL);
             ++bstone;
         }
 
         // add white stones
         QList<QGraphicsItem*>::iterator wstone = wstones->begin();
-        foreach(const Go::Stone& s, (*node)->whiteStones){
-            TerritoryInfo ti;
-            ti.color = s.color;
-            ti.stone = *bstone;
-            boardBuffer[s.position.y][s.position.x] = ti;
+        foreach(const Go::Stone& stone, (*node)->whiteStones){
+            addStoneToBuffer(stone.position.x, stone.position.y, stone.color, 0, *wstone, NULL);
+            ++wstone;
+        }
 
-            (*wstone)->show();
-            ++bstone;
+        // add empty stones
+        foreach(const Go::Stone& stone, (*node)->emptyStones){
+            TerritoryInfo& ti = boardBuffer[stone.position.y][stone.position.x];
+            if (ti.stone){
+                ti.stone->hide();
+                ti.stone = NULL;
+            }
+            if (ti.number){
+                ti.number->hide();
+                ti.number = NULL;
+            }
         }
 
         ++stone;
@@ -502,6 +487,27 @@ void BoardWidget::eraseBuffer(){
             whiteStones.last().push_back(item);
         }
     }
+}
+
+/**
+  create TerritoryInfo and set to boardBuffer
+*/
+BoardWidget::TerritoryInfo& BoardWidget::addStoneToBuffer(int x, int y, Go::Color color, int moveNumber, QGraphicsItem* stone, QGraphicsSimpleTextItem* number){
+    TerritoryInfo ti;
+    ti.color = color;
+    ti.moveNumber = moveNumber;
+    ti.stone = stone;
+    ti.number = number;
+    boardBuffer[y][x] = ti;
+
+    stone->show();
+
+    if (number){
+        number->show();
+        number->setText( QString::number(moveNumber) );
+    }
+
+    return boardBuffer[y][x];
 }
 
 /**

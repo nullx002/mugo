@@ -92,6 +92,7 @@ protected:
     void createBuffer(bool erase);
     void eraseBuffer();
     QGraphicsItem* createStoneItem(int x, int y, Go::Color color);
+    TerritoryInfo& addStoneToBuffer(int x, int y, Go::Color color, int moveNumber, QGraphicsItem* stone, QGraphicsSimpleTextItem* number);
     void getStarPosition(QList<int>& xpos, QList<int>& ypos);
     void killStones(int x, int y);
     void killStones(char* buf);
