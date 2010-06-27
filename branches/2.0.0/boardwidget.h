@@ -87,7 +87,11 @@ protected:
     void onRButtonDown(QMouseEvent* e);
 
     void setItemsPosition();
+    void setStoneItemPosition(QGraphicsItem* item, int x, int y);
+    void setTextItemPosition(QGraphicsSimpleTextItem* text, int x, int y);
     void createBuffer(bool erase);
+    void eraseBuffer();
+    QGraphicsItem* createStoneItem(int x, int y, Go::Color color);
     void getStarPosition(QList<int>& xpos, QList<int>& ypos);
     void killStones(int x, int y);
     void killStones(char* buf);
@@ -112,6 +116,8 @@ private:
     QList<QGraphicsLineItem*> vLines;
     QList<QGraphicsEllipseItem*> stars;
     QList<QGraphicsItem*> stones;
+    QList< QList<QGraphicsItem*> > blackStones;
+    QList< QList<QGraphicsItem*> > whiteStones;
     QList<QGraphicsSimpleTextItem*> numbers;
     Go::NodePtr currentNode;
     Go::NodeList currentNodeList;
