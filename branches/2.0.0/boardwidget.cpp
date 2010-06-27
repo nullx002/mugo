@@ -401,8 +401,9 @@ void BoardWidget::createBuffer(bool erase){
             break;
         }
 
+        if ((*node)->isStone())
+            ++moveNumber;
         ++node;
-        ++moveNumber;
     };
 
     int moveNumber2 = moveNumber + 1;
