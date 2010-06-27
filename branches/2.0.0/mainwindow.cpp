@@ -373,13 +373,24 @@ bool MainWindow::fileSave(Document* doc){
     save
 */
 bool MainWindow::fileSaveAs(Document* doc){
+    // initial path for save dialog
+    QString initialPath;
+    if (doc->getFileName().isEmpty() == false)
+        initialPath = doc->getFileName();
+    else{
+        initialPath = doc->getDocName();
+        QFileInfo fi(initialPath);
+        if (fi.suffix().isEmpty())
+            initialPath += ".sgf";
+    }
+
+    // get save filename
     QString fname;
     QTextCodec* codec = doc->getCodec();
-    if (getSaveFileName(fname, codec) == false)
+    if (getSaveFileName(initialPath, fname, codec) == false)
         return false;
 
     SgfDocument* sgfDoc = qobject_cast<SgfDocument*>(doc);
-
     QFileInfo fi(fname);
     if (fi.suffix().isEmpty()){
         if (sgfDoc)
@@ -914,7 +925,7 @@ bool MainWindow::getOpenFileName(QString& fname, QTextCodec*& codec){
 /**
   get save file name
 */
-bool MainWindow::getSaveFileName(QString& fname, QTextCodec*& codec){
+bool MainWindow::getSaveFileName(const QString& initialPath, QString& fname, QTextCodec*& codec){
     QString filter = "Smart Game Format (*.sgf);;All Files (*.*)";
 /*
     QString fname = QFileDialog::getSaveFileName(this, QString(), QString(doc->getDocName()), filter, NULL);
@@ -922,7 +933,7 @@ bool MainWindow::getSaveFileName(QString& fname, QTextCodec*& codec){
         return false;
 */
 
-    QFileDialog dlg(this, QString(), QString(), filter);
+    QFileDialog dlg(this, QString(), initialPath, filter);
     dlg.setAcceptMode(QFileDialog::AcceptSave);
 
     QLayout* layout = dlg.layout();

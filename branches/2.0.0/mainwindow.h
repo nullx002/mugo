@@ -107,7 +107,7 @@ protected:
     void updateMenu();
 
     bool getOpenFileName(QString& fname, QTextCodec*& codec);
-    bool getSaveFileName(QString& fname, QTextCodec*& codec);
+    bool getSaveFileName(const QString& initialPath, QString& fname, QTextCodec*& codec);
 
 private:
     Ui::MainWindow *ui;
