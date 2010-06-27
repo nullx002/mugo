@@ -65,86 +65,11 @@ MainWindow::MainWindow(const QString& fname, QWidget *parent)
     // keyboard shortcut
     setKeyboardShortcut();
 
-    // File -> Reload
-    ui->fileToolBar->insertAction( ui->actionExportBoardAsImage, ui->menuReload->menuAction() );
-    ui->fileToolBar->insertSeparator( ui->actionExportBoardAsImage );
-
-    // File -> Collection
-    ui->collectionToolBar->insertAction(ui->collectionToolBar->actions().at(0), ui->collectionDockWidget->toggleViewAction());
-    ui->collectionDockWidget->toggleViewAction()->setIcon( QIcon(":/res/collection.png") );
-
-    // Edit -> undo/redo
-    QAction* undoAction = undoGroup.createUndoAction(this);
-    QAction* redoAction = undoGroup.createRedoAction(this);
-    undoAction->setShortcut(QKeySequence::Undo);
-    redoAction->setShortcut(QKeySequence::Redo);
-    undoAction->setIcon( QIcon(":/res/undo.png") );
-    redoAction->setIcon( QIcon(":/res/redo.png") );
-    ui->menuEdit->insertAction(ui->menuEdit->actions().at(0), redoAction);
-    ui->menuEdit->insertAction(redoAction, undoAction);
-    ui->editToolBar->insertAction(ui->editToolBar->actions().at(0), redoAction);
-    ui->editToolBar->insertAction(redoAction, undoAction);
-
-    // window -> toolbars menu
-    ui->menuToolbars->addAction( ui->fileToolBar->toggleViewAction() );
-    ui->menuToolbars->addAction( ui->editToolBar->toggleViewAction() );
-    ui->menuToolbars->addAction( ui->navigationToolBar->toggleViewAction() );
-    ui->menuToolbars->addAction( ui->collectionToolBar->toggleViewAction() );
-
-    // window (dock view)
-    ui->menuWindow->insertAction( ui->actionPreviousTab, ui->commentDockWidget->toggleViewAction() );
-    ui->menuWindow->insertAction( ui->actionPreviousTab, ui->branchDockWidget->toggleViewAction() );
-    ui->menuWindow->insertAction( ui->actionPreviousTab, ui->collectionDockWidget->toggleViewAction() );
-    ui->menuWindow->insertAction( ui->actionPreviousTab, ui->undoDockWidget->toggleViewAction() );
-    ui->menuWindow->insertSeparator( ui->actionPreviousTab );
-
-    // default view
-    ui->collectionDockWidget->hide();
-    ui->undoDockWidget->hide();
-
-    // undo view
-    ui->undoView->setGroup(&undoGroup);
+    // menu
+    createMenu();
 
     // encoding
-    connect(ui->menuReload->menuAction(), SIGNAL(triggered()), SLOT(on_actionReload_triggered()));
-    QActionGroup* encodingGroup = new QActionGroup(this);
-    foreach(QAction* act, ui->menuReload->actions()){
-        encodingGroup->addAction(act);
-        connect(act, SIGNAL(triggered()), SLOT(on_actionReload_triggered()));
-    }
-    encoding[ui->actionEncodingUTF8] = QTextCodec::codecForName("UTF-8");
-    encoding[ui->actionEncodingISO8859_1] = QTextCodec::codecForName("ISO-8859-1");
-    encoding[ui->actionEncodingISO8859_2] = QTextCodec::codecForName("ISO-8859-2");
-    encoding[ui->actionEncodingISO8859_3] = QTextCodec::codecForName("ISO-8859-3");
-    encoding[ui->actionEncodingISO8859_4] = QTextCodec::codecForName("ISO-8859-4");
-    encoding[ui->actionEncodingISO8859_5] = QTextCodec::codecForName("ISO-8859-5");
-    encoding[ui->actionEncodingISO8859_6] = QTextCodec::codecForName("ISO-8859-6");
-    encoding[ui->actionEncodingISO8859_7] = QTextCodec::codecForName("ISO-8859-7");
-    encoding[ui->actionEncodingISO8859_8] = QTextCodec::codecForName("ISO-8859-8");
-    encoding[ui->actionEncodingISO8859_9] = QTextCodec::codecForName("ISO-8859-9");
-    encoding[ui->actionEncodingISO8859_10] = QTextCodec::codecForName("ISO-8859-10");
-    encoding[ui->actionEncodingISO8859_11] = QTextCodec::codecForName("TIS-620");
-    encoding[ui->actionEncodingISO8859_13] = QTextCodec::codecForName("ISO-8859-13");
-    encoding[ui->actionEncodingISO8859_14] = QTextCodec::codecForName("ISO-8859-14");
-    encoding[ui->actionEncodingISO8859_15] = QTextCodec::codecForName("ISO-8859-15");
-    encoding[ui->actionEncodingISO8859_16] = QTextCodec::codecForName("ISO-8859-16");
-    encoding[ui->actionEncodingWindows_1250] = QTextCodec::codecForName("windows-1250");
-    encoding[ui->actionEncodingWindows_1251] = QTextCodec::codecForName("windows-1251");
-    encoding[ui->actionEncodingWindows_1252] = QTextCodec::codecForName("windows-1252");
-    encoding[ui->actionEncodingWindows_1253] = QTextCodec::codecForName("windows-1253");
-    encoding[ui->actionEncodingWindows_1254] = QTextCodec::codecForName("windows-1254");
-    encoding[ui->actionEncodingWindows_1255] = QTextCodec::codecForName("windows-1255");
-    encoding[ui->actionEncodingWindows_1256] = QTextCodec::codecForName("windows-1256");
-    encoding[ui->actionEncodingWindows_1257] = QTextCodec::codecForName("windows-1257");
-    encoding[ui->actionEncodingWindows_1258] = QTextCodec::codecForName("windows-1258");
-    encoding[ui->actionEncodingKoi8_R] = QTextCodec::codecForName("KOI8-R");
-    encoding[ui->actionEncodingKoi8_U] = QTextCodec::codecForName("KOI8-U");
-    encoding[ui->actionEncodingGB2312] = QTextCodec::codecForName("GB2312");
-    encoding[ui->actionEncodingBig5] = QTextCodec::codecForName("Big5");
-    encoding[ui->actionEncodingShiftJIS] = QTextCodec::codecForName("Shift_JIS");
-    encoding[ui->actionEncodingJIS] = QTextCodec::codecForName("ISO-2022-JP");
-    encoding[ui->actionEncodingEucJP] = QTextCodec::codecForName("EUC-JP");
-    encoding[ui->actionEncodingKorean] = QTextCodec::codecForName("EUC-KR");
+    createEncodingAction();
 
     // status bar
     moveNumberLabel = new QLabel;
@@ -162,7 +87,7 @@ MainWindow::MainWindow(const QString& fname, QWidget *parent)
     restoreState( settings.value("docksState").toByteArray() );
     ui->collectionView->header()->restoreState( settings.value("collectionState").toByteArray() );
 
-    // open or new tab
+    // open or create new tab
     if (fname.isEmpty())
         fileNew(defaultCodec);
     else
@@ -246,6 +171,116 @@ void MainWindow::setKeyboardShortcut(){
     ui->actionPasteSgfToNewTab->setShortcut(QKeySequence::Paste);
     ui->actionPreviousTab->setShortcut(QKeySequence::PreviousChild);
     ui->actionNextTab->setShortcut(QKeySequence::NextChild);
+}
+
+/**
+  create menu
+*/
+void MainWindow::createMenu(){
+    // File -> Reload
+    ui->fileToolBar->insertAction( ui->actionExportBoardAsImage, ui->menuReload->menuAction() );
+    ui->fileToolBar->insertSeparator( ui->actionExportBoardAsImage );
+    connect(ui->menuReload->menuAction(), SIGNAL(triggered()), SLOT(on_actionReload_triggered()));
+
+    // File -> Collection
+    ui->collectionToolBar->insertAction(ui->collectionToolBar->actions().at(0), ui->collectionDockWidget->toggleViewAction());
+    ui->collectionDockWidget->toggleViewAction()->setIcon( QIcon(":/res/collection.png") );
+
+    // Edit -> undo/redo
+    QAction* undoAction = undoGroup.createUndoAction(this);
+    QAction* redoAction = undoGroup.createRedoAction(this);
+    undoAction->setShortcut(QKeySequence::Undo);
+    redoAction->setShortcut(QKeySequence::Redo);
+    undoAction->setIcon( QIcon(":/res/undo.png") );
+    redoAction->setIcon( QIcon(":/res/redo.png") );
+    ui->menuEdit->insertAction(ui->menuEdit->actions().at(0), redoAction);
+    ui->menuEdit->insertAction(redoAction, undoAction);
+    ui->editToolBar->insertAction(ui->editToolBar->actions().at(0), redoAction);
+    ui->editToolBar->insertAction(redoAction, undoAction);
+
+    // Edit -> Annotation
+    QActionGroup* nodeAnnotationGroup = new QActionGroup(this);
+    nodeAnnotationGroup->addAction(ui->actionNoNodeAnnotation);
+    nodeAnnotationGroup->addAction(ui->actionEven);
+    nodeAnnotationGroup->addAction(ui->actionGoodForBlack);
+    nodeAnnotationGroup->addAction(ui->actionVeryGoodForBlack);
+    nodeAnnotationGroup->addAction(ui->actionGoodForWhite);
+    nodeAnnotationGroup->addAction(ui->actionVeryGoodForWhite);
+    nodeAnnotationGroup->addAction(ui->actionUnclear);
+
+    QActionGroup* moveAnnotationGroup = new QActionGroup(this);
+    moveAnnotationGroup->addAction(ui->actionNoMoveAnnotation);
+    moveAnnotationGroup->addAction(ui->actionGoodMove);
+    moveAnnotationGroup->addAction(ui->actionVeryGoodMove);
+    moveAnnotationGroup->addAction(ui->actionBadMove);
+    moveAnnotationGroup->addAction(ui->actionVeryBadMove);
+    moveAnnotationGroup->addAction(ui->actionDoubtfulMove);
+    moveAnnotationGroup->addAction(ui->actionInterestingMove);
+
+    // window -> toolbars menu
+    ui->menuToolbars->addAction( ui->fileToolBar->toggleViewAction() );
+    ui->menuToolbars->addAction( ui->editToolBar->toggleViewAction() );
+    ui->menuToolbars->addAction( ui->navigationToolBar->toggleViewAction() );
+    ui->menuToolbars->addAction( ui->collectionToolBar->toggleViewAction() );
+
+    // window (dock view)
+    ui->menuWindow->insertAction( ui->actionPreviousTab, ui->commentDockWidget->toggleViewAction() );
+    ui->menuWindow->insertAction( ui->actionPreviousTab, ui->branchDockWidget->toggleViewAction() );
+    ui->menuWindow->insertAction( ui->actionPreviousTab, ui->collectionDockWidget->toggleViewAction() );
+    ui->menuWindow->insertAction( ui->actionPreviousTab, ui->undoDockWidget->toggleViewAction() );
+    ui->menuWindow->insertSeparator( ui->actionPreviousTab );
+
+    // default view
+    ui->collectionDockWidget->hide();
+    ui->undoDockWidget->hide();
+
+    // undo view
+    ui->undoView->setGroup(&undoGroup);
+}
+
+/**
+  create encoding action
+*/
+void MainWindow::createEncodingAction(){
+    QActionGroup* encodingGroup = new QActionGroup(this);
+    foreach(QAction* act, ui->menuReload->actions()){
+        encodingGroup->addAction(act);
+        connect(act, SIGNAL(triggered()), SLOT(on_actionReload_triggered()));
+    }
+
+    encoding[ui->actionEncodingUTF8] = QTextCodec::codecForName("UTF-8");
+    encoding[ui->actionEncodingISO8859_1] = QTextCodec::codecForName("ISO-8859-1");
+    encoding[ui->actionEncodingISO8859_2] = QTextCodec::codecForName("ISO-8859-2");
+    encoding[ui->actionEncodingISO8859_3] = QTextCodec::codecForName("ISO-8859-3");
+    encoding[ui->actionEncodingISO8859_4] = QTextCodec::codecForName("ISO-8859-4");
+    encoding[ui->actionEncodingISO8859_5] = QTextCodec::codecForName("ISO-8859-5");
+    encoding[ui->actionEncodingISO8859_6] = QTextCodec::codecForName("ISO-8859-6");
+    encoding[ui->actionEncodingISO8859_7] = QTextCodec::codecForName("ISO-8859-7");
+    encoding[ui->actionEncodingISO8859_8] = QTextCodec::codecForName("ISO-8859-8");
+    encoding[ui->actionEncodingISO8859_9] = QTextCodec::codecForName("ISO-8859-9");
+    encoding[ui->actionEncodingISO8859_10] = QTextCodec::codecForName("ISO-8859-10");
+    encoding[ui->actionEncodingISO8859_11] = QTextCodec::codecForName("TIS-620");
+    encoding[ui->actionEncodingISO8859_13] = QTextCodec::codecForName("ISO-8859-13");
+    encoding[ui->actionEncodingISO8859_14] = QTextCodec::codecForName("ISO-8859-14");
+    encoding[ui->actionEncodingISO8859_15] = QTextCodec::codecForName("ISO-8859-15");
+    encoding[ui->actionEncodingISO8859_16] = QTextCodec::codecForName("ISO-8859-16");
+    encoding[ui->actionEncodingWindows_1250] = QTextCodec::codecForName("windows-1250");
+    encoding[ui->actionEncodingWindows_1251] = QTextCodec::codecForName("windows-1251");
+    encoding[ui->actionEncodingWindows_1252] = QTextCodec::codecForName("windows-1252");
+    encoding[ui->actionEncodingWindows_1253] = QTextCodec::codecForName("windows-1253");
+    encoding[ui->actionEncodingWindows_1254] = QTextCodec::codecForName("windows-1254");
+    encoding[ui->actionEncodingWindows_1255] = QTextCodec::codecForName("windows-1255");
+    encoding[ui->actionEncodingWindows_1256] = QTextCodec::codecForName("windows-1256");
+    encoding[ui->actionEncodingWindows_1257] = QTextCodec::codecForName("windows-1257");
+    encoding[ui->actionEncodingWindows_1258] = QTextCodec::codecForName("windows-1258");
+    encoding[ui->actionEncodingKoi8_R] = QTextCodec::codecForName("KOI8-R");
+    encoding[ui->actionEncodingKoi8_U] = QTextCodec::codecForName("KOI8-U");
+    encoding[ui->actionEncodingGB2312] = QTextCodec::codecForName("GB2312");
+    encoding[ui->actionEncodingBig5] = QTextCodec::codecForName("Big5");
+    encoding[ui->actionEncodingShiftJIS] = QTextCodec::codecForName("Shift_JIS");
+    encoding[ui->actionEncodingJIS] = QTextCodec::codecForName("ISO-2022-JP");
+    encoding[ui->actionEncodingEucJP] = QTextCodec::codecForName("EUC-JP");
+    encoding[ui->actionEncodingKorean] = QTextCodec::codecForName("EUC-KR");
 }
 
 /**
@@ -641,6 +676,8 @@ QTreeWidgetItem* MainWindow::createBranchItem(BoardWidget* board, Go::NodePtr no
 */
 QString MainWindow::getBranchItemText(BoardWidget* board, Go::NodePtr node){
     QString str;
+
+    // node type
     if (node->isStone() == false && !node->gameInformation)
         str = tr("Other");
     else if (node->isStone() && node->isPass())
@@ -648,15 +685,49 @@ QString MainWindow::getBranchItemText(BoardWidget* board, Go::NodePtr node){
     else if (node->isStone())
         str = board->getCoordinateString(node, false);
 
+    // node name
     if (node->name.isEmpty() == false)
         str += " " + node->name;
 
+    // comment
     if (node->comment.isEmpty() == false)
         str += " " + tr("Comment");
 
+    // node annotation
+    if (node->nodeAnnotation == Go::Node::even)
+        str += " " + tr("[Even]");
+    else if(node->nodeAnnotation == Go::Node::goodForBlack)
+        str += " " + tr("[Good for Black]");
+    else if(node->nodeAnnotation == Go::Node::veryGoodForBlack)
+        str += " " + tr("[Very Good for Black]");
+    else if(node->nodeAnnotation == Go::Node::goodForWhite)
+        str += " " + tr("[Good for White]");
+    else if(node->nodeAnnotation == Go::Node::veryGoodForWhite)
+        str += " " + tr("[Very Good for White]");
+    else if(node->nodeAnnotation == Go::Node::unclear)
+        str += " " + tr("[Unclear]");
+
+    // move annotation
+    if (node->moveAnnotation == Go::Node::goodMove)
+        str += " " + tr("[Good Move]");
+    else if(node->moveAnnotation == Go::Node::veryGoodMove)
+        str += " " + tr("[Very Good Move]");
+    else if(node->moveAnnotation == Go::Node::badMove)
+        str += " " + tr("[Bad Move]");
+    else if(node->moveAnnotation == Go::Node::veryBadMove)
+        str += " " + tr("[Very Bad Move]");
+    else if(node->moveAnnotation == Go::Node::doubtfulMove)
+        str += " " + tr("[Doubtful Move]");
+    else if(node->moveAnnotation == Go::Node::interestingMove)
+        str += " " + tr("[Interesting Move]");
+
+    // annotation
+    if (node->annotation == Go::Node::hotspot)
+        str += " " + tr("[Hotspot]");
+
+    // game information
     if (str.isEmpty() == false && str[0].isSpace())
         str.remove(0, 1);
-
     if (node->gameInformation){
         if (str.isEmpty())
             str = tr("Game Information");
@@ -735,6 +806,53 @@ void MainWindow::updateCaption(bool updateTab){
 
     setWindowTitle(title);
 }
+
+/**
+  update menu
+*/
+void MainWindow::updateMenu(){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    Go::NodePtr node = board->getCurrentNode();
+
+    // Edit -> Annotation
+    ui->actionHotspot->setChecked(node->annotation == Go::Node::hotspot);
+
+    // Edit -> Move Annotation
+    if (node->moveAnnotation == Go::Node::noMoveAnnotation)
+        ui->actionNoMoveAnnotation->setChecked(true);
+    else if (node->moveAnnotation == Go::Node::goodMove)
+        ui->actionGoodMove->setChecked(true);
+    else if (node->moveAnnotation == Go::Node::veryGoodMove)
+        ui->actionVeryGoodMove->setChecked(true);
+    else if (node->moveAnnotation == Go::Node::badMove)
+        ui->actionBadMove->setChecked(true);
+    else if (node->moveAnnotation == Go::Node::veryBadMove)
+        ui->actionVeryBadMove->setChecked(true);
+    else if (node->moveAnnotation == Go::Node::doubtfulMove)
+        ui->actionDoubtfulMove->setChecked(true);
+    else if (node->moveAnnotation == Go::Node::interestingMove)
+        ui->actionInterestingMove->setChecked(true);
+
+    // Edit -> Node Annotation
+    if (node->nodeAnnotation == Go::Node::noNodeAnnotation)
+        ui->actionNoNodeAnnotation->setChecked(true);
+    else if (node->nodeAnnotation == Go::Node::even)
+        ui->actionEven->setChecked(true);
+    else if (node->nodeAnnotation == Go::Node::goodForBlack)
+        ui->actionGoodForBlack->setChecked(true);
+    else if (node->nodeAnnotation == Go::Node::veryGoodForBlack)
+        ui->actionVeryGoodForBlack->setChecked(true);
+    else if (node->nodeAnnotation == Go::Node::goodForWhite)
+        ui->actionGoodForWhite->setChecked(true);
+    else if (node->nodeAnnotation == Go::Node::veryGoodForWhite)
+        ui->actionVeryGoodForWhite->setChecked(true);
+    else if (node->nodeAnnotation == Go::Node::unclear)
+        ui->actionUnclear->setChecked(true);
+}
+
 
 /**
   remove node from NodeToTreeMap
@@ -1269,6 +1387,187 @@ void MainWindow::on_actionGameInformation_triggered(){
 
 /**
   Slot
+  Edit -> Node Annotation -> No Annotation
+*/
+void MainWindow::on_actionNoNodeAnnotation_triggered(){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    board->document()->getUndoStack()->push( new SetNodeAnnotationCommand(board->document(), board->getCurrentNode(), Go::Node::noNodeAnnotation) );
+}
+
+/**
+  Slot
+  Edit -> Node Annotation -> Even
+*/
+void MainWindow::on_actionEven_triggered(){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    board->document()->getUndoStack()->push( new SetNodeAnnotationCommand(board->document(), board->getCurrentNode(), Go::Node::even) );
+}
+
+/**
+  Slot
+  Edit -> Node Annotation -> Good for Black
+*/
+void MainWindow::on_actionGoodForBlack_triggered(){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    board->document()->getUndoStack()->push( new SetNodeAnnotationCommand(board->document(), board->getCurrentNode(), Go::Node::goodForBlack) );
+}
+
+/**
+  Slot
+  Edit -> Node Annotation -> Very Good for Black
+*/
+void MainWindow::on_actionVeryGoodForBlack_triggered(){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    board->document()->getUndoStack()->push( new SetNodeAnnotationCommand(board->document(), board->getCurrentNode(), Go::Node::veryGoodForBlack) );
+}
+
+/**
+  Slot
+  Edit -> Node Annotation -> Good for White
+*/
+void MainWindow::on_actionGoodForWhite_triggered(){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    board->document()->getUndoStack()->push( new SetNodeAnnotationCommand(board->document(), board->getCurrentNode(), Go::Node::goodForWhite) );
+}
+
+/**
+  Slot
+  Edit -> Node Annotation -> Very Good for White
+*/
+void MainWindow::on_actionVeryGoodForWhite_triggered(){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    board->document()->getUndoStack()->push( new SetNodeAnnotationCommand(board->document(), board->getCurrentNode(), Go::Node::veryGoodForWhite) );
+}
+
+/**
+  Slot
+  Edit -> Node Annotation -> Unclear
+*/
+void MainWindow::on_actionUnclear_triggered(){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    board->document()->getUndoStack()->push( new SetNodeAnnotationCommand(board->document(), board->getCurrentNode(), Go::Node::unclear) );
+}
+
+/**
+  Slot
+  Edit -> Move Annotation -> No Annotation
+*/
+void MainWindow::on_actionNoMoveAnnotation_triggered(){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    board->document()->getUndoStack()->push( new SetMoveAnnotationCommand(board->document(), board->getCurrentNode(), Go::Node::noMoveAnnotation) );
+}
+
+/**
+  Slot
+  Edit -> Move Annotation -> Good Move
+*/
+void MainWindow::on_actionGoodMove_triggered(){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    board->document()->getUndoStack()->push( new SetMoveAnnotationCommand(board->document(), board->getCurrentNode(), Go::Node::goodMove) );
+}
+
+/**
+  Slot
+  Edit -> Move Annotation -> Very Good Move
+*/
+void MainWindow::on_actionVeryGoodMove_triggered(){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    board->document()->getUndoStack()->push( new SetMoveAnnotationCommand(board->document(), board->getCurrentNode(), Go::Node::veryGoodMove) );
+}
+
+/**
+  Slot
+  Edit -> Move Annotation -> Bad Move
+*/
+void MainWindow::on_actionBadMove_triggered(){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    board->document()->getUndoStack()->push( new SetMoveAnnotationCommand(board->document(), board->getCurrentNode(), Go::Node::badMove) );
+}
+
+/**
+  Slot
+  Edit -> Move Annotation -> Very Bad Move
+*/
+void MainWindow::on_actionVeryBadMove_triggered(){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    board->document()->getUndoStack()->push( new SetMoveAnnotationCommand(board->document(), board->getCurrentNode(), Go::Node::veryBadMove) );
+}
+
+/**
+  Slot
+  Edit -> Move Annotation -> Doubtful Move
+*/
+void MainWindow::on_actionDoubtfulMove_triggered(){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    board->document()->getUndoStack()->push( new SetMoveAnnotationCommand(board->document(), board->getCurrentNode(), Go::Node::doubtfulMove) );
+}
+
+/**
+  Slot
+  Edit -> Move Annotation -> Interesting Move
+*/
+void MainWindow::on_actionInterestingMove_triggered(){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    board->document()->getUndoStack()->push( new SetMoveAnnotationCommand(board->document(), board->getCurrentNode(), Go::Node::interestingMove) );
+}
+
+/**
+  Slot
+  Edit -> Annotation -> Hotspot
+*/
+void MainWindow::on_actionHotspot_triggered(bool checked){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    board->document()->getUndoStack()->push( new SetAnnotationCommand(board->document(), board->getCurrentNode(), checked ? Go::Node::hotspot : Go::Node::noAnnotation) );
+}
+
+
+/**
+  Slot
   Navigation -> Move First
 */
 void MainWindow::on_actionNavigationMoveFirst_triggered()
@@ -1467,15 +1766,21 @@ void MainWindow::on_sgfdocument_nodeDeleted(Go::NodePtr node, bool removeChildre
 */
 void MainWindow::on_sgfdocument_nodeModified(Go::NodePtr node){
     BoardWidget* board = currentBoard();
+
+    // set comment
     if (board->getCurrentNode() == node){
         if (node->comment != ui->commentWidget->toPlainText())
             ui->commentWidget->setPlainText( node->comment );
     }
 
+    // set tree text
     SgfDocument* doc = qobject_cast<SgfDocument*>(sender());
     QTreeWidgetItem* item = docManager[doc].nodeToTreeItem[node];
     if (item)
         item->setText( 0, getBranchItemText(board, node) );
+
+    // update menu
+    updateMenu();
 }
 
 /**
@@ -1540,6 +1845,7 @@ void MainWindow::on_boardWidget_currentNodeChanged(Go::NodePtr node){
     }
 
     updateCaption(false);
+    updateMenu();
 }
 
 /**
@@ -1553,8 +1859,6 @@ void MainWindow::on_boardWidget_currentGameChanged(Go::NodePtr /*game*/){
     SgfDocument* doc = board->document();
 
     createBranchWidget(doc);
-
-    updateCaption(false);
 }
 
 /**
@@ -1589,6 +1893,7 @@ void MainWindow::on_boardTabWidget_currentChanged(QWidget* widget)
     undoGroup.setActiveStack(boardWidget->document()->getUndoStack());
 
     updateCaption(false);
+    updateMenu();
 }
 
 /**

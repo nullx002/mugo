@@ -14,7 +14,7 @@
    <string>mugo</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="mugo.qrc">
+   <iconset>
     <normaloff>:/pics/mugo.png</normaloff>:/pics/mugo.png</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
@@ -62,7 +62,7 @@
      <x>0</x>
      <y>0</y>
      <width>600</width>
-     <height>24</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -74,7 +74,7 @@
       <string>Reload</string>
      </property>
      <property name="icon">
-      <iconset resource="mugo.qrc">
+      <iconset>
        <normaloff>:/res/reload.png</normaloff>:/res/reload.png</iconset>
      </property>
      <addaction name="actionEncodingUTF8"/>
@@ -177,6 +177,38 @@
     <property name="title">
      <string>&amp;Edit</string>
     </property>
+    <widget class="QMenu" name="menuAnnotation">
+     <property name="title">
+      <string>Annotation</string>
+     </property>
+     <addaction name="actionHotspot"/>
+    </widget>
+    <widget class="QMenu" name="menuMove_Annotation">
+     <property name="title">
+      <string>Move Annotation</string>
+     </property>
+     <addaction name="actionNoMoveAnnotation"/>
+     <addaction name="separator"/>
+     <addaction name="actionGoodMove"/>
+     <addaction name="actionVeryGoodMove"/>
+     <addaction name="actionBadMove"/>
+     <addaction name="actionVeryBadMove"/>
+     <addaction name="actionDoubtfulMove"/>
+     <addaction name="actionInterestingMove"/>
+    </widget>
+    <widget class="QMenu" name="menuNode_Annotation">
+     <property name="title">
+      <string>Node Annotation</string>
+     </property>
+     <addaction name="actionNoNodeAnnotation"/>
+     <addaction name="separator"/>
+     <addaction name="actionEven"/>
+     <addaction name="actionGoodForBlack"/>
+     <addaction name="actionVeryGoodForBlack"/>
+     <addaction name="actionGoodForWhite"/>
+     <addaction name="actionVeryGoodForWhite"/>
+     <addaction name="actionUnclear"/>
+    </widget>
     <addaction name="separator"/>
     <addaction name="actionCopySgfToClipboard"/>
     <addaction name="actionCopyCurrentBranchToClipboard"/>
@@ -188,6 +220,10 @@
     <addaction name="actionDeleteAfterCurrent"/>
     <addaction name="actionDeleteCurrentOnly"/>
     <addaction name="actionPass"/>
+    <addaction name="separator"/>
+    <addaction name="menuMove_Annotation"/>
+    <addaction name="menuNode_Annotation"/>
+    <addaction name="menuAnnotation"/>
    </widget>
    <widget class="QMenu" name="menuNavigation">
     <property name="title">
@@ -369,7 +405,7 @@
   </widget>
   <action name="actionNew">
    <property name="icon">
-    <iconset resource="mugo.qrc">
+    <iconset>
      <normaloff>:/res/filenew.png</normaloff>:/res/filenew.png</iconset>
    </property>
    <property name="text">
@@ -378,7 +414,7 @@
   </action>
   <action name="actionOpen">
    <property name="icon">
-    <iconset resource="mugo.qrc">
+    <iconset>
      <normaloff>:/res/fileopen.png</normaloff>:/res/fileopen.png</iconset>
    </property>
    <property name="text">
@@ -392,7 +428,7 @@
   </action>
   <action name="actionSave">
    <property name="icon">
-    <iconset resource="mugo.qrc">
+    <iconset>
      <normaloff>:/res/filesave.png</normaloff>:/res/filesave.png</iconset>
    </property>
    <property name="text">
@@ -416,7 +452,7 @@
   </action>
   <action name="actionExportBoardAsImage">
    <property name="icon">
-    <iconset resource="mugo.qrc">
+    <iconset>
      <normaloff>:/res/saveimage.png</normaloff>:/res/saveimage.png</iconset>
    </property>
    <property name="text">
@@ -430,7 +466,7 @@
   </action>
   <action name="actionCollectionExtract">
    <property name="icon">
-    <iconset resource="mugo.qrc">
+    <iconset>
      <normaloff>:/res/collectionextract.png</normaloff>:/res/collectionextract.png</iconset>
    </property>
    <property name="text">
@@ -439,7 +475,7 @@
   </action>
   <action name="actionCollectionImport">
    <property name="icon">
-    <iconset resource="mugo.qrc">
+    <iconset>
      <normaloff>:/res/collectionimport.png</normaloff>:/res/collectionimport.png</iconset>
    </property>
    <property name="text">
@@ -742,7 +778,7 @@
   </action>
   <action name="actionGameInformation">
    <property name="icon">
-    <iconset resource="mugo.qrc">
+    <iconset>
      <normaloff>:/res/gameinfo.png</normaloff>:/res/gameinfo.png</iconset>
    </property>
    <property name="text">
@@ -751,7 +787,7 @@
   </action>
   <action name="actionDeleteAfterCurrent">
    <property name="icon">
-    <iconset resource="mugo.qrc">
+    <iconset>
      <normaloff>:/res/remove.png</normaloff>:/res/remove.png</iconset>
    </property>
    <property name="text">
@@ -763,7 +799,7 @@
   </action>
   <action name="actionDeleteCurrentOnly">
    <property name="icon">
-    <iconset resource="mugo.qrc">
+    <iconset>
      <normaloff>:/res/removeself.png</normaloff>:/res/removeself.png</iconset>
    </property>
    <property name="text">
@@ -775,16 +811,136 @@
   </action>
   <action name="actionPass">
    <property name="icon">
-    <iconset resource="mugo.qrc">
+    <iconset>
      <normaloff>:/res/pass.png</normaloff>:/res/pass.png</iconset>
    </property>
    <property name="text">
     <string>Pass</string>
    </property>
   </action>
+  <action name="actionGoodMove">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Good Move</string>
+   </property>
+  </action>
+  <action name="actionVeryGoodMove">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Very Good Move</string>
+   </property>
+  </action>
+  <action name="actionBadMove">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Bad Move</string>
+   </property>
+  </action>
+  <action name="actionVeryBadMove">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Very Bad Move</string>
+   </property>
+  </action>
+  <action name="actionDoubtfulMove">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Doubtful Move</string>
+   </property>
+  </action>
+  <action name="actionInterestingMove">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Interesting Move</string>
+   </property>
+  </action>
+  <action name="actionEven">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Even</string>
+   </property>
+  </action>
+  <action name="actionGoodForBlack">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Good for Black</string>
+   </property>
+  </action>
+  <action name="actionVeryGoodForBlack">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Very Good for Black</string>
+   </property>
+  </action>
+  <action name="actionGoodForWhite">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Good for White</string>
+   </property>
+  </action>
+  <action name="actionVeryGoodForWhite">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Very Good for White</string>
+   </property>
+  </action>
+  <action name="actionUnclear">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Unclear</string>
+   </property>
+  </action>
+  <action name="actionHotspot">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Hotspot</string>
+   </property>
+  </action>
+  <action name="actionNoMoveAnnotation">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>No Annotation</string>
+   </property>
+  </action>
+  <action name="actionNoNodeAnnotation">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>No Annotation</string>
+   </property>
+  </action>
   <action name="actionNavigationMoveFirst">
    <property name="icon">
-    <iconset resource="mugo.qrc">
+    <iconset>
      <normaloff>:/res/movefirst.png</normaloff>:/res/movefirst.png</iconset>
    </property>
    <property name="text">
@@ -793,7 +949,7 @@
   </action>
   <action name="actionNavigationFastRewind">
    <property name="icon">
-    <iconset resource="mugo.qrc">
+    <iconset>
      <normaloff>:/res/fastrewind.png</normaloff>:/res/fastrewind.png</iconset>
    </property>
    <property name="text">
@@ -802,7 +958,7 @@
   </action>
   <action name="actionNavigationMovePrevious">
    <property name="icon">
-    <iconset resource="mugo.qrc">
+    <iconset>
      <normaloff>:/res/moveprev.png</normaloff>:/res/moveprev.png</iconset>
    </property>
    <property name="text">
@@ -811,7 +967,7 @@
   </action>
   <action name="actionNavigationMoveLast">
    <property name="icon">
-    <iconset resource="mugo.qrc">
+    <iconset>
      <normaloff>:/res/movelast.png</normaloff>:/res/movelast.png</iconset>
    </property>
    <property name="text">
@@ -820,7 +976,7 @@
   </action>
   <action name="actionNavigationFastForward">
    <property name="icon">
-    <iconset resource="mugo.qrc">
+    <iconset>
      <normaloff>:/res/fastforward.png</normaloff>:/res/fastforward.png</iconset>
    </property>
    <property name="text">
@@ -829,7 +985,7 @@
   </action>
   <action name="actionNavigationMoveNext">
    <property name="icon">
-    <iconset resource="mugo.qrc">
+    <iconset>
      <normaloff>:/res/movenext.png</normaloff>:/res/movenext.png</iconset>
    </property>
    <property name="text">
@@ -858,7 +1014,7 @@
   </action>
   <action name="actionCollectionDelete">
    <property name="icon">
-    <iconset resource="mugo.qrc">
+    <iconset>
      <normaloff>:/res/removeself.png</normaloff>:/res/removeself.png</iconset>
    </property>
    <property name="text">
@@ -867,7 +1023,7 @@
   </action>
   <action name="actionCollectionMoveUp">
    <property name="icon">
-    <iconset resource="mugo.qrc">
+    <iconset>
      <normaloff>:/res/collectionup.png</normaloff>:/res/collectionup.png</iconset>
    </property>
    <property name="text">
@@ -876,7 +1032,7 @@
   </action>
   <action name="actionCollectionMoveDown">
    <property name="icon">
-    <iconset resource="mugo.qrc">
+    <iconset>
      <normaloff>:/res/collectiondown.png</normaloff>:/res/collectiondown.png</iconset>
    </property>
    <property name="text">
@@ -892,8 +1048,6 @@
    <header>qundoview.h</header>
   </customwidget>
  </customwidgets>
- <resources>
-  <include location="mugo.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

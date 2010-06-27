@@ -72,6 +72,8 @@ protected:
     Document* currentDocument();
     void setKeyboardShortcut();
     void setStatusBarWidget();
+    void createMenu();
+    void createEncodingAction();
 
     // new, open, save, close
     void fileNew(QTextCodec* codec, int xsize=19, int ysize=19, double komi=6.5, int handicap=0);
@@ -102,6 +104,7 @@ protected:
     void createCollectionModelRow(const Go::NodePtr& game, QList<QStandardItem*>& items);
 
     void updateCaption(bool updateTab);
+    void updateMenu();
 
     bool getOpenFileName(QString& fname, QTextCodec*& codec);
     bool getSaveFileName(QString& fname, QTextCodec*& codec);
@@ -147,6 +150,27 @@ private slots:
     void on_actionDeleteCurrentOnly_triggered();
     void on_actionPass_triggered();
     void on_actionGameInformation_triggered();
+
+    // Edit -> Node Annotation
+    void on_actionNoNodeAnnotation_triggered();
+    void on_actionEven_triggered();
+    void on_actionGoodForBlack_triggered();
+    void on_actionVeryGoodForBlack_triggered();
+    void on_actionGoodForWhite_triggered();
+    void on_actionVeryGoodForWhite_triggered();
+    void on_actionUnclear_triggered();
+
+    // Edit -> Move Annotation
+    void on_actionNoMoveAnnotation_triggered();
+    void on_actionGoodMove_triggered();
+    void on_actionVeryGoodMove_triggered();
+    void on_actionBadMove_triggered();
+    void on_actionVeryBadMove_triggered();
+    void on_actionDoubtfulMove_triggered();
+    void on_actionInterestingMove_triggered();
+
+    // Edit -> Annotation
+    void on_actionHotspot_triggered(bool checked);
 
     // Navigation Menu
     void on_actionNavigationMoveFirst_triggered();

@@ -27,7 +27,8 @@
   Constructor
 */
 GameInformationDialog::GameInformationDialog(QWidget *parent, SgfDocument* doc, Go::GameInformationPtr gameInfo_)
-    : m_ui(new Ui::GameInformationDialog)
+    : QDialog(parent)
+    , m_ui(new Ui::GameInformationDialog)
     , document(doc)
     , gameInfo(gameInfo_)
 {

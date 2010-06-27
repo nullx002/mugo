@@ -85,8 +85,130 @@ void DeleteNodeCommand::undo(){
         }
     }
     document->addNode(parentNode, node, pos);
+}
 
+/**
+  Constructor
+*/
+SetNodeAnnotationCommand::SetNodeAnnotationCommand(SgfDocument* doc, Go::NodePtr node_, Go::Node::NodeAnnotation annotation, QUndoCommand *parent)
+    : QUndoCommand(parent)
+    , document(doc)
+    , node(node_)
+    , newAnnotation(annotation)
+{
+    oldAnnotation = node->nodeAnnotation;
+}
 
+/**
+  redo set node annotation command
+*/
+void SetNodeAnnotationCommand::redo(){
+    setText( tr("Set Node Annotation") );
+    node->nodeAnnotation = newAnnotation;
+    document->modifyNode(node);
+}
+
+/**
+  undo set node annotation command
+*/
+void SetNodeAnnotationCommand::undo(){
+    node->nodeAnnotation = oldAnnotation;
+    document->modifyNode(node);
+}
+
+/**
+  Constructor
+*/
+SetMoveAnnotationCommand::SetMoveAnnotationCommand(SgfDocument* doc, Go::NodePtr node_, Go::Node::MoveAnnotation annotation, QUndoCommand *parent)
+    : QUndoCommand(parent)
+    , document(doc)
+    , node(node_)
+    , newAnnotation(annotation)
+{
+    oldAnnotation = node->moveAnnotation;
+}
+
+/**
+  redo set node annotation command
+*/
+void SetMoveAnnotationCommand::redo(){
+    setText( tr("Set Move Annotation") );
+    node->moveAnnotation = newAnnotation;
+    document->modifyNode(node);
+}
+
+/**
+  undo set node annotation command
+*/
+void SetMoveAnnotationCommand::undo(){
+    node->moveAnnotation = oldAnnotation;
+    document->modifyNode(node);
+}
+
+/**
+  Constructor
+*/
+SetAnnotationCommand::SetAnnotationCommand(SgfDocument* doc, Go::NodePtr node_, Go::Node::Annotation annotation, QUndoCommand *parent)
+    : QUndoCommand(parent)
+    , document(doc)
+    , node(node_)
+    , newAnnotation(annotation)
+{
+    oldAnnotation = node->annotation;
+}
+
+/**
+  redo set annotation command
+*/
+void SetAnnotationCommand::redo(){
+    setText( tr("Set Annotation") );
+    node->annotation = newAnnotation;
+    document->modifyNode(node);
+}
+
+/**
+  undo set annotation command
+*/
+void SetAnnotationCommand::undo(){
+    node->annotation = oldAnnotation;
+    document->modifyNode(node);
+}
+
+/**
+  Constructor
+*/
+SetCommentCommand::SetCommentCommand(SgfDocument* doc, Go::NodePtr node_, const QString& comment_, QUndoCommand *parent)
+    : QUndoCommand(parent)
+    , document(doc)
+    , node(node_)
+    , comment(comment_)
+{
+    oldComment = node->comment;
+}
+
+/**
+  redo set comment command
+*/
+void SetCommentCommand::redo(){
+    setText( tr("Edit comment") );
+    node->comment = comment;
+    document->modifyNode(node);
+}
+
+/**
+  undo set comment command
+*/
+void SetCommentCommand::undo(){
+    node->comment = oldComment;
+    document->modifyNode(node);
+}
+
+/**
+  set comment text
+*/
+void SetCommentCommand::setComment(const QString& comment){
+    node->comment = this->comment = comment;
+    document->modifyNode(node);
 }
 
 /**
@@ -234,43 +356,6 @@ void MoveDownInCollectionCommand::undo(){
         return;
 
     document->moveUp(game);
-}
-
-/**
-  Constructor
-*/
-SetCommentCommand::SetCommentCommand(SgfDocument* doc, Go::NodePtr node_, const QString& comment_, QUndoCommand *parent)
-    : QUndoCommand(parent)
-    , document(doc)
-    , node(node_)
-    , comment(comment_)
-{
-    oldComment = node->comment;
-}
-
-/**
-  redo set comment command
-*/
-void SetCommentCommand::redo(){
-    setText( tr("Edit comment") );
-    node->comment = comment;
-    document->modifyNode(node);
-}
-
-/**
-  undo set comment command
-*/
-void SetCommentCommand::undo(){
-    node->comment = oldComment;
-    document->modifyNode(node);
-}
-
-/**
-  set comment text
-*/
-void SetCommentCommand::setComment(const QString& comment){
-    node->comment = this->comment = comment;
-    document->modifyNode(node);
 }
 
 /**

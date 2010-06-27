@@ -204,9 +204,9 @@ public:
     StoneList blackStones;
     StoneList whiteStones;
     StoneList emptyStones;
-    int annotation;
-    int moveAnnotation;
-    int nodeAnnotation;
+    Annotation annotation;
+    MoveAnnotation moveAnnotation;
+    NodeAnnotation nodeAnnotation;
     QString comment;
     Point position;
     Color color;

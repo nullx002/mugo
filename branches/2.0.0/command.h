@@ -69,6 +69,100 @@ private:
 };
 
 /**
+  set node annotation command
+*/
+class SetNodeAnnotationCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(SetNodeAnnotationCommand)
+
+public:
+    SetNodeAnnotationCommand(SgfDocument* doc, Go::NodePtr node, Go::Node::NodeAnnotation annotation, QUndoCommand *parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+private:
+    SgfDocument* document;
+    Go::NodePtr  node;
+    Go::Node::NodeAnnotation newAnnotation;
+    Go::Node::NodeAnnotation oldAnnotation;
+};
+
+/**
+  set move annotation command
+*/
+class SetMoveAnnotationCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(SetMoveAnnotationCommand)
+
+public:
+    SetMoveAnnotationCommand(SgfDocument* doc, Go::NodePtr node, Go::Node::MoveAnnotation annotation, QUndoCommand *parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+private:
+    SgfDocument* document;
+    Go::NodePtr  node;
+    Go::Node::MoveAnnotation newAnnotation;
+    Go::Node::MoveAnnotation oldAnnotation;
+};
+
+/**
+  set annotation command
+*/
+class SetAnnotationCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(SetAnnotationCommand)
+
+public:
+    SetAnnotationCommand(SgfDocument* doc, Go::NodePtr node, Go::Node::Annotation annotation, QUndoCommand *parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+private:
+    SgfDocument* document;
+    Go::NodePtr  node;
+    Go::Node::Annotation newAnnotation;
+    Go::Node::Annotation oldAnnotation;
+};
+
+/**
+  set comment command
+*/
+class SetCommentCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(SetCommentCommand)
+
+public:
+    SetCommentCommand(SgfDocument* doc, Go::NodePtr node, const QString& comment, QUndoCommand *parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+    void setComment(const QString& comment);
+    Go::NodePtr getNode(){ return node; }
+
+private:
+    SgfDocument* document;
+    Go::NodePtr  node;
+    QString      comment;
+    QString      oldComment;
+};
+
+/**
+  set game information command
+*/
+class SetGameInformationCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(SetGameInformationCommand)
+
+public:
+    SetGameInformationCommand(SgfDocument* doc, Go::GameInformationPtr gameInfo, Go::GameInformationPtr newInfo, QUndoCommand *parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+private:
+    SgfDocument* document;
+    Go::NodePtr node;
+    Go::GameInformationPtr gameInfo;
+    Go::GameInformationPtr newInfo;
+    Go::GameInformationPtr oldInfo;
+};
+
+/**
   set current game command
 */
 class SetCurrentGameCommand : public QUndoCommand{
@@ -150,46 +244,6 @@ private:
     SgfDocument* document;
     Go::NodePtr game;
     bool moved;
-};
-
-/**
-  set comment command
-*/
-class SetCommentCommand : public QUndoCommand{
-    Q_DECLARE_TR_FUNCTIONS(SetCommentCommand)
-
-public:
-    SetCommentCommand(SgfDocument* doc, Go::NodePtr node, const QString& comment, QUndoCommand *parent = 0);
-    virtual void redo();
-    virtual void undo();
-
-    void setComment(const QString& comment);
-    Go::NodePtr getNode(){ return node; }
-
-private:
-    SgfDocument* document;
-    Go::NodePtr  node;
-    QString      comment;
-    QString      oldComment;
-};
-
-/**
-  set game information command
-*/
-class SetGameInformationCommand : public QUndoCommand{
-    Q_DECLARE_TR_FUNCTIONS(SetGameInformationCommand)
-
-public:
-    SetGameInformationCommand(SgfDocument* doc, Go::GameInformationPtr gameInfo, Go::GameInformationPtr newInfo, QUndoCommand *parent = 0);
-    virtual void redo();
-    virtual void undo();
-
-private:
-    SgfDocument* document;
-    Go::NodePtr node;
-    Go::GameInformationPtr gameInfo;
-    Go::GameInformationPtr newInfo;
-    Go::GameInformationPtr oldInfo;
 };
 
 #endif // COMMAND_H
