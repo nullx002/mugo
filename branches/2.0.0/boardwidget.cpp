@@ -241,7 +241,6 @@ void BoardWidget::setItemsPosition(){
 
     // set position of stones and move number.
     qreal stone_size = size * 0.95;
-    int moveNumber = 0;
     Go::NodeList::iterator node = currentNodeList.begin();
     QList<QGraphicsItem*>::iterator stone = stones.begin();
     QList<QGraphicsSimpleTextItem*>::iterator number = numbers.begin();
@@ -271,7 +270,6 @@ void BoardWidget::setItemsPosition(){
         ++node;
         ++stone;
         ++number;
-        ++moveNumber;
     }
 }
 
@@ -285,15 +283,11 @@ void BoardWidget::createBuffer(bool erase){
         currentNodeList.clear();
 
         // erase stone items
-        foreach(QGraphicsItem* item, stones)
-            if (item)
-                scene->removeItem(item);
+        qDeleteAll(stones);
         stones.clear();
 
         // erase text items
-        foreach(QGraphicsSimpleTextItem* item, numbers)
-            if (item)
-                scene->removeItem(item);
+        qDeleteAll(numbers);
         numbers.clear();
 
         // create currentNodeList
@@ -347,6 +341,17 @@ void BoardWidget::createBuffer(bool erase){
             int x = (*node)->position.x;
             int y = (*node)->position.y;
 
+            if ((*node)->moveNumber > 0){
+                moveNumber = (*node)->moveNumber;
+                QList<QGraphicsSimpleTextItem*>::iterator number2 = number;
+                while(true){
+                    if (number2 == numbers.begin())
+                        break;
+                    if (*--number2)
+                        (*number2)->hide();
+                }
+            }
+
             TerritoryInfo ti;
             ti.color = (*node)->color;
             ti.moveNumber = moveNumber;
@@ -379,6 +384,9 @@ void BoardWidget::createBuffer(bool erase){
 
     int moveNumber2 = moveNumber + 1;
     while(node != currentNodeList.end()){
+        if ((*node)->moveNumber > 0)
+            moveNumber2 = (*node)->moveNumber;
+
         if (*stone)
             (*stone)->hide();
         if (*number){

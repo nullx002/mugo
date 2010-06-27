@@ -155,6 +155,8 @@ private slots:
     void on_actionDeleteCurrentOnly_triggered();
     void on_actionPass_triggered();
     void on_actionEditNodeName_triggered();
+    void on_actionSetMoveNumber_triggered();
+    void on_actionUnsetMoveNumber_triggered();
 
     // Edit -> Node Annotation
     void on_actionNoNodeAnnotation_triggered();

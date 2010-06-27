@@ -87,6 +87,41 @@ private:
 };
 
 /**
+  set move number command
+*/
+class SetMoveNumberCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(SetMoveNumberCommand)
+
+public:
+    SetMoveNumberCommand(SgfDocument* doc, Go::NodePtr node, int moveNumber, QUndoCommand *parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+private:
+    SgfDocument* document;
+    Go::NodePtr  node;
+    int newNumber;
+    int oldNumber;
+};
+
+/**
+  unset move number command
+*/
+class UnsetMoveNumberCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(UnsetMoveNumberCommand)
+
+public:
+    UnsetMoveNumberCommand(SgfDocument* doc, Go::NodePtr node, QUndoCommand *parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+private:
+    SgfDocument* document;
+    Go::NodePtr  node;
+    int oldNumber;
+};
+
+/**
   set node annotation command
 */
 class SetNodeAnnotationCommand : public QUndoCommand{

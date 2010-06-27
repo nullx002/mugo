@@ -740,6 +740,10 @@ QString MainWindow::getBranchItemText(BoardWidget* board, Go::NodePtr node){
     if (node->name.isEmpty() == false)
         str += " " + node->name;
 
+    // move number
+    if (node->moveNumber > 0)
+        str += " (" + QString::number(node->moveNumber) + ")";
+
     // comment
     if (node->comment.isEmpty() == false)
         str += " " + tr("Comment");
@@ -1477,6 +1481,47 @@ void MainWindow::on_actionEditNodeName_triggered(){
         return;
 
     board->document()->getUndoStack()->push( new SetNodeNameCommand(board->document(), node, dlg.textValue()) );
+}
+
+/**
+  Slot
+  Edit -> Move Number -> Set Move Number
+*/
+void MainWindow::on_actionSetMoveNumber_triggered(){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    Go::NodePtr node = board->getCurrentNode();
+    if (node->isStone() == false)
+        return;
+
+    QInputDialog dlg(this);
+    dlg.setInputMode(QInputDialog::IntInput);
+    dlg.setLabelText( tr("Input move number") );
+    dlg.setIntMinimum(1);
+    dlg.setIntMaximum(1000);
+
+    if (node->moveNumber > 0)
+        dlg.setIntValue(node->moveNumber);
+
+    if (dlg.exec() != QDialog::Accepted)
+        return;
+
+    board->document()->getUndoStack()->push( new SetMoveNumberCommand(board->document(), node, dlg.intValue()) );
+}
+
+/**
+  Slot
+  Edit -> Move Number -> Unset Move Number
+*/
+void MainWindow::on_actionUnsetMoveNumber_triggered(){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    Go::NodePtr node = board->getCurrentNode();
+    board->document()->getUndoStack()->push( new UnsetMoveNumberCommand(board->document(), node) );
 }
 
 /**

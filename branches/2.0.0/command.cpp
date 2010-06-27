@@ -119,6 +119,63 @@ void SetNodeNameCommand::undo(){
 /**
   Constructor
 */
+SetMoveNumberCommand::SetMoveNumberCommand(SgfDocument* doc, Go::NodePtr node_, int moveNumber, QUndoCommand *parent)
+    : QUndoCommand(parent)
+    , document(doc)
+    , node(node_)
+    , newNumber(moveNumber)
+{
+    oldNumber = node->moveNumber;
+}
+
+/**
+  redo set move number command
+*/
+void SetMoveNumberCommand::redo(){
+    setText( tr("Set Move Number") );
+    node->moveNumber = newNumber;
+    document->modifyNode(node);
+}
+
+/**
+  undo set move number command
+*/
+void SetMoveNumberCommand::undo(){
+    node->moveNumber = oldNumber;
+    document->modifyNode(node);
+}
+
+/**
+  Constructor
+*/
+UnsetMoveNumberCommand::UnsetMoveNumberCommand(SgfDocument* doc, Go::NodePtr node_, QUndoCommand *parent)
+    : QUndoCommand(parent)
+    , document(doc)
+    , node(node_)
+{
+    oldNumber = node->moveNumber;
+}
+
+/**
+  redo unset move number command
+*/
+void UnsetMoveNumberCommand::redo(){
+    setText( tr("Unset Move Number") );
+    node->moveNumber = 0;
+    document->modifyNode(node);
+}
+
+/**
+  undo unset move number command
+*/
+void UnsetMoveNumberCommand::undo(){
+    node->moveNumber = oldNumber;
+    document->modifyNode(node);
+}
+
+/**
+  Constructor
+*/
 SetNodeAnnotationCommand::SetNodeAnnotationCommand(SgfDocument* doc, Go::NodePtr node_, Go::Node::NodeAnnotation annotation, QUndoCommand *parent)
     : QUndoCommand(parent)
     , document(doc)
