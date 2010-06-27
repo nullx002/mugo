@@ -77,13 +77,15 @@ protected:
 
     // new, open, save, close
     void fileNew(QTextCodec* codec, int xsize=19, int ysize=19, double komi=6.5, int handicap=0);
-    bool fileOpen(QTextCodec* codec, const QString& fname, bool guessCodec);
+    bool fileOpen(const QString& fname, QTextCodec* codec, bool guessCodec);
     bool urlOpen(const QUrl& url, bool newTab);
     bool fileSave(Document*);
     bool fileSaveAs(Document*);
     bool fileSaveAs(Document* doc, const QString& fname);
     bool closeTab(int index);
     bool maybeSave(Document* doc);
+    void addRecentFile(const QString& fname);
+    void updateRecentFileActions();
 
     // document
     QString newDocumentName();
@@ -124,6 +126,7 @@ private:
     QLabel* moveNumberLabel;
     QLabel* capturedLabel;
     int sgfLineWidth;
+    int maxRecentFiles;
 
 private slots:
     // File Menu
@@ -139,6 +142,7 @@ private slots:
     void on_actionCollectionExtract_triggered();
     void on_actionExportBoardAsImage_triggered();
     void on_actionExportAsciiToClipboard_triggered();
+    void on_actionOpenRecentFile_triggered();
     void on_actionExit_triggered();
 
     // Edit Menu

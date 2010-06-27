@@ -87,11 +87,15 @@ MainWindow::MainWindow(const QString& fname, QWidget *parent)
     restoreState( settings.value("docksState").toByteArray() );
     ui->collectionView->header()->restoreState( settings.value("collectionState").toByteArray() );
 
+    // recent files
+    maxRecentFiles = settings.value("maxRecentFiles", 6).toInt();
+    updateRecentFileActions();
+
     // open or create new tab
     if (fname.isEmpty())
         fileNew(defaultCodec);
     else
-        fileOpen(defaultCodec, fname, true);
+        fileOpen(fname, defaultCodec, true);
     ui->boardTabWidget->removeTab(0);
 }
 
@@ -312,7 +316,7 @@ void MainWindow::fileNew(QTextCodec* codec, int xsize, int ysize, double komi, i
 /**
   file Open
 */
-bool MainWindow::fileOpen(QTextCodec* codec, const QString& fname, bool guessCodec)
+bool MainWindow::fileOpen(const QString& fname, QTextCodec* codec, bool guessCodec)
 {
     DocumentManager::iterator iter = docManager.begin();
     while (iter != docManager.end()){
@@ -327,6 +331,7 @@ bool MainWindow::fileOpen(QTextCodec* codec, const QString& fname, bool guessCod
     if (doc == NULL)
         return false;
     addDocument(doc);
+    addRecentFile(fname);
 
     return true;
 }
@@ -419,6 +424,7 @@ bool MainWindow::fileSaveAs(Document* doc, const QString& fname){
     }
 
     docManager[doc].tabChangeAction->setText( doc->getDocName() );
+    addRecentFile(fname);
 
     return true;
 }
@@ -453,6 +459,40 @@ bool MainWindow::maybeSave(Document* doc){
     else if (ret == QMessageBox::Cancel)
         return false;
     return true;
+}
+
+/**
+  add file to recent file list
+*/
+void MainWindow::addRecentFile(const QString& fname){
+    QSettings settings;
+    QStringList files = settings.value("recentFileList").toStringList();
+    files.removeAll(fname);
+    files.push_front(fname);
+    while (files.size() > maxRecentFiles)
+        files.removeLast();
+    settings.setValue("recentFileList", files);
+
+    updateRecentFileActions();
+}
+
+/**
+  update recent files menu
+*/
+void MainWindow::updateRecentFileActions()
+{
+    QSettings settings;
+    QStringList files = settings.value("recentFileList").toStringList();
+
+    int numRecentFiles = qMin(files.size(), maxRecentFiles);
+
+    qDeleteAll(ui->menuRecentFiles->actions());
+    for (int i = 0; i < numRecentFiles; ++i) {
+        QString text = QFileInfo(files[i]).fileName();
+        QAction* act = new QAction(text, this);
+        ui->menuRecentFiles->addAction(act);
+        connect(act, SIGNAL(triggered()), SLOT(on_actionOpenRecentFile_triggered()));
+    }
 }
 
 /**
@@ -990,9 +1030,9 @@ void MainWindow::on_actionOpen_triggered()
         return;
 
     if (codec == NULL)
-        fileOpen(defaultCodec, fname, true);
+        fileOpen(fname, defaultCodec, true);
     else
-        fileOpen(codec, fname, false);
+        fileOpen(fname, codec, false);
 }
 
 /**
@@ -1204,6 +1244,24 @@ void MainWindow::on_actionExportAsciiToClipboard_triggered()
 
     ExportAsciiDialog dlg(this, board->getBoardBuffer());
     dlg.exec();
+}
+
+/**
+  Slot
+  File -> Recent Files
+*/
+void MainWindow::on_actionOpenRecentFile_triggered(){
+    QAction* act = qobject_cast<QAction*>(sender());
+    int n = ui->menuRecentFiles->actions().indexOf(act);
+    if (n < 0)
+        return;
+
+    QSettings settings;
+    QStringList files = settings.value("recentFileList").toStringList();
+    if (files.size() <= n)
+        return;
+
+    fileOpen(files[n], defaultCodec, true);
 }
 
 /**
