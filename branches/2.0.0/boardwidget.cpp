@@ -340,7 +340,7 @@ void BoardWidget::createBuffer(bool erase){
         boardBuffer[i].resize(gameInformation->xsize);
 
     // show or hide stones
-    moveNumber = 0;
+    moveNumber = 1;
     capturedBlack = 0;
     capturedWhite = 0;
     Go::NodeList::iterator node = currentNodeList.begin();
