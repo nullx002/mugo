@@ -46,6 +46,7 @@ public:
             Go::Color territory;
             int moveNumber;
             QGraphicsItem* stone;
+            QGraphicsItem* mark;
             QGraphicsSimpleTextItem* number;
 
     };
@@ -90,11 +91,14 @@ protected:
 
     void setItemsPosition();
     void setStoneItemPosition(QGraphicsItem* item, int x, int y);
+    void setMarkItemPosition(QGraphicsItem* item, const Go::Mark& mark);
     void setTextItemPosition(QGraphicsSimpleTextItem* text, int x, int y);
     void createBuffer(bool erase);
     void eraseBuffer();
     QGraphicsItem* createStoneItem(int x, int y, Go::Color color);
+    QGraphicsItem* createMarkItem(const Go::Mark& mark);
     TerritoryInfo& addStoneToBuffer(int x, int y, Go::Color color, int moveNumber, QGraphicsItem* stone, QGraphicsSimpleTextItem* number);
+    TerritoryInfo& addMarkToBuffer(const Go::Mark& mark, QGraphicsItem* item);
     void getStarPosition(QList<int>& xpos, QList<int>& ypos);
     void killStones(int x, int y);
     void killStones(char* buf);
@@ -121,6 +125,7 @@ private:
     QList<QGraphicsItem*> stones;
     QList< QList<QGraphicsItem*> > blackStones;
     QList< QList<QGraphicsItem*> > whiteStones;
+    QList< QList<QGraphicsItem*> > marks;
     QList<QGraphicsSimpleTextItem*> numbers;
     Go::NodePtr currentNode;
     Go::NodeList currentNodeList;
