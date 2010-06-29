@@ -205,30 +205,21 @@ void ExportAsciiDialog::createJapaneseAscii(bool isMono){
 }
 
 bool ExportAsciiDialog::isStar(int x, int y){
-    int  xsize = boardBuffer.size();
-    bool isxstar = false;
-    if (xsize < 7)
-        isxstar = false;
-    else if (xsize < 10)
-        isxstar = x == 2 || x == xsize - 3;
-    else{
-        isxstar = x == 3 || x == xsize - 4;
-        if (!isxstar && xsize % 2)
-            isxstar = x == xsize / 2;
-    }
-
-    int  ysize = boardBuffer[0].size();
-    bool isystar = false;
-    if (ysize < 7)
-        isystar = false;
-    else if (ysize < 10)
-        isystar = y == 2 || y == ysize - 3;
-    else{
-        isystar = y == 3 || y == ysize - 4;
-        if (!isystar && ysize % 2)
-            isystar = y == ysize / 2;
-    }
-
-    return isxstar && isystar;
+    int  ysize = boardBuffer.size();
+    int  xsize = boardBuffer[0].size();
+    return isStar2(xsize, x) && isStar2(ysize, y);
 }
 
+bool ExportAsciiDialog::isStar2(int size, int n){
+    bool isStar = false;
+    if (size < 7)
+        isStar = false;
+    else if (size < 10)
+        isStar = n == 2 || n == size - 3;
+    else{
+        isStar = n == 3 || n == size - 4;
+        if (!isStar && size % 2)
+            isStar = n == size / 2;
+    }
+    return isStar;
+}
