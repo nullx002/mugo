@@ -35,6 +35,7 @@ public:
     void createEnglishAscii();
     void createJapaneseAscii(bool isMono);
     bool isStar(int x, int y);
+    bool isStar2(int size, int n);
 
 public slots:
     virtual void accept();
