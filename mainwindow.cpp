@@ -72,72 +72,40 @@ MainWindow::MainWindow(QWidget *parent)
     ui->collectionDockWidget->setVisible(false);
 
     // encoding
+    codecActions.clear();
     codecActions.push_back( ui->actionEncodingUTF8 );
     codecActions.push_back( ui->actionISO8859_1 );
-    codecActions.push_back( ui->actionISO8859_2 );
+    codecActions.push_back( ui->actionISO8859_15 );
+    codecActions.push_back( ui->actionWindows_1252 );
+    codecActions.push_back( ui->actionISO8859_14 );
+    codecActions.push_back( ui->actionISO8859_7 );
+    codecActions.push_back( ui->actionWindows_1253 );
+    codecActions.push_back( ui->actionISO8859_10 );
     codecActions.push_back( ui->actionISO8859_3 );
     codecActions.push_back( ui->actionISO8859_4 );
-    codecActions.push_back( ui->actionISO8859_5 );
-    codecActions.push_back( ui->actionISO8859_6 );
-    codecActions.push_back( ui->actionISO8859_7 );
-    codecActions.push_back( ui->actionISO8859_8 );
-    codecActions.push_back( ui->actionISO8859_9 );
-    codecActions.push_back( ui->actionISO8859_10 );
-    codecActions.push_back( ui->actionISO8859_11 );
     codecActions.push_back( ui->actionISO8859_13 );
-    codecActions.push_back( ui->actionISO8859_14 );
-    codecActions.push_back( ui->actionISO8859_15 );
-    codecActions.push_back( ui->actionISO8859_16 );
-    codecActions.push_back( ui->actionWindows_1250 );
-    codecActions.push_back( ui->actionWindows_1251 );
-    codecActions.push_back( ui->actionWindows_1252 );
-    codecActions.push_back( ui->actionWindows_1253 );
-    codecActions.push_back( ui->actionWindows_1254 );
-    codecActions.push_back( ui->actionWindows_1255 );
-    codecActions.push_back( ui->actionWindows_1256 );
     codecActions.push_back( ui->actionWindows_1257 );
-    codecActions.push_back( ui->actionWindows_1258 );
+    codecActions.push_back( ui->actionISO8859_2 );
+    codecActions.push_back( ui->actionWindows_1250 );
+    codecActions.push_back( ui->actionISO8859_5 );
+    codecActions.push_back( ui->actionWindows_1251 );
     codecActions.push_back( ui->actionKoi8_R );
     codecActions.push_back( ui->actionKoi8_U );
+    codecActions.push_back( ui->actionISO8859_16 );
+    codecActions.push_back( ui->actionISO8859_11 );
+    codecActions.push_back( ui->actionISO8859_9 );
+    codecActions.push_back( ui->actionWindows_1254 );
+    codecActions.push_back( ui->actionWindows_1258 );
+    codecActions.push_back( ui->actionISO8859_6 );
+    codecActions.push_back( ui->actionWindows_1256 );
+    codecActions.push_back( ui->actionWindows_1255 );
+    codecActions.push_back( ui->actionISO8859_8 );
     codecActions.push_back( ui->actionEncodingGB2312 );
     codecActions.push_back( ui->actionEncodingBig5 );
-    codecActions.push_back( ui->actionEncodingShiftJIS );
-    codecActions.push_back( ui->actionEncodingJIS );
-    codecActions.push_back( ui->actionEncodingEucJP );
     codecActions.push_back( ui->actionEncodingKorean );
-    codecNames.push_back( "UTF-8" );
-    codecNames.push_back( "ISO-8859-1" );
-    codecNames.push_back( "ISO-8859-2" );
-    codecNames.push_back( "ISO-8859-3" );
-    codecNames.push_back( "ISO-8859-4" );
-    codecNames.push_back( "ISO-8859-5" );
-    codecNames.push_back( "ISO-8859-6" );
-    codecNames.push_back( "ISO-8859-7" );
-    codecNames.push_back( "ISO-8859-8" );
-    codecNames.push_back( "ISO-8859-9" );
-    codecNames.push_back( "ISO-8859-10" );
-    codecNames.push_back( "TIS-620" );  // ISO-8859-11
-    codecNames.push_back( "ISO-8859-13" );
-    codecNames.push_back( "ISO-8859-14" );
-    codecNames.push_back( "ISO-8859-15" );
-    codecNames.push_back( "ISO-8859-16" );
-    codecNames.push_back( "windows-1250" );
-    codecNames.push_back( "windows-1251" );
-    codecNames.push_back( "windows-1252" );
-    codecNames.push_back( "windows-1253" );
-    codecNames.push_back( "windows-1254" );
-    codecNames.push_back( "windows-1255" );
-    codecNames.push_back( "windows-1256" );
-    codecNames.push_back( "windows-1257" );
-    codecNames.push_back( "windows-1258" );
-    codecNames.push_back( "KOI8-R" );
-    codecNames.push_back( "KOI8-U" );
-    codecNames.push_back( "GB2312" );
-    codecNames.push_back( "Big5" );
-    codecNames.push_back( "Shift_JIS" );
-    codecNames.push_back( "ISO-2022-JP" );
-    codecNames.push_back( "EUC-JP" );
-    codecNames.push_back( "EUC-KR" );
+    codecActions.push_back( ui->actionEncodingEucJP );
+    codecActions.push_back( ui->actionEncodingJIS );
+    codecActions.push_back( ui->actionEncodingShiftJIS );
 
     // action group
     QActionGroup* showMoveNumberGroup = new QActionGroup(this);
@@ -176,10 +144,6 @@ MainWindow::MainWindow(QWidget *parent)
 
 
     QSettings settings;
-
-    // codec
-    QByteArray codecName = settings.value("codec", "UTF-8").toByteArray();
-    defaultCodec = QTextCodec::codecForName(codecName);
 
     // for open URL
     http = new QHttp(this);
@@ -1142,23 +1106,18 @@ void MainWindow::on_actionFlipSgfVertically_triggered(){
 * Edit -> Encoding
 */
 void MainWindow::setEncoding(){
-    setEncoding( qobject_cast<QAction*>(sender()), true );
+    setEncoding( qobject_cast<QAction*>(sender()) );
 }
 
-void MainWindow::setEncoding(QAction* action, bool saveToDefault){
+void MainWindow::setEncoding(QAction* action){
     TabData& tabData = tabDatas[currentBoard()];
     tabData.encode = action;
     for (int i=0; i<codecActions.size(); ++i){
         if (codecActions[i] == action){
             tabData.codec = QTextCodec::codecForName( codecNames[i] );
 
-            if (tabData.codec){
+            if (tabData.codec)
                 qDebug() << "change codec to " << tabData.codec->name();
-                if (saveToDefault){
-                    defaultCodec = tabData.codec;
-                    QSettings().setValue("codec", defaultCodec->name());
-                }
-            }
             else
                 qDebug() << "codec is null";
 
@@ -3589,6 +3548,13 @@ void MainWindow::on_gtp_estimated(BoardWidget* board, const QVector< QVector<dou
 void MainWindow::readSettings(){
     QSettings settings;
 
+    // codec
+    QByteArray codecName = settings.value("codec", "UTF-8").toByteArray();
+    defaultCodec = QTextCodec::codecForName(codecName);
+    if (defaultCodec == NULL)
+        defaultCodec = QTextCodec::codecForName("UTF-8");
+
+    // steps of fast move
     stepsOfFastMove = settings.value("navigation/stepsOfFastMove", FAST_MOVE_STEPS).toInt();
 
     for (int i=0; i<ui->boardTabWidget->count(); ++i){

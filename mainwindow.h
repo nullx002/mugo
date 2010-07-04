@@ -161,8 +161,6 @@ private:
     QHttp* http;
     QByteArray downloadBuff;
 
-    QList<QAction*> codecActions;
-    QList<const char*> codecNames;
     QTextCodec* defaultCodec;
 
     int stepsOfFastMove;
@@ -239,7 +237,7 @@ private slots:
 
     // Edit menu -> Encoding
     void setEncoding();
-    void setEncoding(QAction* action, bool saveToDefault=false);
+    void setEncoding(QAction* action);
     void setEncoding(QTextCodec* codec);
 
     // Traverse menu

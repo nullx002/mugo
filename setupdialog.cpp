@@ -91,6 +91,14 @@ SetupDialog::SetupDialog(QWidget *parent) :
     // save name
     m_ui->saveNameEdit->setText( settings.value("saveName", SAVE_NAME).toString() );
 
+    // encoding
+    QString defaultCodec = settings.value("codec" ,"UTF-8").toString();
+    for (int i=0; i<codecNames.size(); ++i){
+        m_ui->defaultEncodingComboBox->addItem( codecActions[i]->text() );
+        if (defaultCodec == codecNames[i])
+            m_ui->defaultEncodingComboBox->setCurrentIndex( m_ui->defaultEncodingComboBox->count() - 1 );
+    }
+
     // window style
     m_ui->windowStyleList->addItem( tr("Default") );
     m_ui->windowStyleList->addItems( QStyleFactory::keys() );
@@ -161,6 +169,10 @@ void SetupDialog::accept(){
 
     // save name
     settings.setValue("saveName", m_ui->saveNameEdit->text());
+
+    // encoding
+    int codec = m_ui->defaultEncodingComboBox->currentIndex();
+    settings.setValue("codec", codecNames[codec]);
 
     // window style
     QString oldStyle = settings.value("style").toString();
