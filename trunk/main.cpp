@@ -33,6 +33,10 @@
 #include "mainwindow.h"
 
 
+QList<QAction*> codecActions;
+QList<const char*> codecNames;
+
+
 /**
 * Constructor
 */
@@ -50,6 +54,40 @@ Application::Application(int argc, char** argv)
     setApplicationVersion(VERSION);
 
     connect(this, SIGNAL(messageReceived(const QString&)), SLOT(received(const QString&)));
+
+    codecNames.push_back( "UTF-8" );
+    codecNames.push_back( "ISO-8859-1" );
+    codecNames.push_back( "ISO-8859-15" );
+    codecNames.push_back( "windows-1252" );
+    codecNames.push_back( "ISO-8859-14" );
+    codecNames.push_back( "ISO-8859-7" );
+    codecNames.push_back( "windows-1253" );
+    codecNames.push_back( "ISO-8859-10" );
+    codecNames.push_back( "ISO-8859-3" );
+    codecNames.push_back( "ISO-8859-4" );
+    codecNames.push_back( "ISO-8859-13" );
+    codecNames.push_back( "windows-1257" );
+    codecNames.push_back( "ISO-8859-2" );
+    codecNames.push_back( "windows-1250" );
+    codecNames.push_back( "ISO-8859-5" );
+    codecNames.push_back( "windows-1251" );
+    codecNames.push_back( "KOI8-R" );
+    codecNames.push_back( "KOI8-U" );
+    codecNames.push_back( "ISO-8859-16" );
+    codecNames.push_back( "TIS-620" );  // ISO-8859-11
+    codecNames.push_back( "ISO-8859-9" );
+    codecNames.push_back( "windows-1254" );
+    codecNames.push_back( "windows-1258" );
+    codecNames.push_back( "ISO-8859-6" );
+    codecNames.push_back( "windows-1256" );
+    codecNames.push_back( "windows-1255" );
+    codecNames.push_back( "ISO-8859-8" );
+    codecNames.push_back( "GB2312" );
+    codecNames.push_back( "Big5" );
+    codecNames.push_back( "EUC-KR" );
+    codecNames.push_back( "EUC-JP" );
+    codecNames.push_back( "ISO-2022-JP" );
+    codecNames.push_back( "Shift_JIS" );
 }
 
 /**

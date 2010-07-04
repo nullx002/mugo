@@ -21,6 +21,12 @@
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <widget class="QListWidget" name="categoryList">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="maximumSize">
         <size>
          <width>160</width>
@@ -54,7 +60,7 @@
        </item>
        <item>
         <property name="text">
-         <string>Save</string>
+         <string>File</string>
         </property>
        </item>
        <item>
@@ -579,7 +585,7 @@
            </property>
            <layout class="QFormLayout" name="formLayout_9">
             <item row="0" column="0">
-             <widget class="QLabel" name="label">
+             <widget class="QLabel" name="fastStepsLabel">
               <property name="text">
                <string>Fast forward/rewind steps</string>
               </property>
@@ -737,6 +743,25 @@
             </item>
             <item row="0" column="1">
              <widget class="QLineEdit" name="saveNameEdit"/>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="encodingGroupBox">
+           <property name="title">
+            <string>Encoding</string>
+           </property>
+           <layout class="QFormLayout" name="formLayout_10">
+            <item row="0" column="0">
+             <widget class="QLabel" name="defaultEncodingLabel">
+              <property name="text">
+               <string>Default Encoding</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QComboBox" name="defaultEncodingComboBox"/>
             </item>
            </layout>
           </widget>
