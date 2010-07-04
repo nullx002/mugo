@@ -75,10 +75,8 @@ void ExportAsciiDialog::createAscii(int index){
 }
 
 void ExportAsciiDialog::createEnglishAscii(){
-#ifndef Q_WS_X11
-    QFont f("Consolas,Courier", 8);
+    QFont f("Consolas,Courier,monospace", 8);
     m_ui->asciiTextEdit->setFont(f);
-#endif
 
     QByteArray s;
     s.reserve(boardBuffer.size() + 2 * boardBuffer[0].size() * 3);
@@ -124,12 +122,13 @@ void ExportAsciiDialog::createJapaneseAscii(bool isMono){
     const char* monospace   = "Osaka\342\210\222\347\255\211\345\271\205"; // Osaka-tohaba
     const char* propotional = "Osaka"; // Osaka
 #else
-    const char* monospace   = "Osaka\xe2\xe7\xad\x89\xe5\xb9\x85"; // Osaka-tohaba
-    const char* propotional = "Osaka\xe2\xe7\xad\x89\xe5\xb9\x85"; //
+    const char* monospace   = "monospace";
+    const char* propotional = "Takao Pゴシック";
 #endif
 
     QFont f(isMono ? monospace : propotional, 8);
     m_ui->asciiTextEdit->setFont(f);
+qDebug() << f.family();
 
     QByteArray s;
     s.reserve(boardBuffer.size() + 2 * boardBuffer[0].size() * 3);
@@ -150,7 +149,7 @@ void ExportAsciiDialog::createJapaneseAscii(bool isMono){
         if (j >= headerNum)
             j = 0;
         s.push_back( header[j] );
-        if (isMono == false)
+        if (isMono == false && j != 12 && j != 16)
             s.push_back(' ');
     }
 
@@ -197,7 +196,7 @@ void ExportAsciiDialog::createJapaneseAscii(bool isMono){
         if (j >= headerNum)
             j = 0;
         s.push_back( header[j] );
-        if (isMono == false)
+        if (isMono == false && j != 12 && j != 16)
             s.push_back(' ');
     }
 
