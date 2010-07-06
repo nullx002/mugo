@@ -1861,10 +1861,11 @@ void MainWindow::boardCleared(){
 */
 void MainWindow::nodeAdded(go::nodePtr parent, go::nodePtr node, bool /*select*/){
     BoardWidget* board = qobject_cast<BoardWidget*>(sender());
+    TabData& tabData = tabDatas[board];
     if (parent->childNodes.back() == node)
-        addTreeWidget(board, node, true);
+        addTreeWidget(board, node, true, tabData.branchWidget->invisibleRootItem());
     else
-        remakeTreeWidget( board, tabDatas[board].nodeToTree[node->parent()] );
+        remakeTreeWidget( board, tabData.nodeToTree[node->parent()] );
     setCaption();
 }
 
@@ -2747,19 +2748,25 @@ void MainWindow::setTreeData(BoardWidget* board){
     tabData.branchWidget->clear();
     tabData.nodeToTree.clear();
 
-    addTreeWidget(board, board->getData().root);
+    QTreeWidgetItem root(0);
+    addTreeWidget(board, board->getData().root, false, &root);
+    for (int i=0; i<root.childCount();){
+        QTreeWidgetItem* item = root.child(0);
+        root.removeChild(item);
+        tabData.branchWidget->addTopLevelItem(item);
+    }
     board->setCurrentNode();
     board->repaint();
 }
 
-QTreeWidgetItem* MainWindow::addTreeWidget(BoardWidget* board, go::nodePtr node, bool needRemake){
+QTreeWidgetItem* MainWindow::addTreeWidget(BoardWidget* board, go::nodePtr node, bool needRemake, QTreeWidgetItem* rootItem){
     TabData& tabData = tabDatas[board];
     QTreeWidgetItem* treeWidget = tabData.nodeToTree[node];
     QTreeWidgetItem* newWidget  = NULL;
     if (treeWidget == NULL)
         newWidget = createTreeWidget(board, node);
-    QTreeWidgetItem* parentWidget  = (node->parent() && tabData.nodeToTree[node->parent()]) ? tabData.nodeToTree[node->parent()] : tabData.branchWidget->invisibleRootItem();
-    QTreeWidgetItem* parentWidget2 = parentWidget->parent() ? parentWidget->parent() : tabData.branchWidget->invisibleRootItem();
+    QTreeWidgetItem* parentWidget  = (node->parent() && tabData.nodeToTree[node->parent()]) ? tabData.nodeToTree[node->parent()] : rootItem;
+    QTreeWidgetItem* parentWidget2 = parentWidget->parent() ? parentWidget->parent() : rootItem;
     go::nodePtr parentNode  = node->parent();
     go::nodePtr parentNode2 = getNode(parentWidget2);
 
@@ -2792,7 +2799,7 @@ QTreeWidgetItem* MainWindow::addTreeWidget(BoardWidget* board, go::nodePtr node,
                 remakeTreeWidget(board, parentWidget);
         }
         else if(parentWidget->indexOfChild(treeWidget) != index){
-            QTreeWidgetItem* p = treeWidget->parent() ? treeWidget->parent() : tabData.branchWidget->invisibleRootItem();
+            QTreeWidgetItem* p = treeWidget->parent() ? treeWidget->parent() : rootItem;
             p->removeChild(treeWidget);
             if (parentWidget->childCount() > index)
                 parentWidget->insertChild(index, treeWidget);
@@ -2808,7 +2815,7 @@ QTreeWidgetItem* MainWindow::addTreeWidget(BoardWidget* board, go::nodePtr node,
                 remakeTreeWidget(board, parentWidget2);
         }
         else if(parentWidget2->indexOfChild(treeWidget) < 0){
-            QTreeWidgetItem* p = treeWidget->parent() ? treeWidget->parent() : tabData.branchWidget->invisibleRootItem();
+            QTreeWidgetItem* p = treeWidget->parent() ? treeWidget->parent() : rootItem;
             bool isselected = treeWidget->isSelected();
             p->removeChild(treeWidget);
             parentWidget2->addChild(treeWidget);
@@ -2819,7 +2826,7 @@ QTreeWidgetItem* MainWindow::addTreeWidget(BoardWidget* board, go::nodePtr node,
 
     go::nodeList::iterator iter = node->childNodes.begin();
     while (iter != node->childNodes.end()){
-        addTreeWidget(board, *iter);
+        addTreeWidget(board, *iter, false, rootItem);
         ++iter;
     }
 
@@ -2856,7 +2863,7 @@ QTreeWidgetItem* MainWindow::remakeTreeWidget(BoardWidget* board, QTreeWidgetIte
         return NULL;
     go::nodeList::iterator iter = node->childNodes.begin();
     while (iter != node->childNodes.end()){
-        addTreeWidget(board, *iter);
+        addTreeWidget(board, *iter, false, treeWidget->treeWidget()->invisibleRootItem());
         ++iter;
     }
     return NULL;
