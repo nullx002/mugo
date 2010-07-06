@@ -120,7 +120,7 @@ private:
     void setNodeAnnotation(QAction* action, int annotation);
 
     void setTreeData(BoardWidget* board);
-    QTreeWidgetItem* addTreeWidget(BoardWidget* board, go::nodePtr node, bool needRemake = false);
+    QTreeWidgetItem* addTreeWidget(BoardWidget* board, go::nodePtr node, bool needRemake, QTreeWidgetItem* root);
     QTreeWidgetItem* createTreeWidget(BoardWidget* board, go::nodePtr node);
     QTreeWidgetItem* remakeTreeWidget(BoardWidget* board, QTreeWidgetItem* currentWidget);
     void deleteNode(bool deleteNode);
