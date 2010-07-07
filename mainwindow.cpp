@@ -18,7 +18,6 @@
 #include <QDebug>
 #include <QSettings>
 #include <QMessageBox>
-#include <QMessageBox>
 #include <QInputDialog>
 #include <QtAlgorithms>
 #include <QClipboard>
@@ -2404,10 +2403,12 @@ bool MainWindow::fileOpen(){
 * file open.
 */
 bool MainWindow::fileOpen(const QString& fname, bool guessCodec, bool newTab, bool forceOpen){
+    QFileInfo fi1(fname);
     if (!forceOpen){
         TabDataMap::iterator iter = tabDatas.begin();
         while (iter != tabDatas.end()){
-            if (iter->fileName.compare(fname, Qt::CaseInsensitive) == 0){
+            QFileInfo fi2(iter->fileName);
+            if (fi1 == fi2){
                 ui->boardTabWidget->setCurrentWidget(iter.key());
                 return true;
             }
