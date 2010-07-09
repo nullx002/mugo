@@ -729,9 +729,7 @@ QString MainWindow::getBranchItemText(BoardWidget* board, Go::NodePtr node){
     QString str;
 
     // node type
-    if (node->isStone() == false && !node->gameInformation)
-        str = tr("Other");
-    else if (node->isStone() && node->isPass())
+    if (node->isStone() && node->isPass())
         str = tr("Pass");
     else if (node->isStone())
         str = board->getCoordinateString(node, false);
@@ -780,6 +778,24 @@ QString MainWindow::getBranchItemText(BoardWidget* board, Go::NodePtr node){
     if (node->annotation == Go::Node::hotspot)
         str += " " + tr("[Hotspot]");
 
+    // add stone
+    if (node->whiteStones.empty() == false)
+        str += " " + tr("Add White");
+    if (node->blackStones.empty() == false)
+        str += " " + tr("Add Black");
+    if (node->emptyStones.empty() == false)
+        str += " " + tr("Add Empty");
+
+    // mark
+    if (node->marks.empty() == false)
+        str += " " + tr("Mark");
+    if (node->whiteTerritories.empty() == false)
+        str += " " + tr("White Territories");
+    if (node->blackTerritories.empty() == false)
+        str += " " + tr("Black Territories");
+    if (node->dims.empty() == false)
+        str += " " + tr("Dim");
+
     // game information
     if (str.isEmpty() == false && str[0].isSpace())
         str.remove(0, 1);
@@ -789,6 +805,9 @@ QString MainWindow::getBranchItemText(BoardWidget* board, Go::NodePtr node){
         else
             str.insert(0, tr("Info") + " ");
     }
+
+    if (str.isEmpty())
+        str = tr("Other");
 
     return str;
 }
