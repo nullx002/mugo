@@ -295,18 +295,19 @@ void BoardWidget::setItemsPosition(){
     // set position of stones and move number.
     Go::NodeList::iterator node = currentNodeList.begin();
     QList<QGraphicsItem*>::iterator stone = stones.begin();
-    QList< QList<QGraphicsItem*> >::iterator bstones = blackStones.begin();
-    QList< QList<QGraphicsItem*> >::iterator wstones = whiteStones.begin();
-    QList< QList<QGraphicsItem*> >::iterator imarks = marks.begin();
-    QList<QGraphicsSimpleTextItem*>::iterator number = numbers.begin();
+    QList< QList<QGraphicsItem*> >::iterator iter_bstones = blackStones.begin();
+    QList< QList<QGraphicsItem*> >::iterator iter_wstones = whiteStones.begin();
+    QList< QList<QGraphicsItem*> >::iterator iter_marks = marks.begin();
+    QList< QList<QGraphicsItem*> >::iterator iter_territories = territories.begin();
+    QList<QGraphicsSimpleTextItem*>::iterator iter_number = numbers.begin();
     while(node != currentNodeList.end()){
         int x = (*node)->x();
         int y = (*node)->y();
 
         setStoneItemPosition(*stone, x, y);
-        setTextItemPosition(*number, x, y);
+        setTextItemPosition(*iter_number, x, y);
 
-        QList<QGraphicsItem*>::iterator bstone = bstones->begin();
+        QList<QGraphicsItem*>::iterator bstone = iter_bstones->begin();
         foreach(const Go::Stone& stone, (*node)->blackStones){
             int x = stone.position.x;
             int y = stone.position.y;
@@ -314,7 +315,7 @@ void BoardWidget::setItemsPosition(){
             ++bstone;
         }
 
-        QList<QGraphicsItem*>::iterator wstone = wstones->begin();
+        QList<QGraphicsItem*>::iterator wstone = iter_wstones->begin();
         foreach(const Go::Stone& stone, (*node)->whiteStones){
             int x = stone.position.x;
             int y = stone.position.y;
@@ -322,18 +323,29 @@ void BoardWidget::setItemsPosition(){
             ++wstone;
         }
 
-        QList<QGraphicsItem*>::iterator imark = imarks->begin();
-        foreach(const Go::Mark& mark, (*node)->marks){
-            setMarkItemPosition(*imark, mark);
-            ++imark;
+        QList<QGraphicsItem*>::iterator mark = iter_marks->begin();
+        foreach(const Go::Mark& m, (*node)->marks){
+            setMarkItemPosition(*mark, m);
+            ++mark;
+        }
+
+        QList<QGraphicsItem*>::iterator territory = iter_territories->begin();
+        foreach(const Go::Mark& m, (*node)->whiteTerritories){
+            setMarkItemPosition(*territory, m);
+            ++territory;
+        }
+        foreach(const Go::Mark& m, (*node)->blackTerritories){
+            setMarkItemPosition(*territory, m);
+            ++territory;
         }
 
         ++node;
         ++stone;
-        ++number;
-        ++bstones;
-        ++wstones;
-        ++imarks;
+        ++iter_number;
+        ++iter_bstones;
+        ++iter_wstones;
+        ++iter_marks;
+        ++iter_territories;
     }
 }
 
@@ -424,7 +436,8 @@ void BoardWidget::createBuffer(bool erase){
     QList< QList<QGraphicsItem*> >::iterator  iter_bstones = blackStones.begin();
     QList< QList<QGraphicsItem*> >::iterator  iter_wstones = whiteStones.begin();
     QList< QList<QGraphicsItem*> >::iterator  iter_marks   = marks.begin();
-    QList<QGraphicsSimpleTextItem*>::iterator iter_number  = numbers.begin();
+    QList< QList<QGraphicsItem*> >::iterator  iter_territories = territories.begin();
+    QList<QGraphicsSimpleTextItem*>::iterator iter_number = numbers.begin();
     while(node != currentNodeList.end()){
         if ( inBoard(*node) ){
             // hide move number before set move number
@@ -481,11 +494,29 @@ void BoardWidget::createBuffer(bool erase){
             ++mark;
         }
 
+        // territories
+        QList<QGraphicsItem*>::iterator territory = iter_territories->begin();
+        foreach(const Go::Mark& m, (*node)->whiteTerritories){
+            if (*node == currentNode)
+                addMarkToBuffer(m, *territory);
+            else
+                removeMarkFromBuffer(m, *territory);
+            ++territory;
+        }
+        foreach(const Go::Mark& m, (*node)->blackTerritories){
+            if (*node == currentNode)
+                addMarkToBuffer(m, *territory);
+            else
+                removeMarkFromBuffer(m, *territory);
+            ++territory;
+        }
+
         ++iter_stone;
         ++iter_number;
         ++iter_bstones;
         ++iter_wstones;
         ++iter_marks;
+        ++iter_territories;
         if (*node == currentNode){
             ++node;
             break;
@@ -509,29 +540,24 @@ void BoardWidget::createBuffer(bool erase){
             (*iter_number)->setText( QString::number(moveNumber2++) );
         }
 
-        QList<QGraphicsItem*>::iterator bstone = iter_bstones->begin();
-        while (bstone != iter_bstones->end()){
-            (*bstone)->hide();
-            ++bstone;
-        }
+        foreach(QGraphicsItem* item, *iter_wstones)
+            item->hide();
 
-        QList<QGraphicsItem*>::iterator wstone = iter_wstones->begin();
-        while (wstone != iter_wstones->end()){
-            (*wstone)->hide();
-            ++wstone;
-        }
+        foreach(QGraphicsItem* item, *iter_bstones)
+            item->hide();
 
-        QList<QGraphicsItem*>::iterator mark = iter_marks->begin();
-        while (mark != iter_marks->end()){
-            (*mark)->hide();
-            ++mark;
-        }
+        foreach(QGraphicsItem* item, *iter_marks)
+            item->hide();
+
+        foreach(QGraphicsItem* item, *iter_territories)
+            item->hide();
 
         ++iter_stone;
         ++iter_number;
         ++iter_bstones;
         ++iter_wstones;
         ++iter_marks;
+        ++iter_territories;
         ++node;
     }
 
@@ -587,10 +613,12 @@ void BoardWidget::eraseBuffer(){
         currentNodeList.push_back(n);
     }
 
+    // create graphics items
     foreach(const Go::NodePtr& node, currentNodeList){
         blackStones.push_back(QList<QGraphicsItem*>());
         whiteStones.push_back(QList<QGraphicsItem*>());
         marks.push_back(QList<QGraphicsItem*>());
+        territories.push_back(QList<QGraphicsItem*>());
 
         if ( inBoard(node) ){
             QGraphicsItem* stone = createStoneItem(node->x(), node->y(), node->color);
@@ -621,6 +649,18 @@ void BoardWidget::eraseBuffer(){
             if (item)
                 marks.last().push_back(item);
         }
+
+        foreach(const Go::Mark& mark, node->whiteTerritories){
+            QGraphicsItem* item = createMarkItem(mark);
+            if (item)
+                territories.last().push_back(item);
+        }
+
+        foreach(const Go::Mark& mark, node->blackTerritories){
+            QGraphicsItem* item = createMarkItem(mark);
+            if (item)
+                territories.last().push_back(item);
+        }
     }
 }
 
@@ -636,6 +676,7 @@ BoardWidget::TerritoryInfo& BoardWidget::addStoneToBuffer(int x, int y, Go::Colo
     boardBuffer[y][x] = ti;
 
     stone->show();
+    stone->setOpacity(1.0);
 
     if (number){
         number->show();
@@ -650,6 +691,7 @@ BoardWidget::TerritoryInfo& BoardWidget::addStoneToBuffer(int x, int y, Go::Colo
 */
 BoardWidget::TerritoryInfo& BoardWidget::addMarkToBuffer(const Go::Mark& mark, QGraphicsItem* item){
     TerritoryInfo& ti = boardBuffer[mark.position.y][mark.position.x];
+
     GraphicsLabelTextItem* label = dynamic_cast<GraphicsLabelTextItem*>(item);
     QAbstractGraphicsShapeItem* path = dynamic_cast<QAbstractGraphicsShapeItem*>(item);
     if (label){
@@ -660,10 +702,20 @@ BoardWidget::TerritoryInfo& BoardWidget::addMarkToBuffer(const Go::Mark& mark, Q
         }
     }
     else if (path){
-        path->setPen(QPen(ti.color == Go::black ? Qt::white : Qt::black, 2));
-
-        if (mark.type == Go::Mark::select)
+        if (mark.type == Go::Mark::blackTerritory || mark.type == Go::Mark::whiteTerritory){
+            QColor color = mark.type == Go::Mark::blackTerritory ? Qt::black : Qt::white;
+            path->setPen( QPen(color));
+            path->setBrush(QBrush(color));
+            if (ti.stone)
+                ti.stone->setOpacity(0.3);
+        }
+        else if (mark.type == Go::Mark::select){
+            path->setPen(QPen(ti.color == Go::black ? Qt::white : Qt::black));
             path->setBrush(QBrush(ti.color == Go::black ? Qt::white : Qt::black));
+        }
+        else{
+            path->setPen(QPen(ti.color == Go::black ? Qt::white : Qt::black, 2));
+        }
     }
 
     ti.mark = item;
@@ -801,7 +853,6 @@ QPainterPath BoardWidget::createTrianglePath(const Go::Mark& mark){
   create black territory path
 */
 QPainterPath BoardWidget::createTerritoryPath(const Go::Mark& mark){
-qDebug() << "createTerritoryPath";
     qreal size = vLines[1]->line().x1() - vLines[0]->line().x1();
     size *= 0.35;
     int sceneX = vLines[mark.position.x]->line().x1() - size / 2;
