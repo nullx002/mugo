@@ -1439,9 +1439,13 @@ void MainWindow::on_actionDeleteAfterCurrent_triggered()
     BoardWidget* board = currentBoard();
     if (board == NULL)
         return;
-    SgfDocument* doc = board->document();
 
-    doc->getUndoStack()->push( new DeleteNodeCommand(doc, board->getCurrentNode(), true) );
+    Go::NodePtr currentNode = board->getCurrentNode();
+    if (currentNode == board->getCurrentNodeList().front())
+        return;
+
+    SgfDocument* doc = board->document();
+    doc->getUndoStack()->push( new DeleteNodeCommand(doc, currentNode, true) );
 }
 
 /**
@@ -1453,8 +1457,12 @@ void MainWindow::on_actionDeleteCurrentOnly_triggered()
     BoardWidget* board = currentBoard();
     if (board == NULL)
         return;
-    SgfDocument* doc = board->document();
 
+    Go::NodePtr currentNode = board->getCurrentNode();
+    if (currentNode == board->getCurrentNodeList().front())
+        return;
+
+    SgfDocument* doc = board->document();
     doc->getUndoStack()->push( new DeleteNodeCommand(doc, board->getCurrentNode(), false) );
 }
 
