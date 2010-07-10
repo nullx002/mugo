@@ -33,6 +33,8 @@ class GraphicsArrowItem;
 class BoardWidget : public QGraphicsView {
     Q_OBJECT
 public:
+    enum EditMode{ alternateMove, addBlack, addWhite, addEmpty, addLabel, addLabelManually, addCircle, addCross, addTriangle, addSquare, deleteEmpty };
+
     class TerritoryInfo{
         public:
             TerritoryInfo() : color(Go::empty), territory(Go::empty), moveNumber(0), stone(NULL), mark(NULL), dim(NULL), number(NULL){}
@@ -78,6 +80,11 @@ public:
     void forward(int step=1);
     void back(int step=1);
 
+    // edit mode
+    void setEditMode(EditMode editMode);
+    EditMode getEditMode() const{ return editMode; }
+
+    //
     void addItem(Go::NodePtr parent, Go::NodePtr node, int index);
     QString getCoordinateString(Go::NodePtr node, bool showI) const;
 
@@ -157,6 +164,7 @@ private:
     int moveNumber;
     int capturedBlack;
     int capturedWhite;
+    EditMode editMode;
 };
 
 #endif // BOARDWIDGET_H

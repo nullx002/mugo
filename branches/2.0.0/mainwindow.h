@@ -114,14 +114,15 @@ protected:
 private:
     Ui::MainWindow *ui;
     QUndoGroup undoGroup;
+    QActionGroup* editGroup;
     QActionGroup* tabChangeGroup;
     QMap<QAction*, QTextCodec*> encoding;
     QTextCodec* defaultCodec;
     DocumentManager docManager;
     uint docID;
     QProgressDialog* progressDialog;
+    int downloadID;
     QUrl downloadURL;
-    QByteArray downloadBuff;
     bool downloadNewTab;
     QLabel* moveNumberLabel;
     QLabel* capturedLabel;
@@ -154,6 +155,18 @@ private slots:
     void on_actionDeleteAfterCurrent_triggered();
     void on_actionDeleteCurrentOnly_triggered();
     void on_actionPass_triggered();
+    void on_actionAlternateMove_triggered();
+    void on_actionStonesAndMarkers_triggered();
+    void on_actionAddBlackStone_triggered();
+    void on_actionAddWhiteStone_triggered();
+    void on_actionAddEmpty_triggered();
+    void on_actionAddLabel_triggered();
+    void on_actionAddLabelManually_triggered();
+    void on_actionAddCircle_triggered();
+    void on_actionAddCross_triggered();
+    void on_actionAddTriangle_triggered();
+    void on_actionAddSquare_triggered();
+    void on_actionDeleteMarker_triggered();
     void on_actionEditNodeName_triggered();
     void on_actionSetMoveNumber_triggered();
     void on_actionUnsetMoveNumber_triggered();
@@ -226,9 +239,8 @@ private slots:
     void on_actionCollectionDelete_triggered();
 
     // Open URL
-    void on_openUrl_ReadReady(const QHttpResponseHeader&);
-    void on_openUrl_UrlReadProgress(int, int);
-    void on_openUrl_UrlDone(bool);
+    void on_openUrl_dataReadProgress(int, int);
+    void on_openUrl_requestFinished(int id, bool error);
 };
 
 

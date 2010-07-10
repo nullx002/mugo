@@ -29,5 +29,14 @@
         <file>res/saveimage.png</file>
         <file>res/gameinfo.png</file>
         <file>res/pass.png</file>
+        <file>res/movealternate.png</file>
+        <file>res/empty.png</file>
+        <file>res/text.png</file>
+        <file>res/text2.png</file>
+        <file>res/triangle.png</file>
+        <file>res/cross.png</file>
+        <file>res/circle.png</file>
+        <file>res/square.png</file>
+        <file>res/rubbereraser.png</file>
     </qresource>
 </RCC>

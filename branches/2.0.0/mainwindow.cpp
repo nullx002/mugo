@@ -26,6 +26,7 @@
 #include <QInputDialog>
 #include <QUrl>
 #include <QHttp>
+#include <QBuffer>
 #include <QProgressDialog>
 #include <QLabel>
 #include <QComboBox>
@@ -42,6 +43,7 @@
 
 
 Q_DECLARE_METATYPE(Go::NodePtr);
+Q_DECLARE_METATYPE(QAction*);
 
 
 /**
@@ -203,6 +205,26 @@ void MainWindow::createMenu(){
     ui->editToolBar->insertAction(ui->editToolBar->actions().at(0), redoAction);
     ui->editToolBar->insertAction(redoAction, undoAction);
 
+    // Edit -> Alternate Move, Stones & Markers
+    connect(ui->menuStonesAndMarkers->menuAction(), SIGNAL(triggered()), SLOT(on_actionStonesAndMarkers_triggered()));
+    ui->menuStonesAndMarkers->menuAction()->setCheckable(true);
+    ui->menuStonesAndMarkers->setIcon(ui->actionAddLabel->icon());
+    ui->menuStonesAndMarkers->menuAction()->setData( QVariant::fromValue(ui->actionAddLabel) );
+    ui->editToolBar->insertAction(ui->editToolBar->actions().at(4), ui->menuStonesAndMarkers->menuAction());
+
+    editGroup = new QActionGroup(this);
+    editGroup->addAction(ui->actionAlternateMove);
+    editGroup->addAction(ui->actionAddBlackStone);
+    editGroup->addAction(ui->actionAddWhiteStone);
+    editGroup->addAction(ui->actionAddEmpty);
+    editGroup->addAction(ui->actionAddLabel);
+    editGroup->addAction(ui->actionAddLabelManually);
+    editGroup->addAction(ui->actionAddCircle);
+    editGroup->addAction(ui->actionAddCross);
+    editGroup->addAction(ui->actionAddTriangle);
+    editGroup->addAction(ui->actionAddSquare);
+    editGroup->addAction(ui->actionDeleteMarker);
+
     // Edit -> Annotation
     QActionGroup* nodeAnnotationGroup = new QActionGroup(this);
     nodeAnnotationGroup->addAction(ui->actionNoNodeAnnotation);
@@ -342,17 +364,15 @@ bool MainWindow::fileOpen(const QString& fname, QTextCodec* codec, bool guessCod
 */
 bool MainWindow::urlOpen(const QUrl& url, bool newTab){
     downloadURL = url;
-    downloadBuff.clear();
     downloadNewTab = newTab;
 
     QHttp* http = new QHttp;
-    connect( http, SIGNAL(readyRead(const QHttpResponseHeader&)), SLOT(on_openUrl_ReadReady(const QHttpResponseHeader&)) );
-    connect( http, SIGNAL(dataReadProgress(int, int)), SLOT(on_openUrl_UrlReadProgress(int, int)) );
-    connect( http, SIGNAL(done(bool)), SLOT(on_openUrl_UrlDone(bool)) );
+    connect( http, SIGNAL(dataReadProgress(int, int)), SLOT(on_openUrl_dataReadProgress(int, int)) );
+    connect( http, SIGNAL(requestFinished(int, bool)), SLOT(on_openUrl_requestFinished(int, bool)) );
 
     QHttp::ConnectionMode mode = url.scheme().toLower() == "https" ? QHttp::ConnectionModeHttps : QHttp::ConnectionModeHttp;
     http->setHost(url.host(), mode, url.port() == -1 ? 0 : url.port());
-    http->get( url.encodedPath() );
+    downloadID = http->get( url.encodedPath(), new QBuffer(http) );
 
     progressDialog = new QProgressDialog(tr("Downloading SGF File"), "cancel", 0, 100, this);
     connect(progressDialog, SIGNAL(canceled()), this, SLOT(on_openUrl_canceled()));
@@ -1495,6 +1515,124 @@ void MainWindow::on_actionPass_triggered()
 
 /**
   Slot
+  Edit -> Alternate Move
+*/
+void MainWindow::on_actionAlternateMove_triggered(){
+    ui->menuStonesAndMarkers->menuAction()->setChecked(false);
+}
+
+/**
+  Slot
+  Edit -> Stones And Markers
+*/
+void MainWindow::on_actionStonesAndMarkers_triggered(){
+    QAction* act = ui->menuStonesAndMarkers->menuAction()->data().value<QAction*>();
+    if (act)
+        act->trigger();
+}
+
+/**
+  Slot
+  Edit -> Add Black Stone
+*/
+void MainWindow::on_actionAddBlackStone_triggered(){
+    ui->menuStonesAndMarkers->menuAction()->setChecked(true);
+    ui->menuStonesAndMarkers->setIcon( ui->actionAddBlackStone->icon() );
+    ui->menuStonesAndMarkers->menuAction()->setData( QVariant::fromValue(ui->actionAddBlackStone) );
+}
+
+/**
+  Slot
+  Edit -> Add White Stone
+*/
+void MainWindow::on_actionAddWhiteStone_triggered(){
+    ui->menuStonesAndMarkers->menuAction()->setChecked(true);
+    ui->menuStonesAndMarkers->setIcon( ui->actionAddWhiteStone->icon() );
+    ui->menuStonesAndMarkers->menuAction()->setData( QVariant::fromValue(ui->actionAddWhiteStone) );
+}
+
+/**
+  Slot
+  Edit -> Add Empty
+*/
+void MainWindow::on_actionAddEmpty_triggered(){
+    ui->menuStonesAndMarkers->menuAction()->setChecked(true);
+    ui->menuStonesAndMarkers->setIcon( ui->actionAddEmpty->icon() );
+    ui->menuStonesAndMarkers->menuAction()->setData( QVariant::fromValue(ui->actionAddEmpty) );
+}
+
+/**
+  Slot
+  Edit -> Add Label
+*/
+void MainWindow::on_actionAddLabel_triggered(){
+    ui->menuStonesAndMarkers->menuAction()->setChecked(true);
+    ui->menuStonesAndMarkers->setIcon( ui->actionAddLabel->icon() );
+    ui->menuStonesAndMarkers->menuAction()->setData( QVariant::fromValue(ui->actionAddLabel) );
+}
+
+/**
+  Slot
+  Edit -> Add Label Manually
+*/
+void MainWindow::on_actionAddLabelManually_triggered(){
+    ui->menuStonesAndMarkers->menuAction()->setChecked(true);
+    ui->menuStonesAndMarkers->setIcon( ui->actionAddLabelManually->icon() );
+    ui->menuStonesAndMarkers->menuAction()->setData( QVariant::fromValue(ui->actionAddLabelManually) );
+}
+
+/**
+  Slot
+  Edit -> Add Circle
+*/
+void MainWindow::on_actionAddCircle_triggered(){
+    ui->menuStonesAndMarkers->menuAction()->setChecked(true);
+    ui->menuStonesAndMarkers->setIcon( ui->actionAddCircle->icon() );
+    ui->menuStonesAndMarkers->menuAction()->setData( QVariant::fromValue(ui->actionAddCircle) );
+}
+
+/**
+  Slot
+  Edit -> Add Cross
+*/
+void MainWindow::on_actionAddCross_triggered(){
+    ui->menuStonesAndMarkers->menuAction()->setChecked(true);
+    ui->menuStonesAndMarkers->setIcon( ui->actionAddCross->icon() );
+    ui->menuStonesAndMarkers->menuAction()->setData( QVariant::fromValue(ui->actionAddCross) );
+}
+
+/**
+  Slot
+  Edit -> Add Triangle
+*/
+void MainWindow::on_actionAddTriangle_triggered(){
+    ui->menuStonesAndMarkers->menuAction()->setChecked(true);
+    ui->menuStonesAndMarkers->setIcon( ui->actionAddTriangle->icon() );
+    ui->menuStonesAndMarkers->menuAction()->setData( QVariant::fromValue(ui->actionAddTriangle) );
+}
+
+/**
+  Slot
+  Edit -> Add Square
+*/
+void MainWindow::on_actionAddSquare_triggered(){
+    ui->menuStonesAndMarkers->menuAction()->setChecked(true);
+    ui->menuStonesAndMarkers->setIcon( ui->actionAddSquare->icon() );
+    ui->menuStonesAndMarkers->menuAction()->setData( QVariant::fromValue(ui->actionAddSquare) );
+}
+
+/**
+  Slot
+  Edit -> Delete Marker
+*/
+void MainWindow::on_actionDeleteMarker_triggered(){
+    ui->menuStonesAndMarkers->menuAction()->setChecked(true);
+    ui->menuStonesAndMarkers->setIcon( ui->actionDeleteMarker->icon() );
+    ui->menuStonesAndMarkers->menuAction()->setData( QVariant::fromValue(ui->actionDeleteMarker) );
+}
+
+/**
+  Slot
   Edit -> Edit Node Name
 */
 void MainWindow::on_actionEditNodeName_triggered(){
@@ -2208,33 +2346,7 @@ void MainWindow::on_actionCollectionDelete_triggered()
   Slot
   Open URL
 */
-void MainWindow::on_openUrl_ReadReady(const QHttpResponseHeader& resp){
-    QHttp* http = qobject_cast<QHttp*>(sender());
-
-    switch (resp.statusCode()) {
-        case 200:                   // Ok
-        case 301:                   // Moved Permanently
-        case 302:                   // Found
-        case 303:                   // See Other
-        case 307:                   // Temporary Redirect
-            // these are not error conditions
-            downloadBuff.append( http->readAll() );
-            break;
-
-        default:
-            QMessageBox::information(this, APP_NAME,
-                                     tr("Download failed: %1.")
-                                     .arg(resp.reasonPhrase()));
-            http->abort();
-            break;
-    }
-}
-
-/**
-  Slot
-  Open URL
-*/
-void MainWindow::on_openUrl_UrlReadProgress(int done, int total){
+void MainWindow::on_openUrl_dataReadProgress(int done, int total){
     progressDialog->setMaximum(total);
     progressDialog->setValue(done);
 }
@@ -2243,14 +2355,27 @@ void MainWindow::on_openUrl_UrlReadProgress(int done, int total){
   Slot
   Open URL
 */
-void MainWindow::on_openUrl_UrlDone(bool error){
-    QByteArray buf = downloadBuff;
-    downloadBuff.clear();
-    sender()->deleteLater();
-    delete progressDialog;
-
-    if (error == true)
+void MainWindow::on_openUrl_requestFinished(int id, bool error){
+    if (id != downloadID)
         return;
+
+    delete progressDialog;
+    sender()->deleteLater();
+
+    QHttp* http = qobject_cast<QHttp*>(sender());
+    if (http == NULL)
+        return;
+
+    QBuffer* buffer = qobject_cast<QBuffer*>(http->currentDestinationDevice());
+    if (buffer == NULL)
+        return;
+
+    QHttpResponseHeader res = http->lastResponse();
+    if (error == true || res.statusCode() >= 300){
+        QString str = tr("Download Failed: %1 %2").arg(res.statusCode()).arg(res.reasonPhrase());
+        QMessageBox::critical(this, QString(), str);
+        return;
+    }
 
     QString docName = downloadURL.toString();
     int p = docName.lastIndexOf('/');
@@ -2259,7 +2384,7 @@ void MainWindow::on_openUrl_UrlDone(bool error){
 
     if (downloadNewTab){
         SgfDocument* doc = new SgfDocument(defaultCodec);
-        if (doc->read(docName, buf, true) == false){
+        if (doc->read(docName, buffer->buffer(), true) == false){
             delete doc;
             return;
         }
@@ -2272,7 +2397,7 @@ void MainWindow::on_openUrl_UrlDone(bool error){
             return;
 
         SgfDocument* doc = new SgfDocument(board->document()->getCodec());
-        if (doc->read(docName, buf, false) == false){
+        if (doc->read(docName, buffer->buffer(), false) == false){
             delete doc;
             return;
         }

@@ -1137,6 +1137,13 @@ void BoardWidget::back(int step){
 }
 
 /**
+  set edit mode
+*/
+void BoardWidget::setEditMode(EditMode editMode_){
+    editMode = editMode_;
+}
+
+/**
   add item
 */
 void BoardWidget::addItem(Go::NodePtr parent, Go::NodePtr node, int index){

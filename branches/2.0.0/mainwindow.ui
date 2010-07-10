@@ -216,6 +216,23 @@
      <addaction name="actionSetMoveNumber"/>
      <addaction name="actionUnsetMoveNumber"/>
     </widget>
+    <widget class="QMenu" name="menuStonesAndMarkers">
+     <property name="title">
+      <string>Stones &amp;&amp; Markers</string>
+     </property>
+     <addaction name="actionAddBlackStone"/>
+     <addaction name="actionAddWhiteStone"/>
+     <addaction name="actionAddEmpty"/>
+     <addaction name="separator"/>
+     <addaction name="actionAddLabel"/>
+     <addaction name="actionAddLabelManually"/>
+     <addaction name="actionAddCircle"/>
+     <addaction name="actionAddCross"/>
+     <addaction name="actionAddSquare"/>
+     <addaction name="actionAddTriangle"/>
+     <addaction name="separator"/>
+     <addaction name="actionDeleteMarker"/>
+    </widget>
     <addaction name="separator"/>
     <addaction name="actionCopySgfToClipboard"/>
     <addaction name="actionCopyCurrentBranchToClipboard"/>
@@ -227,6 +244,9 @@
     <addaction name="actionDeleteAfterCurrent"/>
     <addaction name="actionDeleteCurrentOnly"/>
     <addaction name="actionPass"/>
+    <addaction name="separator"/>
+    <addaction name="actionAlternateMove"/>
+    <addaction name="menuStonesAndMarkers"/>
     <addaction name="separator"/>
     <addaction name="actionEditNodeName"/>
     <addaction name="menuMove_Number"/>
@@ -296,6 +316,8 @@
    <attribute name="toolBarBreak">
     <bool>true</bool>
    </attribute>
+   <addaction name="separator"/>
+   <addaction name="actionAlternateMove"/>
    <addaction name="separator"/>
    <addaction name="actionDeleteAfterCurrent"/>
    <addaction name="actionPass"/>
@@ -825,6 +847,141 @@
    </property>
    <property name="text">
     <string>Pass</string>
+   </property>
+  </action>
+  <action name="actionAlternateMove">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="mugo.qrc">
+     <normaloff>:/res/movealternate.png</normaloff>:/res/movealternate.png</iconset>
+   </property>
+   <property name="text">
+    <string>Alternate Move</string>
+   </property>
+  </action>
+  <action name="actionAddBlackStone">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="mugo.qrc">
+     <normaloff>:/res/black_128.png</normaloff>:/res/black_128.png</iconset>
+   </property>
+   <property name="text">
+    <string>Add Black Stone</string>
+   </property>
+  </action>
+  <action name="actionAddWhiteStone">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="mugo.qrc">
+     <normaloff>:/res/white_128.png</normaloff>:/res/white_128.png</iconset>
+   </property>
+   <property name="text">
+    <string>Add White Stone</string>
+   </property>
+  </action>
+  <action name="actionAddEmpty">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="mugo.qrc">
+     <normaloff>:/res/empty.png</normaloff>:/res/empty.png</iconset>
+   </property>
+   <property name="text">
+    <string>Add Empty</string>
+   </property>
+  </action>
+  <action name="actionAddLabel">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="mugo.qrc">
+     <normaloff>:/res/text.png</normaloff>:/res/text.png</iconset>
+   </property>
+   <property name="text">
+    <string>Add Label</string>
+   </property>
+  </action>
+  <action name="actionAddLabelManually">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="mugo.qrc">
+     <normaloff>:/res/text2.png</normaloff>:/res/text2.png</iconset>
+   </property>
+   <property name="text">
+    <string>Add Label Manually</string>
+   </property>
+  </action>
+  <action name="actionAddCircle">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="mugo.qrc">
+     <normaloff>:/res/circle.png</normaloff>:/res/circle.png</iconset>
+   </property>
+   <property name="text">
+    <string>Add Circle</string>
+   </property>
+  </action>
+  <action name="actionAddCross">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="mugo.qrc">
+     <normaloff>:/res/cross.png</normaloff>:/res/cross.png</iconset>
+   </property>
+   <property name="text">
+    <string>Add Cross</string>
+   </property>
+  </action>
+  <action name="actionAddSquare">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="mugo.qrc">
+     <normaloff>:/res/square.png</normaloff>:/res/square.png</iconset>
+   </property>
+   <property name="text">
+    <string>Add Square</string>
+   </property>
+  </action>
+  <action name="actionAddTriangle">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="mugo.qrc">
+     <normaloff>:/res/triangle.png</normaloff>:/res/triangle.png</iconset>
+   </property>
+   <property name="text">
+    <string>Add Triangle</string>
+   </property>
+  </action>
+  <action name="actionDeleteMarker">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="mugo.qrc">
+     <normaloff>:/res/rubbereraser.png</normaloff>:/res/rubbereraser.png</iconset>
+   </property>
+   <property name="text">
+    <string>Delete Marker</string>
    </property>
   </action>
   <action name="actionEditNodeName">
