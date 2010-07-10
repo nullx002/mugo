@@ -23,6 +23,8 @@
 
 
 class SgfDocument;
+class GraphicsArrowItem;
+
 
 
 /**
@@ -33,7 +35,7 @@ class BoardWidget : public QGraphicsView {
 public:
     class TerritoryInfo{
         public:
-            TerritoryInfo() : color(Go::empty), territory(Go::empty), moveNumber(0), stone(NULL), number(NULL){}
+            TerritoryInfo() : color(Go::empty), territory(Go::empty), moveNumber(0), stone(NULL), mark(NULL), dim(NULL), number(NULL){}
 
             bool isStone() const{ return color != Go::empty; }
             bool isBlack() const{ return color == Go::black; }
@@ -47,6 +49,7 @@ public:
             int moveNumber;
             QGraphicsItem* stone;
             QGraphicsItem* mark;
+            QGraphicsItem* dim;
             QGraphicsSimpleTextItem* number;
 
     };
@@ -83,18 +86,25 @@ signals:
     void currentNodeChanged(Go::NodePtr currentNode);
 
 protected:
+    // event
     void resizeEvent(QResizeEvent* e);
     void mouseReleaseEvent(QMouseEvent* e);
     void wheelEvent(QWheelEvent* e);
     void onLButtonDown(QMouseEvent* e);
     void onRButtonDown(QMouseEvent* e);
 
+    // create buffer
+    void createBuffer(bool erase);
+    void eraseBuffer();
+
+    // set graphics item position
     void setItemsPosition();
     void setStoneItemPosition(QGraphicsItem* item, int x, int y);
     void setMarkItemPosition(QGraphicsItem* item, const Go::Mark& mark);
+    void setLineItemPosition(GraphicsArrowItem* item, const Go::Line& mark);
     void setTextItemPosition(QGraphicsSimpleTextItem* text, int x, int y);
-    void createBuffer(bool erase);
-    void eraseBuffer();
+
+    // create graphics item
     QGraphicsItem* createStoneItem(int x, int y, Go::Color color);
     QGraphicsItem* createMarkItem(const Go::Mark& mark);
     QPainterPath createCrossPath(const Go::Mark& mark);
@@ -103,9 +113,13 @@ protected:
     QPainterPath createTrianglePath(const Go::Mark& mark);
     QPainterPath createTerritoryPath(const Go::Mark& mark);
     QPainterPath createSelectPath(const Go::Mark& mark);
+    GraphicsArrowItem* createLineItem(const Go::Line& line);
     TerritoryInfo& addStoneToBuffer(int x, int y, Go::Color color, int moveNumber, QGraphicsItem* stone, QGraphicsSimpleTextItem* number);
     TerritoryInfo& addMarkToBuffer(const Go::Mark& mark, QGraphicsItem* item);
     TerritoryInfo& removeMarkFromBuffer(const Go::Mark& mark, QGraphicsItem* item);
+    void addLineToBuffer(const Go::Line& line, GraphicsArrowItem* item);
+    void removeLineFromBuffer(const Go::Line& line, GraphicsArrowItem* item);
+
     void getStarPosition(QList<int>& xpos, QList<int>& ypos);
     void killStones(int x, int y);
     void killStones(char* buf);
@@ -135,6 +149,7 @@ private:
     QList< QList<QGraphicsItem*> > marks;
     QList< QList<QGraphicsItem*> > territories;
     QList< QList<QGraphicsRectItem*> > dims;
+    QList< QList<GraphicsArrowItem*> > lines;
     QList<QGraphicsSimpleTextItem*> numbers;
     Go::NodePtr currentNode;
     Go::NodeList currentNodeList;

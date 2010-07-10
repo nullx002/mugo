@@ -60,6 +60,23 @@ bool operator ==(const Point& a, const Point& b){
 }
 
 /**
+    Stone
+*/
+class Stone{
+public:
+    // Constructor
+    Stone(const Point& p, Color c) : position(p), color(c){}
+    Stone(int x, int y, Color c) : position(x, y), color(c){}
+
+    bool isBlack() const{ return color == black; }
+    bool isWhite() const{ return color == white; }
+    bool isEmpty() const{ return color == empty; }
+
+    Point position;
+    Color color;
+};
+
+/**
     Mark
 */
 class Mark{
@@ -77,26 +94,22 @@ public:
     QString text;
 };
 
-/**
-    Stone
-*/
-class Stone{
+class Line{
 public:
+    enum Type{line, arrow};
+
     // Constructor
-    Stone(const Point& p, Color c) : position(p), color(c){}
-    Stone(int x, int y, Color c) : position(x, y), color(c){}
+    Line(const Point& p1, const Point& p2, Type t) : position1(p1), position2(p2), type(t){}
+    Line(int x1, int y1, int x2, int y2, Type t) : position1(x1, y1), position2(x2, y2), type(t){}
 
-    bool isBlack() const{ return color == black; }
-    bool isWhite() const{ return color == white; }
-    bool isEmpty() const{ return color == empty; }
-
-    Point position;
-    Color color;
+    Point position1;
+    Point position2;
+    Type  type;
 };
 
-typedef QList<Mark>  MarkList;
 typedef QList<Stone> StoneList;
-class Data;
+typedef QList<Mark>  MarkList;
+typedef QList<Line>  LineList;
 
 
 class GameInformation{
@@ -204,6 +217,7 @@ public:
     StoneList blackStones;
     StoneList whiteStones;
     StoneList emptyStones;
+    LineList  lines;
     Annotation annotation;
     MoveAnnotation moveAnnotation;
     NodeAnnotation nodeAnnotation;

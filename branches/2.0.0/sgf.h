@@ -49,10 +49,12 @@ public:
             void addMark(Go::MarkList& markList, const QStringList& values) const;
             void addMark(Go::MarkList& markList, const QStringList& values, Go::Mark::Type type) const;
             void addStone(Go::StoneList& stoneList, const QString& key, const QStringList& values) const;
+            void addLine(Go::LineList& lineList, const QStringList& values, Line::Type type) const;
 
             bool set();
             bool set(const Go::MarkList& markList);
             bool set(const Go::StoneList& stoneList);
+            bool set(const Go::LineList& stoneList);
     };
 
     Sgf() : lineWidth(50){
@@ -91,8 +93,11 @@ protected:
 
     static bool positionToInt(const QString& pos, int& x, int& y, QString* str=NULL);
     static bool positionToIntList(const QString& pos, QList<int>& x, QList<int>& y);
+    static bool positionToIntArea(const QString& pos, QList<int>& x, QList<int>& y);
     static QString positionToString(int x, int y, const QString* s=NULL);
     static QString positionToString(const Go::Point& p, const QString* s=NULL);
+    static QString positionToString(int x1, int y1, int x2, int y2);
+    static QString positionToString(const Go::Point& p1, const Go::Point& p2);
 
 #if 0
     enum NodeType{ unknown, root, gameInformation, branch, black, white };

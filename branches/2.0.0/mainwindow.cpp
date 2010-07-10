@@ -796,6 +796,8 @@ QString MainWindow::getBranchItemText(BoardWidget* board, Go::NodePtr node){
         str += " " + tr("Black Territories");
     if (node->dims.empty() == false)
         str += " " + tr("Dim");
+    if (node->lines.empty() == false)
+        str += " " + tr("Line");
 
     // game information
     if (str.isEmpty() == false && str[0].isSpace())

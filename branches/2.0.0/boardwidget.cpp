@@ -26,6 +26,14 @@
 #include "sgfdocument.h"
 #include "command.h"
 
+#define _USE_MATH_DEFINES
+#include <math.h>
+
+/**
+  GraphicsLabelTextItem
+
+  draw simple text and fill background.
+*/
 class GraphicsLabelTextItem : public QGraphicsSimpleTextItem{
     public:
         GraphicsLabelTextItem(QGraphicsItem* parent = 0);
@@ -40,23 +48,107 @@ class GraphicsLabelTextItem : public QGraphicsSimpleTextItem{
         QBrush backgroundBrush_;
 };
 
+/**
+  Constructor
+*/
 GraphicsLabelTextItem::GraphicsLabelTextItem(QGraphicsItem* parent)
     : QGraphicsSimpleTextItem(parent)
 {
 }
 
+/**
+  Constructor
+*/
 GraphicsLabelTextItem::GraphicsLabelTextItem(const QString& text, QGraphicsItem* parent)
     : QGraphicsSimpleTextItem(text, parent)
 {
 }
 
+/**
+  Paint
+*/
 void GraphicsLabelTextItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget){
     painter->fillRect(boundingRect(), backgroundBrush_);
     QGraphicsSimpleTextItem::paint(painter, option, widget);
 }
 
 
+/**
+  GraphicsArrowItem
 
+  draw arrow line.
+*/
+class GraphicsArrowItem : public QGraphicsPathItem{
+    public:
+        enum Shape{ none, normal, vee };
+
+        GraphicsArrowItem(QGraphicsItem* parent = 0);
+        GraphicsArrowItem(qreal x1, qreal y1, qreal x2, qreal y2, Shape start = none, Shape end = none, QGraphicsItem* parent = 0);
+
+        void setLine(qreal x1, qreal y1, qreal x2, qreal y2);
+
+    protected:
+        void createNormal(QPainterPath& path, qreal x1, qreal y1, qreal x2, qreal y2);
+
+        Shape start;
+        Shape end;
+};
+
+/**
+  Constructor
+*/
+GraphicsArrowItem::GraphicsArrowItem(QGraphicsItem* parent)
+    : QGraphicsPathItem(parent)
+{
+}
+
+/**
+  Constructor
+*/
+GraphicsArrowItem::GraphicsArrowItem(qreal x1, qreal y1, qreal x2, qreal y2, Shape start_, Shape end_, QGraphicsItem* parent)
+    : QGraphicsPathItem(parent)
+    , start(start_)
+    , end(end_)
+{
+    setLine(x1, y1, x2, y2);
+}
+
+void GraphicsArrowItem::setLine(qreal x1, qreal y1, qreal x2, qreal y2){
+    QPainterPath path;
+    path.moveTo(x1, y1);
+    path.lineTo(x2, y2);
+
+    if (start == normal)
+        createNormal(path, x2, y2, x1, y1);
+
+    if (end == normal)
+        createNormal(path, x1, y1, x2, y2);
+
+    setPath(path);
+}
+
+void GraphicsArrowItem::createNormal(QPainterPath& path, qreal x1, qreal y1, qreal x2, qreal y2){
+    QPainterPath p;
+    p.moveTo(0, 0);
+    p.lineTo(-10, -5);
+    p.lineTo(-10, 5);
+    p.lineTo(0, 0);
+
+    qreal x = x2 - x1;
+    qreal y = y2 - y1;
+    qreal r = acos(x / sqrt(x*x + y*y));
+    qreal deg = (r / M_PI) * 180.0;
+
+    if (y < 0)
+        deg = 360 - deg;
+
+    QMatrix m;
+    m.translate(x2, y2);
+    m.rotate(deg);
+
+    path.addPath(p * m);
+
+}
 
 /**
   Constructor
@@ -300,6 +392,7 @@ void BoardWidget::setItemsPosition(){
     QList< QList<QGraphicsItem*> >::iterator iter_marks = marks.begin();
     QList< QList<QGraphicsItem*> >::iterator iter_territories = territories.begin();
     QList< QList<QGraphicsRectItem*> >::iterator iter_dims = dims.begin();
+    QList< QList<GraphicsArrowItem*> >::iterator iter_lines = lines.begin();
     QList<QGraphicsSimpleTextItem*>::iterator iter_number = numbers.begin();
     while(node != currentNodeList.end()){
         int x = (*node)->x();
@@ -346,6 +439,12 @@ void BoardWidget::setItemsPosition(){
             ++dim;
         }
 
+        QList<GraphicsArrowItem*>::iterator line = iter_lines->begin();
+        foreach(const Go::Line& l, (*node)->lines){
+            setLineItemPosition(*line, l);
+            ++line;
+        }
+
         ++node;
         ++stone;
         ++iter_number;
@@ -354,6 +453,7 @@ void BoardWidget::setItemsPosition(){
         ++iter_marks;
         ++iter_territories;
         ++iter_dims;
+        ++iter_lines;
     }
 }
 
@@ -411,6 +511,18 @@ void BoardWidget::setMarkItemPosition(QGraphicsItem* item, const Go::Mark& mark)
 }
 
 /**
+  set grahics line item position
+*/
+void BoardWidget::setLineItemPosition(GraphicsArrowItem* item, const Go::Line& line){
+    qreal x1 = vLines[line.position1.x]->line().x1();
+    qreal x2 = vLines[line.position2.x]->line().x2();
+    qreal y1 = hLines[line.position1.y]->line().y1();
+    qreal y2 = hLines[line.position2.y]->line().y2();
+
+    item->setLine(x1, y1, x2, y2);
+}
+
+/**
   set graphics text item position
 */
 void BoardWidget::setTextItemPosition(QGraphicsSimpleTextItem* text, int x, int y){
@@ -454,6 +566,7 @@ void BoardWidget::createBuffer(bool erase){
     QList< QList<QGraphicsItem*> >::iterator  iter_marks = marks.begin();
     QList< QList<QGraphicsItem*> >::iterator  iter_territories = territories.begin();
     QList< QList<QGraphicsRectItem*> >::iterator iter_dims = dims.begin();
+    QList< QList<GraphicsArrowItem*> >::iterator iter_lines = lines.begin();
     QList<QGraphicsSimpleTextItem*>::iterator iter_number = numbers.begin();
     while(node != currentNodeList.end()){
         if ((*node)->isStone())
@@ -538,6 +651,16 @@ void BoardWidget::createBuffer(bool erase){
             ++dim;
         }
 
+        // lines
+        QList<GraphicsArrowItem*>::iterator line = iter_lines->begin();
+        foreach(const Go::Line& l, (*node)->lines){
+            if (*node == currentNode)
+                addLineToBuffer(l, *line);
+            else
+                removeLineFromBuffer(l, *line);
+            ++line;
+        }
+
         ++iter_stone;
         ++iter_number;
         ++iter_bstones;
@@ -545,6 +668,7 @@ void BoardWidget::createBuffer(bool erase){
         ++iter_marks;
         ++iter_territories;
         ++iter_dims;
+        ++iter_lines;
         if (*node == currentNode){
             ++node;
             break;
@@ -580,6 +704,9 @@ void BoardWidget::createBuffer(bool erase){
         foreach(QGraphicsRectItem* item, *iter_dims)
             item->hide();
 
+        foreach(GraphicsArrowItem* item, *iter_lines)
+            item->hide();
+
         ++iter_stone;
         ++iter_number;
         ++iter_bstones;
@@ -587,6 +714,7 @@ void BoardWidget::createBuffer(bool erase){
         ++iter_marks;
         ++iter_territories;
         ++iter_dims;
+        ++iter_lines;
         ++node;
     }
 
@@ -634,6 +762,11 @@ void BoardWidget::eraseBuffer(){
         qDeleteAll(dims[i]);
     dims.clear();
 
+    // lines
+    for (int i=0; i<lines.size(); ++i)
+        qDeleteAll(lines[i]);
+    lines.clear();
+
     // create currentNodeList
     Go::NodePtr n = currentNode;
     while(n){
@@ -654,6 +787,7 @@ void BoardWidget::eraseBuffer(){
         marks.push_back(QList<QGraphicsItem*>());
         territories.push_back(QList<QGraphicsItem*>());
         dims.push_back(QList<QGraphicsRectItem*>());
+        lines.push_back(QList<GraphicsArrowItem*>());
 
         if ( inBoard(node) ){
             QGraphicsItem* stone = createStoneItem(node->x(), node->y(), node->color);
@@ -702,6 +836,12 @@ void BoardWidget::eraseBuffer(){
             if (item)
                 dims.last().push_back(item);
         }
+
+        foreach(const Go::Line& line, node->lines){
+            GraphicsArrowItem* item = createLineItem(line);
+            if (item)
+                lines.last().push_back(item);
+        }
     }
 }
 
@@ -733,6 +873,12 @@ BoardWidget::TerritoryInfo& BoardWidget::addStoneToBuffer(int x, int y, Go::Colo
 BoardWidget::TerritoryInfo& BoardWidget::addMarkToBuffer(const Go::Mark& mark, QGraphicsItem* item){
     TerritoryInfo& ti = boardBuffer[mark.position.y][mark.position.x];
 
+    if (mark.type == Go::Mark::dim){
+        ti.dim = item;
+        item->show();
+        return ti;
+    }
+
     GraphicsLabelTextItem* label = dynamic_cast<GraphicsLabelTextItem*>(item);
     QAbstractGraphicsShapeItem* path = dynamic_cast<QAbstractGraphicsShapeItem*>(item);
     if (label){
@@ -741,8 +887,6 @@ BoardWidget::TerritoryInfo& BoardWidget::addMarkToBuffer(const Go::Mark& mark, Q
         if (ti.color == Go::empty){
             label->setBackgroundBrush(board->brush());
         }
-    }
-    else if (mark.type == Go::Mark::dim){
     }
     else if (path){
         if (mark.type == Go::Mark::blackTerritory || mark.type == Go::Mark::whiteTerritory){
@@ -776,6 +920,21 @@ BoardWidget::TerritoryInfo& BoardWidget::removeMarkFromBuffer(const Go::Mark& ma
     item->hide();
 
     return ti;
+}
+
+/**
+  set graphics line item to boardBuffer
+*/
+void BoardWidget::addLineToBuffer(const Go::Line& /*line*/, GraphicsArrowItem* item){
+    item->setBrush( QBrush(item->pen().color()) );
+    item->show();
+}
+
+/**
+  remove graphics line item from boardBuffer
+*/
+void BoardWidget::removeLineFromBuffer(const Go::Line& /*line*/, GraphicsArrowItem* item){
+    item->hide();
 }
 
 /**
@@ -922,6 +1081,26 @@ QPainterPath BoardWidget::createSelectPath(const Go::Mark& mark){
     path.addRect(sceneX, sceneY, size, size);
 
     return path;
+}
+
+/**
+  create line or arrow item
+*/
+GraphicsArrowItem* BoardWidget::createLineItem(const Go::Line& line){
+    qreal x1 = vLines[line.position1.x]->line().x1();
+    qreal x2 = vLines[line.position2.x]->line().x2();
+    qreal y1 = hLines[line.position1.y]->line().y1();
+    qreal y2 = hLines[line.position2.y]->line().y2();
+
+    GraphicsArrowItem* item;
+    GraphicsArrowItem::Shape shape = line.type == Go::Line::arrow ? GraphicsArrowItem::normal : GraphicsArrowItem::none;
+    item = new GraphicsArrowItem(x1, y1, x2, y2, GraphicsArrowItem::none, shape);
+
+    item->setPen( QPen(Qt::blue, 3) );
+    item->setZValue(4);
+    scene->addItem(item);
+
+    return item;
 }
 
 /**

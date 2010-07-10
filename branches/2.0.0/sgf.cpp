@@ -323,6 +323,28 @@ bool Sgf::positionToIntList(const QString& pos, QList<int>& xList, QList<int>& y
         return false;
 
     int x2, y2;
+    if (list[2].isEmpty() || positionToInt(list[2], x2, y2) == false || (x1 == x2 && y1 == y2))
+        return false;
+
+    xList.push_back(x1);
+    xList.push_back(x2);
+
+    yList.push_back(y1);
+    yList.push_back(y2);
+
+    return true;
+}
+
+bool Sgf::positionToIntArea(const QString& pos, QList<int>& xList, QList<int>& yList){
+    QRegExp exp("(..):?(..)?");
+    exp.indexIn(pos);
+    QStringList list = exp.capturedTexts();
+
+    int x1, y1;
+    if (positionToInt(list[1], x1, y1) == false)
+        return false;
+
+    int x2, y2;
     if (list[2].isEmpty() || positionToInt(list[2], x2, y2) == false){
         xList.push_back(x1);
         yList.push_back(y1);
@@ -352,6 +374,20 @@ QString Sgf::positionToString(const Go::Point& p, const QString* s){
     return positionToString(p.x, p.y, s);
 }
 
+QString Sgf::positionToString(int x1, int y1, int x2, int y2){
+    QString buf1 = positionToString(x1, y1);
+    QString buf2 = positionToString(x2, y2);
+
+    QString ret = buf1;
+    ret.append(':');
+    ret.append(buf2);
+
+    return ret;
+}
+
+QString Sgf::positionToString(const Go::Point& p1, const Go::Point& p2){
+    return positionToString(p1.x, p1.y, p2.x, p2.y);
+}
 
 bool Sgf::Node::get(Go::NodePtr& node) const{
     PropertyType::const_iterator iter = properties.begin();
@@ -458,12 +494,20 @@ bool Sgf::Node::get(const QString& key, const QStringList& values, Go::NodePtr& 
         addMark(node->whiteTerritories, values, Mark::whiteTerritory);
     else if (key == "DD")
         addMark(node->dims, values, Mark::dim);
+
+    // stone
     else if (key == "AB")
         addStone(node->blackStones, key, values);
     else if (key == "AW")
         addStone(node->whiteStones, key, values);
     else if (key == "AE")
         addStone(node->emptyStones, key, values);
+
+    // line
+    else if (key == "LN")
+        addLine(node->lines, values, Line::line);
+    else if (key == "AR")
+        addLine(node->lines, values, Line::arrow);
 
     // move annotation
     else if (key == "TE")
@@ -511,7 +555,7 @@ void Sgf::Node::addMark(Go::MarkList& markList, const QStringList& values) const
 void Sgf::Node::addMark(Go::MarkList& markList, const QStringList& values, Go::Mark::Type type) const{
     foreach(const QString& s, values){
         QList<int> x, y;
-        if (positionToIntList(s, x, y))
+        if (positionToIntArea(s, x, y))
             for(int i=0; i<x.size(); ++i)
                 markList.push_back( Go::Mark(x[i], y[i], type) );
     }
@@ -522,9 +566,18 @@ void Sgf::Node::addStone(Go::StoneList& stoneList, const QString& key, const QSt
 
     foreach(const QString& s, values){
         QList<int> x, y;
-        if (positionToIntList(s, x, y))
+        if (positionToIntArea(s, x, y))
             for (int i=0; i<x.size(); ++i)
                 stoneList.push_back( Go::Stone(x[i], y[i], c) );
+    }
+}
+
+void Sgf::Node::addLine(Go::LineList& lineList, const QStringList& values, Line::Type type) const{
+    foreach(const QString& s, values){
+        QList<int> x, y;
+        if (positionToIntList(s, x, y) == false)
+            continue;
+        lineList.push_back( Go::Line(x[0], y[0], x[1], y[1], type) );
     }
 }
 
@@ -593,10 +646,15 @@ bool Sgf::Node::set(const Go::NodePtr& n){
     set(n->marks);
     set(n->blackTerritories);
     set(n->whiteTerritories);
+    set(n->dims);
+
+    // stone
     set(n->emptyStones);
     set(n->blackStones);
     set(n->whiteStones);
-    set(n->dims);
+
+    // line
+    set(n->lines);
 
     if (n->moveAnnotation == Go::Node::goodMove)
         properties["TE"].push_back("1");
@@ -675,6 +733,22 @@ bool Sgf::Node::set(const Go::StoneList& stoneList){
         else if (stone.isEmpty())
             properties["AE"].push_back( positionToString(stone.position) );
     }
+    return true;
+}
+
+bool Sgf::Node::set(const Go::LineList& lineList){
+    foreach (const Go::Line& line, lineList){
+        switch (line.type){
+            case Go::Line::line:
+                properties["LN"].push_back( positionToString(line.position1, line.position2) );
+                break;
+
+            case Go::Line::arrow:
+                properties["AR"].push_back( positionToString(line.position1, line.position2) );
+                break;
+        }
+    }
+
     return true;
 }
 
