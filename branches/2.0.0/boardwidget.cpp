@@ -935,6 +935,11 @@ void BoardWidget::killStones(int x, int y){
     if (canKillStones(x, y+1, color == Go::black ? Go::white : Go::black, buf) == true)
         killStones(buf);
 
+    // if suicide move, kill myself
+    memset(buf, 0, ysize*xsize);
+    if (canKillStones(x, y, color, buf) == true)
+        killStones(buf);
+
     delete[] buf;
 }
 
