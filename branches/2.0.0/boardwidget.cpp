@@ -26,6 +26,38 @@
 #include "sgfdocument.h"
 #include "command.h"
 
+class GraphicsLabelTextItem : public QGraphicsSimpleTextItem{
+    public:
+        GraphicsLabelTextItem(QGraphicsItem* parent = 0);
+        GraphicsLabelTextItem(const QString& text, QGraphicsItem* parent = 0);
+
+        void setBackgroundBrush(const QBrush& b){ backgroundBrush_ = b; update(); }
+        QBrush backgroundBrush(QBrush& b) const{ return backgroundBrush_; }
+
+    protected:
+        void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget);
+
+        QBrush backgroundBrush_;
+};
+
+GraphicsLabelTextItem::GraphicsLabelTextItem(QGraphicsItem* parent)
+    : QGraphicsSimpleTextItem(parent)
+{
+}
+
+GraphicsLabelTextItem::GraphicsLabelTextItem(const QString& text, QGraphicsItem* parent)
+    : QGraphicsSimpleTextItem(text, parent)
+{
+}
+
+void GraphicsLabelTextItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget){
+    painter->fillRect(boundingRect(), backgroundBrush_);
+    QGraphicsSimpleTextItem::paint(painter, option, widget);
+}
+
+
+
+
 /**
   Constructor
 */
@@ -44,6 +76,7 @@ BoardWidget::BoardWidget(SgfDocument* doc, QWidget *parent) :
     // create board
     shadow = scene->addRect(0, 0, 1, 1, QPen(Qt::transparent), QBrush(QColor(10, 10, 10, 130)));
     board  = scene->addRect(0, 0, 1, 1, QPen(QColor(255, 200, 100)), QBrush(QColor(255, 200, 100)));
+//    board  = scene->addRect(0, 0, 1, 1, QPen(QColor(255, 200, 100)), QBrush(QPixmap(":/res/bg.png")));
     board->setZValue(1);
 
     // set current game
@@ -318,12 +351,35 @@ void BoardWidget::setStoneItemPosition(QGraphicsItem* item, int x, int y){
   set grahics mark item position
 */
 void BoardWidget::setMarkItemPosition(QGraphicsItem* item, const Go::Mark& mark){
-/*
-    qreal size = (vLines[1]->line().x1() - vLines[0]->line().x1()) * 0.95;
-    QAbstractGraphicsShapeItem* ellipse = dynamic_cast<QAbstractGraphicsShapeItem*>(item);
-    if (ellipse)
-        ellipse->setRect(vLines[x]->line().x1()-size/2, hLines[y]->line().y1()-size/2, size, size);
-*/
+    QGraphicsPathItem* pathItem = dynamic_cast<QGraphicsPathItem*>(item);
+    QGraphicsSimpleTextItem* textItem = dynamic_cast<QGraphicsSimpleTextItem*>(item);
+    if (pathItem){
+        QPainterPath path;
+        if (mark.type == Go::Mark::cross)
+            path = createCrossPath(mark);
+        else if (mark.type == Go::Mark::circle)
+            path = createCirclePath(mark);
+        else if (mark.type == Go::Mark::square)
+            path = createSquarePath(mark);
+        else if (mark.type == Go::Mark::triangle)
+            path = createTrianglePath(mark);
+        else if (mark.type == Go::Mark::blackTerritory)
+            path = createTerritoryPath(mark);
+        else if (mark.type == Go::Mark::whiteTerritory)
+            path = createTerritoryPath(mark);
+        else if (mark.type == Go::Mark::dim)
+            path = createDimPath(mark);
+        else if (mark.type == Go::Mark::select)
+            path = createSelectPath(mark);
+        else
+            return;
+        pathItem->setPath(path);
+    }
+    else if (textItem){
+        setTextItemPosition(textItem, mark.position.x, mark.position.y);
+//        QRectF r = textItem->boundingRect();
+//        text->setPos(vLines[x]->line().x1()-r.width()*0.5, hLines[y]->line().y1()-r.height()*0.5);
+    }
 }
 
 /**
@@ -364,37 +420,39 @@ void BoardWidget::createBuffer(bool erase){
     capturedBlack = 0;
     capturedWhite = 0;
     Go::NodeList::iterator node = currentNodeList.begin();
-    QList<QGraphicsItem*>::iterator stone = stones.begin();
-    QList< QList<QGraphicsItem*> >::iterator bstones = blackStones.begin();
-    QList< QList<QGraphicsItem*> >::iterator wstones = whiteStones.begin();
-    QList< QList<QGraphicsItem*> >::iterator imarks = marks.begin();
-    QList<QGraphicsSimpleTextItem*>::iterator number = numbers.begin();
+    QList<QGraphicsItem*>::iterator iter_stone = stones.begin();
+    QList< QList<QGraphicsItem*> >::iterator  iter_bstones = blackStones.begin();
+    QList< QList<QGraphicsItem*> >::iterator  iter_wstones = whiteStones.begin();
+    QList< QList<QGraphicsItem*> >::iterator  iter_marks   = marks.begin();
+    QList<QGraphicsSimpleTextItem*>::iterator iter_number  = numbers.begin();
     while(node != currentNodeList.end()){
         if ( inBoard(*node) ){
+            // hide move number before set move number
             if ((*node)->moveNumber > 0){
                 moveNumber = (*node)->moveNumber;
-                QList<QGraphicsSimpleTextItem*>::iterator number2 = number;
+                QList<QGraphicsSimpleTextItem*>::iterator number = iter_number;
                 while(true){
-                    if (number2 == numbers.begin())
+                    if (number == numbers.begin())
                         break;
-                    if (*--number2)
-                        (*number2)->hide();
+                    if (*--number)
+                        (*number)->hide();
                 }
             }
 
-            addStoneToBuffer((*node)->position.x, (*node)->position.y, (*node)->color, moveNumber, *stone, *number);
+            // add stone to buffer if stone is in board
+            addStoneToBuffer((*node)->position.x, (*node)->position.y, (*node)->color, moveNumber, *iter_stone, *iter_number);
             killStones((*node)->position.x, (*node)->position.y);
         }
 
         // add black stones
-        QList<QGraphicsItem*>::iterator bstone = bstones->begin();
+        QList<QGraphicsItem*>::iterator bstone = iter_bstones->begin();
         foreach(const Go::Stone& stone, (*node)->blackStones){
             addStoneToBuffer(stone.position.x, stone.position.y, stone.color, 0, *bstone, NULL);
             ++bstone;
         }
 
         // add white stones
-        QList<QGraphicsItem*>::iterator wstone = wstones->begin();
+        QList<QGraphicsItem*>::iterator wstone = iter_wstones->begin();
         foreach(const Go::Stone& stone, (*node)->whiteStones){
             addStoneToBuffer(stone.position.x, stone.position.y, stone.color, 0, *wstone, NULL);
             ++wstone;
@@ -413,18 +471,21 @@ void BoardWidget::createBuffer(bool erase){
             }
         }
 
-        // add marks
-        QList<QGraphicsItem*>::iterator mark = imarks->begin();
+        // marks
+        QList<QGraphicsItem*>::iterator mark = iter_marks->begin();
         foreach(const Go::Mark& m, (*node)->marks){
-            addMarkToBuffer(m, *mark);
+            if (*node == currentNode)
+                addMarkToBuffer(m, *mark);
+            else
+                removeMarkFromBuffer(m, *mark);
             ++mark;
         }
 
-        ++stone;
-        ++number;
-        ++bstones;
-        ++wstones;
-        ++imarks;
+        ++iter_stone;
+        ++iter_number;
+        ++iter_bstones;
+        ++iter_wstones;
+        ++iter_marks;
         if (*node == currentNode){
             ++node;
             break;
@@ -440,37 +501,37 @@ void BoardWidget::createBuffer(bool erase){
         if ((*node)->moveNumber > 0)
             moveNumber2 = (*node)->moveNumber;
 
-        if (*stone)
-            (*stone)->hide();
+        if (*iter_stone)
+            (*iter_stone)->hide();
 
-        if (*number){
-            (*number)->hide();
-            (*number)->setText( QString::number(moveNumber2++) );
+        if (*iter_number){
+            (*iter_number)->hide();
+            (*iter_number)->setText( QString::number(moveNumber2++) );
         }
 
-        QList<QGraphicsItem*>::iterator bstone = bstones->begin();
-        while (bstone != bstones->end()){
+        QList<QGraphicsItem*>::iterator bstone = iter_bstones->begin();
+        while (bstone != iter_bstones->end()){
             (*bstone)->hide();
             ++bstone;
         }
 
-        QList<QGraphicsItem*>::iterator wstone = wstones->begin();
-        while (wstone != wstones->end()){
+        QList<QGraphicsItem*>::iterator wstone = iter_wstones->begin();
+        while (wstone != iter_wstones->end()){
             (*wstone)->hide();
             ++wstone;
         }
 
-        QList<QGraphicsItem*>::iterator mark = imarks->begin();
-        while (mark != imarks->end()){
+        QList<QGraphicsItem*>::iterator mark = iter_marks->begin();
+        while (mark != iter_marks->end()){
             (*mark)->hide();
             ++mark;
         }
 
-        ++stone;
-        ++number;
-        ++bstones;
-        ++wstones;
-        ++imarks;
+        ++iter_stone;
+        ++iter_number;
+        ++iter_bstones;
+        ++iter_wstones;
+        ++iter_marks;
         ++node;
     }
 
@@ -503,10 +564,15 @@ void BoardWidget::eraseBuffer(){
         qDeleteAll(whiteStones[i]);
     whiteStones.clear();
 
-    // white stones
+    // marks
     for (int i=0; i<marks.size(); ++i)
         qDeleteAll(marks[i]);
     marks.clear();
+
+    // territories
+    for (int i=0; i<territories.size(); ++i)
+        qDeleteAll(territories[i]);
+    territories.clear();
 
     // create currentNodeList
     Go::NodePtr n = currentNode;
@@ -584,8 +650,16 @@ BoardWidget::TerritoryInfo& BoardWidget::addStoneToBuffer(int x, int y, Go::Colo
 */
 BoardWidget::TerritoryInfo& BoardWidget::addMarkToBuffer(const Go::Mark& mark, QGraphicsItem* item){
     TerritoryInfo& ti = boardBuffer[mark.position.y][mark.position.x];
+    GraphicsLabelTextItem* label = dynamic_cast<GraphicsLabelTextItem*>(item);
     QAbstractGraphicsShapeItem* path = dynamic_cast<QAbstractGraphicsShapeItem*>(item);
-    if (path){
+    if (label){
+        label->setBrush( QBrush(ti.color == Go::black ? Qt::white : Qt::black) );
+
+        if (ti.color == Go::empty){
+            label->setBackgroundBrush(board->brush());
+        }
+    }
+    else if (path){
         path->setPen(QPen(ti.color == Go::black ? Qt::white : Qt::black, 2));
 
         if (mark.type == Go::Mark::select)
@@ -594,6 +668,18 @@ BoardWidget::TerritoryInfo& BoardWidget::addMarkToBuffer(const Go::Mark& mark, Q
 
     ti.mark = item;
     item->show();
+    return ti;
+}
+
+/**
+  remove graphics mark item from boardBuffer
+*/
+BoardWidget::TerritoryInfo& BoardWidget::removeMarkFromBuffer(const Go::Mark& mark, QGraphicsItem* item){
+    TerritoryInfo& ti = boardBuffer[mark.position.y][mark.position.x];
+
+    ti.mark = NULL;
+    item->hide();
+
     return ti;
 }
 
@@ -615,98 +701,139 @@ QGraphicsItem* BoardWidget::createStoneItem(int x, int y, Go::Color color){
   create graphic stone item
 */
 QGraphicsItem* BoardWidget::createMarkItem(const Go::Mark& mark){
-    int size = vLines[1]->line().x1() - vLines[0]->line().x1();
     QGraphicsItem* item = NULL;
-    if (mark.type == Go::Mark::cross){
-        size *= 0.4;
-        int sceneX = vLines[mark.position.x]->line().x1() - size / 2;
-        int sceneY = hLines[mark.position.y]->line().y1() - size / 2;
-        QPainterPath path;
-        path.moveTo(sceneX, sceneY);
-        path.lineTo(sceneX+size, sceneY+size);
-        path.moveTo(sceneX+size, sceneY);
-        path.lineTo(sceneX, sceneY+size);
-        item = scene->addPath(path);
-    }
-    else if (mark.type == Go::Mark::circle){
-        size *= 0.5;
-        int sceneX = vLines[mark.position.x]->line().x1() - size / 2;
-        int sceneY = hLines[mark.position.y]->line().y1() - size / 2;
-        item = scene->addEllipse(sceneX, sceneY, size, size);
-    }
-    else if (mark.type == Go::Mark::square){
-        size *= 0.45;
-        int sceneX = vLines[mark.position.x]->line().x1() - size / 2;
-        int sceneY = hLines[mark.position.y]->line().y1() - size / 2;
-        item = scene->addRect(sceneX, sceneY, size, size);
-    }
-    else if (mark.type == Go::Mark::triangle){
-        int xsize = size * 0.5;
-        int ysize = size * 0.4;
-        int sceneX = vLines[mark.position.x]->line().x1() - xsize / 2;
-        int sceneY = hLines[mark.position.y]->line().y1() - ysize / 2;
-        QPainterPath path;
-        path.moveTo(sceneX+xsize/2, sceneY);
-        path.lineTo(sceneX, sceneY+ysize);
-        path.lineTo(sceneX+xsize, sceneY+ysize);
-        path.lineTo(sceneX+xsize/2, sceneY);
-        item = scene->addPath(path);
-    }
+    if (mark.type == Go::Mark::cross)
+        item = scene->addPath( createCrossPath(mark) );
+    else if (mark.type == Go::Mark::circle)
+        item = scene->addPath( createCirclePath(mark) );
+    else if (mark.type == Go::Mark::square)
+        item = scene->addPath( createSquarePath(mark) );
+    else if (mark.type == Go::Mark::triangle)
+        item = scene->addPath( createTrianglePath(mark) );
     else if (mark.type == Go::Mark::character){
-        size *= 0.5;
-        int sceneX = vLines[mark.position.x]->line().x1() - size / 2;
-        int sceneY = hLines[mark.position.y]->line().y1() - size / 2;
-        QPainterPath path;
-        path.moveTo(sceneX, sceneY);
-        path.lineTo(sceneX+size, sceneY+size);
-        path.moveTo(sceneX+size, sceneY);
-        path.lineTo(sceneX, sceneY+size);
-        item = scene->addPath(path);
+//        item = scene->addSimpleText(mark.text);
+        item = new GraphicsLabelTextItem(mark.text);
+        scene->addItem(item);
     }
-    else if (mark.type == Go::Mark::blackTerritory){
-        size *= 0.5;
-        int sceneX = vLines[mark.position.x]->line().x1() - size / 2;
-        int sceneY = hLines[mark.position.y]->line().y1() - size / 2;
-        QPainterPath path;
-        path.moveTo(sceneX, sceneY);
-        path.lineTo(sceneX+size, sceneY+size);
-        path.moveTo(sceneX+size, sceneY);
-        path.lineTo(sceneX, sceneY+size);
-        item = scene->addPath(path);
-    }
-    else if (mark.type == Go::Mark::whiteTerritory){
-        size *= 0.5;
-        int sceneX = vLines[mark.position.x]->line().x1() - size / 2;
-        int sceneY = hLines[mark.position.y]->line().y1() - size / 2;
-        QPainterPath path;
-        path.moveTo(sceneX, sceneY);
-        path.lineTo(sceneX+size, sceneY+size);
-        path.moveTo(sceneX+size, sceneY);
-        path.lineTo(sceneX, sceneY+size);
-        item = scene->addPath(path);
-    }
-    else if (mark.type == Go::Mark::dim){
-        size *= 0.5;
-        int sceneX = vLines[mark.position.x]->line().x1() - size / 2;
-        int sceneY = hLines[mark.position.y]->line().y1() - size / 2;
-        QPainterPath path;
-        path.moveTo(sceneX, sceneY);
-        path.lineTo(sceneX+size, sceneY+size);
-        path.moveTo(sceneX+size, sceneY);
-        path.lineTo(sceneX, sceneY+size);
-        item = scene->addPath(path);
-    }
-    else if (mark.type == Go::Mark::select){
-        size *= 0.45;
-        int sceneX = vLines[mark.position.x]->line().x1() - size / 2;
-        int sceneY = hLines[mark.position.y]->line().y1() - size / 2;
-        item = scene->addRect(sceneX, sceneY, size, size);
-    }
+    else if (mark.type == Go::Mark::blackTerritory)
+        item = scene->addPath( createTerritoryPath(mark) );
+    else if (mark.type == Go::Mark::whiteTerritory)
+        item = scene->addPath( createTerritoryPath(mark) );
+    else if (mark.type == Go::Mark::dim)
+        item = scene->addPath( createDimPath(mark) );
+    else if (mark.type == Go::Mark::select)
+        item = scene->addPath( createSelectPath(mark) );
     else
         return NULL;
 
     item->setZValue(4);
     return item;
+}
+
+/**
+  create cross path
+*/
+QPainterPath BoardWidget::createCrossPath(const Go::Mark& mark){
+    qreal size = vLines[1]->line().x1() - vLines[0]->line().x1();
+    size *= 0.4;
+    int sceneX = vLines[mark.position.x]->line().x1() - size / 2;
+    int sceneY = hLines[mark.position.y]->line().y1() - size / 2;
+
+    QPainterPath path;
+    path.moveTo(sceneX, sceneY);
+    path.lineTo(sceneX+size, sceneY+size);
+    path.moveTo(sceneX+size, sceneY);
+    path.lineTo(sceneX, sceneY+size);
+
+    return path;
+}
+
+/**
+  create circle path
+*/
+QPainterPath BoardWidget::createCirclePath(const Go::Mark& mark){
+    qreal size = vLines[1]->line().x1() - vLines[0]->line().x1();
+    size *= 0.5;
+    int sceneX = vLines[mark.position.x]->line().x1() - size / 2;
+    int sceneY = hLines[mark.position.y]->line().y1() - size / 2;
+
+    QPainterPath path;
+    path.addEllipse(sceneX, sceneY, size, size);
+
+    return path;
+}
+
+/**
+  create square path
+*/
+QPainterPath BoardWidget::createSquarePath(const Go::Mark& mark){
+    qreal size = vLines[1]->line().x1() - vLines[0]->line().x1();
+    size *= 0.45;
+    int sceneX = vLines[mark.position.x]->line().x1() - size / 2;
+    int sceneY = hLines[mark.position.y]->line().y1() - size / 2;
+
+    QPainterPath path;
+    path.addRect(sceneX, sceneY, size, size);
+
+    return path;
+}
+
+/**
+  create triangle path
+*/
+QPainterPath BoardWidget::createTrianglePath(const Go::Mark& mark){
+    qreal size = vLines[1]->line().x1() - vLines[0]->line().x1();
+    qreal xsize = size * 0.5;
+    qreal ysize = size * 0.4;
+    int sceneX = vLines[mark.position.x]->line().x1() - xsize / 2;
+    int sceneY = hLines[mark.position.y]->line().y1() - ysize / 2;
+
+    QPainterPath path;
+    path.moveTo(sceneX+xsize/2, sceneY);
+    path.lineTo(sceneX, sceneY+ysize);
+    path.lineTo(sceneX+xsize, sceneY+ysize);
+    path.lineTo(sceneX+xsize/2, sceneY);
+
+    return path;
+}
+
+/**
+  create black territory path
+*/
+QPainterPath BoardWidget::createTerritoryPath(const Go::Mark& mark){
+qDebug() << "createTerritoryPath";
+    qreal size = vLines[1]->line().x1() - vLines[0]->line().x1();
+    size *= 0.35;
+    int sceneX = vLines[mark.position.x]->line().x1() - size / 2;
+    int sceneY = hLines[mark.position.y]->line().y1() - size / 2;
+
+    QPainterPath path;
+    path.addRect(sceneX, sceneY, size, size);
+
+    return path;
+}
+
+/**
+  create dim path
+*/
+QPainterPath BoardWidget::createDimPath(const Go::Mark& mark){
+    QPainterPath path;
+    return path;
+}
+
+/**
+  create select path
+*/
+QPainterPath BoardWidget::createSelectPath(const Go::Mark& mark){
+    qreal size = vLines[1]->line().x1() - vLines[0]->line().x1();
+    size *= 0.45;
+    int sceneX = vLines[mark.position.x]->line().x1() - size / 2;
+    int sceneY = hLines[mark.position.y]->line().y1() - size / 2;
+
+    QPainterPath path;
+    path.addRect(sceneX, sceneY, size, size);
+
+    return path;
 }
 
 /**

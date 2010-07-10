@@ -97,8 +97,16 @@ protected:
     void eraseBuffer();
     QGraphicsItem* createStoneItem(int x, int y, Go::Color color);
     QGraphicsItem* createMarkItem(const Go::Mark& mark);
+    QPainterPath createCrossPath(const Go::Mark& mark);
+    QPainterPath createCirclePath(const Go::Mark& mark);
+    QPainterPath createSquarePath(const Go::Mark& mark);
+    QPainterPath createTrianglePath(const Go::Mark& mark);
+    QPainterPath createTerritoryPath(const Go::Mark& mark);
+    QPainterPath createDimPath(const Go::Mark& mark);
+    QPainterPath createSelectPath(const Go::Mark& mark);
     TerritoryInfo& addStoneToBuffer(int x, int y, Go::Color color, int moveNumber, QGraphicsItem* stone, QGraphicsSimpleTextItem* number);
     TerritoryInfo& addMarkToBuffer(const Go::Mark& mark, QGraphicsItem* item);
+    TerritoryInfo& removeMarkFromBuffer(const Go::Mark& mark, QGraphicsItem* item);
     void getStarPosition(QList<int>& xpos, QList<int>& ypos);
     void killStones(int x, int y);
     void killStones(char* buf);
@@ -126,6 +134,7 @@ private:
     QList< QList<QGraphicsItem*> > blackStones;
     QList< QList<QGraphicsItem*> > whiteStones;
     QList< QList<QGraphicsItem*> > marks;
+    QList< QList<QGraphicsItem*> > territories;
     QList<QGraphicsSimpleTextItem*> numbers;
     Go::NodePtr currentNode;
     Go::NodeList currentNodeList;
