@@ -102,7 +102,6 @@ protected:
     QPainterPath createSquarePath(const Go::Mark& mark);
     QPainterPath createTrianglePath(const Go::Mark& mark);
     QPainterPath createTerritoryPath(const Go::Mark& mark);
-    QPainterPath createDimPath(const Go::Mark& mark);
     QPainterPath createSelectPath(const Go::Mark& mark);
     TerritoryInfo& addStoneToBuffer(int x, int y, Go::Color color, int moveNumber, QGraphicsItem* stone, QGraphicsSimpleTextItem* number);
     TerritoryInfo& addMarkToBuffer(const Go::Mark& mark, QGraphicsItem* item);
@@ -135,6 +134,7 @@ private:
     QList< QList<QGraphicsItem*> > whiteStones;
     QList< QList<QGraphicsItem*> > marks;
     QList< QList<QGraphicsItem*> > territories;
+    QList< QList<QGraphicsRectItem*> > dims;
     QList<QGraphicsSimpleTextItem*> numbers;
     Go::NodePtr currentNode;
     Go::NodeList currentNodeList;
