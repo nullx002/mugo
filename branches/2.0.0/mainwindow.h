@@ -220,7 +220,7 @@ private slots:
     void on_commentWidget_textChanged();
 
     // Collection View
-    void on_collectionView_doubleClicked(QModelIndex index);
+    void on_collectionView_activated(const QModelIndex& index);
     void on_actionCollectionMoveDown_triggered();
     void on_actionCollectionMoveUp_triggered();
     void on_actionCollectionDelete_triggered();
