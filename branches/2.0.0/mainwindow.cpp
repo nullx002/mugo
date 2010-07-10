@@ -2116,14 +2116,6 @@ void MainWindow::on_commentWidget_textChanged(){
 
 /**
   Slot
-  collection view -> double clicked
-*/
-void MainWindow::on_collectionView_doubleClicked(const QModelIndex& index)
-{
-}
-
-/**
-  Slot
   collection view -> activated
 */
 void MainWindow::on_collectionView_activated(const QModelIndex& index)
