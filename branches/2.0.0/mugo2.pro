@@ -1,8 +1,10 @@
 # -------------------------------------------------
 # Project created by QtCreator 2010-06-04T18:33:47
 # -------------------------------------------------
-QT += network \
-    phonon
+QT += network
+unix:QT += phonon
+mac:QT += phonon
+
 TARGET = mugo2
 TEMPLATE = app
 SOURCES += main.cpp \
@@ -33,3 +35,4 @@ win32:RC_FILE = mugo.rc
 mac:RC_FILE = pics/mugo.icns
 TRANSLATIONS += mugo.ja_JP.ts \
     mugo_mac.ja_JP.ts
+win32:INCLUDEPATH += c:\libs\

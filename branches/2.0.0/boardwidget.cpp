@@ -32,7 +32,7 @@ class GraphicsLabelTextItem : public QGraphicsSimpleTextItem{
         GraphicsLabelTextItem(const QString& text, QGraphicsItem* parent = 0);
 
         void setBackgroundBrush(const QBrush& b){ backgroundBrush_ = b; update(); }
-        QBrush backgroundBrush(QBrush& b) const{ return backgroundBrush_; }
+        QBrush backgroundBrush() const{ return backgroundBrush_; }
 
     protected:
         void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget);
@@ -785,8 +785,8 @@ QPainterPath BoardWidget::createTrianglePath(const Go::Mark& mark){
     qreal size = vLines[1]->line().x1() - vLines[0]->line().x1();
     qreal xsize = size * 0.5;
     qreal ysize = size * 0.4;
-    int sceneX = vLines[mark.position.x]->line().x1() - xsize / 2;
-    int sceneY = hLines[mark.position.y]->line().y1() - ysize / 2;
+    qreal sceneX = vLines[mark.position.x]->line().x1() - xsize / 2;
+    qreal sceneY = hLines[mark.position.y]->line().y1() - ysize / 2;
 
     QPainterPath path;
     path.moveTo(sceneX+xsize/2, sceneY);

@@ -180,6 +180,10 @@ bool Sgf::readNodeValue(QString::iterator& first, QString::iterator last, QStrin
         if (c == '\\'){
             c = first->unicode();
             ++first;
+
+            // soft linebreak
+            if (c == '\r' || c == '\n')
+                continue;
         }
         value.push_back(c);
     }

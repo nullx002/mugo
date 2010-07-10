@@ -170,7 +170,8 @@ void MainWindow::setKeyboardShortcut(){
     ui->actionOpen->setShortcut(QKeySequence::Open);
     ui->actionCloseTab->setShortcut(QKeySequence::Close);
     ui->actionSave->setShortcut(QKeySequence::Save);
-    ui->actionExit->setShortcut(QKeySequence::Quit);
+//    ui->actionExit->setShortcut(QKeySequence::Quit);
+    ui->actionExit->setShortcut( QKeySequence("Ctrl+Q") );
     ui->actionCopySgfToClipboard->setShortcut(QKeySequence::Copy);
     ui->actionPasteSgfToNewTab->setShortcut(QKeySequence::Paste);
     ui->actionPreviousTab->setShortcut(QKeySequence::PreviousChild);
