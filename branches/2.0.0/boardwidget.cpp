@@ -428,7 +428,7 @@ void BoardWidget::createBuffer(bool erase){
         boardBuffer[i].resize(gameInformation->xsize);
 
     // show or hide stones
-    moveNumber = 1;
+    moveNumber = 0;
     capturedBlack = 0;
     capturedWhite = 0;
     Go::NodeList::iterator node = currentNodeList.begin();
@@ -439,6 +439,9 @@ void BoardWidget::createBuffer(bool erase){
     QList< QList<QGraphicsItem*> >::iterator  iter_territories = territories.begin();
     QList<QGraphicsSimpleTextItem*>::iterator iter_number = numbers.begin();
     while(node != currentNodeList.end()){
+        if ((*node)->isStone())
+            ++moveNumber;
+
         if ( inBoard(*node) ){
             // hide move number before set move number
             if ((*node)->moveNumber > 0){
@@ -521,9 +524,6 @@ void BoardWidget::createBuffer(bool erase){
             ++node;
             break;
         }
-
-        if ((*node)->isStone())
-            ++moveNumber;
         ++node;
     };
 
