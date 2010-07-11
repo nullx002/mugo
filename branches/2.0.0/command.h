@@ -213,6 +213,43 @@ private:
 };
 
 /**
+  add stone command
+*/
+class AddStoneCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(AddStoneCommand)
+
+public:
+    AddStoneCommand(SgfDocument* doc, Go::NodePtr node, const Go::Stone& stone, QUndoCommand *parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+private:
+    SgfDocument* document;
+    Go::NodePtr  node;
+    Go::Stone    stone;
+};
+
+/**
+  remove stone command
+*/
+class RemoveStoneCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(RemoveStoneCommand)
+
+public:
+    RemoveStoneCommand(SgfDocument* doc, Go::NodePtr node, const Go::Point& p, QUndoCommand *parent = 0);
+    ~RemoveStoneCommand();
+    virtual void redo();
+    virtual void undo();
+
+private:
+    SgfDocument* document;
+    Go::NodePtr  node;
+    Go::Point    position;
+    Go::Stone*   stone;
+    int          index;
+};
+
+/**
   set comment command
 */
 class SetCommentCommand : public QUndoCommand{

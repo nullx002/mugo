@@ -239,6 +239,10 @@ void BoardWidget::onLButtonDown(QMouseEvent* e){
             addStone(x, y, Go::white);
             break;
 
+        case EditMode::addEmpty:
+            addStone(x, y, Go::empty);
+            break;
+
         case EditMode::addLabel:
             addLabel(x, y, true);
             break;
@@ -1151,7 +1155,47 @@ void BoardWidget::alternateMove(int x, int y){
         createChildItem(x, y);
 }
 
+/**
+  add stone
+*/
 void BoardWidget::addStone(int x, int y, Go::Color color){
+    TerritoryInfo& ti = boardBuffer[y][x];
+
+    Go::Point p(x, y);
+
+    if (ti.stone && ti.number == NULL){
+        bool removed = removeStone(currentNode->blackStones, p) ||
+                       removeStone(currentNode->whiteStones, p) ||
+                       removeStone(currentNode->emptyStones, p);
+        if (removed)
+            return;
+    }
+
+    if ((color == Go::empty && ti.stone) || ti.stone == NULL){
+        // if currentNode is stone, create child node and add stone to new node.
+        if (currentNode->isStone()){
+            Go::NodePtr node(new Go::Node(currentNode));
+            addItem(currentNode, node, -1);
+            setCurrentNode(node);
+        }
+
+        AddStoneCommand* command = new AddStoneCommand(document(), currentNode, Go::Stone(p, color));
+        document()->getUndoStack()->push(command);
+    }
+}
+
+/**
+  remove stone
+*/
+bool BoardWidget::removeStone(const Go::StoneList& stoneList, const Go::Point& p){
+    foreach(const Go::Stone& s, stoneList){
+        if (s.position == p){
+            RemoveStoneCommand* command = new RemoveStoneCommand(document(), currentNode, p);
+            document()->getUndoStack()->push(command);
+            return true;
+        }
+    }
+    return false;
 }
 
 /**

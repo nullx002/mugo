@@ -134,6 +134,7 @@ protected:
     void addStone(int x, int y, Go::Color color);
     void addLabel(int x, int y, bool autoLabel);
     void addMark(int x, int y, Go::Mark::Type mark);
+    bool removeStone(const Go::StoneList& stoneList, const Go::Point& p);
 
     void getStarPosition(QList<int>& xpos, QList<int>& ypos);
     void killStones(int x, int y);

@@ -38,7 +38,10 @@ AddNodeCommand::AddNodeCommand(SgfDocument* doc, Go::NodePtr parentNode_, Go::No
   redo add node command
 */
 void AddNodeCommand::redo(){
-    setText( tr("Add Stone") );
+    if (node->isStone())
+        setText( tr("Move") );
+    else
+        setText( tr("Add Empty Node") );
     document->addNode(parentNode, node, index);
 }
 
@@ -269,13 +272,24 @@ AddMarkCommand::AddMarkCommand(SgfDocument* doc, Go::NodePtr node_, const Go::Ma
     , node(node_)
     , mark(mark_)
 {
+    if (mark.type == Go::Mark::circle)
+        setText( tr("Add Circle") );
+    else if (mark.type == Go::Mark::triangle)
+        setText( tr("Add Triangle") );
+    else if (mark.type == Go::Mark::square)
+        setText( tr("Add Square") );
+    else if (mark.type == Go::Mark::cross)
+        setText( tr("Add Cross") );
+    else if (mark.type == Go::Mark::character)
+        setText( tr("Add Label") );
+    else
+        setText( tr("Add Mark") );
 }
 
 /**
   redo add mark command
 */
 void AddMarkCommand::redo(){
-    setText( tr("Add Mark") );
     node->marks.push_back(mark);
     document->modifyNode(node, true);
 }
@@ -298,15 +312,15 @@ RemoveMarkCommand::RemoveMarkCommand(SgfDocument* doc, Go::NodePtr node_, const 
     , position(p)
     , mark(NULL)
 {
+    setText( tr("Remove Mark") );
+
     index = 0;
-    Go::MarkList::iterator iter = node->marks.begin();
-    while (iter != node->marks.end()){
-        if (iter->position == position){
-            mark = new Go::Mark(*iter);
+    foreach(const Go::Mark& m, node->marks){
+        if (m.position == position){
+            mark = new Go::Mark(m);
             break;
         }
         ++index;
-        ++iter;
     }
 }
 
@@ -321,8 +335,6 @@ RemoveMarkCommand::~RemoveMarkCommand(){
   redo remove mark command
 */
 void RemoveMarkCommand::redo(){
-    setText( tr("Remove Mark") );
-
     node->marks.removeAt(index);
     document->modifyNode(node, true);
 }
@@ -332,6 +344,126 @@ void RemoveMarkCommand::redo(){
 */
 void RemoveMarkCommand::undo(){
     node->marks.insert(index, *mark);
+    document->modifyNode(node, true);
+}
+
+/**
+  Constructor
+*/
+AddStoneCommand::AddStoneCommand(SgfDocument* doc, Go::NodePtr node_, const Go::Stone& stone_, QUndoCommand *parent)
+    : QUndoCommand(parent)
+    , document(doc)
+    , node(node_)
+    , stone(stone_)
+{
+    if (stone.color == Go::black)
+        setText( tr("Add Black Stone") );
+    else if (stone.color == Go::white)
+        setText( tr("Add White Stone") );
+    else if (stone.color == Go::empty)
+        setText( tr("Add Empty") );
+}
+
+/**
+  redo add stone command
+*/
+void AddStoneCommand::redo(){
+    if (stone.color == Go::black)
+        node->blackStones.push_back(stone);
+    else if (stone.color == Go::white)
+        node->whiteStones.push_back(stone);
+    else if (stone.color == Go::empty)
+        node->emptyStones.push_back(stone);
+
+    document->modifyNode(node, true);
+}
+
+/**
+  undo add stone command
+*/
+void AddStoneCommand::undo(){
+    if (stone.color == Go::black)
+        node->blackStones.pop_back();
+    else if (stone.color == Go::white)
+        node->whiteStones.pop_back();
+    else if (stone.color == Go::empty)
+        node->emptyStones.pop_back();
+
+    document->modifyNode(node, true);
+}
+
+/**
+  Constructor
+*/
+RemoveStoneCommand::RemoveStoneCommand(SgfDocument* doc, Go::NodePtr node_, const Go::Point& p, QUndoCommand *parent)
+    : QUndoCommand(parent)
+    , document(doc)
+    , node(node_)
+    , position(p)
+    , stone(NULL)
+{
+    setText( tr("Remove Stone") );
+
+    index = 0;
+    foreach(const Go::Stone& s, node->blackStones){
+        if (s.position == position){
+            stone = new Go::Stone(s);
+            return;
+        }
+        ++index;
+    }
+
+    index = 0;
+    foreach(const Go::Stone& s, node->whiteStones){
+        if (s.position == position){
+            stone = new Go::Stone(s);
+            return;
+        }
+        ++index;
+    }
+
+    index = 0;
+    foreach(const Go::Stone& s, node->emptyStones){
+        if (s.position == position){
+            stone = new Go::Stone(s);
+            return;
+        }
+        ++index;
+    }
+}
+
+/**
+  Destructor
+*/
+RemoveStoneCommand::~RemoveStoneCommand(){
+    delete stone;
+}
+
+/**
+  redo remove stone  command
+*/
+void RemoveStoneCommand::redo(){
+    if (stone->color == Go::black)
+        node->blackStones.removeAt(index);
+    else if (stone->color == Go::white)
+        node->whiteStones.removeAt(index);
+    else if (stone->color == Go::empty)
+        node->emptyStones.removeAt(index);
+
+    document->modifyNode(node, true);
+}
+
+/**
+  undo remove stone command
+*/
+void RemoveStoneCommand::undo(){
+    if (stone->color == Go::black)
+        node->blackStones.insert(index, *stone);
+    else if (stone->color == Go::white)
+        node->whiteStones.insert(index, *stone);
+    else if (stone->color == Go::empty)
+        node->emptyStones.insert(index, *stone);
+
     document->modifyNode(node, true);
 }
 

@@ -111,6 +111,7 @@ void SgfDocument::addNode(Go::NodePtr parentNode, Go::NodePtr node, int index){
         parentNode->childNodes.push_back(node);
     else
         parentNode->childNodes.insert(index, node);
+    node->setParent(parentNode);
 
     setDirty();
     emit nodeAdded(node);
