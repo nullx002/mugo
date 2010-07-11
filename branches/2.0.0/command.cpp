@@ -105,7 +105,7 @@ SetNodeNameCommand::SetNodeNameCommand(SgfDocument* doc, Go::NodePtr node_, cons
 void SetNodeNameCommand::redo(){
     setText( tr("Set Node Name") );
     node->name = newName;
-    document->modifyNode(node);
+    document->modifyNode(node, false);
 }
 
 /**
@@ -113,7 +113,7 @@ void SetNodeNameCommand::redo(){
 */
 void SetNodeNameCommand::undo(){
     node->name = oldName;
-    document->modifyNode(node);
+    document->modifyNode(node, false);
 }
 
 /**
@@ -134,7 +134,7 @@ SetMoveNumberCommand::SetMoveNumberCommand(SgfDocument* doc, Go::NodePtr node_, 
 void SetMoveNumberCommand::redo(){
     setText( tr("Set Move Number") );
     node->moveNumber = newNumber;
-    document->modifyNode(node);
+    document->modifyNode(node, false);
 }
 
 /**
@@ -142,7 +142,7 @@ void SetMoveNumberCommand::redo(){
 */
 void SetMoveNumberCommand::undo(){
     node->moveNumber = oldNumber;
-    document->modifyNode(node);
+    document->modifyNode(node, false);
 }
 
 /**
@@ -162,7 +162,7 @@ UnsetMoveNumberCommand::UnsetMoveNumberCommand(SgfDocument* doc, Go::NodePtr nod
 void UnsetMoveNumberCommand::redo(){
     setText( tr("Unset Move Number") );
     node->moveNumber = 0;
-    document->modifyNode(node);
+    document->modifyNode(node, false);
 }
 
 /**
@@ -170,7 +170,7 @@ void UnsetMoveNumberCommand::redo(){
 */
 void UnsetMoveNumberCommand::undo(){
     node->moveNumber = oldNumber;
-    document->modifyNode(node);
+    document->modifyNode(node, false);
 }
 
 /**
@@ -191,7 +191,7 @@ SetNodeAnnotationCommand::SetNodeAnnotationCommand(SgfDocument* doc, Go::NodePtr
 void SetNodeAnnotationCommand::redo(){
     setText( tr("Set Node Annotation") );
     node->nodeAnnotation = newAnnotation;
-    document->modifyNode(node);
+    document->modifyNode(node, false);
 }
 
 /**
@@ -199,7 +199,7 @@ void SetNodeAnnotationCommand::redo(){
 */
 void SetNodeAnnotationCommand::undo(){
     node->nodeAnnotation = oldAnnotation;
-    document->modifyNode(node);
+    document->modifyNode(node, false);
 }
 
 /**
@@ -220,7 +220,7 @@ SetMoveAnnotationCommand::SetMoveAnnotationCommand(SgfDocument* doc, Go::NodePtr
 void SetMoveAnnotationCommand::redo(){
     setText( tr("Set Move Annotation") );
     node->moveAnnotation = newAnnotation;
-    document->modifyNode(node);
+    document->modifyNode(node, false);
 }
 
 /**
@@ -228,7 +228,7 @@ void SetMoveAnnotationCommand::redo(){
 */
 void SetMoveAnnotationCommand::undo(){
     node->moveAnnotation = oldAnnotation;
-    document->modifyNode(node);
+    document->modifyNode(node, false);
 }
 
 /**
@@ -249,7 +249,7 @@ SetAnnotationCommand::SetAnnotationCommand(SgfDocument* doc, Go::NodePtr node_, 
 void SetAnnotationCommand::redo(){
     setText( tr("Set Annotation") );
     node->annotation = newAnnotation;
-    document->modifyNode(node);
+    document->modifyNode(node, false);
 }
 
 /**
@@ -257,7 +257,82 @@ void SetAnnotationCommand::redo(){
 */
 void SetAnnotationCommand::undo(){
     node->annotation = oldAnnotation;
-    document->modifyNode(node);
+    document->modifyNode(node, false);
+}
+
+/**
+  Constructor
+*/
+AddMarkCommand::AddMarkCommand(SgfDocument* doc, Go::NodePtr node_, const Go::Mark& mark_, QUndoCommand *parent)
+    : QUndoCommand(parent)
+    , document(doc)
+    , node(node_)
+    , mark(mark_)
+{
+}
+
+/**
+  redo add mark command
+*/
+void AddMarkCommand::redo(){
+    setText( tr("Add Mark") );
+    node->marks.push_back(mark);
+    document->modifyNode(node, true);
+}
+
+/**
+  undo add mark command
+*/
+void AddMarkCommand::undo(){
+    node->marks.pop_back();
+    document->modifyNode(node, true);
+}
+
+/**
+  Constructor
+*/
+RemoveMarkCommand::RemoveMarkCommand(SgfDocument* doc, Go::NodePtr node_, const Go::Point& p, QUndoCommand *parent)
+    : QUndoCommand(parent)
+    , document(doc)
+    , node(node_)
+    , position(p)
+    , mark(NULL)
+{
+    index = 0;
+    Go::MarkList::iterator iter = node->marks.begin();
+    while (iter != node->marks.end()){
+        if (iter->position == position){
+            mark = new Go::Mark(*iter);
+            break;
+        }
+        ++index;
+        ++iter;
+    }
+}
+
+/**
+  Destructor
+*/
+RemoveMarkCommand::~RemoveMarkCommand(){
+    delete mark;
+}
+
+/**
+  redo remove mark command
+*/
+void RemoveMarkCommand::redo(){
+    setText( tr("Remove Mark") );
+
+    node->marks.removeAt(index);
+    document->modifyNode(node, true);
+}
+
+/**
+  undo remove mark command
+*/
+void RemoveMarkCommand::undo(){
+    node->marks.insert(index, *mark);
+    document->modifyNode(node, true);
 }
 
 /**
@@ -278,7 +353,7 @@ SetCommentCommand::SetCommentCommand(SgfDocument* doc, Go::NodePtr node_, const 
 void SetCommentCommand::redo(){
     setText( tr("Edit comment") );
     node->comment = comment;
-    document->modifyNode(node);
+    document->modifyNode(node, false);
 }
 
 /**
@@ -286,7 +361,7 @@ void SetCommentCommand::redo(){
 */
 void SetCommentCommand::undo(){
     node->comment = oldComment;
-    document->modifyNode(node);
+    document->modifyNode(node, false);
 }
 
 /**
@@ -294,7 +369,7 @@ void SetCommentCommand::undo(){
 */
 void SetCommentCommand::setComment(const QString& comment){
     node->comment = this->comment = comment;
-    document->modifyNode(node);
+    document->modifyNode(node, false);
 }
 
 /**

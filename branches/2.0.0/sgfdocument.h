@@ -45,7 +45,7 @@ public:
     bool moveUp(const Go::NodePtr& game);
     bool moveDown(const Go::NodePtr& game);
 
-    void modifyNode(Go::NodePtr& node){ setDirty(); emit nodeModified(node); }
+    void modifyNode(Go::NodePtr& node, bool needRecreateBoard){ setDirty(); emit nodeModified(node, needRecreateBoard); }
 
     Go::NodeList gameList;
     int lineWidth;
@@ -53,7 +53,7 @@ public:
 signals:
     void nodeAdded(Go::NodePtr node);
     void nodeDeleted(Go::NodePtr node, bool removeChildren);
-    void nodeModified(Go::NodePtr node);
+    void nodeModified(Go::NodePtr node, bool needRecreateBoard);
     void gameAdded(Go::NodePtr game, int index);
     void gameDeleted(Go::NodePtr game, int index);
     void gameMoved(Go::NodePtr game, int from, int to);

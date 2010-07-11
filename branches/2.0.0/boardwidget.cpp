@@ -156,10 +156,13 @@ void GraphicsArrowItem::createNormal(QPainterPath& path, qreal x1, qreal y1, qre
 BoardWidget::BoardWidget(SgfDocument* doc, QWidget *parent) :
     QGraphicsView(parent),
     document_(doc),
-    scene( new QGraphicsScene(this) )
+    scene( new QGraphicsScene(this) ),
+    editMode(EditMode::alternateMove)
+
 {
 //    connect(document_, SIGNAL(nodeAdded(Go::NodePtr)), SLOT(on_sgfdocument_nodeAdded(Go::NodePtr)));
     connect(document_, SIGNAL(nodeDeleted(Go::NodePtr, bool)), SLOT(on_sgfdocument_nodeDeleted(Go::NodePtr, bool)));
+    connect(document_, SIGNAL(nodeModified(Go::NodePtr, bool)), SLOT(on_sgfdocument_nodeModified(Go::NodePtr, bool)));
 
     setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
 
@@ -221,11 +224,44 @@ void BoardWidget::onLButtonDown(QMouseEvent* e){
 
     if (x < 0 || y < 0 || x >= gameInformation->xsize || y >= gameInformation->ysize)
         return;
-    else if (boardBuffer[y][x].isStone())
-        return;
 
-    if (moveToChildItem(x, y) == false)
-        createChildItem(x, y);
+    switch(editMode){
+        case EditMode::alternateMove:
+            alternateMove(x, y);
+            break;
+
+        case EditMode::addBlack:
+            addStone(x, y, Go::black);
+            break;
+
+        case EditMode::addWhite:
+            addStone(x, y, Go::white);
+            break;
+
+        case EditMode::addLabel:
+            addLabel(x, y, true);
+            break;
+
+        case EditMode::addLabelManually:
+            addLabel(x, y, false);
+            break;
+
+        case EditMode::addCircle:
+            addMark(x, y, Go::Mark::circle);
+            break;
+
+        case EditMode::addCross:
+            addMark(x, y, Go::Mark::cross);
+            break;
+
+        case EditMode::addTriangle:
+            addMark(x, y, Go::Mark::triangle);
+            break;
+
+        case EditMode::addSquare:
+            addMark(x, y, Go::Mark::square);
+            break;
+    }
 }
 
 /**
@@ -1104,6 +1140,35 @@ GraphicsArrowItem* BoardWidget::createLineItem(const Go::Line& line){
 }
 
 /**
+  alternate move
+*/
+void BoardWidget::alternateMove(int x, int y){
+    if (boardBuffer[y][x].isStone())
+        return;
+
+    if (moveToChildItem(x, y) == false)
+        createChildItem(x, y);
+}
+
+void BoardWidget::addStone(int x, int y, Go::Color color){
+}
+
+void BoardWidget::addLabel(int x, int y, bool autoLabel){
+}
+
+void BoardWidget::addMark(int x, int y, Go::Mark::Type mark){
+    TerritoryInfo& ti = boardBuffer[y][x];
+    if(ti.mark){
+        RemoveMarkCommand* command = new RemoveMarkCommand(document(), currentNode, Go::Point(x, y));
+        document()->getUndoStack()->push(command);
+    }
+    else{
+        AddMarkCommand* command = new AddMarkCommand(document(), currentNode, Go::Mark(x, y, mark));
+        document()->getUndoStack()->push(command);
+    }
+}
+
+/**
   Move next node
 */
 void BoardWidget::forward(int step){
@@ -1139,7 +1204,7 @@ void BoardWidget::back(int step){
 /**
   set edit mode
 */
-void BoardWidget::setEditMode(EditMode editMode_){
+void BoardWidget::setEditMode(EditMode::Mode editMode_){
     editMode = editMode_;
 }
 
@@ -1334,4 +1399,14 @@ void BoardWidget::on_sgfdocument_nodeDeleted(Go::NodePtr node, bool /*removeChil
         iter = currentNodeList.erase(iter);
         createBuffer(true);
     }
+}
+
+/**
+  Slot
+  node modified
+*/
+void BoardWidget::on_sgfdocument_nodeModified(Go::NodePtr /*node*/, bool needRecreateBoard){
+    if (needRecreateBoard == false)
+        return;
+    createBuffer(true);
 }

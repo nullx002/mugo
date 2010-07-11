@@ -176,6 +176,43 @@ private:
 };
 
 /**
+  add mark command
+*/
+class AddMarkCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(SetMarkCommand)
+
+public:
+    AddMarkCommand(SgfDocument* doc, Go::NodePtr node, const Go::Mark& mark, QUndoCommand *parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+private:
+    SgfDocument* document;
+    Go::NodePtr  node;
+    Go::Mark     mark;
+};
+
+/**
+  remove mark command
+*/
+class RemoveMarkCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(RemoveMarkCommand)
+
+public:
+    RemoveMarkCommand(SgfDocument* doc, Go::NodePtr node, const Go::Point& p, QUndoCommand *parent = 0);
+    ~RemoveMarkCommand();
+    virtual void redo();
+    virtual void undo();
+
+private:
+    SgfDocument* document;
+    Go::NodePtr  node;
+    Go::Point    position;
+    Go::Mark*    mark;
+    int          index;
+};
+
+/**
   set comment command
 */
 class SetCommentCommand : public QUndoCommand{

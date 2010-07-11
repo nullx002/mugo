@@ -33,7 +33,9 @@ class GraphicsArrowItem;
 class BoardWidget : public QGraphicsView {
     Q_OBJECT
 public:
-    enum EditMode{ alternateMove, addBlack, addWhite, addEmpty, addLabel, addLabelManually, addCircle, addCross, addTriangle, addSquare, deleteEmpty };
+    struct EditMode{
+        enum Mode{ alternateMove, addBlack, addWhite, addEmpty, addLabel, addLabelManually, addCircle, addCross, addTriangle, addSquare, deleteMarker };
+    };
 
     class TerritoryInfo{
         public:
@@ -81,8 +83,8 @@ public:
     void back(int step=1);
 
     // edit mode
-    void setEditMode(EditMode editMode);
-    EditMode getEditMode() const{ return editMode; }
+    void setEditMode(EditMode::Mode editMode);
+    EditMode::Mode getEditMode() const{ return editMode; }
 
     //
     void addItem(Go::NodePtr parent, Go::NodePtr node, int index);
@@ -127,6 +129,12 @@ protected:
     void addLineToBuffer(const Go::Line& line, GraphicsArrowItem* item);
     void removeLineFromBuffer(const Go::Line& line, GraphicsArrowItem* item);
 
+    // add stone or marker
+    void alternateMove(int x, int y);
+    void addStone(int x, int y, Go::Color color);
+    void addLabel(int x, int y, bool autoLabel);
+    void addMark(int x, int y, Go::Mark::Type mark);
+
     void getStarPosition(QList<int>& xpos, QList<int>& ypos);
     void killStones(int x, int y);
     void killStones(char* buf);
@@ -139,6 +147,7 @@ private slots:
     // Document
 //    void on_sgfdocument_nodeAdded(Go::NodePtr node);
     void on_sgfdocument_nodeDeleted(Go::NodePtr node, bool removeChild);
+    void on_sgfdocument_nodeModified(Go::NodePtr, bool needRecreateBoard);
 
 private:
     SgfDocument* document_;
@@ -164,7 +173,7 @@ private:
     int moveNumber;
     int capturedBlack;
     int capturedWhite;
-    EditMode editMode;
+    EditMode::Mode editMode;
 };
 
 #endif // BOARDWIDGET_H

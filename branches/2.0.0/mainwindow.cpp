@@ -575,7 +575,7 @@ void MainWindow::addDocument(SgfDocument* doc, BoardWidget* board)
     connect(doc, SIGNAL(modified(bool)), SLOT(on_sgfdocument_modified(bool)));
     connect(doc, SIGNAL(nodeAdded(Go::NodePtr)), SLOT(on_sgfdocument_nodeAdded(Go::NodePtr)));
     connect(doc, SIGNAL(nodeDeleted(Go::NodePtr, bool)), SLOT(on_sgfdocument_nodeDeleted(Go::NodePtr, bool)));
-    connect(doc, SIGNAL(nodeModified(Go::NodePtr)), SLOT(on_sgfdocument_nodeModified(Go::NodePtr)));
+    connect(doc, SIGNAL(nodeModified(Go::NodePtr, bool)), SLOT(on_sgfdocument_nodeModified(Go::NodePtr, bool)));
     connect(doc, SIGNAL(gameAdded(Go::NodePtr, int)), SLOT(on_sgfdocument_gameAdded(Go::NodePtr, int)));
     connect(doc, SIGNAL(gameDeleted(Go::NodePtr, int)), SLOT(on_sgfdocument_gameDeleted(Go::NodePtr, int)));
     connect(doc, SIGNAL(gameMoved(Go::NodePtr, int, int)), SLOT(on_sgfdocument_gameMoved(Go::NodePtr, int, int)));
@@ -1518,6 +1518,11 @@ void MainWindow::on_actionPass_triggered()
   Edit -> Alternate Move
 */
 void MainWindow::on_actionAlternateMove_triggered(){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+    board->setEditMode(BoardWidget::EditMode::alternateMove);
+
     ui->menuStonesAndMarkers->menuAction()->setChecked(false);
 }
 
@@ -1536,6 +1541,11 @@ void MainWindow::on_actionStonesAndMarkers_triggered(){
   Edit -> Add Black Stone
 */
 void MainWindow::on_actionAddBlackStone_triggered(){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+    board->setEditMode(BoardWidget::EditMode::addBlack);
+
     ui->menuStonesAndMarkers->menuAction()->setChecked(true);
     ui->menuStonesAndMarkers->setIcon( ui->actionAddBlackStone->icon() );
     ui->menuStonesAndMarkers->menuAction()->setData( QVariant::fromValue(ui->actionAddBlackStone) );
@@ -1546,6 +1556,11 @@ void MainWindow::on_actionAddBlackStone_triggered(){
   Edit -> Add White Stone
 */
 void MainWindow::on_actionAddWhiteStone_triggered(){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+    board->setEditMode(BoardWidget::EditMode::addWhite);
+
     ui->menuStonesAndMarkers->menuAction()->setChecked(true);
     ui->menuStonesAndMarkers->setIcon( ui->actionAddWhiteStone->icon() );
     ui->menuStonesAndMarkers->menuAction()->setData( QVariant::fromValue(ui->actionAddWhiteStone) );
@@ -1556,6 +1571,11 @@ void MainWindow::on_actionAddWhiteStone_triggered(){
   Edit -> Add Empty
 */
 void MainWindow::on_actionAddEmpty_triggered(){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+    board->setEditMode(BoardWidget::EditMode::addEmpty);
+
     ui->menuStonesAndMarkers->menuAction()->setChecked(true);
     ui->menuStonesAndMarkers->setIcon( ui->actionAddEmpty->icon() );
     ui->menuStonesAndMarkers->menuAction()->setData( QVariant::fromValue(ui->actionAddEmpty) );
@@ -1566,6 +1586,11 @@ void MainWindow::on_actionAddEmpty_triggered(){
   Edit -> Add Label
 */
 void MainWindow::on_actionAddLabel_triggered(){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+    board->setEditMode(BoardWidget::EditMode::addLabel);
+
     ui->menuStonesAndMarkers->menuAction()->setChecked(true);
     ui->menuStonesAndMarkers->setIcon( ui->actionAddLabel->icon() );
     ui->menuStonesAndMarkers->menuAction()->setData( QVariant::fromValue(ui->actionAddLabel) );
@@ -1576,6 +1601,11 @@ void MainWindow::on_actionAddLabel_triggered(){
   Edit -> Add Label Manually
 */
 void MainWindow::on_actionAddLabelManually_triggered(){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+    board->setEditMode(BoardWidget::EditMode::addLabelManually);
+
     ui->menuStonesAndMarkers->menuAction()->setChecked(true);
     ui->menuStonesAndMarkers->setIcon( ui->actionAddLabelManually->icon() );
     ui->menuStonesAndMarkers->menuAction()->setData( QVariant::fromValue(ui->actionAddLabelManually) );
@@ -1586,6 +1616,11 @@ void MainWindow::on_actionAddLabelManually_triggered(){
   Edit -> Add Circle
 */
 void MainWindow::on_actionAddCircle_triggered(){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+    board->setEditMode(BoardWidget::EditMode::addCircle);
+
     ui->menuStonesAndMarkers->menuAction()->setChecked(true);
     ui->menuStonesAndMarkers->setIcon( ui->actionAddCircle->icon() );
     ui->menuStonesAndMarkers->menuAction()->setData( QVariant::fromValue(ui->actionAddCircle) );
@@ -1596,6 +1631,11 @@ void MainWindow::on_actionAddCircle_triggered(){
   Edit -> Add Cross
 */
 void MainWindow::on_actionAddCross_triggered(){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+    board->setEditMode(BoardWidget::EditMode::addCross);
+
     ui->menuStonesAndMarkers->menuAction()->setChecked(true);
     ui->menuStonesAndMarkers->setIcon( ui->actionAddCross->icon() );
     ui->menuStonesAndMarkers->menuAction()->setData( QVariant::fromValue(ui->actionAddCross) );
@@ -1606,6 +1646,11 @@ void MainWindow::on_actionAddCross_triggered(){
   Edit -> Add Triangle
 */
 void MainWindow::on_actionAddTriangle_triggered(){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+    board->setEditMode(BoardWidget::EditMode::addTriangle);
+
     ui->menuStonesAndMarkers->menuAction()->setChecked(true);
     ui->menuStonesAndMarkers->setIcon( ui->actionAddTriangle->icon() );
     ui->menuStonesAndMarkers->menuAction()->setData( QVariant::fromValue(ui->actionAddTriangle) );
@@ -1616,6 +1661,11 @@ void MainWindow::on_actionAddTriangle_triggered(){
   Edit -> Add Square
 */
 void MainWindow::on_actionAddSquare_triggered(){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+    board->setEditMode(BoardWidget::EditMode::addSquare);
+
     ui->menuStonesAndMarkers->menuAction()->setChecked(true);
     ui->menuStonesAndMarkers->setIcon( ui->actionAddSquare->icon() );
     ui->menuStonesAndMarkers->menuAction()->setData( QVariant::fromValue(ui->actionAddSquare) );
@@ -1626,6 +1676,11 @@ void MainWindow::on_actionAddSquare_triggered(){
   Edit -> Delete Marker
 */
 void MainWindow::on_actionDeleteMarker_triggered(){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+    board->setEditMode(BoardWidget::EditMode::deleteMarker);
+
     ui->menuStonesAndMarkers->menuAction()->setChecked(true);
     ui->menuStonesAndMarkers->setIcon( ui->actionDeleteMarker->icon() );
     ui->menuStonesAndMarkers->menuAction()->setData( QVariant::fromValue(ui->actionDeleteMarker) );
@@ -2071,7 +2126,7 @@ void MainWindow::on_sgfdocument_nodeDeleted(Go::NodePtr node, bool removeChildre
   Slot
   node modified
 */
-void MainWindow::on_sgfdocument_nodeModified(Go::NodePtr node){
+void MainWindow::on_sgfdocument_nodeModified(Go::NodePtr node, bool /*needRecreateBoard*/){
     BoardWidget* board = currentBoard();
 
     // set comment
