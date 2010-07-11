@@ -22,6 +22,7 @@
 #include <QGraphicsEllipseItem>
 #include <QGraphicsPixmapItem>
 #include <QGraphicsSimpleTextItem>
+#include <QInputDialog>
 #include "boardwidget.h"
 #include "sgfdocument.h"
 #include "command.h"
@@ -1153,9 +1154,43 @@ void BoardWidget::alternateMove(int x, int y){
 void BoardWidget::addStone(int x, int y, Go::Color color){
 }
 
+/**
+  add label
+*/
 void BoardWidget::addLabel(int x, int y, bool autoLabel){
+    TerritoryInfo& ti = boardBuffer[y][x];
+    if(ti.mark){
+        RemoveMarkCommand* command = new RemoveMarkCommand(document(), currentNode, Go::Point(x, y));
+        document()->getUndoStack()->push(command);
+        return;
+    }
+
+    QString str;
+    if (autoLabel == false){
+        str = QInputDialog::getText(this, QString(), tr("Input label"));
+        if (str.isEmpty())
+            return;
+    }
+    else{
+        char c = 'A';
+
+        QStringList strList;
+        foreach(const Go::Mark& mark, currentNode->marks){
+            if (mark.type == Go::Mark::character)
+                strList.push_back(mark.text);
+        }
+
+        str.sprintf("%c", c);
+        while (strList.indexOf(str) >= 0)
+            str.sprintf("%c", ++c);
+    }
+    AddMarkCommand* command = new AddMarkCommand(document(), currentNode, Go::Mark(x, y, str));
+    document()->getUndoStack()->push(command);
 }
 
+/**
+  add mark(circle, cross, square, triangle)
+*/
 void BoardWidget::addMark(int x, int y, Go::Mark::Type mark){
     TerritoryInfo& ti = boardBuffer[y][x];
     if(ti.mark){
