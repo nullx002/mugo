@@ -4,7 +4,7 @@ mugo (1.1.2-1) unstable; urgency=low
   add: undo spport for add marker and set move number
   chg: improved performance of create branch tree.
   fix: star positions with rectangular board on export ascii dialog
-
+  fix: file was opened in new tab when file that has already been opened in mugo open from explorer.
 
  -- nsase <sikusiku@gmail.com>  Sun, 5 Jul 2010 02:37:00 +0900
 
