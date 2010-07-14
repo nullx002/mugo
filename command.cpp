@@ -219,20 +219,21 @@ void AddMarkCommand::redo(){
 
     markAdded = false;
     eraseList.clear();
+    erasePos.clear();
 
     bool removeMark = false;
     go::point p(x, y);
-    go::markList::iterator iter = node->marks.begin();
-    while (iter != node->marks.end()){
-        if (iter->p == p){
-            if (iter->t == type)
+    for (int i=0; i<node->marks.size();){
+        const go::mark& mark = node->marks[i];
+        if (mark.p == p){
+            if (mark.t == type)
                 removeMark = true;
-            eraseList.push_back(*iter);
-            iter = node->marks.erase(iter);
-            if (iter == node->marks.end())
-                break;
+            eraseList.push_back(mark);
+            erasePos.push_back(i);
+            node->marks.removeAt(i);
         }
-        ++iter;
+        else
+            ++i;
     }
 
     if (removeMark == false){
@@ -249,8 +250,10 @@ void AddMarkCommand::undo(){
     if (markAdded)
         node->marks.pop_back();
 
+    int i = 0;
     foreach(const go::mark& m, eraseList){
-        node->marks.push_back(m);
+        int pos = erasePos[i];
+        node->marks.insert(pos, m);
     }
     boardWidget->modifyNode(node);
 }
