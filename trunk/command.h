@@ -128,6 +128,7 @@ private:
     go::mark::eType type;
     QString label;
     go::markList eraseList;
+    QList<int> erasePos;
     bool markAdded;
 };
 
