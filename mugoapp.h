@@ -26,7 +26,7 @@ class MainWindow;
 class Application : public QtSingleApplication{
 Q_OBJECT
 public:
-    Application(int argc, char** argv);
+    Application(int& argc, char** argv);
     virtual ~Application();
 
     // translation

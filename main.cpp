@@ -40,7 +40,7 @@ QList<const char*> codecNames;
 /**
 * Constructor
 */
-Application::Application(int argc, char** argv)
+Application::Application(int& argc, char** argv)
     : QtSingleApplication(argc, argv)
     , mainWindow(NULL)
     , qtTranslator(NULL)
@@ -244,7 +244,7 @@ int main(int argc, char *argv[])
     Application a(argc, argv);
 
     // if 2nd instance, file open in 1st instance.
-    QStringList args = a.arguments();
+    QStringList args = QApplication::arguments();
     QString param;
     for(int i=1; i<args.size(); ++i)
         param.append(args[i]).append("\n");
