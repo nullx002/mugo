@@ -1,5 +1,13 @@
 #summary One-sentence summary of this page.
 
+==1.1.2==
+ * add: default encoding setting on setup dialog
+ * add: save new document option settings
+ * add: undo spport for add marker and set move number
+ * chg: improved performance of create branch tree.
+ * fix: star positions with rectangular board on export ascii dialog
+ * fix: file was opened in new tab when file that has already been opened in mugo open from explorer.
+
 ==1.1.1==
  * add: coordinae color on option dialog
  * add: rectangular board size on new document dialog.
