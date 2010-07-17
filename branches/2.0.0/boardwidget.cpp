@@ -652,6 +652,7 @@ void BoardWidget::createBuffer(bool erase){
         // add empty stones
         foreach(const Go::Stone& stone, (*node)->emptyStones){
             TerritoryInfo& ti = boardBuffer[stone.position.y][stone.position.x];
+            ti.color = Go::empty;
             if (ti.stone){
                 ti.stone->hide();
                 ti.stone = NULL;
@@ -1155,8 +1156,14 @@ void BoardWidget::alternateMove(int x, int y){
     if (boardBuffer[y][x].isStone())
         return;
 
-    if (moveToChildItem(x, y) == false)
-        createChildItem(x, y);
+    if (moveToChildItem(x, y) == false){
+        Go::Color nextColor = getNextColor();
+        boardBuffer[y][x].color = nextColor;
+        if (canKillStones(x, y) == true || isDeadStones(x, y) == false)
+            createChildItem(x, y);
+        else
+            boardBuffer[y][x].color = Go::empty;
+    }
 }
 
 /**
@@ -1359,24 +1366,24 @@ void BoardWidget::killStones(int x, int y){
     char* buf = new char[ysize * xsize];
 
     memset(buf, 0, ysize*xsize);
-    if (canKillStones(x-1, y, color == Go::black ? Go::white : Go::black, buf) == true)
+    if (isDeadStones(x-1, y, color == Go::black ? Go::white : Go::black, buf) == true)
         killStones(buf);
 
     memset(buf, 0, ysize*xsize);
-    if (canKillStones(x+1, y, color == Go::black ? Go::white : Go::black, buf) == true)
+    if (isDeadStones(x+1, y, color == Go::black ? Go::white : Go::black, buf) == true)
         killStones(buf);
 
     memset(buf, 0, ysize*xsize);
-    if (canKillStones(x, y-1, color == Go::black ? Go::white : Go::black, buf) == true)
+    if (isDeadStones(x, y-1, color == Go::black ? Go::white : Go::black, buf) == true)
         killStones(buf);
 
     memset(buf, 0, ysize*xsize);
-    if (canKillStones(x, y+1, color == Go::black ? Go::white : Go::black, buf) == true)
+    if (isDeadStones(x, y+1, color == Go::black ? Go::white : Go::black, buf) == true)
         killStones(buf);
 
     // if suicide move, kill myself
     memset(buf, 0, ysize*xsize);
-    if (canKillStones(x, y, color, buf) == true)
+    if (isDeadStones(x, y, color, buf) == true)
         killStones(buf);
 
     delete[] buf;
@@ -1406,7 +1413,54 @@ void BoardWidget::killStones(char* buf){
 
 /**
 */
-bool BoardWidget::canKillStones(int x, int y, Go::Color color, char* buf){
+bool BoardWidget::canKillStones(int x, int y){
+    Go::Color color = boardBuffer[y][x].color;
+    if (color == Go::empty)
+        return false;
+    color = color == Go::black ? Go::white : Go::black;
+
+    int xsize = gameInformation->xsize;
+    int ysize = gameInformation->ysize;
+    QVector<char> buf(ysize * xsize);
+
+    if (isDeadStones(x-1, y, color, buf.data()) == true)
+        return true;
+
+    buf.fill(0);
+    if (isDeadStones(x+1, y, color, buf.data()) == true)
+        return true;
+
+    buf.fill(0);
+    if (isDeadStones(x, y-1, color, buf.data()) == true)
+        return true;
+
+    buf.fill(0);
+    if (isDeadStones(x, y+1, color, buf.data()) == true)
+        return true;
+
+    return false;
+}
+
+/**
+*/
+bool BoardWidget::isDeadStones(int x, int y){
+    Go::Color color = boardBuffer[y][x].color;
+    if (color == Go::empty)
+        return false;
+
+    int xsize = gameInformation->xsize;
+    int ysize = gameInformation->ysize;
+    QVector<char> buf(ysize * xsize);
+
+    if (isDeadStones(x, y, color, buf.data()) == false)
+        return false;
+
+    return true;
+}
+
+/**
+*/
+bool BoardWidget::isDeadStones(int x, int y, Go::Color color, char* buf){
     if (x < 0 || x >= gameInformation->xsize || y < 0 || y >= gameInformation->ysize)
         return true;
     else if (boardBuffer[y][x].color == Go::empty)
@@ -1419,16 +1473,16 @@ bool BoardWidget::canKillStones(int x, int y, Go::Color color, char* buf){
 
     buf[y * gameInformation->xsize + x] = 1;
 
-    if (canKillStones(x-1, y, color, buf) == false)
+    if (isDeadStones(x-1, y, color, buf) == false)
         return false;
 
-    if (canKillStones(x+1, y, color, buf) == false)
+    if (isDeadStones(x+1, y, color, buf) == false)
         return false;
 
-    if (canKillStones(x, y-1, color, buf) == false)
+    if (isDeadStones(x, y-1, color, buf) == false)
         return false;
 
-    if (canKillStones(x, y+1, color, buf) == false)
+    if (isDeadStones(x, y+1, color, buf) == false)
         return false;
 
     return true;

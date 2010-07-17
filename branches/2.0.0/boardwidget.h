@@ -140,7 +140,9 @@ protected:
     void getStarPosition(QList<int>& xpos, QList<int>& ypos);
     void killStones(int x, int y);
     void killStones(char* buf);
-    bool canKillStones(int x, int y, Go::Color color, char* buf);
+    bool canKillStones(int x, int y);
+    bool isDeadStones(int x, int y);
+    bool isDeadStones(int x, int y, Go::Color color, char* buf);
     bool inBoard(Go::NodePtr node);
     bool moveToChildItem(int x, int y);
     bool createChildItem(int x, int y);
