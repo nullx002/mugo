@@ -1182,7 +1182,7 @@ void BoardWidget::addStone(int x, int y, Go::Color color){
             return;
     }
 
-    if ((color == Go::empty && ti.stone) || ti.stone == NULL){
+    if ((color == Go::empty && ti.stone) || (color != Go::empty && ti.stone == NULL)){
         // if currentNode is stone, create child node and add stone to new node.
         if (currentNode->isStone()){
             Go::NodePtr node(new Go::Node(currentNode));
