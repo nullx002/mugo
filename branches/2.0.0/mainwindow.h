@@ -170,6 +170,7 @@ private slots:
     void on_actionEditNodeName_triggered();
     void on_actionSetMoveNumber_triggered();
     void on_actionUnsetMoveNumber_triggered();
+    void on_actionWhiteFirst_triggered(bool checked);
 
     // Edit -> Node Annotation
     void on_actionNoNodeAnnotation_triggered();

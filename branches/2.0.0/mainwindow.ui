@@ -62,7 +62,7 @@
      <x>0</x>
      <y>0</y>
      <width>600</width>
-     <height>24</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -253,6 +253,9 @@
     <addaction name="menuMove_Annotation"/>
     <addaction name="menuNode_Annotation"/>
     <addaction name="menuAnnotation"/>
+    <addaction name="separator"/>
+    <addaction name="actionWhiteFirst"/>
+    <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuNavigation">
     <property name="title">
@@ -321,6 +324,8 @@
    <addaction name="separator"/>
    <addaction name="actionDeleteAfterCurrent"/>
    <addaction name="actionPass"/>
+   <addaction name="separator"/>
+   <addaction name="actionWhiteFirst"/>
   </widget>
   <widget class="QToolBar" name="navigationToolBar">
    <property name="windowTitle">
@@ -997,6 +1002,18 @@
   <action name="actionUnsetMoveNumber">
    <property name="text">
     <string>Unset Move Number</string>
+   </property>
+  </action>
+  <action name="actionWhiteFirst">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="mugo.qrc">
+     <normaloff>:/res/whitefirst.png</normaloff>:/res/whitefirst.png</iconset>
+   </property>
+   <property name="text">
+    <string>White First</string>
    </property>
   </action>
   <action name="actionGoodMove">

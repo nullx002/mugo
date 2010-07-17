@@ -912,6 +912,7 @@ void MainWindow::updateMenu(){
     if (board == NULL)
         return;
 
+    Go::NodePtr game = board->getCurrentGame();
     Go::NodePtr node = board->getCurrentNode();
 
     // File -> Reload
@@ -953,6 +954,9 @@ void MainWindow::updateMenu(){
         ui->actionVeryGoodForWhite->setChecked(true);
     else if (node->nodeAnnotation == Go::Node::unclear)
         ui->actionUnclear->setChecked(true);
+
+    // Edit -> White First
+    ui->actionWhiteFirst->setChecked(game->nextColor == Go::white);
 }
 
 
@@ -1745,6 +1749,19 @@ void MainWindow::on_actionUnsetMoveNumber_triggered(){
 
     Go::NodePtr node = board->getCurrentNode();
     board->document()->getUndoStack()->push( new UnsetMoveNumberCommand(board->document(), node) );
+}
+
+/**
+  Slot
+  Edit -> White First
+*/
+void MainWindow::on_actionWhiteFirst_triggered(bool checked){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    Go::NodePtr node = board->getCurrentGame();
+    node->nextColor = checked ? Go::white : Go::black;
 }
 
 /**
