@@ -136,7 +136,7 @@ void ExportAsciiDialog::createJapaneseAscii(bool isMono){
     const char* propotional = "Osaka"; // Osaka
 #else
     const char* monospace   = "monospace";
-    const char* propotional = "Osaka\xe2\xe7\xad\x89\xe5\xb9\x85"; //
+    const char* propotional = "Takao Pゴシック";
 #endif
     const char* fontname = isMono ? monospace : propotional;
 

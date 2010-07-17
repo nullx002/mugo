@@ -252,19 +252,23 @@ void BoardWidget::onLButtonDown(QMouseEvent* e){
             break;
 
         case EditMode::addCircle:
-            addMark(x, y, Go::Mark::circle);
+            addMarker(x, y, Go::Mark::circle);
             break;
 
         case EditMode::addCross:
-            addMark(x, y, Go::Mark::cross);
+            addMarker(x, y, Go::Mark::cross);
             break;
 
         case EditMode::addTriangle:
-            addMark(x, y, Go::Mark::triangle);
+            addMarker(x, y, Go::Mark::triangle);
             break;
 
         case EditMode::addSquare:
-            addMark(x, y, Go::Mark::square);
+            addMarker(x, y, Go::Mark::square);
+            break;
+
+        case EditMode::removeMarker:
+            removeMarker(x, y);
             break;
     }
 }
@@ -273,6 +277,7 @@ void BoardWidget::onLButtonDown(QMouseEvent* e){
     RightButton Down
 */
 void BoardWidget::onRButtonDown(QMouseEvent* /*e*/){
+    document()->getUndoStack()->undo();
 }
 
 /**
@@ -315,14 +320,13 @@ void BoardWidget::setCurrentGame(Go::NodePtr game, bool forceChange){
     currentNodeList.clear();
 
     // delete lines and stars
-    foreach(QGraphicsLineItem* line, hLines)
-        scene->removeItem(line);
+    qDeleteAll(hLines);
     hLines.clear();
-    foreach(QGraphicsLineItem* line, vLines)
-        scene->removeItem(line);
+
+    qDeleteAll(vLines);
     vLines.clear();
-    foreach(QGraphicsEllipseItem* star, stars)
-        scene->removeItem(star);
+
+    qDeleteAll(stars);
     stars.clear();
 
     // create lines
@@ -1235,7 +1239,7 @@ void BoardWidget::addLabel(int x, int y, bool autoLabel){
 /**
   add mark(circle, cross, square, triangle)
 */
-void BoardWidget::addMark(int x, int y, Go::Mark::Type mark){
+void BoardWidget::addMarker(int x, int y, Go::Mark::Type mark){
     TerritoryInfo& ti = boardBuffer[y][x];
     if(ti.mark){
         RemoveMarkCommand* command = new RemoveMarkCommand(document(), currentNode, Go::Point(x, y));
@@ -1244,6 +1248,23 @@ void BoardWidget::addMark(int x, int y, Go::Mark::Type mark){
     else{
         AddMarkCommand* command = new AddMarkCommand(document(), currentNode, Go::Mark(x, y, mark));
         document()->getUndoStack()->push(command);
+    }
+}
+
+/**
+  remove marker
+*/
+void BoardWidget::removeMarker(int x, int y){
+    Go::Point p(x, y);
+    TerritoryInfo& ti = boardBuffer[y][x];
+    if(ti.mark){
+        RemoveMarkCommand* command = new RemoveMarkCommand(document(), currentNode, p);
+        document()->getUndoStack()->push(command);
+    }
+    else{
+        removeStone(currentNode->blackStones, p) ||
+            removeStone(currentNode->whiteStones, p) ||
+            removeStone(currentNode->emptyStones, p);
     }
 }
 

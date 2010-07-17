@@ -34,7 +34,7 @@ class BoardWidget : public QGraphicsView {
     Q_OBJECT
 public:
     struct EditMode{
-        enum Mode{ alternateMove, addBlack, addWhite, addEmpty, addLabel, addLabelManually, addCircle, addCross, addTriangle, addSquare, deleteMarker };
+        enum Mode{ alternateMove, addBlack, addWhite, addEmpty, addLabel, addLabelManually, addCircle, addCross, addTriangle, addSquare, removeMarker };
     };
 
     class TerritoryInfo{
@@ -133,7 +133,8 @@ protected:
     void alternateMove(int x, int y);
     void addStone(int x, int y, Go::Color color);
     void addLabel(int x, int y, bool autoLabel);
-    void addMark(int x, int y, Go::Mark::Type mark);
+    void addMarker(int x, int y, Go::Mark::Type mark);
+    void removeMarker(int x, int y);
     bool removeStone(const Go::StoneList& stoneList, const Go::Point& p);
 
     void getStarPosition(QList<int>& xpos, QList<int>& ypos);

@@ -1679,7 +1679,7 @@ void MainWindow::on_actionDeleteMarker_triggered(){
     BoardWidget* board = currentBoard();
     if (board == NULL)
         return;
-    board->setEditMode(BoardWidget::EditMode::deleteMarker);
+    board->setEditMode(BoardWidget::EditMode::removeMarker);
 
     ui->menuStonesAndMarkers->menuAction()->setChecked(true);
     ui->menuStonesAndMarkers->setIcon( ui->actionDeleteMarker->icon() );
