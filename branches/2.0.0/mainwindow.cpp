@@ -36,6 +36,7 @@
 #include "ui_mainwindow.h"
 #include "boardwidget.h"
 #include "gameinformationdialog.h"
+#include "newdocumentdialog.h"
 #include "exportasciidialog.h"
 #include "sgf.h"
 #include "sgfdocument.h"
@@ -60,9 +61,6 @@ MainWindow::MainWindow(const QString& fname, QWidget *parent)
     ui->setupUi(this);
 
     QSettings settings;
-
-    // default codec
-    defaultCodec = QTextCodec::codecForName( settings.value("defaultCodec", "UTF-8").toByteArray() );
 
     // keyboard shortcut
     setKeyboardShortcut();
@@ -95,9 +93,9 @@ MainWindow::MainWindow(const QString& fname, QWidget *parent)
 
     // open or create new tab
     if (fname.isEmpty())
-        fileNew(defaultCodec);
+        fileNew(mugoApp()->defaultCodec());
     else
-        fileOpen(fname, defaultCodec, true);
+        fileOpen(fname, mugoApp()->defaultCodec(), true);
     ui->boardTabWidget->removeTab(0);
 }
 
@@ -269,12 +267,6 @@ void MainWindow::createMenu(){
   create encoding action
 */
 void MainWindow::createEncodingAction(){
-    QActionGroup* encodingGroup = new QActionGroup(this);
-    foreach(QAction* act, ui->menuReload->actions()){
-        encodingGroup->addAction(act);
-        connect(act, SIGNAL(triggered()), SLOT(on_actionReload_triggered()));
-    }
-
     encoding[ui->actionEncodingUTF8] = QTextCodec::codecForName("UTF-8");
     encoding[ui->actionEncodingISO8859_1] = QTextCodec::codecForName("ISO-8859-1");
     encoding[ui->actionEncodingISO8859_2] = QTextCodec::codecForName("ISO-8859-2");
@@ -308,6 +300,21 @@ void MainWindow::createEncodingAction(){
     encoding[ui->actionEncodingJIS] = QTextCodec::codecForName("ISO-2022-JP");
     encoding[ui->actionEncodingEucJP] = QTextCodec::codecForName("EUC-JP");
     encoding[ui->actionEncodingKorean] = QTextCodec::codecForName("EUC-KR");
+
+
+    QList<QAction*> actions;
+    QList<QTextCodec*> codecs;
+    QActionGroup* encodingGroup = new QActionGroup(this);
+    foreach(QAction* act, ui->menuReload->actions()){
+        encodingGroup->addAction(act);
+        connect(act, SIGNAL(triggered()), SLOT(on_actionReload_triggered()));
+
+        actions.push_back(act);
+        codecs.push_back( encoding.value(act) );
+    }
+
+    mugoApp()->setEncodingActions(actions);
+    mugoApp()->setCodecs(codecs);
 }
 
 /**
@@ -996,12 +1003,18 @@ bool MainWindow::getOpenFileName(QString& fname, QTextCodec*& codec){
     combo->addItem(tr("Auto Detect"));
     combo->setCurrentIndex(0);
     actions.push_back(NULL);
+    combo->insertSeparator(combo->count());
+    actions.push_back(NULL);
     foreach(QAction* act, ui->menuReload->actions()){
         if (act->isSeparator() == false){
             combo->addItem(act->text());
             if (codec && encoding[act]->name() == codec->name())
                 combo->setCurrentIndex( combo->count() - 1 );
             actions.push_back(act);
+        }
+        else{
+            combo->insertSeparator(combo->count());
+            actions.push_back(NULL);
         }
     }
 
@@ -1012,7 +1025,7 @@ bool MainWindow::getOpenFileName(QString& fname, QTextCodec*& codec){
         return false;
 
     fname = dlg.selectedFiles()[0];
-    codec = combo->currentIndex() >= 0 ? encoding[actions[combo->currentIndex()]] : defaultCodec;
+    codec = combo->currentIndex() >= 0 ? encoding[actions[combo->currentIndex()]] : mugoApp()->defaultCodec();
 
     return true;
 }
@@ -1045,6 +1058,10 @@ bool MainWindow::getSaveFileName(const QString& initialPath, QString& fname, QTe
                 combo->setCurrentIndex( combo->count() - 1 );
             actions.push_back(act);
         }
+        else{
+            combo->insertSeparator(combo->count());
+            actions.push_back(NULL);
+        }
     }
 
     if (dlg.exec() != QDialog::Accepted)
@@ -1065,7 +1082,11 @@ bool MainWindow::getSaveFileName(const QString& initialPath, QString& fname, QTe
 */
 void MainWindow::on_actionNew_triggered()
 {
-    fileNew(defaultCodec);
+    NewDocumentDialog dlg;
+    if (dlg.exec() != QDialog::Accepted)
+        return;
+
+    fileNew(dlg.codec, dlg.xsize, dlg.ysize, dlg.komi);
 }
 
 /**
@@ -1080,7 +1101,7 @@ void MainWindow::on_actionOpen_triggered()
         return;
 
     if (codec == NULL)
-        fileOpen(fname, defaultCodec, true);
+        fileOpen(fname, mugoApp()->defaultCodec(), true);
     else
         fileOpen(fname, codec, false);
 }
@@ -1201,7 +1222,7 @@ void MainWindow::on_actionCollectionImport_triggered()
     // open document
     SgfDocument* tmpDoc;
     if (codec == NULL)
-        tmpDoc = openDocument(fname, defaultCodec, true);
+        tmpDoc = openDocument(fname, mugoApp()->defaultCodec(), true);
     else
         tmpDoc = openDocument(fname, codec, false);
 
@@ -1311,7 +1332,7 @@ void MainWindow::on_actionOpenRecentFile_triggered(){
     if (files.size() <= n)
         return;
 
-    fileOpen(files[n], defaultCodec, true);
+    fileOpen(files[n], mugoApp()->defaultCodec(), true);
 }
 
 /**
@@ -2490,7 +2511,7 @@ void MainWindow::on_openUrl_requestFinished(int id, bool error){
         docName = docName.mid(p+1);
 
     if (downloadNewTab){
-        SgfDocument* doc = new SgfDocument(defaultCodec);
+        SgfDocument* doc = new SgfDocument(mugoApp()->defaultCodec());
         if (doc->read(docName, buffer->buffer(), true) == false){
             delete doc;
             return;
