@@ -531,11 +531,8 @@ void FlipSgfCommand::undo(){
 }
 
 void FlipSgfCommand::execute(Go::GameInformationPtr& gameInfo, Go::NodePtr& node, bool redo){
-    if (gameInfo)
-        qSwap(gameInfo->xsize, gameInfo->ysize);
-
     if (redo){
-        if(node->isStone() && node->isPass() == false)
+        if(node->isStone())
             this->redo(gameInfo, node->position);
         this->redo(gameInfo, node->marks);
         this->redo(gameInfo, node->blackTerritories);
@@ -547,7 +544,7 @@ void FlipSgfCommand::execute(Go::GameInformationPtr& gameInfo, Go::NodePtr& node
         this->redo(gameInfo, node->lines);
     }
     else{
-        if(node->isStone() && node->isPass() == false)
+        if(node->isStone())
             this->undo(gameInfo, node->position);
         this->undo(gameInfo, node->marks);
         this->undo(gameInfo, node->blackTerritories);
@@ -609,13 +606,27 @@ RotateSgfClockwiseCommand::RotateSgfClockwiseCommand(SgfDocument* doc, Go::NodeP
 }
 
 /**
+  redo/undo rotate command
+*/
+void RotateSgfClockwiseCommand::execute(Go::GameInformationPtr& gameInfo, Go::NodePtr& node, bool redo){
+    if (node->gameInformation)
+        qSwap(node->gameInformation->xsize, node->gameInformation->ysize);
+
+    FlipSgfCommand::execute(gameInfo, node, redo);
+}
+
+/**
   redo rotate command
 */
 void RotateSgfClockwiseCommand::redo(Go::GameInformationPtr& gameInfo, Go::Point& p){
     int x = p.x;
     int y = p.y;
-    p.x = gameInfo->xsize - y - 1;
-    p.y = x;
+
+    if (y != -1)
+        p.x = gameInfo->xsize - y - 1;  // xsize and ysize has been already swapped.
+
+    if (x != -1)
+        p.y = x;
 }
 
 /**
@@ -624,8 +635,12 @@ void RotateSgfClockwiseCommand::redo(Go::GameInformationPtr& gameInfo, Go::Point
 void RotateSgfClockwiseCommand::undo(Go::GameInformationPtr& gameInfo, Go::Point& p){
     int x = p.x;
     int y = p.y;
-    p.x = y;
-    p.y = gameInfo->ysize - x - 1;
+
+    if (y != -1)
+        p.x = y;
+
+    if (x != -1)
+        p.y = gameInfo->ysize - x - 1;  // xsize and ysize has been already swapped.
 }
 
 /**
@@ -641,14 +656,16 @@ FlipSgfHorizontallyCommand::FlipSgfHorizontallyCommand(SgfDocument* doc, Go::Nod
   redo flip sgf horizontally command
 */
 void FlipSgfHorizontallyCommand::redo(Go::GameInformationPtr& gameInfo, Go::Point& p){
-    p.x = gameInfo->xsize - p.x - 1;
+    if (p.x != -1)
+        p.x = gameInfo->xsize - p.x - 1;
 }
 
 /**
   undo flip sgf horizontally command
 */
 void FlipSgfHorizontallyCommand::undo(Go::GameInformationPtr& gameInfo, Go::Point& p){
-    p.x = gameInfo->xsize - p.x - 1;
+    if (p.x != -1)
+        p.x = gameInfo->xsize - p.x - 1;
 }
 
 /**
@@ -664,14 +681,16 @@ FlipSgfVerticallyCommand::FlipSgfVerticallyCommand(SgfDocument* doc, Go::NodePtr
   redo flip sgf vertically command
 */
 void FlipSgfVerticallyCommand::redo(Go::GameInformationPtr& gameInfo, Go::Point& p){
-    p.y = gameInfo->ysize - p.y - 1;
+    if (p.y != -1)
+        p.y = gameInfo->ysize - p.y - 1;
 }
 
 /**
   undo flip sgf vertically command
 */
 void FlipSgfVerticallyCommand::undo(Go::GameInformationPtr& gameInfo, Go::Point& p){
-    p.y = gameInfo->ysize - p.y - 1;
+    if (p.y != -1)
+        p.y = gameInfo->ysize - p.y - 1;
 }
 
 /**

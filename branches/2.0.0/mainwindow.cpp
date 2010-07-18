@@ -325,8 +325,8 @@ void MainWindow::setStatusBarWidget(){
     if (board == NULL)
         return;
 
-    moveNumberLabel->setText( tr("Last Move: %1").arg(board->getMoveNumber()) );
-    capturedLabel->setText( tr("Dead: White %1 Black %2").arg(board->getCapturedWhite()).arg(board->getCapturedBlack()) );
+    moveNumberLabel->setText( tr("Last Move: %1 (%2)").arg(board->getMoveNumber()).arg(board->document()->positionString(board->getCurrentNode(), false)) );
+    capturedLabel->setText( tr("Prisoners: White %1 Black %2").arg(board->getCapturedWhite()).arg(board->getCapturedBlack()) );
 }
 
 /**
@@ -760,7 +760,7 @@ QString MainWindow::getBranchItemText(BoardWidget* board, Go::NodePtr node){
     if (node->isStone() && node->isPass())
         str = tr("Pass");
     else if (node->isStone())
-        str = board->getCoordinateString(node, false);
+        str = board->document()->positionString(node, false);
 
     // node name
     if (node->name.isEmpty() == false)

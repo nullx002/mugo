@@ -20,6 +20,7 @@
 
 
 #include <QApplication>
+#include <QList>
 
 
 #define APP_NAME     "mugo"
@@ -29,12 +30,36 @@
 #define COPYRIGHT    "Copyright 2009-2010 nsase."
 
 
+class QAction;
+class QTextCodec;
+
+
+class MugoApplication;
+inline MugoApplication* mugoApp(){
+    return (MugoApplication*)qApp;
+}
+
+
 /**
-  Application
+  Mugo Application
 */
-class Application : public QApplication{
+class MugoApplication : public QApplication{
+    Q_OBJECT
     public:
-        Application(int& argc, char** argv);
+        MugoApplication(int& argc, char** argv);
+
+        void setDefaultCodec(QTextCodec* codec){ defaultCodec_ = codec; }
+        void setEncodingActions( const QList<QAction*>& actions ){ encodingActions_ = actions; }
+        void setCodecs( QList<QTextCodec*>& codecs ){ codecs_ = codecs; }
+
+        QTextCodec* defaultCodec() const{ return defaultCodec_; }
+        const QList<QAction*>& encodingActions() const{ return encodingActions_; }
+        const QList<QTextCodec*>& codecs() const{ return codecs_; }
+
+    private:
+        QTextCodec* defaultCodec_;
+        QList<QAction*>    encodingActions_;
+        QList<QTextCodec*> codecs_;
 };
 
 

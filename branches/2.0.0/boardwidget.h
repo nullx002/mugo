@@ -86,9 +86,8 @@ public:
     void setEditMode(EditMode::Mode editMode);
     EditMode::Mode getEditMode() const{ return editMode; }
 
-    //
+    // add
     void addItem(Go::NodePtr parent, Go::NodePtr node, int index);
-    QString getCoordinateString(Go::NodePtr node, bool showI) const;
 
 signals:
     void currentGameChanged(Go::NodePtr currentGame);
@@ -144,6 +143,7 @@ protected:
     bool isDeadStones(int x, int y);
     bool isDeadStones(int x, int y, Go::Color color, char* buf);
     bool inBoard(Go::NodePtr node);
+    bool inBoard(int x, int y);
     bool moveToChildItem(int x, int y);
     bool createChildItem(int x, int y);
 

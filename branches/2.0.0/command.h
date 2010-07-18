@@ -325,6 +325,7 @@ public:
     RotateSgfClockwiseCommand(SgfDocument* doc, Go::NodePtr game, QUndoCommand *parent = 0);
 
 protected:
+    virtual void execute(Go::GameInformationPtr& gameInfo, Go::NodePtr& node, bool redo);
     virtual void redo(Go::GameInformationPtr& gameInfo, Go::Point& p);
     virtual void undo(Go::GameInformationPtr& gameInfo, Go::Point& p);
 };

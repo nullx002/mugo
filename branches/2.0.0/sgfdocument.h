@@ -45,8 +45,12 @@ public:
     bool moveUp(const Go::NodePtr& game);
     bool moveDown(const Go::NodePtr& game);
 
+    // set dirty flag and notify
     void modifyGame(Go::NodePtr& game){ setDirty(); emit gameModified(game); }
     void modifyNode(Go::NodePtr& node, bool needRecreateBoard){ setDirty(); emit nodeModified(node, needRecreateBoard); }
+
+    // misc
+    QString positionString(Go::NodePtr node, bool showI);
 
     Go::NodeList gameList;
     int lineWidth;

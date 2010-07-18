@@ -4,7 +4,6 @@
 QT += network
 unix:QT += phonon
 mac:QT += phonon
-
 TARGET = mugo2
 TEMPLATE = app
 SOURCES += main.cpp \
@@ -16,7 +15,8 @@ SOURCES += main.cpp \
     sgf.cpp \
     command.cpp \
     gameinformationdialog.cpp \
-    exportasciidialog.cpp
+    exportasciidialog.cpp \
+    newdocumentdialog.cpp
 HEADERS += mainwindow.h \
     boardwidget.h \
     document.h \
@@ -26,13 +26,15 @@ HEADERS += mainwindow.h \
     sgf.h \
     command.h \
     gameinformationdialog.h \
-    exportasciidialog.h
+    exportasciidialog.h \
+    newdocumentdialog.h
 FORMS += mainwindow.ui \
     gameinformationdialog.ui \
-    exportasciidialog.ui
+    exportasciidialog.ui \
+    newdocumentdialog.ui
 RESOURCES += mugo.qrc
 win32:RC_FILE = mugo.rc
 mac:RC_FILE = pics/mugo.icns
 TRANSLATIONS += mugo.ja_JP.ts \
     mugo_mac.ja_JP.ts
-win32:INCLUDEPATH += c:\libs\
+win32:INCLUDEPATH += c:\libs

@@ -205,3 +205,22 @@ bool SgfDocument::moveDown(const Go::NodePtr& game){
 
     return true;
 }
+
+/**
+  get position string
+*/
+QString SgfDocument::positionString(Go::NodePtr node, bool showI){
+    if (node->isStone() == false)
+        return "";
+    else if (node->isPass())
+        return tr("Pass");
+
+    QString str;
+    Go::GameInformationPtr info = node->getInformation();
+    int x = node->position.x % 26;
+    if (showI == false && x > 7)
+        ++x;
+    int y = info->ysize - node->position.y;
+    str.sprintf("%c%d", 'A'+x, y);
+    return str;
+}

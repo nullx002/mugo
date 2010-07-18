@@ -387,17 +387,18 @@ void BoardWidget::setItemsPosition(){
     QRectF r = scene->sceneRect();
 
     // calculate board size
-    int width  = r.width() - 30;
-    int height = r.height() - 30;
-    int x = width  / gameInformation->xsize;
-    int y = height / gameInformation->ysize;
-    int size = qMin(x, y);
-    int w = size * (gameInformation->xsize - 1);
-    int h = size * (gameInformation->ysize - 1);
+    int width  = r.width();
+    int height = r.height();
+    int gridW = width  / (gameInformation->xsize + 1);
+    int gridH = height / (gameInformation->ysize + 1);
+    int gridSize = qMin(gridW, gridH);
+    int w = gridSize * (gameInformation->xsize - 1);
+    int h = gridSize * (gameInformation->ysize - 1);
 
-    x = (r.width() - w) / 2;
-    y = (r.height() - h) / 2;
-    QRect boardRect(QPoint(x-size*0.8, y-size*0.8), QPoint(x+w+size*0.8, y+w+size*0.8));
+    int x = (r.width() - w) / 2;
+    int y = (r.height() - h) / 2;
+    int margin = gridSize * 0.8;
+    QRect boardRect(QPoint(x-margin, y-margin), QPoint(x+w+margin, y+h+margin));
 
     // set position of shadow.
     shadow->setRect(boardRect.left()+4, boardRect.top()+4, boardRect.width(), boardRect.height());
@@ -409,14 +410,14 @@ void BoardWidget::setItemsPosition(){
     int xx = x;
     foreach(QGraphicsLineItem* item, vLines){
         item->setLine(xx, y, xx, y+h);
-        xx += size;
+        xx += gridSize;
     }
 
     // set position of horizontal lines.
     int yy = y;
     foreach(QGraphicsLineItem* item, hLines){
         item->setLine(x, yy, x+w, yy);
-        yy += size;
+        yy += gridSize;
     }
 
     // set position of stars.
@@ -1323,17 +1324,6 @@ void BoardWidget::addItem(Go::NodePtr parent, Go::NodePtr node, int index){
     document()->getUndoStack()->push( new AddNodeCommand(document(), parent, node, index) );
 }
 
-QString BoardWidget::getCoordinateString(Go::NodePtr node, bool showI) const{
-    QString str;
-    Go::GameInformationPtr info = node->getInformation();
-    int x = node->position.x % 26;
-    if (showI == false && x > 7)
-        ++x;
-    int y = info->ysize - node->position.y;
-    str.sprintf("%c%d", 'A'+x, y);
-    return str;
-}
-
 /**
   Get Star Position
 */
@@ -1341,16 +1331,19 @@ void BoardWidget::getStarPosition(QList<int>& xpos, QList<int>& ypos){
     int xsize = gameInformation->xsize;
     int ysize = gameInformation->ysize;
 
-    xpos.push_back(xsize > 9 ? 3 : 2);
-    xpos.push_back(xsize > 9 ? xsize-4 : xsize-3);
-    ypos.push_back(ysize > 9 ? 3 : 2);
-    ypos.push_back(ysize > 9 ? ysize-4 : ysize-3);
+    if (xsize > 6){
+        xpos.push_back(xsize > 9 ? 3 : 2);
+        xpos.push_back(xsize > 9 ? xsize-4 : xsize-3);
+        if (xsize % 2 != 0 && xsize >= 9)
+            xpos.push_back(xsize / 2);
+    }
 
-    if (xsize % 2 != 0 && xsize >= 9)
-        xpos.push_back(xsize / 2);
-
-    if (ysize % 2 != 0 && ysize >= 9)
-        ypos.push_back(ysize / 2);
+    if (ysize > 6){
+        ypos.push_back(ysize > 9 ? 3 : 2);
+        ypos.push_back(ysize > 9 ? ysize-4 : ysize-3);
+        if (ysize % 2 != 0 && ysize >= 9)
+            ypos.push_back(ysize / 2);
+    }
 }
 
 /**
@@ -1424,19 +1417,19 @@ bool BoardWidget::canKillStones(int x, int y){
     int ysize = gameInformation->ysize;
     QVector<char> buf(ysize * xsize);
 
-    if (isDeadStones(x-1, y, color, buf.data()) == true)
+    if (inBoard(x-1, y) && isDeadStones(x-1, y, color, buf.data()) == true)
         return true;
 
     buf.fill(0);
-    if (isDeadStones(x+1, y, color, buf.data()) == true)
+    if (inBoard(x+1, y) && isDeadStones(x+1, y, color, buf.data()) == true)
         return true;
 
     buf.fill(0);
-    if (isDeadStones(x, y-1, color, buf.data()) == true)
+    if (inBoard(x, y-1) && isDeadStones(x, y-1, color, buf.data()) == true)
         return true;
 
     buf.fill(0);
-    if (isDeadStones(x, y+1, color, buf.data()) == true)
+    if (inBoard(x, y+1) && isDeadStones(x, y+1, color, buf.data()) == true)
         return true;
 
     return false;
@@ -1496,6 +1489,15 @@ bool BoardWidget::inBoard(Go::NodePtr node){
         return false;
 
     if (node->position.x >= gameInformation->xsize || node->position.y >= gameInformation->ysize)
+        return false;
+
+    return true;
+}
+
+/**
+*/
+bool BoardWidget::inBoard(int x, int y){
+    if (x < 0 || y < 0 || x >= boardBuffer[0].size() || y >= boardBuffer.size())
         return false;
 
     return true;

@@ -117,7 +117,6 @@ private:
     QActionGroup* editGroup;
     QActionGroup* tabChangeGroup;
     QMap<QAction*, QTextCodec*> encoding;
-    QTextCodec* defaultCodec;
     DocumentManager docManager;
     uint docID;
     QProgressDialog* progressDialog;

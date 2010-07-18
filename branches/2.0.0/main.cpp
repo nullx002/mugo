@@ -15,6 +15,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#include <QSettings>
 #include "mugoapp.h"
 #include "mainwindow.h"
 
@@ -22,10 +23,16 @@
 /**
   Constructor
 */
-Application::Application(int& argc, char** argv) : QApplication(argc, argv){
+MugoApplication::MugoApplication(int& argc, char** argv) : QApplication(argc, argv){
     setApplicationName(SETTING_NAME);
     setApplicationVersion(APP_VERSION);
     setOrganizationDomain(AUTHOR);
+
+    // Settings
+    QSettings settings;
+
+    // default codec
+    defaultCodec_ = QTextCodec::codecForName( settings.value("defaultCodec", "UTF-8").toByteArray() );
 }
 
 
@@ -34,7 +41,7 @@ int main(int argc, char *argv[])
     QTextCodec::setCodecForCStrings( QTextCodec::codecForName("UTF-8") );
     QTextCodec::setCodecForTr( QTextCodec::codecForName("UTF-8") );
 
-    Application a(argc, argv);
+    MugoApplication a(argc, argv);
     MainWindow w;
     w.show();
     return a.exec();
