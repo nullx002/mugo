@@ -45,6 +45,7 @@ public:
     bool moveUp(const Go::NodePtr& game);
     bool moveDown(const Go::NodePtr& game);
 
+    void modifyGame(Go::NodePtr& game){ setDirty(); emit gameModified(game); }
     void modifyNode(Go::NodePtr& node, bool needRecreateBoard){ setDirty(); emit nodeModified(node, needRecreateBoard); }
 
     Go::NodeList gameList;
@@ -57,6 +58,7 @@ signals:
     void gameAdded(Go::NodePtr game, int index);
     void gameDeleted(Go::NodePtr game, int index);
     void gameMoved(Go::NodePtr game, int from, int to);
+    void gameModified(Go::NodePtr game);
 };
 
 #endif // SGFDOCUMENT_H

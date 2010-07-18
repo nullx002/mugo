@@ -131,6 +131,9 @@ private:
 
 private slots:
     // File Menu
+    void on_actionFlipSgfVertically_triggered();
+    void on_actionFlipSgfHorizontally_triggered();
+    void on_actionRotateSGFClockwise_triggered();
     void on_actionNew_triggered();
     void on_actionOpen_triggered();
     void on_actionReload_triggered();

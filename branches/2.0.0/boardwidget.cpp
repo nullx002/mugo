@@ -164,6 +164,7 @@ BoardWidget::BoardWidget(SgfDocument* doc, QWidget *parent) :
 //    connect(document_, SIGNAL(nodeAdded(Go::NodePtr)), SLOT(on_sgfdocument_nodeAdded(Go::NodePtr)));
     connect(document_, SIGNAL(nodeDeleted(Go::NodePtr, bool)), SLOT(on_sgfdocument_nodeDeleted(Go::NodePtr, bool)));
     connect(document_, SIGNAL(nodeModified(Go::NodePtr, bool)), SLOT(on_sgfdocument_nodeModified(Go::NodePtr, bool)));
+    connect(document_, SIGNAL(gameModified(Go::NodePtr)), SLOT(on_sgfdocument_gameModified(Go::NodePtr)));
 
     setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
 
@@ -1563,4 +1564,17 @@ void BoardWidget::on_sgfdocument_nodeModified(Go::NodePtr /*node*/, bool needRec
     if (needRecreateBoard == false)
         return;
     createBuffer(true);
+}
+
+/**
+  Slot
+  node modified
+*/
+void BoardWidget::on_sgfdocument_gameModified(Go::NodePtr game){
+    if (game != currentGame)
+        return;
+
+    Go::NodePtr node = currentNode;
+    setCurrentGame(game, true);
+    setCurrentNode(node);
 }

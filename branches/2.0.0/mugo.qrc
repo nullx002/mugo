@@ -39,5 +39,8 @@
         <file>res/square.png</file>
         <file>res/rubbereraser.png</file>
         <file>res/whitefirst.png</file>
+        <file>res/rotateright.png</file>
+        <file>res/fliphorizontally.png</file>
+        <file>res/flipvertically.png</file>
     </qresource>
 </RCC>

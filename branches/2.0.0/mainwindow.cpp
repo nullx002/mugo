@@ -1944,10 +1944,9 @@ void MainWindow::on_actionHotspot_triggered(bool checked){
     board->document()->getUndoStack()->push( new SetAnnotationCommand(board->document(), board->getCurrentNode(), checked ? Go::Node::hotspot : Go::Node::noAnnotation) );
 }
 
-
 /**
   Slot
-  Navigation -> Move First
+  Edit -> Move First
 */
 void MainWindow::on_actionNavigationMoveFirst_triggered()
 {
@@ -1957,6 +1956,42 @@ void MainWindow::on_actionNavigationMoveFirst_triggered()
 
     const Go::NodeList& nodeList = board->getCurrentNodeList();
     board->setCurrentNode(nodeList.front());
+}
+
+/**
+  Slot
+  Edit -> Rotate SGF Clockwise
+*/
+void MainWindow::on_actionRotateSGFClockwise_triggered(){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    board->document()->getUndoStack()->push( new RotateSgfClockwiseCommand(board->document(), board->getCurrentGame()) );
+}
+
+/**
+  Slot
+  Edit -> Flip SGF Horizontally
+*/
+void MainWindow::on_actionFlipSgfHorizontally_triggered(){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    board->document()->getUndoStack()->push( new FlipSgfHorizontallyCommand(board->document(), board->getCurrentGame()) );
+}
+
+/**
+  Slot
+  Edit -> Flip SGF Vertically
+*/
+void MainWindow::on_actionFlipSgfVertically_triggered(){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    board->document()->getUndoStack()->push( new FlipSgfVerticallyCommand(board->document(), board->getCurrentGame()) );
 }
 
 /**

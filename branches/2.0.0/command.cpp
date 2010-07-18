@@ -507,6 +507,176 @@ void SetCommentCommand::setComment(const QString& comment){
 /**
   Constructor
 */
+FlipSgfCommand::FlipSgfCommand(SgfDocument* doc, Go::NodePtr game_, QUndoCommand *parent)
+    : QUndoCommand(parent)
+    , document(doc)
+    , game(game_)
+{
+}
+
+/**
+  redo rotate sgf clockwise command
+*/
+void FlipSgfCommand::redo(){
+    execute(game->gameInformation, game, true);
+    document->modifyGame(game);
+}
+
+/**
+  undo rotate sgf clockwise command
+*/
+void FlipSgfCommand::undo(){
+    execute(game->gameInformation, game, false);
+    document->modifyGame(game);
+}
+
+void FlipSgfCommand::execute(Go::GameInformationPtr& gameInfo, Go::NodePtr& node, bool redo){
+    if (gameInfo)
+        qSwap(gameInfo->xsize, gameInfo->ysize);
+
+    if (redo){
+        if(node->isStone() && node->isPass() == false)
+            this->redo(gameInfo, node->position);
+        this->redo(gameInfo, node->marks);
+        this->redo(gameInfo, node->blackTerritories);
+        this->redo(gameInfo, node->whiteTerritories);
+        this->redo(gameInfo, node->dims);
+        this->redo(gameInfo, node->blackStones);
+        this->redo(gameInfo, node->whiteStones);
+        this->redo(gameInfo, node->emptyStones);
+        this->redo(gameInfo, node->lines);
+    }
+    else{
+        if(node->isStone() && node->isPass() == false)
+            this->undo(gameInfo, node->position);
+        this->undo(gameInfo, node->marks);
+        this->undo(gameInfo, node->blackTerritories);
+        this->undo(gameInfo, node->whiteTerritories);
+        this->undo(gameInfo, node->dims);
+        this->undo(gameInfo, node->blackStones);
+        this->undo(gameInfo, node->whiteStones);
+        this->undo(gameInfo, node->emptyStones);
+        this->undo(gameInfo, node->lines);
+    }
+
+    foreach(Go::NodePtr child, node->childNodes)
+        execute(child->gameInformation ? child->gameInformation : gameInfo, child, redo);
+}
+
+template<class T>
+void FlipSgfCommand::redo(Go::GameInformationPtr& gameInfo, T& itemList){
+    typename T::iterator iter = itemList.begin();
+    while (iter != itemList.end()){
+        redo(gameInfo, iter->position);
+        ++iter;
+    }
+}
+
+void FlipSgfCommand::redo(Go::GameInformationPtr& gameInfo, Go::LineList& itemList){
+    Go::LineList::iterator iter = itemList.begin();
+    while (iter != itemList.end()){
+        redo(gameInfo, iter->position1);
+        redo(gameInfo, iter->position2);
+        ++iter;
+    }
+}
+
+template<class T>
+void FlipSgfCommand::undo(Go::GameInformationPtr& gameInfo, T& itemList){
+    typename T::iterator iter = itemList.begin();
+    while (iter != itemList.end()){
+        undo(gameInfo, iter->position);
+        ++iter;
+    }
+}
+
+void FlipSgfCommand::undo(Go::GameInformationPtr& gameInfo, Go::LineList& itemList){
+    Go::LineList::iterator iter = itemList.begin();
+    while (iter != itemList.end()){
+        undo(gameInfo, iter->position1);
+        undo(gameInfo, iter->position2);
+        ++iter;
+    }
+}
+
+/**
+  Constructor
+*/
+RotateSgfClockwiseCommand::RotateSgfClockwiseCommand(SgfDocument* doc, Go::NodePtr game, QUndoCommand *parent)
+    : FlipSgfCommand(doc, game, parent)
+{
+    setText( tr("Rotate SGF clockwise") );
+}
+
+/**
+  redo rotate command
+*/
+void RotateSgfClockwiseCommand::redo(Go::GameInformationPtr& gameInfo, Go::Point& p){
+    int x = p.x;
+    int y = p.y;
+    p.x = gameInfo->xsize - y - 1;
+    p.y = x;
+}
+
+/**
+  undo rotate command
+*/
+void RotateSgfClockwiseCommand::undo(Go::GameInformationPtr& gameInfo, Go::Point& p){
+    int x = p.x;
+    int y = p.y;
+    p.x = y;
+    p.y = gameInfo->ysize - x - 1;
+}
+
+/**
+  Constructor
+*/
+FlipSgfHorizontallyCommand::FlipSgfHorizontallyCommand(SgfDocument* doc, Go::NodePtr game, QUndoCommand *parent)
+    : FlipSgfCommand(doc, game, parent)
+{
+    setText( tr("Flip SGF Horizontally") );
+}
+
+/**
+  redo flip sgf horizontally command
+*/
+void FlipSgfHorizontallyCommand::redo(Go::GameInformationPtr& gameInfo, Go::Point& p){
+    p.x = gameInfo->xsize - p.x - 1;
+}
+
+/**
+  undo flip sgf horizontally command
+*/
+void FlipSgfHorizontallyCommand::undo(Go::GameInformationPtr& gameInfo, Go::Point& p){
+    p.x = gameInfo->xsize - p.x - 1;
+}
+
+/**
+  Constructor
+*/
+FlipSgfVerticallyCommand::FlipSgfVerticallyCommand(SgfDocument* doc, Go::NodePtr game, QUndoCommand *parent)
+    : FlipSgfCommand(doc, game, parent)
+{
+    setText( tr("Flip SGF Vertically") );
+}
+
+/**
+  redo flip sgf vertically command
+*/
+void FlipSgfVerticallyCommand::redo(Go::GameInformationPtr& gameInfo, Go::Point& p){
+    p.y = gameInfo->ysize - p.y - 1;
+}
+
+/**
+  undo flip sgf vertically command
+*/
+void FlipSgfVerticallyCommand::undo(Go::GameInformationPtr& gameInfo, Go::Point& p){
+    p.y = gameInfo->ysize - p.y - 1;
+}
+
+/**
+  Constructor
+*/
 SetCurrentGameCommand::SetCurrentGameCommand(BoardWidget* board, Go::NodePtr game_, QUndoCommand *parent)
     : QUndoCommand(parent)
     , boardWidget(board)

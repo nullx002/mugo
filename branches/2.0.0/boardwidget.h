@@ -151,7 +151,8 @@ private slots:
     // Document
 //    void on_sgfdocument_nodeAdded(Go::NodePtr node);
     void on_sgfdocument_nodeDeleted(Go::NodePtr node, bool removeChild);
-    void on_sgfdocument_nodeModified(Go::NodePtr, bool needRecreateBoard);
+    void on_sgfdocument_nodeModified(Go::NodePtr node, bool needRecreateBoard);
+    void on_sgfdocument_gameModified(Go::NodePtr game);
 
 private:
     SgfDocument* document_;

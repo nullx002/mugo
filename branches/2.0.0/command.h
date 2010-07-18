@@ -290,6 +290,74 @@ private:
 };
 
 /**
+  flip sgf command
+*/
+class FlipSgfCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(FlipSgfClockwiseCommand)
+
+public:
+    FlipSgfCommand(SgfDocument* doc, Go::NodePtr game, QUndoCommand *parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+protected:
+    virtual void execute(Go::GameInformationPtr& gameInfo, Go::NodePtr& node, bool redo);
+    virtual void redo(Go::GameInformationPtr& gameInfo, Go::Point& p) = 0;
+    virtual void undo(Go::GameInformationPtr& gameInfo, Go::Point& p) = 0;
+
+    template<class T> void redo(Go::GameInformationPtr& gameInfo, T& itemList);
+    void redo(Go::GameInformationPtr& gameInfo, Go::LineList& itemList);
+
+    template<class T> void undo(Go::GameInformationPtr& gameInfo, T& itemList);
+    void undo(Go::GameInformationPtr& gameInfo, Go::LineList& itemList);
+
+    SgfDocument* document;
+    Go::NodePtr  game;
+};
+
+/**
+  rotate sgf clockwise command
+*/
+class RotateSgfClockwiseCommand : public FlipSgfCommand{
+    Q_DECLARE_TR_FUNCTIONS(RotateSgfClockwiseCommand)
+
+public:
+    RotateSgfClockwiseCommand(SgfDocument* doc, Go::NodePtr game, QUndoCommand *parent = 0);
+
+protected:
+    virtual void redo(Go::GameInformationPtr& gameInfo, Go::Point& p);
+    virtual void undo(Go::GameInformationPtr& gameInfo, Go::Point& p);
+};
+
+/**
+  flip sgf horizontally command
+*/
+class FlipSgfHorizontallyCommand : public FlipSgfCommand{
+    Q_DECLARE_TR_FUNCTIONS(FlipSgfHorizontallyCommand)
+
+public:
+    FlipSgfHorizontallyCommand(SgfDocument* doc, Go::NodePtr game, QUndoCommand *parent = 0);
+
+protected:
+    virtual void redo(Go::GameInformationPtr& gameInfo, Go::Point& p);
+    virtual void undo(Go::GameInformationPtr& gameInfo, Go::Point& p);
+};
+
+/**
+  flip sgf vertically command
+*/
+class FlipSgfVerticallyCommand : public FlipSgfCommand{
+    Q_DECLARE_TR_FUNCTIONS(FlipSgfVerticallyCommand)
+
+public:
+    FlipSgfVerticallyCommand(SgfDocument* doc, Go::NodePtr game, QUndoCommand *parent = 0);
+
+protected:
+    virtual void redo(Go::GameInformationPtr& gameInfo, Go::Point& p);
+    virtual void undo(Go::GameInformationPtr& gameInfo, Go::Point& p);
+};
+
+/**
   set current game command
 */
 class SetCurrentGameCommand : public QUndoCommand{
@@ -372,5 +440,6 @@ private:
     Go::NodePtr game;
     bool moved;
 };
+
 
 #endif // COMMAND_H
