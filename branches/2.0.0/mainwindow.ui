@@ -264,12 +264,12 @@
     <property name="title">
      <string>&amp;Navigation</string>
     </property>
-    <addaction name="actionNavigationMoveFirst"/>
-    <addaction name="actionNavigationFastRewind"/>
-    <addaction name="actionNavigationMovePrevious"/>
-    <addaction name="actionNavigationMoveNext"/>
-    <addaction name="actionNavigationFastForward"/>
-    <addaction name="actionNavigationMoveLast"/>
+    <addaction name="actionMoveFirst"/>
+    <addaction name="actionFastRewind"/>
+    <addaction name="actionMovePrevious"/>
+    <addaction name="actionMoveNext"/>
+    <addaction name="actionFastForward"/>
+    <addaction name="actionMoveLast"/>
     <addaction name="separator"/>
     <addaction name="actionBackToParent"/>
     <addaction name="actionPreviousSibling"/>
@@ -347,12 +347,12 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionNavigationMoveFirst"/>
-   <addaction name="actionNavigationFastRewind"/>
-   <addaction name="actionNavigationMovePrevious"/>
-   <addaction name="actionNavigationMoveNext"/>
-   <addaction name="actionNavigationFastForward"/>
-   <addaction name="actionNavigationMoveLast"/>
+   <addaction name="actionMoveFirst"/>
+   <addaction name="actionFastRewind"/>
+   <addaction name="actionMovePrevious"/>
+   <addaction name="actionMoveNext"/>
+   <addaction name="actionFastForward"/>
+   <addaction name="actionMoveLast"/>
    <addaction name="separator"/>
    <addaction name="actionBackToParent"/>
    <addaction name="actionPreviousSibling"/>
@@ -1180,7 +1180,7 @@
     <string>Flip SGF Vertically</string>
    </property>
   </action>
-  <action name="actionNavigationMoveFirst">
+  <action name="actionMoveFirst">
    <property name="icon">
     <iconset resource="mugo.qrc">
      <normaloff>:/res/movefirst.png</normaloff>:/res/movefirst.png</iconset>
@@ -1189,7 +1189,7 @@
     <string>Move First</string>
    </property>
   </action>
-  <action name="actionNavigationFastRewind">
+  <action name="actionFastRewind">
    <property name="icon">
     <iconset resource="mugo.qrc">
      <normaloff>:/res/fastrewind.png</normaloff>:/res/fastrewind.png</iconset>
@@ -1198,7 +1198,7 @@
     <string>First Rewind</string>
    </property>
   </action>
-  <action name="actionNavigationMovePrevious">
+  <action name="actionMovePrevious">
    <property name="icon">
     <iconset resource="mugo.qrc">
      <normaloff>:/res/moveprev.png</normaloff>:/res/moveprev.png</iconset>
@@ -1207,7 +1207,7 @@
     <string>Move Previous</string>
    </property>
   </action>
-  <action name="actionNavigationMoveLast">
+  <action name="actionMoveLast">
    <property name="icon">
     <iconset resource="mugo.qrc">
      <normaloff>:/res/movelast.png</normaloff>:/res/movelast.png</iconset>
@@ -1216,7 +1216,7 @@
     <string>Move Last</string>
    </property>
   </action>
-  <action name="actionNavigationFastForward">
+  <action name="actionFastForward">
    <property name="icon">
     <iconset resource="mugo.qrc">
      <normaloff>:/res/fastforward.png</normaloff>:/res/fastforward.png</iconset>
@@ -1225,13 +1225,61 @@
     <string>Fast Forward</string>
    </property>
   </action>
-  <action name="actionNavigationMoveNext">
+  <action name="actionMoveNext">
    <property name="icon">
     <iconset resource="mugo.qrc">
      <normaloff>:/res/movenext.png</normaloff>:/res/movenext.png</iconset>
    </property>
    <property name="text">
     <string>Move Next</string>
+   </property>
+  </action>
+  <action name="actionBackToParent">
+   <property name="icon">
+    <iconset resource="mugo.qrc">
+     <normaloff>:/res/backparent.png</normaloff>:/res/backparent.png</iconset>
+   </property>
+   <property name="text">
+    <string>Back to Parent</string>
+   </property>
+  </action>
+  <action name="actionPreviousSibling">
+   <property name="icon">
+    <iconset resource="mugo.qrc">
+     <normaloff>:/res/prevbranch.png</normaloff>:/res/prevbranch.png</iconset>
+   </property>
+   <property name="text">
+    <string>Previous Sibling</string>
+   </property>
+  </action>
+  <action name="actionNextSibling">
+   <property name="icon">
+    <iconset resource="mugo.qrc">
+     <normaloff>:/res/nextbranch.png</normaloff>:/res/nextbranch.png</iconset>
+   </property>
+   <property name="text">
+    <string>Next Sibling</string>
+   </property>
+  </action>
+  <action name="actionJumpToMoveNumber">
+   <property name="icon">
+    <iconset resource="mugo.qrc">
+     <normaloff>:/res/jumptonumber.png</normaloff>:/res/jumptonumber.png</iconset>
+   </property>
+   <property name="text">
+    <string>Jump to Move Number</string>
+   </property>
+  </action>
+  <action name="actionJumpToClicked">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="mugo.qrc">
+     <normaloff>:/res/jumptoclicked.png</normaloff>:/res/jumptoclicked.png</iconset>
+   </property>
+   <property name="text">
+    <string>Jump to Clicked</string>
    </property>
   </action>
   <action name="actionPreviousTab">
@@ -1279,51 +1327,6 @@
    </property>
    <property name="text">
     <string>Move Down</string>
-   </property>
-  </action>
-  <action name="actionBackToParent">
-   <property name="icon">
-    <iconset resource="mugo.qrc">
-     <normaloff>:/res/backparent.png</normaloff>:/res/backparent.png</iconset>
-   </property>
-   <property name="text">
-    <string>Back to Parent</string>
-   </property>
-  </action>
-  <action name="actionPreviousSibling">
-   <property name="icon">
-    <iconset resource="mugo.qrc">
-     <normaloff>:/res/prevbranch.png</normaloff>:/res/prevbranch.png</iconset>
-   </property>
-   <property name="text">
-    <string>Previous Sibling</string>
-   </property>
-  </action>
-  <action name="actionNextSibling">
-   <property name="icon">
-    <iconset resource="mugo.qrc">
-     <normaloff>:/res/nextbranch.png</normaloff>:/res/nextbranch.png</iconset>
-   </property>
-   <property name="text">
-    <string>Next Sibling</string>
-   </property>
-  </action>
-  <action name="actionJumpToMoveNumber">
-   <property name="icon">
-    <iconset resource="mugo.qrc">
-     <normaloff>:/res/jumptonumber.png</normaloff>:/res/jumptonumber.png</iconset>
-   </property>
-   <property name="text">
-    <string>Jump to Move Number</string>
-   </property>
-  </action>
-  <action name="actionJumpToClicked">
-   <property name="icon">
-    <iconset resource="mugo.qrc">
-     <normaloff>:/res/jumptoclicked.png</normaloff>:/res/jumptoclicked.png</iconset>
-   </property>
-   <property name="text">
-    <string>Jump to Clicked</string>
    </property>
   </action>
  </widget>

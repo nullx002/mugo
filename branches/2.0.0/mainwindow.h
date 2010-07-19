@@ -196,17 +196,17 @@ private slots:
     void on_actionHotspot_triggered(bool checked);
 
     // Navigation Menu
-    void on_actionNavigationMoveFirst_triggered();
-    void on_actionNavigationFastRewind_triggered();
-    void on_actionNavigationMovePrevious_triggered();
-    void on_actionNavigationMoveLast_triggered();
-    void on_actionNavigationFastForward_triggered();
-    void on_actionNavigationMoveNext_triggered();
+    void on_actionMoveFirst_triggered();
+    void on_actionFastRewind_triggered();
+    void on_actionMovePrevious_triggered();
+    void on_actionMoveLast_triggered();
+    void on_actionFastForward_triggered();
+    void on_actionMoveNext_triggered();
     void on_actionBackToParent_triggered();
     void on_actionPreviousSibling_triggered();
     void on_actionNextSibling_triggered();
     void on_actionJumpToMoveNumber_triggered();
-    void on_actionJumpToClicked_triggered();
+    void on_actionJumpToClicked_triggered(bool checked);
 
     // Window Menu
     void on_actionPreviousTab_triggered();

@@ -85,6 +85,8 @@ public:
     // edit mode
     void setEditMode(EditMode::Mode editMode);
     EditMode::Mode getEditMode() const{ return editMode; }
+    void setJumpToClicked(bool flag){ jumpToClicked = flag; }
+    bool isJumpToClicked() const{ return jumpToClicked; }
 
     // add
     void addItem(Go::NodePtr parent, Go::NodePtr node, int index);
@@ -158,6 +160,8 @@ private:
     SgfDocument* document_;
     Go::NodePtr  currentGame;
     Go::GameInformationPtr gameInformation;
+    Go::NodePtr currentNode;
+    Go::NodeList currentNodeList;
     QGraphicsScene* scene;
     QGraphicsRectItem* board;
     QGraphicsRectItem* shadow;
@@ -172,13 +176,12 @@ private:
     QList< QList<QGraphicsRectItem*> > dims;
     QList< QList<GraphicsArrowItem*> > lines;
     QList<QGraphicsSimpleTextItem*> numbers;
-    Go::NodePtr currentNode;
-    Go::NodeList currentNodeList;
     BoardBuffer boardBuffer;
     int moveNumber;
     int capturedBlack;
     int capturedWhite;
     EditMode::Mode editMode;
+    bool jumpToClicked;
 };
 
 #endif // BOARDWIDGET_H

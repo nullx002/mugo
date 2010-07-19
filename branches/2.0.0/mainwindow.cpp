@@ -1002,6 +1002,9 @@ void MainWindow::updateMenu(){
 
     // Edit -> White First
     ui->actionWhiteFirst->setChecked(game->nextColor == Go::white);
+
+    // Navigation -> Jump To Clicked
+    ui->actionJumpToClicked->setChecked(board->isJumpToClicked());
 }
 
 
@@ -2007,7 +2010,7 @@ void MainWindow::on_actionHotspot_triggered(bool checked){
   Slot
   Edit -> Move First
 */
-void MainWindow::on_actionNavigationMoveFirst_triggered()
+void MainWindow::on_actionMoveFirst_triggered()
 {
     BoardWidget* board = currentBoard();
     if (board == NULL)
@@ -2057,7 +2060,7 @@ void MainWindow::on_actionFlipSgfVertically_triggered(){
   Slot
   Navigation -> Fast Rewind
 */
-void MainWindow::on_actionNavigationFastRewind_triggered()
+void MainWindow::on_actionFastRewind_triggered()
 {
     BoardWidget* board = currentBoard();
     if (board == NULL)
@@ -2069,7 +2072,7 @@ void MainWindow::on_actionNavigationFastRewind_triggered()
   Slot
   Navigation -> Move Next
 */
-void MainWindow::on_actionNavigationMovePrevious_triggered()
+void MainWindow::on_actionMovePrevious_triggered()
 {
     BoardWidget* board = currentBoard();
     if (board == NULL)
@@ -2081,7 +2084,7 @@ void MainWindow::on_actionNavigationMovePrevious_triggered()
   Slot
   Navigation -> Move Last
 */
-void MainWindow::on_actionNavigationMoveLast_triggered()
+void MainWindow::on_actionMoveLast_triggered()
 {
     BoardWidget* board = currentBoard();
     if (board == NULL)
@@ -2095,7 +2098,7 @@ void MainWindow::on_actionNavigationMoveLast_triggered()
   Slot
   Navigation -> Fast Forward
 */
-void MainWindow::on_actionNavigationFastForward_triggered()
+void MainWindow::on_actionFastForward_triggered()
 {
     BoardWidget* board = currentBoard();
     if (board == NULL)
@@ -2107,7 +2110,7 @@ void MainWindow::on_actionNavigationFastForward_triggered()
   Slot
   Navigation -> Move Next
 */
-void MainWindow::on_actionNavigationMoveNext_triggered()
+void MainWindow::on_actionMoveNext_triggered()
 {
     BoardWidget* board = currentBoard();
     if (board == NULL)
@@ -2168,13 +2171,32 @@ void MainWindow::on_actionNextSibling_triggered(){
   Navigation -> Jump to Move Number
 */
 void MainWindow::on_actionJumpToMoveNumber_triggered(){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    const Go::NodeList& nodeList = board->getCurrentNodeList();
+    int currentIndex = nodeList.indexOf(board->getCurrentNode());
+
+    bool ok;
+    int number = QInputDialog::getInt(this, QString(), tr("Input Move Number"), currentIndex, 0, nodeList.size()-1, 1, &ok);
+
+    if(ok == false)
+        return;
+
+    board->setCurrentNode(nodeList[number]);
 }
 
 /**
   Slot
   Navigation -> Jump to Clicked
 */
-void MainWindow::on_actionJumpToClicked_triggered(){
+void MainWindow::on_actionJumpToClicked_triggered(bool checked){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    board->setJumpToClicked(checked);
 }
 
 /**

@@ -154,12 +154,12 @@ void GraphicsArrowItem::createNormal(QPainterPath& path, qreal x1, qreal y1, qre
 /**
   Constructor
 */
-BoardWidget::BoardWidget(SgfDocument* doc, QWidget *parent) :
-    QGraphicsView(parent),
-    document_(doc),
-    scene( new QGraphicsScene(this) ),
-    editMode(EditMode::alternateMove)
-
+BoardWidget::BoardWidget(SgfDocument* doc, QWidget *parent)
+    : QGraphicsView(parent)
+    , document_(doc)
+    , scene( new QGraphicsScene(this) )
+    , editMode(EditMode::alternateMove)
+    , jumpToClicked(false)
 {
 //    connect(document_, SIGNAL(nodeAdded(Go::NodePtr)), SLOT(on_sgfdocument_nodeAdded(Go::NodePtr)));
     connect(document_, SIGNAL(nodeDeleted(Go::NodePtr, bool)), SLOT(on_sgfdocument_nodeDeleted(Go::NodePtr, bool)));
@@ -226,6 +226,21 @@ void BoardWidget::onLButtonDown(QMouseEvent* e){
 
     if (x < 0 || y < 0 || x >= gameInformation->xsize || y >= gameInformation->ysize)
         return;
+
+    // if jump to clicked mode, change current node and return
+    if (jumpToClicked){
+        Go::NodePtr node = currentNode;
+        while (node){
+            if (node->isStone() && node->x() == x && node->y() == y)
+                break;
+            node = node->parent();
+        }
+        if (node){
+            jumpToClicked = false;
+            setCurrentNode(node, true);
+        }
+        return;
+    }
 
     switch(editMode){
         case EditMode::alternateMove:
