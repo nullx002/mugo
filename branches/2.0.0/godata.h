@@ -184,13 +184,16 @@ public:
     virtual ~Node();
 
     void clear();
-    virtual QString toString() const;
+//    virtual QString toString() const;
     GameInformationPtr getInformation() const;
 
     // parent
     NodePtr parent() const{ return parent_.lock(); }
     void setParent(NodePtr node){ parent_ = node; }
 
+    // sibling
+    NodePtr previousSibling() const;
+    NodePtr nextSibling() const;
 
     // get
     int x() const{ return position.x; }

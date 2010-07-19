@@ -103,11 +103,15 @@ Node::~Node(){
     clear();
 }
 
+/**
+  clear this node
+*/
 void Node::clear(){
     parent_.reset();
     childNodes.clear();
 }
 
+/*
 QString Node::toString() const{
     QString str = name;
 
@@ -172,7 +176,11 @@ QString Node::toString() const{
 
     return str;
 }
+*/
 
+/**
+  get game information
+*/
 GameInformationPtr Node::getInformation() const{
     if (gameInformation)
         return gameInformation;
@@ -187,6 +195,54 @@ GameInformationPtr Node::getInformation() const{
     return gameInformation;
 }
 
+/**
+  get previous sibling
+*/
+NodePtr Node::previousSibling() const{
+    Go::NodePtr p = parent();
+    if (!p)
+        return NodePtr();
+
+    int i = 0;
+    foreach(const Go::NodePtr& node, p->childNodes){
+        if (node.get() == this)
+            break;
+        ++i;
+    }
+
+    if (i > 0 && i < p->childNodes.size())
+        return p->childNodes[i - 1];
+    else
+        return NodePtr();
+}
+
+/**
+  get next sibling
+*/
+NodePtr Node::nextSibling() const{
+    Go::NodePtr p = parent();
+    if (!p)
+        return NodePtr();
+
+    int i = 0;
+    foreach(const Go::NodePtr& node, p->childNodes){
+        if (node.get() == this)
+            break;
+        ++i;
+    }
+
+    if (i < p->childNodes.size() - 1)
+        return p->childNodes[i + 1];
+    else
+        return NodePtr();
+}
+
+/**
+  is pass
+
+  @retval true  pass
+  @retval false not pass
+*/
 bool Node::isPass() const{
     GameInformationPtr info = getInformation();
     if (info)

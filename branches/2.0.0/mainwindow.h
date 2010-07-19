@@ -130,9 +130,6 @@ private:
 
 private slots:
     // File Menu
-    void on_actionFlipSgfVertically_triggered();
-    void on_actionFlipSgfHorizontally_triggered();
-    void on_actionRotateSGFClockwise_triggered();
     void on_actionNew_triggered();
     void on_actionOpen_triggered();
     void on_actionReload_triggered();
@@ -173,6 +170,9 @@ private slots:
     void on_actionSetMoveNumber_triggered();
     void on_actionUnsetMoveNumber_triggered();
     void on_actionWhiteFirst_triggered(bool checked);
+    void on_actionRotateSGFClockwise_triggered();
+    void on_actionFlipSgfHorizontally_triggered();
+    void on_actionFlipSgfVertically_triggered();
 
     // Edit -> Node Annotation
     void on_actionNoNodeAnnotation_triggered();
@@ -202,6 +202,11 @@ private slots:
     void on_actionNavigationMoveLast_triggered();
     void on_actionNavigationFastForward_triggered();
     void on_actionNavigationMoveNext_triggered();
+    void on_actionBackToParent_triggered();
+    void on_actionPreviousSibling_triggered();
+    void on_actionNextSibling_triggered();
+    void on_actionJumpToMoveNumber_triggered();
+    void on_actionJumpToClicked_triggered();
 
     // Window Menu
     void on_actionPreviousTab_triggered();

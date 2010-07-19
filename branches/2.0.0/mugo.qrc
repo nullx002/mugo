@@ -42,5 +42,10 @@
         <file>res/rotateright.png</file>
         <file>res/fliphorizontally.png</file>
         <file>res/flipvertically.png</file>
+        <file>res/backparent.png</file>
+        <file>res/prevbranch.png</file>
+        <file>res/nextbranch.png</file>
+        <file>res/jumptonumber.png</file>
+        <file>res/jumptoclicked.png</file>
     </qresource>
 </RCC>

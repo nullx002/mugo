@@ -926,6 +926,44 @@ void MainWindow::updateMenu(){
     QAction* encodingAction = encoding.key( board->document()->getCodec() );
     if (encodingAction)
         encodingAction->setChecked(true);
+    ui->menuReload->setEnabled( board->document()->getFileName().isEmpty() == false || board->document()->getUrl().isEmpty() == false );
+
+    // Edit -> Stones & Markers
+    switch( board->getEditMode() ){
+        case BoardWidget::EditMode::alternateMove:
+            ui->actionAlternateMove->trigger();
+            break;
+        case BoardWidget::EditMode::addBlack:
+            ui->actionAddBlackStone->trigger();
+            break;
+        case BoardWidget::EditMode::addWhite:
+            ui->actionAddWhiteStone->trigger();
+            break;
+        case BoardWidget::EditMode::addEmpty:
+            ui->actionAddEmpty->trigger();
+            break;
+        case BoardWidget::EditMode::addLabel:
+            ui->actionAddLabel->trigger();
+            break;
+        case BoardWidget::EditMode::addLabelManually:
+            ui->actionAddLabelManually->trigger();
+            break;
+        case BoardWidget::EditMode::addCircle:
+            ui->actionAddCircle->trigger();
+            break;
+        case BoardWidget::EditMode::addCross:
+            ui->actionAddCross->trigger();
+            break;
+        case BoardWidget::EditMode::addTriangle:
+            ui->actionAddTriangle->trigger();
+            break;
+        case BoardWidget::EditMode::addSquare:
+            ui->actionAddSquare->trigger();
+            break;
+        case BoardWidget::EditMode::removeMarker:
+            ui->actionDeleteMarker->trigger();
+            break;
+    }
 
     // Edit -> Annotation
     ui->actionHotspot->setChecked(node->annotation == Go::Node::hotspot);
@@ -2077,6 +2115,67 @@ void MainWindow::on_actionNavigationMoveNext_triggered()
     board->forward();
 }
 
+/**
+  Slot
+  Navigation -> Back to Parent
+*/
+void MainWindow::on_actionBackToParent_triggered(){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    Go::NodePtr node = board->getCurrentNode();
+    while (node->parent()){
+        node = node->parent();
+        if (node->childNodes.size() > 1)
+            break;
+    }
+    board->setCurrentNode(node);
+}
+
+/**
+  Slot
+  Navigation -> Previous Sibling
+*/
+void MainWindow::on_actionPreviousSibling_triggered(){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    Go::NodePtr node = board->getCurrentNode();
+    Go::NodePtr prev = node->previousSibling();
+    if (prev)
+        board->setCurrentNode(prev);
+}
+
+/**
+  Slot
+  Navigation -> Next Sibling
+*/
+void MainWindow::on_actionNextSibling_triggered(){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    Go::NodePtr node = board->getCurrentNode();
+    Go::NodePtr next = node->nextSibling();
+    if (next)
+        board->setCurrentNode(next);
+}
+
+/**
+  Slot
+  Navigation -> Jump to Move Number
+*/
+void MainWindow::on_actionJumpToMoveNumber_triggered(){
+}
+
+/**
+  Slot
+  Navigation -> Jump to Clicked
+*/
+void MainWindow::on_actionJumpToClicked_triggered(){
+}
 
 /**
   Slot

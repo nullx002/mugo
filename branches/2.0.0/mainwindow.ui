@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>600</width>
+    <width>637</width>
     <height>400</height>
    </rect>
   </property>
@@ -61,7 +61,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>600</width>
+     <width>637</width>
      <height>25</height>
     </rect>
    </property>
@@ -270,6 +270,13 @@
     <addaction name="actionNavigationMoveNext"/>
     <addaction name="actionNavigationFastForward"/>
     <addaction name="actionNavigationMoveLast"/>
+    <addaction name="separator"/>
+    <addaction name="actionBackToParent"/>
+    <addaction name="actionPreviousSibling"/>
+    <addaction name="actionNextSibling"/>
+    <addaction name="separator"/>
+    <addaction name="actionJumpToMoveNumber"/>
+    <addaction name="actionJumpToClicked"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -346,6 +353,13 @@
    <addaction name="actionNavigationMoveNext"/>
    <addaction name="actionNavigationFastForward"/>
    <addaction name="actionNavigationMoveLast"/>
+   <addaction name="separator"/>
+   <addaction name="actionBackToParent"/>
+   <addaction name="actionPreviousSibling"/>
+   <addaction name="actionNextSibling"/>
+   <addaction name="separator"/>
+   <addaction name="actionJumpToMoveNumber"/>
+   <addaction name="actionJumpToClicked"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <widget class="QDockWidget" name="commentDockWidget">
@@ -1265,6 +1279,51 @@
    </property>
    <property name="text">
     <string>Move Down</string>
+   </property>
+  </action>
+  <action name="actionBackToParent">
+   <property name="icon">
+    <iconset resource="mugo.qrc">
+     <normaloff>:/res/backparent.png</normaloff>:/res/backparent.png</iconset>
+   </property>
+   <property name="text">
+    <string>Back to Parent</string>
+   </property>
+  </action>
+  <action name="actionPreviousSibling">
+   <property name="icon">
+    <iconset resource="mugo.qrc">
+     <normaloff>:/res/prevbranch.png</normaloff>:/res/prevbranch.png</iconset>
+   </property>
+   <property name="text">
+    <string>Previous Sibling</string>
+   </property>
+  </action>
+  <action name="actionNextSibling">
+   <property name="icon">
+    <iconset resource="mugo.qrc">
+     <normaloff>:/res/nextbranch.png</normaloff>:/res/nextbranch.png</iconset>
+   </property>
+   <property name="text">
+    <string>Next Sibling</string>
+   </property>
+  </action>
+  <action name="actionJumpToMoveNumber">
+   <property name="icon">
+    <iconset resource="mugo.qrc">
+     <normaloff>:/res/jumptonumber.png</normaloff>:/res/jumptonumber.png</iconset>
+   </property>
+   <property name="text">
+    <string>Jump to Move Number</string>
+   </property>
+  </action>
+  <action name="actionJumpToClicked">
+   <property name="icon">
+    <iconset resource="mugo.qrc">
+     <normaloff>:/res/jumptoclicked.png</normaloff>:/res/jumptoclicked.png</iconset>
+   </property>
+   <property name="text">
+    <string>Jump to Clicked</string>
    </property>
   </action>
  </widget>
