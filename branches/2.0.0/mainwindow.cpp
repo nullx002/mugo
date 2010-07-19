@@ -1005,6 +1005,12 @@ void MainWindow::updateMenu(){
 
     // Navigation -> Jump To Clicked
     ui->actionJumpToClicked->setChecked(board->isJumpToClicked());
+
+    // View -> Show Move Number
+    ui->actionShowMoveNumber->setChecked(board->getShowMoveNumber());
+
+    // View -> Reset Move Number In Branch
+    ui->actionResetMoveNumberInBranch->setChecked(board->getResetMoveNumberInBranch());
 }
 
 
@@ -2197,6 +2203,36 @@ void MainWindow::on_actionJumpToClicked_triggered(bool checked){
         return;
 
     board->setJumpToClicked(checked);
+}
+
+/**
+  Slot
+  View -> Show Move Number
+*/
+void MainWindow::on_actionShowMoveNumber_triggered(bool checked){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    board->setShowMoveNumber(checked);
+
+    QSettings settings;
+    settings.setValue("marker/showMoveNumber", checked);
+}
+
+/**
+  Slot
+  View -> Reset Move Number in Branch
+*/
+void MainWindow::on_actionResetMoveNumberInBranch_triggered(bool checked){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    board->setResetMoveNumberInBranch(checked);
+
+    QSettings settings;
+    settings.setValue("marker/resetMoveNumberInBranch", checked);
 }
 
 /**

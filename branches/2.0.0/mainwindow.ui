@@ -278,9 +278,32 @@
     <addaction name="actionJumpToMoveNumber"/>
     <addaction name="actionJumpToClicked"/>
    </widget>
+   <widget class="QMenu" name="menu_View">
+    <property name="title">
+     <string>&amp;View</string>
+    </property>
+    <widget class="QMenu" name="menuMoveNumber">
+     <property name="title">
+      <string>Move Number</string>
+     </property>
+     <addaction name="actionShowMoveNumber"/>
+     <addaction name="actionResetMoveNumberInBranch"/>
+     <addaction name="separator"/>
+     <addaction name="actionNoMoveNumber"/>
+     <addaction name="actionLast1Move"/>
+     <addaction name="actionLast2Moves"/>
+     <addaction name="actionLast5Moves"/>
+     <addaction name="actionLast10Moves"/>
+     <addaction name="actionLast20Moves"/>
+     <addaction name="actionLast50Moves"/>
+     <addaction name="actionAllMoves"/>
+    </widget>
+    <addaction name="menuMoveNumber"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuNavigation"/>
+   <addaction name="menu_View"/>
    <addaction name="menuWindow"/>
    <addaction name="menuHelp"/>
   </widget>
@@ -1285,6 +1308,86 @@
   <action name="actionPreviousTab">
    <property name="text">
     <string>Previous Tab</string>
+   </property>
+  </action>
+  <action name="actionShowMoveNumber">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Move Number</string>
+   </property>
+  </action>
+  <action name="actionResetMoveNumberInBranch">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Reset Move Number in Branch</string>
+   </property>
+  </action>
+  <action name="actionNoMoveNumber">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>No Move Number</string>
+   </property>
+  </action>
+  <action name="actionLast1Move">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Last 1 Move</string>
+   </property>
+  </action>
+  <action name="actionLast2Moves">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Last 2 Moves</string>
+   </property>
+  </action>
+  <action name="actionLast5Moves">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Last 5 Moves</string>
+   </property>
+  </action>
+  <action name="actionLast10Moves">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Last 10 Moves</string>
+   </property>
+  </action>
+  <action name="actionLast20Moves">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Last 20 Moves</string>
+   </property>
+  </action>
+  <action name="actionLast50Moves">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Last 50 Moves</string>
+   </property>
+  </action>
+  <action name="actionAllMoves">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>All Moves</string>
    </property>
   </action>
   <action name="actionNextTab">

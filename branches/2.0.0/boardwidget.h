@@ -82,11 +82,17 @@ public:
     void forward(int step=1);
     void back(int step=1);
 
-    // edit mode
+    // set edit mode
     void setEditMode(EditMode::Mode editMode);
-    EditMode::Mode getEditMode() const{ return editMode; }
     void setJumpToClicked(bool flag){ jumpToClicked = flag; }
+    void setShowMoveNumber(bool show);
+    void setResetMoveNumberInBranch(bool reset);
+
+    // get edit mode
+    EditMode::Mode getEditMode() const{ return editMode; }
     bool isJumpToClicked() const{ return jumpToClicked; }
+    bool getShowMoveNumber() const{ return showMoveNumber; }
+    bool getResetMoveNumberInBranch() const{ return resetMoveNumberInBranch; }
 
     // add
     void addItem(Go::NodePtr parent, Go::NodePtr node, int index);
@@ -182,6 +188,8 @@ private:
     int capturedWhite;
     EditMode::Mode editMode;
     bool jumpToClicked;
+    bool showMoveNumber;
+    bool resetMoveNumberInBranch;
 };
 
 #endif // BOARDWIDGET_H

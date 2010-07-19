@@ -160,6 +160,8 @@ BoardWidget::BoardWidget(SgfDocument* doc, QWidget *parent)
     , scene( new QGraphicsScene(this) )
     , editMode(EditMode::alternateMove)
     , jumpToClicked(false)
+    , showMoveNumber(true)
+    , resetMoveNumberInBranch(false)
 {
 //    connect(document_, SIGNAL(nodeAdded(Go::NodePtr)), SLOT(on_sgfdocument_nodeAdded(Go::NodePtr)));
     connect(document_, SIGNAL(nodeDeleted(Go::NodePtr, bool)), SLOT(on_sgfdocument_nodeDeleted(Go::NodePtr, bool)));
@@ -635,9 +637,15 @@ void BoardWidget::createBuffer(bool erase){
             ++moveNumber;
 
         if ( inBoard(*node) ){
-            // hide move number before set move number
-            if ((*node)->moveNumber > 0){
-                moveNumber = (*node)->moveNumber;
+            // reset move number
+            bool resetMoveNumber = (*node)->moveNumber > 0;
+            if (resetMoveNumberInBranch){
+                Go::NodePtr parent = (*node)->parent();
+                if (parent && parent->childNodes.size() > 1)
+                    resetMoveNumber = true;
+            }
+            if (resetMoveNumber){
+                moveNumber = (*node)->moveNumber ? (*node)->moveNumber : 1;
                 QList<QGraphicsSimpleTextItem*>::iterator number = iter_number;
                 while(true){
                     if (number == numbers.begin())
@@ -923,7 +931,11 @@ BoardWidget::TerritoryInfo& BoardWidget::addStoneToBuffer(int x, int y, Go::Colo
     stone->setOpacity(1.0);
 
     if (number){
-        number->show();
+        if (showMoveNumber){
+            number->show();
+        }
+        else
+            number->hide();
         number->setText( QString::number(moveNumber) );
     }
 
@@ -1330,6 +1342,16 @@ void BoardWidget::back(int step){
 */
 void BoardWidget::setEditMode(EditMode::Mode editMode_){
     editMode = editMode_;
+}
+
+void BoardWidget::setShowMoveNumber(bool show){
+    showMoveNumber = show;
+    createBuffer(false);
+}
+
+void BoardWidget::setResetMoveNumberInBranch(bool reset){
+    resetMoveNumberInBranch = reset;
+    createBuffer(false);
 }
 
 /**
