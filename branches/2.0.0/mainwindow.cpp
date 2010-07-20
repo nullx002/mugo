@@ -243,6 +243,8 @@ void MainWindow::createMenu(){
     moveAnnotationGroup->addAction(ui->actionInterestingMove);
 
     // View -> Move Number
+    ui->viewToolBar->insertAction(ui->actionBranchMode, ui->menuMoveNumber->menuAction());
+    ui->menuMoveNumber->setIcon(QIcon(":/res/showmovenumber.png"));
     QActionGroup* moveNumberGroup = new QActionGroup(this);
     moveNumberGroup->addAction(ui->actionNoMoveNumber);
     moveNumberGroup->addAction(ui->actionLast1Move);
@@ -257,6 +259,7 @@ void MainWindow::createMenu(){
     ui->menuToolbars->addAction( ui->fileToolBar->toggleViewAction() );
     ui->menuToolbars->addAction( ui->editToolBar->toggleViewAction() );
     ui->menuToolbars->addAction( ui->navigationToolBar->toggleViewAction() );
+    ui->menuToolbars->addAction( ui->viewToolBar->toggleViewAction() );
     ui->menuToolbars->addAction( ui->collectionToolBar->toggleViewAction() );
 
     // window (dock view)
@@ -2368,6 +2371,20 @@ void MainWindow::on_actionAllMoves_triggered(){
         return;
 
     board->setShowMoveNumberCount(-1);
+}
+
+/**
+  Slot
+  View -> Show Coordinate
+*/
+void MainWindow::on_actionShow_Coordinate_triggered(){
+}
+
+/**
+  Slot
+  View -> Show Coordinate With I
+*/
+void MainWindow::on_actionShow_Coordinate_With_I_triggered(){
 }
 
 /**

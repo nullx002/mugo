@@ -47,5 +47,7 @@
         <file>res/nextbranch.png</file>
         <file>res/jumptonumber.png</file>
         <file>res/jumptoclicked.png</file>
+        <file>res/showmovenumber.png</file>
+        <file>res/branchmode.png</file>
     </qresource>
 </RCC>

@@ -299,6 +299,10 @@
      <addaction name="actionAllMoves"/>
     </widget>
     <addaction name="menuMoveNumber"/>
+    <addaction name="actionBranchMode"/>
+    <addaction name="separator"/>
+    <addaction name="actionShow_Coordinate"/>
+    <addaction name="actionShow_Coordinate_With_I"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -323,6 +327,18 @@
    <addaction name="actionExportBoardAsImage"/>
    <addaction name="separator"/>
    <addaction name="actionGameInformation"/>
+  </widget>
+  <widget class="QToolBar" name="viewToolBar">
+   <property name="windowTitle">
+    <string>View Toolbar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionBranchMode"/>
   </widget>
   <widget class="QToolBar" name="collectionToolBar">
    <property name="windowTitle">
@@ -1388,6 +1404,34 @@
    </property>
    <property name="text">
     <string>All Moves</string>
+   </property>
+  </action>
+  <action name="actionBranchMode">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="mugo.qrc">
+     <normaloff>:/res/branchmode.png</normaloff>:/res/branchmode.png</iconset>
+   </property>
+   <property name="text">
+    <string>Branch Mode</string>
+   </property>
+  </action>
+  <action name="actionShow_Coordinate">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Coordinate</string>
+   </property>
+  </action>
+  <action name="actionShow_Coordinate_With_I">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Coordinate With I</string>
    </property>
   </action>
   <action name="actionNextTab">
