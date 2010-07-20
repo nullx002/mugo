@@ -209,6 +209,7 @@ private slots:
     void on_actionJumpToClicked_triggered(bool checked);
 
     // View Menu
+    void on_actionMoveNumber_triggered();
     void on_actionShowMoveNumber_triggered(bool checked);
     void on_actionResetMoveNumberInBranch_triggered(bool checked);
     void on_actionNoMoveNumber_triggered();

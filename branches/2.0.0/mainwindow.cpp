@@ -245,6 +245,8 @@ void MainWindow::createMenu(){
     // View -> Move Number
     ui->viewToolBar->insertAction(ui->actionBranchMode, ui->menuMoveNumber->menuAction());
     ui->menuMoveNumber->setIcon(QIcon(":/res/showmovenumber.png"));
+    ui->menuMoveNumber->menuAction()->setCheckable(true);
+    connect(ui->menuMoveNumber->menuAction(), SIGNAL(triggered()), SLOT(on_actionMoveNumber_triggered()));
     QActionGroup* moveNumberGroup = new QActionGroup(this);
     moveNumberGroup->addAction(ui->actionNoMoveNumber);
     moveNumberGroup->addAction(ui->actionLast1Move);
@@ -1021,6 +1023,7 @@ void MainWindow::updateMenu(){
     ui->actionJumpToClicked->setChecked(board->isJumpToClicked());
 
     // View -> Show Move Number
+    ui->menuMoveNumber->menuAction()->setChecked(board->getShowMoveNumber());
     ui->actionShowMoveNumber->setChecked(board->getShowMoveNumber());
 
     // View -> Reset Move Number In Branch
@@ -2249,9 +2252,19 @@ void MainWindow::on_actionJumpToClicked_triggered(bool checked){
 
 /**
   Slot
+  View -> Move Number -> Move Number
+*/
+void MainWindow::on_actionMoveNumber_triggered(){
+    ui->actionShowMoveNumber->trigger();
+}
+
+/**
+  Slot
   View -> Move Number -> Show Move Number
 */
 void MainWindow::on_actionShowMoveNumber_triggered(bool checked){
+    ui->menuMoveNumber->menuAction()->setChecked(checked);
+
     BoardWidget* board = currentBoard();
     if (board == NULL)
         return;
