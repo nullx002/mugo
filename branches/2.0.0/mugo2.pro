@@ -16,7 +16,11 @@ SOURCES += main.cpp \
     command.cpp \
     gameinformationdialog.cpp \
     exportasciidialog.cpp \
-    newdocumentdialog.cpp
+    newdocumentdialog.cpp \
+    libkombilo/search.cpp \
+    sqlite3/sqlite3.c \
+    libkombilo/abstractboard.cpp \
+    libkombilo/sgfparser.cpp
 HEADERS += mainwindow.h \
     boardwidget.h \
     document.h \
@@ -27,7 +31,11 @@ HEADERS += mainwindow.h \
     command.h \
     gameinformationdialog.h \
     exportasciidialog.h \
-    newdocumentdialog.h
+    newdocumentdialog.h \
+    libkombilo/search.h \
+    sqlite3/sqlite3.h \
+    libkombilo/abstractboard.h \
+    libkombilo/sgfparser.h
 FORMS += mainwindow.ui \
     gameinformationdialog.ui \
     exportasciidialog.ui \
@@ -37,4 +45,6 @@ win32:RC_FILE = mugo.rc
 mac:RC_FILE = pics/mugo.icns
 TRANSLATIONS += mugo.ja_JP.ts \
     mugo_mac.ja_JP.ts
-win32:INCLUDEPATH += c:\libs
+win32:INCLUDEPATH += c:\libs\
+    .\libkombilo\
+    .\sqlite3
