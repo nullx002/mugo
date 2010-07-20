@@ -242,6 +242,17 @@ void MainWindow::createMenu(){
     moveAnnotationGroup->addAction(ui->actionDoubtfulMove);
     moveAnnotationGroup->addAction(ui->actionInterestingMove);
 
+    // View -> Move Number
+    QActionGroup* moveNumberGroup = new QActionGroup(this);
+    moveNumberGroup->addAction(ui->actionNoMoveNumber);
+    moveNumberGroup->addAction(ui->actionLast1Move);
+    moveNumberGroup->addAction(ui->actionLast2Moves);
+    moveNumberGroup->addAction(ui->actionLast5Moves);
+    moveNumberGroup->addAction(ui->actionLast10Moves);
+    moveNumberGroup->addAction(ui->actionLast20Moves);
+    moveNumberGroup->addAction(ui->actionLast50Moves);
+    moveNumberGroup->addAction(ui->actionAllMoves);
+
     // window -> toolbars menu
     ui->menuToolbars->addAction( ui->fileToolBar->toggleViewAction() );
     ui->menuToolbars->addAction( ui->editToolBar->toggleViewAction() );
@@ -1011,6 +1022,34 @@ void MainWindow::updateMenu(){
 
     // View -> Reset Move Number In Branch
     ui->actionResetMoveNumberInBranch->setChecked(board->getResetMoveNumberInBranch());
+
+    // View -> Move Number
+    switch(board->getShowMoveNumberCount()){
+        case -1:
+            ui->actionAllMoves->setChecked(true);
+            break;
+        case 0:
+            ui->actionNoMoveNumber->setChecked(true);
+            break;
+        case 1:
+            ui->actionLast1Move->setChecked(true);
+            break;
+        case 2:
+            ui->actionLast2Moves->setChecked(true);
+            break;
+        case 5:
+            ui->actionLast5Moves->setChecked(true);
+            break;
+        case 10:
+            ui->actionLast10Moves->setChecked(true);
+            break;
+        case 20:
+            ui->actionLast20Moves->setChecked(true);
+            break;
+        case 50:
+            ui->actionLast50Moves->setChecked(true);
+            break;
+    }
 }
 
 
@@ -2207,7 +2246,7 @@ void MainWindow::on_actionJumpToClicked_triggered(bool checked){
 
 /**
   Slot
-  View -> Show Move Number
+  View -> Move Number -> Show Move Number
 */
 void MainWindow::on_actionShowMoveNumber_triggered(bool checked){
     BoardWidget* board = currentBoard();
@@ -2222,7 +2261,7 @@ void MainWindow::on_actionShowMoveNumber_triggered(bool checked){
 
 /**
   Slot
-  View -> Reset Move Number in Branch
+  View -> Move Number -> Reset Move Number in Branch
 */
 void MainWindow::on_actionResetMoveNumberInBranch_triggered(bool checked){
     BoardWidget* board = currentBoard();
@@ -2233,6 +2272,102 @@ void MainWindow::on_actionResetMoveNumberInBranch_triggered(bool checked){
 
     QSettings settings;
     settings.setValue("marker/resetMoveNumberInBranch", checked);
+}
+
+/**
+  Slot
+  View -> Move Number -> No Move Number
+*/
+void MainWindow::on_actionNoMoveNumber_triggered(){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    board->setShowMoveNumberCount(0);
+}
+
+/**
+  Slot
+  View -> Move Number -> Last 1 Move
+*/
+void MainWindow::on_actionLast1Move_triggered(){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    board->setShowMoveNumberCount(1);
+}
+
+/**
+  Slot
+  View -> Move Number -> Last 2 Moves
+*/
+void MainWindow::on_actionLast2Moves_triggered(){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    board->setShowMoveNumberCount(2);
+}
+
+/**
+  Slot
+  View -> Move Number -> Last 5 Moves
+*/
+void MainWindow::on_actionLast5Moves_triggered(){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    board->setShowMoveNumberCount(5);
+}
+
+/**
+  Slot
+  View -> Move Number -> Last 10 Moves
+*/
+void MainWindow::on_actionLast10Moves_triggered(){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    board->setShowMoveNumberCount(10);
+}
+
+/**
+  Slot
+  View -> Move Number -> Last 20 Moves
+*/
+void MainWindow::on_actionLast20Moves_triggered(){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    board->setShowMoveNumberCount(20);
+}
+
+/**
+  Slot
+  View -> Move Number -> Last 50 Moves
+*/
+void MainWindow::on_actionLast50Moves_triggered(){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    board->setShowMoveNumberCount(50);
+}
+
+/**
+  Slot
+  View -> Move Number -> All Moves
+*/
+void MainWindow::on_actionAllMoves_triggered(){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    board->setShowMoveNumberCount(-1);
 }
 
 /**

@@ -37,11 +37,11 @@ using std::pair;
 using std::make_pair;
 using std::stack;
 
-#if defined(_MSC_VER) || defined(__MINGW32__)
+//#if defined(_MSC_VER) || defined(__MINGW32__)
 #include <algorithm>
-#else
+//#else
 using std::sort;
-#endif
+//#endif
 
 SnapshotVector::SnapshotVector() : vector<unsigned char>() {
   current = begin();

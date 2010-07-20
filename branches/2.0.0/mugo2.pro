@@ -45,6 +45,6 @@ win32:RC_FILE = mugo.rc
 mac:RC_FILE = pics/mugo.icns
 TRANSLATIONS += mugo.ja_JP.ts \
     mugo_mac.ja_JP.ts
-win32:INCLUDEPATH += c:\libs\
-    .\libkombilo\
+INCLUDEPATH += .\libkombilo
+win32:INCLUDEPATH += c:\libs \
     .\sqlite3

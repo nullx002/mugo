@@ -162,6 +162,7 @@ BoardWidget::BoardWidget(SgfDocument* doc, QWidget *parent)
     , jumpToClicked(false)
     , showMoveNumber(true)
     , resetMoveNumberInBranch(false)
+    , showMoveNumberCount(-1)
 {
 //    connect(document_, SIGNAL(nodeAdded(Go::NodePtr)), SLOT(on_sgfdocument_nodeAdded(Go::NodePtr)));
     connect(document_, SIGNAL(nodeDeleted(Go::NodePtr, bool)), SLOT(on_sgfdocument_nodeDeleted(Go::NodePtr, bool)));
@@ -623,6 +624,7 @@ void BoardWidget::createBuffer(bool erase){
     moveNumber = 0;
     capturedBlack = 0;
     capturedWhite = 0;
+    showNumbers.clear();
     Go::NodeList::iterator node = currentNodeList.begin();
     QList<QGraphicsItem*>::iterator iter_stone = stones.begin();
     QList< QList<QGraphicsItem*> >::iterator  iter_bstones = blackStones.begin();
@@ -645,6 +647,7 @@ void BoardWidget::createBuffer(bool erase){
                     resetMoveNumber = true;
             }
             if (resetMoveNumber){
+                showNumbers.clear();
                 moveNumber = (*node)->moveNumber ? (*node)->moveNumber : 1;
                 QList<QGraphicsSimpleTextItem*>::iterator number = iter_number;
                 while(true){
@@ -933,6 +936,11 @@ BoardWidget::TerritoryInfo& BoardWidget::addStoneToBuffer(int x, int y, Go::Colo
     if (number){
         if (showMoveNumber){
             number->show();
+            showNumbers.push_back(number);
+            if (showMoveNumberCount >= 0 && showNumbers.size() > showMoveNumberCount){
+                showNumbers.front()->hide();
+                showNumbers.pop_front();
+            }
         }
         else
             number->hide();
@@ -1344,13 +1352,27 @@ void BoardWidget::setEditMode(EditMode::Mode editMode_){
     editMode = editMode_;
 }
 
+/**
+  set show move number
+*/
 void BoardWidget::setShowMoveNumber(bool show){
     showMoveNumber = show;
     createBuffer(false);
 }
 
+/**
+  set reset move number in branch
+*/
 void BoardWidget::setResetMoveNumberInBranch(bool reset){
     resetMoveNumberInBranch = reset;
+    createBuffer(false);
+}
+
+/**
+  set show move number count
+*/
+void BoardWidget::setShowMoveNumberCount(int cnt){
+    showMoveNumberCount = cnt;
     createBuffer(false);
 }
 

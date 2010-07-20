@@ -87,12 +87,14 @@ public:
     void setJumpToClicked(bool flag){ jumpToClicked = flag; }
     void setShowMoveNumber(bool show);
     void setResetMoveNumberInBranch(bool reset);
+    void setShowMoveNumberCount(int cnt);
 
     // get edit mode
     EditMode::Mode getEditMode() const{ return editMode; }
     bool isJumpToClicked() const{ return jumpToClicked; }
     bool getShowMoveNumber() const{ return showMoveNumber; }
     bool getResetMoveNumberInBranch() const{ return resetMoveNumberInBranch; }
+    int  getShowMoveNumberCount() const{ return showMoveNumberCount; }
 
     // add
     void addItem(Go::NodePtr parent, Go::NodePtr node, int index);
@@ -182,6 +184,7 @@ private:
     QList< QList<QGraphicsRectItem*> > dims;
     QList< QList<GraphicsArrowItem*> > lines;
     QList<QGraphicsSimpleTextItem*> numbers;
+    QList<QGraphicsSimpleTextItem*> showNumbers;
     BoardBuffer boardBuffer;
     int moveNumber;
     int capturedBlack;
@@ -190,6 +193,7 @@ private:
     bool jumpToClicked;
     bool showMoveNumber;
     bool resetMoveNumberInBranch;
+    int  showMoveNumberCount;
 };
 
 #endif // BOARDWIDGET_H
