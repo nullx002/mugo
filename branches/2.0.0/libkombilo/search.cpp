@@ -37,7 +37,7 @@ using std::pair;
 using std::make_pair;
 using std::stack;
 
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) || defined(__MINGW32__)
 #include <algorithm>
 #else
 using std::sort;
@@ -2599,7 +2599,7 @@ int Algo_hash_full::search(PatternList& patternList, GameList& gl, SearchOptions
     if (hashCode == NOT_HASHABLE) return -1; // failure
 
     char sql[100];
-#if (defined(__BORLANDC__) || defined(_MSC_VER))
+#if (defined(__BORLANDC__) || defined(_MSC_VER) || defined(__MINGW32__))
     sprintf(sql, "select gameid,hit from algo_hash_full_%d where hash = %I64d", boardsize, hashCode);
 #else
     sprintf(sql, "select gameid,hit from algo_hash_full_%d where hash = %lld", boardsize, hashCode);
@@ -2859,7 +2859,7 @@ int Algo_hash::search(PatternList& patternList, GameList& gl, SearchOptions& opt
   int fl = patternList.data[hco.second].flip;
   int fl2 = fl;
   char buf[100];
-#if (defined(__BORLANDC__) || defined(_MSC_VER))
+#if (defined(__BORLANDC__) || defined(_MSC_VER) || defined(__MINGW32__))
   sprintf(buf, "select gameid,position,hash from algo_hash_%d_%s where hash = %I64d", 
       boardsize, dbnameext.c_str(), hashCode);
 #else
@@ -2880,7 +2880,7 @@ int Algo_hash::search(PatternList& patternList, GameList& gl, SearchOptions& opt
     fl2 = patternList.data[hco.second].flip;
 
     if (hashCode != hashCode2) {
-#if (defined(__BORLANDC__) || defined(_MSC_VER))
+#if (defined(__BORLANDC__) || defined(_MSC_VER) || defined(__MINGW32__))
       sprintf(buf, " or hash = %I64d", hashCode2);
 #else
       sprintf(buf, " or hash = %lld", hashCode2);
@@ -4687,7 +4687,7 @@ void GameList::start_processing(int PROCESSVARIATIONS) throw(DBError) {
 
   createGamesDB();
 
-  char* sql = "begin transaction;";
+  const char* sql = "begin transaction;";
   rc = sqlite3_exec(db, sql, 0, 0, 0);
   if (rc) { throw DBError(); }
   rc = sqlite3_exec(algo_db1, sql, 0, 0, 0);
