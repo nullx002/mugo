@@ -341,7 +341,7 @@ void MainWindow::setStatusBarWidget(){
     if (board == NULL)
         return;
 
-    moveNumberLabel->setText( tr("Last Move: %1 (%2)").arg(board->getMoveNumber()).arg(board->document()->positionString(board->getCurrentNode(), false)) );
+    moveNumberLabel->setText( tr("Last Move: %1 (%2)").arg(board->getMoveNumber()).arg(board->document()->positionString(board->getCurrentNode())) );
     capturedLabel->setText( tr("Prisoners: White %1 Black %2").arg(board->getCapturedWhite()).arg(board->getCapturedBlack()) );
 }
 
@@ -776,7 +776,7 @@ QString MainWindow::getBranchItemText(BoardWidget* board, Go::NodePtr node){
     if (node->isStone() && node->isPass())
         str = tr("Pass");
     else if (node->isStone())
-        str = board->document()->positionString(node, false);
+        str = board->document()->positionString(node);
 
     // node name
     if (node->name.isEmpty() == false)
@@ -1056,6 +1056,12 @@ void MainWindow::updateMenu(){
             ui->actionLast50Moves->setChecked(true);
             break;
     }
+
+    // View -> Show Coordinate
+    ui->actionShowCoordinate->setChecked( board->getShowCoordinate() );
+
+    // View -> Show Coordinate WIth I
+    ui->actionShowCoordinateWithI->setChecked( board->getShowCoordinateWithI() );
 }
 
 
@@ -2390,14 +2396,24 @@ void MainWindow::on_actionAllMoves_triggered(){
   Slot
   View -> Show Coordinate
 */
-void MainWindow::on_actionShow_Coordinate_triggered(){
+void MainWindow::on_actionShowCoordinate_triggered(bool checked){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    board->setShowCoordinate(checked);
 }
 
 /**
   Slot
   View -> Show Coordinate With I
 */
-void MainWindow::on_actionShow_Coordinate_With_I_triggered(){
+void MainWindow::on_actionShowCoordinateWithI_triggered(bool checked){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    board->setShowCoordinateWithI(checked);
 }
 
 /**

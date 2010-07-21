@@ -24,6 +24,7 @@
 SgfDocument::SgfDocument(QTextCodec* codec, QObject* parent)
     : Document(codec, parent)
     , lineWidth(50)
+    , showCoordinateWithI(false)
 {
     Go::NodePtr node = Go::createInformationNode(Go::NodePtr());
     gameList.push_back(node);

@@ -163,6 +163,7 @@ BoardWidget::BoardWidget(SgfDocument* doc, QWidget *parent)
     , showMoveNumber(true)
     , resetMoveNumberInBranch(false)
     , showMoveNumberCount(-1)
+    , showCoordinate(true)
 {
 //    connect(document_, SIGNAL(nodeAdded(Go::NodePtr)), SLOT(on_sgfdocument_nodeAdded(Go::NodePtr)));
     connect(document_, SIGNAL(nodeDeleted(Go::NodePtr, bool)), SLOT(on_sgfdocument_nodeDeleted(Go::NodePtr, bool)));
@@ -338,41 +339,8 @@ void BoardWidget::setCurrentGame(Go::NodePtr game, bool forceChange){
     gameInformation = currentGame->getInformation();
     currentNodeList.clear();
 
-    // delete lines and stars
-    qDeleteAll(hLines);
-    hLines.clear();
-
-    qDeleteAll(vLines);
-    vLines.clear();
-
-    qDeleteAll(stars);
-    stars.clear();
-
-    // create lines
-    int xsize = gameInformation->xsize;
-    int ysize = gameInformation->ysize;
-    for (int y=0; y<ysize; ++y){
-        QGraphicsLineItem* item = scene->addLine(0, 0, 0, 0, QPen(Qt::black));
-        item->setZValue(2);
-        hLines.push_back(item);
-    }
-    for (int x=0; x<xsize; ++x){
-        QGraphicsLineItem* item = scene->addLine(0, 0, 0, 0, QPen(Qt::black));
-        item->setZValue(2);
-        vLines.push_back(item);
-    }
-
-    // create stars
-    QList<int> xpos, ypos;
-    getStarPosition(xpos, ypos);
-    for (int y=0; y<ypos.size(); ++y)
-        for (int x=0; x<xpos.size(); ++x){
-            QGraphicsEllipseItem* item = scene->addEllipse(x, y, 2, 2, QPen(Qt::black), QBrush(Qt::black));
-            item->setZValue(2);
-            stars.push_back(item);
-        }
-
-    setItemsPosition();
+    // create board items(board, shadow, lines, coordinate)
+    createBoard();
 
     emit currentGameChanged(currentGame);
 
@@ -399,14 +367,96 @@ void BoardWidget::setCurrentNode(Go::NodePtr node, bool forceChange){
 }
 
 /**
+  create board
+*/
+void BoardWidget::createBoard(){
+    // delete lines and stars
+    qDeleteAll(hLines);
+    qDeleteAll(vLines);
+    hLines.clear();
+    vLines.clear();
+
+    qDeleteAll(stars);
+    stars.clear();
+
+    qDeleteAll(coordinateLeft);
+    qDeleteAll(coordinateRight);
+    qDeleteAll(coordinateTop);
+    qDeleteAll(coordinateBottom);
+    coordinateLeft.clear();
+    coordinateRight.clear();
+    coordinateTop.clear();
+    coordinateBottom.clear();
+
+    // create lines
+    int xsize = gameInformation->xsize;
+    int ysize = gameInformation->ysize;
+    for (int y=0; y<ysize; ++y){
+        QGraphicsLineItem* item = scene->addLine(0, 0, 0, 0, QPen(Qt::black));
+        item->setZValue(2);
+        hLines.push_back(item);
+    }
+    for (int x=0; x<xsize; ++x){
+        QGraphicsLineItem* item = scene->addLine(0, 0, 0, 0, QPen(Qt::black));
+        item->setZValue(2);
+        vLines.push_back(item);
+    }
+
+    // create stars
+    QList<int> xpos, ypos;
+    getStarPosition(xpos, ypos);
+    for (int y=0; y<ypos.size(); ++y)
+        for (int x=0; x<xpos.size(); ++x){
+            QGraphicsEllipseItem* item = scene->addEllipse(x, y, 2, 2, QPen(Qt::black), QBrush(Qt::black));
+            item->setZValue(2);
+            stars.push_back(item);
+        }
+
+    // create coordinate
+    for (int i=gameInformation->ysize; i>0; --i){
+        QGraphicsSimpleTextItem* left  = scene->addSimpleText(QString::number(i), QFont("Helvetica", 10));
+        QGraphicsSimpleTextItem* right = scene->addSimpleText(QString::number(i), QFont("Helvetica", 10));
+        left->setZValue(2);
+        right->setZValue(2);
+        coordinateLeft.push_back(left);
+        coordinateRight.push_back(right);
+    }
+    for (int i=0; i<gameInformation->xsize; ++i){
+        int n = i % (document()->showCoordinateWithI ? 26 : 25);
+        if (document()->showCoordinateWithI == false && n > 7)
+            ++n;
+        QGraphicsSimpleTextItem* top    = scene->addSimpleText(QString().sprintf("%c", 'A' + n), QFont("Helvetica", 10));
+        QGraphicsSimpleTextItem* bottom = scene->addSimpleText(QString().sprintf("%c", 'A' + n), QFont("Helvetica", 10));
+        top->setZValue(2);
+        bottom->setZValue(2);
+        coordinateTop.push_back(top);
+        coordinateBottom.push_back(bottom);
+    }
+
+    setItemsPosition();
+}
+
+/**
   set scene items position
 */
 void BoardWidget::setItemsPosition(){
     QRectF r = scene->sceneRect();
 
+    // get coordinate item size
+    qreal coordinateW = 0.0, coordinateH = 0.0;
+    foreach(QGraphicsSimpleTextItem* item, coordinateLeft)
+        coordinateW = qMax(coordinateW, item->boundingRect().width());
+    foreach(QGraphicsSimpleTextItem* item, coordinateTop)
+        coordinateH = qMax(coordinateH, item->boundingRect().width());
+
     // calculate board size
     int width  = r.width();
     int height = r.height();
+    if (showCoordinate){
+        width  -= coordinateW * 2 + 10;
+        height -= coordinateH * 2 + 10;
+    }
+
     int gridW = width  / (gameInformation->xsize + 1);
     int gridH = height / (gameInformation->ysize + 1);
     int gridSize = qMin(gridW, gridH);
@@ -447,6 +497,20 @@ void BoardWidget::setItemsPosition(){
             int yy = hLines[ypos[y]]->line().y1() - 2;
             stars[n]->setRect(xx, yy, 4, 4);
         }
+    }
+
+    // set positions of coordinate
+    for (int i=0; i<gameInformation->ysize; ++i){
+        coordinateLeft[i]->setPos( board->rect().left() - coordinateLeft[i]->boundingRect().width() - (coordinateW - coordinateLeft[i]->boundingRect().width()) / 2 - 4, hLines[i]->line().y1() - coordinateLeft[i]->boundingRect().height() / 2 );
+        coordinateRight[i]->setPos( board->rect().right() + (coordinateW - coordinateLeft[i]->boundingRect().width()) / 2 + 4, hLines[i]->line().y1() - coordinateLeft[i]->boundingRect().height() / 2 );
+        coordinateLeft[i]->setVisible(showCoordinate);
+        coordinateRight[i]->setVisible(showCoordinate);
+    }
+    for (int i=0; i<gameInformation->xsize; ++i){
+        coordinateTop[i]->setPos( vLines[i]->line().x1() - coordinateTop[i]->boundingRect().width() / 2, board->rect().top() - coordinateTop[i]->boundingRect().height() - 4 );
+        coordinateBottom[i]->setPos( vLines[i]->line().x1() - coordinateTop[i]->boundingRect().width() / 2, board->rect().bottom() + 4 );
+        coordinateTop[i]->setVisible(showCoordinate);
+        coordinateBottom[i]->setVisible(showCoordinate);
     }
 
     // set position of stones and move number.
@@ -1374,6 +1438,23 @@ void BoardWidget::setResetMoveNumberInBranch(bool reset){
 void BoardWidget::setShowMoveNumberCount(int cnt){
     showMoveNumberCount = cnt;
     createBuffer(false);
+}
+
+/**
+  set show coordinate
+*/
+void BoardWidget::setShowCoordinate(bool show){
+    showCoordinate = show;
+    setItemsPosition();
+}
+
+/**
+  set show coordinate with i
+*/
+void BoardWidget::setShowCoordinateWithI(bool show){
+    document()->showCoordinateWithI = show;
+    createBoard();
+    document()->modifyGame(currentGame);
 }
 
 /**

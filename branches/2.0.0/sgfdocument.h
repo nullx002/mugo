@@ -50,10 +50,12 @@ public:
     void modifyNode(Go::NodePtr& node, bool needRecreateBoard){ setDirty(); emit nodeModified(node, needRecreateBoard); }
 
     // misc
+    QString positionString(Go::NodePtr node){ return positionString(node, showCoordinateWithI); }
     QString positionString(Go::NodePtr node, bool showI);
 
     Go::NodeList gameList;
     int lineWidth;
+    bool showCoordinateWithI;
 
 signals:
     void nodeAdded(Go::NodePtr node);

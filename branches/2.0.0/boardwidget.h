@@ -20,9 +20,9 @@
 
 #include <QGraphicsView>
 #include "godata.h"
+#include "sgfdocument.h"
 
 
-class SgfDocument;
 class GraphicsArrowItem;
 
 
@@ -82,19 +82,27 @@ public:
     void forward(int step=1);
     void back(int step=1);
 
-    // set edit mode
-    void setEditMode(EditMode::Mode editMode);
-    void setJumpToClicked(bool flag){ jumpToClicked = flag; }
-    void setShowMoveNumber(bool show);
-    void setResetMoveNumberInBranch(bool reset);
-    void setShowMoveNumberCount(int cnt);
-
     // get edit mode
     EditMode::Mode getEditMode() const{ return editMode; }
     bool isJumpToClicked() const{ return jumpToClicked; }
+
+    // set edit mode
+    void setEditMode(EditMode::Mode editMode);
+    void setJumpToClicked(bool flag){ jumpToClicked = flag; }
+
+    // get view mode
     bool getShowMoveNumber() const{ return showMoveNumber; }
     bool getResetMoveNumberInBranch() const{ return resetMoveNumberInBranch; }
     int  getShowMoveNumberCount() const{ return showMoveNumberCount; }
+    bool getShowCoordinate() const{ return showCoordinate; }
+    bool getShowCoordinateWithI() const{ return document()->showCoordinateWithI; }
+
+    // set view mode
+    void setShowMoveNumber(bool show);
+    void setResetMoveNumberInBranch(bool reset);
+    void setShowMoveNumberCount(int cnt);
+    void setShowCoordinate(bool show);
+    void setShowCoordinateWithI(bool show);
 
     // add
     void addItem(Go::NodePtr parent, Go::NodePtr node, int index);
@@ -110,6 +118,9 @@ protected:
     void wheelEvent(QWheelEvent* e);
     void onLButtonDown(QMouseEvent* e);
     void onRButtonDown(QMouseEvent* e);
+
+    // create board
+    void createBoard();
 
     // create buffer
     void createBuffer(bool erase);
@@ -173,6 +184,7 @@ private:
     QGraphicsScene* scene;
     QGraphicsRectItem* board;
     QGraphicsRectItem* shadow;
+    QList<QGraphicsSimpleTextItem*> coordinateLeft, coordinateRight, coordinateTop, coordinateBottom;
     QList<QGraphicsLineItem*> hLines;
     QList<QGraphicsLineItem*> vLines;
     QList<QGraphicsEllipseItem*> stars;
@@ -194,6 +206,7 @@ private:
     bool showMoveNumber;
     bool resetMoveNumberInBranch;
     int  showMoveNumberCount;
+    bool showCoordinate;
 };
 
 #endif // BOARDWIDGET_H

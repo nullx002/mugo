@@ -220,8 +220,8 @@ private slots:
     void on_actionLast20Moves_triggered();
     void on_actionLast50Moves_triggered();
     void on_actionAllMoves_triggered();
-    void on_actionShow_Coordinate_triggered();
-    void on_actionShow_Coordinate_With_I_triggered();
+    void on_actionShowCoordinate_triggered(bool checked);
+    void on_actionShowCoordinateWithI_triggered(bool checked);
 
     // Window Menu
     void on_actionPreviousTab_triggered();

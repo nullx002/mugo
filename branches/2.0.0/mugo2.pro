@@ -18,7 +18,6 @@ SOURCES += main.cpp \
     exportasciidialog.cpp \
     newdocumentdialog.cpp \
     libkombilo/search.cpp \
-    sqlite3/sqlite3.c \
     libkombilo/abstractboard.cpp \
     libkombilo/sgfparser.cpp
 HEADERS += mainwindow.h \
@@ -33,7 +32,6 @@ HEADERS += mainwindow.h \
     exportasciidialog.h \
     newdocumentdialog.h \
     libkombilo/search.h \
-    sqlite3/sqlite3.h \
     libkombilo/abstractboard.h \
     libkombilo/sgfparser.h
 FORMS += mainwindow.ui \
@@ -48,3 +46,6 @@ TRANSLATIONS += mugo.ja_JP.ts \
 INCLUDEPATH += .\libkombilo
 win32:INCLUDEPATH += c:\libs \
     .\sqlite3
+win32:HEADERS += sqlite3/sqlite3.h
+win32:SOURCES += sqlite3/sqlite3.c
+unix:LIBS += -lsqlite3
