@@ -653,46 +653,46 @@ bool MainWindow::closeDocument(Document* doc, bool save, bool closeTab){
   create branch tree widget
 */
 void MainWindow::createBranchWidget(Document* doc){
-    ViewData& view = docManager[doc];
-    view.branchWidget->clear();
-    view.nodeToTreeItem.clear();
+    ViewData& data = docManager[doc];
+    data.branchWidget->clear();
+    data.nodeToTreeItem.clear();
 
     QTreeWidgetItem* dummy = new QTreeWidgetItem(QStringList(""));
-    createBranchWidget( view.boardWidget, dummy, dummy, dummy, Go::NodePtr(), view.boardWidget->getCurrentGame() );
+    createBranchWidget( data, data.boardWidget, dummy, dummy, dummy, Go::NodePtr(), data.boardWidget->getCurrentGame() );
 
     int count = dummy->childCount();
     for (int i=0; i<count; ++i){
         QTreeWidgetItem* item = dummy->child(0);
         dummy->removeChild(item);
-        view.branchWidget->invisibleRootItem()->addChild(item);
+        data.branchWidget->invisibleRootItem()->addChild(item);
     }
     delete dummy;
 
-    if (view.branchWidget->invisibleRootItem()->childCount() > 0)
-        view.branchWidget->setCurrentItem( view.branchWidget->invisibleRootItem()->child(0) );
+    if (data.branchWidget->invisibleRootItem()->childCount() > 0)
+        data.branchWidget->setCurrentItem( data.branchWidget->invisibleRootItem()->child(0) );
 
-    view.branchWidget->setHeaderHidden(true);
-    view.branchWidget->setIndentation(17);
+    data.branchWidget->setHeaderHidden(true);
+    data.branchWidget->setIndentation(17);
 }
 
 /**
   create branch tree widget
 */
 void MainWindow::createBranchWidget(BoardWidget* board, Go::NodePtr node){
-    ViewData& view = docManager[board->document()];
-    QTreeWidgetItem* parent2 = view.nodeToTreeItem[node];
-    QTreeWidgetItem* parent1 = parent2->parent() ? parent2->parent() : view.branchWidget->invisibleRootItem();
+    ViewData& data = docManager[board->document()];
+    QTreeWidgetItem* parent2 = data.nodeToTreeItem[node];
+    QTreeWidgetItem* parent1 = parent2->parent() ? parent2->parent() : data.branchWidget->invisibleRootItem();
 
     foreach(Go::NodePtr childNode, node->childNodes)
-        createBranchWidget(board, view.branchWidget->invisibleRootItem(), parent1, parent2, node, childNode);
+        createBranchWidget(data, board, data.branchWidget->invisibleRootItem(), parent1, parent2, node, childNode);
 }
 
 /**
   create branch tree widget
 */
-void MainWindow::createBranchWidget(BoardWidget* board, QTreeWidgetItem* root, QTreeWidgetItem* parent1, QTreeWidgetItem* parent2, Go::NodePtr parentNode, Go::NodePtr node){
+void MainWindow::createBranchWidget(ViewData& data, BoardWidget* board, QTreeWidgetItem* root, QTreeWidgetItem* parent1, QTreeWidgetItem* parent2, Go::NodePtr parentNode, Go::NodePtr node){
     // create tree item widget
-    QTreeWidgetItem* item = createBranchItem(board, node);
+    QTreeWidgetItem* item = createBranchItem(data, board, node);
     QTreeWidgetItem* currentParent = NULL;
     if (item->parent())
         currentParent = item->parent();
@@ -701,8 +701,14 @@ void MainWindow::createBranchWidget(BoardWidget* board, QTreeWidgetItem* root, Q
 
     Go::NodePtr parent1Node = parent1->data(0, Qt::UserRole).value<Go::NodePtr>();
     QTreeWidgetItem* parentWidget = NULL;
-    int index = 0;
-    if ((!parentNode || parentNode->childNodes.size() == 1) && (parent1Node == NULL || parent1Node->childNodes.size() == 1)){
+    int index = parentNode ? parentNode->childNodes.indexOf(node) : 0;
+    if (index < 0)
+        index = 0;
+
+    bool childCountIsOne = !parentNode || parentNode->childNodes.size() == 1;
+    bool notBranch = (parent1Node == NULL || parent1Node->childNodes.size() == 1);
+    bool firstChild = index == 0;
+    if (((data.branchType == branchMode && childCountIsOne) || (data.branchType == gameMode && firstChild)) && notBranch){
         parentWidget = parent1;
         int parentIndex = parentWidget->indexOfChild(parent2);
         if (parentIndex >= 0)
@@ -723,19 +729,17 @@ void MainWindow::createBranchWidget(BoardWidget* board, QTreeWidgetItem* root, Q
         parentWidget->insertChild(index, item);
 
     foreach(Go::NodePtr childNode, node->childNodes)
-        createBranchWidget(board, root, parentWidget, item, node, childNode);
+        createBranchWidget(data, board, root, parentWidget, item, node, childNode);
 }
 
 /**
   create branch tree item from node
 */
-QTreeWidgetItem* MainWindow::createBranchItem(BoardWidget* board, Go::NodePtr node){
+QTreeWidgetItem* MainWindow::createBranchItem(ViewData& data, BoardWidget* board, Go::NodePtr node){
     // icons
     static QIcon blackIcon(":/res/black_128.png");
     static QIcon whiteIcon(":/res/white_128.png");
     static QIcon greenIcon(":/res/green_64.png");
-
-    ViewData& data = docManager[board->document()];
 
     // if item exist return exist item
     QTreeWidgetItem* item = data.nodeToTreeItem[node];
@@ -2390,6 +2394,21 @@ void MainWindow::on_actionAllMoves_triggered(){
         return;
 
     board->setShowMoveNumberCount(-1);
+}
+
+/**
+  Slot
+  View -> branch mode
+*/
+void MainWindow::on_actionBranchMode_triggered(bool checked){
+    SgfDocument* doc = qobject_cast<SgfDocument*>(currentDocument());
+    if (doc == NULL)
+        return;
+
+    ViewData& data = docManager[doc];
+    data.branchType = checked ? branchMode : gameMode;
+
+    createBranchWidget(doc);
 }
 
 /**

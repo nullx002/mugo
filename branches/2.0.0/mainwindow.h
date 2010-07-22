@@ -96,8 +96,8 @@ protected:
     // branch widget
     void createBranchWidget(Document* doc);
     void createBranchWidget(BoardWidget* board, Go::NodePtr node);
-    void createBranchWidget(BoardWidget* board, QTreeWidgetItem* root, QTreeWidgetItem* parent1, QTreeWidgetItem* parent2, Go::NodePtr parentNode, Go::NodePtr node);
-    QTreeWidgetItem* createBranchItem(BoardWidget* board, Go::NodePtr node);
+    void createBranchWidget(ViewData& data, BoardWidget* board, QTreeWidgetItem* root, QTreeWidgetItem* parent1, QTreeWidgetItem* parent2, Go::NodePtr parentNode, Go::NodePtr node);
+    QTreeWidgetItem* createBranchItem(ViewData& data, BoardWidget* board, Go::NodePtr node);
     QString getBranchItemText(BoardWidget* board, Go::NodePtr node);
     void removeBranchItem(QTreeWidgetItem* parent, NodeTreeMap& map, Go::NodePtr node);
 
@@ -220,6 +220,7 @@ private slots:
     void on_actionLast20Moves_triggered();
     void on_actionLast50Moves_triggered();
     void on_actionAllMoves_triggered();
+    void on_actionBranchMode_triggered(bool checked);
     void on_actionShowCoordinate_triggered(bool checked);
     void on_actionShowCoordinateWithI_triggered(bool checked);
 
