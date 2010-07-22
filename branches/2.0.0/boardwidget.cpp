@@ -161,7 +161,7 @@ BoardWidget::BoardWidget(SgfDocument* doc, QWidget *parent)
     , editMode(EditMode::alternateMove)
     , jumpToClicked(false)
     , showMoveNumber(true)
-    , resetMoveNumberInBranch(false)
+    , resetMoveNumberMode(ResetMoveNumber::noReset)
     , showMoveNumberCount(-1)
     , showCoordinate(true)
 {
@@ -704,9 +704,11 @@ void BoardWidget::createBuffer(bool erase){
 
         if ( inBoard(*node) ){
             // reset move number
+            Go::NodePtr parent = (*node)->parent();
+            bool isBranch = parent && parent->childNodes.size() > 1;
+            bool notFirstChild = parent && parent->childNodes.indexOf(*node) > 0;
             bool resetMoveNumber = (*node)->moveNumber > 0;
-            if (resetMoveNumberInBranch){
-                Go::NodePtr parent = (*node)->parent();
+            if ((isBranch && resetMoveNumberMode == ResetMoveNumber::allBranch) || (notFirstChild && resetMoveNumberMode != ResetMoveNumber::noReset)){
                 if (parent && parent->childNodes.size() > 1)
                     resetMoveNumber = true;
             }
@@ -1427,8 +1429,8 @@ void BoardWidget::setShowMoveNumber(bool show){
 /**
   set reset move number in branch
 */
-void BoardWidget::setResetMoveNumberInBranch(bool reset){
-    resetMoveNumberInBranch = reset;
+void BoardWidget::setResetMoveNumberMode(ResetMoveNumber::Mode mode){
+    resetMoveNumberMode = mode;
     createBuffer(false);
 }
 

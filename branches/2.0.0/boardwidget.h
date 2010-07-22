@@ -37,6 +37,10 @@ public:
         enum Mode{ alternateMove, addBlack, addWhite, addEmpty, addLabel, addLabelManually, addCircle, addCross, addTriangle, addSquare, removeMarker };
     };
 
+    struct ResetMoveNumber{
+        enum Mode{ noReset, branch, allBranch };
+    };
+
     class TerritoryInfo{
         public:
             TerritoryInfo() : color(Go::empty), territory(Go::empty), moveNumber(0), stone(NULL), mark(NULL), dim(NULL), number(NULL){}
@@ -92,14 +96,14 @@ public:
 
     // get view mode
     bool getShowMoveNumber() const{ return showMoveNumber; }
-    bool getResetMoveNumberInBranch() const{ return resetMoveNumberInBranch; }
+    ResetMoveNumber::Mode getResetMoveNumberMode() const{ return resetMoveNumberMode; }
     int  getShowMoveNumberCount() const{ return showMoveNumberCount; }
     bool getShowCoordinate() const{ return showCoordinate; }
     bool getShowCoordinateWithI() const{ return document()->showCoordinateWithI; }
 
     // set view mode
     void setShowMoveNumber(bool show);
-    void setResetMoveNumberInBranch(bool reset);
+    void setResetMoveNumberMode(ResetMoveNumber::Mode mode);
     void setShowMoveNumberCount(int cnt);
     void setShowCoordinate(bool show);
     void setShowCoordinateWithI(bool show);
@@ -204,7 +208,7 @@ private:
     EditMode::Mode editMode;
     bool jumpToClicked;
     bool showMoveNumber;
-    bool resetMoveNumberInBranch;
+    ResetMoveNumber::Mode resetMoveNumberMode;
     int  showMoveNumberCount;
     bool showCoordinate;
 };

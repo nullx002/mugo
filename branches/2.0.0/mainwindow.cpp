@@ -1037,7 +1037,7 @@ void MainWindow::updateMenu(){
     ui->actionShowMoveNumber->setChecked(board->getShowMoveNumber());
 
     // View -> Reset Move Number In Branch
-    ui->actionResetMoveNumberInBranch->setChecked(board->getResetMoveNumberInBranch());
+    ui->actionResetMoveNumberInBranch->setChecked(board->getResetMoveNumberMode() != BoardWidget::ResetMoveNumber::noReset);
 
     // View -> Move Number
     switch(board->getShowMoveNumberCount()){
@@ -2303,7 +2303,15 @@ void MainWindow::on_actionResetMoveNumberInBranch_triggered(bool checked){
     if (board == NULL)
         return;
 
-    board->setResetMoveNumberInBranch(checked);
+    SgfDocument* doc = board->document();
+    ViewData& data = docManager[doc];
+
+    if (checked)
+        board->setResetMoveNumberMode( data.branchType == gameMode ? BoardWidget::ResetMoveNumber::branch : BoardWidget::ResetMoveNumber::allBranch );
+    else
+        board->setResetMoveNumberMode( BoardWidget::ResetMoveNumber::noReset );
+
+    setStatusBarWidget();
 
     QSettings settings;
     settings.setValue("marker/resetMoveNumberInBranch", checked);
@@ -2421,6 +2429,11 @@ void MainWindow::on_actionBranchMode_triggered(bool checked){
     Go::NodePtr currentNode = board->getCurrentNode();
     createBranchWidget(doc);
     board->setCurrentNode(currentNode);
+
+    if (board->getResetMoveNumberMode() != BoardWidget::ResetMoveNumber::noReset)
+        board->setResetMoveNumberMode( data.branchType == gameMode ? BoardWidget::ResetMoveNumber::branch : BoardWidget::ResetMoveNumber::allBranch );
+
+    setStatusBarWidget();
 }
 
 /**
