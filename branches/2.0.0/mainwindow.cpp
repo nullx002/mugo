@@ -563,7 +563,7 @@ void MainWindow::addDocument(SgfDocument* doc, BoardWidget* board)
     // create branch widget
     QTreeWidget* branchWidget = new QTreeWidget;
     view.branchWidget = branchWidget;
-    view.branchType   = branchMode;
+    view.branchType   = gameMode;
 
     // create collection model
     QStandardItemModel* model = new QStandardItemModel;
@@ -705,10 +705,13 @@ void MainWindow::createBranchWidget(ViewData& data, BoardWidget* board, QTreeWid
     if (index < 0)
         index = 0;
 
-    bool childCountIsOne = !parentNode || parentNode->childNodes.size() == 1;
-    bool notBranch = (parent1Node == NULL || parent1Node->childNodes.size() == 1);
-    bool firstChild = index == 0;
-    if (((data.branchType == branchMode && childCountIsOne) || (data.branchType == gameMode && firstChild)) && notBranch){
+    //
+    bool isBranch =
+        (parentNode && data.branchType == branchMode && parentNode->childNodes.size() > 1) ||
+        (parentNode && data.branchType == gameMode && parentNode->childNodes.indexOf(node) > 0) ||
+        (parent1Node && parent1Node->childNodes.size() > 1);
+
+    if (isBranch == false){
         parentWidget = parent1;
         int parentIndex = parentWidget->indexOfChild(parent2);
         if (parentIndex >= 0)
@@ -717,6 +720,8 @@ void MainWindow::createBranchWidget(ViewData& data, BoardWidget* board, QTreeWid
     else if (parentNode->childNodes.empty() == false){
         parentWidget = parent2;
         index = parentNode->childNodes.indexOf(node);
+        if (data.branchType == gameMode && parent1->childCount() > 0 && (parent1Node == NULL || parent1Node->childNodes.size() == 1))
+            --index;
     }
 
     if (currentParent){
@@ -941,6 +946,7 @@ void MainWindow::updateMenu(){
 
     Go::NodePtr game = board->getCurrentGame();
     Go::NodePtr node = board->getCurrentNode();
+    ViewData& data = docManager[board->document()];
 
     // File -> Reload
     QAction* encodingAction = encoding.key( board->document()->getCodec() );
@@ -1060,6 +1066,9 @@ void MainWindow::updateMenu(){
             ui->actionLast50Moves->setChecked(true);
             break;
     }
+
+    // View -> Branch Mode
+    ui->actionBranchMode->setChecked(data.branchType == branchMode);
 
     // View -> Show Coordinate
     ui->actionShowCoordinate->setChecked( board->getShowCoordinate() );
@@ -2401,14 +2410,17 @@ void MainWindow::on_actionAllMoves_triggered(){
   View -> branch mode
 */
 void MainWindow::on_actionBranchMode_triggered(bool checked){
-    SgfDocument* doc = qobject_cast<SgfDocument*>(currentDocument());
-    if (doc == NULL)
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
         return;
+    SgfDocument* doc = board->document();
 
     ViewData& data = docManager[doc];
     data.branchType = checked ? branchMode : gameMode;
 
+    Go::NodePtr currentNode = board->getCurrentNode();
     createBranchWidget(doc);
+    board->setCurrentNode(currentNode);
 }
 
 /**
