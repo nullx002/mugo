@@ -2666,9 +2666,9 @@ void MainWindow::on_boardWidget_currentNodeChanged(Go::NodePtr node){
 
     if (board == currentBoard()){
         ui->commentWidget->setPlainText(node->comment);
-        updateStatusBar();
         updateCaption(false);
         updateMenu();
+        updateStatusBar();
     }
 }
 
@@ -2712,9 +2712,9 @@ void MainWindow::on_boardTabWidget_currentChanged(QWidget* widget)
 
     undoGroup.setActiveStack(boardWidget->document()->getUndoStack());
 
-    updateStatusBar(boardWidget);
     updateCaption(false);
     updateMenu();
+    updateStatusBar(boardWidget);
 }
 
 /**
