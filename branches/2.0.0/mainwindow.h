@@ -71,7 +71,6 @@ protected:
     BoardWidget* currentBoard();
     Document* currentDocument();
     void setKeyboardShortcut();
-    void setStatusBarWidget();
     void createMenu();
     void createEncodingAction();
 
@@ -105,6 +104,7 @@ protected:
     void createCollectionModel(const Go::NodeList& gameList, QStandardItemModel* model);
     void createCollectionModelRow(const Go::NodePtr& game, QList<QStandardItem*>& items);
 
+    void updateStatusBar(BoardWidget* board=NULL);
     void updateCaption(bool updateTab);
     void updateMenu();
 
@@ -115,6 +115,7 @@ private:
     Ui::MainWindow *ui;
     QUndoGroup undoGroup;
     QActionGroup* editGroup;
+    QActionGroup* encodingGroup;
     QActionGroup* tabChangeGroup;
     QMap<QAction*, QTextCodec*> encoding;
     DocumentManager docManager;
@@ -123,6 +124,7 @@ private:
     int downloadID;
     QUrl downloadURL;
     bool downloadNewTab;
+    QLabel* encodingLabel;
     QLabel* moveNumberLabel;
     QLabel* capturedLabel;
     int sgfLineWidth;

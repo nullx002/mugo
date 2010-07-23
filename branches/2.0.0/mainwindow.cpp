@@ -82,6 +82,11 @@ MainWindow::MainWindow(const QString& fname, QWidget *parent)
     capturedLabel->setToolTip(tr("Captured"));
     ui->statusBar->addPermanentWidget(capturedLabel, 0);
 
+    encodingLabel = new QLabel;
+    encodingLabel ->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
+    encodingLabel ->setToolTip(tr("Encoding"));
+    ui->statusBar->addPermanentWidget(encodingLabel, 0);
+
     // window settings
     restoreGeometry( settings.value("mainwindowGeometry").toByteArray() );
     restoreState( settings.value("docksState").toByteArray() );
@@ -320,7 +325,7 @@ void MainWindow::createEncodingAction(){
 
     QList<QAction*> actions;
     QList<QTextCodec*> codecs;
-    QActionGroup* encodingGroup = new QActionGroup(this);
+    encodingGroup = new QActionGroup(this);
     foreach(QAction* act, ui->menuReload->actions()){
         encodingGroup->addAction(act);
         connect(act, SIGNAL(triggered()), SLOT(on_actionReload_triggered()));
@@ -336,13 +341,16 @@ void MainWindow::createEncodingAction(){
 /**
   set statusbar widget
 */
-void MainWindow::setStatusBarWidget(){
-    BoardWidget* board = currentBoard();
-    if (board == NULL)
-        return;
+void MainWindow::updateStatusBar(BoardWidget* board){
+    if (board == NULL){
+        board = currentBoard();
+        if (board == NULL)
+            return;
+    }
 
     moveNumberLabel->setText( tr("Last Move: %1 (%2)").arg(board->getMoveNumber()).arg(board->document()->positionString(board->getCurrentNode())) );
     capturedLabel->setText( tr("Prisoners: White %1 Black %2").arg(board->getCapturedWhite()).arg(board->getCapturedBlack()) );
+    encodingLabel->setText( encodingGroup->checkedAction()->text() );
 }
 
 /**
@@ -2311,7 +2319,7 @@ void MainWindow::on_actionResetMoveNumberInBranch_triggered(bool checked){
     else
         board->setResetMoveNumberMode( BoardWidget::ResetMoveNumber::noReset );
 
-    setStatusBarWidget();
+    updateStatusBar();
 
     QSettings settings;
     settings.setValue("marker/resetMoveNumberInBranch", checked);
@@ -2433,7 +2441,7 @@ void MainWindow::on_actionBranchMode_triggered(bool checked){
     if (board->getResetMoveNumberMode() != BoardWidget::ResetMoveNumber::noReset)
         board->setResetMoveNumberMode( data.branchType == gameMode ? BoardWidget::ResetMoveNumber::branch : BoardWidget::ResetMoveNumber::allBranch );
 
-    setStatusBarWidget();
+    updateStatusBar();
 }
 
 /**
@@ -2658,11 +2666,10 @@ void MainWindow::on_boardWidget_currentNodeChanged(Go::NodePtr node){
 
     if (board == currentBoard()){
         ui->commentWidget->setPlainText(node->comment);
-        setStatusBarWidget();
+        updateStatusBar();
+        updateCaption(false);
+        updateMenu();
     }
-
-    updateCaption(false);
-    updateMenu();
 }
 
 /**
@@ -2703,12 +2710,9 @@ void MainWindow::on_boardTabWidget_currentChanged(QWidget* widget)
     // comment
     ui->commentWidget->setPlainText(boardWidget->getCurrentNode()->comment);
 
-    // status bar
-    setStatusBarWidget();
-
-
     undoGroup.setActiveStack(boardWidget->document()->getUndoStack());
 
+    updateStatusBar(boardWidget);
     updateCaption(false);
     updateMenu();
 }
