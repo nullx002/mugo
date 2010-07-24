@@ -226,6 +226,9 @@ private slots:
     void on_actionShowCoordinate_triggered(bool checked);
     void on_actionShowCoordinateWithI_triggered(bool checked);
     void on_actionShowMarker_triggered(bool checked);
+    void on_actionNoMarkup_triggered();
+    void on_actionShowChildren_triggered();
+    void on_actionShowSiblings_triggered();
 
     // Window Menu
     void on_actionPreviousTab_triggered();

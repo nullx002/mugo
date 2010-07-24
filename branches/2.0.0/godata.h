@@ -192,8 +192,9 @@ public:
     void setParent(NodePtr node){ parent_ = node; }
 
     // sibling
-    NodePtr previousSibling() const;
-    NodePtr nextSibling() const;
+    NodeList siblings() const;
+    NodePtr  previousSibling() const;
+    NodePtr  nextSibling() const;
 
     // get
     int x() const{ return position.x; }

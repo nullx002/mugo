@@ -298,12 +298,21 @@
      <addaction name="actionLast50Moves"/>
      <addaction name="actionAllMoves"/>
     </widget>
+    <widget class="QMenu" name="menuShowVariations">
+     <property name="title">
+      <string>Show Variations</string>
+     </property>
+     <addaction name="actionNoMarkup"/>
+     <addaction name="actionShowChildren"/>
+     <addaction name="actionShowSiblings"/>
+    </widget>
     <addaction name="menuMoveNumber"/>
     <addaction name="actionBranchMode"/>
     <addaction name="separator"/>
     <addaction name="actionShowCoordinate"/>
     <addaction name="actionShowCoordinateWithI"/>
     <addaction name="actionShowMarker"/>
+    <addaction name="menuShowVariations"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -1444,6 +1453,30 @@
    </property>
    <property name="text">
     <string>Show Marker</string>
+   </property>
+  </action>
+  <action name="actionNoMarkup">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>No Markup</string>
+   </property>
+  </action>
+  <action name="actionShowChildren">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Children</string>
+   </property>
+  </action>
+  <action name="actionShowSiblings">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Siblings</string>
    </property>
   </action>
   <action name="actionNextTab">

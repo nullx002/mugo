@@ -41,6 +41,10 @@ public:
         enum Mode{ noReset, branch, allBranch };
     };
 
+    struct ShowVariations{
+        enum Mode{ noMarkup, children, siblings};
+    };
+
     class TerritoryInfo{
         public:
             TerritoryInfo() : color(Go::empty), territory(Go::empty), moveNumber(0), stone(NULL), mark(NULL), dim(NULL), number(NULL){}
@@ -101,6 +105,7 @@ public:
     bool getShowCoordinate() const{ return showCoordinate; }
     bool getShowCoordinateWithI() const{ return document()->showCoordinateWithI; }
     bool getShowMarker() const{ return showMarker; }
+    ShowVariations::Mode getShowVariations() const{ return showVariations; }
 
     // set view mode
     void setShowMoveNumber(bool show);
@@ -109,6 +114,7 @@ public:
     void setShowCoordinate(bool show);
     void setShowCoordinateWithI(bool show);
     void setShowMarker(bool show);
+    void setShowVariations(ShowVariations::Mode mode);
 
     // add
     void addItem(Go::NodePtr parent, Go::NodePtr node, int index);
@@ -214,6 +220,7 @@ private:
     int  showMoveNumberCount;
     bool showCoordinate;
     bool showMarker;
+    ShowVariations::Mode showVariations;
 };
 
 #endif // BOARDWIDGET_H

@@ -164,6 +164,7 @@ BoardWidget::BoardWidget(SgfDocument* doc, QWidget *parent)
     , showMoveNumberCount(-1)
     , showCoordinate(true)
     , showMarker(true)
+    , showVariations(ShowVariations::children)
 {
 //    connect(document_, SIGNAL(nodeAdded(Go::NodePtr)), SLOT(on_sgfdocument_nodeAdded(Go::NodePtr)));
     connect(document_, SIGNAL(nodeDeleted(Go::NodePtr, bool)), SLOT(on_sgfdocument_nodeDeleted(Go::NodePtr, bool)));
@@ -1466,6 +1467,14 @@ void BoardWidget::setShowCoordinateWithI(bool show){
 */
 void BoardWidget::setShowMarker(bool show){
     showMarker = show;
+    createBuffer(false);
+}
+
+/**
+  set show variations
+*/
+void BoardWidget::setShowVariations(ShowVariations::Mode mode){
+    showVariations = mode;
     createBuffer(false);
 }
 

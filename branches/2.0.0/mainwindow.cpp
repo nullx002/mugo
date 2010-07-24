@@ -262,14 +262,20 @@ void MainWindow::createMenu(){
     moveNumberGroup->addAction(ui->actionLast50Moves);
     moveNumberGroup->addAction(ui->actionAllMoves);
 
-    // window -> toolbars menu
+    // View -> Show Variations
+    QActionGroup* showVariationsGroup = new QActionGroup(this);
+    showVariationsGroup->addAction(ui->actionNoMarkup);
+    showVariationsGroup->addAction(ui->actionShowChildren);
+    showVariationsGroup->addAction(ui->actionShowSiblings);
+
+    // Window -> toolbars menu
     ui->menuToolbars->addAction( ui->fileToolBar->toggleViewAction() );
     ui->menuToolbars->addAction( ui->editToolBar->toggleViewAction() );
     ui->menuToolbars->addAction( ui->navigationToolBar->toggleViewAction() );
     ui->menuToolbars->addAction( ui->viewToolBar->toggleViewAction() );
     ui->menuToolbars->addAction( ui->collectionToolBar->toggleViewAction() );
 
-    // window (dock view)
+    // Window (dock view)
     ui->menuWindow->insertAction( ui->actionPreviousTab, ui->commentDockWidget->toggleViewAction() );
     ui->menuWindow->insertAction( ui->actionPreviousTab, ui->branchDockWidget->toggleViewAction() );
     ui->menuWindow->insertAction( ui->actionPreviousTab, ui->collectionDockWidget->toggleViewAction() );
@@ -1083,6 +1089,14 @@ void MainWindow::updateMenu(){
 
     // View -> Show Coordinate WIth I
     ui->actionShowCoordinateWithI->setChecked( board->getShowCoordinateWithI() );
+
+    // View -> Show Variations
+    if (board->getShowVariations() == BoardWidget::ShowVariations::noMarkup)
+        ui->actionNoMarkup->setChecked(true);
+    else if (board->getShowVariations() == BoardWidget::ShowVariations::children)
+        ui->actionShowChildren->setChecked(true);
+    else if (board->getShowVariations() == BoardWidget::ShowVariations::siblings)
+        ui->actionShowSiblings->setChecked(true);
 
     // View -> Show Marker
     ui->actionShowMarker->setChecked( board->getShowMarker() );
@@ -2481,6 +2495,42 @@ void MainWindow::on_actionShowMarker_triggered(bool checked){
         return;
 
     board->setShowMarker(checked);
+}
+
+/**
+  Slot
+  Viwe -> Show Variations -> No Markup
+*/
+void MainWindow::on_actionNoMarkup_triggered(){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    board->setShowVariations(BoardWidget::ShowVariations::noMarkup);
+}
+
+/**
+  Slot
+  Viwe -> Show Variations -> Show Children
+*/
+void MainWindow::on_actionShowChildren_triggered(){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    board->setShowVariations(BoardWidget::ShowVariations::children);
+}
+
+/**
+  Slot
+  Viwe -> Show Variations -> Show Siblings
+*/
+void MainWindow::on_actionShowSiblings_triggered(){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    board->setShowVariations(BoardWidget::ShowVariations::siblings);
 }
 
 /**

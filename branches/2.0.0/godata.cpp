@@ -196,6 +196,25 @@ GameInformationPtr Node::getInformation() const{
 }
 
 /**
+  get siblings
+*/
+NodeList Node::siblings() const{
+    NodeList nodeList;
+
+    NodePtr p = parent();
+    if (p){
+        NodeList::iterator iter = p->childNodes.begin();
+        while (iter != p->childNodes.end()){
+            if ((*iter).get() != this)
+                nodeList.push_back(*iter);
+            ++iter;
+        }
+    }
+
+    return nodeList;
+}
+
+/**
   get previous sibling
 */
 NodePtr Node::previousSibling() const{
