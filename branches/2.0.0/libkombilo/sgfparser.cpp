@@ -244,16 +244,19 @@ Node::~Node() {
 }
 
 string remove_lowercase(string s) throw(SGFError) {
-  char ID[s.size()+1];
+  char* ID = new char[s.size()+1];
   int IDindex = 0;
   for(unsigned int i=0; i<s.size(); i++) {
     if (65 <= s[i] && s[i] <= 90) ID[IDindex++] = s[i];
     else if (!(97 <= s[i] && s[i] <= 122)) {
+      delete[] ID;
       throw SGFError();
     }
   }
   ID[IDindex] = 0;
-  return string(ID);
+  string ret(ID);
+  delete[] ID;
+  return ret;
 }
 
 vector<string> Node::gpv(const string& prop) {
