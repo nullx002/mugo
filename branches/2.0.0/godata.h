@@ -65,6 +65,7 @@ bool operator ==(const Point& a, const Point& b){
 class Stone{
 public:
     // Constructor
+    Stone() : color(empty){}
     Stone(const Point& p, Color c) : position(p), color(c){}
     Stone(int x, int y, Color c) : position(x, y), color(c){}
 
@@ -84,6 +85,7 @@ public:
     enum Type{cross, circle, square, triangle, character, blackTerritory, whiteTerritory, dim, select};
 
     // Constructor
+    Mark() : type(){}
     Mark(const Point& p, Type t) : position(p), type(t){}
     Mark(const Point& p, const QString& s) : position(p), type(character), text(s){}
     Mark(int x, int y, Type t) : position(x, y), type(t){}
@@ -99,6 +101,7 @@ public:
     enum Type{line, arrow};
 
     // Constructor
+    Line() : type(line){}
     Line(const Point& p1, const Point& p2, Type t) : position1(p1), position2(p2), type(t){}
     Line(int x1, int y1, int x2, int y2, Type t) : position1(x1, y1), position2(x2, y2), type(t){}
 

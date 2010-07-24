@@ -47,7 +47,7 @@ public:
 
     class TerritoryInfo{
         public:
-            TerritoryInfo() : color(Go::empty), territory(Go::empty), moveNumber(0), stone(NULL), mark(NULL), dim(NULL), number(NULL){}
+            TerritoryInfo() : color(Go::empty), territory(Go::empty), moveNumber(0), stoneItem(NULL), numberItem(NULL), markItem(NULL), dimItem(NULL){}
 
             bool isStone() const{ return color != Go::empty; }
             bool isBlack() const{ return color == Go::black; }
@@ -59,11 +59,14 @@ public:
             Go::Color color;
             Go::Color territory;
             int moveNumber;
-            QGraphicsItem* stone;
-            QGraphicsItem* mark;
-            QGraphicsItem* dim;
-            QGraphicsSimpleTextItem* number;
-
+            QGraphicsItem* stoneItem;
+            QGraphicsSimpleTextItem* numberItem;
+            QGraphicsItem* markItem;
+            QGraphicsItem* dimItem;
+            QList<GraphicsArrowItem*> lineItemList;
+            Go::Mark  mark;
+            Go::Mark  dim;
+            Go::LineList lineList;
     };
     typedef QVector< QVector<TerritoryInfo> > BoardBuffer;
 
@@ -142,7 +145,7 @@ protected:
     void setItemsPosition();
     void setStoneItemPosition(QGraphicsItem* item, int x, int y);
     void setMarkItemPosition(QGraphicsItem* item, const Go::Mark& mark);
-    void setLineItemPosition(GraphicsArrowItem* item, const Go::Line& mark);
+    void setLineItemPosition(GraphicsArrowItem* item, const Go::Line& line);
     void setTextItemPosition(QGraphicsSimpleTextItem* text, int x, int y);
 
     // create graphics item
@@ -154,6 +157,7 @@ protected:
     QPainterPath createTrianglePath(const Go::Mark& mark);
     QPainterPath createTerritoryPath(const Go::Mark& mark);
     QPainterPath createSelectPath(const Go::Mark& mark);
+    QRectF createRectPath(const Go::Mark& mark);
     GraphicsArrowItem* createLineItem(const Go::Line& line);
     TerritoryInfo& addStoneToBuffer(int x, int y, Go::Color color, int moveNumber, QGraphicsItem* stone, QGraphicsSimpleTextItem* number);
     TerritoryInfo& addMarkToBuffer(const Go::Mark& mark, QGraphicsItem* item);
@@ -201,14 +205,12 @@ private:
     QList<QGraphicsLineItem*> vLines;
     QList<QGraphicsEllipseItem*> stars;
     QList<QGraphicsItem*> stones;
-    QList< QList<QGraphicsItem*> > blackStones;
-    QList< QList<QGraphicsItem*> > whiteStones;
-    QList< QList<QGraphicsItem*> > marks;
-    QList< QList<QGraphicsItem*> > territories;
-    QList< QList<QGraphicsRectItem*> > dims;
-    QList< QList<GraphicsArrowItem*> > lines;
     QList<QGraphicsSimpleTextItem*> numbers;
     QList<QGraphicsSimpleTextItem*> showNumbers;
+    QList<QGraphicsItem*> addStones;
+    QList<QGraphicsItem*> marks;
+    QList<QGraphicsRectItem*> dims;
+    QList<GraphicsArrowItem*> lines;
     BoardBuffer boardBuffer;
     int moveNumber;
     int capturedBlack;
