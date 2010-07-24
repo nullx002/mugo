@@ -41,13 +41,9 @@ public:
         enum Mode{ noReset, branch, allBranch };
     };
 
-    struct ShowVariations{
-        enum Mode{ noMarkup, children, siblings};
-    };
-
     class TerritoryInfo{
         public:
-            TerritoryInfo() : color(Go::empty), territory(Go::empty), moveNumber(0), stoneItem(NULL), numberItem(NULL), markItem(NULL), dimItem(NULL){}
+            TerritoryInfo() : color(Go::empty), territory(Go::empty), moveNumber(0), stoneItem(NULL), numberItem(NULL), markItem(NULL), dimItem(NULL), variationItem(NULL){}
 
             bool isStone() const{ return color != Go::empty; }
             bool isBlack() const{ return color == Go::black; }
@@ -63,6 +59,7 @@ public:
             QGraphicsSimpleTextItem* numberItem;
             QGraphicsItem* markItem;
             QGraphicsItem* dimItem;
+            QGraphicsSimpleTextItem* variationItem;
             QList<GraphicsArrowItem*> lineItemList;
             Go::Mark  mark;
             Go::Mark  dim;
@@ -108,7 +105,7 @@ public:
     bool getShowCoordinate() const{ return showCoordinate; }
     bool getShowCoordinateWithI() const{ return document()->showCoordinateWithI; }
     bool getShowMarker() const{ return showMarker; }
-    ShowVariations::Mode getShowVariations() const{ return showVariations; }
+    int getShowVariations() const{ return currentGame->gameInformation->variation; }
 
     // set view mode
     void setShowMoveNumber(bool show);
@@ -117,7 +114,7 @@ public:
     void setShowCoordinate(bool show);
     void setShowCoordinateWithI(bool show);
     void setShowMarker(bool show);
-    void setShowVariations(ShowVariations::Mode mode);
+    void setShowVariations(int variation);
 
     // add
     void addItem(Go::NodePtr parent, Go::NodePtr node, int index);
@@ -149,6 +146,9 @@ protected:
     void setTextItemPosition(QGraphicsSimpleTextItem* text, int x, int y);
 
     // create graphics item
+    void createMarkItemList(const Go::MarkList& markList);
+    void createLineItemList(const Go::LineList& lineList);
+    void createVariationItemList(Go::NodePtr node);
     QGraphicsItem* createStoneItem(int x, int y, Go::Color color);
     QGraphicsItem* createMarkItem(const Go::Mark& mark);
     QPainterPath createCrossPath(const Go::Mark& mark);
@@ -211,6 +211,7 @@ private:
     QList<QGraphicsItem*> marks;
     QList<QGraphicsRectItem*> dims;
     QList<GraphicsArrowItem*> lines;
+    QList<QGraphicsSimpleTextItem*> variations;
     BoardBuffer boardBuffer;
     int moveNumber;
     int capturedBlack;
@@ -222,7 +223,6 @@ private:
     int  showMoveNumberCount;
     bool showCoordinate;
     bool showMarker;
-    ShowVariations::Mode showVariations;
 };
 
 #endif // BOARDWIDGET_H

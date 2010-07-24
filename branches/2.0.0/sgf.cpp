@@ -401,7 +401,9 @@ bool Sgf::Node::get(Go::NodePtr& node) const{
 
 bool Sgf::Node::get(const QString& key, const QStringList& values, Go::NodePtr& node) const{
     // game information
-    if (key == "PW")
+    if (key == "ST")
+        getInformation(node)->variation = values[0].toInt();
+    else if (key == "PW")
         getInformation(node)->whitePlayer = values[0];
     else if (key == "WR")
         getInformation(node)->whiteRank = values[0];
@@ -585,14 +587,15 @@ bool Sgf::Node::set(const Go::NodePtr& n){
     if (n->gameInformation){
         properties["GM"].push_back("1");
         properties["FF"].push_back("4");
+        properties["ST"].push_back( QString::number(n->gameInformation->variation) );
         properties["AP"].push_back(APP_NAME ":" APP_VERSION);
         if (n->gameInformation->xsize == n->gameInformation->ysize)
-            properties["SZ"].push_back( QString("%1").arg(n->gameInformation->xsize) );
+            properties["SZ"].push_back( QString::number(n->gameInformation->xsize) );
         else
-            properties["SZ"].push_back( QString("%1:%2").arg(n->gameInformation->xsize).arg(n->gameInformation->ysize) );
-        properties["KM"].push_back( QString("%1").arg(n->gameInformation->komi) );
+            properties["SZ"].push_back( QString().sprintf("%d:%d", n->gameInformation->xsize, n->gameInformation->ysize) );
+        properties["KM"].push_back( QString::number(n->gameInformation->komi) );
 
-        if (n->gameInformation->handicap != 0)   properties["HA"].push_back( QString("%1").arg(n->gameInformation->handicap) );
+        if (n->gameInformation->handicap != 0)   properties["HA"].push_back( QString::number(n->gameInformation->handicap) );
         if (!n->gameInformation->rule.isEmpty()) properties["RU"].push_back( n->gameInformation->rule );
 
         if (!n->gameInformation->whitePlayer.isEmpty()) properties["PW"].push_back( n->gameInformation->whitePlayer );
@@ -627,7 +630,7 @@ bool Sgf::Node::set(const Go::NodePtr& n){
         properties[key].push_back(str);
 
         if (n->moveNumber > 0)
-            properties["MN"].push_back( QString("%1").arg(n->moveNumber) );
+            properties["MN"].push_back( QString::number(n->moveNumber) );
     }
 
     if (!n->name.isEmpty())

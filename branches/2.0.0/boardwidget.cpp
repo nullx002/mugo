@@ -164,7 +164,6 @@ BoardWidget::BoardWidget(SgfDocument* doc, QWidget *parent)
     , showMoveNumberCount(-1)
     , showCoordinate(true)
     , showMarker(true)
-    , showVariations(ShowVariations::children)
 {
 //    connect(document_, SIGNAL(nodeAdded(Go::NodePtr)), SLOT(on_sgfdocument_nodeAdded(Go::NodePtr)));
     connect(document_, SIGNAL(nodeDeleted(Go::NodePtr, bool)), SLOT(on_sgfdocument_nodeDeleted(Go::NodePtr, bool)));
@@ -515,6 +514,21 @@ void BoardWidget::setItemsPosition(){
     }
 
     // set position of stones and move number.
+    for (int i=0; i<currentNodeList.size(); ++i){
+        Go::NodePtr& node = currentNodeList[i];
+        if (inBoard(node) == false)
+            continue;
+
+        QGraphicsItem* stone = stones[i];
+        if (stone)
+            setStoneItemPosition(stone, node->x(), node->y());
+
+        QGraphicsSimpleTextItem* number = numbers[i];
+        if (number)
+            setTextItemPosition(number, node->x(), node->y());
+    }
+
+    // set position of markers
     for (int y=0; y<boardBuffer.size(); ++y){
         for (int x=0; x<boardBuffer[y].size(); ++x){
             TerritoryInfo& ti= boardBuffer[y][x];
@@ -530,6 +544,9 @@ void BoardWidget::setItemsPosition(){
 
             for (int i=0; i<ti.lineItemList.size(); ++i)
                 setLineItemPosition(ti.lineItemList[i], ti.lineList[i]);
+
+            if (ti.variationItem)
+                setTextItemPosition(ti.variationItem, x, y);
         }
     }
 }
@@ -631,10 +648,12 @@ void BoardWidget::createBuffer(bool erase){
     qDeleteAll(marks);
     qDeleteAll(dims);
     qDeleteAll(lines);
+    qDeleteAll(variations);
     addStones.clear();
     marks.clear();
     dims.clear();
     lines.clear();
+    variations.clear();
 
     // create boardBuffer
     boardBuffer.clear();
@@ -707,26 +726,11 @@ void BoardWidget::createBuffer(bool erase){
         ++number;
         if (*node == currentNode){
             // add mark
-            foreach(const Go::Mark& mark, (*node)->marks){
-                QGraphicsItem* item = createMarkItem(mark);
-                addMarkToBuffer(mark, item);
-                marks.push_back(item);
-            }
-            foreach(const Go::Mark& mark, (*node)->whiteTerritories){
-                QGraphicsItem* item = createMarkItem(mark);
-                addMarkToBuffer(mark, item);
-                marks.push_back(item);
-            }
-            foreach(const Go::Mark& mark, (*node)->blackTerritories){
-                QGraphicsItem* item = createMarkItem(mark);
-                addMarkToBuffer(mark, item);
-                marks.push_back(item);
-            }
-            foreach(const Go::Line& line, (*node)->lines){
-                GraphicsArrowItem* item = createLineItem(line);
-                lines.push_back(item);
-                addLineToBuffer(line, item);
-            }
+            createMarkItemList((*node)->marks);
+            createMarkItemList((*node)->whiteTerritories);
+            createMarkItemList((*node)->blackTerritories);
+            createLineItemList((*node)->lines);
+            createVariationItemList(*node);
 
             ++node;
             break;
@@ -909,6 +913,79 @@ void BoardWidget::addLineToBuffer(const Go::Line& line, GraphicsArrowItem* item)
 */
 void BoardWidget::removeLineFromBuffer(const Go::Line& /*line*/, GraphicsArrowItem* item){
     item->hide();
+}
+
+/**
+  create graphic mark item list
+*/
+void BoardWidget::createMarkItemList(const Go::MarkList& markList){
+    foreach(const Go::Mark& mark, markList){
+        QGraphicsItem* item = createMarkItem(mark);
+        addMarkToBuffer(mark, item);
+        marks.push_back(item);
+    }
+}
+
+/**
+  create graphic mark item list
+*/
+void BoardWidget::createLineItemList(const Go::LineList& lineList){
+    foreach(const Go::Line& line, lineList){
+        GraphicsArrowItem* item = createLineItem(line);
+        lines.push_back(item);
+        addLineToBuffer(line, item);
+    }
+}
+
+/**
+  create variation label item list
+*/
+void BoardWidget::createVariationItemList(Go::NodePtr node){
+    // return if show no markup
+    if (getShowVariations() != 0 && getShowVariations() != 1)
+        return;
+
+    // get variation list
+    Go::NodeList variations;
+    if (getShowVariations() == 0)   // show children
+        variations = node->childNodes;
+    else if (getShowVariations() == 1){   // show siblings
+        Go::NodePtr p = node->parent();
+        if (p)
+            variations = p->childNodes;
+    }
+
+    // not show variations if variasion count is 0 or 1
+    if (variations.size() <= 1)
+        return;
+
+    // create variation label
+    char label = 'A';
+    foreach(const Go::NodePtr& v, variations){
+        QString str(label++);
+
+        if (inBoard(v) == false)
+            continue;
+        else if (v == node)
+            continue;
+
+        TerritoryInfo& ti = boardBuffer[v->y()][v->x()];
+        if (ti.markItem)
+            continue;
+
+        GraphicsLabelTextItem* item = new GraphicsLabelTextItem(str);
+        item->setZValue(4);
+        item->setBrush( QBrush(Qt::blue) );
+
+        if (ti.color == Go::empty)
+            item->setBackgroundBrush(board->brush());
+
+        setTextItemPosition(item, v->x(), v->y());
+        scene->addItem(item);
+        this->variations.push_back(item);
+
+        ti.variationItem = item;
+    }
 }
 
 /**
@@ -1307,8 +1384,8 @@ void BoardWidget::setShowMarker(bool show){
 /**
   set show variations
 */
-void BoardWidget::setShowVariations(ShowVariations::Mode mode){
-    showVariations = mode;
+void BoardWidget::setShowVariations(int variation){
+    currentGame->gameInformation->variation = variation;
     createBuffer(false);
 }
 

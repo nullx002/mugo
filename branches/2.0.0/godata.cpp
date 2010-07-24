@@ -65,6 +65,7 @@ GameInformation::GameInformation()
     , ysize(19)
     , komi(6.5)
     , handicap(0)
+    , variation(0)
 {
 }
 

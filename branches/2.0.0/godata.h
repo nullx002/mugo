@@ -151,6 +151,7 @@ public:
     QString copyright;
     QString user;
     QString opening;
+    int variation;
 };
 
 

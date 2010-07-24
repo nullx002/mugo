@@ -1091,12 +1091,12 @@ void MainWindow::updateMenu(){
     ui->actionShowCoordinateWithI->setChecked( board->getShowCoordinateWithI() );
 
     // View -> Show Variations
-    if (board->getShowVariations() == BoardWidget::ShowVariations::noMarkup)
-        ui->actionNoMarkup->setChecked(true);
-    else if (board->getShowVariations() == BoardWidget::ShowVariations::children)
+    if (board->getShowVariations() == 0)
         ui->actionShowChildren->setChecked(true);
-    else if (board->getShowVariations() == BoardWidget::ShowVariations::siblings)
+    else if (board->getShowVariations() == 1)
         ui->actionShowSiblings->setChecked(true);
+    else
+        ui->actionNoMarkup->setChecked(true);
 
     // View -> Show Marker
     ui->actionShowMarker->setChecked( board->getShowMarker() );
@@ -2506,7 +2506,7 @@ void MainWindow::on_actionNoMarkup_triggered(){
     if (board == NULL)
         return;
 
-    board->setShowVariations(BoardWidget::ShowVariations::noMarkup);
+    board->setShowVariations(2);
 }
 
 /**
@@ -2518,7 +2518,7 @@ void MainWindow::on_actionShowChildren_triggered(){
     if (board == NULL)
         return;
 
-    board->setShowVariations(BoardWidget::ShowVariations::children);
+    board->setShowVariations(0);
 }
 
 /**
@@ -2530,7 +2530,7 @@ void MainWindow::on_actionShowSiblings_triggered(){
     if (board == NULL)
         return;
 
-    board->setShowVariations(BoardWidget::ShowVariations::siblings);
+    board->setShowVariations(1);
 }
 
 /**
