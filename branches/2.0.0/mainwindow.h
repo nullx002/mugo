@@ -225,6 +225,7 @@ private slots:
     void on_actionBranchMode_triggered(bool checked);
     void on_actionShowCoordinate_triggered(bool checked);
     void on_actionShowCoordinateWithI_triggered(bool checked);
+    void on_actionShowMarker_triggered(bool checked);
 
     // Window Menu
     void on_actionPreviousTab_triggered();

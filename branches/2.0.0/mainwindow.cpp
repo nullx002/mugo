@@ -1083,6 +1083,9 @@ void MainWindow::updateMenu(){
 
     // View -> Show Coordinate WIth I
     ui->actionShowCoordinateWithI->setChecked( board->getShowCoordinateWithI() );
+
+    // View -> Show Marker
+    ui->actionShowMarker->setChecked( board->getShowMarker() );
 }
 
 
@@ -2466,6 +2469,18 @@ void MainWindow::on_actionShowCoordinateWithI_triggered(bool checked){
         return;
 
     board->setShowCoordinateWithI(checked);
+}
+
+/**
+  Slot
+  Viwe -> Show Marker
+*/
+void MainWindow::on_actionShowMarker_triggered(bool checked){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    board->setShowMarker(checked);
 }
 
 /**

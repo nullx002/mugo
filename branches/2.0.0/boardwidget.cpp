@@ -73,7 +73,6 @@ void GraphicsLabelTextItem::paint(QPainter* painter, const QStyleOptionGraphicsI
     QGraphicsSimpleTextItem::paint(painter, option, widget);
 }
 
-
 /**
   GraphicsArrowItem
 
@@ -164,6 +163,7 @@ BoardWidget::BoardWidget(SgfDocument* doc, QWidget *parent)
     , resetMoveNumberMode(ResetMoveNumber::noReset)
     , showMoveNumberCount(-1)
     , showCoordinate(true)
+    , showMarker(true)
 {
 //    connect(document_, SIGNAL(nodeAdded(Go::NodePtr)), SLOT(on_sgfdocument_nodeAdded(Go::NodePtr)));
     connect(document_, SIGNAL(nodeDeleted(Go::NodePtr, bool)), SLOT(on_sgfdocument_nodeDeleted(Go::NodePtr, bool)));
@@ -1024,7 +1024,7 @@ BoardWidget::TerritoryInfo& BoardWidget::addMarkToBuffer(const Go::Mark& mark, Q
 
     if (mark.type == Go::Mark::dim){
         ti.dim = item;
-        item->show();
+        item->setVisible(showMarker);
         return ti;
     }
 
@@ -1054,8 +1054,10 @@ BoardWidget::TerritoryInfo& BoardWidget::addMarkToBuffer(const Go::Mark& mark, Q
         }
     }
 
+    if (ti.mark)
+        ti.mark->hide();
     ti.mark = item;
-    item->show();
+    item->setVisible(showMarker);
     return ti;
 }
 
@@ -1076,7 +1078,7 @@ BoardWidget::TerritoryInfo& BoardWidget::removeMarkFromBuffer(const Go::Mark& ma
 */
 void BoardWidget::addLineToBuffer(const Go::Line& /*line*/, GraphicsArrowItem* item){
     item->setBrush( QBrush(item->pen().color()) );
-    item->show();
+    item->setVisible(showMarker);
 }
 
 /**
@@ -1457,6 +1459,14 @@ void BoardWidget::setShowCoordinateWithI(bool show){
     document()->showCoordinateWithI = show;
     createBoard();
     document()->modifyGame(currentGame);
+}
+
+/**
+  set show marker
+*/
+void BoardWidget::setShowMarker(bool show){
+    showMarker = show;
+    createBuffer(false);
 }
 
 /**

@@ -100,6 +100,7 @@ public:
     int  getShowMoveNumberCount() const{ return showMoveNumberCount; }
     bool getShowCoordinate() const{ return showCoordinate; }
     bool getShowCoordinateWithI() const{ return document()->showCoordinateWithI; }
+    bool getShowMarker() const{ return showMarker; }
 
     // set view mode
     void setShowMoveNumber(bool show);
@@ -107,6 +108,7 @@ public:
     void setShowMoveNumberCount(int cnt);
     void setShowCoordinate(bool show);
     void setShowCoordinateWithI(bool show);
+    void setShowMarker(bool show);
 
     // add
     void addItem(Go::NodePtr parent, Go::NodePtr node, int index);
@@ -211,6 +213,7 @@ private:
     ResetMoveNumber::Mode resetMoveNumberMode;
     int  showMoveNumberCount;
     bool showCoordinate;
+    bool showMarker;
 };
 
 #endif // BOARDWIDGET_H

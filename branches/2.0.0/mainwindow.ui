@@ -62,7 +62,7 @@
      <x>0</x>
      <y>0</y>
      <width>637</width>
-     <height>19</height>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -303,6 +303,7 @@
     <addaction name="separator"/>
     <addaction name="actionShowCoordinate"/>
     <addaction name="actionShowCoordinateWithI"/>
+    <addaction name="actionShowMarker"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -1435,6 +1436,14 @@
    </property>
    <property name="text">
     <string>Show Coordinate With I</string>
+   </property>
+  </action>
+  <action name="actionShowMarker">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Marker</string>
    </property>
   </action>
   <action name="actionNextTab">
