@@ -70,6 +70,13 @@ public:
     BoardWidget(SgfDocument* doc, QWidget *parent = 0);
     ~BoardWidget();
 
+    // coordinate
+    void getGridLinePosition(int x, int y, int gridSize, int x1, int y1, int x2, int y2, QLineF& line) const;
+    qreal getGridSize() const;
+    void sgfToBoardCoordinate(int sgfX, int sgfY, qreal& viewX, qreal& viewY) const;
+    void boardToSgfCoordinate(qreal viewX, qreal viewY, int& sgfX, int& sgfY) const;
+    void setVCoordinatePosition(int pos, const QRectF& rect, QGraphicsSimpleTextItem* left, QGraphicsSimpleTextItem* right);
+    void setHCoordinatePosition(int pos, const QRectF& rect, QGraphicsSimpleTextItem* top, QGraphicsSimpleTextItem* bottom);
 
     // get
     const SgfDocument* document() const{ return document_; }
@@ -105,7 +112,10 @@ public:
     bool getShowCoordinate() const{ return showCoordinate; }
     bool getShowCoordinateWithI() const{ return document()->showCoordinateWithI; }
     bool getShowMarker() const{ return showMarker; }
-    int getShowVariations() const{ return currentGame->gameInformation->variation; }
+    int  getShowVariations() const{ return currentGame->gameInformation->variation; }
+    int  getRotate() const{ return rotate; }
+    bool getFlipHorizntally() const{ return flipHorizontally; }
+    bool getFlipVertically() const{ return flipVertically; }
 
     // set view mode
     void setShowMoveNumber(bool show);
@@ -115,6 +125,9 @@ public:
     void setShowCoordinateWithI(bool show);
     void setShowMarker(bool show);
     void setShowVariations(int variation);
+    void setRotate(int rotate);
+    void setFlipHorizontally(bool flip);
+    void setFlipVertically(bool flip);
 
     // add
     void addItem(Go::NodePtr parent, Go::NodePtr node, int index);
@@ -223,6 +236,9 @@ private:
     int  showMoveNumberCount;
     bool showCoordinate;
     bool showMarker;
+    int  rotate;
+    bool flipHorizontally;
+    bool flipVertically;
 };
 
 #endif // BOARDWIDGET_H

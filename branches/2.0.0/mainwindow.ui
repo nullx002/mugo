@@ -313,6 +313,11 @@
     <addaction name="actionShowCoordinateWithI"/>
     <addaction name="actionShowMarker"/>
     <addaction name="menuShowVariations"/>
+    <addaction name="separator"/>
+    <addaction name="actionRotateClockwise"/>
+    <addaction name="actionFlipHorizontally"/>
+    <addaction name="actionFlipVertically"/>
+    <addaction name="actionResetBoard"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -349,6 +354,11 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionBranchMode"/>
+   <addaction name="separator"/>
+   <addaction name="actionRotateClockwise"/>
+   <addaction name="actionFlipHorizontally"/>
+   <addaction name="actionFlipVertically"/>
+   <addaction name="actionResetBoard"/>
   </widget>
   <widget class="QToolBar" name="collectionToolBar">
    <property name="windowTitle">
@@ -1519,6 +1529,51 @@
    </property>
    <property name="text">
     <string>Move Down</string>
+   </property>
+  </action>
+  <action name="actionRotateClockwise">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="mugo.qrc">
+     <normaloff>:/res/rotateright.png</normaloff>:/res/rotateright.png</iconset>
+   </property>
+   <property name="text">
+    <string>Rotate Clockwise</string>
+   </property>
+  </action>
+  <action name="actionFlipHorizontally">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="mugo.qrc">
+     <normaloff>:/res/fliphorizontally.png</normaloff>:/res/fliphorizontally.png</iconset>
+   </property>
+   <property name="text">
+    <string>Flip Horizontally</string>
+   </property>
+  </action>
+  <action name="actionFlipVertically">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="mugo.qrc">
+     <normaloff>:/res/flipvertically.png</normaloff>:/res/flipvertically.png</iconset>
+   </property>
+   <property name="text">
+    <string>Flip Vertically</string>
+   </property>
+  </action>
+  <action name="actionResetBoard">
+   <property name="icon">
+    <iconset resource="mugo.qrc">
+     <normaloff>:/res/resetboard.png</normaloff>:/res/resetboard.png</iconset>
+   </property>
+   <property name="text">
+    <string>Reset Board</string>
    </property>
   </action>
  </widget>

@@ -1100,6 +1100,15 @@ void MainWindow::updateMenu(){
 
     // View -> Show Marker
     ui->actionShowMarker->setChecked( board->getShowMarker() );
+
+    // View -> Rotate Clockwise
+    ui->actionRotateClockwise->setChecked( board->getRotate() != 0 );
+
+    // View -> Flip Horizontally
+    ui->actionFlipHorizontally->setChecked( board->getFlipHorizntally() );
+
+    // View -> Flip Vertically
+    ui->actionFlipVertically->setChecked( board->getFlipVertically() );
 }
 
 
@@ -2531,6 +2540,61 @@ void MainWindow::on_actionShowSiblings_triggered(){
         return;
 
     board->setShowVariations(1);
+}
+
+/**
+  Slot
+  Viwe -> Rotate Clockwise
+*/
+void MainWindow::on_actionRotateClockwise_triggered(){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    board->setRotate( (board->getRotate() + 1) % 4 ) ;
+    ui->actionRotateClockwise->setChecked( board->getRotate() != 0 );
+}
+
+/**
+  Slot
+  Viwe -> Flip Horizontally
+*/
+void MainWindow::on_actionFlipHorizontally_triggered(bool checked){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    board->setFlipHorizontally(checked);
+}
+
+/**
+  Slot
+  Viwe -> Flip Vertically
+*/
+void MainWindow::on_actionFlipVertically_triggered(bool checked){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    board->setFlipVertically(checked);
+}
+
+/**
+  Slot
+  Viwe -> Reset Board
+*/
+void MainWindow::on_actionResetBoard_triggered(){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    ui->actionFlipHorizontally->setChecked(false);
+    ui->actionFlipVertically->setChecked(false);
+    ui->actionRotateClockwise->setChecked(false);
+
+    board->setFlipVertically(false);
+    board->setFlipHorizontally(false);
+    board->setRotate(0);
 }
 
 /**

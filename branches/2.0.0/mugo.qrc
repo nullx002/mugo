@@ -49,5 +49,6 @@
         <file>res/jumptoclicked.png</file>
         <file>res/showmovenumber.png</file>
         <file>res/branchmode.png</file>
+        <file>res/resetboard.png</file>
     </qresource>
 </RCC>

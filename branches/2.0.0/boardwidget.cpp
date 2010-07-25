@@ -164,6 +164,9 @@ BoardWidget::BoardWidget(SgfDocument* doc, QWidget *parent)
     , showMoveNumberCount(-1)
     , showCoordinate(true)
     , showMarker(true)
+    , rotate(0)
+    , flipHorizontally(false)
+    , flipVertically(false)
 {
 //    connect(document_, SIGNAL(nodeAdded(Go::NodePtr)), SLOT(on_sgfdocument_nodeAdded(Go::NodePtr)));
     connect(document_, SIGNAL(nodeDeleted(Go::NodePtr, bool)), SLOT(on_sgfdocument_nodeDeleted(Go::NodePtr, bool)));
@@ -224,10 +227,8 @@ void BoardWidget::mouseReleaseEvent(QMouseEvent* e){
 */
 void BoardWidget::onLButtonDown(QMouseEvent* e){
     // get mouse position
-    int size = vLines[1]->line().x1() - vLines[0]->line().x1();
-    int x = (e->x() - vLines[0]->line().x1() + size / 2) / size;
-    int y = (e->y() - hLines[0]->line().y1() + size / 2) / size;
-
+    int x, y;
+    boardToSgfCoordinate(e->x(), e->y(), x, y);
     if (x < 0 || y < 0 || x >= gameInformation->xsize || y >= gameInformation->ysize)
         return;
 
@@ -298,6 +299,173 @@ void BoardWidget::onLButtonDown(QMouseEvent* e){
 */
 void BoardWidget::onRButtonDown(QMouseEvent* /*e*/){
     document()->getUndoStack()->undo();
+}
+
+// get line position
+void BoardWidget::getGridLinePosition(int x, int y, int gridSize, int x1, int y1, int x2, int y2, QLineF& line) const{
+    if (flipHorizontally){
+        x1 = vLines.size() - x1 - 1;
+        x2 = vLines.size() - x2 - 1;
+    }
+
+    if (flipVertically){
+        y1 = hLines.size() - y1 - 1;
+        y2 = hLines.size() - y2 - 1;
+    }
+
+    qreal xx1, yy1, xx2, yy2;
+    if (rotate == 0){
+        xx1 = x + x1 * gridSize;
+        xx2 = x + x2 * gridSize;
+        yy1 = y + y1 * gridSize;
+        yy2 = y + y2 * gridSize;
+    }
+    else if (rotate == 1){
+        xx1 = x + (hLines.size() - y1 - 1) * gridSize;
+        xx2 = x + (hLines.size() - y2 - 1) * gridSize;
+        yy1 = y + x1 * gridSize;
+        yy2 = y + x2 * gridSize;
+    }
+    else if (rotate == 2){
+        xx1 = x + (vLines.size() - x1 - 1) * gridSize;
+        xx2 = x + (vLines.size() - x2 - 1) * gridSize;
+        yy1 = y + (hLines.size() - y1 - 1) * gridSize;
+        yy2 = y + (hLines.size() - y2 - 1) * gridSize;
+    }
+    else if (rotate == 3){
+        xx1 = x + y1 * gridSize;
+        xx2 = x + y2 * gridSize;
+        yy1 = y + (vLines.size() - x1 - 1) * gridSize;
+        yy2 = y + (vLines.size() - x2 - 1) * gridSize;
+    }
+
+    line.setLine(xx1, yy1, xx2, yy2);
+}
+
+/**
+  get grid size
+*/
+qreal BoardWidget::getGridSize() const{
+    if ((rotate % 2) == 0)
+        return fabs(vLines[1]->line().x1() - vLines[0]->line().x1());
+    else
+        return fabs(vLines[1]->line().y1() - vLines[0]->line().y1());
+}
+
+/**
+  grid coordinate to view coordinate
+*/
+void BoardWidget::sgfToBoardCoordinate(int sgfX, int sgfY, qreal& boardX, qreal& boardY) const{
+    if ((rotate % 2) == 0){
+        boardX = vLines[sgfX]->line().x1();
+        boardY = hLines[sgfY]->line().y1();
+    }
+    else{
+        boardX = hLines[sgfY]->line().x1();
+        boardY = vLines[sgfX]->line().y1();
+    }
+}
+
+/**
+  view coordinate to sgf coordinate
+*/
+void BoardWidget::boardToSgfCoordinate(qreal boardX, qreal boardY, int& sgfX, int& sgfY) const{
+    qreal size = getGridSize();
+
+    if ((rotate % 2) == 0){
+        sgfX = (fabs(boardX - vLines[0]->line().x1()) + size / 2.0) / size;
+        sgfY = (fabs(boardY - hLines[0]->line().y1()) + size / 2.0) / size;
+    }
+    else{
+        sgfX = (fabs(boardY - vLines[0]->line().y1()) + size / 2.0) / size;
+        sgfY = (fabs(boardX - hLines[0]->line().x1()) + size / 2.0) / size;
+    }
+}
+
+void BoardWidget::setVCoordinatePosition(int pos, const QRectF& rect, QGraphicsSimpleTextItem* left, QGraphicsSimpleTextItem* right){
+    if (rotate == 0){
+        qreal x1 = board->rect().left();
+        qreal x2 = board->rect().right();
+        qreal y1 = hLines[pos]->line().y1();
+        qreal y2 = y1;
+        left->setPos(x1 - (rect.width() - left->boundingRect().width()) / 2.0 - left->boundingRect().width() - 4
+                   , y1 - left->boundingRect().height() / 2);
+        right->setPos(x2 + (rect.width() - right->boundingRect().width()) / 2.0 + 4
+                    , y2 - right->boundingRect().height() / 2);
+    }
+    else if (rotate == 1){
+        qreal x1 = hLines[pos]->line().x1();
+        qreal x2 = x1;
+        qreal y1 = board->rect().top();
+        qreal y2 = board->rect().bottom();
+        left->setPos(x1 - left->boundingRect().width() / 2
+                   , y1 - left->boundingRect().height() - 4);
+        right->setPos(x2 - right->boundingRect().width() / 2
+                    , y2 + 4);
+    }
+    else if (rotate == 2){
+        qreal x1 = board->rect().right();
+        qreal x2 = board->rect().left();
+        qreal y1 = hLines[pos]->line().y1();
+        qreal y2 = y1;
+        left->setPos(x1 + (rect.width() - left->boundingRect().width()) / 2.0 + 4
+                   , y1 - left->boundingRect().height() / 2);
+        right->setPos(x2 - (rect.width() - right->boundingRect().width()) / 2.0 - right->boundingRect().width() - 4
+                    , y2 - right->boundingRect().height() / 2);
+    }
+    else if (rotate == 3){
+        qreal x1 = hLines[pos]->line().x1();
+        qreal x2 = x1;
+        qreal y1 = board->rect().bottom();
+        qreal y2 = board->rect().top();
+        left->setPos(x1 - left->boundingRect().width() / 2
+                   , y1 + 4);
+        right->setPos(x2 - right->boundingRect().width() / 2
+                    , y2 - right->boundingRect().height() - 4);
+    }
+}
+
+void BoardWidget::setHCoordinatePosition(int pos, const QRectF& rect, QGraphicsSimpleTextItem* top, QGraphicsSimpleTextItem* bottom){
+    if (rotate == 0){
+        qreal x1 = vLines[pos]->line().x1();
+        qreal x2 = x1;
+        qreal y1 = board->rect().top();
+        qreal y2 = board->rect().bottom();
+        top->setPos(x1 - top->boundingRect().width() / 2
+                  , y1 - top->boundingRect().height() - 4);
+        bottom->setPos(x2 - bottom->boundingRect().width() / 2
+                     , y2 + 4);
+    }
+    else if (rotate == 1){
+        qreal x1 = board->rect().right();
+        qreal x2 = board->rect().left();
+        qreal y1 = vLines[pos]->line().y1();
+        qreal y2 = y1;
+        top->setPos(x1 + (rect.width() - top->boundingRect().width()) / 2 + 4
+                  , y1 - top->boundingRect().height() / 2);
+        bottom->setPos(x2 - (rect.width() - bottom->boundingRect().width()) / 2 - bottom->boundingRect().width() - 4
+                     , y2 - bottom->boundingRect().height() / 2);
+    }
+    else if (rotate == 2){
+        qreal x1 = vLines[pos]->line().x1();
+        qreal x2 = x1;
+        qreal y1 = board->rect().bottom();
+        qreal y2 = board->rect().top();
+        top->setPos(x1 - top->boundingRect().width() / 2
+                  , y1 + 4);
+        bottom->setPos(x2 - bottom->boundingRect().width() / 2
+                     , y2 - bottom->boundingRect().height() - 4);
+    }
+    else if (rotate == 3){
+        qreal x1 = board->rect().left();
+        qreal x2 = board->rect().right();
+        qreal y1 = vLines[pos]->line().y1();
+        qreal y2 = y1;
+        top->setPos(x1 - (rect.width() - top->boundingRect().width()) / 2 - top->boundingRect().width() - 4
+                  , y1 - top->boundingRect().height() / 2);
+        bottom->setPos(x2 + (rect.width() - bottom->boundingRect().width()) / 2 + 4
+                     , y2 - bottom->boundingRect().height() / 2);
+    }
 }
 
 /**
@@ -443,25 +611,34 @@ void BoardWidget::setItemsPosition(){
     QRectF r = scene->sceneRect();
 
     // get coordinate item size
-    qreal coordinateW = 0.0, coordinateH = 0.0;
-    foreach(QGraphicsSimpleTextItem* item, coordinateLeft)
-        coordinateW = qMax(coordinateW, item->boundingRect().width());
-    foreach(QGraphicsSimpleTextItem* item, coordinateTop)
-        coordinateH = qMax(coordinateH, item->boundingRect().width());
+    QRectF coordinateRect;
+    foreach(QGraphicsSimpleTextItem* item, coordinateLeft){
+        coordinateRect.setWidth(qMax(coordinateRect.width(), item->boundingRect().width()));
+        coordinateRect.setHeight(qMax(coordinateRect.height(), item->boundingRect().height()));
+    }
+    foreach(QGraphicsSimpleTextItem* item, coordinateTop){
+        coordinateRect.setWidth(qMax(coordinateRect.width(), item->boundingRect().width()));
+        coordinateRect.setHeight(qMax(coordinateRect.height(), item->boundingRect().height()));
+    }
 
     // calculate board size
     int width  = r.width();
     int height = r.height();
     if (showCoordinate){
-        width  -= coordinateW * 2 + 10;
-        height -= coordinateH * 2 + 10;
+        width  -= coordinateRect.width()  * 2 + 10;
+        height -= coordinateRect.height() * 2 + 10;
     }
 
-    int gridW = width  / (gameInformation->xsize + 1);
-    int gridH = height / (gameInformation->ysize + 1);
+    int xsize = gameInformation->xsize;
+    int ysize = gameInformation->ysize;
+    if (rotate % 2)
+        qSwap(xsize, ysize);
+
+    int gridW = width  / (xsize + 1);
+    int gridH = height / (ysize + 1);
     int gridSize = qMin(gridW, gridH);
-    int w = gridSize * (gameInformation->xsize - 1);
-    int h = gridSize * (gameInformation->ysize - 1);
+    int w = gridSize * (xsize - 1);
+    int h = gridSize * (ysize - 1);
 
     int x = (r.width() - w) / 2;
     int y = (r.height() - h) / 2;
@@ -475,17 +652,21 @@ void BoardWidget::setItemsPosition(){
     board->setRect(boardRect);
 
     // set position of vertical lines.
-    int xx = x;
+    int i = 0;
     foreach(QGraphicsLineItem* item, vLines){
-        item->setLine(xx, y, xx, y+h);
-        xx += gridSize;
+        QLineF line;
+        getGridLinePosition(x, y, gridSize, i, 0, i, hLines.size()-1, line);
+        item->setLine(line);
+        ++i;
     }
 
     // set position of horizontal lines.
-    int yy = y;
+    i = 0;
     foreach(QGraphicsLineItem* item, hLines){
-        item->setLine(x, yy, x+w, yy);
-        yy += gridSize;
+        QLineF line;
+        getGridLinePosition(x, y, gridSize, 0, i, vLines.size()-1, i, line);
+        item->setLine(line);
+        ++i;
     }
 
     // set position of stars.
@@ -493,22 +674,20 @@ void BoardWidget::setItemsPosition(){
     getStarPosition(xpos, ypos);
     for (int y=0, n=0; y<ypos.size(); ++y){
         for (int x=0; x<xpos.size(); ++x, ++n){
-            int xx = vLines[xpos[x]]->line().x1() - 2;
-            int yy = hLines[ypos[y]]->line().y1() - 2;
-            stars[n]->setRect(xx, yy, 4, 4);
+            qreal xx, yy;
+            sgfToBoardCoordinate(xpos[x], ypos[y], xx, yy);
+            stars[n]->setRect(xx-2, yy-2, 4, 4);
         }
     }
 
     // set positions of coordinate
     for (int i=0; i<gameInformation->ysize; ++i){
-        coordinateLeft[i]->setPos( board->rect().left() - coordinateLeft[i]->boundingRect().width() - (coordinateW - coordinateLeft[i]->boundingRect().width()) / 2 - 4, hLines[i]->line().y1() - coordinateLeft[i]->boundingRect().height() / 2 );
-        coordinateRight[i]->setPos( board->rect().right() + (coordinateW - coordinateLeft[i]->boundingRect().width()) / 2 + 4, hLines[i]->line().y1() - coordinateLeft[i]->boundingRect().height() / 2 );
+        setVCoordinatePosition(i, coordinateRect, coordinateLeft[i], coordinateRight[i]);
         coordinateLeft[i]->setVisible(showCoordinate);
         coordinateRight[i]->setVisible(showCoordinate);
     }
     for (int i=0; i<gameInformation->xsize; ++i){
-        coordinateTop[i]->setPos( vLines[i]->line().x1() - coordinateTop[i]->boundingRect().width() / 2, board->rect().top() - coordinateTop[i]->boundingRect().height() - 4 );
-        coordinateBottom[i]->setPos( vLines[i]->line().x1() - coordinateTop[i]->boundingRect().width() / 2, board->rect().bottom() + 4 );
+        setHCoordinatePosition(i, coordinateRect, coordinateTop[i], coordinateBottom[i]);
         coordinateTop[i]->setVisible(showCoordinate);
         coordinateBottom[i]->setVisible(showCoordinate);
     }
@@ -555,10 +734,13 @@ void BoardWidget::setItemsPosition(){
   set grahics stone item position
 */
 void BoardWidget::setStoneItemPosition(QGraphicsItem* item, int x, int y){
-    qreal size = (vLines[1]->line().x1() - vLines[0]->line().x1()) * 0.95;
+    qreal size = getGridSize() * 0.95;
+    qreal xx, yy;
+    sgfToBoardCoordinate(x, y, xx, yy);
+
     QGraphicsEllipseItem* ellipse = dynamic_cast<QGraphicsEllipseItem*>(item);
     if (ellipse)
-        ellipse->setRect(vLines[x]->line().x1()-size/2, hLines[y]->line().y1()-size/2, size, size);
+        ellipse->setRect(xx-size/2, yy-size/2, size, size);
 }
 
 /**
@@ -567,15 +749,12 @@ void BoardWidget::setStoneItemPosition(QGraphicsItem* item, int x, int y){
 void BoardWidget::setMarkItemPosition(QGraphicsItem* item, const Go::Mark& mark){
     QGraphicsPathItem* pathItem = dynamic_cast<QGraphicsPathItem*>(item);
     QGraphicsSimpleTextItem* textItem = dynamic_cast<QGraphicsSimpleTextItem*>(item);
-    if (textItem){
+    if (textItem)
         setTextItemPosition(textItem, mark.position.x, mark.position.y);
-//        QRectF r = textItem->boundingRect();
-//        text->setPos(vLines[x]->line().x1()-r.width()*0.5, hLines[y]->line().y1()-r.height()*0.5);
-    }
     else if (mark.type == Go::Mark::dim){
-        qreal size = hLines[1]->line().y1() - hLines[0]->line().y1();
-        qreal x = vLines[mark.position.x]->line().x1();
-        qreal y = hLines[mark.position.y]->line().y1();
+        qreal size = getGridSize();
+        qreal x, y;
+        sgfToBoardCoordinate(mark.position.x, mark.position.y, x, y);
 
         QGraphicsRectItem* rect = dynamic_cast<QGraphicsRectItem*>(item);
         if (rect == NULL)
@@ -608,10 +787,9 @@ void BoardWidget::setMarkItemPosition(QGraphicsItem* item, const Go::Mark& mark)
   set grahics line item position
 */
 void BoardWidget::setLineItemPosition(GraphicsArrowItem* item, const Go::Line& line){
-    qreal x1 = vLines[line.position1.x]->line().x1();
-    qreal x2 = vLines[line.position2.x]->line().x2();
-    qreal y1 = hLines[line.position1.y]->line().y1();
-    qreal y2 = hLines[line.position2.y]->line().y2();
+    qreal x1, y1, x2, y2;
+    sgfToBoardCoordinate(line.position1.x, line.position1.y, x1, y1);
+    sgfToBoardCoordinate(line.position2.x, line.position2.y, x2, y2);
 
     item->setLine(x1, y1, x2, y2);
 }
@@ -620,7 +798,7 @@ void BoardWidget::setLineItemPosition(GraphicsArrowItem* item, const Go::Line& l
   set graphics text item position
 */
 void BoardWidget::setTextItemPosition(QGraphicsSimpleTextItem* text, int x, int y){
-    qreal size = (vLines[1]->line().x1() - vLines[0]->line().x1()) * 0.95;
+    qreal size = getGridSize() * 0.95;
     if (text){
         qreal number_size;
         if (text->text().size() > 2)
@@ -632,7 +810,10 @@ void BoardWidget::setTextItemPosition(QGraphicsSimpleTextItem* text, int x, int 
 
         text->setFont( QFont("Helvetica", number_size) );
         QRectF r = text->boundingRect();
-        text->setPos(vLines[x]->line().x1()-r.width()*0.5, hLines[y]->line().y1()-r.height()*0.5);
+
+        qreal xx, yy;
+        sgfToBoardCoordinate(x, y, xx, yy);
+        text->setPos(xx-r.width()*0.5, yy-r.height()*0.5);
     }
 }
 
@@ -992,9 +1173,11 @@ void BoardWidget::createVariationItemList(Go::NodePtr node){
   create graphic stone item
 */
 QGraphicsItem* BoardWidget::createStoneItem(int x, int y, Go::Color color){
-    int size = vLines[1]->line().x1() - vLines[0]->line().x1();
-    int sceneX = vLines[x]->line().x1() - size / 2;
-    int sceneY = hLines[y]->line().y1() - size / 2;
+    qreal size = getGridSize();
+    qreal xx, yy;
+    sgfToBoardCoordinate(x, y, xx, yy);
+    int sceneX = xx - size / 2;
+    int sceneY = yy - size / 2;
 
     QGraphicsItem* stone = scene->addEllipse( sceneX, sceneY, size, size, QPen(Qt::black), QBrush(color == Go::black ? Qt::black : Qt::white) );
     stone->setZValue(3);
@@ -1042,10 +1225,11 @@ QGraphicsItem* BoardWidget::createMarkItem(const Go::Mark& mark){
   create cross path
 */
 QPainterPath BoardWidget::createCrossPath(const Go::Mark& mark){
-    qreal size = vLines[1]->line().x1() - vLines[0]->line().x1();
-    size *= 0.4;
-    int sceneX = vLines[mark.position.x]->line().x1() - size / 2;
-    int sceneY = hLines[mark.position.y]->line().y1() - size / 2;
+    qreal size = getGridSize() * 0.4;
+    qreal x, y;
+    sgfToBoardCoordinate(mark.position.x, mark.position.y, x, y);
+    int sceneX = x - size / 2;
+    int sceneY = y - size / 2;
 
     QPainterPath path;
     path.moveTo(sceneX, sceneY);
@@ -1060,10 +1244,11 @@ QPainterPath BoardWidget::createCrossPath(const Go::Mark& mark){
   create circle path
 */
 QPainterPath BoardWidget::createCirclePath(const Go::Mark& mark){
-    qreal size = vLines[1]->line().x1() - vLines[0]->line().x1();
-    size *= 0.5;
-    int sceneX = vLines[mark.position.x]->line().x1() - size / 2;
-    int sceneY = hLines[mark.position.y]->line().y1() - size / 2;
+    qreal size = getGridSize() * 0.5;
+    qreal x, y;
+    sgfToBoardCoordinate(mark.position.x, mark.position.y, x, y);
+    int sceneX = x - size / 2;
+    int sceneY = y - size / 2;
 
     QPainterPath path;
     path.addEllipse(sceneX, sceneY, size, size);
@@ -1075,10 +1260,11 @@ QPainterPath BoardWidget::createCirclePath(const Go::Mark& mark){
   create square path
 */
 QPainterPath BoardWidget::createSquarePath(const Go::Mark& mark){
-    qreal size = vLines[1]->line().x1() - vLines[0]->line().x1();
-    size *= 0.45;
-    int sceneX = vLines[mark.position.x]->line().x1() - size / 2;
-    int sceneY = hLines[mark.position.y]->line().y1() - size / 2;
+    qreal size = getGridSize() * 0.45;
+    qreal x, y;
+    sgfToBoardCoordinate(mark.position.x, mark.position.y, x, y);
+    int sceneX = x - size / 2;
+    int sceneY = y - size / 2;
 
     QPainterPath path;
     path.addRect(sceneX, sceneY, size, size);
@@ -1090,11 +1276,12 @@ QPainterPath BoardWidget::createSquarePath(const Go::Mark& mark){
   create triangle path
 */
 QPainterPath BoardWidget::createTrianglePath(const Go::Mark& mark){
-    qreal size = vLines[1]->line().x1() - vLines[0]->line().x1();
-    qreal xsize = size * 0.5;
-    qreal ysize = size * 0.4;
-    qreal sceneX = vLines[mark.position.x]->line().x1() - xsize / 2;
-    qreal sceneY = hLines[mark.position.y]->line().y1() - ysize / 2;
+    qreal xsize = getGridSize() * 0.5;
+    qreal ysize = getGridSize() * 0.4;
+    qreal x, y;
+    sgfToBoardCoordinate(mark.position.x, mark.position.y, x, y);
+    int sceneX = x - xsize / 2;
+    int sceneY = y - ysize / 2;
 
     QPainterPath path;
     path.moveTo(sceneX+xsize/2, sceneY);
@@ -1109,10 +1296,11 @@ QPainterPath BoardWidget::createTrianglePath(const Go::Mark& mark){
   create black territory path
 */
 QPainterPath BoardWidget::createTerritoryPath(const Go::Mark& mark){
-    qreal size = vLines[1]->line().x1() - vLines[0]->line().x1();
-    size *= 0.35;
-    int sceneX = vLines[mark.position.x]->line().x1() - size / 2;
-    int sceneY = hLines[mark.position.y]->line().y1() - size / 2;
+    qreal size = getGridSize() * 0.35;
+    qreal x, y;
+    sgfToBoardCoordinate(mark.position.x, mark.position.y, x, y);
+    int sceneX = x - size / 2;
+    int sceneY = y - size / 2;
 
     QPainterPath path;
     path.addRect(sceneX, sceneY, size, size);
@@ -1124,10 +1312,11 @@ QPainterPath BoardWidget::createTerritoryPath(const Go::Mark& mark){
   create select path
 */
 QPainterPath BoardWidget::createSelectPath(const Go::Mark& mark){
-    qreal size = vLines[1]->line().x1() - vLines[0]->line().x1();
-    size *= 0.45;
-    int sceneX = vLines[mark.position.x]->line().x1() - size / 2;
-    int sceneY = hLines[mark.position.y]->line().y1() - size / 2;
+    qreal size = getGridSize() * 0.45;
+    qreal x, y;
+    sgfToBoardCoordinate(mark.position.x, mark.position.y, x, y);
+    int sceneX = x - size / 2;
+    int sceneY = y - size / 2;
 
     QPainterPath path;
     path.addRect(sceneX, sceneY, size, size);
@@ -1139,10 +1328,9 @@ QPainterPath BoardWidget::createSelectPath(const Go::Mark& mark){
   create line or arrow item
 */
 GraphicsArrowItem* BoardWidget::createLineItem(const Go::Line& line){
-    qreal x1 = vLines[line.position1.x]->line().x1();
-    qreal x2 = vLines[line.position2.x]->line().x2();
-    qreal y1 = hLines[line.position1.y]->line().y1();
-    qreal y2 = hLines[line.position2.y]->line().y2();
+    qreal x1, y1, x2, y2;
+    sgfToBoardCoordinate(line.position1.x, line.position1.y, x1, y1);
+    sgfToBoardCoordinate(line.position2.x, line.position2.y, x2, y2);
 
     GraphicsArrowItem* item;
     GraphicsArrowItem::Shape shape = line.type == Go::Line::arrow ? GraphicsArrowItem::normal : GraphicsArrowItem::none;
@@ -1159,11 +1347,11 @@ GraphicsArrowItem* BoardWidget::createLineItem(const Go::Line& line){
   create rect path
 */
 QRectF BoardWidget::createRectPath(const Go::Mark& mark){
-    qreal size = vLines[1]->line().x1() - vLines[0]->line().x1();
-    int sceneX = vLines[mark.position.x]->line().x1() - size / 2;
-    int sceneY = hLines[mark.position.y]->line().y1() - size / 2;
+    qreal size = getGridSize();
+    qreal x, y;
+    sgfToBoardCoordinate(mark.position.x, mark.position.y, x, y);
 
-    return QRect(QPoint(sceneX, sceneY), QSize(size, size));
+    return QRect(QPoint(x, y), QSize(size, size));
 }
 
 /**
@@ -1387,6 +1575,32 @@ void BoardWidget::setShowMarker(bool show){
 void BoardWidget::setShowVariations(int variation){
     currentGame->gameInformation->variation = variation;
     createBuffer(false);
+}
+
+/**
+  rotate view
+*/
+void BoardWidget::setRotate(int rotate_){
+    if (rotate_ < 0 || rotate_ > 3)
+        return;
+    rotate = rotate_;
+    setItemsPosition();
+}
+
+/**
+  flip view horizontally
+*/
+void BoardWidget::setFlipHorizontally(bool flip){
+    flipHorizontally = flip;
+    setItemsPosition();
+}
+
+/**
+  flip view vertically
+*/
+void BoardWidget::setFlipVertically(bool flip){
+    flipVertically = flip;
+    setItemsPosition();
 }
 
 /**

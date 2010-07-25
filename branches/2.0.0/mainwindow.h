@@ -229,6 +229,10 @@ private slots:
     void on_actionNoMarkup_triggered();
     void on_actionShowChildren_triggered();
     void on_actionShowSiblings_triggered();
+    void on_actionRotateClockwise_triggered();
+    void on_actionFlipHorizontally_triggered(bool checked);
+    void on_actionFlipVertically_triggered(bool checked);
+    void on_actionResetBoard_triggered();
 
     // Window Menu
     void on_actionPreviousTab_triggered();
