@@ -70,7 +70,9 @@ GraphicsLabelTextItem::GraphicsLabelTextItem(const QString& text, QGraphicsItem*
   Paint
 */
 void GraphicsLabelTextItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget){
-    painter->fillRect(boundingRect(), backgroundBrush_);
+    painter->translate(-pos().x(), -pos().y());
+    painter->fillRect(pos().x(), pos().y(), boundingRect().width(), boundingRect().height(), backgroundBrush_);
+    painter->translate(pos().x(), pos().y());
     QGraphicsSimpleTextItem::paint(painter, option, widget);
 }
 
@@ -158,6 +160,7 @@ BoardWidget::BoardWidget(SgfDocument* doc, QWidget *parent)
     : QGraphicsView(parent)
     , document_(doc)
     , scene( new QGraphicsScene(this) )
+    , focus(NULL)
     , editMode(EditMode::alternateMove)
     , jumpToClicked(false)
     , showMoveNumber(true)
@@ -177,6 +180,9 @@ BoardWidget::BoardWidget(SgfDocument* doc, QWidget *parent)
     , whiteStoneColor(WHITE_STONE_COLOR)
     , blackStoneType(Preference::internal)
     , blackStoneColor(BLACK_STONE_COLOR)
+    , branchColor(BRANCH_COLOR)
+    , focusColor(FOCUS_COLOR)
+    , focusType(0)
 {
 //    connect(document_, SIGNAL(nodeAdded(Go::NodePtr)), SLOT(on_sgfdocument_nodeAdded(Go::NodePtr)));
     connect(document_, SIGNAL(nodeDeleted(Go::NodePtr, bool)), SLOT(on_sgfdocument_nodeDeleted(Go::NodePtr, bool)));
@@ -783,19 +789,19 @@ void BoardWidget::setMarkItemPosition(QGraphicsItem* item, const Go::Mark& mark)
     else if (pathItem){
         QPainterPath path;
         if (mark.type == Go::Mark::cross)
-            path = createCrossPath(mark);
+            path = createCrossPath(mark.position.x, mark.position.y);
         else if (mark.type == Go::Mark::circle)
-            path = createCirclePath(mark);
+            path = createCirclePath(mark.position.x, mark.position.y);
         else if (mark.type == Go::Mark::square)
-            path = createSquarePath(mark);
+            path = createSquarePath(mark.position.x, mark.position.y);
         else if (mark.type == Go::Mark::triangle)
-            path = createTrianglePath(mark);
+            path = createTrianglePath(mark.position.x, mark.position.y);
         else if (mark.type == Go::Mark::blackTerritory)
-            path = createTerritoryPath(mark);
+            path = createTerritoryPath(mark.position.x, mark.position.y);
         else if (mark.type == Go::Mark::whiteTerritory)
-            path = createTerritoryPath(mark);
+            path = createTerritoryPath(mark.position.x, mark.position.y);
         else if (mark.type == Go::Mark::select)
-            path = createSelectPath(mark);
+            path = createSelectPath(mark.position.x, mark.position.y);
         else
             return;
         pathItem->setPath(path);
@@ -854,6 +860,8 @@ void BoardWidget::createBuffer(bool erase){
     dims.clear();
     lines.clear();
     variations.clear();
+    delete focus;
+    focus = NULL;
 
     // create boardBuffer
     boardBuffer.clear();
@@ -931,6 +939,9 @@ void BoardWidget::createBuffer(bool erase){
             createMarkItemList((*node)->blackTerritories);
             createLineItemList((*node)->lines);
             createVariationItemList(*node);
+
+            if (inBoard(*node))
+                createFocusItem((*node)->x(), (*node)->y());
 
             ++node;
             break;
@@ -1116,6 +1127,30 @@ void BoardWidget::removeLineFromBuffer(const Go::Line& /*line*/, GraphicsArrowIt
 }
 
 /**
+  create focus item
+*/
+void BoardWidget::createFocusItem(int x, int y){
+    if (showMoveNumberCount != 0)
+        return;
+
+    if (focusType == 0){
+        focus = scene->addPath( createTrianglePath(x, y) );
+        focus->setBrush(QBrush(focusColor));
+    }
+    else if (focusType == 1)
+        focus = scene->addPath( createCirclePath(x, y) );
+    else if (focusType == 2)
+        focus = scene->addPath( createCrossPath(x, y) );
+    else if (focusType == 3)
+        focus = scene->addPath( createSquarePath(x, y) );
+    else if (focusType == 4)
+        focus = scene->addPath( createTrianglePath(x, y) );
+
+    focus->setPen(QPen(focusColor, 2));
+    focus->setZValue(5);
+}
+
+/**
   create graphic mark item list
 */
 void BoardWidget::createMarkItemList(const Go::MarkList& markList){
@@ -1131,7 +1166,7 @@ void BoardWidget::createMarkItemList(const Go::MarkList& markList){
 */
 void BoardWidget::createLineItemList(const Go::LineList& lineList){
     foreach(const Go::Line& line, lineList){
-        GraphicsArrowItem* item = createLineItem(line);
+        GraphicsArrowItem* item = createLineItem(line.position1.x, line.position1.y, line.position2.x, line.position2.y, line.type);
         lines.push_back(item);
         addLineToBuffer(line, item);
     }
@@ -1175,7 +1210,7 @@ void BoardWidget::createVariationItemList(Go::NodePtr node){
 
         GraphicsLabelTextItem* item = new GraphicsLabelTextItem(str);
         item->setZValue(4);
-        item->setBrush( QBrush(Qt::blue) );
+        item->setBrush( QBrush(branchColor) );
 
         if (ti.color == Go::empty)
             item->setBackgroundBrush(board->brush());
@@ -1254,13 +1289,13 @@ void BoardWidget::createStonePixmap(){
 QGraphicsItem* BoardWidget::createMarkItem(const Go::Mark& mark){
     QGraphicsItem* item = NULL;
     if (mark.type == Go::Mark::cross)
-        item = scene->addPath( createCrossPath(mark) );
+        item = scene->addPath( createCrossPath(mark.position.x, mark.position.y) );
     else if (mark.type == Go::Mark::circle)
-        item = scene->addPath( createCirclePath(mark) );
+        item = scene->addPath( createCirclePath(mark.position.x, mark.position.y) );
     else if (mark.type == Go::Mark::square)
-        item = scene->addPath( createSquarePath(mark) );
+        item = scene->addPath( createSquarePath(mark.position.x, mark.position.y) );
     else if (mark.type == Go::Mark::triangle)
-        item = scene->addPath( createTrianglePath(mark) );
+        item = scene->addPath( createTrianglePath(mark.position.x, mark.position.y) );
     else if (mark.type == Go::Mark::character){
 //        item = scene->addSimpleText(mark.text);
         item = new GraphicsLabelTextItem(mark.text);
@@ -1268,15 +1303,15 @@ QGraphicsItem* BoardWidget::createMarkItem(const Go::Mark& mark){
         scene->addItem(item);
     }
     else if (mark.type == Go::Mark::blackTerritory)
-        item = scene->addPath( createTerritoryPath(mark) );
+        item = scene->addPath( createTerritoryPath(mark.position.x, mark.position.y) );
     else if (mark.type == Go::Mark::whiteTerritory)
-        item = scene->addPath( createTerritoryPath(mark) );
+        item = scene->addPath( createTerritoryPath(mark.position.x, mark.position.y) );
     else if (mark.type == Go::Mark::dim){
-        item = scene->addRect( createRectPath(mark), QPen(Qt::transparent), QBrush(Qt::black) );
+        item = scene->addRect( createRectPath(mark.position.x, mark.position.y), QPen(Qt::transparent), QBrush(Qt::black) );
         item->setOpacity(0.65);
     }
     else if (mark.type == Go::Mark::select)
-        item = scene->addPath( createSelectPath(mark) );
+        item = scene->addPath( createSelectPath(mark.position.x, mark.position.y) );
     else
         return NULL;
 
@@ -1287,12 +1322,12 @@ QGraphicsItem* BoardWidget::createMarkItem(const Go::Mark& mark){
 /**
   create cross path
 */
-QPainterPath BoardWidget::createCrossPath(const Go::Mark& mark){
+QPainterPath BoardWidget::createCrossPath(int x, int y){
     qreal size = getGridSize() * 0.4;
-    qreal x, y;
-    sgfToBoardCoordinate(mark.position.x, mark.position.y, x, y);
-    int sceneX = x - size / 2;
-    int sceneY = y - size / 2;
+    qreal xx, yy;
+    sgfToBoardCoordinate(x, y, xx, yy);
+    int sceneX = xx - size / 2;
+    int sceneY = yy - size / 2;
 
     QPainterPath path;
     path.moveTo(sceneX, sceneY);
@@ -1306,12 +1341,12 @@ QPainterPath BoardWidget::createCrossPath(const Go::Mark& mark){
 /**
   create circle path
 */
-QPainterPath BoardWidget::createCirclePath(const Go::Mark& mark){
+QPainterPath BoardWidget::createCirclePath(int x, int y){
     qreal size = getGridSize() * 0.5;
-    qreal x, y;
-    sgfToBoardCoordinate(mark.position.x, mark.position.y, x, y);
-    int sceneX = x - size / 2;
-    int sceneY = y - size / 2;
+    qreal xx, yy;
+    sgfToBoardCoordinate(x, y, xx, yy);
+    int sceneX = xx - size / 2;
+    int sceneY = yy - size / 2;
 
     QPainterPath path;
     path.addEllipse(sceneX, sceneY, size, size);
@@ -1322,12 +1357,12 @@ QPainterPath BoardWidget::createCirclePath(const Go::Mark& mark){
 /**
   create square path
 */
-QPainterPath BoardWidget::createSquarePath(const Go::Mark& mark){
+QPainterPath BoardWidget::createSquarePath(int x, int y){
     qreal size = getGridSize() * 0.45;
-    qreal x, y;
-    sgfToBoardCoordinate(mark.position.x, mark.position.y, x, y);
-    int sceneX = x - size / 2;
-    int sceneY = y - size / 2;
+    qreal xx, yy;
+    sgfToBoardCoordinate(x, y, xx, yy);
+    int sceneX = xx - size / 2;
+    int sceneY = yy - size / 2;
 
     QPainterPath path;
     path.addRect(sceneX, sceneY, size, size);
@@ -1338,13 +1373,13 @@ QPainterPath BoardWidget::createSquarePath(const Go::Mark& mark){
 /**
   create triangle path
 */
-QPainterPath BoardWidget::createTrianglePath(const Go::Mark& mark){
+QPainterPath BoardWidget::createTrianglePath(int x, int y){
     qreal xsize = getGridSize() * 0.5;
     qreal ysize = getGridSize() * 0.4;
-    qreal x, y;
-    sgfToBoardCoordinate(mark.position.x, mark.position.y, x, y);
-    int sceneX = x - xsize / 2;
-    int sceneY = y - ysize / 2;
+    qreal xx, yy;
+    sgfToBoardCoordinate(x, y, xx, yy);
+    int sceneX = xx - xsize / 2;
+    int sceneY = yy - ysize / 2;
 
     QPainterPath path;
     path.moveTo(sceneX+xsize/2, sceneY);
@@ -1358,12 +1393,12 @@ QPainterPath BoardWidget::createTrianglePath(const Go::Mark& mark){
 /**
   create black territory path
 */
-QPainterPath BoardWidget::createTerritoryPath(const Go::Mark& mark){
+QPainterPath BoardWidget::createTerritoryPath(int x, int y){
     qreal size = getGridSize() * 0.35;
-    qreal x, y;
-    sgfToBoardCoordinate(mark.position.x, mark.position.y, x, y);
-    int sceneX = x - size / 2;
-    int sceneY = y - size / 2;
+    qreal xx, yy;
+    sgfToBoardCoordinate(x, y, xx, yy);
+    int sceneX = xx - size / 2;
+    int sceneY = yy - size / 2;
 
     QPainterPath path;
     path.addRect(sceneX, sceneY, size, size);
@@ -1374,12 +1409,12 @@ QPainterPath BoardWidget::createTerritoryPath(const Go::Mark& mark){
 /**
   create select path
 */
-QPainterPath BoardWidget::createSelectPath(const Go::Mark& mark){
+QPainterPath BoardWidget::createSelectPath(int x, int y){
     qreal size = getGridSize() * 0.45;
-    qreal x, y;
-    sgfToBoardCoordinate(mark.position.x, mark.position.y, x, y);
-    int sceneX = x - size / 2;
-    int sceneY = y - size / 2;
+    qreal xx, yy;
+    sgfToBoardCoordinate(x, y, xx, yy);
+    int sceneX = xx - size / 2;
+    int sceneY = yy - size / 2;
 
     QPainterPath path;
     path.addRect(sceneX, sceneY, size, size);
@@ -1390,14 +1425,14 @@ QPainterPath BoardWidget::createSelectPath(const Go::Mark& mark){
 /**
   create line or arrow item
 */
-GraphicsArrowItem* BoardWidget::createLineItem(const Go::Line& line){
-    qreal x1, y1, x2, y2;
-    sgfToBoardCoordinate(line.position1.x, line.position1.y, x1, y1);
-    sgfToBoardCoordinate(line.position2.x, line.position2.y, x2, y2);
+GraphicsArrowItem* BoardWidget::createLineItem(int x1, int y1, int x2, int y2, Go::Line::Type type){
+    qreal xx1, yy1, xx2, yy2;
+    sgfToBoardCoordinate(x1, y1, xx1, yy1);
+    sgfToBoardCoordinate(x2, y2, xx2, yy2);
 
     GraphicsArrowItem* item;
-    GraphicsArrowItem::Shape shape = line.type == Go::Line::arrow ? GraphicsArrowItem::normal : GraphicsArrowItem::none;
-    item = new GraphicsArrowItem(x1, y1, x2, y2, GraphicsArrowItem::none, shape);
+    GraphicsArrowItem::Shape shape = type == Go::Line::arrow ? GraphicsArrowItem::normal : GraphicsArrowItem::none;
+    item = new GraphicsArrowItem(xx1, yy1, xx2, yy2, GraphicsArrowItem::none, shape);
 
     item->setPen( QPen(Qt::blue, 3) );
     item->setZValue(4);
@@ -1409,12 +1444,12 @@ GraphicsArrowItem* BoardWidget::createLineItem(const Go::Line& line){
 /**
   create rect path
 */
-QRectF BoardWidget::createRectPath(const Go::Mark& mark){
+QRectF BoardWidget::createRectPath(int x, int y){
     qreal size = getGridSize();
-    qreal x, y;
-    sgfToBoardCoordinate(mark.position.x, mark.position.y, x, y);
+    qreal xx, yy;
+    sgfToBoardCoordinate(x, y, xx, yy);
 
-    return QRect(QPoint(x, y), QSize(size, size));
+    return QRect(QPoint(xx-size/2, yy-size/2), QSize(size, size));
 }
 
 /**
@@ -1644,6 +1679,7 @@ void BoardWidget::setShowVariations(int variation){
   set board type
 */
 void BoardWidget::setBoardType(Preference::ResourceType type){
+    boardType = type;
     if (type == Preference::internal)
         board->setBrush(QBrush(QPixmap(BOARD_IMAGE)));
     else if (type == Preference::color)
@@ -1656,14 +1692,18 @@ void BoardWidget::setBoardType(Preference::ResourceType type){
   set board color
 */
 void BoardWidget::setBoardColor(const QColor& color){
-    board->setBrush(QBrush(boardColor = color));
+    boardColor = color;
+    if (boardType == Preference::color)
+        board->setBrush(QBrush(boardColor));
 }
 
 /**
   set board image
 */
 void BoardWidget::setBoardImage(const QString& file){
-    board->setBrush(QBrush(QPixmap(boardImage = file)));
+    boardImage = file;
+    if (boardType == Preference::file)
+        board->setBrush(QBrush(QPixmap(boardImage)));
 }
 
 /**
@@ -1754,6 +1794,30 @@ void BoardWidget::setBlackStoneImage(const QString& file){
         createStonePixmap();
         createBuffer(true);
     }
+}
+
+/**
+  set branch color
+*/
+void BoardWidget::setBranchColor(const QColor& color){
+    branchColor = color;
+    createBuffer(true);
+}
+
+/**
+  set focus color
+*/
+void BoardWidget::setFocusColor(const QColor& color){
+    focusColor = color;
+    createBuffer(false);
+}
+
+/**
+  set focus type
+*/
+void BoardWidget::setFocusType(int type){
+    focusType = type;
+    createBuffer(false);
 }
 
 /**

@@ -314,6 +314,11 @@ void MainWindow::setPreferences(BoardWidget* board){
     board->setBlackStoneColor( settings.value("stone/blackColor", BLACK_STONE_COLOR).value<QColor>() );
     board->setBlackStoneImage( settings.value("stone/blackPath").toString() );
     board->setBlackStoneType( (BoardWidget::Preference::ResourceType)settings.value("stone/blackType").toInt() );
+
+    // marker
+    board->setBranchColor( settings.value("marker/branchColor", BRANCH_COLOR).value<QColor>() );
+    board->setFocusColor( settings.value("marker/focusColor", FOCUS_COLOR).value<QColor>() );
+    board->setFocusType( settings.value("marker/focusType").toInt() );
 }
 
 /**

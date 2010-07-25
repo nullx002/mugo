@@ -37,10 +37,13 @@ private:
     Ui::SetupDialog *m_ui;
 
     // board
-    QColor boardColor, whiteColor, blackColor, coordinateColor, bgColor, tutorColor;
+    QColor boardColor, coordinateColor, bgColor, tutorColor;
+
+    // stone
+    QColor whiteColor, blackColor;
 
     // markers
-    QColor focusWhiteColor, focusBlackColor, branchColor;
+    QColor focusColor, branchColor;
 
 private slots:
     void on_categoryList_currentRowChanged(int currentRow);
@@ -62,8 +65,7 @@ private slots:
     void on_blackPathButton_clicked();
 
     // marker
-    void on_focusWhiteColorButton_clicked();
-    void on_focusBlackColorButton_clicked();
+    void on_focusColorButton_clicked();
     void on_branchColorButton_clicked();
 
     // sound

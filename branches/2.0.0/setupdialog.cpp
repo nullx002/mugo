@@ -61,13 +61,10 @@ SetupDialog::SetupDialog(QWidget *parent) :
     m_ui->blackColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(blackColor.red()).arg(blackColor.green()).arg(blackColor.blue()) );
     m_ui->blackPathEdit->setText( settings.value("stone/blackPath").toString() );
 
-/*
     // markers/focus
     m_ui->focusTypeComboBox->setCurrentIndex( settings.value("marker/focusType").toInt() );
-    focusWhiteColor = settings.value("marker/focusWhiteColor", FOCUS_WHITE_COLOR).value<QColor>();
-    m_ui->focusWhiteColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(focusWhiteColor.red()).arg(focusWhiteColor.green()).arg(focusWhiteColor.blue()) );
-    focusBlackColor = settings.value("marker/focusBlackColor", FOCUS_BLACK_COLOR).value<QColor>();
-    m_ui->focusBlackColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(focusBlackColor.red()).arg(focusBlackColor.green()).arg(focusBlackColor.blue()) );
+    focusColor = settings.value("marker/focusColor", FOCUS_COLOR).value<QColor>();
+    m_ui->focusColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(focusColor.red()).arg(focusColor.green()).arg(focusColor.blue()) );
 
     // markers/branch
     branchColor = settings.value("marker/branchColor", BRANCH_COLOR).value<QColor>();
@@ -76,6 +73,7 @@ SetupDialog::SetupDialog(QWidget *parent) :
     // markers/label
     m_ui->labelTypeComboBox->setCurrentIndex( settings.value("marker/labelType").toInt() );
 
+/*
     // navigation
     m_ui->stepsOfFastMoveSpinBox->setValue( settings.value("navigation/stepsOfFastMove", FAST_MOVE_STEPS).toInt() );
     m_ui->reproductionSpeedSpinBox->setValue( settings.value("navigation/autoReplayInterval", AUTO_REPLAY_INTERVAL).toInt() );
@@ -137,14 +135,13 @@ void SetupDialog::accept(){
     settings.setValue("stone/blackColor", blackColor);
     settings.setValue("stone/blackPath", m_ui->blackPathEdit->text());
 
-/*
     // markers
     settings.setValue("marker/focusType", m_ui->focusTypeComboBox->currentIndex());
-    settings.setValue("marker/focusWhiteColor", focusWhiteColor);
-    settings.setValue("marker/focusBlackColor", focusBlackColor);
+    settings.setValue("marker/focusColor", focusColor);
     settings.setValue("marker/branchColor", branchColor);
     settings.setValue("marker/labelType", m_ui->labelTypeComboBox->currentIndex());
 
+/*
     // navigation
     settings.setValue("navigation/stepsOfFastMove", m_ui->stepsOfFastMoveSpinBox->value());
     settings.setValue("navigation/autoReplayInterval", m_ui->reproductionSpeedSpinBox->value());
@@ -312,26 +309,14 @@ void SetupDialog::on_blackPathButton_clicked(){
 
 /**
 * slot
-* focus color (white stone) button clicked
+* focus color button clicked
 */
-void SetupDialog::on_focusWhiteColorButton_clicked(){
-    QColorDialog dlg(focusWhiteColor, this);
+void SetupDialog::on_focusColorButton_clicked(){
+    QColorDialog dlg(focusColor, this);
     if (dlg.exec() != QDialog::Accepted)
         return;
-    focusWhiteColor = dlg.selectedColor();
-    m_ui->focusWhiteColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(focusWhiteColor.red()).arg(focusWhiteColor.green()).arg(focusWhiteColor.blue()) );
-}
-
-/**
-* slot
-* focus color (black stone) button clicked
-*/
-void SetupDialog::on_focusBlackColorButton_clicked(){
-    QColorDialog dlg(focusBlackColor, this);
-    if (dlg.exec() != QDialog::Accepted)
-        return;
-    focusBlackColor = dlg.selectedColor();
-    m_ui->focusBlackColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(focusBlackColor.red()).arg(focusBlackColor.green()).arg(focusBlackColor.blue()) );
+    focusColor = dlg.selectedColor();
+    m_ui->focusColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(focusColor.red()).arg(focusColor.green()).arg(focusColor.blue()) );
 }
 
 /**

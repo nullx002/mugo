@@ -145,6 +145,9 @@ public:
     void setBlackStoneType(Preference::ResourceType type);
     void setBlackStoneColor(const QColor& color);
     void setBlackStoneImage(const QString& file);
+    void setBranchColor(const QColor& color);
+    void setFocusColor(const QColor& color);
+    void setFocusType(int type);
 
     // add
     void addItem(Go::NodePtr parent, Go::NodePtr node, int index = -1);
@@ -179,17 +182,18 @@ protected:
     void createMarkItemList(const Go::MarkList& markList);
     void createLineItemList(const Go::LineList& lineList);
     void createVariationItemList(Go::NodePtr node);
+    void createFocusItem(int x, int y);
     QGraphicsItem* createStoneItem(int x, int y, Go::Color color);
     void createStonePixmap();
     QGraphicsItem* createMarkItem(const Go::Mark& mark);
-    QPainterPath createCrossPath(const Go::Mark& mark);
-    QPainterPath createCirclePath(const Go::Mark& mark);
-    QPainterPath createSquarePath(const Go::Mark& mark);
-    QPainterPath createTrianglePath(const Go::Mark& mark);
-    QPainterPath createTerritoryPath(const Go::Mark& mark);
-    QPainterPath createSelectPath(const Go::Mark& mark);
-    QRectF createRectPath(const Go::Mark& mark);
-    GraphicsArrowItem* createLineItem(const Go::Line& line);
+    QPainterPath createCrossPath(int x, int y);
+    QPainterPath createCirclePath(int x, int y);
+    QPainterPath createSquarePath(int x, int y);
+    QPainterPath createTrianglePath(int x, int y);
+    QPainterPath createTerritoryPath(int x, int y);
+    QPainterPath createSelectPath(int x, int y);
+    QRectF createRectPath(int x, int y);
+    GraphicsArrowItem* createLineItem(int x1, int y1, int x2, int y2, Go::Line::Type type);
     TerritoryInfo& addStoneToBuffer(int x, int y, Go::Color color, int moveNumber, QGraphicsItem* stone, QGraphicsSimpleTextItem* number);
     TerritoryInfo& addMarkToBuffer(const Go::Mark& mark, QGraphicsItem* item);
     TerritoryInfo& removeMarkFromBuffer(const Go::Mark& mark, QGraphicsItem* item);
@@ -231,6 +235,7 @@ private:
     QGraphicsScene* scene;
     QGraphicsRectItem* board;
     QGraphicsRectItem* shadow;
+    QGraphicsPathItem* focus;
     QPixmap whiteStonePixmap;
     QPixmap blackStonePixmap;
     QList<QGraphicsSimpleTextItem*> coordinateLeft, coordinateRight, coordinateTop, coordinateBottom;
@@ -261,6 +266,7 @@ private:
     bool flipVertically;
 
     // preferences
+    Preference::ResourceType boardType;
     QColor  boardColor;
     QString boardImage;
     QColor  backgroundColor;
@@ -271,6 +277,9 @@ private:
     Preference::ResourceType blackStoneType;
     QColor  blackStoneColor;
     QString blackStoneImage;
+    QColor  branchColor;
+    QColor  focusColor;
+    int focusType;
 };
 
 #endif // BOARDWIDGET_H

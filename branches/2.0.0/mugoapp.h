@@ -40,6 +40,8 @@
 #define BLACK_STONE_IMAGE ":/res/black_128_ds.png"
 #define WHITE_STONE_COLOR Qt::white
 #define BLACK_STONE_COLOR Qt::black
+#define FOCUS_COLOR Qt::red
+#define BRANCH_COLOR Qt::blue
 
 
 class QAction;
