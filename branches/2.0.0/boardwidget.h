@@ -23,8 +23,8 @@
 #include "sgfdocument.h"
 
 
+class QFileInfo;
 class GraphicsArrowItem;
-
 
 
 /**
@@ -39,6 +39,10 @@ public:
 
     struct ResetMoveNumber{
         enum Mode{ noReset, branch, allBranch };
+    };
+
+    struct Preference{
+        enum ResourceType{ internal, color, file };
     };
 
     class TerritoryInfo{
@@ -129,8 +133,21 @@ public:
     void setFlipHorizontally(bool flip);
     void setFlipVertically(bool flip);
 
+    // set preferences
+    void setBoardType(Preference::ResourceType type);
+    void setBoardColor(const QColor& color);
+    void setBoardImage(const QString& file);
+    void setCoordinateColor(const QColor& color);
+    void setBackgroundColor(const QColor& color);
+    void setWhiteStoneType(Preference::ResourceType type);
+    void setWhiteStoneColor(const QColor& color);
+    void setWhiteStoneImage(const QString& file);
+    void setBlackStoneType(Preference::ResourceType type);
+    void setBlackStoneColor(const QColor& color);
+    void setBlackStoneImage(const QString& file);
+
     // add
-    void addItem(Go::NodePtr parent, Go::NodePtr node, int index);
+    void addItem(Go::NodePtr parent, Go::NodePtr node, int index = -1);
 
 signals:
     void currentGameChanged(Go::NodePtr currentGame);
@@ -153,7 +170,7 @@ protected:
 
     // set graphics item position
     void setItemsPosition();
-    void setStoneItemPosition(QGraphicsItem* item, int x, int y);
+    void setStoneItemPosition(QGraphicsItem* item, int x, int y, Go::Color color);
     void setMarkItemPosition(QGraphicsItem* item, const Go::Mark& mark);
     void setLineItemPosition(GraphicsArrowItem* item, const Go::Line& line);
     void setTextItemPosition(QGraphicsSimpleTextItem* text, int x, int y);
@@ -163,6 +180,7 @@ protected:
     void createLineItemList(const Go::LineList& lineList);
     void createVariationItemList(Go::NodePtr node);
     QGraphicsItem* createStoneItem(int x, int y, Go::Color color);
+    void createStonePixmap();
     QGraphicsItem* createMarkItem(const Go::Mark& mark);
     QPainterPath createCrossPath(const Go::Mark& mark);
     QPainterPath createCirclePath(const Go::Mark& mark);
@@ -213,6 +231,8 @@ private:
     QGraphicsScene* scene;
     QGraphicsRectItem* board;
     QGraphicsRectItem* shadow;
+    QPixmap whiteStonePixmap;
+    QPixmap blackStonePixmap;
     QList<QGraphicsSimpleTextItem*> coordinateLeft, coordinateRight, coordinateTop, coordinateBottom;
     QList<QGraphicsLineItem*> hLines;
     QList<QGraphicsLineItem*> vLines;
@@ -239,6 +259,18 @@ private:
     int  rotate;
     bool flipHorizontally;
     bool flipVertically;
+
+    // preferences
+    QColor  boardColor;
+    QString boardImage;
+    QColor  backgroundColor;
+    QColor  coordinateColor;
+    Preference::ResourceType whiteStoneType;
+    QColor  whiteStoneColor;
+    QString whiteStoneImage;
+    Preference::ResourceType blackStoneType;
+    QColor  blackStoneColor;
+    QString blackStoneImage;
 };
 
 #endif // BOARDWIDGET_H

@@ -23,6 +23,7 @@
 #include <QGraphicsPixmapItem>
 #include <QGraphicsSimpleTextItem>
 #include <QInputDialog>
+#include "mugoapp.h"
 #include "boardwidget.h"
 #include "sgfdocument.h"
 #include "command.h"
@@ -167,6 +168,15 @@ BoardWidget::BoardWidget(SgfDocument* doc, QWidget *parent)
     , rotate(0)
     , flipHorizontally(false)
     , flipVertically(false)
+
+    // Preferences
+    , boardColor(BOARD_COLOR)
+    , backgroundColor(BG_COLOR)
+    , coordinateColor(COORDINATE_COLOR)
+    , whiteStoneType(Preference::internal)
+    , whiteStoneColor(WHITE_STONE_COLOR)
+    , blackStoneType(Preference::internal)
+    , blackStoneColor(BLACK_STONE_COLOR)
 {
 //    connect(document_, SIGNAL(nodeAdded(Go::NodePtr)), SLOT(on_sgfdocument_nodeAdded(Go::NodePtr)));
     connect(document_, SIGNAL(nodeDeleted(Go::NodePtr, bool)), SLOT(on_sgfdocument_nodeDeleted(Go::NodePtr, bool)));
@@ -178,9 +188,8 @@ BoardWidget::BoardWidget(SgfDocument* doc, QWidget *parent)
     setScene(scene);
 
     // create board
-    shadow = scene->addRect(0, 0, 1, 1, QPen(Qt::transparent), QBrush(QColor(10, 10, 10, 130)));
-    board  = scene->addRect(0, 0, 1, 1, QPen(QColor(255, 200, 100)), QBrush(QColor(255, 200, 100)));
-//    board  = scene->addRect(0, 0, 1, 1, QPen(QColor(255, 200, 100)), QBrush(QPixmap(":/res/bg.png")));
+    shadow = scene->addRect(0, 0, 1, 1, QPen(Qt::transparent), QBrush(SHADOW_COLOR));
+    board  = scene->addRect(0, 0, 1, 1, QPen(Qt::transparent), QBrush(QPixmap(BOARD_IMAGE)));
     board->setZValue(1);
 
     // set current game
@@ -586,6 +595,8 @@ void BoardWidget::createBoard(){
         QGraphicsSimpleTextItem* right = scene->addSimpleText(QString::number(i), QFont("Helvetica", 10));
         left->setZValue(2);
         right->setZValue(2);
+        left->setBrush( QBrush(coordinateColor) );
+        right->setBrush( QBrush(coordinateColor) );
         coordinateLeft.push_back(left);
         coordinateRight.push_back(right);
     }
@@ -597,6 +608,8 @@ void BoardWidget::createBoard(){
         QGraphicsSimpleTextItem* bottom = scene->addSimpleText(QString().sprintf("%c", 'A' + n), QFont("Helvetica", 10));
         top->setZValue(2);
         bottom->setZValue(2);
+        top->setBrush( QBrush(coordinateColor) );
+        bottom->setBrush( QBrush(coordinateColor) );
         coordinateTop.push_back(top);
         coordinateBottom.push_back(bottom);
     }
@@ -646,7 +659,7 @@ void BoardWidget::setItemsPosition(){
     QRect boardRect(QPoint(x-margin, y-margin), QPoint(x+w+margin, y+h+margin));
 
     // set position of shadow.
-    shadow->setRect(boardRect.left()+4, boardRect.top()+4, boardRect.width(), boardRect.height());
+    shadow->setRect(boardRect.left()+3, boardRect.top()+3, boardRect.width(), boardRect.height());
 
     // set position of board.
     board->setRect(boardRect);
@@ -693,6 +706,7 @@ void BoardWidget::setItemsPosition(){
     }
 
     // set position of stones and move number.
+    createStonePixmap();
     for (int i=0; i<currentNodeList.size(); ++i){
         Go::NodePtr& node = currentNodeList[i];
         if (inBoard(node) == false)
@@ -700,7 +714,7 @@ void BoardWidget::setItemsPosition(){
 
         QGraphicsItem* stone = stones[i];
         if (stone)
-            setStoneItemPosition(stone, node->x(), node->y());
+            setStoneItemPosition(stone, node->x(), node->y(), node->color);
 
         QGraphicsSimpleTextItem* number = numbers[i];
         if (number)
@@ -713,7 +727,7 @@ void BoardWidget::setItemsPosition(){
             TerritoryInfo& ti= boardBuffer[y][x];
 
             if (ti.stoneItem)
-                setStoneItemPosition(ti.stoneItem, x, y);
+                setStoneItemPosition(ti.stoneItem, x, y, ti.color);
 
             if (ti.markItem)
                 setMarkItemPosition(ti.markItem, ti.mark);
@@ -733,14 +747,19 @@ void BoardWidget::setItemsPosition(){
 /**
   set grahics stone item position
 */
-void BoardWidget::setStoneItemPosition(QGraphicsItem* item, int x, int y){
-    qreal size = getGridSize() * 0.95;
+void BoardWidget::setStoneItemPosition(QGraphicsItem* item, int x, int y, Go::Color color){
+    qreal size = getGridSize();
     qreal xx, yy;
     sgfToBoardCoordinate(x, y, xx, yy);
 
     QGraphicsEllipseItem* ellipse = dynamic_cast<QGraphicsEllipseItem*>(item);
+    QGraphicsPixmapItem* pixmap = dynamic_cast<QGraphicsPixmapItem*>(item);
     if (ellipse)
         ellipse->setRect(xx-size/2, yy-size/2, size, size);
+    else{
+        pixmap->setPixmap(color == Go::white ? whiteStonePixmap : blackStonePixmap);
+        pixmap->setOffset(xx-size/2, yy-size/2);
+    }
 }
 
 /**
@@ -1179,10 +1198,54 @@ QGraphicsItem* BoardWidget::createStoneItem(int x, int y, Go::Color color){
     int sceneX = xx - size / 2;
     int sceneY = yy - size / 2;
 
-    QGraphicsItem* stone = scene->addEllipse( sceneX, sceneY, size, size, QPen(Qt::black), QBrush(color == Go::black ? Qt::black : Qt::white) );
+    QGraphicsItem* stone = NULL;
+    Preference::ResourceType type = color == Go::white ? whiteStoneType : blackStoneType;
+    if (type == Preference::color){
+        QColor& c = color == Go::white ? whiteStoneColor : blackStoneColor;
+        stone = scene->addEllipse( sceneX, sceneY, size, size, QPen(Qt::black), QBrush(c) );
+    }
+    else{
+/*
+        QString& image = type == Preference::file ?
+                        (color == Go::white ? whiteStoneImage : blackStoneImage) :
+                        (color == Go::white ? WHITE_STONE_IMAGE : BLACK_STONE_IMAGE);
+        QPixmap p(image);
+//        p = p.scaled(size, size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+        QGraphicsPixmapItem* item = scene->addPixmap(p);
+//        item->setOffset(sceneX, sceneY);
+*/
+        QPixmap& p = color == Go::white ? whiteStonePixmap : blackStonePixmap;
+        QGraphicsPixmapItem* item = scene->addPixmap(p);
+        item->setOffset(sceneX, sceneY);
+        stone = item;
+    }
+
     stone->setZValue(3);
 
     return stone;
+}
+
+/**
+ create scaled stone pixmap
+*/
+void BoardWidget::createStonePixmap(){
+    qreal size = getGridSize();
+
+    if (whiteStoneType != Preference::color){
+        QString& whiteImage = whiteStoneType == Preference::file ? whiteStoneImage : WHITE_STONE_IMAGE;
+        QPixmap pixmap(whiteImage);
+        whiteStonePixmap = pixmap.scaled(size, size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    }
+    else
+        whiteStonePixmap = QPixmap();
+
+    if (blackStoneType != Preference::color){
+        QString& blackImage = blackStoneType == Preference::file ? blackStoneImage : BLACK_STONE_IMAGE;
+        QPixmap pixmap(blackImage);
+        blackStonePixmap = pixmap.scaled(size, size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    }
+    else
+        blackStonePixmap = QPixmap();
 }
 
 /**
@@ -1391,7 +1454,7 @@ void BoardWidget::addStone(int x, int y, Go::Color color){
         // if currentNode is stone, create child node and add stone to new node.
         if (currentNode->isStone()){
             Go::NodePtr node(new Go::Node(currentNode));
-            addItem(currentNode, node, -1);
+            addItem(currentNode, node);
             setCurrentNode(node);
         }
 
@@ -1575,6 +1638,122 @@ void BoardWidget::setShowMarker(bool show){
 void BoardWidget::setShowVariations(int variation){
     currentGame->gameInformation->variation = variation;
     createBuffer(false);
+}
+
+/**
+  set board type
+*/
+void BoardWidget::setBoardType(Preference::ResourceType type){
+    if (type == Preference::internal)
+        board->setBrush(QBrush(QPixmap(BOARD_IMAGE)));
+    else if (type == Preference::color)
+        board->setBrush(QBrush(boardColor));
+    else if (type == Preference::file)
+        board->setBrush(QBrush(QPixmap(boardImage)));
+}
+
+/**
+  set board color
+*/
+void BoardWidget::setBoardColor(const QColor& color){
+    board->setBrush(QBrush(boardColor = color));
+}
+
+/**
+  set board image
+*/
+void BoardWidget::setBoardImage(const QString& file){
+    board->setBrush(QBrush(QPixmap(boardImage = file)));
+}
+
+/**
+  set coordinate color
+*/
+void BoardWidget::setCoordinateColor(const QColor& color){
+    QBrush brush(coordinateColor = color);
+
+    foreach(QGraphicsSimpleTextItem* text, coordinateLeft)
+        text->setBrush(brush);
+
+    foreach(QGraphicsSimpleTextItem* text, coordinateRight)
+        text->setBrush(brush);
+
+    foreach(QGraphicsSimpleTextItem* text, coordinateTop)
+        text->setBrush(brush);
+
+    foreach(QGraphicsSimpleTextItem* text, coordinateBottom)
+        text->setBrush(brush);
+}
+
+/**
+  set background color
+*/
+void BoardWidget::setBackgroundColor(const QColor& color){
+    scene->setBackgroundBrush( QBrush(backgroundColor = color) );
+}
+
+/**
+  set white stone type
+*/
+void BoardWidget::setWhiteStoneType(Preference::ResourceType type){
+    if (whiteStoneType == type)
+        return;
+
+    whiteStoneType = type;
+    createStonePixmap();
+    createBuffer(true);
+}
+
+/**
+  set white stone color
+*/
+void BoardWidget::setWhiteStoneColor(const QColor& color){
+    whiteStoneColor = color;
+    if (whiteStoneType == Preference::color)
+        createBuffer(true);
+}
+
+/**
+  set white stone image
+*/
+void BoardWidget::setWhiteStoneImage(const QString& file){
+    whiteStoneImage = file;
+    if (whiteStoneType == Preference::file){
+        createStonePixmap();
+        createBuffer(true);
+    }
+}
+
+/**
+  set black stone type
+*/
+void BoardWidget::setBlackStoneType(Preference::ResourceType type){
+    if (blackStoneType == type)
+        return;
+
+    blackStoneType = type;
+    createStonePixmap();
+    createBuffer(true);
+}
+
+/**
+  set black stone color
+*/
+void BoardWidget::setBlackStoneColor(const QColor& color){
+    blackStoneColor = color;
+    if (blackStoneType == Preference::color)
+        createBuffer(true);
+}
+
+/**
+  set black stone image
+*/
+void BoardWidget::setBlackStoneImage(const QString& file){
+    blackStoneImage = file;
+    if (blackStoneType == Preference::file){
+        createStonePixmap();
+        createBuffer(true);
+    }
 }
 
 /**
@@ -1815,7 +1994,7 @@ bool BoardWidget::createChildItem(int x, int y){
     else
         return false;
 
-    addItem(currentNode, node, -1);
+    addItem(currentNode, node);
     setCurrentNode(node);
 
     return true;

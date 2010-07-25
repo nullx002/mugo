@@ -35,6 +35,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "boardwidget.h"
+#include "setupdialog.h"
 #include "gameinformationdialog.h"
 #include "newdocumentdialog.h"
 #include "exportasciidialog.h"
@@ -288,6 +289,31 @@ void MainWindow::createMenu(){
 
     // undo view
     ui->undoView->setGroup(&undoGroup);
+}
+
+/**
+  set preferences
+
+  initialize boardwidget
+*/
+void MainWindow::setPreferences(BoardWidget* board){
+    QSettings settings;
+
+    // board
+    board->setBoardColor( settings.value("board/boardColor", BOARD_COLOR).value<QColor>() );
+    board->setBoardImage( settings.value("board/boardPath").toString() );
+    board->setBoardType( (BoardWidget::Preference::ResourceType)settings.value("board/boardType", 0).toInt() );
+    board->setCoordinateColor( settings.value("board/coordinateColor", COORDINATE_COLOR).value<QColor>() );
+    board->setBackgroundColor( settings.value("board/bgColor", BG_COLOR).value<QColor>() );
+//    board->setCoordinateColor( settings.value("board/bgTutorColor", BG_TUTOR_COLOR).value<QColor>() );
+
+    // stone
+    board->setWhiteStoneColor( settings.value("stone/whiteColor", BLACK_STONE_COLOR).value<QColor>() );
+    board->setWhiteStoneImage( settings.value("stone/whitePath").toString() );
+    board->setWhiteStoneType( (BoardWidget::Preference::ResourceType)settings.value("stone/whiteType").toInt() );
+    board->setBlackStoneColor( settings.value("stone/blackColor", BLACK_STONE_COLOR).value<QColor>() );
+    board->setBlackStoneImage( settings.value("stone/blackPath").toString() );
+    board->setBlackStoneType( (BoardWidget::Preference::ResourceType)settings.value("stone/blackType").toInt() );
 }
 
 /**
@@ -585,6 +611,7 @@ void MainWindow::addDocument(SgfDocument* doc, BoardWidget* board)
 
     if (board == NULL){
         board = new BoardWidget(doc, this);
+        setPreferences(board);
         view.boardWidget  = board;
 
         connect(board, SIGNAL(currentGameChanged(Go::NodePtr)), SLOT(on_boardWidget_currentGameChanged(Go::NodePtr)));
@@ -1679,7 +1706,7 @@ void MainWindow::on_actionPass_triggered()
     else
         return;
 
-    board->addItem(currentNode, childNode, -1);
+    board->addItem(currentNode, childNode);
     board->setCurrentNode(childNode);
 }
 
@@ -2496,7 +2523,7 @@ void MainWindow::on_actionShowCoordinateWithI_triggered(bool checked){
 
 /**
   Slot
-  Viwe -> Show Marker
+  View -> Show Marker
 */
 void MainWindow::on_actionShowMarker_triggered(bool checked){
     BoardWidget* board = currentBoard();
@@ -2508,7 +2535,7 @@ void MainWindow::on_actionShowMarker_triggered(bool checked){
 
 /**
   Slot
-  Viwe -> Show Variations -> No Markup
+  View -> Show Variations -> No Markup
 */
 void MainWindow::on_actionNoMarkup_triggered(){
     BoardWidget* board = currentBoard();
@@ -2520,7 +2547,7 @@ void MainWindow::on_actionNoMarkup_triggered(){
 
 /**
   Slot
-  Viwe -> Show Variations -> Show Children
+  View -> Show Variations -> Show Children
 */
 void MainWindow::on_actionShowChildren_triggered(){
     BoardWidget* board = currentBoard();
@@ -2532,7 +2559,7 @@ void MainWindow::on_actionShowChildren_triggered(){
 
 /**
   Slot
-  Viwe -> Show Variations -> Show Siblings
+  View -> Show Variations -> Show Siblings
 */
 void MainWindow::on_actionShowSiblings_triggered(){
     BoardWidget* board = currentBoard();
@@ -2544,7 +2571,7 @@ void MainWindow::on_actionShowSiblings_triggered(){
 
 /**
   Slot
-  Viwe -> Rotate Clockwise
+  View -> Rotate Clockwise
 */
 void MainWindow::on_actionRotateClockwise_triggered(){
     BoardWidget* board = currentBoard();
@@ -2557,7 +2584,7 @@ void MainWindow::on_actionRotateClockwise_triggered(){
 
 /**
   Slot
-  Viwe -> Flip Horizontally
+  View -> Flip Horizontally
 */
 void MainWindow::on_actionFlipHorizontally_triggered(bool checked){
     BoardWidget* board = currentBoard();
@@ -2569,7 +2596,7 @@ void MainWindow::on_actionFlipHorizontally_triggered(bool checked){
 
 /**
   Slot
-  Viwe -> Flip Vertically
+  View -> Flip Vertically
 */
 void MainWindow::on_actionFlipVertically_triggered(bool checked){
     BoardWidget* board = currentBoard();
@@ -2581,7 +2608,7 @@ void MainWindow::on_actionFlipVertically_triggered(bool checked){
 
 /**
   Slot
-  Viwe -> Reset Board
+  View -> Reset Board
 */
 void MainWindow::on_actionResetBoard_triggered(){
     BoardWidget* board = currentBoard();
@@ -2595,6 +2622,23 @@ void MainWindow::on_actionResetBoard_triggered(){
     board->setFlipVertically(false);
     board->setFlipHorizontally(false);
     board->setRotate(0);
+}
+
+/**
+  Slot
+  Tool -> Options
+*/
+void MainWindow::on_actionOptions_triggered(){
+    SetupDialog dlg(this);
+    if (dlg.exec() != QDialog::Accepted)
+        return;
+
+    for (int i=0; i<ui->boardTabWidget->count(); ++i){
+        QWidget* widget = ui->boardTabWidget->widget(i);
+        BoardWidget* board = qobject_cast<BoardWidget*>(widget);
+        if (board)
+            setPreferences(board);
+    }
 }
 
 /**

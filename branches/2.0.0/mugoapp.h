@@ -29,6 +29,18 @@
 #define AUTHOR       "nsase"
 #define COPYRIGHT    "Copyright 2009-2010 nsase."
 
+// DEFAULT SETTINGS
+#define BOARD_IMAGE ":/res/bg.png"
+#define BOARD_COLOR QColor(255, 200, 100)
+#define SHADOW_COLOR QColor(10, 10, 10, 130)
+#define COORDINATE_COLOR Qt::black
+#define BG_COLOR Qt::white
+#define BG_TUTOR_COLOR QColor(0x20, 0xa0, 0xa0)
+#define WHITE_STONE_IMAGE ":/res/white_128_ds.png"
+#define BLACK_STONE_IMAGE ":/res/black_128_ds.png"
+#define WHITE_STONE_COLOR Qt::white
+#define BLACK_STONE_COLOR Qt::black
+
 
 class QAction;
 class QTextCodec;

@@ -319,10 +319,17 @@
     <addaction name="actionFlipVertically"/>
     <addaction name="actionResetBoard"/>
    </widget>
+   <widget class="QMenu" name="menuTools">
+    <property name="title">
+     <string>&amp;Tools</string>
+    </property>
+    <addaction name="actionOptions"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuNavigation"/>
    <addaction name="menu_View"/>
+   <addaction name="menuTools"/>
    <addaction name="menuWindow"/>
    <addaction name="menuHelp"/>
   </widget>
@@ -1574,6 +1581,15 @@
    </property>
    <property name="text">
     <string>Reset Board</string>
+   </property>
+  </action>
+  <action name="actionOptions">
+   <property name="icon">
+    <iconset resource="mugo.qrc">
+     <normaloff>:/res/options.png</normaloff>:/res/options.png</iconset>
+   </property>
+   <property name="text">
+    <string>Options...</string>
    </property>
   </action>
  </widget>

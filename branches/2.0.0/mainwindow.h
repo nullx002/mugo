@@ -73,6 +73,7 @@ protected:
     void setKeyboardShortcut();
     void createMenu();
     void createEncodingAction();
+    void setPreferences(BoardWidget*);
 
     // new, open, save, close
     void fileNew(QTextCodec* codec, int xsize=19, int ysize=19, double komi=6.5, int handicap=0);
@@ -233,6 +234,9 @@ private slots:
     void on_actionFlipHorizontally_triggered(bool checked);
     void on_actionFlipVertically_triggered(bool checked);
     void on_actionResetBoard_triggered();
+
+    // Tools Menu
+    void on_actionOptions_triggered();
 
     // Window Menu
     void on_actionPreviousTab_triggered();

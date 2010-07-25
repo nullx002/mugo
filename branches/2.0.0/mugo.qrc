@@ -50,5 +50,6 @@
         <file>res/showmovenumber.png</file>
         <file>res/branchmode.png</file>
         <file>res/resetboard.png</file>
+        <file>res/options.png</file>
     </qresource>
 </RCC>

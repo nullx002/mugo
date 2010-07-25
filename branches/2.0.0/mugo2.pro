@@ -19,7 +19,8 @@ SOURCES += main.cpp \
     newdocumentdialog.cpp \
     libkombilo/search.cpp \
     libkombilo/abstractboard.cpp \
-    libkombilo/sgfparser.cpp
+    libkombilo/sgfparser.cpp \
+    setupdialog.cpp
 HEADERS += mainwindow.h \
     boardwidget.h \
     document.h \
@@ -33,11 +34,13 @@ HEADERS += mainwindow.h \
     newdocumentdialog.h \
     libkombilo/search.h \
     libkombilo/abstractboard.h \
-    libkombilo/sgfparser.h
+    libkombilo/sgfparser.h \
+    setupdialog.h
 FORMS += mainwindow.ui \
     gameinformationdialog.ui \
     exportasciidialog.ui \
-    newdocumentdialog.ui
+    newdocumentdialog.ui \
+    setupdialog.ui
 RESOURCES += mugo.qrc
 win32:RC_FILE = mugo.rc
 mac:RC_FILE = pics/mugo.icns
