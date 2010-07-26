@@ -319,6 +319,7 @@ void MainWindow::setPreferences(BoardWidget* board){
     board->setBranchColor( settings.value("marker/branchColor", BRANCH_COLOR).value<QColor>() );
     board->setFocusColor( settings.value("marker/focusColor", FOCUS_COLOR).value<QColor>() );
     board->setFocusType( settings.value("marker/focusType").toInt() );
+    board->setLabelType( (BoardWidget::Preference::LabelType)settings.value("marker/labelType").toInt() );
 }
 
 /**

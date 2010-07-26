@@ -183,6 +183,7 @@ BoardWidget::BoardWidget(SgfDocument* doc, QWidget *parent)
     , branchColor(BRANCH_COLOR)
     , focusColor(FOCUS_COLOR)
     , focusType(0)
+    , labelType(Preference::large)
 {
 //    connect(document_, SIGNAL(nodeAdded(Go::NodePtr)), SLOT(on_sgfdocument_nodeAdded(Go::NodePtr)));
     connect(document_, SIGNAL(nodeDeleted(Go::NodePtr, bool)), SLOT(on_sgfdocument_nodeDeleted(Go::NodePtr, bool)));
@@ -1267,7 +1268,7 @@ void BoardWidget::createStonePixmap(){
     qreal size = getGridSize();
 
     if (whiteStoneType != Preference::color){
-        QString& whiteImage = whiteStoneType == Preference::file ? whiteStoneImage : WHITE_STONE_IMAGE;
+        QString whiteImage = whiteStoneType == Preference::file ? whiteStoneImage : WHITE_STONE_IMAGE;
         QPixmap pixmap(whiteImage);
         whiteStonePixmap = pixmap.scaled(size, size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
     }
@@ -1275,7 +1276,7 @@ void BoardWidget::createStonePixmap(){
         whiteStonePixmap = QPixmap();
 
     if (blackStoneType != Preference::color){
-        QString& blackImage = blackStoneType == Preference::file ? blackStoneImage : BLACK_STONE_IMAGE;
+        QString blackImage = blackStoneType == Preference::file ? blackStoneImage : BLACK_STONE_IMAGE;
         QPixmap pixmap(blackImage);
         blackStonePixmap = pixmap.scaled(size, size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
     }
@@ -1530,7 +1531,7 @@ void BoardWidget::addLabel(int x, int y, bool autoLabel){
             return;
     }
     else{
-        char c = 'A';
+        int c = labelType == Preference::number ? 0 : labelType == Preference::small ? 'a' - 1 : 'A' - 1;
 
         QStringList strList;
         foreach(const Go::Mark& mark, currentNode->marks){
@@ -1538,9 +1539,12 @@ void BoardWidget::addLabel(int x, int y, bool autoLabel){
                 strList.push_back(mark.text);
         }
 
-        str.sprintf("%c", c);
-        while (strList.indexOf(str) >= 0)
-            str.sprintf("%c", ++c);
+        do{
+            if (labelType == Preference::number)
+                str = QString::number(++c);
+            else
+                str.sprintf("%c", ++c);
+        } while(strList.indexOf(str) >= 0);
     }
     AddMarkCommand* command = new AddMarkCommand(document(), currentNode, Go::Mark(x, y, str));
     document()->getUndoStack()->push(command);
@@ -1818,6 +1822,13 @@ void BoardWidget::setFocusColor(const QColor& color){
 void BoardWidget::setFocusType(int type){
     focusType = type;
     createBuffer(false);
+}
+
+/**
+  set label type
+*/
+void BoardWidget::setLabelType(Preference::LabelType type){
+    labelType = type;
 }
 
 /**

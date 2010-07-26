@@ -43,6 +43,7 @@ public:
 
     struct Preference{
         enum ResourceType{ internal, color, file };
+        enum LabelType{ large, small, number };
     };
 
     class TerritoryInfo{
@@ -148,6 +149,7 @@ public:
     void setBranchColor(const QColor& color);
     void setFocusColor(const QColor& color);
     void setFocusType(int type);
+    void setLabelType(Preference::LabelType type);
 
     // add
     void addItem(Go::NodePtr parent, Go::NodePtr node, int index = -1);
@@ -280,6 +282,7 @@ private:
     QColor  branchColor;
     QColor  focusColor;
     int focusType;
+    Preference::LabelType labelType;
 };
 
 #endif // BOARDWIDGET_H
