@@ -931,8 +931,6 @@ void BoardWidget::createBuffer(bool erase){
             addMarkToBuffer(dim, item);
         }
 
-        ++stone;
-        ++number;
         if (*node == currentNode){
             // add mark
             createMarkItemList((*node)->marks);
@@ -944,10 +942,19 @@ void BoardWidget::createBuffer(bool erase){
             if (inBoard(*node))
                 createFocusItem((*node)->x(), (*node)->y());
 
+            if (*number){
+//                (*number)->setPen(QPen(focusColor));
+                (*number)->setBrush(QBrush(focusColor));
+            }
+
             ++node;
+            ++stone;
+            ++number;
             break;
         }
         ++node;
+        ++stone;
+        ++number;
     };
 
     // hide stones after current node
@@ -999,7 +1006,6 @@ void BoardWidget::eraseBuffer(){
             stones.push_back(stone);
 
             QGraphicsSimpleTextItem* number = scene->addSimpleText("");
-            number->setBrush( QBrush(node->color == Go::black ? Qt::white : Qt::black) );
             number->setZValue(4);
             numbers.push_back(number);
         }
@@ -1030,6 +1036,8 @@ BoardWidget::TerritoryInfo& BoardWidget::addStoneToBuffer(int x, int y, Go::Colo
     }
 
     if (number){
+        number->setPen( QPen(Qt::NoPen) );
+        number->setBrush( QBrush(color == Go::black ? Qt::white : Qt::black) );
         number->setText( QString::number(moveNumber) );
         if (showMoveNumber){
             setTextItemPosition(number, x, y);
