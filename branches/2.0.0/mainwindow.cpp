@@ -320,6 +320,13 @@ void MainWindow::setPreferences(BoardWidget* board){
     board->setFocusColor( settings.value("marker/focusColor", FOCUS_COLOR).value<QColor>() );
     board->setFocusType( settings.value("marker/focusType").toInt() );
     board->setLabelType( (BoardWidget::Preference::LabelType)settings.value("marker/labelType").toInt() );
+
+    // sound
+    board->setPlaySound( settings.value("sound/play", true).toBool() );
+    if (settings.value("sound/type").toInt() == 1)
+        board->setMoveSoundFile( settings.value("sound/path").toString() );
+    else
+        board->setMoveSoundFile( MOVE_SOUND_FILE );
 }
 
 /**
@@ -468,12 +475,22 @@ bool MainWindow::fileSave(Document* doc){
     save
 */
 bool MainWindow::fileSaveAs(Document* doc){
+    SgfDocument* sgfDoc = qobject_cast<SgfDocument*>(doc);
+
     // initial path for save dialog
     QString initialPath;
     if (doc->getFileName().isEmpty() == false)
         initialPath = doc->getFileName();
     else{
-        initialPath = doc->getDocName();
+        if (sgfDoc){
+            QSettings settings;
+            QString in = settings.value("saveFileName", SAVE_FILE_NAME).toString();
+            if (replaceSgfProperty(sgfDoc->gameList[0], in, initialPath) == 0)
+                initialPath = doc->getDocName();
+        }
+        else
+            initialPath = doc->getDocName();
+
         QFileInfo fi(initialPath);
         if (fi.suffix().isEmpty())
             initialPath += ".sgf";
@@ -485,7 +502,6 @@ bool MainWindow::fileSaveAs(Document* doc){
     if (getSaveFileName(initialPath, fname, codec) == false)
         return false;
 
-    SgfDocument* sgfDoc = qobject_cast<SgfDocument*>(doc);
     QFileInfo fi(fname);
     if (fi.suffix().isEmpty()){
         if (sgfDoc)
@@ -1142,6 +1158,9 @@ void MainWindow::updateMenu(){
 
     // View -> Flip Vertically
     ui->actionFlipVertically->setChecked( board->getFlipVertically() );
+
+    // Tools -> Play Sound
+    ui->actionPlaySound->setChecked( board->isPlaySound() );
 }
 
 
@@ -2628,6 +2647,22 @@ void MainWindow::on_actionResetBoard_triggered(){
     board->setFlipVertically(false);
     board->setFlipHorizontally(false);
     board->setRotate(0);
+}
+
+/**
+  Slot
+  Tools -> Play Sound
+*/
+void MainWindow::on_actionPlaySound_triggered(bool checked){
+    QSettings settings;
+    settings.setValue("sound/play", checked);
+
+    for (int i=0; i<ui->boardTabWidget->count(); ++i){
+        QWidget* widget = ui->boardTabWidget->widget(i);
+        BoardWidget* board = qobject_cast<BoardWidget*>(widget);
+        if (board)
+            board->setPlaySound(checked);
+    }
 }
 
 /**

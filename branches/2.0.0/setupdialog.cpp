@@ -16,9 +16,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include <QDebug>
+#include <QSettings>
 #include <QFileDialog>
 #include <QColorDialog>
-#include <QSettings>
+#include <QTextCodec>
 #include "mugoapp.h"
 #include "setupdialog.h"
 #include "ui_setupdialog.h"
@@ -77,35 +78,30 @@ SetupDialog::SetupDialog(QWidget *parent) :
     // navigation
     m_ui->stepsOfFastMoveSpinBox->setValue( settings.value("navigation/stepsOfFastMove", FAST_MOVE_STEPS).toInt() );
     m_ui->reproductionSpeedSpinBox->setValue( settings.value("navigation/autoReplayInterval", AUTO_REPLAY_INTERVAL).toInt() );
+*/
 
     // sound
     m_ui->soundTypeComboBox->setCurrentIndex( settings.value("sound/type").toInt() );
     m_ui->soundPathEdit->setText( settings.value("sound/path").toString() );
+    m_ui->playSoundCheckBox->setChecked( settings.value("sound/play", true).toBool() );
 
     // save name
-    m_ui->saveNameEdit->setText( settings.value("saveName", SAVE_NAME).toString() );
+    m_ui->saveNameEdit->setText( settings.value("saveFileName", SAVE_FILE_NAME).toString() );
 
     // encoding
-    QString defaultCodec = settings.value("codec" ,"UTF-8").toString();
-    for (int i=0; i<codecNames.size(); ++i){
-        m_ui->defaultEncodingComboBox->addItem( codecActions[i]->text() );
-        if (defaultCodec == codecNames[i])
-            m_ui->defaultEncodingComboBox->setCurrentIndex( m_ui->defaultEncodingComboBox->count() - 1 );
-    }
+    const QList<QTextCodec*>& codecs = mugoApp()->codecs();
+    QList<QTextCodec*>::const_iterator iter = codecs.begin();
+    foreach(QAction* act, mugoApp()->encodingActions()){
+        if (act->isSeparator())
+            m_ui->defaultEncodingComboBox->insertSeparator(m_ui->defaultEncodingComboBox->count());
+        else
+            m_ui->defaultEncodingComboBox->addItem(act->text());
 
-    // window style
-    m_ui->windowStyleList->addItem( tr("Default") );
-    m_ui->windowStyleList->addItems( QStyleFactory::keys() );
-    QString style = settings.value("style").toString();
-    if (style.isEmpty())
-        m_ui->windowStyleList->setCurrentRow(0);
-    else
-        for (int i=0; i<m_ui->windowStyleList->count(); ++i)
-            if (m_ui->windowStyleList->item(i)->text() == style){
-                m_ui->windowStyleList->setCurrentRow(i);
-                break;
-            }
-*/
+        if (*iter == mugoApp()->defaultCodec())
+            m_ui->defaultEncodingComboBox->setCurrentIndex(m_ui->defaultEncodingComboBox->count()-1);
+
+        ++iter;
+    }
 }
 
 SetupDialog::~SetupDialog()
@@ -145,28 +141,22 @@ void SetupDialog::accept(){
     // navigation
     settings.setValue("navigation/stepsOfFastMove", m_ui->stepsOfFastMoveSpinBox->value());
     settings.setValue("navigation/autoReplayInterval", m_ui->reproductionSpeedSpinBox->value());
+*/
 
     // sound
     settings.setValue("sound/type", m_ui->soundTypeComboBox->currentIndex());
     settings.setValue("sound/path", m_ui->soundPathEdit->text());
+    settings.setValue("sound/play", m_ui->playSoundCheckBox->isChecked());
 
     // save name
-    settings.setValue("saveName", m_ui->saveNameEdit->text());
+    settings.setValue("saveFileName", m_ui->saveNameEdit->text());
 
     // encoding
-    int codec = m_ui->defaultEncodingComboBox->currentIndex();
-    settings.setValue("codec", codecNames[codec]);
-
-    // window style
-    QString oldStyle = settings.value("style").toString();
-    QString newStyle = m_ui->windowStyleList->currentItem()->text();
-    int style = m_ui->windowStyleList->currentRow();
-    if (style == 0)
-        settings.remove("style");
-    else
-        settings.setValue("style", newStyle);
-    qobject_cast<Application*>(qApp)->setWindowStyle(style ? newStyle : "");
-*/
+    int encodingIndex = m_ui->defaultEncodingComboBox->currentIndex();
+    const QList<QTextCodec*>& codecs = mugoApp()->codecs();
+    QTextCodec* codec = codecs[encodingIndex];
+    mugoApp()->setDefaultCodec(codec);
+    settings.setValue("defaultCodec", codec->name());
 }
 
 /**

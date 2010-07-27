@@ -23,6 +23,7 @@
 #include <QGraphicsPixmapItem>
 #include <QGraphicsSimpleTextItem>
 #include <QInputDialog>
+#include <phonon>
 #include "mugoapp.h"
 #include "boardwidget.h"
 #include "sgfdocument.h"
@@ -30,6 +31,59 @@
 
 #define _USE_MATH_DEFINES
 #include <math.h>
+
+/**
+  Sound
+*/
+class Sound{
+public:
+    Sound();
+    ~Sound();
+
+    void setFilePath(const QString& path);
+    const QString& getFilePath() const{ return filePath; }
+
+    void play();
+
+private:
+    Phonon::MediaObject* media;
+    QString filePath;
+};
+
+/**
+  Constructor
+*/
+Sound::Sound(){
+    media = Phonon::createPlayer(Phonon::NotificationCategory);
+}
+
+/**
+  Destructor
+*/
+Sound::~Sound(){
+    delete media;
+}
+
+/**
+  set file path
+*/
+void Sound::setFilePath(const QString& path){
+    media->setCurrentSource(filePath = path);
+}
+
+/**
+  play sound
+*/
+void Sound::play(){
+    if (media->currentTime() == media->totalTime()){
+        media->stop();
+        media->seek(0);
+    }
+
+    if (media->currentTime() == 0)
+        media->play();
+}
+
 
 /**
   GraphicsLabelTextItem
@@ -184,7 +238,10 @@ BoardWidget::BoardWidget(SgfDocument* doc, QWidget *parent)
     , focusColor(FOCUS_COLOR)
     , focusType(0)
     , labelType(Preference::large)
+    , playSound(true)
 {
+    moveSound = new Sound;
+
 //    connect(document_, SIGNAL(nodeAdded(Go::NodePtr)), SLOT(on_sgfdocument_nodeAdded(Go::NodePtr)));
     connect(document_, SIGNAL(nodeDeleted(Go::NodePtr, bool)), SLOT(on_sgfdocument_nodeDeleted(Go::NodePtr, bool)));
     connect(document_, SIGNAL(nodeModified(Go::NodePtr, bool)), SLOT(on_sgfdocument_nodeModified(Go::NodePtr, bool)));
@@ -195,8 +252,8 @@ BoardWidget::BoardWidget(SgfDocument* doc, QWidget *parent)
     setScene(scene);
 
     // create board
-    shadow = scene->addRect(0, 0, 1, 1, QPen(Qt::transparent), QBrush(SHADOW_COLOR));
-    board  = scene->addRect(0, 0, 1, 1, QPen(Qt::transparent), QBrush(QPixmap(BOARD_IMAGE)));
+    shadow = scene->addRect(0, 0, 1, 1, QPen(Qt::NoPen), QBrush(SHADOW_COLOR));
+    board  = scene->addRect(0, 0, 1, 1, QPen(Qt::NoPen), QBrush(QPixmap(BOARD_IMAGE)));
     board->setZValue(1);
 
     // set current game
@@ -208,6 +265,7 @@ BoardWidget::BoardWidget(SgfDocument* doc, QWidget *parent)
 */
 BoardWidget::~BoardWidget()
 {
+    delete moveSound;
 }
 
 /**
@@ -538,16 +596,23 @@ void BoardWidget::setCurrentNode(Go::NodePtr node, bool forceChange){
     if (forceChange == false && node == currentNode)
         return;
 
+    // get game information in new current node
     currentNode = node;
     gameInformation = currentNode->getInformation();
 
+    // create buffer
     Go::NodeList::iterator iter = qFind(currentNodeList.begin(), currentNodeList.end(), currentNode);
     if (iter == currentNodeList.end())
         createBuffer(true);
     else
         createBuffer(false);
 
+    // emit
     emit currentNodeChanged(currentNode);
+
+    // play sound
+    if (playSound && inBoard(currentNode))
+        moveSound->play();
 }
 
 /**
@@ -1316,7 +1381,7 @@ QGraphicsItem* BoardWidget::createMarkItem(const Go::Mark& mark){
     else if (mark.type == Go::Mark::whiteTerritory)
         item = scene->addPath( createTerritoryPath(mark.position.x, mark.position.y) );
     else if (mark.type == Go::Mark::dim){
-        item = scene->addRect( createRectPath(mark.position.x, mark.position.y), QPen(Qt::transparent), QBrush(Qt::black) );
+        item = scene->addRect( createRectPath(mark.position.x, mark.position.y), QPen(Qt::NoPen), QBrush(Qt::black) );
         item->setOpacity(0.65);
     }
     else if (mark.type == Go::Mark::select)
@@ -1837,6 +1902,20 @@ void BoardWidget::setFocusType(int type){
 */
 void BoardWidget::setLabelType(Preference::LabelType type){
     labelType = type;
+}
+
+/**
+  set sound file
+*/
+void BoardWidget::setPlaySound(bool play){
+    playSound = play;
+}
+
+/**
+  set sound file
+*/
+void BoardWidget::setMoveSoundFile(const QString& file){
+    moveSound->setFilePath(file);
 }
 
 /**

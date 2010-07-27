@@ -25,6 +25,7 @@
 
 class QFileInfo;
 class GraphicsArrowItem;
+class Sound;
 
 
 /**
@@ -150,6 +151,11 @@ public:
     void setFocusColor(const QColor& color);
     void setFocusType(int type);
     void setLabelType(Preference::LabelType type);
+    void setMoveSoundFile(const QString& file);
+    void setPlaySound(bool play);
+
+    // get preferences
+    bool isPlaySound() const{ return playSound; }
 
     // add
     void addItem(Go::NodePtr parent, Go::NodePtr node, int index = -1);
@@ -268,6 +274,7 @@ private:
     bool flipVertically;
 
     // preferences
+    Sound* moveSound;
     Preference::ResourceType boardType;
     QColor  boardColor;
     QString boardImage;
@@ -283,6 +290,7 @@ private:
     QColor  focusColor;
     int focusType;
     Preference::LabelType labelType;
+    bool playSound;
 };
 
 #endif // BOARDWIDGET_H

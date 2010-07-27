@@ -51,5 +51,6 @@
         <file>res/branchmode.png</file>
         <file>res/resetboard.png</file>
         <file>res/options.png</file>
+        <file>res/sound.png</file>
     </qresource>
 </RCC>

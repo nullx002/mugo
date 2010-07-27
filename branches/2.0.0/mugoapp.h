@@ -42,6 +42,8 @@
 #define BLACK_STONE_COLOR Qt::black
 #define FOCUS_COLOR Qt::red
 #define BRANCH_COLOR Qt::blue
+#define MOVE_SOUND_FILE "sound/stone.wav"
+#define SAVE_FILE_NAME "$(DT)_$(PW)_$(PB)"
 
 
 class QAction;
@@ -75,6 +77,11 @@ class MugoApplication : public QApplication{
         QList<QAction*>    encodingActions_;
         QList<QTextCodec*> codecs_;
 };
+
+
+#include "godata.h"
+int replaceSgfProperty(const Go::NodePtr& game, const QString& in, QString& out, QMap<QString, QString> addProps = QMap<QString, QString>());
+
 
 
 #endif
