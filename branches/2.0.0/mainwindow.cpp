@@ -2667,12 +2667,31 @@ void MainWindow::on_actionPlaySound_triggered(bool checked){
 
 /**
   Slot
-  Tool -> Options
+  Tools -> Options
 */
 void MainWindow::on_actionOptions_triggered(){
     SetupDialog dlg(this);
     if (dlg.exec() != QDialog::Accepted)
         return;
+
+    for (int i=0; i<ui->boardTabWidget->count(); ++i){
+        QWidget* widget = ui->boardTabWidget->widget(i);
+        BoardWidget* board = qobject_cast<BoardWidget*>(widget);
+        if (board)
+            setPreferences(board);
+    }
+}
+
+/**
+  Slot
+  Tools -> Clear Settings
+*/
+void MainWindow::on_actionClearSettings_triggered(){
+    if ( QMessageBox::question(this, QString(), tr("Are you sure you want to clear the configuration?"), QMessageBox::Yes|QMessageBox::No) != QMessageBox::Yes)
+        return;
+
+    QSettings settings;
+    settings.clear();
 
     for (int i=0; i<ui->boardTabWidget->count(); ++i){
         QWidget* widget = ui->boardTabWidget->widget(i);

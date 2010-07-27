@@ -133,6 +133,7 @@ private:
 
 private slots:
     // File Menu
+    void on_actionClearSettings_triggered();
     void on_actionPlaySound_triggered(bool checked);
     void on_actionNew_triggered();
     void on_actionOpen_triggered();
