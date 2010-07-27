@@ -230,6 +230,7 @@ BoardWidget::BoardWidget(SgfDocument* doc, QWidget *parent)
     , boardColor(BOARD_COLOR)
     , backgroundColor(BG_COLOR)
     , coordinateColor(COORDINATE_COLOR)
+    , coordinateFont("Sans")
     , whiteStoneType(Preference::internal)
     , whiteStoneColor(WHITE_STONE_COLOR)
     , blackStoneType(Preference::internal)
@@ -238,6 +239,7 @@ BoardWidget::BoardWidget(SgfDocument* doc, QWidget *parent)
     , focusColor(FOCUS_COLOR)
     , focusType(0)
     , labelType(Preference::large)
+    , labelFont("Sans")
     , playSound(true)
 {
     moveSound = new Sound;
@@ -663,8 +665,8 @@ void BoardWidget::createBoard(){
 
     // create coordinate
     for (int i=gameInformation->ysize; i>0; --i){
-        QGraphicsSimpleTextItem* left  = scene->addSimpleText(QString::number(i), QFont("Helvetica", 10));
-        QGraphicsSimpleTextItem* right = scene->addSimpleText(QString::number(i), QFont("Helvetica", 10));
+        QGraphicsSimpleTextItem* left  = scene->addSimpleText(QString::number(i), QFont(coordinateFont, 10));
+        QGraphicsSimpleTextItem* right = scene->addSimpleText(QString::number(i), QFont(coordinateFont, 10));
         left->setZValue(2);
         right->setZValue(2);
         left->setBrush( QBrush(coordinateColor) );
@@ -676,8 +678,8 @@ void BoardWidget::createBoard(){
         int n = i % (document()->showCoordinateWithI ? 26 : 25);
         if (document()->showCoordinateWithI == false && n > 7)
             ++n;
-        QGraphicsSimpleTextItem* top    = scene->addSimpleText(QString().sprintf("%c", 'A' + n), QFont("Helvetica", 10));
-        QGraphicsSimpleTextItem* bottom = scene->addSimpleText(QString().sprintf("%c", 'A' + n), QFont("Helvetica", 10));
+        QGraphicsSimpleTextItem* top    = scene->addSimpleText(QString().sprintf("%c", 'A' + n), QFont(coordinateFont, 10));
+        QGraphicsSimpleTextItem* bottom = scene->addSimpleText(QString().sprintf("%c", 'A' + n), QFont(coordinateFont, 10));
         top->setZValue(2);
         bottom->setZValue(2);
         top->setBrush( QBrush(coordinateColor) );
@@ -899,7 +901,7 @@ void BoardWidget::setTextItemPosition(QGraphicsSimpleTextItem* text, int x, int 
         else
             number_size = size * 0.5;
 
-        text->setFont( QFont("Helvetica", number_size) );
+        text->setFont( QFont(labelFont, number_size) );
         QRectF r = text->boundingRect();
 
         qreal xx, yy;
@@ -1800,6 +1802,33 @@ void BoardWidget::setCoordinateColor(const QColor& color){
 
     foreach(QGraphicsSimpleTextItem* text, coordinateBottom)
         text->setBrush(brush);
+}
+
+/**
+  set coordinate font
+*/
+void BoardWidget::setCoordinateFont(const QString& fontName){
+    QFont font(coordinateFont = fontName, 10);
+
+    foreach(QGraphicsSimpleTextItem* text, coordinateLeft)
+        text->setFont(font);
+
+    foreach(QGraphicsSimpleTextItem* text, coordinateRight)
+        text->setFont(font);
+
+    foreach(QGraphicsSimpleTextItem* text, coordinateTop)
+        text->setFont(font);
+
+    foreach(QGraphicsSimpleTextItem* text, coordinateBottom)
+        text->setFont(font);
+}
+
+/**
+  set label font
+*/
+void BoardWidget::setLabelFont(const QString& fontName){
+    labelFont = fontName;
+    createBuffer(false);
 }
 
 /**

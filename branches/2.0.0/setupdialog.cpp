@@ -41,6 +41,7 @@ SetupDialog::SetupDialog(QWidget *parent) :
     // board/coordinat ecolor
     coordinateColor = settings.value("board/coordinateColor", COORDINATE_COLOR).value<QColor>();
     m_ui->coordinateColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(coordinateColor.red()).arg(coordinateColor.green()).arg(coordinateColor.blue()) );
+    m_ui->coordinateFontComboBox->setCurrentFont( QFont(settings.value("board/coordinateFont", "Sans").toString()) );
 
     // board/background
     bgColor = settings.value("board/bgColor", BG_COLOR).value<QColor>();
@@ -73,6 +74,7 @@ SetupDialog::SetupDialog(QWidget *parent) :
 
     // markers/label
     m_ui->labelTypeComboBox->setCurrentIndex( settings.value("marker/labelType").toInt() );
+    m_ui->labelFontComboBox->setCurrentFont( QFont(settings.value("marker/labelFont", "Sans").toString()) );
 
 /*
     // navigation
@@ -119,6 +121,8 @@ void SetupDialog::accept(){
     settings.setValue("board/boardColor", boardColor);
     settings.setValue("board/boardPath", m_ui->boardPathEdit->text());
     settings.setValue("board/coordinateColor", coordinateColor);
+    settings.setValue("board/coordinateFont", m_ui->coordinateFontComboBox->currentFont().family());
+    qDebug() << m_ui->coordinateFontComboBox->currentFont().family();
     settings.setValue("board/bgColor", bgColor);
     settings.setValue("board/bgTutorColor", tutorColor);
 
@@ -136,6 +140,7 @@ void SetupDialog::accept(){
     settings.setValue("marker/focusColor", focusColor);
     settings.setValue("marker/branchColor", branchColor);
     settings.setValue("marker/labelType", m_ui->labelTypeComboBox->currentIndex());
+    settings.setValue("marker/labelFont", m_ui->labelFontComboBox->currentFont().family() );
 
 /*
     // navigation

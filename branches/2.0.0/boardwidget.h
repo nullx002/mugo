@@ -140,6 +140,7 @@ public:
     void setBoardColor(const QColor& color);
     void setBoardImage(const QString& file);
     void setCoordinateColor(const QColor& color);
+    void setCoordinateFont(const QString& fontName);
     void setBackgroundColor(const QColor& color);
     void setWhiteStoneType(Preference::ResourceType type);
     void setWhiteStoneColor(const QColor& color);
@@ -151,6 +152,7 @@ public:
     void setFocusColor(const QColor& color);
     void setFocusType(int type);
     void setLabelType(Preference::LabelType type);
+    void setLabelFont(const QString& fontName);
     void setMoveSoundFile(const QString& file);
     void setPlaySound(bool play);
 
@@ -280,6 +282,7 @@ private:
     QString boardImage;
     QColor  backgroundColor;
     QColor  coordinateColor;
+    QString coordinateFont;
     Preference::ResourceType whiteStoneType;
     QColor  whiteStoneColor;
     QString whiteStoneImage;
@@ -289,6 +292,7 @@ private:
     QColor  branchColor;
     QColor  focusColor;
     int focusType;
+    QString labelFont;
     Preference::LabelType labelType;
     bool playSound;
 };

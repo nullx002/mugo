@@ -304,6 +304,7 @@ void MainWindow::setPreferences(BoardWidget* board){
     board->setBoardImage( settings.value("board/boardPath").toString() );
     board->setBoardType( (BoardWidget::Preference::ResourceType)settings.value("board/boardType", 0).toInt() );
     board->setCoordinateColor( settings.value("board/coordinateColor", COORDINATE_COLOR).value<QColor>() );
+    board->setCoordinateFont( settings.value("board/coordinateFont", "Sans").toString() );
     board->setBackgroundColor( settings.value("board/bgColor", BG_COLOR).value<QColor>() );
 //    board->setCoordinateColor( settings.value("board/bgTutorColor", BG_TUTOR_COLOR).value<QColor>() );
 
@@ -320,6 +321,7 @@ void MainWindow::setPreferences(BoardWidget* board){
     board->setFocusColor( settings.value("marker/focusColor", FOCUS_COLOR).value<QColor>() );
     board->setFocusType( settings.value("marker/focusType").toInt() );
     board->setLabelType( (BoardWidget::Preference::LabelType)settings.value("marker/labelType").toInt() );
+    board->setLabelFont( settings.value("marker/labelFont", "Sans").toString() );
 
     // sound
     board->setPlaySound( settings.value("sound/play", true).toBool() );
