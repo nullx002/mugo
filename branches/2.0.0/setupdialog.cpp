@@ -47,8 +47,8 @@ SetupDialog::SetupDialog(QWidget *parent) :
     bgColor = settings.value("board/bgColor", BG_COLOR).value<QColor>();
     m_ui->bgColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(bgColor.red()).arg(bgColor.green()).arg(bgColor.blue()) );
 
-    // board/bg in tutor
-    tutorColor = settings.value("board/bgTutorColor", TUTOR_BG_COLOR).value<QColor>();
+    // board/background in tutor
+    tutorColor = settings.value("board/tutorBgColor", TUTOR_BG_COLOR).value<QColor>();
     m_ui->bgTutorColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(tutorColor.red()).arg(tutorColor.green()).arg(tutorColor.blue()) );
 
     // stones/white
@@ -124,7 +124,7 @@ void SetupDialog::accept(){
     settings.setValue("board/coordinateFont", m_ui->coordinateFontComboBox->currentFont().family());
     qDebug() << m_ui->coordinateFontComboBox->currentFont().family();
     settings.setValue("board/bgColor", bgColor);
-    settings.setValue("board/bgTutorColor", tutorColor);
+    settings.setValue("board/tutorBgColor", tutorColor);
 
     // stones
     settings.setValue("stone/whiteType", m_ui->whiteTypeComboBox->currentIndex());

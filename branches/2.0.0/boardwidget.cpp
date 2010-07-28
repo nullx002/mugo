@@ -346,7 +346,7 @@ void BoardWidget::onLButtonDown(QMouseEvent* e){
         moveEnemy = true;
         QTimer* timer = new QTimer;
         connect(timer, SIGNAL(timeout()), SLOT(on_tutorOneSide_timeout()));
-        timer->start(800);
+        timer->start(680);
 
         return;
     }
