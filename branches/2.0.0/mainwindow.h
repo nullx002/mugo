@@ -107,7 +107,8 @@ protected:
 
     void updateStatusBar(BoardWidget* board=NULL);
     void updateCaption(bool updateTab);
-    void updateMenu();
+    void updateMenu(bool updateAll=false);
+    void setTutorMode(BoardWidget* board, bool tutorMode);
 
     bool getOpenFileName(QString& fname, QTextCodec*& codec);
     bool getSaveFileName(const QString& initialPath, QString& fname, QTextCodec*& codec);
@@ -133,6 +134,8 @@ private:
 
 private slots:
     // File Menu
+    void on_actionTutorOneSide_triggered(bool checked);
+    void on_actionTutorBothSides_triggered(bool checked);
     void on_actionClearSettings_triggered();
     void on_actionPlaySound_triggered(bool checked);
     void on_actionNew_triggered();

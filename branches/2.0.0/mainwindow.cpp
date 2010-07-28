@@ -306,7 +306,7 @@ void MainWindow::setPreferences(BoardWidget* board){
     board->setCoordinateColor( settings.value("board/coordinateColor", COORDINATE_COLOR).value<QColor>() );
     board->setCoordinateFont( settings.value("board/coordinateFont", "Sans").toString() );
     board->setBackgroundColor( settings.value("board/bgColor", BG_COLOR).value<QColor>() );
-//    board->setCoordinateColor( settings.value("board/bgTutorColor", BG_TUTOR_COLOR).value<QColor>() );
+    board->setTutorBackgroundColor( settings.value("board/tutorBgColor", TUTOR_BG_COLOR).value<QColor>() );
 
     // stone
     board->setWhiteStoneColor( settings.value("stone/whiteColor", BLACK_STONE_COLOR).value<QColor>() );
@@ -1004,7 +1004,7 @@ void MainWindow::updateCaption(bool updateTab){
 /**
   update menu
 */
-void MainWindow::updateMenu(){
+void MainWindow::updateMenu(bool updateAll){
     BoardWidget* board = currentBoard();
     if (board == NULL)
         return;
@@ -1012,49 +1012,6 @@ void MainWindow::updateMenu(){
     Go::NodePtr game = board->getCurrentGame();
     Go::NodePtr node = board->getCurrentNode();
     ViewData& data = docManager[board->document()];
-
-    // File -> Reload
-    QAction* encodingAction = encoding.key( board->document()->getCodec() );
-    if (encodingAction)
-        encodingAction->setChecked(true);
-    ui->menuReload->setEnabled( board->document()->getFileName().isEmpty() == false || board->document()->getUrl().isEmpty() == false );
-
-    // Edit -> Stones & Markers
-    switch( board->getEditMode() ){
-        case BoardWidget::EditMode::alternateMove:
-            ui->actionAlternateMove->trigger();
-            break;
-        case BoardWidget::EditMode::addBlack:
-            ui->actionAddBlackStone->trigger();
-            break;
-        case BoardWidget::EditMode::addWhite:
-            ui->actionAddWhiteStone->trigger();
-            break;
-        case BoardWidget::EditMode::addEmpty:
-            ui->actionAddEmpty->trigger();
-            break;
-        case BoardWidget::EditMode::addLabel:
-            ui->actionAddLabel->trigger();
-            break;
-        case BoardWidget::EditMode::addLabelManually:
-            ui->actionAddLabelManually->trigger();
-            break;
-        case BoardWidget::EditMode::addCircle:
-            ui->actionAddCircle->trigger();
-            break;
-        case BoardWidget::EditMode::addCross:
-            ui->actionAddCross->trigger();
-            break;
-        case BoardWidget::EditMode::addTriangle:
-            ui->actionAddTriangle->trigger();
-            break;
-        case BoardWidget::EditMode::addSquare:
-            ui->actionAddSquare->trigger();
-            break;
-        case BoardWidget::EditMode::removeMarker:
-            ui->actionDeleteMarker->trigger();
-            break;
-    }
 
     // Edit -> Annotation
     ui->actionHotspot->setChecked(node->annotation == Go::Node::hotspot);
@@ -1090,9 +1047,6 @@ void MainWindow::updateMenu(){
         ui->actionVeryGoodForWhite->setChecked(true);
     else if (node->nodeAnnotation == Go::Node::unclear)
         ui->actionUnclear->setChecked(true);
-
-    // Edit -> White First
-    ui->actionWhiteFirst->setChecked(game->nextColor == Go::white);
 
     // Navigation -> Jump To Clicked
     ui->actionJumpToClicked->setChecked(board->isJumpToClicked());
@@ -1132,6 +1086,55 @@ void MainWindow::updateMenu(){
             break;
     }
 
+    if (updateAll == false)
+        return;
+
+    // File -> Reload
+    QAction* encodingAction = encoding.key( board->document()->getCodec() );
+    if (encodingAction)
+        encodingAction->setChecked(true);
+    ui->menuReload->menuAction()->setEnabled( board->document()->getFileName().isEmpty() == false || board->document()->getUrl().isEmpty() == false );
+
+    // Edit -> Stones & Markers
+    switch( board->getEditMode() ){
+        case BoardWidget::EditMode::alternateMove:
+            ui->actionAlternateMove->trigger();
+            break;
+        case BoardWidget::EditMode::addBlack:
+            ui->actionAddBlackStone->trigger();
+            break;
+        case BoardWidget::EditMode::addWhite:
+            ui->actionAddWhiteStone->trigger();
+            break;
+        case BoardWidget::EditMode::addEmpty:
+            ui->actionAddEmpty->trigger();
+            break;
+        case BoardWidget::EditMode::addLabel:
+            ui->actionAddLabel->trigger();
+            break;
+        case BoardWidget::EditMode::addLabelManually:
+            ui->actionAddLabelManually->trigger();
+            break;
+        case BoardWidget::EditMode::addCircle:
+            ui->actionAddCircle->trigger();
+            break;
+        case BoardWidget::EditMode::addCross:
+            ui->actionAddCross->trigger();
+            break;
+        case BoardWidget::EditMode::addTriangle:
+            ui->actionAddTriangle->trigger();
+            break;
+        case BoardWidget::EditMode::addSquare:
+            ui->actionAddSquare->trigger();
+            break;
+        case BoardWidget::EditMode::removeMarker:
+            ui->actionDeleteMarker->trigger();
+            break;
+    }
+
+    // Edit -> White First
+    ui->actionWhiteFirst->setChecked(game->nextColor == Go::white);
+
     // View -> Branch Mode
     ui->actionBranchMode->setChecked(data.branchType == branchMode);
 
@@ -1161,10 +1164,84 @@ void MainWindow::updateMenu(){
     // View -> Flip Vertically
     ui->actionFlipVertically->setChecked( board->getFlipVertically() );
 
+    // Tools -> Tutor Mode
+    ui->actionTutorBothSides->setChecked( board->getTutorMode() == BoardWidget::TutorMode::tutorBothSides );
+    ui->actionTutorOneSide->setChecked( board->getTutorMode() == BoardWidget::TutorMode::tutorOneSide );
+
     // Tools -> Play Sound
     ui->actionPlaySound->setChecked( board->isPlaySound() );
+
+    // Tutor Mode
+    if (board->getTutorMode() != BoardWidget::TutorMode::noTutor)
+        setTutorMode(board, true);
+    else
+        setTutorMode(board, false);
 }
 
+/**
+  set tutor mdoe
+*/
+void MainWindow::setTutorMode(BoardWidget* board, bool tutorMode){
+    QList<QAction*> allActions;
+    allActions << ui->menuFile->actions()
+               << ui->menuEdit->actions()
+               << ui->menuNavigation->actions()
+               << ui->menuView->actions()
+               << ui->menuTools->actions();
+
+    static QAction* actions[] = {
+        ui->actionNew,
+        ui->actionOpen,
+        ui->actionOpenURL,
+        ui->actionCloseTab,
+        ui->actionCloseAllTabs,
+        ui->actionSave,
+        ui->actionSaveAs,
+        ui->actionExportAsciiToClipboard,
+        ui->menuRecentFiles->menuAction(),
+        ui->actionExit,
+        ui->actionCopySgfToClipboard,
+        ui->actionCopyCurrentBranchToClipboard,
+        ui->actionPasteSgfToNewTab,
+        ui->menuMoveNumber->menuAction(),
+        ui->actionShowCoordinate,
+        ui->actionShowCoordinateWithI,
+        ui->actionRotateClockwise,
+        ui->actionFlipHorizontally,
+        ui->actionFlipVertically,
+        ui->actionResetBoard,
+        ui->actionPlaySound,
+        ui->actionOptions,
+        ui->actionTutorBothSides,
+        ui->actionTutorOneSide,
+    };
+    static int N = sizeof(actions) / sizeof(actions[0]);
+
+    ViewData& data = docManager[board->document()];
+    if (tutorMode){
+        undoGroup.setActiveStack(NULL);
+        data.branchWidget->hide();
+    }
+    else{
+        undoGroup.setActiveStack(board->document()->getUndoStack());
+        data.branchWidget->show();
+    }
+
+    foreach(QAction* act, allActions){
+        if (tutorMode){
+            QAction** a = qFind(actions, actions+N, act);
+            bool enable = a != actions + N;
+            if (act->isEnabled() != enable)
+                act->setEnabled(enable);
+        }
+        else{
+            if (act->isEnabled() != true)
+                act->setEnabled(true);
+        }
+    }
+
+    ui->menuReload->menuAction()->setEnabled( board->document()->getFileName().isEmpty() == false || board->document()->getUrl().isEmpty() == false );
+}
 
 /**
   remove node from NodeToTreeMap
@@ -2653,6 +2730,38 @@ void MainWindow::on_actionResetBoard_triggered(){
 
 /**
   Slot
+  Tools -> Tutor Both Sides
+*/
+void MainWindow::on_actionTutorBothSides_triggered(bool checked){
+    if (checked)
+        ui->actionTutorOneSide->setChecked(false);
+
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    setTutorMode(board, checked);
+    board->setTutorMode(checked ? BoardWidget::TutorMode::tutorBothSides : BoardWidget::TutorMode::noTutor);
+}
+
+/**
+  Slot
+  Tools -> Tutor One Side
+*/
+void MainWindow::on_actionTutorOneSide_triggered(bool checked){
+    if (checked)
+        ui->actionTutorBothSides->setChecked(false);
+
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    setTutorMode(board, checked);
+    board->setTutorMode(checked ? BoardWidget::TutorMode::tutorOneSide : BoardWidget::TutorMode::noTutor);
+}
+
+/**
+  Slot
   Tools -> Play Sound
 */
 void MainWindow::on_actionPlaySound_triggered(bool checked){
@@ -2682,6 +2791,8 @@ void MainWindow::on_actionOptions_triggered(){
         if (board)
             setPreferences(board);
     }
+
+    updateMenu(true);
 }
 
 /**
@@ -2905,6 +3016,16 @@ void MainWindow::on_boardWidget_currentNodeChanged(Go::NodePtr node){
         updateMenu();
         updateStatusBar();
     }
+
+    // if tutor mode and new node is last node, exit tutor mode
+    if (board->getTutorMode() != BoardWidget::TutorMode::noTutor){
+        const Go::NodeList& nodeList = board->getCurrentNodeList();
+        if (nodeList.indexOf(node) == nodeList.size() - 1){
+            board->setTutorMode(BoardWidget::TutorMode::noTutor);
+            if (board == currentBoard())
+                updateMenu(true);
+        }
+    }
 }
 
 /**
@@ -2948,7 +3069,7 @@ void MainWindow::on_boardTabWidget_currentChanged(QWidget* widget)
     undoGroup.setActiveStack(boardWidget->document()->getUndoStack());
 
     updateCaption(false);
-    updateMenu();
+    updateMenu(true);
     updateStatusBar(boardWidget);
 }
 

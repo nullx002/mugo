@@ -23,6 +23,7 @@
 #include <QGraphicsPixmapItem>
 #include <QGraphicsSimpleTextItem>
 #include <QInputDialog>
+#include <QTimer>
 #include <phonon>
 #include "mugoapp.h"
 #include "boardwidget.h"
@@ -216,6 +217,7 @@ BoardWidget::BoardWidget(SgfDocument* doc, QWidget *parent)
     , scene( new QGraphicsScene(this) )
     , focus(NULL)
     , editMode(EditMode::alternateMove)
+    , tutorMode(TutorMode::noTutor)
     , jumpToClicked(false)
     , showMoveNumber(true)
     , resetMoveNumberMode(ResetMoveNumber::noReset)
@@ -225,10 +227,12 @@ BoardWidget::BoardWidget(SgfDocument* doc, QWidget *parent)
     , rotate(0)
     , flipHorizontally(false)
     , flipVertically(false)
+    , moveEnemy(false)
 
     // Preferences
     , boardColor(BOARD_COLOR)
     , backgroundColor(BG_COLOR)
+    , tutorBackgroundColor(TUTOR_BG_COLOR)
     , coordinateColor(COORDINATE_COLOR)
     , coordinateFont("Sans")
     , whiteStoneType(Preference::internal)
@@ -282,6 +286,9 @@ void BoardWidget::resizeEvent(QResizeEvent* e){
   Mouse Wheel
 */
 void BoardWidget::wheelEvent(QWheelEvent* e){
+    if (tutorMode != TutorMode::noTutor)
+        return;
+
     if (e->delta() > 0)
         back();
     else if (e->delta() < 0)
@@ -320,6 +327,27 @@ void BoardWidget::onLButtonDown(QMouseEvent* e){
             jumpToClicked = false;
             setCurrentNode(node, true);
         }
+        return;
+    }
+    else if (tutorMode == TutorMode::tutorBothSides){
+        moveToChildItem(x, y);
+        return;
+    }
+    else if (tutorMode == TutorMode::tutorOneSide){
+        if (moveEnemy || moveToChildItem(x, y) == false)
+            return;
+
+        Go::NodeList::iterator iter = qFind(currentNodeList.begin(), currentNodeList.end(), currentNode);
+        if (iter == currentNodeList.end())
+            return;
+        else if (++iter == currentNodeList.end())
+            return;
+
+        moveEnemy = true;
+        QTimer* timer = new QTimer;
+        connect(timer, SIGNAL(timeout()), SLOT(on_tutorOneSide_timeout()));
+        timer->start(800);
+
         return;
     }
 
@@ -1258,7 +1286,7 @@ void BoardWidget::createLineItemList(const Go::LineList& lineList){
 */
 void BoardWidget::createVariationItemList(Go::NodePtr node){
     // return if show no markup
-    if (getShowVariations() != 0 && getShowVariations() != 1)
+    if ((getShowVariations() != 0 && getShowVariations() != 1) || tutorMode != TutorMode::noTutor)
         return;
 
     // get variation list
@@ -1703,6 +1731,21 @@ void BoardWidget::setEditMode(EditMode::Mode editMode_){
 }
 
 /**
+  set tutor mode
+*/
+void BoardWidget::setTutorMode(TutorMode::Mode tutorMode_){
+    tutorMode = tutorMode_;
+    moveEnemy = false;
+
+    if (tutorMode == TutorMode::noTutor)
+        scene->setBackgroundBrush(QBrush(backgroundColor));
+    else
+        scene->setBackgroundBrush(QBrush(tutorBackgroundColor));
+
+    createBuffer(false);
+}
+
+/**
   set show move number
 */
 void BoardWidget::setShowMoveNumber(bool show){
@@ -1841,6 +1884,15 @@ void BoardWidget::setLabelFont(const QString& fontName){
 */
 void BoardWidget::setBackgroundColor(const QColor& color){
     scene->setBackgroundBrush( QBrush(backgroundColor = color) );
+}
+
+/**
+  set tutor background color
+*/
+void BoardWidget::setTutorBackgroundColor(const QColor& color){
+    tutorBackgroundColor = color;
+    if (tutorMode != TutorMode::noTutor)
+        scene->setBackgroundBrush( QBrush(tutorBackgroundColor) );
 }
 
 /**
@@ -2240,4 +2292,17 @@ void BoardWidget::on_sgfdocument_gameModified(Go::NodePtr game){
     Go::NodePtr node = currentNode;
     setCurrentGame(game, true);
     setCurrentNode(node);
+}
+
+/**
+  Slot
+  move enemy at tutor one side
+*/
+void BoardWidget::on_tutorOneSide_timeout(){
+    QTimer* timer = static_cast<QTimer*>(sender());
+    timer->stop();
+    timer->deleteLater();
+
+    forward();
+    moveEnemy = false;
 }

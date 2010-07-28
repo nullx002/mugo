@@ -48,7 +48,7 @@ SetupDialog::SetupDialog(QWidget *parent) :
     m_ui->bgColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(bgColor.red()).arg(bgColor.green()).arg(bgColor.blue()) );
 
     // board/bg in tutor
-    tutorColor = settings.value("board/bgTutorColor", BG_TUTOR_COLOR).value<QColor>();
+    tutorColor = settings.value("board/bgTutorColor", TUTOR_BG_COLOR).value<QColor>();
     m_ui->bgTutorColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(tutorColor.red()).arg(tutorColor.green()).arg(tutorColor.blue()) );
 
     // stones/white

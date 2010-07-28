@@ -38,6 +38,10 @@ public:
         enum Mode{ alternateMove, addBlack, addWhite, addEmpty, addLabel, addLabelManually, addCircle, addCross, addTriangle, addSquare, removeMarker };
     };
 
+    struct TutorMode{
+        enum Mode{ noTutor, tutorBothSides, tutorOneSide };
+    };
+
     struct ResetMoveNumber{
         enum Mode{ noReset, branch, allBranch };
     };
@@ -105,10 +109,12 @@ public:
 
     // get edit mode
     EditMode::Mode getEditMode() const{ return editMode; }
+    TutorMode::Mode getTutorMode() const{ return tutorMode; }
     bool isJumpToClicked() const{ return jumpToClicked; }
 
     // set edit mode
     void setEditMode(EditMode::Mode editMode);
+    void setTutorMode(TutorMode::Mode tutorMode);
     void setJumpToClicked(bool flag){ jumpToClicked = flag; }
 
     // get view mode
@@ -142,6 +148,7 @@ public:
     void setCoordinateColor(const QColor& color);
     void setCoordinateFont(const QString& fontName);
     void setBackgroundColor(const QColor& color);
+    void setTutorBackgroundColor(const QColor& color);
     void setWhiteStoneType(Preference::ResourceType type);
     void setWhiteStoneColor(const QColor& color);
     void setWhiteStoneImage(const QString& file);
@@ -235,6 +242,7 @@ private slots:
     void on_sgfdocument_nodeDeleted(Go::NodePtr node, bool removeChild);
     void on_sgfdocument_nodeModified(Go::NodePtr node, bool needRecreateBoard);
     void on_sgfdocument_gameModified(Go::NodePtr game);
+    void on_tutorOneSide_timeout();
 
 private:
     SgfDocument* document_;
@@ -265,6 +273,7 @@ private:
     int capturedBlack;
     int capturedWhite;
     EditMode::Mode editMode;
+    TutorMode::Mode tutorMode;
     bool jumpToClicked;
     bool showMoveNumber;
     ResetMoveNumber::Mode resetMoveNumberMode;
@@ -274,6 +283,7 @@ private:
     int  rotate;
     bool flipHorizontally;
     bool flipVertically;
+    bool moveEnemy;
 
     // preferences
     Sound* moveSound;
@@ -281,6 +291,7 @@ private:
     QColor  boardColor;
     QString boardImage;
     QColor  backgroundColor;
+    QColor  tutorBackgroundColor;
     QColor  coordinateColor;
     QString coordinateFont;
     Preference::ResourceType whiteStoneType;
