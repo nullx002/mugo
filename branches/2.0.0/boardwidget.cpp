@@ -1010,8 +1010,10 @@ void BoardWidget::createBuffer(bool erase){
                 createFocusItem((*node)->x(), (*node)->y());
 
             if (*number){
-//                (*number)->setPen(QPen(focusColor));
                 (*number)->setBrush(QBrush(focusColor));
+                QFont f = (*number)->font();
+                f.setWeight(QFont::Bold);
+                (*number)->setFont(f);
             }
 
             ++node;
@@ -1103,9 +1105,12 @@ BoardWidget::TerritoryInfo& BoardWidget::addStoneToBuffer(int x, int y, Go::Colo
     }
 
     if (number){
-        number->setPen( QPen(Qt::NoPen) );
         number->setBrush( QBrush(color == Go::black ? Qt::white : Qt::black) );
         number->setText( QString::number(moveNumber) );
+        QFont f = number->font();
+        f.setWeight(QFont::Normal);
+        number->setFont(f);
+
         if (showMoveNumber){
             setTextItemPosition(number, x, y);
             number->show();

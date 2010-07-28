@@ -1,9 +1,8 @@
 # -------------------------------------------------
 # Project created by QtCreator 2010-06-04T18:33:47
 # -------------------------------------------------
-QT += network
-unix:QT += phonon
-mac:QT += phonon
+QT += network \
+    phonon
 TARGET = mugo2
 TEMPLATE = app
 SOURCES += main.cpp \

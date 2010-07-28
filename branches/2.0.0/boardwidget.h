@@ -292,8 +292,8 @@ private:
     QColor  branchColor;
     QColor  focusColor;
     int focusType;
-    QString labelFont;
     Preference::LabelType labelType;
+    QString labelFont;
     bool playSound;
 };
 
