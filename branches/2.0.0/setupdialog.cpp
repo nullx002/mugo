@@ -76,11 +76,9 @@ SetupDialog::SetupDialog(QWidget *parent) :
     m_ui->labelTypeComboBox->setCurrentIndex( settings.value("marker/labelType").toInt() );
     m_ui->labelFontComboBox->setCurrentFont( QFont(settings.value("marker/labelFont", "Sans").toString()) );
 
-/*
     // navigation
     m_ui->stepsOfFastMoveSpinBox->setValue( settings.value("navigation/stepsOfFastMove", FAST_MOVE_STEPS).toInt() );
-    m_ui->reproductionSpeedSpinBox->setValue( settings.value("navigation/autoReplayInterval", AUTO_REPLAY_INTERVAL).toInt() );
-*/
+    m_ui->autoReplayIntervalSpinBox->setValue( settings.value("navigation/autoReplayInterval", AUTO_REPLAY_INTERVAL).toInt() );
 
     // sound
     m_ui->soundTypeComboBox->setCurrentIndex( settings.value("sound/type").toInt() );
@@ -142,11 +140,9 @@ void SetupDialog::accept(){
     settings.setValue("marker/labelType", m_ui->labelTypeComboBox->currentIndex());
     settings.setValue("marker/labelFont", m_ui->labelFontComboBox->currentFont().family() );
 
-/*
     // navigation
     settings.setValue("navigation/stepsOfFastMove", m_ui->stepsOfFastMoveSpinBox->value());
-    settings.setValue("navigation/autoReplayInterval", m_ui->reproductionSpeedSpinBox->value());
-*/
+    settings.setValue("navigation/autoReplayInterval", m_ui->autoReplayIntervalSpinBox->value());
 
     // sound
     settings.setValue("sound/type", m_ui->soundTypeComboBox->currentIndex());

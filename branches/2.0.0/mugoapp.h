@@ -44,6 +44,8 @@
 #define BRANCH_COLOR Qt::blue
 #define MOVE_SOUND_FILE "sound/stone.wav"
 #define SAVE_FILE_NAME "$(DT)_$(PW)_$(PB)"
+#define FAST_MOVE_STEPS 10
+#define AUTO_REPLAY_INTERVAL 1000
 
 
 class QAction;

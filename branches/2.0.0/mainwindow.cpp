@@ -57,7 +57,7 @@ MainWindow::MainWindow(const QString& fname, QWidget *parent)
     , tabChangeGroup(new QActionGroup(this))
     , docID(0)
     , sgfLineWidth(50)
-
+    , stepsOfFastMove(FAST_MOVE_STEPS)
 {
     ui->setupUi(this);
 
@@ -322,6 +322,10 @@ void MainWindow::setPreferences(BoardWidget* board){
     board->setFocusType( settings.value("marker/focusType").toInt() );
     board->setLabelType( (BoardWidget::Preference::LabelType)settings.value("marker/labelType").toInt() );
     board->setLabelFont( settings.value("marker/labelFont", "Sans").toString() );
+
+    // navigation
+    stepsOfFastMove = settings.value("navigation/stepsOfFastMove", FAST_MOVE_STEPS).toInt();
+    board->setAutomaticReplayInterval( settings.value("navigation/autoReplayInterval", AUTO_REPLAY_INTERVAL).toInt() );
 
     // sound
     board->setPlaySound( settings.value("sound/play", true).toBool() );
@@ -1165,6 +1169,7 @@ void MainWindow::updateMenu(bool updateAll){
     ui->actionFlipVertically->setChecked( board->getFlipVertically() );
 
     // Tools -> Tutor Mode
+    ui->actionAutomaticReplay->setChecked( board->getTutorMode() == BoardWidget::TutorMode::replay );
     ui->actionTutorBothSides->setChecked( board->getTutorMode() == BoardWidget::TutorMode::tutorBothSides );
     ui->actionTutorOneSide->setChecked( board->getTutorMode() == BoardWidget::TutorMode::tutorOneSide );
 
@@ -1172,16 +1177,13 @@ void MainWindow::updateMenu(bool updateAll){
     ui->actionPlaySound->setChecked( board->isPlaySound() );
 
     // Tutor Mode
-    if (board->getTutorMode() != BoardWidget::TutorMode::noTutor)
-        setTutorMode(board, true);
-    else
-        setTutorMode(board, false);
+    setTutorMode(board, board->getTutorMode());
 }
 
 /**
   set tutor mdoe
 */
-void MainWindow::setTutorMode(BoardWidget* board, bool tutorMode){
+void MainWindow::setTutorMode(BoardWidget* board, int mode){
     QList<QAction*> allActions;
     allActions << ui->menuFile->actions()
                << ui->menuEdit->actions()
@@ -1212,25 +1214,27 @@ void MainWindow::setTutorMode(BoardWidget* board, bool tutorMode){
         ui->actionResetBoard,
         ui->actionPlaySound,
         ui->actionOptions,
+        ui->actionAutomaticReplay,
         ui->actionTutorBothSides,
         ui->actionTutorOneSide,
     };
     static int N = sizeof(actions) / sizeof(actions[0]);
 
     ViewData& data = docManager[board->document()];
-    if (tutorMode){
+    if (mode != BoardWidget::TutorMode::noTutor){
         undoGroup.setActiveStack(NULL);
-        data.branchWidget->hide();
         ui->collectionDockWidget->setEnabled(false);
+        if (mode != BoardWidget::TutorMode::replay)
+            data.branchWidget->hide();
     }
     else{
         undoGroup.setActiveStack(board->document()->getUndoStack());
-        data.branchWidget->show();
         ui->collectionDockWidget->setEnabled(true);
+        data.branchWidget->show();
     }
 
     foreach(QAction* act, allActions){
-        if (tutorMode){
+        if (mode != BoardWidget::TutorMode::noTutor){
             QAction** a = qFind(actions, actions+N, act);
             bool enable = a != actions + N;
             if (act->isEnabled() != enable)
@@ -2302,7 +2306,7 @@ void MainWindow::on_actionFastRewind_triggered()
     BoardWidget* board = currentBoard();
     if (board == NULL)
         return;
-    board->back(5);
+    board->back(stepsOfFastMove);
 }
 
 /**
@@ -2340,7 +2344,7 @@ void MainWindow::on_actionFastForward_triggered()
     BoardWidget* board = currentBoard();
     if (board == NULL)
         return;
-    board->forward(5);
+    board->forward(stepsOfFastMove);
 }
 
 /**
@@ -2732,18 +2736,38 @@ void MainWindow::on_actionResetBoard_triggered(){
 
 /**
   Slot
-  Tools -> Tutor Both Sides
+  Tools -> Automatic Replay
 */
-void MainWindow::on_actionTutorBothSides_triggered(bool checked){
-    if (checked)
+void MainWindow::on_actionAutomaticReplay_triggered(bool checked){
+    if (checked){
+        ui->actionTutorBothSides->setChecked(false);
         ui->actionTutorOneSide->setChecked(false);
+    }
 
     BoardWidget* board = currentBoard();
     if (board == NULL)
         return;
 
-    setTutorMode(board, checked);
+    board->setTutorMode(checked ? BoardWidget::TutorMode::replay : BoardWidget::TutorMode::noTutor);
+    setTutorMode(board, board->getTutorMode());
+}
+
+/**
+  Slot
+  Tools -> Tutor Both Sides
+*/
+void MainWindow::on_actionTutorBothSides_triggered(bool checked){
+    if (checked){
+        ui->actionAutomaticReplay->setChecked(false);
+        ui->actionTutorOneSide->setChecked(false);
+    }
+
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
     board->setTutorMode(checked ? BoardWidget::TutorMode::tutorBothSides : BoardWidget::TutorMode::noTutor);
+    setTutorMode(board, board->getTutorMode());
 }
 
 /**
@@ -2751,15 +2775,17 @@ void MainWindow::on_actionTutorBothSides_triggered(bool checked){
   Tools -> Tutor One Side
 */
 void MainWindow::on_actionTutorOneSide_triggered(bool checked){
-    if (checked)
+    if (checked){
+        ui->actionAutomaticReplay->setChecked(false);
         ui->actionTutorBothSides->setChecked(false);
+    }
 
     BoardWidget* board = currentBoard();
     if (board == NULL)
         return;
 
-    setTutorMode(board, checked);
     board->setTutorMode(checked ? BoardWidget::TutorMode::tutorOneSide : BoardWidget::TutorMode::noTutor);
+    setTutorMode(board, board->getTutorMode());
 }
 
 /**
@@ -3092,9 +3118,18 @@ void MainWindow::on_branchWidget_currentItemChanged(QTreeWidgetItem* current, QT
     if (current == NULL)
         return;
 
-    BoardWidget* board = currentBoard();
+    BoardWidget* board = NULL;
+    QTreeWidget* branchWidget = current->treeWidget();
+    DocumentManager::const_iterator iter = docManager.begin();
+    while (iter != docManager.end()){
+        if (iter->branchWidget == branchWidget){
+            board = iter->boardWidget;
+            break;
+        }
+        ++iter;
+    }
     if (board == NULL)
-            return;
+        return;
 
     QVariant v = current->data(0, Qt::UserRole);
     Go::NodePtr node = v.value<Go::NodePtr>();

@@ -39,7 +39,7 @@ public:
     };
 
     struct TutorMode{
-        enum Mode{ noTutor, tutorBothSides, tutorOneSide };
+        enum Mode{ noTutor, tutorBothSides, tutorOneSide, replay };
     };
 
     struct ResetMoveNumber{
@@ -160,6 +160,7 @@ public:
     void setFocusType(int type);
     void setLabelType(Preference::LabelType type);
     void setLabelFont(const QString& fontName);
+    void setAutomaticReplayInterval(int interval);
     void setMoveSoundFile(const QString& file);
     void setPlaySound(bool play);
 
@@ -242,14 +243,18 @@ private slots:
     void on_sgfdocument_nodeDeleted(Go::NodePtr node, bool removeChild);
     void on_sgfdocument_nodeModified(Go::NodePtr node, bool needRecreateBoard);
     void on_sgfdocument_gameModified(Go::NodePtr game);
+    void on_automaticReplay_timeout();
     void on_tutorOneSide_timeout();
 
 private:
+    // document / node
     SgfDocument* document_;
     Go::NodePtr  currentGame;
-    Go::GameInformationPtr gameInformation;
     Go::NodePtr currentNode;
     Go::NodeList currentNodeList;
+    Go::GameInformationPtr gameInformation;
+
+    // graphics view
     QGraphicsScene* scene;
     QGraphicsRectItem* board;
     QGraphicsRectItem* shadow;
@@ -268,21 +273,33 @@ private:
     QList<QGraphicsRectItem*> dims;
     QList<GraphicsArrowItem*> lines;
     QList<QGraphicsSimpleTextItem*> variations;
+
+    // board buffer
     BoardBuffer boardBuffer;
     int moveNumber;
     int capturedBlack;
     int capturedWhite;
+
+    // edit mode
     EditMode::Mode editMode;
     TutorMode::Mode tutorMode;
     bool jumpToClicked;
+
+    // view options
     bool showMoveNumber;
     ResetMoveNumber::Mode resetMoveNumberMode;
     int  showMoveNumberCount;
     bool showCoordinate;
     bool showMarker;
+
+    // roate / flip view
     int  rotate;
     bool flipHorizontally;
     bool flipVertically;
+
+    // automatic replay / tutor mode
+    QTimer* replayTimer;
+    int replayInterval;
     bool moveEnemy;
 
     // preferences

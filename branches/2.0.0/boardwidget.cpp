@@ -227,6 +227,8 @@ BoardWidget::BoardWidget(SgfDocument* doc, QWidget *parent)
     , rotate(0)
     , flipHorizontally(false)
     , flipVertically(false)
+    , replayTimer(NULL)
+    , replayInterval(AUTO_REPLAY_INTERVAL)
     , moveEnemy(false)
 
     // Preferences
@@ -344,7 +346,7 @@ void BoardWidget::onLButtonDown(QMouseEvent* e){
             return;
 
         moveEnemy = true;
-        QTimer* timer = new QTimer;
+        QTimer* timer = new QTimer(this);
         connect(timer, SIGNAL(timeout()), SLOT(on_tutorOneSide_timeout()));
         timer->start(680);
 
@@ -757,7 +759,7 @@ void BoardWidget::setItemsPosition(){
 
     int x = (r.width() - w) / 2;
     int y = (r.height() - h) / 2;
-    int margin = gridSize * 0.8;
+    int margin = gridSize * 0.6;
     QRect boardRect(QPoint(x-margin, y-margin), QPoint(x+w+margin, y+h+margin));
 
     // set position of shadow.
@@ -1742,6 +1744,16 @@ void BoardWidget::setTutorMode(TutorMode::Mode tutorMode_){
     else
         scene->setBackgroundBrush(QBrush(tutorBackgroundColor));
 
+    if (tutorMode == TutorMode::replay){
+        replayTimer = new QTimer(this);
+        connect(replayTimer, SIGNAL(timeout()), SLOT(on_automaticReplay_timeout()));
+        replayTimer->start(replayInterval);
+    }
+    else if (replayTimer){
+        replayTimer->deleteLater();
+        replayTimer = NULL;
+    }
+
     createBuffer(false);
 }
 
@@ -1872,14 +1884,6 @@ void BoardWidget::setCoordinateFont(const QString& fontName){
 }
 
 /**
-  set label font
-*/
-void BoardWidget::setLabelFont(const QString& fontName){
-    labelFont = fontName;
-    createBuffer(false);
-}
-
-/**
   set background color
 */
 void BoardWidget::setBackgroundColor(const QColor& color){
@@ -1988,6 +1992,23 @@ void BoardWidget::setFocusType(int type){
 */
 void BoardWidget::setLabelType(Preference::LabelType type){
     labelType = type;
+}
+
+/**
+  set label font
+*/
+void BoardWidget::setLabelFont(const QString& fontName){
+    labelFont = fontName;
+    createBuffer(false);
+}
+
+/**
+  set automatic replay interval
+*/
+void BoardWidget::setAutomaticReplayInterval(int interval){
+    replayInterval = interval;
+    if (replayTimer)
+        replayTimer->setInterval(replayInterval);
 }
 
 /**
@@ -2292,6 +2313,14 @@ void BoardWidget::on_sgfdocument_gameModified(Go::NodePtr game){
     Go::NodePtr node = currentNode;
     setCurrentGame(game, true);
     setCurrentNode(node);
+}
+
+/**
+  Slot
+  automatic replay
+*/
+void BoardWidget::on_automaticReplay_timeout(){
+    forward();
 }
 
 /**

@@ -108,7 +108,7 @@ protected:
     void updateStatusBar(BoardWidget* board=NULL);
     void updateCaption(bool updateTab);
     void updateMenu(bool updateAll=false);
-    void setTutorMode(BoardWidget* board, bool tutorMode);
+    void setTutorMode(BoardWidget* board, int mode);
 
     bool getOpenFileName(QString& fname, QTextCodec*& codec);
     bool getSaveFileName(const QString& initialPath, QString& fname, QTextCodec*& codec);
@@ -131,13 +131,10 @@ private:
     QLabel* capturedLabel;
     int sgfLineWidth;
     int maxRecentFiles;
+    int stepsOfFastMove;
 
 private slots:
     // File Menu
-    void on_actionTutorOneSide_triggered(bool checked);
-    void on_actionTutorBothSides_triggered(bool checked);
-    void on_actionClearSettings_triggered();
-    void on_actionPlaySound_triggered(bool checked);
     void on_actionNew_triggered();
     void on_actionOpen_triggered();
     void on_actionReload_triggered();
@@ -241,7 +238,12 @@ private slots:
     void on_actionResetBoard_triggered();
 
     // Tools Menu
+    void on_actionAutomaticReplay_triggered(bool checked);
+    void on_actionTutorBothSides_triggered(bool checked);
+    void on_actionTutorOneSide_triggered(bool checked);
+    void on_actionPlaySound_triggered(bool checked);
     void on_actionOptions_triggered();
+    void on_actionClearSettings_triggered();
 
     // Window Menu
     void on_actionPreviousTab_triggered();
