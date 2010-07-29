@@ -1221,10 +1221,12 @@ void MainWindow::setTutorMode(BoardWidget* board, bool tutorMode){
     if (tutorMode){
         undoGroup.setActiveStack(NULL);
         data.branchWidget->hide();
+        ui->collectionDockWidget->setEnabled(false);
     }
     else{
         undoGroup.setActiveStack(board->document()->getUndoStack());
         data.branchWidget->show();
+        ui->collectionDockWidget->setEnabled(true);
     }
 
     foreach(QAction* act, allActions){
