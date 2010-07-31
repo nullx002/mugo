@@ -37,7 +37,7 @@ typedef boost::shared_ptr<GameInformation> GameInformationPtr;
 typedef QList<NodePtr> NodeList;
 
 
-enum Color{ empty=0, black=1, white=2, blackTerritory=4, whiteTerritory=8, dame=16 };
+enum Color{ empty, black, white, dame };
 
 /**
     Point
@@ -82,7 +82,7 @@ public:
 */
 class Mark{
 public:
-    enum Type{cross, circle, square, triangle, character, blackTerritory, whiteTerritory, dim, select};
+    enum Type{cross, circle, square, triangle, character, blackTerritory, whiteTerritory, dim, select, dame};
 
     // Constructor
     Mark() : type(){}

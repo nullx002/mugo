@@ -721,6 +721,8 @@ bool Sgf::Node::set(const Go::MarkList& markList){
             case Go::Mark::dim:
                 properties["DD"].push_back( positionToString(mark.position) );
                 break;
+            default:
+                break;
         };
     }
 

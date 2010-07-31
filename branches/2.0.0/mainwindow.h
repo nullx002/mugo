@@ -108,6 +108,7 @@ protected:
     void updateStatusBar(BoardWidget* board=NULL);
     void updateCaption(bool updateTab);
     void updateMenu(bool updateAll=false);
+    void setScoreMode(BoardWidget* board, int mode);
     void setTutorMode(BoardWidget* board, int mode);
 
     bool getOpenFileName(QString& fname, QTextCodec*& codec);
@@ -238,6 +239,7 @@ private slots:
     void on_actionResetBoard_triggered();
 
     // Tools Menu
+    void on_actionCountTerritory_triggered(bool checked);
     void on_actionAutomaticReplay_triggered(bool checked);
     void on_actionTutorBothSides_triggered(bool checked);
     void on_actionTutorOneSide_triggered(bool checked);

@@ -218,6 +218,7 @@ BoardWidget::BoardWidget(SgfDocument* doc, QWidget *parent)
     , focus(NULL)
     , editMode(EditMode::alternateMove)
     , tutorMode(TutorMode::noTutor)
+    , scoreMode(ScoreMode::noScore)
     , jumpToClicked(false)
     , showMoveNumber(true)
     , resetMoveNumberMode(ResetMoveNumber::noReset)
@@ -317,19 +318,12 @@ void BoardWidget::onLButtonDown(QMouseEvent* e){
     if (x < 0 || y < 0 || x >= gameInformation->xsize || y >= gameInformation->ysize)
         return;
 
-    // if jump to clicked mode, change current node and return
-    if (jumpToClicked){
-        Go::NodePtr node = currentNode;
-        while (node){
-            if (node->isStone() && node->x() == x && node->y() == y)
-                break;
-            node = node->parent();
+    if (scoreMode == ScoreMode::final){
+        if (boardBuffer[y][x].color != Go::empty){
+            setDeadStones(x, y);
+            return;
         }
-        if (node){
-            jumpToClicked = false;
-            setCurrentNode(node, true);
-        }
-        return;
+
     }
     else if (tutorMode == TutorMode::tutorBothSides){
         moveToChildItem(x, y);
@@ -350,6 +344,20 @@ void BoardWidget::onLButtonDown(QMouseEvent* e){
         connect(timer, SIGNAL(timeout()), SLOT(on_tutorOneSide_timeout()));
         timer->start(680);
 
+        return;
+    }
+    else if (jumpToClicked){
+        // if jump to clicked mode, change current node and return
+        Go::NodePtr node = currentNode;
+        while (node){
+            if (node->isStone() && node->x() == x && node->y() == y)
+                break;
+            node = node->parent();
+        }
+        if (node){
+            jumpToClicked = false;
+            setCurrentNode(node, true);
+        }
         return;
     }
 
@@ -931,7 +939,9 @@ void BoardWidget::setTextItemPosition(QGraphicsSimpleTextItem* text, int x, int 
         else
             number_size = size * 0.5;
 
-        text->setFont( QFont(labelFont, number_size) );
+        QFont f = text->font();
+        f.setPointSizeF(number_size);
+        text->setFont(f);
         QRectF r = text->boundingRect();
 
         qreal xx, yy;
@@ -947,19 +957,11 @@ void BoardWidget::createBuffer(bool erase){
     if (erase)
         eraseBuffer();
 
-    // remove stones and markers
+    // remove stones and dims
     qDeleteAll(addStones);
-    qDeleteAll(marks);
     qDeleteAll(dims);
-    qDeleteAll(lines);
-    qDeleteAll(variations);
     addStones.clear();
-    marks.clear();
     dims.clear();
-    lines.clear();
-    variations.clear();
-    delete focus;
-    focus = NULL;
 
     // create boardBuffer
     boardBuffer.clear();
@@ -967,11 +969,9 @@ void BoardWidget::createBuffer(bool erase){
     for (int i=0; i<boardBuffer.size(); ++i)
         boardBuffer[i].resize(gameInformation->xsize);
 
-    // show or hide stones
-    moveNumber = 0;
-    capturedBlack = 0;
-    capturedWhite = 0;
+    focusNumber = NULL;
     showNumbers.clear();
+    moveNumber = 0;
     Go::NodeList::iterator node = currentNodeList.begin();
     QList<QGraphicsItem*>::iterator stone = stones.begin();
     QList<QGraphicsSimpleTextItem*>::iterator number = numbers.begin();
@@ -983,12 +983,11 @@ void BoardWidget::createBuffer(bool erase){
             // reset move number
             Go::NodePtr parent = (*node)->parent();
             bool isBranch = parent && parent->childNodes.size() > 1;
-            bool notFirstChild = parent && parent->childNodes.indexOf(*node) > 0;
+            bool firstChild = parent && parent->childNodes.indexOf(*node) == 0;
             bool resetMoveNumber = (*node)->moveNumber > 0;
-            if ((isBranch && resetMoveNumberMode == ResetMoveNumber::allBranch) || (notFirstChild && resetMoveNumberMode != ResetMoveNumber::noReset)){
-                if (parent && parent->childNodes.size() > 1)
-                    resetMoveNumber = true;
-            }
+            if ((isBranch && resetMoveNumberMode == ResetMoveNumber::allBranch) || (!firstChild && resetMoveNumberMode != ResetMoveNumber::noReset))
+                resetMoveNumber = true;
+
             if (resetMoveNumber){
                 showNumbers.clear();
                 moveNumber = (*node)->moveNumber ? (*node)->moveNumber : 1;
@@ -1000,6 +999,9 @@ void BoardWidget::createBuffer(bool erase){
                         (*number2)->hide();
                 }
             }
+
+            if (*node == currentNode)
+                focusNumber = *number;
 
             // add stone to buffer if stone is in board
             addStoneToBuffer((*node)->position.x, (*node)->position.y, (*node)->color, moveNumber, *stone, *number);
@@ -1028,33 +1030,17 @@ void BoardWidget::createBuffer(bool erase){
             addMarkToBuffer(dim, item);
         }
 
-        if (*node == currentNode){
-            // add mark
-            createMarkItemList((*node)->marks);
-            createMarkItemList((*node)->whiteTerritories);
-            createMarkItemList((*node)->blackTerritories);
-            createLineItemList((*node)->lines);
-            createVariationItemList(*node);
-
-            if (inBoard(*node))
-                createFocusItem((*node)->x(), (*node)->y());
-
-            if (*number){
-                (*number)->setBrush(QBrush(focusColor));
-                QFont f = (*number)->font();
-                f.setWeight(QFont::Bold);
-                (*number)->setFont(f);
-            }
-
-            ++node;
-            ++stone;
-            ++number;
-            break;
-        }
+        bool exit = *node == currentNode;
         ++node;
         ++stone;
         ++number;
-    };
+
+        if (exit)
+            break;
+    }
+
+    // show board items
+    createBoardItems();
 
     // hide stones after current node
     while (node != currentNodeList.end()){
@@ -1067,6 +1053,38 @@ void BoardWidget::createBuffer(bool erase){
         ++node;
         ++stone;
         ++number;
+    }
+}
+
+/**
+  create mark items
+*/
+void BoardWidget::createBoardItems(){
+    // remove markers
+    qDeleteAll(marks);
+    qDeleteAll(lines);
+    qDeleteAll(variations);
+    marks.clear();
+    lines.clear();
+    variations.clear();
+    delete focus;
+    focus = NULL;
+
+    // add mark
+    createMarkItemList(currentNode->marks);
+    createMarkItemList(currentNode->whiteTerritories);
+    createMarkItemList(currentNode->blackTerritories);
+    createLineItemList(currentNode->lines);
+    createVariationItemList(currentNode);
+
+    if (inBoard(currentNode))
+        createFocusItem(currentNode->x(), currentNode->y());
+
+    if (focusNumber){
+        focusNumber->setBrush(QBrush(focusColor));
+        QFont f = focusNumber->font();
+        f.setWeight(QFont::DemiBold);
+        focusNumber->setFont(f);
     }
 }
 
@@ -1111,6 +1129,134 @@ void BoardWidget::eraseBuffer(){
         else{
             stones.push_back(NULL);
             numbers.push_back(NULL);
+        }
+    }
+}
+
+/**
+  create territories
+*/
+void BoardWidget::createTerritories(){
+    for (int y=0; y<boardBuffer.size(); ++y)
+        for (int x=0; x<boardBuffer[y].size(); ++x)
+            setTerritories(x, y);
+
+    createTerritoryItems();
+}
+
+void BoardWidget::setTerritories(int x, int y){
+    if (boardBuffer[y][x].isStone() || boardBuffer[y][x].isTerritory())
+        return;
+
+    int size = boardBuffer.size() * boardBuffer[0].size();
+    char* buf = new char[size];
+    memset(buf, 0, size);
+
+    bool black=false, white=false;
+    getTerritory(x, y, buf, black, white);
+    Go::Color color = black && !white ? Go::black : !black && white ? Go::white : Go::dame;
+    setTerritories(buf, color);
+
+    delete[] buf;
+}
+
+void BoardWidget::setTerritories(char* buf, Go::Color color){
+    int xsize = boardBuffer[0].size();
+    for (int y=0; y<boardBuffer.size(); ++y){
+        for (int x=0; x<boardBuffer[y].size(); ++x){
+            if (buf[y * xsize + x] == 0)
+                continue;
+            if (boardBuffer[y][x].isStone() == false || color != Go::dame)
+                boardBuffer[y][x].territory = color;
+        }
+    }
+}
+
+void BoardWidget::getTerritory(int x, int y, char* buf, bool& black, bool& white){
+    if (black && white)
+        return;
+    else if (x < 0 || y < 0 || y >= boardBuffer.size() || x >= boardBuffer[y].size())
+        return;
+    else if (boardBuffer[y][x].color == Go::black || (boardBuffer[y][x].color == Go::white && boardBuffer[y][x].territory == Go::black)){
+        black = true;
+        return;
+    }
+    else if (boardBuffer[y][x].color == Go::white || (boardBuffer[y][x].color == Go::black && boardBuffer[y][x].territory == Go::white)){
+        white = true;
+        return;
+    }
+
+    int xsize = boardBuffer[0].size();
+    if (buf[y*xsize+x])
+        return;
+    buf[y*xsize+x] = 1;
+
+    getTerritory(x-1, y, buf, black, white);
+    getTerritory(x+1, y, buf, black, white);
+    getTerritory(x, y-1, buf, black, white);
+    getTerritory(x, y+1, buf, black, white);
+
+    return;
+}
+
+void BoardWidget::setDeadStones(int x, int y){
+    Go::Color color = boardBuffer[y][x].color;
+    Go::Color territory = Go::dame;
+    if (boardBuffer[y][x].isTerritory() == false)
+        territory = color == Go::black ? Go::white : Go::black;
+
+    int size = boardBuffer.size() * boardBuffer[0].size();
+    char* buf = new char[size];
+    memset(buf, 0, size);
+
+    setDeadStones(x, y, color, territory, buf);
+
+    delete[] buf;
+
+    createTerritoryItems();
+}
+
+void BoardWidget::setDeadStones(int x, int y, Go::Color color, Go::Color territory, char* buf){
+    if (x < 0 || y < 0 || y >= boardBuffer.size() || x >= boardBuffer[y].size())
+        return;
+    else if (boardBuffer[y][x].color != Go::empty && boardBuffer[y][x].color != color)
+        return;
+
+    int xsize = boardBuffer[0].size();
+    if (buf[y*xsize+x])
+        return;
+    buf[y*xsize+x] = 1;
+
+    if (boardBuffer[y][x].color != Go::empty && territory == Go::dame)
+        boardBuffer[y][x].territory = Go::empty;
+    else
+        boardBuffer[y][x].territory = territory;
+
+    setDeadStones(x-1, y, color, territory, buf);
+    setDeadStones(x+1, y, color, territory, buf);
+    setDeadStones(x, y-1, color, territory, buf);
+    setDeadStones(x, y+1, color, territory, buf);
+}
+
+void BoardWidget::createTerritoryItems(){
+    for (int y=0; y<boardBuffer.size(); ++y){
+        for (int x=0; x<boardBuffer[y].size(); ++x){
+            if (boardBuffer[y][x].isTerritory() == false){
+                if (boardBuffer[y][x].territoryItem){
+                    delete boardBuffer[y][x].territoryItem;
+                    marks.removeOne(boardBuffer[y][x].territoryItem);
+                    boardBuffer[y][x].territoryItem = boardBuffer[y][x].markItem = NULL;
+                    if (boardBuffer[y][x].stoneItem)
+                        boardBuffer[y][x].stoneItem->setOpacity(1.0);
+                }
+                continue;
+            }
+
+            Go::Color color = boardBuffer[y][x].territory;
+            Go::Mark mark(x, y, color == Go::black ? Go::Mark::blackTerritory : color == Go::white ? Go::Mark::whiteTerritory : Go::Mark::dame);
+            QGraphicsItem* item = createMarkItem(mark);
+            marks.push_back(item);
+            addMarkToBuffer(mark, item);
         }
     }
 }
@@ -1182,12 +1328,19 @@ BoardWidget::TerritoryInfo& BoardWidget::addMarkToBuffer(const Go::Mark& mark, Q
         }
     }
     else if (path){
-        if (mark.type == Go::Mark::blackTerritory || mark.type == Go::Mark::whiteTerritory){
-            QColor color = mark.type == Go::Mark::blackTerritory ? Qt::black : Qt::white;
+        if (mark.type == Go::Mark::blackTerritory || mark.type == Go::Mark::whiteTerritory || mark.type == Go::Mark::dame){
+            QColor color = mark.type == Go::Mark::blackTerritory ? Qt::black : (mark.type == Go::Mark::whiteTerritory ? Qt::white : Qt::red);
             path->setPen( QPen(color));
             path->setBrush(QBrush(color));
             if (ti.stoneItem)
                 ti.stoneItem->setOpacity(0.3);
+            ti.territory = mark.type == Go::Mark::blackTerritory ? Go::black : mark.type == Go::Mark::whiteTerritory ? Go::white : Go::dame;
+            if (ti.territoryItem){
+                marks.removeOne(ti.territoryItem);
+                delete ti.territoryItem;
+            }
+            ti.territoryItem = item;
+            ti.markItem = NULL;
         }
         else if (mark.type == Go::Mark::select){
             path->setPen(QPen(ti.color == Go::black ? Qt::white : Qt::black));
@@ -1413,9 +1566,7 @@ QGraphicsItem* BoardWidget::createMarkItem(const Go::Mark& mark){
         setTextItemPosition((GraphicsLabelTextItem*)item, mark.position.x, mark.position.y);
         scene->addItem(item);
     }
-    else if (mark.type == Go::Mark::blackTerritory)
-        item = scene->addPath( createTerritoryPath(mark.position.x, mark.position.y) );
-    else if (mark.type == Go::Mark::whiteTerritory)
+    else if (mark.type == Go::Mark::blackTerritory || mark.type == Go::Mark::whiteTerritory || mark.type == Go::Mark::dame)
         item = scene->addPath( createTerritoryPath(mark.position.x, mark.position.y) );
     else if (mark.type == Go::Mark::dim){
         item = scene->addRect( createRectPath(mark.position.x, mark.position.y), QPen(Qt::NoPen), QBrush(Qt::black) );
@@ -1728,15 +1879,15 @@ void BoardWidget::back(int step){
 /**
   set edit mode
 */
-void BoardWidget::setEditMode(EditMode::Mode editMode_){
-    editMode = editMode_;
+void BoardWidget::setEditMode(EditMode::Mode mode){
+    editMode = mode;
 }
 
 /**
   set tutor mode
 */
-void BoardWidget::setTutorMode(TutorMode::Mode tutorMode_){
-    tutorMode = tutorMode_;
+void BoardWidget::setTutorMode(TutorMode::Mode mode){
+    tutorMode = mode;
     moveEnemy = false;
 
     if (tutorMode == TutorMode::noTutor)
@@ -1755,6 +1906,15 @@ void BoardWidget::setTutorMode(TutorMode::Mode tutorMode_){
     }
 
     createBuffer(false);
+}
+
+/**
+*/
+void BoardWidget::setScoreMode(ScoreMode::Mode mode){
+    scoreMode = mode;
+    createBuffer(false);
+    if (mode == ScoreMode::final)
+        createTerritories();
 }
 
 /**

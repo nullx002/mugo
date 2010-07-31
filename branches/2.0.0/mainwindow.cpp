@@ -1178,6 +1178,76 @@ void MainWindow::updateMenu(bool updateAll){
 
     // Tutor Mode
     setTutorMode(board, board->getTutorMode());
+
+    // Score Mode
+    setScoreMode(board, board->getScoreMode());
+}
+
+/**
+  set score mdoe
+*/
+void MainWindow::setScoreMode(BoardWidget* board, int mode){
+    QList<QAction*> allActions;
+    allActions << ui->menuFile->actions()
+               << ui->menuEdit->actions()
+               << ui->menuNavigation->actions()
+               << ui->menuView->actions()
+               << ui->menuTools->actions();
+
+    static QAction* actions[] = {
+        ui->actionNew,
+        ui->actionOpen,
+        ui->actionOpenURL,
+        ui->actionCloseTab,
+        ui->actionCloseAllTabs,
+        ui->actionSave,
+        ui->actionSaveAs,
+        ui->actionExportAsciiToClipboard,
+        ui->menuRecentFiles->menuAction(),
+        ui->actionExit,
+        ui->actionCopySgfToClipboard,
+        ui->actionCopyCurrentBranchToClipboard,
+        ui->actionPasteSgfToNewTab,
+        ui->menuMoveNumber->menuAction(),
+        ui->actionShowCoordinate,
+        ui->actionShowCoordinateWithI,
+        ui->actionRotateClockwise,
+        ui->actionFlipHorizontally,
+        ui->actionFlipVertically,
+        ui->actionResetBoard,
+        ui->actionPlaySound,
+        ui->actionOptions,
+        ui->actionCountTerritory,
+    };
+    static int N = sizeof(actions) / sizeof(actions[0]);
+
+    ViewData& data = docManager[board->document()];
+    if (mode != BoardWidget::ScoreMode::noScore){
+        ui->collectionDockWidget->setEnabled(false);
+        data.branchWidget->setEnabled(false);
+    }
+    else{
+        ui->collectionDockWidget->setEnabled(true);
+        data.branchWidget->setEnabled(true);
+    }
+
+    foreach(QAction* act, allActions){
+        if (mode != BoardWidget::ScoreMode::noScore){
+            QAction** a = qFind(actions, actions+N, act);
+            bool enable = a != actions + N;
+            if (act->isEnabled() != enable)
+                act->setEnabled(enable);
+        }
+        else{
+            if (act->isEnabled() != true)
+                act->setEnabled(true);
+        }
+    }
+
+    if (mode == BoardWidget::ScoreMode::noScore)
+        ui->menuReload->menuAction()->setEnabled( board->document()->getFileName().isEmpty() == false || board->document()->getUrl().isEmpty() == false );
+    else
+        ui->menuReload->menuAction()->setEnabled(false);
 }
 
 /**
@@ -1246,7 +1316,10 @@ void MainWindow::setTutorMode(BoardWidget* board, int mode){
         }
     }
 
-    ui->menuReload->menuAction()->setEnabled( board->document()->getFileName().isEmpty() == false || board->document()->getUrl().isEmpty() == false );
+    if (mode == BoardWidget::TutorMode::noTutor)
+        ui->menuReload->menuAction()->setEnabled( board->document()->getFileName().isEmpty() == false || board->document()->getUrl().isEmpty() == false );
+    else
+        ui->menuReload->menuAction()->setEnabled(false);
 }
 
 /**
@@ -2732,6 +2805,22 @@ void MainWindow::on_actionResetBoard_triggered(){
     board->setFlipVertically(false);
     board->setFlipHorizontally(false);
     board->setRotate(0);
+}
+
+/**
+  Slot
+  Tools -> Count Territory
+*/
+void MainWindow::on_actionCountTerritory_triggered(bool checked){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    if (checked)
+        board->setScoreMode(BoardWidget::ScoreMode::final);
+    else
+        board->setScoreMode(BoardWidget::ScoreMode::noScore);
+    setScoreMode(board, board->getScoreMode());
 }
 
 /**

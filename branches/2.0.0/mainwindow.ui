@@ -323,6 +323,10 @@
     <property name="title">
      <string>&amp;Tools</string>
     </property>
+    <addaction name="actionCountTerritory"/>
+    <addaction name="actionEstimateScore"/>
+    <addaction name="actionPlayWithComputer"/>
+    <addaction name="separator"/>
     <addaction name="actionAutomaticReplay"/>
     <addaction name="actionTutorBothSides"/>
     <addaction name="actionTutorOneSide"/>
@@ -1358,11 +1362,6 @@
     <string>Jump to Clicked</string>
    </property>
   </action>
-  <action name="actionPreviousTab">
-   <property name="text">
-    <string>Previous Tab</string>
-   </property>
-  </action>
   <action name="actionShowMoveNumber">
    <property name="checkable">
     <bool>true</bool>
@@ -1503,48 +1502,6 @@
     <string>Show Siblings</string>
    </property>
   </action>
-  <action name="actionNextTab">
-   <property name="text">
-    <string>Next Tab</string>
-   </property>
-  </action>
-  <action name="actionAbuot">
-   <property name="text">
-    <string>Abuot...</string>
-   </property>
-  </action>
-  <action name="actionAboutQt">
-   <property name="text">
-    <string>About Qt...</string>
-   </property>
-  </action>
-  <action name="actionCollectionDelete">
-   <property name="icon">
-    <iconset resource="mugo.qrc">
-     <normaloff>:/res/removeself.png</normaloff>:/res/removeself.png</iconset>
-   </property>
-   <property name="text">
-    <string>Delete</string>
-   </property>
-  </action>
-  <action name="actionCollectionMoveUp">
-   <property name="icon">
-    <iconset resource="mugo.qrc">
-     <normaloff>:/res/collectionup.png</normaloff>:/res/collectionup.png</iconset>
-   </property>
-   <property name="text">
-    <string>Move Up</string>
-   </property>
-  </action>
-  <action name="actionCollectionMoveDown">
-   <property name="icon">
-    <iconset resource="mugo.qrc">
-     <normaloff>:/res/collectiondown.png</normaloff>:/res/collectiondown.png</iconset>
-   </property>
-   <property name="text">
-    <string>Move Down</string>
-   </property>
-  </action>
   <action name="actionRotateClockwise">
    <property name="checkable">
     <bool>true</bool>
@@ -1588,6 +1545,24 @@
    </property>
    <property name="text">
     <string>Reset Board</string>
+   </property>
+  </action>
+  <action name="actionCountTerritory">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Count Territory</string>
+   </property>
+  </action>
+  <action name="actionEstimateScore">
+   <property name="text">
+    <string>Estimate Score</string>
+   </property>
+  </action>
+  <action name="actionPlayWithComputer">
+   <property name="text">
+    <string>Play With Computer</string>
    </property>
   </action>
   <action name="actionAutomaticReplay">
@@ -1638,6 +1613,53 @@
   <action name="actionClearSettings">
    <property name="text">
     <string>Clear Settings</string>
+   </property>
+  </action>
+  <action name="actionPreviousTab">
+   <property name="text">
+    <string>Previous Tab</string>
+   </property>
+  </action>
+  <action name="actionNextTab">
+   <property name="text">
+    <string>Next Tab</string>
+   </property>
+  </action>
+  <action name="actionAbuot">
+   <property name="text">
+    <string>Abuot...</string>
+   </property>
+  </action>
+  <action name="actionAboutQt">
+   <property name="text">
+    <string>About Qt...</string>
+   </property>
+  </action>
+  <action name="actionCollectionDelete">
+   <property name="icon">
+    <iconset resource="mugo.qrc">
+     <normaloff>:/res/removeself.png</normaloff>:/res/removeself.png</iconset>
+   </property>
+   <property name="text">
+    <string>Delete</string>
+   </property>
+  </action>
+  <action name="actionCollectionMoveUp">
+   <property name="icon">
+    <iconset resource="mugo.qrc">
+     <normaloff>:/res/collectionup.png</normaloff>:/res/collectionup.png</iconset>
+   </property>
+   <property name="text">
+    <string>Move Up</string>
+   </property>
+  </action>
+  <action name="actionCollectionMoveDown">
+   <property name="icon">
+    <iconset resource="mugo.qrc">
+     <normaloff>:/res/collectiondown.png</normaloff>:/res/collectiondown.png</iconset>
+   </property>
+   <property name="text">
+    <string>Move Down</string>
    </property>
   </action>
  </widget>

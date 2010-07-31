@@ -42,6 +42,10 @@ public:
         enum Mode{ noTutor, tutorBothSides, tutorOneSide, replay };
     };
 
+    struct ScoreMode{
+        enum Mode{ noScore, final, estimate };
+    };
+
     struct ResetMoveNumber{
         enum Mode{ noReset, branch, allBranch };
     };
@@ -53,7 +57,7 @@ public:
 
     class TerritoryInfo{
         public:
-            TerritoryInfo() : color(Go::empty), territory(Go::empty), moveNumber(0), stoneItem(NULL), numberItem(NULL), markItem(NULL), dimItem(NULL), variationItem(NULL){}
+            TerritoryInfo() : color(Go::empty), territory(Go::empty), moveNumber(0), stoneItem(NULL), numberItem(NULL), markItem(NULL), dimItem(NULL), variationItem(NULL), territoryItem(NULL){}
 
             bool isStone() const{ return color != Go::empty; }
             bool isBlack() const{ return color == Go::black; }
@@ -61,6 +65,7 @@ public:
             bool isTerritory() const{ return territory != Go::empty; }
             bool isBlackTerritory() const{ return territory != Go::black; }
             bool isWhiteTerritory() const{ return territory != Go::white; }
+            bool isDame() const{ return territory != Go::dame; }
 
             Go::Color color;
             Go::Color territory;
@@ -70,6 +75,7 @@ public:
             QGraphicsItem* markItem;
             QGraphicsItem* dimItem;
             QGraphicsSimpleTextItem* variationItem;
+            QGraphicsItem* territoryItem;
             QList<GraphicsArrowItem*> lineItemList;
             Go::Mark  mark;
             Go::Mark  dim;
@@ -110,11 +116,13 @@ public:
     // get edit mode
     EditMode::Mode getEditMode() const{ return editMode; }
     TutorMode::Mode getTutorMode() const{ return tutorMode; }
+    ScoreMode::Mode getScoreMode() const{ return scoreMode; }
     bool isJumpToClicked() const{ return jumpToClicked; }
 
     // set edit mode
-    void setEditMode(EditMode::Mode editMode);
-    void setTutorMode(TutorMode::Mode tutorMode);
+    void setEditMode(EditMode::Mode mode);
+    void setTutorMode(TutorMode::Mode mode);
+    void setScoreMode(ScoreMode::Mode mode);
     void setJumpToClicked(bool flag){ jumpToClicked = flag; }
 
     // get view mode
@@ -188,6 +196,14 @@ protected:
     // create buffer
     void createBuffer(bool erase);
     void eraseBuffer();
+    void createBoardItems();
+    void createTerritories();
+    void setTerritories(int x, int y);
+    void setTerritories(char* buf, Go::Color color);
+    void getTerritory(int x, int y, char* buf, bool& black, bool& white);
+    void setDeadStones(int x, int y);
+    void setDeadStones(int x, int y, Go::Color color, Go::Color territory, char* buf);
+    void createTerritoryItems();
 
     // set graphics item position
     void setItemsPosition();
@@ -217,6 +233,7 @@ protected:
     TerritoryInfo& removeMarkFromBuffer(const Go::Mark& mark, QGraphicsItem* item);
     void addLineToBuffer(const Go::Line& line, GraphicsArrowItem* item);
     void removeLineFromBuffer(const Go::Line& line, GraphicsArrowItem* item);
+    bool removeFromMarkItems(QGraphicsItem* item);
 
     // add stone or marker
     void alternateMove(int x, int y);
@@ -259,6 +276,7 @@ private:
     QGraphicsRectItem* board;
     QGraphicsRectItem* shadow;
     QGraphicsPathItem* focus;
+    QGraphicsSimpleTextItem* focusNumber;
     QPixmap whiteStonePixmap;
     QPixmap blackStonePixmap;
     QList<QGraphicsSimpleTextItem*> coordinateLeft, coordinateRight, coordinateTop, coordinateBottom;
@@ -283,6 +301,7 @@ private:
     // edit mode
     EditMode::Mode editMode;
     TutorMode::Mode tutorMode;
+    ScoreMode::Mode scoreMode;
     bool jumpToClicked;
 
     // view options
