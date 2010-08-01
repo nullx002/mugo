@@ -71,8 +71,30 @@ void CountTerritoryDialog::setScore(int total, int alive_b, int alive_w, int dea
     qreal wscorej = whiteTerritory + dead_b + capturedBlack + komi;
     japanese_score = wscorej - bscorej;
 
+    // chinese rule
+    double half = double(total) / 2.0;
+    double bscorec = blackTerritory + alive_b - komi / 2.0;
+    double wscorec = whiteTerritory + alive_w + komi / 2.0;
+
+    if (m_ui->ruleComboBox->currentIndex() == 0){
+        QString text;
+        if (wscorej > bscorej)
+            text = tr("White: %1 = %2(territories) + %3(captured) + %4(komi)\nBlack: %5 = %6(territories) + %7(captured)\nResult: W+%8")
+                            .arg(wscorej).arg(whiteTerritory).arg(dead_b + capturedBlack).arg(komi)
+                            .arg(bscorej).arg(blackTerritory).arg(dead_w + capturedWhite).arg(japanese_score);
+        else if (wscorej < bscorej)
+            text = tr("White: %1 = %2(territories) + %3(captured) + %4(komi)\nBlack: %5 = %6(territories) + %7(captured)\nResult: B+%8")
+                            .arg(wscorej).arg(whiteTerritory).arg(dead_b + capturedBlack).arg(komi)
+                            .arg(bscorej).arg(blackTerritory).arg(dead_w + capturedWhite).arg(abs(japanese_score));
+        else
+            text = tr("White: %1 = %2(territories) + %3(captured) + %4(komi)\nBlack: %5 = %6(territories) + %7(captured)\nResult: Draw")
+                            .arg(wscorej).arg(whiteTerritory).arg(dead_b + capturedBlack).arg(komi)
+                            .arg(bscorej).arg(blackTerritory).arg(dead_w + capturedWhite);
+        m_ui->scoreTextEdit->setPlainText(text);
+    }
+    else{
+    }
 /*
-    tr("Japanese Rule:\nWhite: %1 = %2(territories) + %3(captured) + %4(komi)\nBlack: %5 = %6(territories) + %7(captured)");
     tr("Chinese Rule:\nWhite: %1 = %2(points) - %3(komi) / 2\nBlack: %4 = %5(points) - %6(komi) / 2");
 
     // japanese rule
@@ -89,11 +111,6 @@ void CountTerritoryDialog::setScore(int total, int alive_b, int alive_w, int dea
 
     QString s = tr("Japanese Rule") + ":\n" + wj + "\n" + bj + "\n" + resultj + "\n\n";
 
-
-    // chinese rule
-    double half = double(total) / 2.0;
-    double bscorec = blackTerritory + alive_b - komi / 2.0;
-    double wscorec = whiteTerritory + alive_w + komi / 2.0;
 
     QString bc, wc;
     if (komi > 0){

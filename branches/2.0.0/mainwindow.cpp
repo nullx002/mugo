@@ -39,6 +39,7 @@
 #include "gameinformationdialog.h"
 #include "newdocumentdialog.h"
 #include "exportasciidialog.h"
+#include "countterritorydialog.h"
 #include "sgf.h"
 #include "sgfdocument.h"
 #include "command.h"
@@ -198,8 +199,8 @@ void MainWindow::createMenu(){
     ui->collectionDockWidget->toggleViewAction()->setIcon( QIcon(":/res/collection.png") );
 
     // Edit -> undo/redo
-    QAction* undoAction = undoGroup.createUndoAction(this);
-    QAction* redoAction = undoGroup.createRedoAction(this);
+    undoAction = undoGroup.createUndoAction(this);
+    redoAction = undoGroup.createRedoAction(this);
     undoAction->setShortcut(QKeySequence::Undo);
     redoAction->setShortcut(QKeySequence::Redo);
     undoAction->setIcon( QIcon(":/res/undo.png") );
@@ -644,6 +645,7 @@ void MainWindow::addDocument(SgfDocument* doc, BoardWidget* board)
 
         connect(board, SIGNAL(currentGameChanged(Go::NodePtr)), SLOT(on_boardWidget_currentGameChanged(Go::NodePtr)));
         connect(board, SIGNAL(currentNodeChanged(Go::NodePtr)), SLOT(on_boardWidget_currentNodeChanged(Go::NodePtr)));
+        connect(board, SIGNAL(scoreUpdated(int, int, int, int, int, int, int, int, int)), SLOT(on_boardWidget_scoreUpdated(int, int, int, int, int, int, int, int, int)));
 
         board->setCurrentGame(doc->gameList.front(), true);
     }
@@ -1168,6 +1170,9 @@ void MainWindow::updateMenu(bool updateAll){
     // View -> Flip Vertically
     ui->actionFlipVertically->setChecked( board->getFlipVertically() );
 
+    // Tools -> Score Mode
+    ui->actionCountTerritory->setChecked( board->getScoreMode() == BoardWidget::ScoreMode::final );
+
     // Tools -> Tutor Mode
     ui->actionAutomaticReplay->setChecked( board->getTutorMode() == BoardWidget::TutorMode::replay );
     ui->actionTutorBothSides->setChecked( board->getTutorMode() == BoardWidget::TutorMode::tutorBothSides );
@@ -1248,6 +1253,9 @@ void MainWindow::setScoreMode(BoardWidget* board, int mode){
         ui->menuReload->menuAction()->setEnabled( board->document()->getFileName().isEmpty() == false || board->document()->getUrl().isEmpty() == false );
     else
         ui->menuReload->menuAction()->setEnabled(false);
+
+    undoAction->setEnabled( undoGroup.canUndo() );
+    redoAction->setEnabled( undoGroup.canRedo() );
 }
 
 /**
@@ -1320,6 +1328,9 @@ void MainWindow::setTutorMode(BoardWidget* board, int mode){
         ui->menuReload->menuAction()->setEnabled( board->document()->getFileName().isEmpty() == false || board->document()->getUrl().isEmpty() == false );
     else
         ui->menuReload->menuAction()->setEnabled(false);
+
+    undoAction->setEnabled( undoGroup.canUndo() );
+    redoAction->setEnabled( undoGroup.canRedo() );
 }
 
 /**
@@ -2816,10 +2827,20 @@ void MainWindow::on_actionCountTerritory_triggered(bool checked){
     if (board == NULL)
         return;
 
-    if (checked)
+    ViewData& data = docManager[board->document()];
+
+    if (checked){
+        data.countTerritoryDialog = new CountTerritoryDialog(this);
+        connect(data.countTerritoryDialog, SIGNAL(finished(int)), this, SLOT(on_scoreDialog_finished(int)));
+        data.countTerritoryDialog->setInformationNode( board->getGameInformation() );
+        data.countTerritoryDialog->show();
         board->setScoreMode(BoardWidget::ScoreMode::final);
-    else
+    }
+    else{
         board->setScoreMode(BoardWidget::ScoreMode::noScore);
+        delete data.countTerritoryDialog;
+        data.countTerritoryDialog = NULL;
+    }
     setScoreMode(board, board->getScoreMode());
 }
 
@@ -3160,6 +3181,29 @@ void MainWindow::on_boardWidget_currentGameChanged(Go::NodePtr /*game*/){
 
 /**
   Slot
+  score updated
+*/
+void MainWindow::on_boardWidget_scoreUpdated(int total, int alive_b, int alive_w, int dead_b, int dead_w, int capturedBlack, int capturedWhite, int blackTerritory, int whiteTerritory){
+    BoardWidget* board = NULL;
+    CountTerritoryDialog* dialog = NULL;
+    DocumentManager::const_iterator iter = docManager.begin();
+    while (iter != docManager.end()){
+        if (iter->boardWidget == sender()){
+            board  = iter->boardWidget;
+            dialog = iter->countTerritoryDialog;
+            break;
+        }
+        ++iter;
+    }
+    if (board == NULL || dialog == NULL)
+        return;
+
+    double komi = board->getGameInformation()->komi;
+    dialog->setScore(total, alive_b, alive_w, dead_b, dead_w, capturedBlack, capturedWhite, blackTerritory, whiteTerritory, komi);
+}
+
+/**
+  Slot
   current tab is changed.
 */
 void MainWindow::on_boardTabWidget_currentChanged(QWidget* widget)
@@ -3400,4 +3444,26 @@ void MainWindow::on_openUrl_requestFinished(int id, bool error){
         doc->setUrl(downloadURL.toString());
         addDocument(doc, board);
     }
+}
+
+/**
+  Slot
+  Count Territory Dialog finished
+*/
+void MainWindow::on_scoreDialog_finished(int result){
+    BoardWidget* board = NULL;
+    DocumentManager::iterator iter = docManager.begin();
+    while (iter!= docManager.end()){
+        if (iter->countTerritoryDialog == sender()){
+            board = iter->boardWidget;
+            break;
+        }
+        ++iter;
+    }
+
+    if (board == NULL)
+        return;
+
+    board->setScoreMode(BoardWidget::ScoreMode::noScore);
+    updateMenu(true);
 }

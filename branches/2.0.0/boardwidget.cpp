@@ -290,6 +290,8 @@ void BoardWidget::resizeEvent(QResizeEvent* e){
 void BoardWidget::wheelEvent(QWheelEvent* e){
     if (tutorMode != TutorMode::noTutor)
         return;
+    else if (scoreMode != ScoreMode::noScore)
+        return;
 
     if (e->delta() > 0)
         back();
@@ -818,7 +820,7 @@ void BoardWidget::setItemsPosition(){
 
     // set position of stones and move number.
     createStonePixmap();
-    createBoardItems();
+    createBoardItemList();
 }
 
 /**
@@ -920,23 +922,27 @@ void BoardWidget::createBuffer(bool erase){
     foreach(const Go::Mark& mark, currentNode->blackTerritories)
         boardBuffer[mark.position.y][mark.position.x].territory = Go::black;
 
-    createBoardItems();
+    createBoardItemList();
 }
 
 /**
   create mark items
 */
-void BoardWidget::createBoardItems(){
-    // remove stones and markers
-    qDeleteAll(stones);
-    qDeleteAll(numbers);
-    qDeleteAll(marks);
-    stones.clear();
-    numbers.clear();
-    marks.clear();
-
+void BoardWidget::createBoardItemList(){
     if (currentNode == NULL)
         return;
+
+    createStoneItemList();
+    createNumberItemList();
+    createMarkItemList();
+}
+
+/**
+  create stone items
+*/
+void BoardWidget::createStoneItemList(){
+    qDeleteAll(stones);
+    stones.clear();
 
     for(int y=0; y<boardBuffer.size(); ++y){
         for(int x=0; x<boardBuffer.size(); ++x){
@@ -945,7 +951,22 @@ void BoardWidget::createBoardItems(){
             if (ti.color != Go::empty){
                 QGraphicsItem* item = createStoneItem(x, y, ti.color);
                 stones.push_back(item);
+                ti.stoneItem = item;
             }
+        }
+    }
+}
+
+/**
+  create number item list
+*/
+void BoardWidget::createNumberItemList(){
+    qDeleteAll(numbers);
+    numbers.clear();
+
+    for(int y=0; y<boardBuffer.size(); ++y){
+        for(int x=0; x<boardBuffer.size(); ++x){
+            TerritoryInfo& ti = boardBuffer[y][x];
 
             if (showMoveNumber && ti.number > 0 && ti.color != Go::empty){
                 if (showMoveNumberCount == -1 || number - ti.number < showMoveNumberCount){
@@ -961,11 +982,30 @@ void BoardWidget::createBoardItems(){
                 else if (showMoveNumberCount == 0 && ti.number == number)
                     createFocusItem(x, y);
             }
+        }
+    }
+}
+
+/**
+  create mark items
+*/
+void BoardWidget::createMarkItemList(){
+    qDeleteAll(marks);
+    marks.clear();
+
+    for(int y=0; y<boardBuffer.size(); ++y){
+        for(int x=0; x<boardBuffer.size(); ++x){
+            TerritoryInfo& ti = boardBuffer[y][x];
 
             if (ti.territory != Go::empty){
                 QGraphicsItem* item = createTerritoryItem(x, y, ti.territory);
                 marks.push_back(item);
+                if (ti.stoneItem)
+                    ti.stoneItem->setOpacity(0.3);
             }
+            else if (ti.stoneItem)
+                ti.stoneItem->setOpacity(1.0);
+
 
             if (showMarker){
                 if (ti.mark && showMarker){
@@ -985,7 +1025,6 @@ void BoardWidget::createBoardItems(){
             }
         }
     }
-
     createVariationItemList(currentNode);
 }
 
@@ -1014,11 +1053,31 @@ void BoardWidget::eraseBuffer(){
   create territories
 */
 void BoardWidget::createTerritories(){
-
     for (int y=0; y<boardBuffer.size(); ++y)
         for (int x=0; x<boardBuffer[y].size(); ++x)
             setTerritories(x, y);
-    createBoardItems();
+    createMarkItemList();
+
+    int total = boardBuffer.size() * boardBuffer[0].size();
+    int alive_b = 0, alive_w = 0, dead_b = 0, dead_w = 0, blackTerritory = 0, whiteTerritory = 0;
+
+    for (int y=0; y<boardBuffer.size(); ++y){
+        for (int x=0; x<boardBuffer[y].size(); ++x){
+            TerritoryInfo& ti = boardBuffer[y][x];
+            if (ti.territory == Go::black)
+                ++blackTerritory;
+            else if (ti.territory == Go::white)
+                ++whiteTerritory;
+
+            if (ti.color == Go::white && ti.territory == Go::black)
+                ++dead_w;
+            else if (ti.color == Go::black && ti.territory == Go::white)
+                ++dead_b;
+        }
+    }
+
+
+    emit scoreUpdated(total, alive_b, alive_w, dead_b, dead_w, capturedBlack, capturedWhite, blackTerritory, whiteTerritory);
 }
 
 void BoardWidget::setTerritories(int x, int y){

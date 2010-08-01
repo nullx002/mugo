@@ -36,6 +36,7 @@ class QLabel;
 class BoardWidget;
 class Document;
 class SgfDocument;
+class CountTerritoryDialog;
 
 
 namespace Ui {
@@ -53,12 +54,15 @@ public:
 
     class ViewData{
         public:
+            ViewData() : boardWidget(NULL), branchWidget(NULL), collectionModel(NULL), tabChangeAction(NULL){}
+
             BoardWidget* boardWidget;
             QTreeWidget* branchWidget;
             BranchType   branchType;
             QStandardItemModel* collectionModel;
             NodeTreeMap nodeToTreeItem;
             QAction* tabChangeAction;
+            CountTerritoryDialog* countTerritoryDialog;
     };
     typedef QMap<Document*, ViewData> DocumentManager;
 
@@ -117,6 +121,8 @@ protected:
 private:
     Ui::MainWindow *ui;
     QUndoGroup undoGroup;
+    QAction* undoAction;
+    QAction* redoAction;
     QActionGroup* editGroup;
     QActionGroup* encodingGroup;
     QActionGroup* tabChangeGroup;
@@ -268,6 +274,7 @@ private slots:
     // BoardWidget
     void on_boardWidget_currentNodeChanged(Go::NodePtr node);
     void on_boardWidget_currentGameChanged(Go::NodePtr game);
+    void on_boardWidget_scoreUpdated(int total, int alive_b, int alive_w, int dead_b, int dead_w, int capturedBlack, int capturedWhite, int blackTerritory, int whiteTerritory);
 
     // BoardTabWidget
     void on_boardTabWidget_currentChanged(QWidget* );
@@ -288,6 +295,9 @@ private slots:
     // Open URL
     void on_openUrl_dataReadProgress(int, int);
     void on_openUrl_requestFinished(int id, bool error);
+
+    // Count Territory Dialog
+    void on_scoreDialog_finished(int);
 };
 
 

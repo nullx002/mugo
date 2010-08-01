@@ -58,7 +58,7 @@ public:
 
     class TerritoryInfo{
         public:
-            TerritoryInfo() : color(Go::empty), territory(Go::empty), number(0), moveNumber(0), mark(NULL), dim(NULL){}
+            TerritoryInfo() : color(Go::empty), territory(Go::empty), number(0), moveNumber(0), mark(NULL), dim(NULL), stoneItem(NULL){}
 
             bool isStone() const{ return color != Go::empty; }
             bool isBlack() const{ return color == Go::black; }
@@ -75,6 +75,7 @@ public:
             const Go::Mark* mark;
             const Go::Mark* dim;
             Go::LineList lineList;
+            QGraphicsItem* stoneItem;
     };
     typedef QVector< QVector<TerritoryInfo> > BoardBuffer;
 
@@ -95,6 +96,8 @@ public:
     const Go::NodePtr& getCurrentGame() const{ return currentGame; }
     const Go::NodePtr& getCurrentNode() const{ return currentNode; }
     const Go::NodeList& getCurrentNodeList() const{ return currentNodeList; }
+    const Go::GameInformationPtr& getGameInformation() const{ return gameInformation; }
+
     int getMoveNumber() const{ return moveNumber; }
     int getCapturedBlack() const{ return capturedBlack; }
     int getCapturedWhite() const{ return capturedWhite; }
@@ -176,6 +179,7 @@ public:
 signals:
     void currentGameChanged(Go::NodePtr currentGame);
     void currentNodeChanged(Go::NodePtr currentNode);
+    void scoreUpdated(int total, int alive_b, int alive_w, int dead_b, int dead_w, int capturedBlack, int capturedWhite, int blackTerritory, int whiteTerritory);
 
 protected:
     // event
@@ -191,7 +195,10 @@ protected:
     // create buffer
     void createBuffer(bool erase);
     void eraseBuffer();
-    void createBoardItems();
+    void createBoardItemList();
+    void createStoneItemList();
+    void createNumberItemList();
+    void createMarkItemList();
 
     // create territory
     void createTerritories();
