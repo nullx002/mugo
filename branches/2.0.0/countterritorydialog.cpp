@@ -95,16 +95,24 @@ void CountTerritoryDialog::setScore(int total, int alive_b, int alive_w, int dea
     else if (wscorej < bscorej)
         japanese_text = tr("White: %1 = %2(territories) + %3(captured) + %4(komi)\nBlack: %5 = %6(territories) + %7(captured)\nResult: B+%8")
                         .arg(wscorej).arg(whiteTerritory).arg(dead_b + capturedBlack).arg(komi)
-                        .arg(bscorej).arg(blackTerritory).arg(dead_w + capturedWhite).arg(abs(japanese_score));
+                        .arg(bscorej).arg(blackTerritory).arg(dead_w + capturedWhite).arg(japanese_score * -1.0);
     else
         japanese_text = tr("White: %1 = %2(territories) + %3(captured) + %4(komi)\nBlack: %5 = %6(territories) + %7(captured)\nResult: Draw")
                         .arg(wscorej).arg(whiteTerritory).arg(dead_b + capturedBlack).arg(komi)
                         .arg(bscorej).arg(blackTerritory).arg(dead_w + capturedWhite);
 
-    chinese_text = tr("White: %1 = %2(points) - %3(komi) / 2 + %4(dame) / 2\nBlack: %5 = %6(points) - %7(komi) / 2 + %8(dame) / 2\nResult: W+%9")
+    if (wscorec > bscorec)
+        chinese_text = tr("White: %1 = %2(points) - %3(komi) / 2 + %4(dame) / 2\nBlack: %5 = %6(points) - %7(komi) / 2 + %8(dame) / 2\nResult: W+%9")
                         .arg(wscorec).arg(whiteTerritory + alive_w).arg(komi).arg(dame)
-                        .arg(bscorec).arg(blackTerritory + alive_b).arg(komi).arg(dame)
-                        .arg(chinese_score);
+                        .arg(bscorec).arg(blackTerritory + alive_b).arg(komi).arg(dame).arg(chinese_score);
+    else if (wscorec < bscorec)
+        chinese_text = tr("White: %1 = %2(points) - %3(komi) / 2 + %4(dame) / 2\nBlack: %5 = %6(points) - %7(komi) / 2 + %8(dame) / 2\nResult: B+%9")
+                        .arg(wscorec).arg(whiteTerritory + alive_w).arg(komi).arg(dame)
+                        .arg(bscorec).arg(blackTerritory + alive_b).arg(komi).arg(dame).arg(chinese_score * -1.0);
+    else
+        chinese_text = tr("White: %1 = %2(points) - %3(komi) / 2 + %4(dame) / 2\nBlack: %5 = %6(points) - %7(komi) / 2 + %8(dame) / 2\nResult: Draw")
+                        .arg(wscorec).arg(whiteTerritory + alive_w).arg(komi).arg(dame)
+                        .arg(bscorec).arg(blackTerritory + alive_b).arg(komi).arg(dame);
 
     if (m_ui->ruleComboBox->currentIndex() == 0)
         m_ui->scoreTextEdit->setPlainText(japanese_text);
