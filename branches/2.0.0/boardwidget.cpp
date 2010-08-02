@@ -1069,10 +1069,18 @@ void BoardWidget::createTerritories(){
             else if (ti.territory == Go::white)
                 ++whiteTerritory;
 
-            if (ti.color == Go::white && ti.territory == Go::black)
-                ++dead_w;
-            else if (ti.color == Go::black && ti.territory == Go::white)
-                ++dead_b;
+            if (ti.color == Go::white){
+                if (ti.territory == Go::black)
+                    ++dead_w;
+                else
+                    ++alive_w;
+            }
+            else if (ti.color == Go::black){
+                if (ti.territory == Go::white)
+                    ++dead_b;
+                else
+                    ++alive_b;
+            }
         }
     }
 

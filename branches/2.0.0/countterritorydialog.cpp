@@ -63,6 +63,16 @@ void CountTerritoryDialog::accept(){
 }
 
 /**
+  current index of rule combobox chagned
+*/
+void CountTerritoryDialog::on_ruleComboBox_currentIndexChanged(int index){
+    if (index == 0)
+        m_ui->scoreTextEdit->setPlainText(japanese_text);
+    else
+        m_ui->scoreTextEdit->setPlainText(chinese_text);
+}
+
+/**
   set score
 */
 void CountTerritoryDialog::setScore(int total, int alive_b, int alive_w, int dead_b, int dead_w, int capturedBlack, int capturedWhite, int blackTerritory, int whiteTerritory, double komi){
@@ -73,65 +83,31 @@ void CountTerritoryDialog::setScore(int total, int alive_b, int alive_w, int dea
 
     // chinese rule
     double half = double(total) / 2.0;
-    double bscorec = blackTerritory + alive_b - komi / 2.0;
-    double wscorec = whiteTerritory + alive_w + komi / 2.0;
+    double dame = total - alive_b - alive_w - blackTerritory - whiteTerritory;
+    double bscorec = blackTerritory + alive_b - komi / 2.0 + dame / 2.0;
+    double wscorec = whiteTerritory + alive_w + komi / 2.0 + dame / 2.0;
+    chinese_score = wscorec - half;
 
-    if (m_ui->ruleComboBox->currentIndex() == 0){
-        QString text;
-        if (wscorej > bscorej)
-            text = tr("White: %1 = %2(territories) + %3(captured) + %4(komi)\nBlack: %5 = %6(territories) + %7(captured)\nResult: W+%8")
-                            .arg(wscorej).arg(whiteTerritory).arg(dead_b + capturedBlack).arg(komi)
-                            .arg(bscorej).arg(blackTerritory).arg(dead_w + capturedWhite).arg(japanese_score);
-        else if (wscorej < bscorej)
-            text = tr("White: %1 = %2(territories) + %3(captured) + %4(komi)\nBlack: %5 = %6(territories) + %7(captured)\nResult: B+%8")
-                            .arg(wscorej).arg(whiteTerritory).arg(dead_b + capturedBlack).arg(komi)
-                            .arg(bscorej).arg(blackTerritory).arg(dead_w + capturedWhite).arg(abs(japanese_score));
-        else
-            text = tr("White: %1 = %2(territories) + %3(captured) + %4(komi)\nBlack: %5 = %6(territories) + %7(captured)\nResult: Draw")
-                            .arg(wscorej).arg(whiteTerritory).arg(dead_b + capturedBlack).arg(komi)
-                            .arg(bscorej).arg(blackTerritory).arg(dead_w + capturedWhite);
-        m_ui->scoreTextEdit->setPlainText(text);
-    }
-    else{
-    }
-/*
-    tr("Chinese Rule:\nWhite: %1 = %2(points) - %3(komi) / 2\nBlack: %4 = %5(points) - %6(komi) / 2");
-
-    // japanese rule
-    QString bj( tr("Black: %1 = %2(territories) + %3(captured)").arg(bscorej).arg(blackTerritory).arg(dead_w + capturedWhite) );
-    QString wj( tr("White: %1 = %2(territories) + %3(captured) + %4(komi)").arg(wscorej).arg(whiteTerritory).arg(dead_b + capturedBlack).arg(komi) );
-
-    QString resultj;
     if (wscorej > bscorej)
-        resultj = QString(tr("W+%1")).arg(wscorej - bscorej);
-    else if (bscorej > wscorej)
-        resultj = QString(tr("B+%1")).arg(bscorej - wscorej);
+        japanese_text = tr("White: %1 = %2(territories) + %3(captured) + %4(komi)\nBlack: %5 = %6(territories) + %7(captured)\nResult: W+%8")
+                        .arg(wscorej).arg(whiteTerritory).arg(dead_b + capturedBlack).arg(komi)
+                        .arg(bscorej).arg(blackTerritory).arg(dead_w + capturedWhite).arg(japanese_score);
+    else if (wscorej < bscorej)
+        japanese_text = tr("White: %1 = %2(territories) + %3(captured) + %4(komi)\nBlack: %5 = %6(territories) + %7(captured)\nResult: B+%8")
+                        .arg(wscorej).arg(whiteTerritory).arg(dead_b + capturedBlack).arg(komi)
+                        .arg(bscorej).arg(blackTerritory).arg(dead_w + capturedWhite).arg(abs(japanese_score));
     else
-        resultj = tr("Draw");
+        japanese_text = tr("White: %1 = %2(territories) + %3(captured) + %4(komi)\nBlack: %5 = %6(territories) + %7(captured)\nResult: Draw")
+                        .arg(wscorej).arg(whiteTerritory).arg(dead_b + capturedBlack).arg(komi)
+                        .arg(bscorej).arg(blackTerritory).arg(dead_w + capturedWhite);
 
-    QString s = tr("Japanese Rule") + ":\n" + wj + "\n" + bj + "\n" + resultj + "\n\n";
+    chinese_text = tr("White: %1 = %2(points) - %3(komi) / 2 + %4(dame) / 2\nBlack: %5 = %6(points) - %7(komi) / 2 + %8(dame) / 2\nResult: W+%9")
+                        .arg(wscorec).arg(whiteTerritory + alive_w).arg(komi).arg(dame)
+                        .arg(bscorec).arg(blackTerritory + alive_b).arg(komi).arg(dame)
+                        .arg(chinese_score);
 
-
-    QString bc, wc;
-    if (komi > 0){
-        bc = tr("Black: %1 = %2(point) - %3(komi) / 2").arg(bscorec).arg(blackTerritory + alive_b).arg(komi);
-        wc = tr("White: %1 = %2(point) + %3(komi) / 2").arg(wscorec).arg(whiteTerritory + alive_w).arg(komi);
-    }
-    else{
-        bc = tr("Black: %1 = %2(point) + %3(komi) / 2").arg(bscorec).arg(blackTerritory + alive_b).arg(komi);
-        wc = tr("White: %1 = %2(point) - %3(komi) / 2").arg(wscorec).arg(whiteTerritory + alive_w).arg(komi);
-    }
-
-    QString resultc;
-    if (wscorec > bscorec)
-        resultc = QString(tr("W+%1")).arg(wscorec - half);
-    else if (bscorec > wscorec)
-        resultc = QString(tr("B+%1")).arg(bscorec - half);
+    if (m_ui->ruleComboBox->currentIndex() == 0)
+        m_ui->scoreTextEdit->setPlainText(japanese_text);
     else
-        resultc = tr("Draw");
-
-    s += tr("Chinese Rule") + ":\n" + wc + "\n" + bc + "\n" + resultc;
-
-    m_ui->scoreTextEdit->setPlainText(s);
-*/
+        m_ui->scoreTextEdit->setPlainText(chinese_text);
 }

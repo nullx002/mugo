@@ -44,6 +44,11 @@ private:
     Go::GameInformationPtr gameInformation;
     double japanese_score;
     double chinese_score;
+    QString japanese_text;
+    QString chinese_text;
+
+private slots:
+    void on_ruleComboBox_currentIndexChanged(int index);
 };
 
 #endif // COUNTTERRITORYDIALOG_H
