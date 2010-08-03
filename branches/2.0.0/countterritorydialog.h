@@ -18,9 +18,10 @@
 #ifndef COUNTTERRITORYDIALOG_H
 #define COUNTTERRITORYDIALOG_H
 
-#include <QtGui/QDialog>
-#include <QDebug>
+#include <QDialog>
 #include "godata.h"
+
+class SgfDocument;
 
 namespace Ui {
     class CountTerritoryDialog;
@@ -29,7 +30,7 @@ namespace Ui {
 class CountTerritoryDialog : public QDialog {
     Q_OBJECT
 public:
-    CountTerritoryDialog(QWidget *parent = 0);
+    CountTerritoryDialog(SgfDocument* document, QWidget *parent = 0);
     ~CountTerritoryDialog();
 
     void setInformationNode(Go::GameInformationPtr gameInfo){ gameInformation = gameInfo; }
@@ -41,6 +42,7 @@ protected:
 
 private:
     Ui::CountTerritoryDialog *m_ui;
+    SgfDocument* document;
     Go::GameInformationPtr gameInformation;
     double japanese_score;
     double chinese_score;

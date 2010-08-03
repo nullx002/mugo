@@ -2830,7 +2830,7 @@ void MainWindow::on_actionCountTerritory_triggered(bool checked){
     ViewData& data = docManager[board->document()];
 
     if (checked){
-        data.countTerritoryDialog = new CountTerritoryDialog(this);
+        data.countTerritoryDialog = new CountTerritoryDialog(board->document(), this);
         connect(data.countTerritoryDialog, SIGNAL(finished(int)), this, SLOT(on_scoreDialog_finished(int)));
         data.countTerritoryDialog->setInformationNode( board->getGameInformation() );
         data.countTerritoryDialog->show();
@@ -3450,7 +3450,7 @@ void MainWindow::on_openUrl_requestFinished(int id, bool error){
   Slot
   Count Territory Dialog finished
 */
-void MainWindow::on_scoreDialog_finished(int result){
+void MainWindow::on_scoreDialog_finished(int){
     BoardWidget* board = NULL;
     DocumentManager::iterator iter = docManager.begin();
     while (iter!= docManager.end()){
@@ -3466,4 +3466,5 @@ void MainWindow::on_scoreDialog_finished(int result){
 
     board->setScoreMode(BoardWidget::ScoreMode::noScore);
     updateMenu(true);
+    updateCaption(true);
 }

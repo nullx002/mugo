@@ -15,16 +15,20 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#include <QUndoStack>
 #include "countterritorydialog.h"
 #include "ui_countterritorydialog.h"
+#include "sgfdocument.h"
+#include "command.h"
 
 
 /**
   Constructor
 */
-CountTerritoryDialog::CountTerritoryDialog(QWidget *parent)
+CountTerritoryDialog::CountTerritoryDialog(SgfDocument* doc, QWidget *parent)
     : QDialog(parent)
     , m_ui(new Ui::CountTerritoryDialog)
+    , document(doc)
     , japanese_score(0)
     , chinese_score(0)
 {
@@ -51,12 +55,19 @@ void CountTerritoryDialog::done(int r){
 */
 void CountTerritoryDialog::accept(){
     if (gameInformation){
-        if (japanese_score > 0)
-            gameInformation->result = QString("W+%1").arg(japanese_score);
+        double score = m_ui->ruleComboBox->currentIndex() == 0 ? japanese_score : chinese_score;
+
+        Go::GameInformationPtr info(new Go::GameInformation);
+        *info = *gameInformation;
+
+        if (score > 0)
+            info->result = QString("W+%1").arg(score);
         else if (japanese_score < 0)
-            gameInformation->result = QString("B+%1").arg(japanese_score * -1);
+            info->result = QString("B+%1").arg(score * -1);
         else
-            gameInformation->result = "Draw";
+            info->result = "Draw";
+
+        document->getUndoStack()->push( new SetGameInformationCommand(document, gameInformation, info) );
     }
 
     QDialog::accept();

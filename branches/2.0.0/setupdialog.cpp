@@ -120,7 +120,6 @@ void SetupDialog::accept(){
     settings.setValue("board/boardPath", m_ui->boardPathEdit->text());
     settings.setValue("board/coordinateColor", coordinateColor);
     settings.setValue("board/coordinateFont", m_ui->coordinateFontComboBox->currentFont().family());
-    qDebug() << m_ui->coordinateFontComboBox->currentFont().family();
     settings.setValue("board/bgColor", bgColor);
     settings.setValue("board/tutorBgColor", tutorColor);
 
