@@ -677,6 +677,9 @@ void BoardWidget::createBoard(){
     coordinateTop.clear();
     coordinateBottom.clear();
 
+    board->setVisible(monochrome == false);
+    shadow->setVisible(monochrome == false);
+
     // create lines
     int xsize = gameInformation->xsize;
     int ysize = gameInformation->ysize;
@@ -846,9 +849,9 @@ void BoardWidget::setTextItemPosition(QGraphicsSimpleTextItem* text, int x, int 
     if (text){
         qreal number_size;
         if (text->text().size() > 2)
-            number_size = size * 0.4;
+            number_size = size * 0.36;
         else if (text->text().size() > 1)
-            number_size = size * 0.45;
+            number_size = size * 0.44;
         else
             number_size = size * 0.5;
 
@@ -1288,16 +1291,22 @@ QGraphicsItem* BoardWidget::createStoneItem(int x, int y, Go::Color color){
     int sceneY = yy - size / 2;
 
     QGraphicsItem* stone = NULL;
-    Preference::ResourceType type = color == Go::white ? whiteStoneType : blackStoneType;
-    if (type == Preference::color){
-        QColor& c = color == Go::white ? whiteStoneColor : blackStoneColor;
+    if (monochrome){
+        QColor c = color == Go::white ? Qt::white : Qt::black;
         stone = scene()->addEllipse( sceneX, sceneY, size, size, QPen(Qt::black), QBrush(c) );
     }
     else{
-        QPixmap& p = color == Go::white ? whiteStonePixmap : blackStonePixmap;
-        QGraphicsPixmapItem* item = scene()->addPixmap(p);
-        item->setOffset(sceneX, sceneY);
-        stone = item;
+        Preference::ResourceType type = color == Go::white ? whiteStoneType : blackStoneType;
+        if (type == Preference::color){
+            QColor& c = color == Go::white ? whiteStoneColor : blackStoneColor;
+            stone = scene()->addEllipse( sceneX, sceneY, size, size, QPen(Qt::black), QBrush(c) );
+        }
+        else{
+            QPixmap& p = color == Go::white ? whiteStonePixmap : blackStonePixmap;
+            QGraphicsPixmapItem* item = scene()->addPixmap(p);
+            item->setOffset(sceneX, sceneY);
+            stone = item;
+        }
     }
 
     if (boardBuffer[y][x].territory != Go::empty)
@@ -1823,6 +1832,7 @@ void BoardWidget::setShowVariations(int variation){
 */
 void BoardWidget::setMonochrome(bool mono){
     monochrome = mono;
+    createBoard();
 }
 
 /**
@@ -2078,6 +2088,7 @@ void BoardWidget::drawImage(QImage& image){
     setItemsPosition(r);
 
     QPainter p(&image);
+    p.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
     board->scene()->render(&p, r, r);
 
     setItemsPosition(geometry());
