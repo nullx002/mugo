@@ -28,6 +28,7 @@
 #include <QPrintPreviewDialog>
 #include <QProgressDialog>
 #include <QDateTime>
+#include <QPainter>
 #include "appdef.h"
 #include "mugoapp.h"
 #include "sgf.h"
@@ -439,6 +440,10 @@ void MainWindow::on_actionSaveBoardAsPicture_triggered(){
         return;
 
     QImage image(dlg.imageSize, dlg.imageSize, QImage::Format_RGB32);
+    QPainter* p = new QPainter(&image);
+    p->fillRect(0, 0, dlg.imageSize, dlg.imageSize, Qt::white);
+    delete p;
+
     currentBoard()->paintBoard(&image, dlg.showCoordinate, dlg.monochrome);
     image.save( dlg.fileInfo.absoluteFilePath() );
 }

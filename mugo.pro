@@ -5,9 +5,8 @@ TARGET = mugo
 mac:CONFIG += x86 \
     ppc
 TEMPLATE = app
-unix:QT += phonon
-mac:QT += phonon
-QT += network
+QT += phonon \
+    network
 SOURCES += main.cpp \
     mainwindow.cpp \
     boardwidget.cpp \
