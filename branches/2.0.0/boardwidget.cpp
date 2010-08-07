@@ -214,7 +214,6 @@ void GraphicsArrowItem::createNormal(QPainterPath& path, qreal x1, qreal y1, qre
 BoardWidget::BoardWidget(SgfDocument* doc, QWidget *parent)
     : QGraphicsView(parent)
     , document_(doc)
-    , scene( new QGraphicsScene(this) )
     , editMode(EditMode::alternateMove)
     , tutorMode(TutorMode::noTutor)
     , scoreMode(ScoreMode::noScore)
@@ -224,6 +223,7 @@ BoardWidget::BoardWidget(SgfDocument* doc, QWidget *parent)
     , showMoveNumberCount(-1)
     , showCoordinate(true)
     , showMarker(true)
+    , monochrome(false)
     , rotate(0)
     , flipHorizontally(false)
     , flipVertically(false)
@@ -250,6 +250,8 @@ BoardWidget::BoardWidget(SgfDocument* doc, QWidget *parent)
 {
     moveSound = new Sound;
 
+    setScene( new QGraphicsScene(this) );
+
 //    connect(document_, SIGNAL(nodeAdded(Go::NodePtr)), SLOT(on_sgfdocument_nodeAdded(Go::NodePtr)));
     connect(document_, SIGNAL(nodeDeleted(Go::NodePtr, bool)), SLOT(on_sgfdocument_nodeDeleted(Go::NodePtr, bool)));
     connect(document_, SIGNAL(nodeModified(Go::NodePtr, bool)), SLOT(on_sgfdocument_nodeModified(Go::NodePtr, bool)));
@@ -257,11 +259,9 @@ BoardWidget::BoardWidget(SgfDocument* doc, QWidget *parent)
 
     setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
 
-    setScene(scene);
-
     // create board
-    shadow = scene->addRect(0, 0, 1, 1, QPen(Qt::NoPen), QBrush(SHADOW_COLOR));
-    board  = scene->addRect(0, 0, 1, 1, QPen(Qt::NoPen), QBrush(QPixmap(BOARD_IMAGE)));
+    shadow = scene()->addRect(0, 0, 1, 1, QPen(Qt::NoPen), QBrush(SHADOW_COLOR));
+    board  = scene()->addRect(0, 0, 1, 1, QPen(Qt::NoPen), QBrush(QPixmap(BOARD_IMAGE)));
     board->setZValue(1);
 
     // set current game
@@ -279,8 +279,7 @@ BoardWidget::~BoardWidget()
 /**
   resize
 */
-void BoardWidget::resizeEvent(QResizeEvent* e){
-    scene->setSceneRect(0, 0, e->size().width(), e->size().height());
+void BoardWidget::resizeEvent(QResizeEvent*){
     setItemsPosition();
 }
 
@@ -682,12 +681,12 @@ void BoardWidget::createBoard(){
     int xsize = gameInformation->xsize;
     int ysize = gameInformation->ysize;
     for (int y=0; y<ysize; ++y){
-        QGraphicsLineItem* item = scene->addLine(0, 0, 0, 0, QPen(Qt::black));
+        QGraphicsLineItem* item = scene()->addLine(0, 0, 0, 0, QPen(Qt::black));
         item->setZValue(2);
         hLines.push_back(item);
     }
     for (int x=0; x<xsize; ++x){
-        QGraphicsLineItem* item = scene->addLine(0, 0, 0, 0, QPen(Qt::black));
+        QGraphicsLineItem* item = scene()->addLine(0, 0, 0, 0, QPen(Qt::black));
         item->setZValue(2);
         vLines.push_back(item);
     }
@@ -697,15 +696,15 @@ void BoardWidget::createBoard(){
     getStarPosition(xpos, ypos);
     for (int y=0; y<ypos.size(); ++y)
         for (int x=0; x<xpos.size(); ++x){
-            QGraphicsEllipseItem* item = scene->addEllipse(x, y, 2, 2, QPen(Qt::black), QBrush(Qt::black));
+            QGraphicsEllipseItem* item = scene()->addEllipse(x, y, 2, 2, QPen(Qt::black), QBrush(Qt::black));
             item->setZValue(2);
             stars.push_back(item);
         }
 
     // create coordinate
     for (int i=gameInformation->ysize; i>0; --i){
-        QGraphicsSimpleTextItem* left  = scene->addSimpleText(QString::number(i), QFont(coordinateFont, 10));
-        QGraphicsSimpleTextItem* right = scene->addSimpleText(QString::number(i), QFont(coordinateFont, 10));
+        QGraphicsSimpleTextItem* left  = scene()->addSimpleText(QString::number(i), QFont(coordinateFont, 10));
+        QGraphicsSimpleTextItem* right = scene()->addSimpleText(QString::number(i), QFont(coordinateFont, 10));
         left->setZValue(2);
         right->setZValue(2);
         left->setBrush( QBrush(coordinateColor) );
@@ -717,8 +716,8 @@ void BoardWidget::createBoard(){
         int n = i % (document()->showCoordinateWithI ? 26 : 25);
         if (document()->showCoordinateWithI == false && n > 7)
             ++n;
-        QGraphicsSimpleTextItem* top    = scene->addSimpleText(QString().sprintf("%c", 'A' + n), QFont(coordinateFont, 10));
-        QGraphicsSimpleTextItem* bottom = scene->addSimpleText(QString().sprintf("%c", 'A' + n), QFont(coordinateFont, 10));
+        QGraphicsSimpleTextItem* top    = scene()->addSimpleText(QString().sprintf("%c", 'A' + n), QFont(coordinateFont, 10));
+        QGraphicsSimpleTextItem* bottom = scene()->addSimpleText(QString().sprintf("%c", 'A' + n), QFont(coordinateFont, 10));
         top->setZValue(2);
         bottom->setZValue(2);
         top->setBrush( QBrush(coordinateColor) );
@@ -734,8 +733,10 @@ void BoardWidget::createBoard(){
   set scene items position
 */
 void BoardWidget::setItemsPosition(){
-    QRectF r = scene->sceneRect();
+    setItemsPosition(geometry());
+}
 
+void BoardWidget::setItemsPosition(const QRectF& rect){
     // get coordinate item size
     QRectF coordinateRect;
     foreach(QGraphicsSimpleTextItem* item, coordinateLeft){
@@ -748,8 +749,8 @@ void BoardWidget::setItemsPosition(){
     }
 
     // calculate board size
-    int width  = r.width();
-    int height = r.height();
+    int width  = rect.width();
+    int height = rect.height();
     if (showCoordinate){
         width  -= coordinateRect.width()  * 2 + 10;
         height -= coordinateRect.height() * 2 + 10;
@@ -766,8 +767,8 @@ void BoardWidget::setItemsPosition(){
     int w = gridSize * (xsize - 1);
     int h = gridSize * (ysize - 1);
 
-    int x = (r.width() - w) / 2;
-    int y = (r.height() - h) / 2;
+    int x = (rect.width() - w) / 2;
+    int y = (rect.height() - h) / 2;
     int margin = gridSize * 0.6;
     QRect boardRect(QPoint(x-margin, y-margin), QPoint(x+w+margin, y+h+margin));
 
@@ -821,6 +822,20 @@ void BoardWidget::setItemsPosition(){
     // set position of stones and move number.
     createStonePixmap();
     createBoardItemList();
+
+    // set scene rect
+    QRect r = boardRect;
+    if (showCoordinate){
+        r.setLeft( r.left() - coordinateRect.width() - 5 );
+        r.setRight( r.right() + coordinateRect.width() + 5);
+        r.setTop( r.top() - coordinateRect.height() - 5 );
+        r.setBottom( r.bottom() + coordinateRect.height() + 5);
+    }
+    else{
+        r.setRight(shadow->rect().right());
+        r.setBottom(shadow->rect().bottom());
+    }
+    scene()->setSceneRect(r);
 }
 
 /**
@@ -1192,17 +1207,17 @@ QAbstractGraphicsShapeItem* BoardWidget::createFocusItem(int x, int y){
         return focus;
 
     if (focusType == 0){
-        focus = scene->addPath( createTrianglePath(x, y) );
+        focus = scene()->addPath( createTrianglePath(x, y) );
         focus->setBrush(QBrush(focusColor));
     }
     else if (focusType == 1)
-        focus = scene->addPath( createCirclePath(x, y) );
+        focus = scene()->addPath( createCirclePath(x, y) );
     else if (focusType == 2)
-        focus = scene->addPath( createCrossPath(x, y) );
+        focus = scene()->addPath( createCrossPath(x, y) );
     else if (focusType == 3)
-        focus = scene->addPath( createSquarePath(x, y) );
+        focus = scene()->addPath( createSquarePath(x, y) );
     else if (focusType == 4)
-        focus = scene->addPath( createTrianglePath(x, y) );
+        focus = scene()->addPath( createTrianglePath(x, y) );
 
     focus->setPen(QPen(focusColor, 2));
     focus->setZValue(5);
@@ -1255,7 +1270,7 @@ void BoardWidget::createVariationItemList(Go::NodePtr node){
             item->setBackgroundBrush(board->brush());
 
         setTextItemPosition(item, v->x(), v->y());
-        scene->addItem(item);
+        scene()->addItem(item);
         this->variations.push_back(item);
 
         marks.push_back(item);
@@ -1276,11 +1291,11 @@ QGraphicsItem* BoardWidget::createStoneItem(int x, int y, Go::Color color){
     Preference::ResourceType type = color == Go::white ? whiteStoneType : blackStoneType;
     if (type == Preference::color){
         QColor& c = color == Go::white ? whiteStoneColor : blackStoneColor;
-        stone = scene->addEllipse( sceneX, sceneY, size, size, QPen(Qt::black), QBrush(c) );
+        stone = scene()->addEllipse( sceneX, sceneY, size, size, QPen(Qt::black), QBrush(c) );
     }
     else{
         QPixmap& p = color == Go::white ? whiteStonePixmap : blackStonePixmap;
-        QGraphicsPixmapItem* item = scene->addPixmap(p);
+        QGraphicsPixmapItem* item = scene()->addPixmap(p);
         item->setOffset(sceneX, sceneY);
         stone = item;
     }
@@ -1321,7 +1336,7 @@ void BoardWidget::createStonePixmap(){
 */
 QGraphicsSimpleTextItem* BoardWidget::createMoveNumberItem(int x, int y, int number){
     QString text = QString::number(number);
-    QGraphicsSimpleTextItem* item = scene->addSimpleText(text, QFont(labelFont));
+    QGraphicsSimpleTextItem* item = scene()->addSimpleText(text, QFont(labelFont));
     Go::Color color = boardBuffer[y][x].color;
     item->setBrush(QBrush(color == Go::black ? Qt::white : Qt::black));
     setTextItemPosition(item, x, y);
@@ -1335,25 +1350,25 @@ QGraphicsSimpleTextItem* BoardWidget::createMoveNumberItem(int x, int y, int num
 QGraphicsItem* BoardWidget::createMarkItem(const Go::Mark& mark){
     QGraphicsItem* item = NULL;
     if (mark.type == Go::Mark::cross)
-        item = scene->addPath( createCrossPath(mark.position.x, mark.position.y) );
+        item = scene()->addPath( createCrossPath(mark.position.x, mark.position.y) );
     else if (mark.type == Go::Mark::circle)
-        item = scene->addPath( createCirclePath(mark.position.x, mark.position.y) );
+        item = scene()->addPath( createCirclePath(mark.position.x, mark.position.y) );
     else if (mark.type == Go::Mark::square)
-        item = scene->addPath( createSquarePath(mark.position.x, mark.position.y) );
+        item = scene()->addPath( createSquarePath(mark.position.x, mark.position.y) );
     else if (mark.type == Go::Mark::triangle)
-        item = scene->addPath( createTrianglePath(mark.position.x, mark.position.y) );
+        item = scene()->addPath( createTrianglePath(mark.position.x, mark.position.y) );
     else if (mark.type == Go::Mark::character){
-//        item = scene->addSimpleText(mark.text);
+//        item = scene()->addSimpleText(mark.text);
         item = new GraphicsLabelTextItem(mark.text);
         setTextItemPosition((GraphicsLabelTextItem*)item, mark.position.x, mark.position.y);
-        scene->addItem(item);
+        scene()->addItem(item);
     }
     else if (mark.type == Go::Mark::dim){
-        item = scene->addRect( createRectPath(mark.position.x, mark.position.y), QPen(Qt::NoPen), QBrush(Qt::black) );
+        item = scene()->addRect( createRectPath(mark.position.x, mark.position.y), QPen(Qt::NoPen), QBrush(Qt::black) );
         item->setOpacity(0.65);
     }
     else if (mark.type == Go::Mark::select)
-        item = scene->addPath( createSelectPath(mark.position.x, mark.position.y) );
+        item = scene()->addPath( createSelectPath(mark.position.x, mark.position.y) );
     else
         return NULL;
 
@@ -1396,7 +1411,7 @@ QGraphicsItem* BoardWidget::createMarkItem(const Go::Mark& mark){
   create territory item
 */
 QGraphicsItem* BoardWidget::createTerritoryItem(int x, int y, Go::Color color){
-    QAbstractGraphicsShapeItem* item = scene->addPath( createTerritoryPath(x, y) );
+    QAbstractGraphicsShapeItem* item = scene()->addPath( createTerritoryPath(x, y) );
     item->setPen( QPen(Qt::NoPen) );
 
     if (color == Go::black)
@@ -1527,7 +1542,7 @@ GraphicsArrowItem* BoardWidget::createLineItem(int x1, int y1, int x2, int y2, G
 
     item->setPen( QPen(Qt::blue, 3) );
     item->setZValue(4);
-    scene->addItem(item);
+    scene()->addItem(item);
 
     return item;
 }
@@ -1720,9 +1735,9 @@ void BoardWidget::setTutorMode(TutorMode::Mode mode){
     moveEnemy = false;
 
     if (tutorMode == TutorMode::noTutor)
-        scene->setBackgroundBrush(QBrush(backgroundColor));
+        scene()->setBackgroundBrush(QBrush(backgroundColor));
     else
-        scene->setBackgroundBrush(QBrush(tutorBackgroundColor));
+        scene()->setBackgroundBrush(QBrush(tutorBackgroundColor));
 
     if (tutorMode == TutorMode::replay){
         replayTimer = new QTimer(this);
@@ -1804,6 +1819,13 @@ void BoardWidget::setShowVariations(int variation){
 }
 
 /**
+  set monochrome
+*/
+void BoardWidget::setMonochrome(bool mono){
+    monochrome = mono;
+}
+
+/**
   set board type
 */
 void BoardWidget::setBoardType(Preference::ResourceType type){
@@ -1876,7 +1898,7 @@ void BoardWidget::setCoordinateFont(const QString& fontName){
   set background color
 */
 void BoardWidget::setBackgroundColor(const QColor& color){
-    scene->setBackgroundBrush( QBrush(backgroundColor = color) );
+    scene()->setBackgroundBrush( QBrush(backgroundColor = color) );
 }
 
 /**
@@ -1885,7 +1907,7 @@ void BoardWidget::setBackgroundColor(const QColor& color){
 void BoardWidget::setTutorBackgroundColor(const QColor& color){
     tutorBackgroundColor = color;
     if (tutorMode != TutorMode::noTutor)
-        scene->setBackgroundBrush( QBrush(tutorBackgroundColor) );
+        scene()->setBackgroundBrush( QBrush(tutorBackgroundColor) );
 }
 
 /**
@@ -2045,6 +2067,20 @@ void BoardWidget::setFlipVertically(bool flip){
 */
 void BoardWidget::addItem(Go::NodePtr parent, Go::NodePtr node, int index){
     document()->getUndoStack()->push( new AddNodeCommand(document(), parent, node, index) );
+}
+
+/**
+  draw image
+*/
+void BoardWidget::drawImage(QImage& image){
+    QRectF r(0, 0, image.width(), image.height());
+
+    setItemsPosition(r);
+
+    QPainter p(&image);
+    board->scene()->render(&p, r, r);
+
+    setItemsPosition(geometry());
 }
 
 /**

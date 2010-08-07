@@ -20,7 +20,8 @@ SOURCES += main.cpp \
     libkombilo/abstractboard.cpp \
     libkombilo/sgfparser.cpp \
     setupdialog.cpp \
-    countterritorydialog.cpp
+    countterritorydialog.cpp \
+    saveimagedialog.cpp
 HEADERS += mainwindow.h \
     boardwidget.h \
     document.h \
@@ -36,13 +37,15 @@ HEADERS += mainwindow.h \
     libkombilo/abstractboard.h \
     libkombilo/sgfparser.h \
     setupdialog.h \
-    countterritorydialog.h
+    countterritorydialog.h \
+    saveimagedialog.h
 FORMS += mainwindow.ui \
     gameinformationdialog.ui \
     exportasciidialog.ui \
     newdocumentdialog.ui \
     setupdialog.ui \
-    countterritorydialog.ui
+    countterritorydialog.ui \
+    saveimagedialog.ui
 RESOURCES += mugo.qrc
 win32:RC_FILE = mugo.rc
 mac:RC_FILE = pics/mugo.icns

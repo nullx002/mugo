@@ -131,6 +131,7 @@ public:
     bool getShowCoordinateWithI() const{ return document()->showCoordinateWithI; }
     bool getShowMarker() const{ return showMarker; }
     int  getShowVariations() const{ return currentGame->gameInformation->variation; }
+    bool getMonochrome() const{ return monochrome; }
     int  getRotate() const{ return rotate; }
     bool getFlipHorizntally() const{ return flipHorizontally; }
     bool getFlipVertically() const{ return flipVertically; }
@@ -143,6 +144,7 @@ public:
     void setShowCoordinateWithI(bool show);
     void setShowMarker(bool show);
     void setShowVariations(int variation);
+    void setMonochrome(bool monochrome);
     void setRotate(int rotate);
     void setFlipHorizontally(bool flip);
     void setFlipVertically(bool flip);
@@ -175,6 +177,9 @@ public:
 
     // add
     void addItem(Go::NodePtr parent, Go::NodePtr node, int index = -1);
+
+    // draw image
+    void drawImage(QImage& image);
 
 signals:
     void currentGameChanged(Go::NodePtr currentGame);
@@ -210,6 +215,7 @@ protected:
 
     // set graphics item position
     void setItemsPosition();
+    void setItemsPosition(const QRectF& r);
     void setTextItemPosition(QGraphicsSimpleTextItem* text, int x, int y);
 
     // create graphics item
@@ -266,7 +272,6 @@ private:
     Go::GameInformationPtr gameInformation;
 
     // graphics view
-    QGraphicsScene* scene;
     QGraphicsRectItem* board;
     QGraphicsRectItem* shadow;
     QPixmap whiteStonePixmap;
@@ -301,6 +306,7 @@ private:
     int  showMoveNumberCount;
     bool showCoordinate;
     bool showMarker;
+    bool monochrome;
 
     // roate / flip view
     int  rotate;

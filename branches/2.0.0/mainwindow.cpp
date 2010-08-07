@@ -40,6 +40,7 @@
 #include "newdocumentdialog.h"
 #include "exportasciidialog.h"
 #include "countterritorydialog.h"
+#include "saveimagedialog.h"
 #include "sgf.h"
 #include "sgfdocument.h"
 #include "command.h"
@@ -1638,35 +1639,28 @@ void MainWindow::on_actionCollectionExtract_triggered()
 */
 void MainWindow::on_actionExportBoardAsImage_triggered()
 {
-    QMessageBox::warning(this, QString(), "Not Implemented");
-/*
     BoardWidget* board = currentBoard();
     if (board == NULL)
         return;
 
-    QImage image(640, 400, QImage::Format_ARGB32);
-    QPainter p(&image);
-    board->render(&p);
-
-    QString filter = "PNG image(*.png);;Bitmap image(*.bmp);;JPEG image(*.jpeg *.jpg);;TIFF image(*.tiff *.tif)";
-    QString selectedFilter;
-    QString fname = QFileDialog::getSaveFileName(this, QString(), QString(), filter, &selectedFilter);
-    if (fname.isEmpty())
+    SaveImageDialog dlg;
+    if (dlg.exec() != QDialog::Accepted)
         return;
 
-    QFileInfo fi(fname);
-    if (fi.suffix().isEmpty()){
-        if (selectedFilter.indexOf("PNG") == 0)
-            fname += ".png";
-        else if (selectedFilter.indexOf("Bitmap") == 0)
-            fname += ".bmp";
-        else if (selectedFilter.indexOf("JPEG") == 0)
-            fname += ".jpg";
-        else if (selectedFilter.indexOf("TIFF") == 0)
-            fname += ".tif";
-    }
-    image.save(fname);
-*/
+    QImage image(dlg.imageSize, dlg.imageSize, QImage::Format_ARGB32);
+
+    bool showCoordinate = board->getShowCoordinate();
+    board->setShowCoordinate(dlg.showCoordinate);
+    if(dlg.monochrome)
+        board->setMonochrome(true);
+
+    board->drawImage(image);
+
+    board->setShowCoordinate(showCoordinate);
+    if(dlg.monochrome)
+        board->setMonochrome(false);
+
+    image.save(dlg.fileInfo.filePath());
 }
 
 /**
