@@ -1,0 +1,1845 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>937</width>
+    <height>585</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="acceptDrops">
+   <bool>true</bool>
+  </property>
+  <property name="windowTitle">
+   <string>mugo</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="resources.qrc">
+    <normaloff>:/pics/mugo.png</normaloff>:/pics/mugo.png</iconset>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QHBoxLayout" name="horizontalLayout_3">
+    <property name="margin">
+     <number>0</number>
+    </property>
+    <item>
+     <widget class="QTabWidget" name="boardTabWidget">
+      <property name="documentMode">
+       <bool>true</bool>
+      </property>
+      <property name="tabsClosable">
+       <bool>true</bool>
+      </property>
+      <property name="movable">
+       <bool>true</bool>
+      </property>
+      <widget class="QWidget" name="tab">
+       <attribute name="title">
+        <string>Tab 1</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <property name="margin">
+         <number>0</number>
+        </property>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>937</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>&amp;File</string>
+    </property>
+    <widget class="QMenu" name="menuRecentFiles">
+     <property name="title">
+      <string>Recent Files</string>
+     </property>
+    </widget>
+    <widget class="QMenu" name="menuCollection">
+     <property name="title">
+      <string>Collection</string>
+     </property>
+     <addaction name="actionCollectionExtract"/>
+     <addaction name="actionCollectionImport"/>
+    </widget>
+    <addaction name="actionNew"/>
+    <addaction name="actionOpen"/>
+    <addaction name="actionOpenURL"/>
+    <addaction name="actionReload"/>
+    <addaction name="separator"/>
+    <addaction name="actionCloseTab"/>
+    <addaction name="actionCloseAllTabs"/>
+    <addaction name="separator"/>
+    <addaction name="actionSave"/>
+    <addaction name="actionSaveAs"/>
+    <addaction name="separator"/>
+    <addaction name="actionSaveBoardAsPicture"/>
+    <addaction name="actionExportAsciiToClipboard"/>
+    <addaction name="separator"/>
+    <addaction name="menuCollection"/>
+    <addaction name="separator"/>
+    <addaction name="actionPrint"/>
+    <addaction name="separator"/>
+    <addaction name="menuRecentFiles"/>
+    <addaction name="separator"/>
+    <addaction name="actionExit"/>
+   </widget>
+   <widget class="QMenu" name="menuEdit">
+    <property name="title">
+     <string>&amp;Edit</string>
+    </property>
+    <widget class="QMenu" name="menuStoneMarkers">
+     <property name="title">
+      <string>Stone &amp;&amp; &amp;Markers</string>
+     </property>
+     <addaction name="actionAddBlackStone"/>
+     <addaction name="actionAddWhiteStone"/>
+     <addaction name="actionAddEmpty"/>
+     <addaction name="separator"/>
+     <addaction name="actionAddLabel"/>
+     <addaction name="actionAddLabelManually"/>
+     <addaction name="actionAddCircle"/>
+     <addaction name="actionAddCross"/>
+     <addaction name="actionAddSquare"/>
+     <addaction name="actionAddTriangle"/>
+     <addaction name="actionDeleteMarker"/>
+    </widget>
+    <widget class="QMenu" name="menuEncoding">
+     <property name="title">
+      <string>&amp;Encoding</string>
+     </property>
+     <addaction name="actionEncodingUTF8"/>
+     <addaction name="separator"/>
+     <addaction name="actionISO8859_1"/>
+     <addaction name="actionISO8859_15"/>
+     <addaction name="actionWindows_1252"/>
+     <addaction name="actionISO8859_14"/>
+     <addaction name="actionISO8859_7"/>
+     <addaction name="actionWindows_1253"/>
+     <addaction name="actionISO8859_10"/>
+     <addaction name="actionISO8859_3"/>
+     <addaction name="separator"/>
+     <addaction name="actionISO8859_4"/>
+     <addaction name="actionISO8859_13"/>
+     <addaction name="actionWindows_1257"/>
+     <addaction name="actionISO8859_2"/>
+     <addaction name="actionWindows_1250"/>
+     <addaction name="actionISO8859_5"/>
+     <addaction name="actionWindows_1251"/>
+     <addaction name="actionKoi8_R"/>
+     <addaction name="actionKoi8_U"/>
+     <addaction name="actionISO8859_16"/>
+     <addaction name="separator"/>
+     <addaction name="actionISO8859_11"/>
+     <addaction name="actionISO8859_9"/>
+     <addaction name="actionWindows_1254"/>
+     <addaction name="actionWindows_1258"/>
+     <addaction name="separator"/>
+     <addaction name="actionISO8859_6"/>
+     <addaction name="actionWindows_1256"/>
+     <addaction name="actionWindows_1255"/>
+     <addaction name="actionISO8859_8"/>
+     <addaction name="separator"/>
+     <addaction name="actionEncodingGB2312"/>
+     <addaction name="actionEncodingBig5"/>
+     <addaction name="separator"/>
+     <addaction name="actionEncodingKorean"/>
+     <addaction name="separator"/>
+     <addaction name="actionEncodingEucJP"/>
+     <addaction name="actionEncodingJIS"/>
+     <addaction name="actionEncodingShiftJIS"/>
+    </widget>
+    <widget class="QMenu" name="menuAnnotation">
+     <property name="title">
+      <string>&amp;Annotation</string>
+     </property>
+     <addaction name="actionGoodMove"/>
+     <addaction name="actionVeryGoodMove"/>
+     <addaction name="actionBadMove"/>
+     <addaction name="actionVeryBadMove"/>
+     <addaction name="actionDoubtfulMove"/>
+     <addaction name="actionInterestingMove"/>
+     <addaction name="separator"/>
+     <addaction name="actionEven"/>
+     <addaction name="actionGoodForBlack"/>
+     <addaction name="actionVeryGoodForBlack"/>
+     <addaction name="actionGoodForWhite"/>
+     <addaction name="actionVeryGoodForWhite"/>
+     <addaction name="actionUnclear"/>
+     <addaction name="separator"/>
+     <addaction name="actionHotspot"/>
+    </widget>
+    <widget class="QMenu" name="menuEditMoveNumber">
+     <property name="title">
+      <string>Move &amp;Number</string>
+     </property>
+     <addaction name="actionSetMoveNumber"/>
+     <addaction name="actionUnsetMoveNumber"/>
+    </widget>
+    <addaction name="separator"/>
+    <addaction name="actionCopySgfToClipboard"/>
+    <addaction name="actionCopyCurrentSgfToClipboard"/>
+    <addaction name="actionPasteSgfToNewTab"/>
+    <addaction name="actionPasteSgfToCollection"/>
+    <addaction name="actionPasteSgfAsBranchFromClipboard"/>
+    <addaction name="separator"/>
+    <addaction name="actionGameInformation"/>
+    <addaction name="separator"/>
+    <addaction name="actionDeleteAfterCurrent"/>
+    <addaction name="actionDeleteOnlyCurrent"/>
+    <addaction name="actionPass"/>
+    <addaction name="separator"/>
+    <addaction name="actionAlternateMove"/>
+    <addaction name="menuStoneMarkers"/>
+    <addaction name="menuAnnotation"/>
+    <addaction name="menuEditMoveNumber"/>
+    <addaction name="actionEditNodeName"/>
+    <addaction name="separator"/>
+    <addaction name="actionWhiteFirst"/>
+    <addaction name="separator"/>
+    <addaction name="actionRotateSgfClockwise"/>
+    <addaction name="actionFlipSgfHorizontally"/>
+    <addaction name="actionFlipSgfVertically"/>
+    <addaction name="separator"/>
+    <addaction name="menuEncoding"/>
+   </widget>
+   <widget class="QMenu" name="menuNavigation">
+    <property name="title">
+     <string>&amp;Navigation</string>
+    </property>
+    <addaction name="actionMoveFirst"/>
+    <addaction name="actionFastRewind"/>
+    <addaction name="actionPreviousMove"/>
+    <addaction name="actionNextMove"/>
+    <addaction name="actionFastForward"/>
+    <addaction name="actionMoveLast"/>
+    <addaction name="separator"/>
+    <addaction name="actionBackToParent"/>
+    <addaction name="actionPreviousBranch"/>
+    <addaction name="actionNextBranch"/>
+    <addaction name="separator"/>
+    <addaction name="actionJumpToMoveNumber"/>
+    <addaction name="actionJumpToClicked"/>
+   </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>&amp;View</string>
+    </property>
+    <widget class="QMenu" name="menuShowMoveNumber">
+     <property name="title">
+      <string>Move Number</string>
+     </property>
+     <property name="icon">
+      <iconset resource="resources.qrc">
+       <normaloff>:/res/showmovenumber.png</normaloff>:/res/showmovenumber.png</iconset>
+     </property>
+     <addaction name="actionShowMoveNumber"/>
+     <addaction name="actionResetMoveNubmerInBranch"/>
+     <addaction name="separator"/>
+     <addaction name="actionNoMoveNumber"/>
+     <addaction name="actionLast1Move"/>
+     <addaction name="actionLast2Moves"/>
+     <addaction name="actionLast5Moves"/>
+     <addaction name="actionLast10Moves"/>
+     <addaction name="actionLast20Moves"/>
+     <addaction name="actionLast50Moves"/>
+     <addaction name="actionAllMoves"/>
+    </widget>
+    <addaction name="menuShowMoveNumber"/>
+    <addaction name="separator"/>
+    <addaction name="actionShowCoordinate"/>
+    <addaction name="actionShowCoordinateI"/>
+    <addaction name="actionShowMarker"/>
+    <addaction name="actionShowBranchMoves"/>
+    <addaction name="actionBranchMode"/>
+    <addaction name="actionRotateBoardClockwise"/>
+    <addaction name="actionFlipBoardHorizontally"/>
+    <addaction name="actionFlipBoardVertically"/>
+    <addaction name="actionResetBoard"/>
+   </widget>
+   <widget class="QMenu" name="menuTools">
+    <property name="title">
+     <string>&amp;Tools</string>
+    </property>
+    <widget class="QMenu" name="menuLanguage">
+     <property name="title">
+      <string>&amp;Language</string>
+     </property>
+     <addaction name="actionLanguageSystemDefault"/>
+     <addaction name="actionLanguageEnglish"/>
+     <addaction name="actionLanguageJapanese"/>
+    </widget>
+    <addaction name="actionCountTerritory"/>
+    <addaction name="actionEstimateScore"/>
+    <addaction name="actionPlayWithComputer"/>
+    <addaction name="separator"/>
+    <addaction name="actionAutomaticReplay"/>
+    <addaction name="actionTutorBothSides"/>
+    <addaction name="actionTutorOneSide"/>
+    <addaction name="separator"/>
+    <addaction name="actionPlaySound"/>
+    <addaction name="separator"/>
+    <addaction name="menuLanguage"/>
+    <addaction name="actionOptions"/>
+    <addaction name="actionClearSettings"/>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>&amp;Help</string>
+    </property>
+    <addaction name="actionAbout"/>
+    <addaction name="actionAboutQT"/>
+   </widget>
+   <widget class="QMenu" name="menuWindow">
+    <property name="title">
+     <string>&amp;Window</string>
+    </property>
+    <widget class="QMenu" name="menuToolbars">
+     <property name="title">
+      <string>Toolbars</string>
+     </property>
+    </widget>
+    <addaction name="menuToolbars"/>
+    <addaction name="actionPreviousTab"/>
+    <addaction name="actionNextTab"/>
+    <addaction name="separator"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuEdit"/>
+   <addaction name="menuNavigation"/>
+   <addaction name="menuView"/>
+   <addaction name="menuTools"/>
+   <addaction name="menuWindow"/>
+   <addaction name="menuHelp"/>
+  </widget>
+  <widget class="QToolBar" name="mainToolBar">
+   <property name="windowTitle">
+    <string>Main Toolbar</string>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>18</width>
+     <height>18</height>
+    </size>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionNew"/>
+   <addaction name="actionOpen"/>
+   <addaction name="actionSave"/>
+   <addaction name="actionReload"/>
+   <addaction name="separator"/>
+   <addaction name="actionSaveBoardAsPicture"/>
+   <addaction name="separator"/>
+   <addaction name="actionGameInformation"/>
+  </widget>
+  <widget class="QToolBar" name="viewToolBar">
+   <property name="windowTitle">
+    <string>View Toolbar</string>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>18</width>
+     <height>18</height>
+    </size>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionRotateBoardClockwise"/>
+   <addaction name="actionFlipBoardHorizontally"/>
+   <addaction name="actionFlipBoardVertically"/>
+   <addaction name="actionResetBoard"/>
+   <addaction name="separator"/>
+   <addaction name="actionBranchMode"/>
+  </widget>
+  <widget class="QToolBar" name="collectionToolBar">
+   <property name="windowTitle">
+    <string>Collection Toolbar</string>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>18</width>
+     <height>18</height>
+    </size>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionCollectionExtract"/>
+   <addaction name="actionCollectionImport"/>
+   <addaction name="actionCollectionMoveUp"/>
+   <addaction name="actionCollectionMoveDown"/>
+   <addaction name="actionDeleteSgfFromCollection"/>
+  </widget>
+  <widget class="QToolBar" name="editToolBar">
+   <property name="windowTitle">
+    <string>Edit Toolbar</string>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>18</width>
+     <height>18</height>
+    </size>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>true</bool>
+   </attribute>
+   <addaction name="separator"/>
+   <addaction name="actionAlternateMove"/>
+   <addaction name="separator"/>
+   <addaction name="actionDeleteAfterCurrent"/>
+   <addaction name="actionPass"/>
+   <addaction name="separator"/>
+   <addaction name="actionWhiteFirst"/>
+  </widget>
+  <widget class="QToolBar" name="navigationToolBar">
+   <property name="windowTitle">
+    <string>Navigation Toolbar</string>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>18</width>
+     <height>18</height>
+    </size>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionMoveFirst"/>
+   <addaction name="actionFastRewind"/>
+   <addaction name="actionPreviousMove"/>
+   <addaction name="actionNextMove"/>
+   <addaction name="actionFastForward"/>
+   <addaction name="actionMoveLast"/>
+   <addaction name="separator"/>
+   <addaction name="actionBackToParent"/>
+   <addaction name="actionPreviousBranch"/>
+   <addaction name="actionNextBranch"/>
+   <addaction name="separator"/>
+   <addaction name="actionJumpToMoveNumber"/>
+   <addaction name="actionJumpToClicked"/>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QDockWidget" name="commentDockWidget">
+   <property name="windowTitle">
+    <string>Comment View</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="QWidget" name="commentDockWidgetContents">
+    <layout class="QHBoxLayout" name="commentLayout">
+     <property name="margin">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="QPlainTextEdit" name="commentWidget">
+       <property name="focusPolicy">
+        <enum>Qt::ClickFocus</enum>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::Panel</enum>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="branchDockWidget">
+   <property name="windowTitle">
+    <string>Branch View</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="QWidget" name="branchDockWidgetContents">
+    <layout class="QHBoxLayout" name="branchLayout">
+     <property name="margin">
+      <number>0</number>
+     </property>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="undoDockWidget">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="floating">
+    <bool>false</bool>
+   </property>
+   <property name="windowTitle">
+    <string>Undo View</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>1</number>
+   </attribute>
+   <widget class="QWidget" name="undoDockWidgetContents">
+    <layout class="QHBoxLayout" name="undoLayout">
+     <property name="margin">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="QUndoView" name="undoView">
+       <property name="frameShape">
+        <enum>QFrame::Panel</enum>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="collectionDockWidget">
+   <property name="windowTitle">
+    <string>Collection View</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>4</number>
+   </attribute>
+   <widget class="QWidget" name="collectionDockWidgetContents">
+    <layout class="QVBoxLayout" name="verticalLayout_2">
+     <property name="margin">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="QTreeWidget" name="collectionWidget">
+       <property name="alternatingRowColors">
+        <bool>true</bool>
+       </property>
+       <property name="rootIsDecorated">
+        <bool>false</bool>
+       </property>
+       <property name="sortingEnabled">
+        <bool>true</bool>
+       </property>
+       <property name="columnCount">
+        <number>6</number>
+       </property>
+       <attribute name="headerDefaultSectionSize">
+        <number>170</number>
+       </attribute>
+       <attribute name="headerShowSortIndicator" stdset="0">
+        <bool>true</bool>
+       </attribute>
+       <attribute name="headerDefaultSectionSize">
+        <number>170</number>
+       </attribute>
+       <attribute name="headerShowSortIndicator" stdset="0">
+        <bool>true</bool>
+       </attribute>
+       <column>
+        <property name="text">
+         <string>No</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Black</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>White</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Name</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Date</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Result</string>
+        </property>
+       </column>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QToolBar" name="playGameToolBar">
+   <property name="windowTitle">
+    <string>Play ToolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionGamePass"/>
+   <addaction name="actionGameResign"/>
+   <addaction name="actionGameUndo"/>
+  </widget>
+  <action name="actionNew">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/filenew.png</normaloff>:/res/filenew.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;New</string>
+   </property>
+  </action>
+  <action name="actionOpen">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/fileopen.png</normaloff>:/res/fileopen.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Open...</string>
+   </property>
+  </action>
+  <action name="actionOpenURL">
+   <property name="text">
+    <string>Open &amp;URL...</string>
+   </property>
+  </action>
+  <action name="actionReload">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/reload.png</normaloff>:/res/reload.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Reload</string>
+   </property>
+  </action>
+  <action name="actionSave">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/filesave.png</normaloff>:/res/filesave.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Save</string>
+   </property>
+  </action>
+  <action name="actionSaveAs">
+   <property name="text">
+    <string>Save &amp;As...</string>
+   </property>
+  </action>
+  <action name="actionSaveBoardAsPicture">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/saveimage.png</normaloff>:/res/saveimage.png</iconset>
+   </property>
+   <property name="text">
+    <string>Export &amp;Board as Image</string>
+   </property>
+  </action>
+  <action name="actionCloseTab">
+   <property name="text">
+    <string>Close Tab</string>
+   </property>
+  </action>
+  <action name="actionCloseAllTabs">
+   <property name="text">
+    <string>Close All Tabs</string>
+   </property>
+  </action>
+  <action name="actionExit">
+   <property name="text">
+    <string>E&amp;xit</string>
+   </property>
+  </action>
+  <action name="actionCopySgfToClipboard">
+   <property name="text">
+    <string>Copy SGF to Clipboard</string>
+   </property>
+  </action>
+  <action name="actionCopyCurrentSgfToClipboard">
+   <property name="text">
+    <string>Copy Current Branch to Clipboard</string>
+   </property>
+  </action>
+  <action name="actionPasteSgfToNewTab">
+   <property name="text">
+    <string>Paste SGF to New Tab</string>
+   </property>
+  </action>
+  <action name="actionPasteSgfAsBranchFromClipboard">
+   <property name="text">
+    <string>Paste SGF as Branch from Clipboard</string>
+   </property>
+   <property name="visible">
+    <bool>false</bool>
+   </property>
+  </action>
+  <action name="actionGameInformation">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/gameinfo.png</normaloff>:/res/gameinfo.png</iconset>
+   </property>
+   <property name="text">
+    <string>Game &amp;Information</string>
+   </property>
+  </action>
+  <action name="actionDeleteAfterCurrent">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/remove.png</normaloff>:/res/remove.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Delete After Current</string>
+   </property>
+  </action>
+  <action name="actionPass">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/pass.png</normaloff>:/res/pass.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Pass</string>
+   </property>
+  </action>
+  <action name="actionEditNodeName">
+   <property name="text">
+    <string>Edit Node Name</string>
+   </property>
+  </action>
+  <action name="actionAlternateMove">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/movealternate.png</normaloff>:/res/movealternate.png</iconset>
+   </property>
+   <property name="text">
+    <string>Alternate Move</string>
+   </property>
+  </action>
+  <action name="actionAddBlackStone">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/black_64.png</normaloff>:/res/black_64.png</iconset>
+   </property>
+   <property name="text">
+    <string>Add Black Stone</string>
+   </property>
+  </action>
+  <action name="actionAddWhiteStone">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/white_64.png</normaloff>:/res/white_64.png</iconset>
+   </property>
+   <property name="text">
+    <string>Add White Stone</string>
+   </property>
+  </action>
+  <action name="actionAddEmpty">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/empty.png</normaloff>:/res/empty.png</iconset>
+   </property>
+   <property name="text">
+    <string>Add Empty</string>
+   </property>
+  </action>
+  <action name="actionAddLabel">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/text.png</normaloff>:/res/text.png</iconset>
+   </property>
+   <property name="text">
+    <string>Add Label</string>
+   </property>
+  </action>
+  <action name="actionAddCircle">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/circle.png</normaloff>:/res/circle.png</iconset>
+   </property>
+   <property name="text">
+    <string>Add Circle</string>
+   </property>
+  </action>
+  <action name="actionAddCross">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/cross.png</normaloff>:/res/cross.png</iconset>
+   </property>
+   <property name="text">
+    <string>Add Cross</string>
+   </property>
+  </action>
+  <action name="actionAddSquare">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/square.png</normaloff>:/res/square.png</iconset>
+   </property>
+   <property name="text">
+    <string>Add Square</string>
+   </property>
+  </action>
+  <action name="actionAddTriangle">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/triangle.png</normaloff>:/res/triangle.png</iconset>
+   </property>
+   <property name="text">
+    <string>Add Triangle</string>
+   </property>
+  </action>
+  <action name="actionDeleteMarker">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/rubbereraser.png</normaloff>:/res/rubbereraser.png</iconset>
+   </property>
+   <property name="text">
+    <string>Delete Marker</string>
+   </property>
+  </action>
+  <action name="actionGoodMove">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Good Move</string>
+   </property>
+  </action>
+  <action name="actionVeryGoodMove">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Very Good Move</string>
+   </property>
+  </action>
+  <action name="actionBadMove">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Bad Move</string>
+   </property>
+  </action>
+  <action name="actionVeryBadMove">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Very Bad Move</string>
+   </property>
+  </action>
+  <action name="actionDoubtfulMove">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Doubtful Move</string>
+   </property>
+  </action>
+  <action name="actionEven">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Even</string>
+   </property>
+  </action>
+  <action name="actionGoodForBlack">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Good for Black</string>
+   </property>
+  </action>
+  <action name="actionVeryGoodForBlack">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Very Good for Black</string>
+   </property>
+  </action>
+  <action name="actionGoodForWhite">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Good for White</string>
+   </property>
+  </action>
+  <action name="actionVeryGoodForWhite">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Very Good for White</string>
+   </property>
+  </action>
+  <action name="actionUnclear">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Unclear</string>
+   </property>
+  </action>
+  <action name="actionHotspot">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Hotspot</string>
+   </property>
+  </action>
+  <action name="actionInterestingMove">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Interesting Move</string>
+   </property>
+  </action>
+  <action name="actionRotateSgfClockwise">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/rotateright.png</normaloff>:/res/rotateright.png</iconset>
+   </property>
+   <property name="text">
+    <string>Rotate SGF &amp;Clockwise</string>
+   </property>
+  </action>
+  <action name="actionFlipSgfHorizontally">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/fliphorizontally.png</normaloff>:/res/fliphorizontally.png</iconset>
+   </property>
+   <property name="text">
+    <string>Flip SGF &amp;Horizontally</string>
+   </property>
+  </action>
+  <action name="actionFlipSgfVertically">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/flipvertically.png</normaloff>:/res/flipvertically.png</iconset>
+   </property>
+   <property name="text">
+    <string>Flip SGF &amp;Vertically</string>
+   </property>
+  </action>
+  <action name="actionJumpToMoveNumber">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/jumptonumber.png</normaloff>:/res/jumptonumber.png</iconset>
+   </property>
+   <property name="text">
+    <string>Jump To Move Number</string>
+   </property>
+  </action>
+  <action name="actionJumpToClicked">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/jumptoclicked.png</normaloff>:/res/jumptoclicked.png</iconset>
+   </property>
+   <property name="text">
+    <string>Jump To Clicked</string>
+   </property>
+  </action>
+  <action name="actionSetMoveNumber">
+   <property name="text">
+    <string>Set Move Number</string>
+   </property>
+  </action>
+  <action name="actionUnsetMoveNumber">
+   <property name="text">
+    <string>Unset Move Number</string>
+   </property>
+  </action>
+  <action name="actionWhiteFirst">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/whitefirst.png</normaloff>:/res/whitefirst.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;White First</string>
+   </property>
+  </action>
+  <action name="actionEncodingUTF8">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>UTF-8</string>
+   </property>
+  </action>
+  <action name="actionEncodingShiftJIS">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Japanese (Shift_JIS)</string>
+   </property>
+  </action>
+  <action name="actionEncodingJIS">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Japanese (ISO-2022-JP)</string>
+   </property>
+  </action>
+  <action name="actionEncodingEucJP">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Japanese (EUC)</string>
+   </property>
+  </action>
+  <action name="actionEncodingKorean">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Korean (EUC-KR)</string>
+   </property>
+  </action>
+  <action name="actionKoi8_R">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Cyrillic (KOI8-R)</string>
+   </property>
+  </action>
+  <action name="actionKoi8_U">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Cyrillic/Ukrainian (KOI8-U)</string>
+   </property>
+  </action>
+  <action name="actionWindows_1250">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Central European (Windows-1250)</string>
+   </property>
+  </action>
+  <action name="actionWindows_1251">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Cyrillic (Windows-1251)</string>
+   </property>
+  </action>
+  <action name="actionWindows_1252">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Western (Windows-1252)</string>
+   </property>
+  </action>
+  <action name="actionWindows_1253">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Greek (Windows-1253)</string>
+   </property>
+  </action>
+  <action name="actionWindows_1254">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Turkish (Windows-1254)</string>
+   </property>
+  </action>
+  <action name="actionWindows_1255">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Hebrew (Windows-1255)</string>
+   </property>
+  </action>
+  <action name="actionWindows_1256">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Arabic (Windows-1256)</string>
+   </property>
+  </action>
+  <action name="actionWindows_1257">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Baltic (Windows-1257)</string>
+   </property>
+  </action>
+  <action name="actionWindows_1258">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Vietnamese (Windows-1258)</string>
+   </property>
+  </action>
+  <action name="actionISO8859_1">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Western (ISO-8859-1)</string>
+   </property>
+  </action>
+  <action name="actionISO8859_2">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Central European (ISO-8859-2)</string>
+   </property>
+  </action>
+  <action name="actionISO8859_3">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>South European (ISO-8859-3)</string>
+   </property>
+  </action>
+  <action name="actionISO8859_4">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Baltic (ISO-8859-4)</string>
+   </property>
+  </action>
+  <action name="actionISO8859_5">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Cyrillic (ISO-8859-5)</string>
+   </property>
+  </action>
+  <action name="actionISO8859_6">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Arabic (ISO-8859-6)</string>
+   </property>
+  </action>
+  <action name="actionISO8859_7">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Greek (ISO-8859-7)</string>
+   </property>
+  </action>
+  <action name="actionISO8859_8">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Hebrew Visual (ISO-8859-8)</string>
+   </property>
+  </action>
+  <action name="actionISO8859_9">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Turkish (ISO-8859-9)</string>
+   </property>
+  </action>
+  <action name="actionISO8859_10">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Nordic (ISO-8859-10)</string>
+   </property>
+  </action>
+  <action name="actionISO8859_11">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Thai (ISO-8859-11)</string>
+   </property>
+  </action>
+  <action name="actionISO8859_13">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Baltic (ISO-8859-13)</string>
+   </property>
+  </action>
+  <action name="actionISO8859_14">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Celtic (ISO-8859-14)</string>
+   </property>
+  </action>
+  <action name="actionISO8859_15">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Western (ISO-8859-15)</string>
+   </property>
+  </action>
+  <action name="actionISO8859_16">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Romanian (ISO-8859-16)</string>
+   </property>
+  </action>
+  <action name="actionEncodingGB2312">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Chinese Simplified (GB2312)</string>
+   </property>
+  </action>
+  <action name="actionEncodingBig5">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Chinese Traditional (Big5)</string>
+   </property>
+  </action>
+  <action name="actionMoveFirst">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/firstmove.png</normaloff>:/res/firstmove.png</iconset>
+   </property>
+   <property name="text">
+    <string>Move First</string>
+   </property>
+  </action>
+  <action name="actionFastRewind">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/fastrewind.png</normaloff>:/res/fastrewind.png</iconset>
+   </property>
+   <property name="text">
+    <string>Fast Rewind</string>
+   </property>
+  </action>
+  <action name="actionPreviousMove">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/prevmove.png</normaloff>:/res/prevmove.png</iconset>
+   </property>
+   <property name="text">
+    <string>Previous Move</string>
+   </property>
+  </action>
+  <action name="actionNextMove">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/nextmove.png</normaloff>:/res/nextmove.png</iconset>
+   </property>
+   <property name="text">
+    <string>Next Move</string>
+   </property>
+  </action>
+  <action name="actionFastForward">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/fastforward.png</normaloff>:/res/fastforward.png</iconset>
+   </property>
+   <property name="text">
+    <string>Fast Forward</string>
+   </property>
+  </action>
+  <action name="actionMoveLast">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/lastmove.png</normaloff>:/res/lastmove.png</iconset>
+   </property>
+   <property name="text">
+    <string>Move Last</string>
+   </property>
+  </action>
+  <action name="actionBackToParent">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/backparent.png</normaloff>:/res/backparent.png</iconset>
+   </property>
+   <property name="text">
+    <string>Back to Parent</string>
+   </property>
+  </action>
+  <action name="actionPreviousBranch">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/prevbranch.png</normaloff>:/res/prevbranch.png</iconset>
+   </property>
+   <property name="text">
+    <string>Previous Branch</string>
+   </property>
+  </action>
+  <action name="actionNextBranch">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/nextbranch.png</normaloff>:/res/nextbranch.png</iconset>
+   </property>
+   <property name="text">
+    <string>Next Branch</string>
+   </property>
+  </action>
+  <action name="actionShowMoveNumber">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/showmovenumber.png</normaloff>:/res/showmovenumber.png</iconset>
+   </property>
+   <property name="text">
+    <string>Show Move Number</string>
+   </property>
+  </action>
+  <action name="actionNoMoveNumber">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>No Move Number</string>
+   </property>
+  </action>
+  <action name="actionLast1Move">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Last 1 Move</string>
+   </property>
+  </action>
+  <action name="actionLast2Moves">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Last 2 Moves</string>
+   </property>
+  </action>
+  <action name="actionLast5Moves">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Last 5 Moves</string>
+   </property>
+  </action>
+  <action name="actionLast10Moves">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Last 10 Moves</string>
+   </property>
+  </action>
+  <action name="actionLast20Moves">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Last 20 Moves</string>
+   </property>
+  </action>
+  <action name="actionLast50Moves">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Last 50 Moves</string>
+   </property>
+  </action>
+  <action name="actionAllMoves">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>All Moves</string>
+   </property>
+  </action>
+  <action name="actionShowCoordinate">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Coordinate</string>
+   </property>
+  </action>
+  <action name="actionShowCoordinateI">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Coordinate With &amp;I</string>
+   </property>
+  </action>
+  <action name="actionShowMarker">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Marker</string>
+   </property>
+  </action>
+  <action name="actionShowBranchMoves">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Branch Moves</string>
+   </property>
+  </action>
+  <action name="actionBranchMode">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/branchmode.png</normaloff>:/res/branchmode.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Branch Mode</string>
+   </property>
+  </action>
+  <action name="actionRotateBoardClockwise">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/rotateright.png</normaloff>:/res/rotateright.png</iconset>
+   </property>
+   <property name="text">
+    <string>Rotate &amp;Clockwise</string>
+   </property>
+  </action>
+  <action name="actionFlipBoardHorizontally">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/fliphorizontally.png</normaloff>:/res/fliphorizontally.png</iconset>
+   </property>
+   <property name="text">
+    <string>Flip &amp;Horizontally</string>
+   </property>
+  </action>
+  <action name="actionFlipBoardVertically">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/flipvertically.png</normaloff>:/res/flipvertically.png</iconset>
+   </property>
+   <property name="text">
+    <string>Flip &amp;Vertically</string>
+   </property>
+  </action>
+  <action name="actionResetBoard">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/resetboard.png</normaloff>:/res/resetboard.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Reset Board</string>
+   </property>
+  </action>
+  <action name="actionCountTerritory">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Count Territory</string>
+   </property>
+  </action>
+  <action name="actionPlayWithComputer">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Play with Computer</string>
+   </property>
+  </action>
+  <action name="actionTutorBothSides">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Tutor Both Sides</string>
+   </property>
+  </action>
+  <action name="actionTutorOneSide">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Tutor One Side</string>
+   </property>
+  </action>
+  <action name="actionPlaySound">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/sound.png</normaloff>:/res/sound.png</iconset>
+   </property>
+   <property name="text">
+    <string>Play &amp;Sound</string>
+   </property>
+  </action>
+  <action name="action19x19Board">
+   <property name="text">
+    <string>19 x 19 Board</string>
+   </property>
+  </action>
+  <action name="action13x13Board">
+   <property name="text">
+    <string>13 x 13 Board</string>
+   </property>
+  </action>
+  <action name="action9x9Board">
+   <property name="text">
+    <string>9 x 9 Board</string>
+   </property>
+  </action>
+  <action name="actionCustomBoardSize">
+   <property name="text">
+    <string>Custom Board Size</string>
+   </property>
+  </action>
+  <action name="actionLanguageSystemDefault">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>System Default</string>
+   </property>
+  </action>
+  <action name="actionLanguageEnglish">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>English</string>
+   </property>
+  </action>
+  <action name="actionLanguageJapanese">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Japanese</string>
+   </property>
+  </action>
+  <action name="actionOptions">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/options.png</normaloff>:/res/options.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Options...</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/pics/mugo.png</normaloff>:/pics/mugo.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;About...</string>
+   </property>
+  </action>
+  <action name="actionAboutQT">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/qt.png</normaloff>:/res/qt.png</iconset>
+   </property>
+   <property name="text">
+    <string>About Qt...</string>
+   </property>
+  </action>
+  <action name="actionExportAsciiToClipboard">
+   <property name="text">
+    <string>Export Ascii to &amp;Clipboard</string>
+   </property>
+  </action>
+  <action name="actionDeleteOnlyCurrent">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/removeself.png</normaloff>:/res/removeself.png</iconset>
+   </property>
+   <property name="text">
+    <string>Delete Only Current</string>
+   </property>
+  </action>
+  <action name="actionPrint">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/print.png</normaloff>:/res/print.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Print</string>
+   </property>
+  </action>
+  <action name="actionAddLabelManually">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/text2.png</normaloff>:/res/text2.png</iconset>
+   </property>
+   <property name="text">
+    <string>Add Label Manually</string>
+   </property>
+  </action>
+  <action name="actionResetMoveNubmerInBranch">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Reset Move Nubmer in Branch</string>
+   </property>
+  </action>
+  <action name="actionPreviousTab">
+   <property name="text">
+    <string>Previous Tab</string>
+   </property>
+  </action>
+  <action name="actionNextTab">
+   <property name="text">
+    <string>Next Tab</string>
+   </property>
+  </action>
+  <action name="actionCollectionExtract">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/sgfextract.png</normaloff>:/res/sgfextract.png</iconset>
+   </property>
+   <property name="text">
+    <string>Extract</string>
+   </property>
+  </action>
+  <action name="actionCollectionMoveUp">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/collectionup.png</normaloff>:/res/collectionup.png</iconset>
+   </property>
+   <property name="text">
+    <string>Move Up</string>
+   </property>
+  </action>
+  <action name="actionCollectionMoveDown">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/collectiondown.png</normaloff>:/res/collectiondown.png</iconset>
+   </property>
+   <property name="text">
+    <string>Move Down</string>
+   </property>
+  </action>
+  <action name="actionDeleteSgfFromCollection">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/removeself.png</normaloff>:/res/removeself.png</iconset>
+   </property>
+   <property name="text">
+    <string>Delete SGF</string>
+   </property>
+  </action>
+  <action name="actionPasteSgfToCollection">
+   <property name="text">
+    <string>Paste SGF to Collection</string>
+   </property>
+  </action>
+  <action name="actionCollectionImport">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/res/sgfimport.png</normaloff>:/res/sgfimport.png</iconset>
+   </property>
+   <property name="text">
+    <string>Import</string>
+   </property>
+  </action>
+  <action name="actionClearSettings">
+   <property name="text">
+    <string>Clear Settings</string>
+   </property>
+  </action>
+  <action name="actionGamePass">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Pass</string>
+   </property>
+  </action>
+  <action name="actionGameResign">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Resign</string>
+   </property>
+  </action>
+  <action name="actionGameUndo">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>undo</string>
+   </property>
+  </action>
+  <action name="actionAutomaticReplay">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Automatic Replay</string>
+   </property>
+  </action>
+  <action name="actionBranchMoveUp">
+   <property name="text">
+    <string>Move Up</string>
+   </property>
+  </action>
+  <action name="actionBranchMoveDown">
+   <property name="text">
+    <string>Move Down</string>
+   </property>
+  </action>
+  <action name="actionEstimateScore">
+   <property name="text">
+    <string>Estimate Score</string>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>QUndoView</class>
+   <extends>QListView</extends>
+   <header location="global">qundoview.h</header>
+  </customwidget>
+ </customwidgets>
+ <tabstops>
+  <tabstop>commentWidget</tabstop>
+  <tabstop>undoView</tabstop>
+ </tabstops>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
+ <connections/>
+</ui>
