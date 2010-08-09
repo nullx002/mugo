@@ -1,13 +1,3 @@
-mugo (1.1.3-1) unstable; urgency=low
-  fix: background color filled black when export image.
-
- -- nsase <sikusiku@gmail.com>  Mon, 9 Aug 2010 11:19:00 +0900
-
-mugo (1.1.2-2) unstable; urgency=low
-  fix: wrong localization files were installed.
-
- -- nsase <sikusiku@gmail.com>  Mon, 9 Aug 2010 11:10:00 +0900
-
 mugo (1.1.2-1) unstable; urgency=low
   add: default encoding setting on setup dialog
   add: save new document option
