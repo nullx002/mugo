@@ -904,8 +904,8 @@ void BoardWidget::createBuffer(bool erase){
                 moveNumber = (*node)->moveNumber ? (*node)->moveNumber : 1;
                 for (int y=0; y<boardBuffer.size(); ++y){
                     for (int x=0; x<boardBuffer[y].size(); ++x){
-                        if (ti.number)
-                            ti.number = 0;
+                        if (boardBuffer[y][x].number)
+                            boardBuffer[y][x].number = 0;
                     }
                 }
             }
