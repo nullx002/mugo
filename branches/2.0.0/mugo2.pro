@@ -21,7 +21,12 @@ SOURCES += main.cpp \
     libkombilo/sgfparser.cpp \
     setupdialog.cpp \
     countterritorydialog.cpp \
-    saveimagedialog.cpp
+    saveimagedialog.cpp \
+    playwithcomputerdialog.cpp \
+    enginelistdialog.cpp \
+    enginelist.cpp \
+    gameinterface.cpp \
+    gtp.cpp
 HEADERS += mainwindow.h \
     boardwidget.h \
     document.h \
@@ -38,14 +43,21 @@ HEADERS += mainwindow.h \
     libkombilo/sgfparser.h \
     setupdialog.h \
     countterritorydialog.h \
-    saveimagedialog.h
+    saveimagedialog.h \
+    playwithcomputerdialog.h \
+    enginelistdialog.h \
+    enginelist.h \
+    gameinterface.h \
+    gtp.h
 FORMS += mainwindow.ui \
     gameinformationdialog.ui \
     exportasciidialog.ui \
     newdocumentdialog.ui \
     setupdialog.ui \
     countterritorydialog.ui \
-    saveimagedialog.ui
+    saveimagedialog.ui \
+    playwithcomputerdialog.ui \
+    enginelistdialog.ui
 RESOURCES += mugo.qrc
 win32:RC_FILE = mugo.rc
 mac:RC_FILE = pics/mugo.icns

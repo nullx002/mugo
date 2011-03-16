@@ -44,6 +44,7 @@
 #include "sgf.h"
 #include "sgfdocument.h"
 #include "command.h"
+#include "gtp.h"
 
 
 Q_DECLARE_METATYPE(Go::NodePtr);
@@ -69,26 +70,13 @@ MainWindow::MainWindow(const QString& fname, QWidget *parent)
     setKeyboardShortcut();
 
     // menu
-    createMenu();
+    initializeMenu();
 
     // encoding
     createEncodingAction();
 
     // status bar
-    moveNumberLabel = new QLabel;
-    moveNumberLabel->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
-    moveNumberLabel->setToolTip(tr("Move Number"));
-    ui->statusBar->addPermanentWidget(moveNumberLabel, 0);
-
-    capturedLabel = new QLabel;
-    capturedLabel->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
-    capturedLabel->setToolTip(tr("Captured"));
-    ui->statusBar->addPermanentWidget(capturedLabel, 0);
-
-    encodingLabel = new QLabel;
-    encodingLabel ->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
-    encodingLabel ->setToolTip(tr("Encoding"));
-    ui->statusBar->addPermanentWidget(encodingLabel, 0);
+    initializeStatusbar();
 
     // window settings
     restoreGeometry( settings.value("mainwindowGeometry").toByteArray() );
@@ -187,9 +175,9 @@ void MainWindow::setKeyboardShortcut(){
 }
 
 /**
-  create menu
+  initialize menu
 */
-void MainWindow::createMenu(){
+void MainWindow::initializeMenu(){
     // File -> Reload
     ui->fileToolBar->insertAction( ui->actionExportBoardAsImage, ui->menuReload->menuAction() );
     ui->fileToolBar->insertSeparator( ui->actionExportBoardAsImage );
@@ -294,6 +282,26 @@ void MainWindow::createMenu(){
 }
 
 /**
+  initialize statusbar
+*/
+void MainWindow::initializeStatusbar(){
+    moveNumberLabel = new QLabel;
+    moveNumberLabel->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
+    moveNumberLabel->setToolTip(tr("Move Number"));
+    ui->statusBar->addPermanentWidget(moveNumberLabel, 0);
+
+    capturedLabel = new QLabel;
+    capturedLabel->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
+    capturedLabel->setToolTip(tr("Captured"));
+    ui->statusBar->addPermanentWidget(capturedLabel, 0);
+
+    encodingLabel = new QLabel;
+    encodingLabel ->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
+    encodingLabel ->setToolTip(tr("Encoding"));
+    ui->statusBar->addPermanentWidget(encodingLabel, 0);
+}
+
+/**
   set preferences
 
   initialize boardwidget
@@ -341,39 +349,39 @@ void MainWindow::setPreferences(BoardWidget* board){
   create encoding action
 */
 void MainWindow::createEncodingAction(){
-    encoding[ui->actionEncodingUTF8] = QTextCodec::codecForName("UTF-8");
-    encoding[ui->actionEncodingISO8859_1] = QTextCodec::codecForName("ISO-8859-1");
-    encoding[ui->actionEncodingISO8859_2] = QTextCodec::codecForName("ISO-8859-2");
-    encoding[ui->actionEncodingISO8859_3] = QTextCodec::codecForName("ISO-8859-3");
-    encoding[ui->actionEncodingISO8859_4] = QTextCodec::codecForName("ISO-8859-4");
-    encoding[ui->actionEncodingISO8859_5] = QTextCodec::codecForName("ISO-8859-5");
-    encoding[ui->actionEncodingISO8859_6] = QTextCodec::codecForName("ISO-8859-6");
-    encoding[ui->actionEncodingISO8859_7] = QTextCodec::codecForName("ISO-8859-7");
-    encoding[ui->actionEncodingISO8859_8] = QTextCodec::codecForName("ISO-8859-8");
-    encoding[ui->actionEncodingISO8859_9] = QTextCodec::codecForName("ISO-8859-9");
-    encoding[ui->actionEncodingISO8859_10] = QTextCodec::codecForName("ISO-8859-10");
-    encoding[ui->actionEncodingISO8859_11] = QTextCodec::codecForName("TIS-620");
-    encoding[ui->actionEncodingISO8859_13] = QTextCodec::codecForName("ISO-8859-13");
-    encoding[ui->actionEncodingISO8859_14] = QTextCodec::codecForName("ISO-8859-14");
-    encoding[ui->actionEncodingISO8859_15] = QTextCodec::codecForName("ISO-8859-15");
-    encoding[ui->actionEncodingISO8859_16] = QTextCodec::codecForName("ISO-8859-16");
-    encoding[ui->actionEncodingWindows_1250] = QTextCodec::codecForName("windows-1250");
-    encoding[ui->actionEncodingWindows_1251] = QTextCodec::codecForName("windows-1251");
-    encoding[ui->actionEncodingWindows_1252] = QTextCodec::codecForName("windows-1252");
-    encoding[ui->actionEncodingWindows_1253] = QTextCodec::codecForName("windows-1253");
-    encoding[ui->actionEncodingWindows_1254] = QTextCodec::codecForName("windows-1254");
-    encoding[ui->actionEncodingWindows_1255] = QTextCodec::codecForName("windows-1255");
-    encoding[ui->actionEncodingWindows_1256] = QTextCodec::codecForName("windows-1256");
-    encoding[ui->actionEncodingWindows_1257] = QTextCodec::codecForName("windows-1257");
-    encoding[ui->actionEncodingWindows_1258] = QTextCodec::codecForName("windows-1258");
-    encoding[ui->actionEncodingKoi8_R] = QTextCodec::codecForName("KOI8-R");
-    encoding[ui->actionEncodingKoi8_U] = QTextCodec::codecForName("KOI8-U");
-    encoding[ui->actionEncodingGB2312] = QTextCodec::codecForName("GB2312");
-    encoding[ui->actionEncodingBig5] = QTextCodec::codecForName("Big5");
-    encoding[ui->actionEncodingShiftJIS] = QTextCodec::codecForName("Shift_JIS");
-    encoding[ui->actionEncodingJIS] = QTextCodec::codecForName("ISO-2022-JP");
-    encoding[ui->actionEncodingEucJP] = QTextCodec::codecForName("EUC-JP");
-    encoding[ui->actionEncodingKorean] = QTextCodec::codecForName("EUC-KR");
+    encodingActionToCodec[ui->actionEncodingUTF8] = QTextCodec::codecForName("UTF-8");
+    encodingActionToCodec[ui->actionEncodingISO8859_1] = QTextCodec::codecForName("ISO-8859-1");
+    encodingActionToCodec[ui->actionEncodingISO8859_2] = QTextCodec::codecForName("ISO-8859-2");
+    encodingActionToCodec[ui->actionEncodingISO8859_3] = QTextCodec::codecForName("ISO-8859-3");
+    encodingActionToCodec[ui->actionEncodingISO8859_4] = QTextCodec::codecForName("ISO-8859-4");
+    encodingActionToCodec[ui->actionEncodingISO8859_5] = QTextCodec::codecForName("ISO-8859-5");
+    encodingActionToCodec[ui->actionEncodingISO8859_6] = QTextCodec::codecForName("ISO-8859-6");
+    encodingActionToCodec[ui->actionEncodingISO8859_7] = QTextCodec::codecForName("ISO-8859-7");
+    encodingActionToCodec[ui->actionEncodingISO8859_8] = QTextCodec::codecForName("ISO-8859-8");
+    encodingActionToCodec[ui->actionEncodingISO8859_9] = QTextCodec::codecForName("ISO-8859-9");
+    encodingActionToCodec[ui->actionEncodingISO8859_10] = QTextCodec::codecForName("ISO-8859-10");
+    encodingActionToCodec[ui->actionEncodingISO8859_11] = QTextCodec::codecForName("TIS-620");
+    encodingActionToCodec[ui->actionEncodingISO8859_13] = QTextCodec::codecForName("ISO-8859-13");
+    encodingActionToCodec[ui->actionEncodingISO8859_14] = QTextCodec::codecForName("ISO-8859-14");
+    encodingActionToCodec[ui->actionEncodingISO8859_15] = QTextCodec::codecForName("ISO-8859-15");
+    encodingActionToCodec[ui->actionEncodingISO8859_16] = QTextCodec::codecForName("ISO-8859-16");
+    encodingActionToCodec[ui->actionEncodingWindows_1250] = QTextCodec::codecForName("windows-1250");
+    encodingActionToCodec[ui->actionEncodingWindows_1251] = QTextCodec::codecForName("windows-1251");
+    encodingActionToCodec[ui->actionEncodingWindows_1252] = QTextCodec::codecForName("windows-1252");
+    encodingActionToCodec[ui->actionEncodingWindows_1253] = QTextCodec::codecForName("windows-1253");
+    encodingActionToCodec[ui->actionEncodingWindows_1254] = QTextCodec::codecForName("windows-1254");
+    encodingActionToCodec[ui->actionEncodingWindows_1255] = QTextCodec::codecForName("windows-1255");
+    encodingActionToCodec[ui->actionEncodingWindows_1256] = QTextCodec::codecForName("windows-1256");
+    encodingActionToCodec[ui->actionEncodingWindows_1257] = QTextCodec::codecForName("windows-1257");
+    encodingActionToCodec[ui->actionEncodingWindows_1258] = QTextCodec::codecForName("windows-1258");
+    encodingActionToCodec[ui->actionEncodingKoi8_R] = QTextCodec::codecForName("KOI8-R");
+    encodingActionToCodec[ui->actionEncodingKoi8_U] = QTextCodec::codecForName("KOI8-U");
+    encodingActionToCodec[ui->actionEncodingGB2312] = QTextCodec::codecForName("GB2312");
+    encodingActionToCodec[ui->actionEncodingBig5] = QTextCodec::codecForName("Big5");
+    encodingActionToCodec[ui->actionEncodingShiftJIS] = QTextCodec::codecForName("Shift_JIS");
+    encodingActionToCodec[ui->actionEncodingJIS] = QTextCodec::codecForName("ISO-2022-JP");
+    encodingActionToCodec[ui->actionEncodingEucJP] = QTextCodec::codecForName("EUC-JP");
+    encodingActionToCodec[ui->actionEncodingKorean] = QTextCodec::codecForName("EUC-KR");
 
 
     QList<QAction*> actions;
@@ -384,7 +392,7 @@ void MainWindow::createEncodingAction(){
         connect(act, SIGNAL(triggered()), SLOT(on_actionReload_triggered()));
 
         actions.push_back(act);
-        codecs.push_back( encoding.value(act) );
+        codecs.push_back( encodingActionToCodec.value(act) );
     }
 
     mugoApp()->setEncodingActions(actions);
@@ -392,7 +400,7 @@ void MainWindow::createEncodingAction(){
 }
 
 /**
-  set statusbar widget
+  update statusbar widgets
 */
 void MainWindow::updateStatusBar(BoardWidget* board){
     if (board == NULL){
@@ -407,24 +415,32 @@ void MainWindow::updateStatusBar(BoardWidget* board){
 }
 
 /**
-  file New
+  create new document in new tab
 */
-void MainWindow::fileNew(QTextCodec* codec, int xsize, int ysize, double komi, int handicap)
+bool MainWindow::fileNew(QTextCodec* codec, int xsize, int ysize, double komi, int handicap)
 {
-    SgfDocument* doc = new SgfDocument(codec, this);
+    // create new document
+    SgfDocument* doc = new SgfDocument(codec);
     doc->gameList[0]->gameInformation->xsize = xsize;
     doc->gameList[0]->gameInformation->ysize = ysize;
     doc->gameList[0]->gameInformation->komi  = komi;
     doc->gameList[0]->gameInformation->handicap = handicap;
     doc->setDocName( newDocumentName() );
+
+    // create view and show
     addDocument(doc);
+
+    return true;
 }
 
 /**
-  file Open
+  open exist file in new tab.
+  if file is already opened, document will be active.
 */
 bool MainWindow::fileOpen(const QString& fname, QTextCodec* codec, bool guessCodec)
 {
+    // find document from opened document list,
+    // and show document if document found.
     DocumentManager::iterator iter = docManager.begin();
     while (iter != docManager.end()){
         if (iter.key()->getFileName() == fname){
@@ -434,17 +450,22 @@ bool MainWindow::fileOpen(const QString& fname, QTextCodec* codec, bool guessCod
         ++iter;
     }
 
+    // open document if document isn't opened.
     SgfDocument* doc = openDocument(fname, codec, guessCodec);
     if (doc == NULL)
         return false;
+
+    // create view and show
     addDocument(doc);
+
+    // add recent file list
     addRecentFile(fname);
 
     return true;
 }
 
 /**
-  Url Open
+  download file and open.
 */
 bool MainWindow::urlOpen(const QUrl& url, bool newTab){
     downloadURL = url;
@@ -470,7 +491,8 @@ bool MainWindow::urlOpen(const QUrl& url, bool newTab){
 }
 
 /**
-    save
+    save document.
+    if document doesn't have file name, show save as dialog.
 */
 bool MainWindow::fileSave(Document* doc){
     if (doc->getFileName().isEmpty())
@@ -557,7 +579,7 @@ bool MainWindow::closeTab(int index){
 }
 
 /**
- may be save
+ maybe save
 */
 bool MainWindow::maybeSave(Document* doc){
     if (doc->isDirty() == false)
@@ -610,10 +632,10 @@ void MainWindow::updateRecentFileActions()
 }
 
 /**
-  create document
+  create document from file
 */
 SgfDocument* MainWindow::openDocument(const QString& fname, QTextCodec* codec, bool guessCodec){
-    SgfDocument* doc = new SgfDocument(codec, this);
+    SgfDocument* doc = new SgfDocument(codec);
     if (doc->open(fname, guessCodec) == false){
         QMessageBox::critical(this, QString(), tr("File open error: %1").arg(fname));
         delete doc;
@@ -1097,7 +1119,7 @@ void MainWindow::updateMenu(bool updateAll){
         return;
 
     // File -> Reload
-    QAction* encodingAction = encoding.key( board->document()->getCodec() );
+    QAction* encodingAction = encodingActionToCodec.key( board->document()->getCodec() );
     if (encodingAction)
         encodingAction->setChecked(true);
     ui->menuReload->menuAction()->setEnabled( board->document()->getFileName().isEmpty() == false || board->document()->getUrl().isEmpty() == false );
@@ -1375,7 +1397,7 @@ bool MainWindow::getOpenFileName(QString& fname, QTextCodec*& codec){
     foreach(QAction* act, ui->menuReload->actions()){
         if (act->isSeparator() == false){
             combo->addItem(act->text());
-            if (codec && encoding[act]->name() == codec->name())
+            if (codec && encodingActionToCodec[act]->name() == codec->name())
                 combo->setCurrentIndex( combo->count() - 1 );
             actions.push_back(act);
         }
@@ -1392,7 +1414,7 @@ bool MainWindow::getOpenFileName(QString& fname, QTextCodec*& codec){
         return false;
 
     fname = dlg.selectedFiles()[0];
-    codec = combo->currentIndex() >= 0 ? encoding[actions[combo->currentIndex()]] : mugoApp()->defaultCodec();
+    codec = combo->currentIndex() >= 0 ? encodingActionToCodec[actions[combo->currentIndex()]] : mugoApp()->defaultCodec();
 
     return true;
 }
@@ -1421,7 +1443,7 @@ bool MainWindow::getSaveFileName(const QString& initialPath, QString& fname, QTe
     foreach(QAction* act, ui->menuReload->actions()){
         if (act->isSeparator() == false){
             combo->addItem(act->text());
-            if (encoding[act]->name() == codec->name())
+            if (encodingActionToCodec[act]->name() == codec->name())
                 combo->setCurrentIndex( combo->count() - 1 );
             actions.push_back(act);
         }
@@ -1438,7 +1460,7 @@ bool MainWindow::getSaveFileName(const QString& initialPath, QString& fname, QTe
         return false;
 
     fname = dlg.selectedFiles()[0];
-    codec = encoding[actions[combo->currentIndex()]];
+    codec = encodingActionToCodec[actions[combo->currentIndex()]];
 
     return true;
 }
@@ -1493,7 +1515,7 @@ void MainWindow::on_actionReload_triggered()
     if (maybeSave(board->document()) == false)
         return;
 
-    QTextCodec* codec = encoding.find(act) != encoding.end() ? encoding[act] : board->document()->getCodec();
+    QTextCodec* codec = encodingActionToCodec.find(act) != encodingActionToCodec.end() ? encodingActionToCodec[act] : board->document()->getCodec();
     if (board->document()->getFileName().isEmpty() == false){
         SgfDocument* doc = openDocument(board->document()->getFileName(), codec, false);
         if (doc == NULL){
@@ -2836,6 +2858,26 @@ void MainWindow::on_actionCountTerritory_triggered(bool checked){
         data.countTerritoryDialog = NULL;
     }
     setScoreMode(board, board->getScoreMode());
+}
+
+/**
+  Slot
+  Tools -> Estimate Score
+*/
+void MainWindow::on_actionEstimateScore_triggered(){
+}
+
+/**
+  Slot
+  Tools -> Play With Computer
+*/
+void MainWindow::on_actionPlayWithComputer_triggered(){
+    BoardWidget* board = currentBoard();
+    if (board == NULL)
+        return;
+
+    GTP* g = new GTP("c:\\gnugo.exe --mode gtp", this);
+//    board->play(g);
 }
 
 /**

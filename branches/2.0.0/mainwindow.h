@@ -75,12 +75,13 @@ protected:
     BoardWidget* currentBoard();
     Document* currentDocument();
     void setKeyboardShortcut();
-    void createMenu();
+    void initializeMenu();
+    void initializeStatusbar();
     void createEncodingAction();
     void setPreferences(BoardWidget*);
 
     // new, open, save, close
-    void fileNew(QTextCodec* codec, int xsize=19, int ysize=19, double komi=6.5, int handicap=0);
+    bool fileNew(QTextCodec* codec, int xsize=19, int ysize=19, double komi=6.5, int handicap=0);
     bool fileOpen(const QString& fname, QTextCodec* codec, bool guessCodec);
     bool urlOpen(const QUrl& url, bool newTab);
     bool fileSave(Document*);
@@ -126,7 +127,7 @@ private:
     QActionGroup* editGroup;
     QActionGroup* encodingGroup;
     QActionGroup* tabChangeGroup;
-    QMap<QAction*, QTextCodec*> encoding;
+    QMap<QAction*, QTextCodec*> encodingActionToCodec;
     DocumentManager docManager;
     uint docID;
     QProgressDialog* progressDialog;
@@ -142,6 +143,8 @@ private:
 
 private slots:
     // File Menu
+    void on_actionEstimateScore_triggered();
+    void on_actionPlayWithComputer_triggered();
     void on_actionNew_triggered();
     void on_actionOpen_triggered();
     void on_actionReload_triggered();

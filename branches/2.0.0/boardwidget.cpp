@@ -312,23 +312,23 @@ void BoardWidget::mouseReleaseEvent(QMouseEvent* e){
     LeftButton Down
 */
 void BoardWidget::onLButtonDown(QMouseEvent* e){
-    // get mouse position
-    int x, y;
-    boardToSgfCoordinate(e->x(), e->y(), x, y);
-    if (x < 0 || y < 0 || x >= gameInformation->xsize || y >= gameInformation->ysize)
+    // convert view coordinate to sgf coordinate.
+    int sgfX, sgfY;
+    viewToSgfCoordinate(e->x(), e->y(), sgfX, sgfY);
+    if (sgfX < 0 || sgfY < 0 || sgfX >= gameInformation->xsize || sgfY >= gameInformation->ysize)
         return;
 
     if (scoreMode == ScoreMode::final){
-        if (boardBuffer[y][x].color != Go::empty)
-            setDeadStones(x, y);
+        if (boardBuffer[sgfY][sgfX].color != Go::empty)
+            setDeadStones(sgfX, sgfY);
         return;
     }
     else if (tutorMode == TutorMode::tutorBothSides){
-        moveToChildItem(x, y);
+        moveToChildItem(sgfX, sgfY);
         return;
     }
     else if (tutorMode == TutorMode::tutorOneSide){
-        if (moveEnemy || moveToChildItem(x, y) == false)
+        if (moveEnemy || moveToChildItem(sgfX, sgfY) == false)
             return;
 
         Go::NodeList::iterator iter = qFind(currentNodeList.begin(), currentNodeList.end(), currentNode);
@@ -348,7 +348,7 @@ void BoardWidget::onLButtonDown(QMouseEvent* e){
         // if jump to clicked mode, change current node and return
         Go::NodePtr node = currentNode;
         while (node){
-            if (node->isStone() && node->x() == x && node->y() == y)
+            if (node->isStone() && node->x() == sgfX && node->y() == sgfY)
                 break;
             node = node->parent();
         }
@@ -361,47 +361,47 @@ void BoardWidget::onLButtonDown(QMouseEvent* e){
 
     switch(editMode){
         case EditMode::alternateMove:
-            alternateMove(x, y);
+            alternateMove(sgfX, sgfY);
             break;
 
         case EditMode::addBlack:
-            addStone(x, y, Go::black);
+            addStone(sgfX, sgfY, Go::black);
             break;
 
         case EditMode::addWhite:
-            addStone(x, y, Go::white);
+            addStone(sgfX, sgfY, Go::white);
             break;
 
         case EditMode::addEmpty:
-            addStone(x, y, Go::empty);
+            addStone(sgfX, sgfY, Go::empty);
             break;
 
         case EditMode::addLabel:
-            addLabel(x, y, true);
+            addLabel(sgfX, sgfY, true);
             break;
 
         case EditMode::addLabelManually:
-            addLabel(x, y, false);
+            addLabel(sgfX, sgfY, false);
             break;
 
         case EditMode::addCircle:
-            addMarker(x, y, Go::Mark::circle);
+            addMarker(sgfX, sgfY, Go::Mark::circle);
             break;
 
         case EditMode::addCross:
-            addMarker(x, y, Go::Mark::cross);
+            addMarker(sgfX, sgfY, Go::Mark::cross);
             break;
 
         case EditMode::addTriangle:
-            addMarker(x, y, Go::Mark::triangle);
+            addMarker(sgfX, sgfY, Go::Mark::triangle);
             break;
 
         case EditMode::addSquare:
-            addMarker(x, y, Go::Mark::square);
+            addMarker(sgfX, sgfY, Go::Mark::square);
             break;
 
         case EditMode::removeMarker:
-            removeMarker(x, y);
+            removeMarker(sgfX, sgfY);
             break;
     }
 }
@@ -469,7 +469,7 @@ qreal BoardWidget::getGridSize() const{
 /**
   grid coordinate to view coordinate
 */
-void BoardWidget::sgfToBoardCoordinate(int sgfX, int sgfY, qreal& boardX, qreal& boardY) const{
+void BoardWidget::sgfToViewCoordinate(int sgfX, int sgfY, qreal& boardX, qreal& boardY) const{
     if ((rotate % 2) == 0){
         boardX = vLines[sgfX]->line().x1();
         boardY = hLines[sgfY]->line().y1();
@@ -483,7 +483,7 @@ void BoardWidget::sgfToBoardCoordinate(int sgfX, int sgfY, qreal& boardX, qreal&
 /**
   view coordinate to sgf coordinate
 */
-void BoardWidget::boardToSgfCoordinate(qreal boardX, qreal boardY, int& sgfX, int& sgfY) const{
+void BoardWidget::viewToSgfCoordinate(qreal boardX, qreal boardY, int& sgfX, int& sgfY) const{
     qreal size = getGridSize();
 
     if ((rotate % 2) == 0){
@@ -805,7 +805,7 @@ void BoardWidget::setItemsPosition(const QRectF& rect){
     for (int y=0, n=0; y<ypos.size(); ++y){
         for (int x=0; x<xpos.size(); ++x, ++n){
             qreal xx, yy;
-            sgfToBoardCoordinate(xpos[x], ypos[y], xx, yy);
+            sgfToViewCoordinate(xpos[x], ypos[y], xx, yy);
             stars[n]->setRect(xx-2, yy-2, 4, 4);
         }
     }
@@ -861,7 +861,7 @@ void BoardWidget::setTextItemPosition(QGraphicsSimpleTextItem* text, int x, int 
         QRectF r = text->boundingRect();
 
         qreal xx, yy;
-        sgfToBoardCoordinate(x, y, xx, yy);
+        sgfToViewCoordinate(x, y, xx, yy);
         text->setPos(xx-r.width()*0.5, yy-r.height()*0.5);
     }
 }
@@ -1286,7 +1286,7 @@ void BoardWidget::createVariationItemList(Go::NodePtr node){
 QGraphicsItem* BoardWidget::createStoneItem(int x, int y, Go::Color color){
     qreal size = getGridSize();
     qreal xx, yy;
-    sgfToBoardCoordinate(x, y, xx, yy);
+    sgfToViewCoordinate(x, y, xx, yy);
     int sceneX = xx - size / 2;
     int sceneY = yy - size / 2;
 
@@ -1440,7 +1440,7 @@ QGraphicsItem* BoardWidget::createTerritoryItem(int x, int y, Go::Color color){
 QPainterPath BoardWidget::createCrossPath(int x, int y){
     qreal size = getGridSize() * 0.4;
     qreal xx, yy;
-    sgfToBoardCoordinate(x, y, xx, yy);
+    sgfToViewCoordinate(x, y, xx, yy);
     int sceneX = xx - size / 2;
     int sceneY = yy - size / 2;
 
@@ -1459,7 +1459,7 @@ QPainterPath BoardWidget::createCrossPath(int x, int y){
 QPainterPath BoardWidget::createCirclePath(int x, int y){
     qreal size = getGridSize() * 0.5;
     qreal xx, yy;
-    sgfToBoardCoordinate(x, y, xx, yy);
+    sgfToViewCoordinate(x, y, xx, yy);
     int sceneX = xx - size / 2;
     int sceneY = yy - size / 2;
 
@@ -1475,7 +1475,7 @@ QPainterPath BoardWidget::createCirclePath(int x, int y){
 QPainterPath BoardWidget::createSquarePath(int x, int y){
     qreal size = getGridSize() * 0.45;
     qreal xx, yy;
-    sgfToBoardCoordinate(x, y, xx, yy);
+    sgfToViewCoordinate(x, y, xx, yy);
     int sceneX = xx - size / 2;
     int sceneY = yy - size / 2;
 
@@ -1492,7 +1492,7 @@ QPainterPath BoardWidget::createTrianglePath(int x, int y){
     qreal xsize = getGridSize() * 0.5;
     qreal ysize = getGridSize() * 0.4;
     qreal xx, yy;
-    sgfToBoardCoordinate(x, y, xx, yy);
+    sgfToViewCoordinate(x, y, xx, yy);
     int sceneX = xx - xsize / 2;
     int sceneY = yy - ysize / 2;
 
@@ -1511,7 +1511,7 @@ QPainterPath BoardWidget::createTrianglePath(int x, int y){
 QPainterPath BoardWidget::createTerritoryPath(int x, int y){
     qreal size = getGridSize() * 0.35;
     qreal xx, yy;
-    sgfToBoardCoordinate(x, y, xx, yy);
+    sgfToViewCoordinate(x, y, xx, yy);
     int sceneX = xx - size / 2;
     int sceneY = yy - size / 2;
 
@@ -1527,7 +1527,7 @@ QPainterPath BoardWidget::createTerritoryPath(int x, int y){
 QPainterPath BoardWidget::createSelectPath(int x, int y){
     qreal size = getGridSize() * 0.45;
     qreal xx, yy;
-    sgfToBoardCoordinate(x, y, xx, yy);
+    sgfToViewCoordinate(x, y, xx, yy);
     int sceneX = xx - size / 2;
     int sceneY = yy - size / 2;
 
@@ -1542,8 +1542,8 @@ QPainterPath BoardWidget::createSelectPath(int x, int y){
 */
 GraphicsArrowItem* BoardWidget::createLineItem(int x1, int y1, int x2, int y2, Go::Line::Type type){
     qreal xx1, yy1, xx2, yy2;
-    sgfToBoardCoordinate(x1, y1, xx1, yy1);
-    sgfToBoardCoordinate(x2, y2, xx2, yy2);
+    sgfToViewCoordinate(x1, y1, xx1, yy1);
+    sgfToViewCoordinate(x2, y2, xx2, yy2);
 
     GraphicsArrowItem* item;
     GraphicsArrowItem::Shape shape = type == Go::Line::arrow ? GraphicsArrowItem::normal : GraphicsArrowItem::none;
@@ -1562,7 +1562,7 @@ GraphicsArrowItem* BoardWidget::createLineItem(int x1, int y1, int x2, int y2, G
 QRectF BoardWidget::createRectPath(int x, int y){
     qreal size = getGridSize();
     qreal xx, yy;
-    sgfToBoardCoordinate(x, y, xx, yy);
+    sgfToViewCoordinate(x, y, xx, yy);
 
     return QRect(QPoint(xx-size/2, yy-size/2), QSize(size, size));
 }

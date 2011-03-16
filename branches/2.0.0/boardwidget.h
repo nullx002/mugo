@@ -27,6 +27,7 @@ class QFileInfo;
 class QAbstractGraphicsShapeItem;
 class GraphicsArrowItem;
 class Sound;
+class GameInterface;
 
 
 /**
@@ -85,8 +86,8 @@ public:
     // coordinate
     void getGridLinePosition(int x, int y, int gridSize, int x1, int y1, int x2, int y2, QLineF& line) const;
     qreal getGridSize() const;
-    void sgfToBoardCoordinate(int sgfX, int sgfY, qreal& viewX, qreal& viewY) const;
-    void boardToSgfCoordinate(qreal viewX, qreal viewY, int& sgfX, int& sgfY) const;
+    void sgfToViewCoordinate(int sgfX, int sgfY, qreal& viewX, qreal& viewY) const;
+    void viewToSgfCoordinate(qreal viewX, qreal viewY, int& sgfX, int& sgfY) const;
     void setVCoordinatePosition(int pos, const QRectF& rect, QGraphicsSimpleTextItem* left, QGraphicsSimpleTextItem* right);
     void setHCoordinatePosition(int pos, const QRectF& rect, QGraphicsSimpleTextItem* top, QGraphicsSimpleTextItem* bottom);
 
@@ -98,10 +99,11 @@ public:
     const Go::NodeList& getCurrentNodeList() const{ return currentNodeList; }
     const Go::GameInformationPtr& getGameInformation() const{ return gameInformation; }
 
+    BoardBuffer& getBoardBuffer(){ return boardBuffer; }
+
     int getMoveNumber() const{ return moveNumber; }
     int getCapturedBlack() const{ return capturedBlack; }
     int getCapturedWhite() const{ return capturedWhite; }
-    BoardBuffer& getBoardBuffer(){ return boardBuffer; }
     Go::Color getNextColor() const;
 
     // set
@@ -180,6 +182,9 @@ public:
 
     // draw image
     void drawImage(QImage& image);
+
+    // play game
+    void play(GameInterface* game);
 
 signals:
     void currentGameChanged(Go::NodePtr currentGame);
