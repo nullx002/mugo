@@ -21,14 +21,20 @@
 #include <QObject>
 #include <QUndoStack>
 
+/**
+  Base class of mugo document.
+*/
 class Document : public QObject
 {
     Q_OBJECT
 public:
+    // constructor
     explicit Document(QObject *parent = 0);
 
+    // undo stack
     QUndoStack* undoStack(){ return &undoStack_; }
 
+    // document name
     const QString& name() const{ return name_; }
     void setName(const QString& name){ name_ = name; }
 

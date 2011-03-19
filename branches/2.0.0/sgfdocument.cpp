@@ -18,7 +18,7 @@
 #include "sgfdocument.h"
 
 /**
-    constructor
+    Constructs sgf document
 */
 SgfDocument::SgfDocument(int xsize, int ysize, qreal komi, int handicap, QObject* parent) :
     Document(parent)

@@ -17,6 +17,9 @@
 */
 #include "document.h"
 
+/**
+  Constructs an empty document.
+*/
 Document::Document(QObject* parent) :
     QObject(parent)
 {
