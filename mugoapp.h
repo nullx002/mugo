@@ -1,6 +1,6 @@
 /*
     mugo, sgf editor.
-    Copyright (C) 2009-2010 nsase.
+    Copyright (C) 2009-2011 nsase.
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -15,45 +15,79 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#ifndef MUGO_APPLICATION_H
-#define MUGO_APPLICATION_H
+#ifndef __mugoapp_h__
+#define __mugoapp_h__
 
-#include "qtsingleapplication.h"
-#include "appdef.h"
 
-class MainWindow;
+#include <QApplication>
+#include <QList>
 
-class Application : public QtSingleApplication{
-Q_OBJECT
-public:
-    Application(int& argc, char** argv);
-    virtual ~Application();
 
-    // translation
-    void    loadTranslation(QString locale);
-    bool    installTranslator(QTranslator* translator, const QString& path, QString file);
-    QString getTranslationPath();
+#define APP_NAME     "mugo"
+#define APP_VERSION  "2.0.0"
+#define SETTING_NAME "mugo2"
+#define AUTHOR       "nsase"
+#define COPYRIGHT    "Copyright 2009-2011 nsase."
 
-    // window style
-    void    setWindowStyle(const QString& style);
+// DEFAULT SETTINGS
+#define BOARD_IMAGE ":/res/bg.png"
+#define BOARD_COLOR QColor(255, 200, 100)
+#define SHADOW_COLOR QColor(10, 10, 10, 130)
+#define COORDINATE_COLOR Qt::black
+#define BG_COLOR Qt::white
+#define TUTOR_BG_COLOR QColor(0x20, 0xa0, 0xa0)
+#define WHITE_STONE_IMAGE ":/res/white_128_ds.png"
+#define BLACK_STONE_IMAGE ":/res/black_128_ds.png"
+#define WHITE_STONE_COLOR Qt::white
+#define BLACK_STONE_COLOR Qt::black
+#define FOCUS_COLOR Qt::red
+#define BRANCH_COLOR Qt::blue
+#define MOVE_SOUND_FILE "sound/stone.wav"
+#define SAVE_FILE_NAME "$(DT)_$(PW)_$(PB)"
+#define FAST_MOVE_STEPS 10
+#define AUTO_REPLAY_INTERVAL 1000
 
-#if defined(Q_WS_MAC)
-    bool event(QEvent*);
-#endif
 
-    void setMainWindow(MainWindow* win);
+class QAction;
+class QTextCodec;
 
-    const QString& defaultStyle() const{ return defaultStyle_; }
 
-public slots:
-    void received(const QString& msg);
+class MugoApplication;
+inline MugoApplication* mugoApp(){
+    return (MugoApplication*)qApp;
+}
 
-private:
-    MainWindow*  mainWindow;
-    QTranslator* qtTranslator;
-    QTranslator* myTranslator;
-    QString defaultStyle_;
+
+/**
+  Mugo Application
+*/
+class MugoApplication : public QApplication{
+    Q_OBJECT
+    public:
+        MugoApplication(int& argc, char** argv);
+
+/*
+        void setDefaultCodec(QTextCodec* codec){ defaultCodec_ = codec; }
+        void setEncodingActions( const QList<QAction*>& actions ){ encodingActions_ = actions; }
+        void setCodecs( QList<QTextCodec*>& codecs ){ codecs_ = codecs; }
+
+        QTextCodec* defaultCodec() const{ return defaultCodec_; }
+        const QList<QAction*>& encodingActions() const{ return encodingActions_; }
+        const QList<QTextCodec*>& codecs() const{ return codecs_; }
+
+    private:
+        QTextCodec* defaultCodec_;
+        QList<QAction*>    encodingActions_;
+        QList<QTextCodec*> codecs_;
+*/
 };
+
+
+/*
+#include "godata.h"
+int replaceSgfProperty(const Go::NodePtr& game, const QString& in, QString& out, QMap<QString, QString> addProps = QMap<QString, QString>());
+*/
+
 
 
 #endif

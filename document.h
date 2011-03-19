@@ -15,27 +15,26 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#include <QtGui/QApplication>
-#include <QTextCodec>
-#include "mugoapp.h"
-#include "mainwindow.h"
+#ifndef DOCUMENT_H
+#define DOCUMENT_H
 
-/**
-  Constructor
-*/
-MugoApplication::MugoApplication(int& argc, char** argv) : QApplication(argc, argv){
-    setApplicationName(SETTING_NAME);
-    setApplicationVersion(APP_VERSION);
-    setOrganizationDomain(AUTHOR);
-}
+#include <QObject>
+#include <QUndoStack>
 
-int main(int argc, char* argv[])
+class Document : public QObject
 {
-    QTextCodec::setCodecForCStrings( QTextCodec::codecForName("UTF-8") );
-    QTextCodec::setCodecForTr( QTextCodec::codecForName("UTF-8") );
+    Q_OBJECT
+public:
+    explicit Document(QObject *parent = 0);
 
-    MugoApplication a(argc, argv);
-    MainWindow w("");
-    w.show();
-    return a.exec();
-}
+    QUndoStack* undoStack(){ return &undoStack_; }
+
+signals:
+
+public slots:
+
+private:
+    QUndoStack undoStack_;
+};
+
+#endif // DOCUMENT_H

@@ -15,27 +15,34 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#include <QtGui/QApplication>
-#include <QTextCodec>
-#include "mugoapp.h"
-#include "mainwindow.h"
+#ifndef SGFCOMMAND_H
+#define SGFCOMMAND_H
+
+
+#include <QCoreApplication>
+#include <QUndoCommand>
+#include "godata.h"
+
+class SgfDocument;
+
 
 /**
-  Constructor
+  add node command
 */
-MugoApplication::MugoApplication(int& argc, char** argv) : QApplication(argc, argv){
-    setApplicationName(SETTING_NAME);
-    setApplicationVersion(APP_VERSION);
-    setOrganizationDomain(AUTHOR);
-}
+class AddNodeCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(AddNodeCommand)
 
-int main(int argc, char* argv[])
-{
-    QTextCodec::setCodecForCStrings( QTextCodec::codecForName("UTF-8") );
-    QTextCodec::setCodecForTr( QTextCodec::codecForName("UTF-8") );
+public:
+    AddNodeCommand(SgfDocument* doc, Go::NodePtr parentNode, Go::NodePtr node, int index, QUndoCommand* parent = 0);
+    virtual void redo();
+    virtual void undo();
 
-    MugoApplication a(argc, argv);
-    MainWindow w("");
-    w.show();
-    return a.exec();
-}
+private:
+    SgfDocument* document_;
+    Go::NodePtr parentNode_;
+    Go::NodePtr node_;
+    int index_;
+};
+
+
+#endif // SGFCOMMAND_H

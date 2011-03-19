@@ -15,27 +15,29 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#include <QtGui/QApplication>
-#include <QTextCodec>
-#include "mugoapp.h"
-#include "mainwindow.h"
+#ifndef SGFDOCUMENT_H
+#define SGFDOCUMENT_H
 
-/**
-  Constructor
-*/
-MugoApplication::MugoApplication(int& argc, char** argv) : QApplication(argc, argv){
-    setApplicationName(SETTING_NAME);
-    setApplicationVersion(APP_VERSION);
-    setOrganizationDomain(AUTHOR);
-}
+#include "document.h"
+#include "godata.h"
 
-int main(int argc, char* argv[])
+
+class SgfDocument : public Document
 {
-    QTextCodec::setCodecForCStrings( QTextCodec::codecForName("UTF-8") );
-    QTextCodec::setCodecForTr( QTextCodec::codecForName("UTF-8") );
+    Q_OBJECT
+public:
+    explicit SgfDocument(int xsize=19, int ysize=19, qreal komi=6.5, int handicap=0, QObject *parent = 0);
 
-    MugoApplication a(argc, argv);
-    MainWindow w("");
-    w.show();
-    return a.exec();
-}
+signals:
+    void nodeAdded(Go::NodePtr node);
+    void nodeDeleted(Go::NodePtr node);
+
+public slots:
+    void addNode(Go::NodePtr parent, Go::NodePtr node, int index=-1);
+    void deleteNode(Go::NodePtr node, bool removeChildren=true);
+
+public:
+    Go::NodeList gameList;
+};
+
+#endif // SGFDOCUMENT_H

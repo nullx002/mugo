@@ -15,27 +15,36 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#include <QtGui/QApplication>
-#include <QTextCodec>
-#include "mugoapp.h"
-#include "mainwindow.h"
+#include <QDebug>
+#include "sgfcommand.h"
+#include "sgfdocument.h"
 
 /**
   Constructor
 */
-MugoApplication::MugoApplication(int& argc, char** argv) : QApplication(argc, argv){
-    setApplicationName(SETTING_NAME);
-    setApplicationVersion(APP_VERSION);
-    setOrganizationDomain(AUTHOR);
+AddNodeCommand::AddNodeCommand(SgfDocument* doc, Go::NodePtr parentNode, Go::NodePtr node, int index, QUndoCommand* parent)
+    : QUndoCommand(parent)
+    , document_(doc)
+    , parentNode_(parentNode)
+    , node_(node)
+    , index_(index)
+{
 }
 
-int main(int argc, char* argv[])
-{
-    QTextCodec::setCodecForCStrings( QTextCodec::codecForName("UTF-8") );
-    QTextCodec::setCodecForTr( QTextCodec::codecForName("UTF-8") );
+/**
+  redo add node command
+*/
+void AddNodeCommand::redo(){
+    if (node_->isStone())
+        setText( tr("Move") );
+    else
+        setText( tr("Add Empty Node") );
+    document_->addNode(parentNode_, node_, index_);
+}
 
-    MugoApplication a(argc, argv);
-    MainWindow w("");
-    w.show();
-    return a.exec();
+/**
+  undo add node command
+*/
+void AddNodeCommand::undo(){
+    document_->deleteNode(node_);
 }
