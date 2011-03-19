@@ -18,7 +18,7 @@
 #ifndef SAVEIMAGEDIALOG_H
 #define SAVEIMAGEDIALOG_H
 
-#include <QtGui/QDialog>
+#include <QDialog>
 #include <QFileInfo>
 
 namespace Ui {
@@ -41,14 +41,11 @@ public:
     bool      showCoordinate;
     bool      monochrome;
 
-protected:
-    void changeEvent(QEvent *e);
-
 private:
     Ui::SaveImageDialog *m_ui;
 
 private slots:
-    void on_fileNameEdit_textChanged(QString );
+    void on_fileNameEdit_textChanged(QString);
     void on_fileBrowseButton_clicked();
 };
 

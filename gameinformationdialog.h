@@ -21,6 +21,9 @@
 #include <QtGui/QDialog>
 #include "godata.h"
 
+class SgfDocument;
+
+
 namespace Ui {
     class GameInformationDialog;
 }
@@ -28,16 +31,16 @@ namespace Ui {
 class GameInformationDialog : public QDialog {
     Q_OBJECT
 public:
-    GameInformationDialog(QWidget *parent, go::informationNode* infoNode);
+    GameInformationDialog(QWidget *parent, SgfDocument* doc, Go::GameInformationPtr gameInfo);
     ~GameInformationDialog();
 
 protected:
-    virtual void changeEvent(QEvent* e);
     virtual void accept();
 
 private:
     Ui::GameInformationDialog *m_ui;
-    go::informationNode* gameInfo;
+    SgfDocument* document;
+    Go::GameInformationPtr gameInfo;
 };
 
 #endif // GAMEINFORMATIONDIALOG_H

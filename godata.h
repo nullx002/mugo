@@ -22,162 +22,108 @@
 #include <QFile>
 #include <QTextStream>
 #include <QStringList>
-#include <QLinkedList>
 #include <QMap>
 #include <QTextCodec>
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
 
-namespace go{
+namespace Go{
 
-class node;
-class informationNode;
-typedef boost::shared_ptr<node> nodePtr;
-typedef boost::weak_ptr<node> nodeWPtr;
-typedef QList<nodePtr> nodeList;
-typedef boost::shared_ptr<informationNode> informationPtr;
-typedef QList<informationPtr> informationList;
+class Node;
+class GameInformation;
+typedef boost::shared_ptr<Node> NodePtr;
+typedef boost::weak_ptr<Node> NodeWPtr;
+typedef boost::shared_ptr<GameInformation> GameInformationPtr;
+typedef QList<NodePtr> NodeList;
 
 
-enum color{ empty=0, black=1, white=2, blackTerritory=4, whiteTerritory=8, dame=16 };
+enum Color{ empty, black, white, dame };
 
-class point{
+/**
+    Point
+*/
+class Point{
 public:
-    point() : x(-1), y(-1){}
-    point(int x_, int y_) : x(x_), y(y_){}
+    // Constructor
+    Point() : x(-1), y(-1){}  // (-1, -1) is pass.
+    Point(int x_, int y_) : x(x_), y(y_){}
+
+    void set(int x_, int y_){ x = x_, y = y_; }
 
     int x;
     int y;
 };
 
 inline
-bool operator ==(const point& a, const point& b){
+bool operator ==(const Point& a, const Point& b){
     return a.x == b.x && a.y == b.y;
 }
 
-class mark{
+/**
+    Stone
+*/
+class Stone{
 public:
-    enum eType{eCross, eCircle, eSquare, eTriangle, eCharacter, eBlackTerritory, eWhiteTerritory, eDim, eSelect};
+    // Constructor
+    Stone() : color(empty){}
+    Stone(const Point& p, Color c) : position(p), color(c){}
+    Stone(int x, int y, Color c) : position(x, y), color(c){}
 
-    mark(const point& p_, eType t_) : p(p_), t(t_){}
-    mark(const point& p_, const QString& s_) : p(p_), t(eCharacter), s(s_){}
-    mark(int x, int y, eType t_) : p(x, y), t(t_){}
-    mark(int x, int y, const QString& s_) : p(x, y), t(eCharacter), s(s_){}
-
-    point   p;
-    eType   t;
-    QString s;
-};
-
-class stone{
-public:
-    stone(const point& p_, color c_) : p(p_), c(c_){}
-    stone(int x, int y, color c_) : p(x, y), c(c_){}
-
-    bool isBlack() const{ return c == black; }
-    bool isWhite() const{ return c == white; }
-    bool isEmpty() const{ return c == empty; }
-
-    point p;
-    color c;
-};
-
-typedef QList<mark>  markList;
-typedef QList<stone> stoneList;
-class data;
-class informationNode;
-
-class node{
-    Q_DECLARE_TR_FUNCTIONS(go::node)
-
-public:
-    enum eAnnotation{
-        eNoAnnotation = 0,
-        eHotspot = 1,
-    };
-    enum eMoveAnnotation{
-        eGoodMove = 1,
-        eVeryGoodMove,
-        eBadMove ,
-        eVeryBadMove,
-        eDoubtfulMove,
-        eInterestingMove,
-    };
-    enum eNodeAnnotation{
-        eEven = 1,
-        eGoodForBlack,
-        eVeryGoodForBlack,
-        eGoodForWhite,
-        eVeryGoodForWhite,
-        eUnclear,
-    };
-
-    node();
-    explicit node(nodePtr parent);
-    virtual ~node(){  clear();  }
-
-    void clear();
-    nodePtr parent(){ return parent_.lock(); }
-    const nodePtr parent() const{ return parent_.lock(); }
-
-    int getX() const{ return position.x; }
-    int getY() const{ return position.y; }
-
-    void setX(int x){ position.x = x; }
-    void setY(int y){ position.y = y; }
-
-    virtual bool isStone() const{ return isBlack() || isWhite(); }
     bool isBlack() const{ return color == black; }
     bool isWhite() const{ return color == white; }
-    bool isPass() const;
+    bool isEmpty() const{ return color == empty; }
 
-    void setColor(go::color c){ color = c; }
-
-    virtual QString nodeName() const{ return name; }
-    virtual QString toString() const;
-
-//protected:
-    // node
-    nodeWPtr  parent_;
-    nodeList  childNodes;
-    QString   name;
-    markList  marks;
-    markList  blackTerritories;
-    markList  whiteTerritories;
-    markList  dims;
-    stoneList blackStones;
-    stoneList whiteStones;
-    stoneList emptyStones;
-    int annotation;
-    int moveAnnotation;
-    int nodeAnnotation;
-    QString comment;
-    point position;
-    go::color color;
-    go::color nextColor;
-    int   moveNumber;
+    Point position;
+    Color color;
 };
 
-
-class informationNode : public node{
-    Q_DECLARE_TR_FUNCTIONS(go::informationNode)
-//    static QString tr(const char* source, const char* disam, int n){
-//        QCoreApplication::translate("informationNodesource
-//    }
-
+/**
+    Mark
+*/
+class Mark{
 public:
-    explicit informationNode(nodePtr parent=nodePtr());
-    ~informationNode();
+    enum Type{cross, circle, square, triangle, character, blackTerritory, whiteTerritory, dim, select, dame};
 
-    virtual QString nodeName() const;
+    // Constructor
+    Mark() : type(){}
+    Mark(const Point& p, Type t) : position(p), type(t){}
+    Mark(const Point& p, const QString& s) : position(p), type(character), text(s){}
+    Mark(int x, int y, Type t) : position(x, y), type(t){}
+    Mark(int x, int y, const QString& s) : position(x, y), type(character), text(s){}
 
-    void initialize();
+    Point   position;
+    Type    type;
+    QString text;
+};
+
+class Line{
+public:
+    enum Type{line, arrow};
+
+    // Constructor
+    Line() : type(line){}
+    Line(const Point& p1, const Point& p2, Type t) : position1(p1), position2(p2), type(t){}
+    Line(int x1, int y1, int x2, int y2, Type t) : position1(x1, y1), position2(x2, y2), type(t){}
+
+    Point position1;
+    Point position2;
+    Type  type;
+};
+
+typedef QList<Stone> StoneList;
+typedef QList<Mark>  MarkList;
+typedef QList<Line>  LineList;
+
+
+class GameInformation{
+public:
+    GameInformation();
 
     // rule
-    int    xsize;
-    int    ysize;
-    double komi;
-    int    handicap;
+    int     xsize;
+    int     ysize;
+    double  komi;
+    int     handicap;
     QString time;
     QString overTime;
 
@@ -205,27 +151,96 @@ public:
     QString copyright;
     QString user;
     QString opening;
+    int variation;
 };
 
 
-class data{
-public:
-    enum eRule{eJapanese, eChinese};
+class Node{
+    Q_DECLARE_TR_FUNCTIONS(Go::Node)
 
-    data();
+public:
+    enum Annotation{
+        noAnnotation = 0,
+        hotspot,
+    };
+    enum MoveAnnotation{
+        noMoveAnnotation = 0,
+        goodMove,
+        veryGoodMove,
+        badMove ,
+        veryBadMove,
+        doubtfulMove,
+        interestingMove,
+    };
+    enum NodeAnnotation{
+        noNodeAnnotation = 0,
+        even,
+        goodForBlack,
+        veryGoodForBlack,
+        goodForWhite,
+        veryGoodForWhite,
+        unclear,
+    };
+
+    // Constructor
+    Node();
+    explicit Node(NodePtr parent);
+    virtual ~Node();
 
     void clear();
+//    virtual QString toString() const;
+    GameInformationPtr getInformation() const;
 
-    informationList rootList;
-    informationPtr root;
+    // parent
+    NodePtr parent() const{ return parent_.lock(); }
+    void setParent(NodePtr node){ parent_ = node; }
+
+    // sibling
+    NodeList siblings() const;
+    NodePtr  previousSibling() const;
+    NodePtr  nextSibling() const;
+
+    // get
+    int x() const{ return position.x; }
+    int y() const{ return position.y; }
+
+    // set
+    void setX(int x){ position.x = x; }
+    void setY(int y){ position.y = y; }
+
+    // get node type
+    virtual bool isStone() const{ return isBlack() || isWhite(); }
+    bool isBlack() const{ return color == black; }
+    bool isWhite() const{ return color == white; }
+    bool isPass() const;
+
+    GameInformationPtr gameInformation;
+    NodeWPtr  parent_;
+    NodeList  childNodes;
+    QString   name;
+    MarkList  marks;
+    MarkList  blackTerritories;
+    MarkList  whiteTerritories;
+    MarkList  dims;
+    StoneList blackStones;
+    StoneList whiteStones;
+    StoneList emptyStones;
+    LineList  lines;
+    Annotation annotation;
+    MoveAnnotation moveAnnotation;
+    NodeAnnotation nodeAnnotation;
+    QString comment;
+    Point position;
+    Color color;
+    Color nextColor;
+    int   moveNumber;
 };
 
 
-
-class fileBase{
+class FileBase{
 public:
-    fileBase() : codec(NULL){}
-    virtual ~fileBase(){}
+    FileBase() : codec(NULL){}
+    virtual ~FileBase(){}
 
     virtual bool read(const QString& fname, QTextCodec* codec, bool guessCodec);
     virtual bool read(const QByteArray& bytes, QTextCodec* defaultCodec, bool guessCodec);
@@ -234,10 +249,10 @@ public:
     virtual bool save(const QString& fname, QTextCodec* codec);
     virtual bool saveStream(QTextStream& stream) = 0;
 
-    virtual QTextCodec* getCodec(const QByteArray&) const{ return NULL; }
+    virtual QTextCodec* guessCodec(const QByteArray&) const{ return NULL; }
 
-    virtual bool get(go::data& data) const = 0;
-    virtual bool set(const go::data& data) = 0;
+    virtual bool get(NodeList& gameList) const = 0;
+    virtual bool set(NodeList& gameList) = 0;
 
     QString readLine(QString::iterator& first, QString::iterator& last);
 
@@ -246,10 +261,11 @@ public:
 
 
 
-nodePtr createBlackNode(nodePtr parent);
-nodePtr createBlackNode(nodePtr parent, int x, int y);
-nodePtr createWhiteNode(nodePtr parent);
-nodePtr createWhiteNode(nodePtr parent, int x, int y);
+NodePtr createInformationNode(NodePtr parent);
+NodePtr createBlackNode(NodePtr parent);
+NodePtr createBlackNode(NodePtr parent, int x, int y);
+NodePtr createWhiteNode(NodePtr parent);
+NodePtr createWhiteNode(NodePtr parent, int x, int y);
 
 
 }

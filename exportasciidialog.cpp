@@ -20,11 +20,15 @@
 #include <QClipboard>
 #include "exportasciidialog.h"
 #include "ui_exportasciidialog.h"
+#include "boardwidget.h"
 
-ExportAsciiDialog::ExportAsciiDialog(QWidget *parent, const BoardWidget::BoardBuffer& buffer) :
-    QDialog(parent),
-    m_ui(new Ui::ExportAsciiDialog),
-    boardBuffer(buffer)
+/**
+  Constructor
+*/
+ExportAsciiDialog::ExportAsciiDialog(QWidget *parent, const BoardWidget::BoardBuffer& buf)
+    : QDialog(parent)
+    , m_ui(new Ui::ExportAsciiDialog)
+    , boardBuffer(buf)
 {
     m_ui->setupUi(this);
 
@@ -34,23 +38,17 @@ ExportAsciiDialog::ExportAsciiDialog(QWidget *parent, const BoardWidget::BoardBu
     createAscii( language );
 }
 
+/**
+  Destructor
+*/
 ExportAsciiDialog::~ExportAsciiDialog()
 {
     delete m_ui;
 }
 
-void ExportAsciiDialog::changeEvent(QEvent *e)
-{
-    QDialog::changeEvent(e);
-    switch (e->type()) {
-    case QEvent::LanguageChange:
-        m_ui->retranslateUi(this);
-        break;
-    default:
-        break;
-    }
-}
-
+/**
+  accept dialog
+*/
 void ExportAsciiDialog::accept(){
     QDialog::accept();
 
@@ -67,6 +65,9 @@ void ExportAsciiDialog::on_typeComboBox_currentIndexChanged(int index){
     createAscii(index);
 }
 
+/**
+  create ascii board
+*/
 void ExportAsciiDialog::createAscii(int index){
     if (index == 0)
         createEnglishAscii();
@@ -74,17 +75,23 @@ void ExportAsciiDialog::createAscii(int index){
         createJapaneseAscii(index == 1);
 }
 
+/**
+  create ascii board using english font
+*/
 void ExportAsciiDialog::createEnglishAscii(){
     QFont f("Consolas,Courier,monospace", 8);
     m_ui->asciiTextEdit->setFont(f);
 
     QByteArray s;
-    s.reserve(boardBuffer.size() + 2 * boardBuffer[0].size() * 3);
+    s.reserve( (boardBuffer.size() + 2) * boardBuffer[0].size() * 3);
 
     s.append("  ");
     for (int i=0; i<boardBuffer[0].size(); ++i){
+        int n = i % 25;
+        if (n > 7)
+            ++n;
         s.push_back(' ');
-        s.push_back( 'A' + (i > 7 ? i+1 : i) );
+        s.push_back('A' + n);
     }
     s.push_back('\n');
 
@@ -92,9 +99,9 @@ void ExportAsciiDialog::createEnglishAscii(){
         s.append( QString("%1").arg(boardBuffer.size() - y, 2) );
 
         for (int x=0; x<boardBuffer[y].size(); ++x){
-            if (boardBuffer[y][x].black())
+            if (boardBuffer[y][x].isBlack())
                 s.append(" #");
-            else if (boardBuffer[y][x].white())
+            else if (boardBuffer[y][x].isWhite())
                 s.append(" O");
             else if (isStar(x, y))
                 s.append(" +");
@@ -107,13 +114,19 @@ void ExportAsciiDialog::createEnglishAscii(){
 
     s.append("  ");
     for (int i=0; i<boardBuffer[0].size(); ++i){
+        int n = i % 25;
+        if (n > 7)
+            ++n;
         s.push_back(' ');
-        s.push_back( 'A' + (i > 7 ? i+1 : i) );
+        s.push_back('A' + n);
     }
 
     m_ui->asciiTextEdit->setPlainText(s);
 }
 
+/**
+  create ascii board using japanese font
+*/
 void ExportAsciiDialog::createJapaneseAscii(bool isMono){
 #ifdef Q_WS_WIN
     const char* monospace   = "\xef\xbc\xad\xef\xbc\xb3\x20\xe3\x82\xb4\xe3\x82\xb7\xe3\x83\x83\xe3\x82\xaf"; // ms gothic
@@ -123,33 +136,36 @@ void ExportAsciiDialog::createJapaneseAscii(bool isMono){
     const char* propotional = "Osaka"; // Osaka
 #else
     const char* monospace   = "monospace";
-    const char* propotional = "Takao Pゴシック";
+    const char* propotional = "Takao \xe3\x82\xb4\xe3\x82\xb7\xe3\x83\x83\xe3\x82\xaf";   // takao gothic
 #endif
+    const char* fontname = isMono ? monospace : propotional;
 
-    QFont f(isMono ? monospace : propotional, 8);
+    QFont f(fontname, 8);
     m_ui->asciiTextEdit->setFont(f);
-qDebug() << f.family();
 
     QByteArray s;
-    s.reserve(boardBuffer.size() + 2 * boardBuffer[0].size() * 3);
+    s.reserve( (boardBuffer.size() + 2) * boardBuffer[0].size() * 3);
 
     const char* top[]    = {"\xe2\x94\x8f","\xe2\x94\xaf","\xe2\x94\x93"};
     const char* center[] = {"\xe2\x94\xa0","\xe2\x94\xbc","\xe2\x94\xa8"};
     const char* bottom[] = {"\xe2\x94\x97","\xe2\x94\xb7","\xe2\x94\x9b"};
-    const char* header[] = {"\xef\xbc\xa1","\xef\xbc\xa2","\xef\xbc\xa3","\xef\xbc\xa4","\xef\xbc\xa5","\xef\xbc\xa6","\xef\xbc\xa7","\xef\xbc\xa8","\xef\xbc\xaa","\xef\xbc\xab","\xef\xbc\xac","\xef\xbc\xad","\xef\xbc\xae","\xef\xbc\xaf","\xef\xbc\xb0","\xef\xbc\xb1","\xef\xbc\xb2","\xef\xbc\xb3","\xef\xbc\xb4","\xef\xbc\xb5","\xef\xbc\xb6","\xef\xbc\xb7","\xef\xbc\xb8","\xef\xbc\xb9","\xef\xbc\xba"};
-    int headerNum = sizeof(header)/sizeof(header[0]);
+    const char* A = "\xef\xbc\xa1";
 
     // 2byte space
     if (isMono)
-        s.append("\xe3\x80\x80");
+        s.append( "\xe3\x80\x80" );
     else
-        s.append("\xef\xbc\xbf");
+        s.append( "\xef\xbc\xbf" );
 
-    for (int i=0, j=0; i<boardBuffer[0].size(); ++i, ++j){
-        if (j >= headerNum)
-            j = 0;
-        s.push_back( header[j] );
-        if (isMono == false && j != 12 && j != 16)
+    for (int i=0; i<boardBuffer[0].size(); ++i){
+        int n = i % 25;
+        if (n > 7)
+            ++n;
+
+        int a = *(int*)A;
+        ((char*)&a)[2] += n;
+        s.append((char*)&a);
+        if (isMono == false && n != 13 && n != 17)
             s.push_back(' ');
     }
 
@@ -164,9 +180,9 @@ qDebug() << f.family();
         const char** b = y == 0 ? top : y == boardBuffer.size() - 1 ? bottom : center;
 
         for (int x=0; x<boardBuffer[y].size(); ++x){
-            if (boardBuffer[y][x].black())
+            if (boardBuffer[y][x].isBlack())
                 s.append("\xe2\x97\x8f");
-            else if (boardBuffer[y][x].white())
+            else if (boardBuffer[y][x].isWhite())
                 s.append("\xe2\x97\x8b");
             else{
                 if (x == 0)
@@ -192,23 +208,37 @@ qDebug() << f.family();
     else
         s.append("\xef\xbc\xbf");
 
-    for (int i=0, j=0; i<boardBuffer[0].size(); ++i, ++j){
-        if (j >= headerNum)
-            j = 0;
-        s.push_back( header[j] );
-        if (isMono == false && j != 12 && j != 16)
+    for (int i=0; i<boardBuffer[0].size(); ++i){
+        int n = i % 25;
+        if (n > 7)
+            ++n;
+
+        int a = *(int*)A;
+        ((char*)&a)[2] += n;
+        s.append((char*)&a);
+        if (isMono == false && n != 13 && n != 17)
             s.push_back(' ');
     }
+
+    s.push_back('\n');
 
     m_ui->asciiTextEdit->setPlainText(s);
 }
 
+/**
+  @retval true  position(x, y) is star
+  @retval false position(x, y) is not star
+*/
 bool ExportAsciiDialog::isStar(int x, int y){
     int  ysize = boardBuffer.size();
     int  xsize = boardBuffer[0].size();
     return isStar2(xsize, x) && isStar2(ysize, y);
 }
 
+/**
+  @retval true  n is star
+  @retval false n is not star
+*/
 bool ExportAsciiDialog::isStar2(int size, int n){
     bool isStar = false;
     if (size < 7)
@@ -220,5 +250,6 @@ bool ExportAsciiDialog::isStar2(int size, int n){
         if (!isStar && size % 2)
             isStar = n == size / 2;
     }
+
     return isStar;
 }

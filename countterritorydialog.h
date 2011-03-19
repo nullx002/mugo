@@ -18,9 +18,10 @@
 #ifndef COUNTTERRITORYDIALOG_H
 #define COUNTTERRITORYDIALOG_H
 
-#include <QtGui/QDialog>
-#include <QDebug>
+#include <QDialog>
 #include "godata.h"
+
+class SgfDocument;
 
 namespace Ui {
     class CountTerritoryDialog;
@@ -29,21 +30,27 @@ namespace Ui {
 class CountTerritoryDialog : public QDialog {
     Q_OBJECT
 public:
-    CountTerritoryDialog(QWidget *parent = 0);
+    CountTerritoryDialog(SgfDocument* document, QWidget *parent = 0);
     ~CountTerritoryDialog();
 
-    void setInformationNode(go::informationNode* infoNode){ informationNode = infoNode; }
-    void setScore(int alive_b, int alive_w, int dead_b, int dead_w, int capturedBlack, int capturedWhite, int blackTerritory, int whiteTerritory, double komi);
+    void setInformationNode(Go::GameInformationPtr gameInfo){ gameInformation = gameInfo; }
+    void setScore(int total, int alive_b, int alive_w, int dead_b, int dead_w, int capturedBlack, int capturedWhite, int blackTerritory, int whiteTerritory, double komi);
 
 protected:
-    virtual void changeEvent(QEvent *e);
     virtual void done(int r);
     virtual void accept();
 
 private:
     Ui::CountTerritoryDialog *m_ui;
-    go::informationNode* informationNode;
-    double scorej;
+    SgfDocument* document;
+    Go::GameInformationPtr gameInformation;
+    double japanese_score;
+    double chinese_score;
+    QString japanese_text;
+    QString chinese_text;
+
+private slots:
+    void on_ruleComboBox_currentIndexChanged(int index);
 };
 
 #endif // COUNTTERRITORYDIALOG_H

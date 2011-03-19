@@ -16,13 +16,21 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include <QDebug>
+#include <QUndoStack>
 #include "gameinformationdialog.h"
 #include "ui_gameinformationdialog.h"
+#include "sgfdocument.h"
+#include "command.h"
 
-GameInformationDialog::GameInformationDialog(QWidget *parent, go::informationNode* infoNode) :
-    QDialog(parent),
-    m_ui(new Ui::GameInformationDialog),
-    gameInfo(infoNode)
+
+/**
+  Constructor
+*/
+GameInformationDialog::GameInformationDialog(QWidget *parent, SgfDocument* doc, Go::GameInformationPtr gameInfo_)
+    : QDialog(parent)
+    , m_ui(new Ui::GameInformationDialog)
+    , document(doc)
+    , gameInfo(gameInfo_)
 {
     m_ui->setupUi(this);
 
@@ -60,56 +68,52 @@ GameInformationDialog::GameInformationDialog(QWidget *parent, go::informationNod
     m_ui->opening->setText( gameInfo->opening );
 }
 
-GameInformationDialog::~GameInformationDialog()
-{
+/**
+  Destructor
+*/
+GameInformationDialog::~GameInformationDialog(){
     delete m_ui;
 }
 
-void GameInformationDialog::changeEvent(QEvent *e)
-{
-    QDialog::changeEvent(e);
-    switch (e->type()) {
-    case QEvent::LanguageChange:
-        m_ui->retranslateUi(this);
-        break;
-    default:
-        break;
-    }
-}
-
-void GameInformationDialog::accept()
-{
+/**
+  accept dialog
+*/
+void GameInformationDialog::accept(){
     QDialog::accept();
 
+    Go::GameInformationPtr info(new Go::GameInformation);
+
     // white player
-    gameInfo->whitePlayer = m_ui->whitePlayer->text();
-    gameInfo->whiteRank   = m_ui->whiteRank->text();
-    gameInfo->whiteTeam   = m_ui->whiteTeam->text();
+    info->whitePlayer = m_ui->whitePlayer->text();
+    info->whiteRank   = m_ui->whiteRank->text();
+    info->whiteTeam   = m_ui->whiteTeam->text();
 
     // black player
-    gameInfo->blackPlayer = m_ui->blackPlayer->text();
-    gameInfo->blackRank   = m_ui->blackRank->text();
-    gameInfo->blackTeam   = m_ui->blackTeam->text();
+    info->blackPlayer = m_ui->blackPlayer->text();
+    info->blackRank   = m_ui->blackRank->text();
+    info->blackTeam   = m_ui->blackTeam->text();
 
     // rule
-    gameInfo->komi = m_ui->komi->text().toDouble();
-    gameInfo->handicap = m_ui->handicap->text().toInt();
-    gameInfo->result   = m_ui->result->text();
-    gameInfo->time     = m_ui->time->text();
-    gameInfo->overTime = m_ui->overTime->text();
+    info->komi = m_ui->komi->text().toDouble();
+    info->handicap = m_ui->handicap->text().toInt();
+    info->result   = m_ui->result->text();
+    info->time     = m_ui->time->text();
+    info->overTime = m_ui->overTime->text();
 
     // when / where
-    gameInfo->gameName = m_ui->gameName->text();
-    gameInfo->date = m_ui->date->text();
-    gameInfo->round = m_ui->round->text();
-    gameInfo->place = m_ui->place->text();
-    gameInfo->event = m_ui->event->text();
+    info->gameName = m_ui->gameName->text();
+    info->date = m_ui->date->text();
+    info->round = m_ui->round->text();
+    info->place = m_ui->place->text();
+    info->event = m_ui->event->text();
 
     // other
-    gameInfo->annotation  = m_ui->annotation->text();
-    gameInfo->source      = m_ui->source->text();
-    gameInfo->gameComment = m_ui->gameComment->toPlainText();
-    gameInfo->copyright   = m_ui->copyright->toPlainText();
-    gameInfo->user        = m_ui->user->text();
-    gameInfo->opening     = m_ui->opening->text();
+    info->annotation  = m_ui->annotation->text();
+    info->source      = m_ui->source->text();
+    info->gameComment = m_ui->gameComment->toPlainText();
+    info->copyright   = m_ui->copyright->toPlainText();
+    info->user        = m_ui->user->text();
+    info->opening     = m_ui->opening->text();
+
+    document->getUndoStack()->push( new SetGameInformationCommand(document, gameInfo, info) );
 }

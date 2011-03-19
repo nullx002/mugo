@@ -16,80 +16,105 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include <QDebug>
-#include "appdef.h"
+#include "mugoapp.h"
 #include "godata.h"
 
 
-namespace go{
+namespace Go{
 
-const informationNode* infomation(const node* node){
-    while (node->parent()){
-        node = node->parent().get();
-    }
-    return (informationNode*)node;
-}
 
-nodePtr createBlackNode(nodePtr parent){
-    nodePtr newNode( new node(parent) );
-    newNode->setColor(go::black);
+NodePtr createInformationNode(NodePtr parent){
+    NodePtr newNode( new Node(parent) );
+    GameInformationPtr info( new GameInformation );
+    newNode->gameInformation = info;
+    newNode->nextColor = black;
+
     return newNode;
 }
 
-nodePtr createBlackNode(nodePtr parent, int x, int y){
-    nodePtr newNode( createBlackNode(parent) );
-    newNode->setX(x);
-    newNode->setY(y);
+NodePtr createBlackNode(NodePtr parent){
+    NodePtr newNode( new Node(parent) );
+    newNode->color = black;
     return newNode;
 }
 
-nodePtr createWhiteNode(nodePtr parent){
-    nodePtr newNode( new node(parent) );
-    newNode->setColor(go::white);
+NodePtr createBlackNode(NodePtr parent, int x, int y){
+    NodePtr newNode( createBlackNode(parent) );
+    newNode->position.set(x, y);
     return newNode;
 }
 
-nodePtr createWhiteNode(nodePtr parent, int x, int y){
-    nodePtr newNode( createWhiteNode(parent) );
-    newNode->setX(x);
-    newNode->setY(y);
+NodePtr createWhiteNode(NodePtr parent){
+    NodePtr newNode( new Node(parent) );
+    newNode->color = white;
+    return newNode;
+}
+
+NodePtr createWhiteNode(NodePtr parent, int x, int y){
+    NodePtr newNode( createWhiteNode(parent) );
+    newNode->position.set(x, y);
     return newNode;
 }
 
 
-
-node::node()
-    : annotation(eNoAnnotation)
-    , moveAnnotation(eNoAnnotation)
-    , nodeAnnotation(eNoAnnotation)
-    , color(go::empty)
-    , nextColor(go::empty)
-    , moveNumber(-1)
+/**
+  Constructor
+*/
+GameInformation::GameInformation()
+    : xsize(19)
+    , ysize(19)
+    , komi(6.5)
+    , handicap(0)
+    , variation(0)
 {
 }
 
-node::node(nodePtr p_)
+
+/**
+  Constructor
+*/
+Node::Node()
+    : annotation(noAnnotation)
+    , moveAnnotation(noMoveAnnotation)
+    , nodeAnnotation(noNodeAnnotation)
+    , color(empty)
+    , nextColor(empty)
+    , moveNumber(0)
+{
+}
+
+/**
+  Constructor
+*/
+Node::Node(NodePtr p_)
     : parent_(p_)
-    , annotation(eNoAnnotation)
-    , moveAnnotation(eNoAnnotation)
-    , nodeAnnotation(eNoAnnotation)
-    , color(go::empty)
-    , nextColor(go::empty)
-    , moveNumber(-1)
+    , annotation(noAnnotation)
+    , moveAnnotation(noMoveAnnotation)
+    , nodeAnnotation(noNodeAnnotation)
+    , color(empty)
+    , nextColor(empty)
+    , moveNumber(0)
 {
 }
 
-void node::clear(){
+/**
+  Destructor
+*/
+Node::~Node(){
+    clear();
+}
+
+/**
+  clear this node
+*/
+void Node::clear(){
     parent_.reset();
     childNodes.clear();
 }
 
-bool node::isPass() const{
-    const informationNode* info = infomation(this);
-    return position.x < 0 || position.y < 0 || position.x >= info->xsize || position.y >= info->ysize;
-}
-
-QString node::toString() const{
-    QString str = nodeName();
+/*
+QString Node::toString() const{
+    QString str = name;
 
     if (moveNumber > 0)
         str += QString(" (%1)").arg(moveNumber);
@@ -118,33 +143,33 @@ QString node::toString() const{
     if (!whiteTerritories.empty())
         str += QString(" %1").arg( tr("WhiteTerritories") );
 
-    if (moveAnnotation == eGoodMove)
+    if (moveAnnotation == goodMove)
         str += QString(" [%1]").arg( tr("Good Move") );
-    else if (moveAnnotation == eVeryGoodMove)
+    else if (moveAnnotation == veryGoodMove)
         str += QString(" [%1]").arg( tr("Very Good Move") );
-    else if (moveAnnotation == eBadMove)
+    else if (moveAnnotation == badMove)
         str += QString(" [%1]").arg( tr("Bad Move") );
-    else if (moveAnnotation == eVeryBadMove)
+    else if (moveAnnotation == veryBadMove)
         str += QString(" [%1]").arg( tr("Very Bad Move") );
-    else if (moveAnnotation == eDoubtfulMove)
+    else if (moveAnnotation == doubtfulMove)
         str += QString(" [%1]").arg( tr("Doubtful Move") );
-    else if (moveAnnotation == eInterestingMove)
+    else if (moveAnnotation == interestingMove)
         str += QString(" [%1]").arg( tr("Interesting Move") );
 
-    if (nodeAnnotation == eEven)
+    if (nodeAnnotation == even)
         str += QString(" [%1]").arg( tr("Even") );
-    else if (nodeAnnotation == eGoodForBlack)
+    else if (nodeAnnotation == goodForBlack)
         str += QString(" [%1]").arg( tr("Good for Black") );
-    else if (nodeAnnotation == eVeryGoodForBlack)
+    else if (nodeAnnotation == veryGoodForBlack)
         str += QString(" [%1]").arg( tr("Very Good for Black") );
-    else if (nodeAnnotation == eGoodForWhite)
+    else if (nodeAnnotation == goodForWhite)
         str += QString(" [%1]").arg( tr("Good for White") );
-    else if (nodeAnnotation == eVeryGoodForWhite)
+    else if (nodeAnnotation == veryGoodForWhite)
         str += QString(" [%1]").arg( tr("Very Good for White") );
-    else if (nodeAnnotation == eUnclear)
+    else if (nodeAnnotation == unclear)
         str += QString(" [%1]").arg( tr("Unclear") );
 
-    if (annotation == eHotspot)
+    if (annotation == hotspot)
         str += QString(" [%1]").arg( tr("Hotspot") );
 
     if (!str.isEmpty() && str[0] == ' ')
@@ -152,40 +177,102 @@ QString node::toString() const{
 
     return str;
 }
+*/
 
-informationNode::informationNode(nodePtr parent) : node(parent){
-    initialize();
+/**
+  get game information
+*/
+GameInformationPtr Node::getInformation() const{
+    if (gameInformation)
+        return gameInformation;
+
+    NodePtr node = parent();
+    while (node){
+        if (node->gameInformation)
+            return node->gameInformation;
+        node = node->parent();
+    };
+
+    return gameInformation;
 }
 
-informationNode::~informationNode(){
+/**
+  get siblings
+*/
+NodeList Node::siblings() const{
+    NodeList nodeList;
+
+    NodePtr p = parent();
+    if (p){
+        NodeList::iterator iter = p->childNodes.begin();
+        while (iter != p->childNodes.end()){
+            if ((*iter).get() != this)
+                nodeList.push_back(*iter);
+            ++iter;
+        }
+    }
+
+    return nodeList;
 }
 
-void informationNode::initialize(){
-    xsize = 19;
-    ysize = 19;
-    komi = 6.5;
-    handicap = 0;
-    nextColor = go::black;
+/**
+  get previous sibling
+*/
+NodePtr Node::previousSibling() const{
+    Go::NodePtr p = parent();
+    if (!p)
+        return NodePtr();
+
+    int i = 0;
+    foreach(const Go::NodePtr& node, p->childNodes){
+        if (node.get() == this)
+            break;
+        ++i;
+    }
+
+    if (i > 0 && i < p->childNodes.size())
+        return p->childNodes[i - 1];
+    else
+        return NodePtr();
 }
 
-QString informationNode::nodeName() const{
-    static const QString str = tr("GameInfo");
-    return str;
+/**
+  get next sibling
+*/
+NodePtr Node::nextSibling() const{
+    Go::NodePtr p = parent();
+    if (!p)
+        return NodePtr();
+
+    int i = 0;
+    foreach(const Go::NodePtr& node, p->childNodes){
+        if (node.get() == this)
+            break;
+        ++i;
+    }
+
+    if (i < p->childNodes.size() - 1)
+        return p->childNodes[i + 1];
+    else
+        return NodePtr();
+}
+
+/**
+  is pass
+
+  @retval true  pass
+  @retval false not pass
+*/
+bool Node::isPass() const{
+    GameInformationPtr info = getInformation();
+    if (info)
+        return position.x < 0 || position.y < 0 || position.x >= info->xsize || position.y >= info->ysize;
+    else
+        return true;
 }
 
 
-data::data() : root(new informationNode()){
-    rootList.push_back( root );
-}
-
-void data::clear(){
-    rootList.clear();
-    root.reset( new informationNode(nodePtr()) );
-    rootList.push_back( root );
-}
-
-
-bool fileBase::read(const QString& fname, QTextCodec* defaultCodec, bool guessCodec){
+bool FileBase::read(const QString& fname, QTextCodec* defaultCodec, bool guessCodec){
     QFile f(fname);
     if (!f.open(QIODevice::ReadOnly|QIODevice::Text))
         return false;
@@ -194,30 +281,30 @@ bool fileBase::read(const QString& fname, QTextCodec* defaultCodec, bool guessCo
     return read(bytes, defaultCodec, guessCodec);
 }
 
-bool fileBase::read(const QByteArray& bytes, QTextCodec* defaultCodec, bool guessCodec){
-    QTextCodec* codec = guessCodec ? getCodec(bytes) : NULL;
-    if (codec)
-        qDebug() << "file codec is " << codec->name();
+bool FileBase::read(const QByteArray& bytes, QTextCodec* defaultCodec, bool guessCodec){
+    QTextCodec* codec_ = guessCodec ? this->guessCodec(bytes) : NULL;
+    if (codec_)
+        qDebug() << "file codec is " << codec_->name();
     else if (guessCodec)
         qDebug() << "unknown codec, use default codec: " << defaultCodec->name();
     else
         qDebug() << "use default codec: " << defaultCodec->name();
 
-    this->codec = codec ? codec : defaultCodec;
-    QString s = this->codec->toUnicode(bytes);
+    codec = codec_ ? codec_ : defaultCodec;
+    QString s = codec->toUnicode(bytes);
 
     // yen sign problem.
-    QChar chars[2] = {0x005C, 0x00A5};
-    QByteArray ba = this->codec->fromUnicode(chars, 2);
-    if (ba.size() == 2 && ba[0] == ba[1])
-        s.replace(QChar(0x00A5), QChar(0x5C));
+    QChar yen[2] = {0x005C, 0x00A5};
+    QByteArray byte_yen = codec->fromUnicode(yen, 2);
+    if (byte_yen.size() == 2 && byte_yen[0] == byte_yen[1])
+        s.replace(QChar(0x00A5), QChar(0x005C));
 
     QString::iterator iter = s.begin();
     return readStream(iter, s.end());
 }
 
-bool fileBase::save(const QString& fname, QTextCodec* codec){
-    this->codec = codec;
+bool FileBase::save(const QString& fname, QTextCodec* codec_){
+    codec = codec_;
 
     QFile f(fname);
     if (!f.open(QIODevice::WriteOnly))
@@ -234,13 +321,11 @@ bool fileBase::save(const QString& fname, QTextCodec* codec){
     return ret;
 }
 
-QString fileBase::readLine(QString::iterator& first, QString::iterator& last){
+QString FileBase::readLine(QString::iterator& first, QString::iterator& last){
     QString str;
     while (first != last){
         QChar c = *first++;
-        if (c == '\r')
-            continue;
-        else if (c == '\n')
+        if (c == '\n')
             break;
         str.push_back(c);
     }

@@ -15,6 +15,23 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
+    <widget class="QComboBox" name="ruleComboBox">
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <item>
+      <property name="text">
+       <string>Japanese Rule</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Chinese Rule</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item>
     <widget class="QLabel" name="label">
      <property name="text">
       <string>Please click dead stones. 
@@ -41,6 +58,11 @@ Score will be automatically updated.</string>
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>ruleComboBox</tabstop>
+  <tabstop>scoreTextEdit</tabstop>
+  <tabstop>buttonBox</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>

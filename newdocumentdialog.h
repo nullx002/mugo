@@ -15,14 +15,17 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#ifndef BOARDSIZEDIALOG_H
-#define BOARDSIZEDIALOG_H
+#ifndef NEWDOCUMENTDIALOG_H
+#define NEWDOCUMENTDIALOG_H
 
 #include <QDialog>
 
 namespace Ui {
-    class BoardSizeDialog;
+    class NewDocumentDialog;
 }
+
+class QTextCodec;
+
 
 /**
 * Select board size.
@@ -34,25 +37,26 @@ namespace Ui {
 * or input custom board size using by spin box
 *  2 to 52
 */
-class BoardSizeDialog : public QDialog {
+class NewDocumentDialog : public QDialog {
     Q_OBJECT
 public:
-    BoardSizeDialog(QWidget *parent = 0);
-    ~BoardSizeDialog();
+    NewDocumentDialog(QWidget *parent = 0);
+    ~NewDocumentDialog();
 
     int xsize;
     int ysize;
     double komi;
+    QTextCodec* codec;
 
 protected:
     virtual void accept();
 
 private:
-    Ui::BoardSizeDialog *ui;
+    Ui::NewDocumentDialog *ui;
 
 private slots:
     void on_radioCustomButton_toggled(bool checked);
     void on_radioRectangularButton_toggled(bool checked);
 };
 
-#endif // BOARDSIZEDIALOG_H
+#endif // NEWDOCUMENTDIALOG_H

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>483</width>
+    <width>558</width>
     <height>455</height>
    </rect>
   </property>
@@ -63,11 +63,6 @@
          <string>File</string>
         </property>
        </item>
-       <item>
-        <property name="text">
-         <string>Window</string>
-        </property>
-       </item>
       </widget>
      </item>
      <item>
@@ -105,12 +100,12 @@
               </item>
               <item>
                <property name="text">
-                <string>Select File</string>
+                <string>Fill Color</string>
                </property>
               </item>
               <item>
                <property name="text">
-                <string>Fill Color</string>
+                <string>Select File</string>
                </property>
               </item>
              </widget>
@@ -169,14 +164,14 @@
             <string>Background</string>
            </property>
            <layout class="QFormLayout" name="formLayout_3">
-            <item row="1" column="0">
+            <item row="2" column="0">
              <widget class="QLabel" name="bgColorLabel">
               <property name="text">
                <string>Background Color</string>
               </property>
              </widget>
             </item>
-            <item row="1" column="1">
+            <item row="2" column="1">
              <widget class="QPushButton" name="bgColorButton">
               <property name="text">
                <string/>
@@ -186,14 +181,14 @@
               </property>
              </widget>
             </item>
-            <item row="2" column="0">
+            <item row="3" column="0">
              <widget class="QLabel" name="bgTutorColorLabel">
               <property name="text">
                <string>Background in Tutor</string>
               </property>
              </widget>
             </item>
-            <item row="2" column="1">
+            <item row="3" column="1">
              <widget class="QPushButton" name="bgTutorColorButton">
               <property name="text">
                <string/>
@@ -217,6 +212,16 @@
               </property>
               <property name="flat">
                <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QFontComboBox" name="coordinateFontComboBox"/>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="coordinateFontLabel">
+              <property name="text">
+               <string>Coordinate Font</string>
               </property>
              </widget>
             </item>
@@ -265,12 +270,12 @@
               </item>
               <item>
                <property name="text">
-                <string>Select File</string>
+                <string>Fill Color</string>
                </property>
               </item>
               <item>
                <property name="text">
-                <string>Fill Color</string>
+                <string>Select File</string>
                </property>
               </item>
              </widget>
@@ -351,12 +356,12 @@
               </item>
               <item>
                <property name="text">
-                <string>Select File</string>
+                <string>Fill Color</string>
                </property>
               </item>
               <item>
                <property name="text">
-                <string>Fill Color</string>
+                <string>Select File</string>
                </property>
               </item>
              </widget>
@@ -435,6 +440,9 @@
             <string>Markers</string>
            </property>
            <layout class="QFormLayout" name="formLayout_4">
+            <property name="fieldGrowthPolicy">
+             <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+            </property>
             <item row="0" column="0">
              <widget class="QLabel" name="focusTypeLabel">
               <property name="text">
@@ -472,14 +480,14 @@
              </widget>
             </item>
             <item row="1" column="0">
-             <widget class="QLabel" name="focusWhiteColorLabel">
+             <widget class="QLabel" name="focusColorLabel">
               <property name="text">
-               <string>Color (White Stone)</string>
+               <string>Color</string>
               </property>
              </widget>
             </item>
             <item row="1" column="1">
-             <widget class="QPushButton" name="focusWhiteColorButton">
+             <widget class="QPushButton" name="focusColorButton">
               <property name="text">
                <string/>
               </property>
@@ -489,30 +497,13 @@
              </widget>
             </item>
             <item row="2" column="0">
-             <widget class="QLabel" name="focusBlackColorLabel">
-              <property name="text">
-               <string>Color (Black Stone)</string>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="1">
-             <widget class="QPushButton" name="focusBlackColorButton">
-              <property name="text">
-               <string/>
-              </property>
-              <property name="flat">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="0">
              <widget class="QLabel" name="branchLabel">
               <property name="text">
                <string>Branch Color</string>
               </property>
              </widget>
             </item>
-            <item row="3" column="1">
+            <item row="2" column="1">
              <widget class="QPushButton" name="branchColorButton">
               <property name="text">
                <string/>
@@ -522,14 +513,14 @@
               </property>
              </widget>
             </item>
-            <item row="4" column="0">
+            <item row="3" column="0">
              <widget class="QLabel" name="labelTypeLabel">
               <property name="text">
                <string>Label Type</string>
               </property>
              </widget>
             </item>
-            <item row="4" column="1">
+            <item row="3" column="1">
              <widget class="QComboBox" name="labelTypeComboBox">
               <item>
                <property name="text">
@@ -546,16 +537,16 @@
                 <string>1,2,3...</string>
                </property>
               </item>
-              <item>
-               <property name="text">
-                <string>ア,イ,ウ...</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>イ,ロ,ハ...</string>
-               </property>
-              </item>
+             </widget>
+            </item>
+            <item row="4" column="1">
+             <widget class="QFontComboBox" name="labelFontComboBox"/>
+            </item>
+            <item row="4" column="0">
+             <widget class="QLabel" name="labelFontLabel">
+              <property name="text">
+               <string>Label Font</string>
+              </property>
              </widget>
             </item>
            </layout>
@@ -614,14 +605,14 @@
            </property>
            <layout class="QFormLayout" name="formLayout_8">
             <item row="0" column="0">
-             <widget class="QLabel" name="reproductionSpeedLabel">
+             <widget class="QLabel" name="autoReplayIntervalLabel">
               <property name="text">
                <string>Interval(msec)</string>
               </property>
              </widget>
             </item>
             <item row="0" column="1">
-             <widget class="QSpinBox" name="reproductionSpeedSpinBox">
+             <widget class="QSpinBox" name="autoReplayIntervalSpinBox">
               <property name="minimum">
                <number>200</number>
               </property>
@@ -629,7 +620,7 @@
                <number>10000</number>
               </property>
               <property name="value">
-               <number>1300</number>
+               <number>1000</number>
               </property>
              </widget>
             </item>
@@ -708,6 +699,13 @@
               </item>
              </layout>
             </item>
+            <item row="2" column="1">
+             <widget class="QCheckBox" name="playSoundCheckBox">
+              <property name="text">
+               <string>Play Sound</string>
+              </property>
+             </widget>
+            </item>
            </layout>
           </widget>
          </item>
@@ -781,22 +779,6 @@
          </item>
         </layout>
        </widget>
-       <widget class="QWidget" name="windowPage">
-        <layout class="QVBoxLayout" name="verticalLayout_8">
-         <item>
-          <widget class="QGroupBox" name="windowStyleGroupBox">
-           <property name="title">
-            <string>Window Style</string>
-           </property>
-           <layout class="QHBoxLayout" name="horizontalLayout_6">
-            <item>
-             <widget class="QListWidget" name="windowStyleList"/>
-            </item>
-           </layout>
-          </widget>
-         </item>
-        </layout>
-       </widget>
       </widget>
      </item>
     </layout>
@@ -820,6 +802,7 @@
   <tabstop>boardPathEdit</tabstop>
   <tabstop>boardPathButton</tabstop>
   <tabstop>coordinateColorButton</tabstop>
+  <tabstop>coordinateFontComboBox</tabstop>
   <tabstop>bgColorButton</tabstop>
   <tabstop>bgTutorColorButton</tabstop>
   <tabstop>whiteTypeComboBox</tabstop>
@@ -831,17 +814,17 @@
   <tabstop>blackPathEdit</tabstop>
   <tabstop>blackPathButton</tabstop>
   <tabstop>focusTypeComboBox</tabstop>
-  <tabstop>focusWhiteColorButton</tabstop>
-  <tabstop>focusBlackColorButton</tabstop>
+  <tabstop>focusColorButton</tabstop>
   <tabstop>branchColorButton</tabstop>
   <tabstop>labelTypeComboBox</tabstop>
   <tabstop>stepsOfFastMoveSpinBox</tabstop>
-  <tabstop>reproductionSpeedSpinBox</tabstop>
+  <tabstop>autoReplayIntervalSpinBox</tabstop>
   <tabstop>soundTypeComboBox</tabstop>
   <tabstop>soundPathEdit</tabstop>
   <tabstop>soundPathButton</tabstop>
+  <tabstop>playSoundCheckBox</tabstop>
   <tabstop>saveNameEdit</tabstop>
-  <tabstop>windowStyleList</tabstop>
+  <tabstop>defaultEncodingComboBox</tabstop>
   <tabstop>buttonBox</tabstop>
  </tabstops>
  <resources/>

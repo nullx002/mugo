@@ -16,473 +16,856 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include <QDebug>
+#include <QTreeView>
+#include <QStandardItemModel>
 #include "command.h"
 #include "boardwidget.h"
+#include "sgfdocument.h"
 
 /**
-* Add Node Command
+  Constructor
 */
-AddNodeCommand::AddNodeCommand(BoardWidget* _boardWidget, go::nodePtr _parentNode, go::nodePtr _childNode, bool _select, QUndoCommand* parent)
+AddNodeCommand::AddNodeCommand(SgfDocument* doc, Go::NodePtr parentNode_, Go::NodePtr node_, int index_, QUndoCommand* parent)
     : QUndoCommand(parent)
-    , boardWidget(_boardWidget)
-    , parentNode(_parentNode)
-    , childNode(_childNode)
-    , select(_select)
+    , document(doc)
+    , parentNode(parentNode_)
+    , node(node_)
+    , index(index_)
 {
 }
 
+/**
+  redo add node command
+*/
 void AddNodeCommand::redo(){
-    setText( tr("Add %1").arg( boardWidget->toString(childNode) ) );
-    boardWidget->addNode(parentNode, childNode, select);
+    if (node->isStone())
+        setText( tr("Move") );
+    else
+        setText( tr("Add Empty Node") );
+    document->addNode(parentNode, node, index);
 }
 
+/**
+  undo add node command
+*/
 void AddNodeCommand::undo(){
-    boardWidget->deleteNode(childNode);
+    document->deleteNode(node, true);
+}
+
+
+/**
+  Constructor
+*/
+DeleteNodeCommand::DeleteNodeCommand(SgfDocument* doc, Go::NodePtr node_, bool removeChildren_, QUndoCommand *parent)
+    : QUndoCommand(parent)
+    , document(doc)
+    , node(node_)
+    , removeChildren(removeChildren_)
+{
+    parentNode = node->parent();
+    pos = parentNode->childNodes.indexOf(node);
 }
 
 /**
-* Insert Node Command
+  redo delete node command
 */
-InsertNodeCommand::InsertNodeCommand(BoardWidget* _boardWidget, go::nodePtr _parentNode, int _index, go::nodePtr _childNode, bool _select, QUndoCommand* parent)
-    : QUndoCommand(parent)
-    , boardWidget(_boardWidget)
-    , parentNode(_parentNode)
-    , childNode(_childNode)
-    , index(_index)
-    , select(_select)
-{
-}
-
-void InsertNodeCommand::redo(){
-    setText( tr("Insert %1").arg( boardWidget->toString(childNode) ) );
-    boardWidget->insertNode(parentNode, index, childNode, select);
-}
-
-void InsertNodeCommand::undo(){
-    boardWidget->deleteNode(childNode, false);
-}
-
-/**
-* Delete Node Command
-*/
-DeleteNodeCommand::DeleteNodeCommand(BoardWidget* _boardWidget, go::nodePtr _node, bool _deleteChildren, QUndoCommand* parent)
-    : QUndoCommand(parent)
-    , boardWidget(_boardWidget)
-    , node(_node)
-    , deleteChildren(_deleteChildren)
-{
-}
-
 void DeleteNodeCommand::redo(){
-    setText( tr("Delete %1").arg( boardWidget->toString(node) ) );
-
-    go::nodeList::iterator beg = node->parent()->childNodes.begin();
-    go::nodeList::iterator del = qFind(node->parent()->childNodes.begin(), node->parent()->childNodes.end(), node);
-    index = std::distance(beg, del);
-
-    boardWidget->deleteNode(node, deleteChildren);
+    setText( tr("Delete Stone") );
+    document->deleteNode(node, removeChildren);
 }
 
+/**
+  undo delete node command
+*/
 void DeleteNodeCommand::undo(){
-    if (!deleteChildren){
-        for (int i=0; i<node->childNodes.size(); ++i)
-            node->parent()->childNodes.removeAt(index + i);
-
-        go::nodeList::iterator iter = node->childNodes.begin();
-        while (iter != node->childNodes.end()){
-            (*iter)->parent_ = node;
-            ++iter;
+    if (removeChildren == false){
+        foreach(Go::NodePtr child, node->childNodes){
+            Go::NodeList::iterator iter = qFind(parentNode->childNodes.begin(), parentNode->childNodes.end(), child);
+            if (iter != parentNode->childNodes.end()){
+                (*iter)->setParent(node);
+                parentNode->childNodes.erase(iter);
+            }
         }
     }
-    boardWidget->insertNode(node->parent(), index, node);
+    document->addNode(parentNode, node, pos);
 }
 
 /**
+  Constructor
 */
-AddStoneCommand::AddStoneCommand(BoardWidget* _boardWidget, go::nodePtr _node, int _x, int _y, go::color c, QUndoCommand* parent)
+SetNodeNameCommand::SetNodeNameCommand(SgfDocument* doc, Go::NodePtr node_, const QString& name, QUndoCommand *parent)
     : QUndoCommand(parent)
-    , boardWidget(_boardWidget)
-    , node(_node)
-    , x(_x)
-    , y(_y)
-    , color(c)
+    , document(doc)
+    , node(node_)
+    , newName(name)
 {
+    oldName = node->name;
 }
 
-void AddStoneCommand::redo(){
-    setText( tr("Add Stone") );
-
-/*
-    if (removeStone(node->emptyStones, sp, bp) || removeStone(node->blackStones, sp, bp) || removeStone(node->whiteStones, sp, bp)){
-        modifyNode(node);
-        return;
-    }
+/**
+  redo set node name command
 */
-
-    go::nodePtr stoneNode( node->isStone() ? go::nodePtr(new go::node(node)) : node );
-
-    if (color == go::black)
-        node->blackStones.push_back( go::stone(x, y, color) );
-    else if (color == go::white)
-        node->whiteStones.push_back( go::stone(x, y, color) );
-    else
-        node->emptyStones.push_back( go::stone(x, y, color) );
-
-    boardWidget->modifyNode(node, true);
+void SetNodeNameCommand::redo(){
+    setText( tr("Set Node Name") );
+    node->name = newName;
+    document->modifyNode(node, false);
 }
 
-void AddStoneCommand::undo(){
-    if (color == go::black)
-        node->blackStones.pop_back();
-    else if (color == go::white)
-        node->whiteStones.pop_back();
+/**
+  undo set node name command
+*/
+void SetNodeNameCommand::undo(){
+    node->name = oldName;
+    document->modifyNode(node, false);
+}
+
+/**
+  Constructor
+*/
+SetMoveNumberCommand::SetMoveNumberCommand(SgfDocument* doc, Go::NodePtr node_, int moveNumber, QUndoCommand *parent)
+    : QUndoCommand(parent)
+    , document(doc)
+    , node(node_)
+    , newNumber(moveNumber)
+{
+    oldNumber = node->moveNumber;
+}
+
+/**
+  redo set move number command
+*/
+void SetMoveNumberCommand::redo(){
+    setText( tr("Set Move Number") );
+    node->moveNumber = newNumber;
+    document->modifyNode(node, false);
+}
+
+/**
+  undo set move number command
+*/
+void SetMoveNumberCommand::undo(){
+    node->moveNumber = oldNumber;
+    document->modifyNode(node, false);
+}
+
+/**
+  Constructor
+*/
+UnsetMoveNumberCommand::UnsetMoveNumberCommand(SgfDocument* doc, Go::NodePtr node_, QUndoCommand *parent)
+    : QUndoCommand(parent)
+    , document(doc)
+    , node(node_)
+{
+    oldNumber = node->moveNumber;
+}
+
+/**
+  redo unset move number command
+*/
+void UnsetMoveNumberCommand::redo(){
+    setText( tr("Unset Move Number") );
+    node->moveNumber = 0;
+    document->modifyNode(node, false);
+}
+
+/**
+  undo unset move number command
+*/
+void UnsetMoveNumberCommand::undo(){
+    node->moveNumber = oldNumber;
+    document->modifyNode(node, false);
+}
+
+/**
+  Constructor
+*/
+SetNodeAnnotationCommand::SetNodeAnnotationCommand(SgfDocument* doc, Go::NodePtr node_, Go::Node::NodeAnnotation annotation, QUndoCommand *parent)
+    : QUndoCommand(parent)
+    , document(doc)
+    , node(node_)
+    , newAnnotation(annotation)
+{
+    oldAnnotation = node->nodeAnnotation;
+}
+
+/**
+  redo set node annotation command
+*/
+void SetNodeAnnotationCommand::redo(){
+    setText( tr("Set Node Annotation") );
+    node->nodeAnnotation = newAnnotation;
+    document->modifyNode(node, false);
+}
+
+/**
+  undo set node annotation command
+*/
+void SetNodeAnnotationCommand::undo(){
+    node->nodeAnnotation = oldAnnotation;
+    document->modifyNode(node, false);
+}
+
+/**
+  Constructor
+*/
+SetMoveAnnotationCommand::SetMoveAnnotationCommand(SgfDocument* doc, Go::NodePtr node_, Go::Node::MoveAnnotation annotation, QUndoCommand *parent)
+    : QUndoCommand(parent)
+    , document(doc)
+    , node(node_)
+    , newAnnotation(annotation)
+{
+    oldAnnotation = node->moveAnnotation;
+}
+
+/**
+  redo set node annotation command
+*/
+void SetMoveAnnotationCommand::redo(){
+    setText( tr("Set Move Annotation") );
+    node->moveAnnotation = newAnnotation;
+    document->modifyNode(node, false);
+}
+
+/**
+  undo set node annotation command
+*/
+void SetMoveAnnotationCommand::undo(){
+    node->moveAnnotation = oldAnnotation;
+    document->modifyNode(node, false);
+}
+
+/**
+  Constructor
+*/
+SetAnnotationCommand::SetAnnotationCommand(SgfDocument* doc, Go::NodePtr node_, Go::Node::Annotation annotation, QUndoCommand *parent)
+    : QUndoCommand(parent)
+    , document(doc)
+    , node(node_)
+    , newAnnotation(annotation)
+{
+    oldAnnotation = node->annotation;
+}
+
+/**
+  redo set annotation command
+*/
+void SetAnnotationCommand::redo(){
+    setText( tr("Set Annotation") );
+    node->annotation = newAnnotation;
+    document->modifyNode(node, false);
+}
+
+/**
+  undo set annotation command
+*/
+void SetAnnotationCommand::undo(){
+    node->annotation = oldAnnotation;
+    document->modifyNode(node, false);
+}
+
+/**
+  Constructor
+*/
+AddMarkCommand::AddMarkCommand(SgfDocument* doc, Go::NodePtr node_, const Go::Mark& mark_, QUndoCommand *parent)
+    : QUndoCommand(parent)
+    , document(doc)
+    , node(node_)
+    , mark(mark_)
+{
+    if (mark.type == Go::Mark::circle)
+        setText( tr("Add Circle") );
+    else if (mark.type == Go::Mark::triangle)
+        setText( tr("Add Triangle") );
+    else if (mark.type == Go::Mark::square)
+        setText( tr("Add Square") );
+    else if (mark.type == Go::Mark::cross)
+        setText( tr("Add Cross") );
+    else if (mark.type == Go::Mark::character)
+        setText( tr("Add Label") );
     else
+        setText( tr("Add Mark") );
+}
+
+/**
+  redo add mark command
+*/
+void AddMarkCommand::redo(){
+    node->marks.push_back(mark);
+    document->modifyNode(node, true);
+}
+
+/**
+  undo add mark command
+*/
+void AddMarkCommand::undo(){
+    node->marks.pop_back();
+    document->modifyNode(node, true);
+}
+
+/**
+  Constructor
+*/
+RemoveMarkCommand::RemoveMarkCommand(SgfDocument* doc, Go::NodePtr node_, const Go::Point& p, QUndoCommand *parent)
+    : QUndoCommand(parent)
+    , document(doc)
+    , node(node_)
+    , position(p)
+    , mark(NULL)
+{
+    setText( tr("Remove Mark") );
+
+    index = 0;
+    foreach(const Go::Mark& m, node->marks){
+        if (m.position == position){
+            mark = new Go::Mark(m);
+            break;
+        }
+        ++index;
+    }
+}
+
+/**
+  Destructor
+*/
+RemoveMarkCommand::~RemoveMarkCommand(){
+    delete mark;
+}
+
+/**
+  redo remove mark command
+*/
+void RemoveMarkCommand::redo(){
+    node->marks.removeAt(index);
+    document->modifyNode(node, true);
+}
+
+/**
+  undo remove mark command
+*/
+void RemoveMarkCommand::undo(){
+    node->marks.insert(index, *mark);
+    document->modifyNode(node, true);
+}
+
+/**
+  Constructor
+*/
+AddStoneCommand::AddStoneCommand(SgfDocument* doc, Go::NodePtr node_, const Go::Stone& stone_, QUndoCommand *parent)
+    : QUndoCommand(parent)
+    , document(doc)
+    , node(node_)
+    , stone(stone_)
+{
+    if (stone.color == Go::black)
+        setText( tr("Add Black Stone") );
+    else if (stone.color == Go::white)
+        setText( tr("Add White Stone") );
+    else if (stone.color == Go::empty)
+        setText( tr("Add Empty") );
+}
+
+/**
+  redo add stone command
+*/
+void AddStoneCommand::redo(){
+    if (stone.color == Go::black)
+        node->blackStones.push_back(stone);
+    else if (stone.color == Go::white)
+        node->whiteStones.push_back(stone);
+    else if (stone.color == Go::empty)
+        node->emptyStones.push_back(stone);
+
+    document->modifyNode(node, true);
+}
+
+/**
+  undo add stone command
+*/
+void AddStoneCommand::undo(){
+    if (stone.color == Go::black)
+        node->blackStones.pop_back();
+    else if (stone.color == Go::white)
+        node->whiteStones.pop_back();
+    else if (stone.color == Go::empty)
         node->emptyStones.pop_back();
 
-    boardWidget->modifyNode(node, true);
+    document->modifyNode(node, true);
 }
 
 /**
+  Constructor
 */
-DeleteStoneCommand::DeleteStoneCommand(BoardWidget* _boardWidget, go::nodePtr _node, int _x, int _y, QUndoCommand* parent)
+RemoveStoneCommand::RemoveStoneCommand(SgfDocument* doc, Go::NodePtr node_, const Go::Point& p, QUndoCommand *parent)
     : QUndoCommand(parent)
-    , boardWidget(_boardWidget)
-    , node(_node)
-    , x(_x)
-    , y(_y)
+    , document(doc)
+    , node(node_)
+    , position(p)
+    , stone(NULL)
 {
-}
+    setText( tr("Remove Stone") );
 
-void DeleteStoneCommand::redo(){
-    setText( tr("Delete Stone") );
-
-    remove(node->blackStones, blackEraseList, blackPosList);
-    remove(node->whiteStones, whiteEraseList, whitePosList);
-    remove(node->emptyStones, emptyEraseList, emptyPosList);
-
-    boardWidget->modifyNode(node, true);
-}
-
-void DeleteStoneCommand::undo(){
-    add(node->blackStones, blackEraseList, blackPosList);
-    add(node->whiteStones, whiteEraseList, whitePosList);
-    add(node->emptyStones, emptyEraseList, emptyPosList);
-
-    boardWidget->modifyNode(node, true);
-}
-
-void DeleteStoneCommand::add(go::stoneList& stones, go::stoneList& eraseList, QList<int>& posList){
-    go::point p(x, y);
-    int i = 0;
-    foreach(const go::stone& stone, eraseList){
-        stones.insert(posList[i], stone);
-        ++i;
-    }
-}
-
-void DeleteStoneCommand::remove(go::stoneList& stones, go::stoneList& eraseList, QList<int>& posList){
-    eraseList.clear();
-    posList.clear();
-
-    go::point p(x, y);
-    go::stoneList::iterator iter = stones.begin();
-    int i = 0;
-    while (iter != stones.end()){
-        if (iter->p == p){
-            eraseList.push_back(*iter);
-            posList.push_back(i);
-            iter = stones.erase(iter);
-            if (iter == stones.end())
-                break;
+    index = 0;
+    foreach(const Go::Stone& s, node->blackStones){
+        if (s.position == position){
+            stone = new Go::Stone(s);
+            return;
         }
-        ++iter;
-        ++i;
+        ++index;
+    }
+
+    index = 0;
+    foreach(const Go::Stone& s, node->whiteStones){
+        if (s.position == position){
+            stone = new Go::Stone(s);
+            return;
+        }
+        ++index;
+    }
+
+    index = 0;
+    foreach(const Go::Stone& s, node->emptyStones){
+        if (s.position == position){
+            stone = new Go::Stone(s);
+            return;
+        }
+        ++index;
     }
 }
 
 /**
-* Add Mark Command
+  Destructor
 */
-AddMarkCommand::AddMarkCommand(BoardWidget* _boardWidget, go::nodePtr _node, int _x, int _y, go::mark::eType t, const QString& _label, QUndoCommand* parent)
-    : QUndoCommand(parent)
-    , boardWidget(_boardWidget)
-    , node(_node)
-    , x(_x)
-    , y(_y)
-    , type(t)
-    , label(_label)
-{
-}
-
-void AddMarkCommand::redo(){
-    setText( tr("Add Mark") );
-
-    markAdded = false;
-    eraseList.clear();
-    erasePos.clear();
-
-    bool removeMark = false;
-    go::point p(x, y);
-    for (int i=0; i<node->marks.size();){
-        const go::mark& mark = node->marks[i];
-        if (mark.p == p){
-            if (mark.t == type)
-                removeMark = true;
-            eraseList.push_back(mark);
-            erasePos.push_back(i);
-            node->marks.removeAt(i);
-        }
-        else
-            ++i;
-    }
-
-    if (removeMark == false){
-        if (type == go::mark::eCharacter)
-            node->marks.push_back( go::mark(p, label) );
-        else
-            node->marks.push_back( go::mark(p, type) );
-        markAdded = true;
-    }
-    boardWidget->modifyNode(node);
-}
-
-void AddMarkCommand::undo(){
-    if (markAdded)
-        node->marks.pop_back();
-
-    int i = 0;
-    foreach(const go::mark& m, eraseList){
-        int pos = erasePos[i];
-        node->marks.insert(pos, m);
-    }
-    boardWidget->modifyNode(node);
+RemoveStoneCommand::~RemoveStoneCommand(){
+    delete stone;
 }
 
 /**
-* Delete Mark Command
+  redo remove stone  command
 */
-DeleteMarkCommand::DeleteMarkCommand(BoardWidget* _boardWidget, go::nodePtr _node, int _x, int _y, QUndoCommand* parent)
+void RemoveStoneCommand::redo(){
+    if (stone->color == Go::black)
+        node->blackStones.removeAt(index);
+    else if (stone->color == Go::white)
+        node->whiteStones.removeAt(index);
+    else if (stone->color == Go::empty)
+        node->emptyStones.removeAt(index);
+
+    document->modifyNode(node, true);
+}
+
+/**
+  undo remove stone command
+*/
+void RemoveStoneCommand::undo(){
+    if (stone->color == Go::black)
+        node->blackStones.insert(index, *stone);
+    else if (stone->color == Go::white)
+        node->whiteStones.insert(index, *stone);
+    else if (stone->color == Go::empty)
+        node->emptyStones.insert(index, *stone);
+
+    document->modifyNode(node, true);
+}
+
+/**
+  Constructor
+*/
+SetCommentCommand::SetCommentCommand(SgfDocument* doc, Go::NodePtr node_, const QString& comment_, QUndoCommand *parent)
     : QUndoCommand(parent)
-    , boardWidget(_boardWidget)
-    , node(_node)
-    , x(_x)
-    , y(_y)
-{
-}
-
-void DeleteMarkCommand::redo(){
-    setText( tr("Delete Mark") );
-
-    markEraseList.clear();
-    markPosList.clear();
-    emptyEraseList.clear();
-    emptyPosList.clear();
-    blackEraseList.clear();
-    blackPosList.clear();
-    whiteEraseList.clear();
-    whitePosList.clear();
-
-    remove(node->marks, markEraseList, markPosList);
-    remove(node->emptyStones, emptyEraseList, emptyPosList);
-    remove(node->blackStones, blackEraseList, blackPosList);
-    remove(node->whiteStones, whiteEraseList, whitePosList);
-
-    boardWidget->modifyNode(node, true);
-}
-
-void DeleteMarkCommand::undo(){
-    add(node->marks, markEraseList, markPosList);
-    add(node->emptyStones, emptyEraseList, emptyPosList);
-    add(node->blackStones, blackEraseList, blackPosList);
-    add(node->whiteStones, whiteEraseList, whitePosList);
-
-    boardWidget->modifyNode(node, true);
-}
-
-template<class Container, class EraseList, class PosList>
-void DeleteMarkCommand::add(Container& c, EraseList& eraseList, PosList& posList){
-    go::point p(x, y);
-    int i = 0;
-    typename EraseList::iterator iter = eraseList.begin();
-    while (iter != eraseList.end()){
-        c.insert(posList[i], *iter);
-        ++iter;
-        ++i;
-    }
-}
-
-template<class Container, class EraseList, class PosList>
-void DeleteMarkCommand::remove(Container& c, EraseList& eraseList, PosList& posList){
-    go::point p(x, y);
-    int i = 0;
-    typename Container::iterator iter = c.begin();
-    while (iter != c.end()){
-        if (iter->p == p){
-            posList.push_back(i);
-            eraseList.push_back(*iter);
-            iter = c.erase(iter);
-            if (iter == c.end())
-                break;
-        }
-        ++iter;
-        ++i;
-    }
-}
-
-SetMoveNumberCommand::SetMoveNumberCommand(BoardWidget* _boardWidget, go::nodePtr _node, int _moveNumber, QUndoCommand* parent)
-    : QUndoCommand(parent)
-    , boardWidget(_boardWidget)
-    , node(_node)
-    , moveNumber(_moveNumber)
-{
-    oldMoveNumber = node->moveNumber;
-}
-
-void SetMoveNumberCommand::redo(){
-    setText( tr("Set Move Number %1").arg( boardWidget->toString(node) ) );
-    node->moveNumber = moveNumber;
-    boardWidget->modifyNode(node);
-}
-
-void SetMoveNumberCommand::undo(){
-    node->moveNumber = oldMoveNumber;
-    boardWidget->modifyNode(node);
-}
-
-UnsetMoveNumberCommand::UnsetMoveNumberCommand(BoardWidget* _boardWidget, go::nodePtr _node, QUndoCommand* parent)
-    : QUndoCommand(parent)
-    , boardWidget(_boardWidget)
-    , node(_node)
-{
-    oldMoveNumber = node->moveNumber;
-}
-
-void UnsetMoveNumberCommand::redo(){
-    setText( QString(tr("Unset Move Number %1")).arg( boardWidget->toString(node) ) );
-    node->moveNumber = -1;
-    boardWidget->modifyNode(node);
-}
-
-void UnsetMoveNumberCommand::undo(){
-    node->moveNumber = oldMoveNumber;
-    boardWidget->modifyNode(node);
-}
-
-SetNodeNameCommand::SetNodeNameCommand(BoardWidget* _boardWidget, go::nodePtr _node, const QString& _nodeName, QUndoCommand* parent)
-    : QUndoCommand(parent)
-    , boardWidget(_boardWidget)
-    , node(_node)
-    , nodeName(_nodeName)
-{
-    oldNodeName = node->name;
-}
-
-void SetNodeNameCommand::redo(){
-    setText( tr("Set Node Name %1").arg( boardWidget->toString(node) ) );
-    node->name = nodeName;
-    boardWidget->modifyNode(node);
-}
-
-void SetNodeNameCommand::undo(){
-    node->name = oldNodeName;
-    boardWidget->modifyNode(node);
-}
-
-SetCommentCommand::SetCommentCommand(BoardWidget* _boardWidget, go::nodePtr _node, const QString& _comment, QUndoCommand* parent)
-    : QUndoCommand(parent)
-    , boardWidget(_boardWidget)
-    , node(_node)
-    , comment(_comment)
+    , document(doc)
+    , node(node_)
+    , comment(comment_)
 {
     oldComment = node->comment;
 }
 
+/**
+  redo set comment command
+*/
 void SetCommentCommand::redo(){
-    setText( tr("Set Comment %1").arg( boardWidget->toString(node) ) );
+    setText( tr("Edit comment") );
     node->comment = comment;
-    boardWidget->modifyNode(node);
+    document->modifyNode(node, false);
 }
 
+/**
+  undo set comment command
+*/
 void SetCommentCommand::undo(){
     node->comment = oldComment;
-    boardWidget->modifyNode(node);
+    document->modifyNode(node, false);
 }
 
-MovePositionCommand::MovePositionCommand(BoardWidget* _boardWidget, go::nodePtr _node, const go::point& _pos, QUndoCommand* parent)
+/**
+  set comment text
+*/
+void SetCommentCommand::setComment(const QString& comment){
+    node->comment = this->comment = comment;
+    document->modifyNode(node, false);
+}
+
+/**
+  Constructor
+*/
+FlipSgfCommand::FlipSgfCommand(SgfDocument* doc, Go::NodePtr game_, QUndoCommand *parent)
     : QUndoCommand(parent)
-    , boardWidget(_boardWidget)
-    , node(_node)
-    , pos(_pos)
-{
-    oldPos = node->position;
-}
-
-void MovePositionCommand::redo(){
-    setText( tr("Move Position %1").arg( boardWidget->toString(node) ) );
-    node->position.x = pos.x;
-    node->position.y = pos.y;
-}
-
-void MovePositionCommand::undo(){
-    node->position.x = oldPos.x;
-    node->position.y = oldPos.y;
-}
-
-MoveStoneCommand::MoveStoneCommand(BoardWidget* _boardWidget, go::nodePtr _node, go::stone* _stone, const go::point& _pos, QUndoCommand* parent)
-    : QUndoCommand(parent)
-    , boardWidget(_boardWidget)
-    , node(_node)
-    , stone(_stone)
-    , pos(_pos)
-{
-    oldPos = stone->p;
-}
-
-void MoveStoneCommand::redo(){
-    setText( tr("Move Stone %1").arg( boardWidget->toString(node) ) );
-    stone->p = pos;
-}
-
-void MoveStoneCommand::undo(){
-    stone->p = oldPos;
-}
-
-MoveMarkCommand::MoveMarkCommand(BoardWidget* _boardWidget, go::nodePtr _node, go::mark* _mark, const go::point& _pos, QUndoCommand* parent)
-    : QUndoCommand(parent)
-    , boardWidget(_boardWidget)
-    , node(_node)
-    , mark(_mark)
-    , pos(_pos)
-{
-    oldPos = mark->p;
-}
-
-void MoveMarkCommand::redo(){
-    setText( tr("Move Mark %1").arg( boardWidget->toString(node) ) );
-    mark->p = pos;
-}
-
-void MoveMarkCommand::undo(){
-    mark->p = oldPos;
-}
-
-RotateSgfCommand::RotateSgfCommand(BoardWidget* _boardWidget, const QString& _commandName, QUndoCommand* parent)
-    : QUndoCommand(parent)
-    , boardWidget(_boardWidget)
-    , commandName(_commandName)
+    , document(doc)
+    , game(game_)
 {
 }
 
-void RotateSgfCommand::redo(){
-    QUndoCommand::redo();
-    setText(commandName);
-
-    boardWidget->createBoardBuffer();
-    boardWidget->paintBoard();
+/**
+  redo rotate sgf clockwise command
+*/
+void FlipSgfCommand::redo(){
+    execute(game->gameInformation, game, true);
+    document->modifyGame(game);
 }
 
-void RotateSgfCommand::undo(){
-    QUndoCommand::undo();
-    boardWidget->createBoardBuffer();
-    boardWidget->paintBoard();
+/**
+  undo rotate sgf clockwise command
+*/
+void FlipSgfCommand::undo(){
+    execute(game->gameInformation, game, false);
+    document->modifyGame(game);
+}
+
+void FlipSgfCommand::execute(Go::GameInformationPtr& gameInfo, Go::NodePtr& node, bool redo){
+    if (redo){
+        if(node->isStone())
+            this->redo(gameInfo, node->position);
+        this->redo(gameInfo, node->marks);
+        this->redo(gameInfo, node->blackTerritories);
+        this->redo(gameInfo, node->whiteTerritories);
+        this->redo(gameInfo, node->dims);
+        this->redo(gameInfo, node->blackStones);
+        this->redo(gameInfo, node->whiteStones);
+        this->redo(gameInfo, node->emptyStones);
+        this->redo(gameInfo, node->lines);
+    }
+    else{
+        if(node->isStone())
+            this->undo(gameInfo, node->position);
+        this->undo(gameInfo, node->marks);
+        this->undo(gameInfo, node->blackTerritories);
+        this->undo(gameInfo, node->whiteTerritories);
+        this->undo(gameInfo, node->dims);
+        this->undo(gameInfo, node->blackStones);
+        this->undo(gameInfo, node->whiteStones);
+        this->undo(gameInfo, node->emptyStones);
+        this->undo(gameInfo, node->lines);
+    }
+
+    foreach(Go::NodePtr child, node->childNodes)
+        execute(child->gameInformation ? child->gameInformation : gameInfo, child, redo);
+}
+
+template<class T>
+void FlipSgfCommand::redo(Go::GameInformationPtr& gameInfo, T& itemList){
+    typename T::iterator iter = itemList.begin();
+    while (iter != itemList.end()){
+        redo(gameInfo, iter->position);
+        ++iter;
+    }
+}
+
+void FlipSgfCommand::redo(Go::GameInformationPtr& gameInfo, Go::LineList& itemList){
+    Go::LineList::iterator iter = itemList.begin();
+    while (iter != itemList.end()){
+        redo(gameInfo, iter->position1);
+        redo(gameInfo, iter->position2);
+        ++iter;
+    }
+}
+
+template<class T>
+void FlipSgfCommand::undo(Go::GameInformationPtr& gameInfo, T& itemList){
+    typename T::iterator iter = itemList.begin();
+    while (iter != itemList.end()){
+        undo(gameInfo, iter->position);
+        ++iter;
+    }
+}
+
+void FlipSgfCommand::undo(Go::GameInformationPtr& gameInfo, Go::LineList& itemList){
+    Go::LineList::iterator iter = itemList.begin();
+    while (iter != itemList.end()){
+        undo(gameInfo, iter->position1);
+        undo(gameInfo, iter->position2);
+        ++iter;
+    }
+}
+
+/**
+  Constructor
+*/
+RotateSgfClockwiseCommand::RotateSgfClockwiseCommand(SgfDocument* doc, Go::NodePtr game, QUndoCommand *parent)
+    : FlipSgfCommand(doc, game, parent)
+{
+    setText( tr("Rotate SGF clockwise") );
+}
+
+/**
+  redo/undo rotate command
+*/
+void RotateSgfClockwiseCommand::execute(Go::GameInformationPtr& gameInfo, Go::NodePtr& node, bool redo){
+    if (node->gameInformation)
+        qSwap(node->gameInformation->xsize, node->gameInformation->ysize);
+
+    FlipSgfCommand::execute(gameInfo, node, redo);
+}
+
+/**
+  redo rotate command
+*/
+void RotateSgfClockwiseCommand::redo(Go::GameInformationPtr& gameInfo, Go::Point& p){
+    int x = p.x;
+    int y = p.y;
+
+    if (y != -1)
+        p.x = gameInfo->xsize - y - 1;  // xsize and ysize has been already swapped.
+
+    if (x != -1)
+        p.y = x;
+}
+
+/**
+  undo rotate command
+*/
+void RotateSgfClockwiseCommand::undo(Go::GameInformationPtr& gameInfo, Go::Point& p){
+    int x = p.x;
+    int y = p.y;
+
+    if (y != -1)
+        p.x = y;
+
+    if (x != -1)
+        p.y = gameInfo->ysize - x - 1;  // xsize and ysize has been already swapped.
+}
+
+/**
+  Constructor
+*/
+FlipSgfHorizontallyCommand::FlipSgfHorizontallyCommand(SgfDocument* doc, Go::NodePtr game, QUndoCommand *parent)
+    : FlipSgfCommand(doc, game, parent)
+{
+    setText( tr("Flip SGF Horizontally") );
+}
+
+/**
+  redo flip sgf horizontally command
+*/
+void FlipSgfHorizontallyCommand::redo(Go::GameInformationPtr& gameInfo, Go::Point& p){
+    if (p.x != -1)
+        p.x = gameInfo->xsize - p.x - 1;
+}
+
+/**
+  undo flip sgf horizontally command
+*/
+void FlipSgfHorizontallyCommand::undo(Go::GameInformationPtr& gameInfo, Go::Point& p){
+    if (p.x != -1)
+        p.x = gameInfo->xsize - p.x - 1;
+}
+
+/**
+  Constructor
+*/
+FlipSgfVerticallyCommand::FlipSgfVerticallyCommand(SgfDocument* doc, Go::NodePtr game, QUndoCommand *parent)
+    : FlipSgfCommand(doc, game, parent)
+{
+    setText( tr("Flip SGF Vertically") );
+}
+
+/**
+  redo flip sgf vertically command
+*/
+void FlipSgfVerticallyCommand::redo(Go::GameInformationPtr& gameInfo, Go::Point& p){
+    if (p.y != -1)
+        p.y = gameInfo->ysize - p.y - 1;
+}
+
+/**
+  undo flip sgf vertically command
+*/
+void FlipSgfVerticallyCommand::undo(Go::GameInformationPtr& gameInfo, Go::Point& p){
+    if (p.y != -1)
+        p.y = gameInfo->ysize - p.y - 1;
+}
+
+/**
+  Constructor
+*/
+SetCurrentGameCommand::SetCurrentGameCommand(BoardWidget* board, Go::NodePtr game_, QUndoCommand *parent)
+    : QUndoCommand(parent)
+    , boardWidget(board)
+    , game(game_)
+{
+}
+
+/**
+  redo set current game command
+*/
+void SetCurrentGameCommand::redo(){
+    setText( tr("Set current game") );
+
+    prevGame = boardWidget->getCurrentGame();
+    boardWidget->setCurrentGame(game);
+}
+
+/**
+  undo set current game command
+*/
+void SetCurrentGameCommand::undo(){
+    boardWidget->setCurrentGame(prevGame);
+}
+
+/**
+  Constructor
+*/
+AddGameListCommand::AddGameListCommand(SgfDocument* doc, Go::NodeList& gameList_, QUndoCommand *parent)
+    : QUndoCommand(parent)
+    , document(doc)
+    , gameList(gameList_)
+{
+}
+
+/**
+  redo add gamelist command
+*/
+void AddGameListCommand::redo(){
+    setText( tr("Add games into collection") );
+    foreach(const Go::NodePtr& game, gameList)
+        document->addGame(game, -1);
+}
+
+/**
+  undo add agmelist command
+*/
+void AddGameListCommand::undo(){
+    foreach(const Go::NodePtr& game, gameList)
+        document->deleteGame(game);
+}
+
+/**
+  Constructor
+*/
+DeleteGameListCommand::DeleteGameListCommand(SgfDocument* doc, Go::NodeList& gameList_, QUndoCommand *parent)
+    : QUndoCommand(parent)
+    , document(doc)
+    , gameList(gameList_)
+{
+}
+
+/**
+  redo delete game from collection command
+*/
+void DeleteGameListCommand::redo(){
+    setText( tr("Delete games from collection") );
+
+    indexList.clear();
+    foreach(const Go::NodePtr& game, gameList){
+        indexList.push_back( document->gameList.indexOf(game) );
+        document->deleteGame(game);
+    }
+}
+
+/**
+  undo delete game from collection command
+*/
+void DeleteGameListCommand::undo(){
+    for (int i=gameList.size()-1; i>=0; --i){
+        Go::NodePtr& game = gameList[i];
+        document->addGame(game, indexList[i]);
+    }
+}
+
+/**
+  Constructor
+*/
+MoveUpInCollectionCommand::MoveUpInCollectionCommand(SgfDocument* doc, Go::NodePtr& game_, QUndoCommand *parent)
+    : QUndoCommand(parent)
+    , document(doc)
+    , game(game_)
+    , moved(false)
+{
+}
+
+/**
+  redo move up sgf in collection command
+*/
+void MoveUpInCollectionCommand::redo(){
+    setText( tr("Move up sgf in collection") );
+
+    moved = document->moveUp(game);
+}
+
+/**
+  undo move up sgf in collection command
+*/
+void MoveUpInCollectionCommand::undo(){
+    if (moved == false)
+        return;
+
+    document->moveDown(game);
+}
+
+/**
+  Constructor
+*/
+MoveDownInCollectionCommand::MoveDownInCollectionCommand(SgfDocument* doc, Go::NodePtr& game_, QUndoCommand *parent)
+    : QUndoCommand(parent)
+    , document(doc)
+    , game(game_)
+    , moved(false)
+{
+}
+
+/**
+  redo move down sgf in collection command
+*/
+void MoveDownInCollectionCommand::redo(){
+    setText( tr("Move down sgf in collection") );
+
+    moved = document->moveDown(game);
+}
+
+/**
+  undo move down sgf in collection command
+*/
+void MoveDownInCollectionCommand::undo(){
+    if (moved == false)
+        return;
+
+    document->moveUp(game);
+}
+
+/**
+  Constructor
+*/
+SetGameInformationCommand::SetGameInformationCommand(SgfDocument* doc, Go::GameInformationPtr gameInfo_, Go::GameInformationPtr newInfo_, QUndoCommand *parent)
+    : QUndoCommand(parent)
+    , document(doc)
+    , gameInfo(gameInfo_)
+    , newInfo(newInfo_)
+    , oldInfo(new Go::GameInformation)
+{
+    *oldInfo = *gameInfo;
+}
+
+/**
+  redo set comment command
+*/
+void SetGameInformationCommand::redo(){
+    setText( tr("Set game information") );
+    *gameInfo = *newInfo;
+    document->setDirty();
+}
+
+/**
+  undo set comment command
+*/
+void SetGameInformationCommand::undo(){
+    *gameInfo = *oldInfo;
+    document->setDirty();
 }

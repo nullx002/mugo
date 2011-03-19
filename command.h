@@ -21,263 +21,426 @@
 
 #include <QUndoCommand>
 #include <QString>
+#include <QStandardItem>
 #include "godata.h"
+#include "sgf.h"
 
+
+class QTreeView;
+class QStandardItemModel;
+class SgfDocument;
 class BoardWidget;
 
-
+/**
+  add node command
+*/
 class AddNodeCommand : public QUndoCommand{
     Q_DECLARE_TR_FUNCTIONS(AddNodeCommand)
 
 public:
-    AddNodeCommand(BoardWidget* boardWidget, go::nodePtr parentNode, go::nodePtr childNode, bool select, QUndoCommand *parent = 0);
+    AddNodeCommand(SgfDocument* doc, Go::NodePtr parentNode, Go::NodePtr node, int index, QUndoCommand *parent = 0);
     virtual void redo();
     virtual void undo();
 
 private:
-    BoardWidget* boardWidget;
-    go::nodePtr parentNode;
-    go::nodePtr childNode;
-    bool select;
+    SgfDocument* document;
+    Go::NodePtr parentNode;
+    Go::NodePtr node;
+    int index;
 };
 
-class InsertNodeCommand : public QUndoCommand{
-    Q_DECLARE_TR_FUNCTIONS(InsertNodeCommand)
-
-public:
-    InsertNodeCommand(BoardWidget* boardWidget, go::nodePtr parentNode, int index, go::nodePtr childNode, bool select, QUndoCommand *parent = 0);
-    virtual void redo();
-    virtual void undo();
-
-private:
-    BoardWidget* boardWidget;
-    go::nodePtr parentNode;
-    go::nodePtr childNode;
-    int  index;
-    bool select;
-};
-
+/**
+  delete node command
+*/
 class DeleteNodeCommand : public QUndoCommand{
     Q_DECLARE_TR_FUNCTIONS(DeleteNodeCommand)
 
 public:
-    DeleteNodeCommand(BoardWidget* boardWidget, go::nodePtr node, bool deleteChildren, QUndoCommand *parent = 0);
+    DeleteNodeCommand(SgfDocument* doc, Go::NodePtr node, bool removeChildren, QUndoCommand *parent = 0);
     virtual void redo();
     virtual void undo();
 
 private:
-    BoardWidget* boardWidget;
-    go::nodePtr node;
-    bool deleteChildren;
-    int  index;
+    SgfDocument* document;
+    Go::NodePtr parentNode;
+    Go::NodePtr node;
+    bool removeChildren;
+    int pos;
 };
 
-class AddStoneCommand : public QUndoCommand{
-    Q_DECLARE_TR_FUNCTIONS(AddMarkCommand)
-
-public:
-    AddStoneCommand(BoardWidget* boardWidget, go::nodePtr node, int x, int y, go::color color, QUndoCommand *parent = 0);
-    virtual void redo();
-    virtual void undo();
-
-private:
-    BoardWidget* boardWidget;
-    go::nodePtr node;
-    int x;
-    int y;
-    go::color color;
-};
-
-class DeleteStoneCommand : public QUndoCommand{
-    Q_DECLARE_TR_FUNCTIONS(DeleteStoneCommand)
-
-public:
-    DeleteStoneCommand(BoardWidget* boardWidget, go::nodePtr node, int x, int y, QUndoCommand *parent = 0);
-    virtual void redo();
-    virtual void undo();
-
-private:
-    void add(go::stoneList& stones, go::stoneList& eraseList, QList<int>& posList);
-    void remove(go::stoneList& stones, go::stoneList& eraseList, QList<int>& posList);
-
-    BoardWidget* boardWidget;
-    go::nodePtr node;
-    int x;
-    int y;
-    go::stoneList blackEraseList;
-    QList<int> blackPosList;
-    go::stoneList whiteEraseList;
-    QList<int> whitePosList;
-    go::stoneList emptyEraseList;
-    QList<int> emptyPosList;
-};
-
-class AddMarkCommand : public QUndoCommand{
-    Q_DECLARE_TR_FUNCTIONS(AddMarkCommand)
-
-public:
-    AddMarkCommand(BoardWidget* boardWidget, go::nodePtr node, int x, int y, go::mark::eType type, const QString& label, QUndoCommand *parent = 0);
-    virtual void redo();
-    virtual void undo();
-
-private:
-    BoardWidget* boardWidget;
-    go::nodePtr node;
-    int x;
-    int y;
-    go::mark::eType type;
-    QString label;
-    go::markList eraseList;
-    QList<int> erasePos;
-    bool markAdded;
-};
-
-class DeleteMarkCommand : public QUndoCommand{
-    Q_DECLARE_TR_FUNCTIONS(DeleteMarkCommand)
-
-public:
-    DeleteMarkCommand(BoardWidget* boardWidget, go::nodePtr node, int x, int y, QUndoCommand *parent = 0);
-    virtual void redo();
-    virtual void undo();
-
-private:
-    template<class Container, class EraseList, class PosList>
-    void add(Container& c, EraseList& eraseList, PosList& posList);
-
-    template<class Container, class EraseList, class PosList>
-    void remove(Container& c, EraseList& eraseList, PosList& posList);
-
-    BoardWidget* boardWidget;
-    go::nodePtr node;
-    int x;
-    int y;
-    go::markList markEraseList;
-    QList<int> markPosList;
-    go::stoneList emptyEraseList;
-    QList<int> emptyPosList;
-    go::stoneList blackEraseList;
-    QList<int> blackPosList;
-    go::stoneList whiteEraseList;
-    QList<int> whitePosList;
-};
-
-class SetMoveNumberCommand : public QUndoCommand{
-    Q_DECLARE_TR_FUNCTIONS(SetMoveNumberCommand)
-
-public:
-    SetMoveNumberCommand(BoardWidget* boardWidget, go::nodePtr node, int moveNumber, QUndoCommand *parent = 0);
-    virtual void redo();
-    virtual void undo();
-
-private:
-    BoardWidget* boardWidget;
-    go::nodePtr node;
-    int moveNumber;
-    int oldMoveNumber;
-};
-
-class UnsetMoveNumberCommand : public QUndoCommand{
-    Q_DECLARE_TR_FUNCTIONS(UnsetMoveNumberCommand)
-
-public:
-    UnsetMoveNumberCommand(BoardWidget* boardWidget, go::nodePtr node, QUndoCommand *parent = 0);
-    virtual void redo();
-    virtual void undo();
-
-private:
-    BoardWidget* boardWidget;
-    go::nodePtr node;
-    int oldMoveNumber;
-};
-
+/**
+  set node name command
+*/
 class SetNodeNameCommand : public QUndoCommand{
     Q_DECLARE_TR_FUNCTIONS(SetNodeNameCommand)
 
 public:
-    SetNodeNameCommand(BoardWidget* boardWidget, go::nodePtr node, const QString& nodeName, QUndoCommand *parent = 0);
+    SetNodeNameCommand(SgfDocument* doc, Go::NodePtr node, const QString& name, QUndoCommand *parent = 0);
     virtual void redo();
     virtual void undo();
 
 private:
-    BoardWidget* boardWidget;
-    go::nodePtr node;
-    QString nodeName;
-    QString oldNodeName;
+    SgfDocument* document;
+    Go::NodePtr  node;
+    QString newName;
+    QString oldName;
 };
 
+/**
+  set move number command
+*/
+class SetMoveNumberCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(SetMoveNumberCommand)
+
+public:
+    SetMoveNumberCommand(SgfDocument* doc, Go::NodePtr node, int moveNumber, QUndoCommand *parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+private:
+    SgfDocument* document;
+    Go::NodePtr  node;
+    int newNumber;
+    int oldNumber;
+};
+
+/**
+  unset move number command
+*/
+class UnsetMoveNumberCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(UnsetMoveNumberCommand)
+
+public:
+    UnsetMoveNumberCommand(SgfDocument* doc, Go::NodePtr node, QUndoCommand *parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+private:
+    SgfDocument* document;
+    Go::NodePtr  node;
+    int oldNumber;
+};
+
+/**
+  set node annotation command
+*/
+class SetNodeAnnotationCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(SetNodeAnnotationCommand)
+
+public:
+    SetNodeAnnotationCommand(SgfDocument* doc, Go::NodePtr node, Go::Node::NodeAnnotation annotation, QUndoCommand *parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+private:
+    SgfDocument* document;
+    Go::NodePtr  node;
+    Go::Node::NodeAnnotation newAnnotation;
+    Go::Node::NodeAnnotation oldAnnotation;
+};
+
+/**
+  set move annotation command
+*/
+class SetMoveAnnotationCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(SetMoveAnnotationCommand)
+
+public:
+    SetMoveAnnotationCommand(SgfDocument* doc, Go::NodePtr node, Go::Node::MoveAnnotation annotation, QUndoCommand *parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+private:
+    SgfDocument* document;
+    Go::NodePtr  node;
+    Go::Node::MoveAnnotation newAnnotation;
+    Go::Node::MoveAnnotation oldAnnotation;
+};
+
+/**
+  set annotation command
+*/
+class SetAnnotationCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(SetAnnotationCommand)
+
+public:
+    SetAnnotationCommand(SgfDocument* doc, Go::NodePtr node, Go::Node::Annotation annotation, QUndoCommand *parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+private:
+    SgfDocument* document;
+    Go::NodePtr  node;
+    Go::Node::Annotation newAnnotation;
+    Go::Node::Annotation oldAnnotation;
+};
+
+/**
+  add mark command
+*/
+class AddMarkCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(SetMarkCommand)
+
+public:
+    AddMarkCommand(SgfDocument* doc, Go::NodePtr node, const Go::Mark& mark, QUndoCommand *parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+private:
+    SgfDocument* document;
+    Go::NodePtr  node;
+    Go::Mark     mark;
+};
+
+/**
+  remove mark command
+*/
+class RemoveMarkCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(RemoveMarkCommand)
+
+public:
+    RemoveMarkCommand(SgfDocument* doc, Go::NodePtr node, const Go::Point& p, QUndoCommand *parent = 0);
+    ~RemoveMarkCommand();
+    virtual void redo();
+    virtual void undo();
+
+private:
+    SgfDocument* document;
+    Go::NodePtr  node;
+    Go::Point    position;
+    Go::Mark*    mark;
+    int          index;
+};
+
+/**
+  add stone command
+*/
+class AddStoneCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(AddStoneCommand)
+
+public:
+    AddStoneCommand(SgfDocument* doc, Go::NodePtr node, const Go::Stone& stone, QUndoCommand *parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+private:
+    SgfDocument* document;
+    Go::NodePtr  node;
+    Go::Stone    stone;
+};
+
+/**
+  remove stone command
+*/
+class RemoveStoneCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(RemoveStoneCommand)
+
+public:
+    RemoveStoneCommand(SgfDocument* doc, Go::NodePtr node, const Go::Point& p, QUndoCommand *parent = 0);
+    ~RemoveStoneCommand();
+    virtual void redo();
+    virtual void undo();
+
+private:
+    SgfDocument* document;
+    Go::NodePtr  node;
+    Go::Point    position;
+    Go::Stone*   stone;
+    int          index;
+};
+
+/**
+  set comment command
+*/
 class SetCommentCommand : public QUndoCommand{
     Q_DECLARE_TR_FUNCTIONS(SetCommentCommand)
 
 public:
-    SetCommentCommand(BoardWidget* boardWidget, go::nodePtr node, const QString& comment, QUndoCommand *parent = 0);
+    SetCommentCommand(SgfDocument* doc, Go::NodePtr node, const QString& comment, QUndoCommand *parent = 0);
     virtual void redo();
     virtual void undo();
 
+    void setComment(const QString& comment);
+    Go::NodePtr getNode(){ return node; }
+
 private:
-    BoardWidget* boardWidget;
-    go::nodePtr node;
-    QString comment;
-    QString oldComment;
+    SgfDocument* document;
+    Go::NodePtr  node;
+    QString      comment;
+    QString      oldComment;
 };
 
-class MovePositionCommand : public QUndoCommand{
-    Q_DECLARE_TR_FUNCTIONS(MovePositionCommand)
+/**
+  set game information command
+*/
+class SetGameInformationCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(SetGameInformationCommand)
 
 public:
-    MovePositionCommand(BoardWidget* boardWidget, go::nodePtr node, const go::point& pos, QUndoCommand *parent = 0);
+    SetGameInformationCommand(SgfDocument* doc, Go::GameInformationPtr gameInfo, Go::GameInformationPtr newInfo, QUndoCommand *parent = 0);
     virtual void redo();
     virtual void undo();
 
 private:
-    BoardWidget* boardWidget;
-    go::nodePtr  node;
-    go::point    pos;
-    go::point    oldPos;
+    SgfDocument* document;
+    Go::NodePtr node;
+    Go::GameInformationPtr gameInfo;
+    Go::GameInformationPtr newInfo;
+    Go::GameInformationPtr oldInfo;
 };
 
-class MoveStoneCommand : public QUndoCommand{
-    Q_DECLARE_TR_FUNCTIONS(MoveStoneCommand)
+/**
+  flip sgf command
+*/
+class FlipSgfCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(FlipSgfClockwiseCommand)
 
 public:
-    MoveStoneCommand(BoardWidget* boardWidget, go::nodePtr node, go::stone* stone, const go::point& pos, QUndoCommand *parent = 0);
+    FlipSgfCommand(SgfDocument* doc, Go::NodePtr game, QUndoCommand *parent = 0);
     virtual void redo();
     virtual void undo();
 
-private:
-    BoardWidget* boardWidget;
-    go::nodePtr  node;
-    go::stone*   stone;
-    go::point    pos;
-    go::point    oldPos;
+protected:
+    virtual void execute(Go::GameInformationPtr& gameInfo, Go::NodePtr& node, bool redo);
+    virtual void redo(Go::GameInformationPtr& gameInfo, Go::Point& p) = 0;
+    virtual void undo(Go::GameInformationPtr& gameInfo, Go::Point& p) = 0;
+
+    template<class T> void redo(Go::GameInformationPtr& gameInfo, T& itemList);
+    void redo(Go::GameInformationPtr& gameInfo, Go::LineList& itemList);
+
+    template<class T> void undo(Go::GameInformationPtr& gameInfo, T& itemList);
+    void undo(Go::GameInformationPtr& gameInfo, Go::LineList& itemList);
+
+    SgfDocument* document;
+    Go::NodePtr  game;
 };
 
-class MoveMarkCommand : public QUndoCommand{
-    Q_DECLARE_TR_FUNCTIONS(MoveMarkCommand)
+/**
+  rotate sgf clockwise command
+*/
+class RotateSgfClockwiseCommand : public FlipSgfCommand{
+    Q_DECLARE_TR_FUNCTIONS(RotateSgfClockwiseCommand)
 
 public:
-    MoveMarkCommand(BoardWidget* boardWidget, go::nodePtr node, go::mark* mark, const go::point& pos, QUndoCommand *parent = 0);
-    virtual void redo();
-    virtual void undo();
+    RotateSgfClockwiseCommand(SgfDocument* doc, Go::NodePtr game, QUndoCommand *parent = 0);
 
-private:
-    BoardWidget* boardWidget;
-    go::nodePtr  node;
-    go::mark*    mark;
-    go::point    pos;
-    go::point    oldPos;
+protected:
+    virtual void execute(Go::GameInformationPtr& gameInfo, Go::NodePtr& node, bool redo);
+    virtual void redo(Go::GameInformationPtr& gameInfo, Go::Point& p);
+    virtual void undo(Go::GameInformationPtr& gameInfo, Go::Point& p);
 };
 
-class RotateSgfCommand : public QUndoCommand{
+/**
+  flip sgf horizontally command
+*/
+class FlipSgfHorizontallyCommand : public FlipSgfCommand{
+    Q_DECLARE_TR_FUNCTIONS(FlipSgfHorizontallyCommand)
+
 public:
-    RotateSgfCommand(BoardWidget* boardWidget, const QString& commandName, QUndoCommand *parent = 0);
+    FlipSgfHorizontallyCommand(SgfDocument* doc, Go::NodePtr game, QUndoCommand *parent = 0);
+
+protected:
+    virtual void redo(Go::GameInformationPtr& gameInfo, Go::Point& p);
+    virtual void undo(Go::GameInformationPtr& gameInfo, Go::Point& p);
+};
+
+/**
+  flip sgf vertically command
+*/
+class FlipSgfVerticallyCommand : public FlipSgfCommand{
+    Q_DECLARE_TR_FUNCTIONS(FlipSgfVerticallyCommand)
+
+public:
+    FlipSgfVerticallyCommand(SgfDocument* doc, Go::NodePtr game, QUndoCommand *parent = 0);
+
+protected:
+    virtual void redo(Go::GameInformationPtr& gameInfo, Go::Point& p);
+    virtual void undo(Go::GameInformationPtr& gameInfo, Go::Point& p);
+};
+
+/**
+  set current game command
+*/
+class SetCurrentGameCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(SetCurrentGameCommand)
+
+public:
+    SetCurrentGameCommand(BoardWidget* board, Go::NodePtr game, QUndoCommand *parent = 0);
     virtual void redo();
     virtual void undo();
 
 private:
     BoardWidget* boardWidget;
-    QString commandName;
+    Go::NodePtr game;
+    Go::NodePtr prevGame;
 };
 
+/**
+  add games command
+*/
+class AddGameListCommand: public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(AddGameListCommand)
+
+public:
+    AddGameListCommand(SgfDocument* doc, Go::NodeList& gameList, QUndoCommand *parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+private:
+    SgfDocument* document;
+    Go::NodeList gameList;
+};
+
+/**
+  delete games from gamelist command
+*/
+class DeleteGameListCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(DeleteGameCommand)
+
+public:
+    DeleteGameListCommand(SgfDocument* doc, Go::NodeList& gameList, QUndoCommand *parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+private:
+    SgfDocument* document;
+    Go::NodeList gameList;
+    QList<int> indexList;
+};
+
+/**
+  move up sgf in collection command
+*/
+class MoveUpInCollectionCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(MoveUpInCollectionCommand)
+
+public:
+    MoveUpInCollectionCommand(SgfDocument* doc, Go::NodePtr& game, QUndoCommand *parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+private:
+    SgfDocument* document;
+    Go::NodePtr game;
+    bool moved;
+};
+
+/**
+  move down sgf in collection command
+*/
+class MoveDownInCollectionCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(MoveDownInCollectionCommand)
+
+public:
+    MoveDownInCollectionCommand(SgfDocument* doc, Go::NodePtr& game, QUndoCommand *parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+private:
+    SgfDocument* document;
+    Go::NodePtr game;
+    bool moved;
+};
 
 
 #endif // COMMAND_H

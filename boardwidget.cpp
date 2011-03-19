@@ -16,2856 +16,2354 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include <QDebug>
-#include <QMessageBox>
-#include <QSettings>
-#include <QFileInfo>
-#include <QPainter>
-#include <QPrinter>
-#include <QMouseEvent>
-#include <QSound>
+#include <QResizeEvent>
+#include <QGraphicsLineItem>
+#include <QGraphicsRectItem>
+#include <QGraphicsEllipseItem>
+#include <QGraphicsPixmapItem>
+#include <QGraphicsSimpleTextItem>
 #include <QInputDialog>
-#include <QList>
-#include <QDateTime>
-#include <math.h>
-#include "appdef.h"
+#include <QTimer>
+#include <phonon>
+#include "mugoapp.h"
 #include "boardwidget.h"
-#include "mainwindow.h"
+#include "sgfdocument.h"
 #include "command.h"
-#include "ui_boardwidget.h"
 
-#ifdef Q_WS_WIN
-#   define usleep(X) Sleep(X/1000)
+#define _USE_MATH_DEFINES
+#include <math.h>
 
-    QString Sound::fileName;
-    MCI_OPEN_PARMSW Sound::mopw = {0};
-    MCI_OPEN_PARMSA Sound::mopa = {0};
-#else
-#   include <unistd.h>
-#endif
+/**
+  Sound
+*/
+class Sound{
+public:
+    Sound();
+    ~Sound();
 
-Sound::Sound(QWidget* parent_) : parent(parent_){
-#if defined(Q_WS_WIN)
-    lastClock = 0;
+    void setFilePath(const QString& path);
+    const QString& getFilePath() const{ return filePath; }
 
-    memset(&versionInfo, 0, sizeof(versionInfo));
-    versionInfo.dwOSVersionInfoSize = sizeof(versionInfo);
-    GetVersionEx(&versionInfo);
-#else
+    void play();
+
+private:
+    Phonon::MediaObject* media;
+    QString filePath;
+};
+
+/**
+  Constructor
+*/
+Sound::Sound(){
     media = Phonon::createPlayer(Phonon::NotificationCategory);
-#endif
 }
 
+/**
+  Destructor
+*/
 Sound::~Sound(){
-#if defined(Q_WS_WIN)
-#else
     delete media;
-#endif
 }
 
-void Sound::setCurrentSource(const QString& source){
-#if defined(Q_WS_WIN)
-    if (fileName == source)
-        return;
-
-    fileName = source;
-
-    if (versionInfo.dwMajorVersion >= 5){
-        if (mopw.wDeviceID != 0)
-            mciSendCommandW(mopw.wDeviceID, MCI_CLOSE, 0, 0);
-        memset(&mopw, 0, sizeof(mopw));
-        mopw.lpstrDeviceType  = L"WaveAudio";
-        mopw.lpstrElementName = (WCHAR*)source.utf16();
-        mciSendCommandW(0, MCI_OPEN, MCI_OPEN_TYPE|MCI_OPEN_ELEMENT, (DWORD)&mopw);
-    }
-    else{
-        if (mopa.wDeviceID != 0)
-            mciSendCommandA(mopa.wDeviceID, MCI_CLOSE, 0, 0);
-        memset(&mopa, 0, sizeof(mopa));
-        mopa.lpstrDeviceType  = "WaveAudio";
-        QByteArray local8 = source.toLocal8Bit();
-        mopa.lpstrElementName = local8.constData();
-        mciSendCommandA(0, MCI_OPEN, MCI_OPEN_TYPE|MCI_OPEN_ELEMENT, (DWORD)&mopa);
-    }
-#else
-    media->setCurrentSource(source);
-#endif
+/**
+  set file path
+*/
+void Sound::setFilePath(const QString& path){
+    media->setCurrentSource(filePath = path);
 }
 
+/**
+  play sound
+*/
 void Sound::play(){
-#if defined(Q_WS_WIN)
-    DWORD currentClock = GetTickCount();
-    
-    if (versionInfo.dwMajorVersion >= 5){
-        if (mopw.wDeviceID && currentClock - lastClock > 200){
-            mciSendCommandW(mopw.wDeviceID, MCI_STOP, 0, 0);
-            mciSendCommandW(mopw.wDeviceID, MCI_SEEK, MCI_SEEK_TO_START, 0);
-            mciSendCommandW(mopw.wDeviceID, MCI_PLAY, 0, 0);
-            lastClock = currentClock;
-        }
-    }
-    else{
-        if (mopa.wDeviceID && currentClock - lastClock > 200){
-            mciSendCommandA(mopa.wDeviceID, MCI_STOP, 0, 0);
-            mciSendCommandA(mopa.wDeviceID, MCI_SEEK, MCI_SEEK_TO_START, 0);
-            mciSendCommandA(mopa.wDeviceID, MCI_PLAY, 0, 0);
-            lastClock = currentClock;
-        }
-    }
-#else
     if (media->currentTime() == media->totalTime()){
         media->stop();
         media->seek(0);
     }
-    media->play();
-#endif
+
+    if (media->currentTime() == 0)
+        media->play();
 }
 
-
-
-namespace{
-    const char* katakana[] = {"\xe3\x82\xa2","\xe3\x82\xa4","\xe3\x82\xa6","\xe3\x82\xa8","\xe3\x82\xaa","\xe3\x82\xab","\xe3\x82\xad","\xe3\x82\xaf","\xe3\x82\xb1","\xe3\x82\xb3","\xe3\x82\xb5","\xe3\x82\xb7","\xe3\x82\xb9","\xe3\x82\xbb","\xe3\x82\xbd","\xe3\x82\xbf","\xe3\x83\x81","\xe3\x83\x84","\xe3\x83\x86","\xe3\x83\x88","\xe3\x83\x8a","\xe3\x83\x8b","\xe3\x83\x8c","\xe3\x83\x8d","\xe3\x83\x8e","\xe3\x83\x8f","\xe3\x83\x92","\xe3\x83\x95","\xe3\x83\x98","\xe3\x83\x9b","\xe3\x83\x9e","\xe3\x83\x9f","\xe3\x83\xa0","\xe3\x83\xa1","\xe3\x83\xa2","\xe3\x83\xa4","\xe3\x83\xa6","\xe3\x83\xa8","\xe3\x83\xa9","\xe3\x83\xaa","\xe3\x83\xab","\xe3\x83\xac","\xe3\x83\xad","\xe3\x83\xaf","\xe3\x83\xb2","\xe3\x83\xb3"};
-    const char* kana_iroha[] = {"\xe3\x82\xa4","\xe3\x83\xad","\xe3\x83\x8f","\xe3\x83\x8b","\xe3\x83\x9b","\xe3\x83\x98","\xe3\x83\x88","\xe3\x83\x81","\xe3\x83\xaa","\xe3\x83\x8c","\xe3\x83\xab","\xe3\x83\xb2","\xe3\x83\xaf","\xe3\x82\xab","\xe3\x83\xa8","\xe3\x82\xbf","\xe3\x83\xac","\xe3\x82\xbd","\xe3\x83\x84","\xe3\x83\x8d","\xe3\x83\x8a","\xe3\x83\xa9","\xe3\x83\xa0","\xe3\x82\xa6","\xe3\x83\xb0","\xe3\x83\x8e","\xe3\x82\xaa","\xe3\x82\xaf","\xe3\x83\xa4","\xe3\x83\x9e","\xe3\x82\xb1","\xe3\x83\x95","\xe3\x82\xb3","\xe3\x82\xa8","\xe3\x83\x86","\xe3\x82\xa2","\xe3\x82\xb5","\xe3\x82\xad","\xe3\x83\xa6","\xe3\x83\xa1","\xe3\x83\x9f","\xe3\x82\xb7","\xe3\x83\xb1","\xe3\x83\x92","\xe3\x83\xa2","\xe3\x82\xbb","\xe3\x82\xb9","\xe3\x83\xb3"};
-    const int katakana_size = sizeof(katakana) / sizeof(katakana[0]);
-    const int kana_iroha_size = sizeof(kana_iroha) / sizeof(kana_iroha[0]);
-}
 
 /**
-* Constructor
+  GraphicsLabelTextItem
+
+  draw simple text and fill background.
 */
-BoardWidget::BoardWidget(QWidget *parent) :
-    QWidget(parent),
-    m_ui(new Ui::BoardWidget),
-//    readOnly(false),
-    dirty(false),
-    capturedBlack(0),
-    capturedWhite(0),
-    color(go::black),
-    currentMoveNumber(0),
-    showMoveNumber(true),
-    showMoveNumberCount(0),
-    showCoordinates(true),
-    showCoordinatesI(false),
-    showMarker(true),
-    showBranchMoves(true),
-    autoReplayInterval(AUTO_REPLAY_INTERVAL),
-    editMode(eAlternateMove),
-    backupEditMode(eAlternateMove),
-    moveToClicked(false),
-    rotateBoard_(0),
-    flipBoardHorizontally_(false),
-    flipBoardVertically_(false),
-    playSound(false),
-    moveNumberMode(eSequential),
-    stoneSound(this),
-    playGame(NULL)
+class GraphicsLabelTextItem : public QGraphicsSimpleTextItem{
+    public:
+        GraphicsLabelTextItem(QGraphicsItem* parent = 0);
+        GraphicsLabelTextItem(const QString& text, QGraphicsItem* parent = 0);
+
+        void setBackgroundBrush(const QBrush& b){ backgroundBrush_ = b; update(); }
+        QBrush backgroundBrush() const{ return backgroundBrush_; }
+
+    protected:
+        void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget);
+
+        QBrush backgroundBrush_;
+};
+
+/**
+  Constructor
+*/
+GraphicsLabelTextItem::GraphicsLabelTextItem(QGraphicsItem* parent)
+    : QGraphicsSimpleTextItem(parent)
 {
-    m_ui->setupUi(this);
-
-//    stoneSound = Phonon::createPlayer(Phonon::NotificationCategory);
-
-    // auto replay
-    connect(&autoReplayTimer, SIGNAL(timeout()), this, SLOT(autoReplayTimer_timeout()));
-
-    readSettings();
-
-    setCurrentNode(goData.root);
 }
 
 /**
-* Destructor
+  Constructor
+*/
+GraphicsLabelTextItem::GraphicsLabelTextItem(const QString& text, QGraphicsItem* parent)
+    : QGraphicsSimpleTextItem(text, parent)
+{
+}
+
+/**
+  Paint
+*/
+void GraphicsLabelTextItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget){
+    painter->translate(-pos().x(), -pos().y());
+    painter->fillRect(pos().x(), pos().y(), boundingRect().width(), boundingRect().height(), backgroundBrush_);
+    painter->translate(pos().x(), pos().y());
+    QGraphicsSimpleTextItem::paint(painter, option, widget);
+}
+
+/**
+  GraphicsArrowItem
+
+  draw arrow line.
+*/
+class GraphicsArrowItem : public QGraphicsPathItem{
+    public:
+        enum Shape{ none, normal, vee };
+
+        GraphicsArrowItem(QGraphicsItem* parent = 0);
+        GraphicsArrowItem(qreal x1, qreal y1, qreal x2, qreal y2, Shape start = none, Shape end = none, QGraphicsItem* parent = 0);
+
+        void setLine(qreal x1, qreal y1, qreal x2, qreal y2);
+
+    protected:
+        void createNormal(QPainterPath& path, qreal x1, qreal y1, qreal x2, qreal y2);
+
+        Shape start;
+        Shape end;
+};
+
+/**
+  Constructor
+*/
+GraphicsArrowItem::GraphicsArrowItem(QGraphicsItem* parent)
+    : QGraphicsPathItem(parent)
+{
+}
+
+/**
+  Constructor
+*/
+GraphicsArrowItem::GraphicsArrowItem(qreal x1, qreal y1, qreal x2, qreal y2, Shape start_, Shape end_, QGraphicsItem* parent)
+    : QGraphicsPathItem(parent)
+    , start(start_)
+    , end(end_)
+{
+    setLine(x1, y1, x2, y2);
+}
+
+void GraphicsArrowItem::setLine(qreal x1, qreal y1, qreal x2, qreal y2){
+    QPainterPath path;
+    path.moveTo(x1, y1);
+    path.lineTo(x2, y2);
+
+    if (start == normal)
+        createNormal(path, x2, y2, x1, y1);
+
+    if (end == normal)
+        createNormal(path, x1, y1, x2, y2);
+
+    setPath(path);
+}
+
+void GraphicsArrowItem::createNormal(QPainterPath& path, qreal x1, qreal y1, qreal x2, qreal y2){
+    QPainterPath p;
+    p.moveTo(0, 0);
+    p.lineTo(-10, -5);
+    p.lineTo(-10, 5);
+    p.lineTo(0, 0);
+
+    qreal x = x2 - x1;
+    qreal y = y2 - y1;
+    qreal r = acos(x / sqrt(x*x + y*y));
+    qreal deg = (r / M_PI) * 180.0;
+
+    if (y < 0)
+        deg = 360 - deg;
+
+    QMatrix m;
+    m.translate(x2, y2);
+    m.rotate(deg);
+
+    path.addPath(p * m);
+
+}
+
+/**
+  Constructor
+*/
+BoardWidget::BoardWidget(SgfDocument* doc, QWidget *parent)
+    : QGraphicsView(parent)
+    , document_(doc)
+    , editMode(EditMode::alternateMove)
+    , tutorMode(TutorMode::noTutor)
+    , scoreMode(ScoreMode::noScore)
+    , jumpToClicked(false)
+    , showMoveNumber(true)
+    , resetMoveNumberMode(ResetMoveNumber::noReset)
+    , showMoveNumberCount(-1)
+    , showCoordinate(true)
+    , showMarker(true)
+    , monochrome(false)
+    , rotate(0)
+    , flipHorizontally(false)
+    , flipVertically(false)
+    , replayTimer(NULL)
+    , replayInterval(AUTO_REPLAY_INTERVAL)
+    , moveEnemy(false)
+
+    // Preferences
+    , boardColor(BOARD_COLOR)
+    , backgroundColor(BG_COLOR)
+    , tutorBackgroundColor(TUTOR_BG_COLOR)
+    , coordinateColor(COORDINATE_COLOR)
+    , coordinateFont("Sans")
+    , whiteStoneType(Preference::internal)
+    , whiteStoneColor(WHITE_STONE_COLOR)
+    , blackStoneType(Preference::internal)
+    , blackStoneColor(BLACK_STONE_COLOR)
+    , branchColor(BRANCH_COLOR)
+    , focusColor(FOCUS_COLOR)
+    , focusType(0)
+    , labelType(Preference::large)
+    , labelFont("Sans")
+    , playSound(true)
+{
+    moveSound = new Sound;
+
+    setScene( new QGraphicsScene(this) );
+
+//    connect(document_, SIGNAL(nodeAdded(Go::NodePtr)), SLOT(on_sgfdocument_nodeAdded(Go::NodePtr)));
+    connect(document_, SIGNAL(nodeDeleted(Go::NodePtr, bool)), SLOT(on_sgfdocument_nodeDeleted(Go::NodePtr, bool)));
+    connect(document_, SIGNAL(nodeModified(Go::NodePtr, bool)), SLOT(on_sgfdocument_nodeModified(Go::NodePtr, bool)));
+    connect(document_, SIGNAL(gameModified(Go::NodePtr)), SLOT(on_sgfdocument_gameModified(Go::NodePtr)));
+
+    setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
+
+    // create board
+    shadow = scene()->addRect(0, 0, 1, 1, QPen(Qt::NoPen), QBrush(SHADOW_COLOR));
+    board  = scene()->addRect(0, 0, 1, 1, QPen(Qt::NoPen), QBrush(QPixmap(BOARD_IMAGE)));
+    board->setZValue(1);
+
+    // set current game
+    setCurrentGame(document()->gameList.front());
+}
+
+/**
+  Destructor
 */
 BoardWidget::~BoardWidget()
 {
-    delete m_ui;
+    delete moveSound;
 }
 
 /**
-* changeEvent
-* created by wizard.
+  resize
 */
-void BoardWidget::changeEvent(QEvent *e)
-{
-    QWidget::changeEvent(e);
-    switch (e->type()) {
-    case QEvent::LanguageChange:
-        m_ui->retranslateUi(this);
-        break;
-    default:
-        break;
-    }
+void BoardWidget::resizeEvent(QResizeEvent*){
+    setItemsPosition();
 }
 
 /**
-* paintEvent
-* copy offscreen buffer to display
+  Mouse Wheel
 */
-void BoardWidget::paintEvent(QPaintEvent* e){
-    QWidget::paintEvent(e);
+void BoardWidget::wheelEvent(QWheelEvent* e){
+    if (tutorMode != TutorMode::noTutor)
+        return;
+    else if (scoreMode != ScoreMode::noScore)
+        return;
 
-    QPainter p(this);
-
-    if (editMode == eTutorBothSides || editMode == eTutorOneSide)
-        p.fillRect(0, 0, p.device()->width(), p.device()->height(), tutorColor);
-    else
-        p.fillRect(0, 0, p.device()->width(), p.device()->height(), bgColor);
-
-    QPixmap& buffer = offscreenBuffer2.isNull() ? offscreenBuffer1 : offscreenBuffer2;
-    int x = width() / 2 - buffer.width() / 2;
-    int y = height() / 2 - buffer.height() / 2;
-    p.drawPixmap(x, y, buffer);
+    if (e->delta() > 0)
+        back();
+    else if (e->delta() < 0)
+        forward();
 }
 
 /**
-* mouseReleaseEvent
-* put stone, add marker or undo
+  Mouse Release
 */
 void BoardWidget::mouseReleaseEvent(QMouseEvent* e){
-    QWidget::mouseReleaseEvent(e);
-
-    if(e->button() & Qt::LeftButton)
+    if (e->button() == Qt::LeftButton)
         onLButtonDown(e);
-    else if (e->button() & Qt::RightButton)
+    else if (e->button() == Qt::RightButton)
         onRButtonDown(e);
 }
 
 /**
-* mouseMoveEvent
-* draw translucid stone on mouse pointer.
-*/
-void BoardWidget::mouseMoveEvent(QMouseEvent* e){
-    QWidget::mouseMoveEvent(e);
-
-    int x = e->x() - (width() / 2 - offscreenBuffer1.width() / 2);
-    int y = e->y() - (height() / 2 - offscreenBuffer1.height() / 2);
-
-    if (editMode == ePlayGame && (color != playGame->color() || playGame->moving()))
-        return;
-
-    bool black;
-    if (editMode == eAlternateMove || editMode == ePlayGame || editMode == eTutorBothSides || editMode == eTutorOneSide)
-        black = color == go::black;
-    else if (editMode == eAddBlack || editMode == eAddWhite)
-        black = editMode == eAddBlack;
-    else
-        return;
-
-    int bx = (int)floor( qreal(x - xlines[0] + boxSize / 2) / boxSize );
-    int by = (int)floor( qreal(y - ylines[0] + boxSize / 2) / boxSize );
-
-    offscreenBuffer2 = offscreenBuffer1.copy();
-    QPainter p(&offscreenBuffer2);
-
-    if (! (bx < 0 || bx >= xlines.size() || by < 0 || by >= ylines.size() || board[by][bx].color != go::empty) )
-        drawStone(p, bx, by, black ? go::black : go::white, 0.5);
-
-    repaint();
-}
-
-/**
-* wheelEvent
-* move next or previous node.
-*/
-void BoardWidget::wheelEvent(QWheelEvent* e){
-    QWidget::wheelEvent(e);
-
-    if (editMode == eTutorBothSides || editMode == eTutorOneSide || editMode == ePlayGame)
-        return;
-
-    go::nodeList::iterator iter = qFind(nodeList.begin(), nodeList.end(), currentNode);
-    if (e->delta() > 0){
-        if (iter != nodeList.begin() && iter != nodeList.end())
-            setCurrentNode( *--iter );
-    }
-    else{
-        if (iter != nodeList.end() && ++iter != nodeList.end())
-            setCurrentNode( *iter );
-    }
-}
-
-/**
-* resizeEvent
-* resize offscreen buffer and redraw.
-*/
-void BoardWidget::resizeEvent(QResizeEvent* e){
-    QWidget::resizeEvent(e);
-
-    int w = qMin(e->size().width(), e->size().height());
-    offscreenBuffer1 = QPixmap(w, w);
-    paintBoard();
-}
-
-/**
-* mouse left button down
+    LeftButton Down
 */
 void BoardWidget::onLButtonDown(QMouseEvent* e){
-    int x = e->x() - (width() / 2 - offscreenBuffer1.width() / 2);
-    int y = e->y() - (height() / 2 - offscreenBuffer1.height() / 2);
-
-    int boardX = (int)floor( qreal(x - xlines[0] + boxSize / 2) / boxSize );
-    int boardY = (int)floor( qreal(y - ylines[0] + boxSize / 2) / boxSize );
-
-    if (boardX < 0 || boardX >= xsize || boardY < 0 || boardY >= ysize)
-        return;
-
+    // convert view coordinate to sgf coordinate.
     int sgfX, sgfY;
-    boardToSgfCoordinate(boardX, boardY, sgfX, sgfY);
-
-    if (editMode == ePlayGame)
-        playGameLButtonDown(sgfX, sgfY);
-    else if (editMode == eTutorBothSides)
-        forward(sgfX, sgfY);
-    else if (editMode == eTutorOneSide){
-        if (forward(sgfX, sgfY)){
-            go::nodeList::iterator iter = qFind(nodeList.begin(), nodeList.end(), currentNode);
-            if (iter != nodeList.end() && ++iter != nodeList.end()){
-                usleep(500000);
-                setCurrentNode(*iter);
-            }
-        }
-    }
-    else if (editMode == eAlternateMove){
-        if (moveToClicked && board[boardY][boardX].node)
-            setCurrentNode( board[boardY][boardX].node );
-        else
-            addStoneNodeCommand(sgfX, sgfY);
-    }
-    else if (editMode == eAutoReplay)
+    viewToSgfCoordinate(e->x(), e->y(), sgfX, sgfY);
+    if (sgfX < 0 || sgfY < 0 || sgfX >= gameInformation->xsize || sgfY >= gameInformation->ysize)
         return;
-    else if (editMode == eFinalScore){
-        reverseTerritory(boardX, boardY);
-        int alive_b=0, alive_w=0, dead_b=0, dead_w=0, bt=0, wt=0;
-        getFinalScore(alive_b, alive_w, dead_b, dead_w, bt, wt);
-        emit updateTerritory(alive_b, alive_w, dead_b, dead_w, capturedBlack, capturedWhite, bt, wt, goData.root->komi);
+
+    if (scoreMode == ScoreMode::final){
+        if (boardBuffer[sgfY][sgfX].color != Go::empty)
+            setDeadStones(sgfX, sgfY);
+        return;
     }
-    else
-        addMarkCommand(sgfX, sgfY, e->modifiers() & Qt::ControlModifier);
-}
-
-/**
-* mouse right button down.
-* undo if alternate move.
-*/
-void BoardWidget::onRButtonDown(QMouseEvent*){
-    if (editMode == eAlternateMove)
-        undo();
-}
-
-/**
-* undo
-*/
-void BoardWidget::undo(){
-    if (editMode == eAlternateMove)
-        undoStack.undo();
-    else if (editMode == ePlayGame)
-        playGame->undo();
-}
-
-/**
-* read settings
-*/
-void BoardWidget::readSettings(){
-    QSettings settings;
-
-    // board
-    boardType  = settings.value("board/boardType").toInt();
-    boardColor = settings.value("board/boardColor", BOARD_COLOR).value<QColor>();
-    coordinateColor = settings.value("board/coordinateColor", COORDINATE_COLOR).value<QColor>();
-    bgColor    = settings.value("board/bgColor", BG_COLOR).value<QColor>();
-    tutorColor = settings.value("board/bgTutorColor", BG_TUTOR_COLOR).value<QColor>();
-    if (boardType == 0){
-        if (boardImage1.load(":/res/bg.png") == false)
-            boardType = 2;
+    else if (tutorMode == TutorMode::tutorBothSides){
+        moveToChildItem(sgfX, sgfY);
+        return;
     }
-    else if (boardType == 1){
-        if (boardImage1.load( settings.value("board/boardPath").toString() ) == false)
-            boardType = 2;
-    }
+    else if (tutorMode == TutorMode::tutorOneSide){
+        if (moveEnemy || moveToChildItem(sgfX, sgfY) == false)
+            return;
 
-    // white stone
-    whiteType  = settings.value("board/whiteType").toInt();
-    whiteColor = settings.value("board/whiteColor", WHITE_COLOR).value<QColor>();
-    if (whiteType == 0){
-        if (white1.load(":/res/white_128_ds.png") == false)
-            whiteType = 2;
-    }
-    else{
-        if (white1.load( settings.value("board/whitePath").toString() ) == false)
-            whiteType = 2;
-    }
+        Go::NodeList::iterator iter = qFind(currentNodeList.begin(), currentNodeList.end(), currentNode);
+        if (iter == currentNodeList.end())
+            return;
+        else if (++iter == currentNodeList.end())
+            return;
 
-    // black stone
-    blackColor = settings.value("board/blackColor", BLACK_COLOR).value<QColor>();
-    blackType  = settings.value("board/blackType").toInt();
-    if (blackType == 0){
-        if (black1.load(":/res/black_128_ds.png") == false)
-            blackType = 2;
+        moveEnemy = true;
+        QTimer* timer = new QTimer(this);
+        connect(timer, SIGNAL(timeout()), SLOT(on_tutorOneSide_timeout()));
+        timer->start(680);
+
+        return;
     }
-    else{
-        if (black1.load( settings.value("board/blackPath").toString() ) == false)
-            blackType = 2;
-    }
-
-    // marker
-    focusType = settings.value("marker/focusType").toInt();
-    focusWhiteColor = settings.value("marker/focusWhiteColor", FOCUS_WHITE_COLOR).value<QColor>();
-    focusBlackColor = settings.value("marker/focusBlackColor", FOCUS_BLACK_COLOR).value<QColor>();
-    branchColor = settings.value("marker/branchColor", BRANCH_COLOR).value<QColor>();
-    labelType = settings.value("marker/labelType").toInt();
-    showMoveNumber = settings.value("marker/showMoveNumber", true).toBool();
-    showMoveNumberCount = settings.value("marker/moveNumber", 0).toInt();
-
-    // navigation
-    autoReplayInterval = settings.value("navigation/autoReplayInterval", AUTO_REPLAY_INTERVAL).toInt();
-
-    // sound
-    playSound = settings.value("sound/play", 1).toBool();
-    if (settings.value("sound/type").toInt() == 0){
-        QStringList soundPathList;
-#if defined(Q_WS_MAC)
-        soundPathList.push_back( QFileInfo(qApp->applicationDirPath() + "/../Resources/sounds/").absolutePath() );
-#endif
-        soundPathList.push_back(qApp->applicationDirPath() + "/sounds");
-        soundPathList.push_back("/usr/share/" APPNAME "/sounds");
-        soundPathList.push_back("/usr/local/share/" APPNAME "/sounds");
-        soundPathList.push_back("./sounds");
-        QStringList::iterator iter = soundPathList.begin();
-        while (iter != soundPathList.end()){
-            QFileInfo finfo( *iter + "/stone.wav" );
-            if (finfo.exists()){
-                setStoneSoundPath(finfo.filePath());
+    else if (jumpToClicked){
+        // if jump to clicked mode, change current node and return
+        Go::NodePtr node = currentNode;
+        while (node){
+            if (node->isStone() && node->x() == sgfX && node->y() == sgfY)
                 break;
-            }
-            ++iter;
+            node = node->parent();
         }
+        if (node){
+            jumpToClicked = false;
+            setCurrentNode(node, true);
+        }
+        return;
+    }
+
+    switch(editMode){
+        case EditMode::alternateMove:
+            alternateMove(sgfX, sgfY);
+            break;
+
+        case EditMode::addBlack:
+            addStone(sgfX, sgfY, Go::black);
+            break;
+
+        case EditMode::addWhite:
+            addStone(sgfX, sgfY, Go::white);
+            break;
+
+        case EditMode::addEmpty:
+            addStone(sgfX, sgfY, Go::empty);
+            break;
+
+        case EditMode::addLabel:
+            addLabel(sgfX, sgfY, true);
+            break;
+
+        case EditMode::addLabelManually:
+            addLabel(sgfX, sgfY, false);
+            break;
+
+        case EditMode::addCircle:
+            addMarker(sgfX, sgfY, Go::Mark::circle);
+            break;
+
+        case EditMode::addCross:
+            addMarker(sgfX, sgfY, Go::Mark::cross);
+            break;
+
+        case EditMode::addTriangle:
+            addMarker(sgfX, sgfY, Go::Mark::triangle);
+            break;
+
+        case EditMode::addSquare:
+            addMarker(sgfX, sgfY, Go::Mark::square);
+            break;
+
+        case EditMode::removeMarker:
+            removeMarker(sgfX, sgfY);
+            break;
+    }
+}
+
+/**
+    RightButton Down
+*/
+void BoardWidget::onRButtonDown(QMouseEvent* /*e*/){
+    document()->getUndoStack()->undo();
+}
+
+/**
+  get line position
+*/
+void BoardWidget::getGridLinePosition(int x, int y, int gridSize, int x1, int y1, int x2, int y2, QLineF& line) const{
+    if (flipHorizontally){
+        x1 = vLines.size() - x1 - 1;
+        x2 = vLines.size() - x2 - 1;
+    }
+
+    if (flipVertically){
+        y1 = hLines.size() - y1 - 1;
+        y2 = hLines.size() - y2 - 1;
+    }
+
+    qreal xx1, yy1, xx2, yy2;
+    if (rotate == 0){
+        xx1 = x + x1 * gridSize;
+        xx2 = x + x2 * gridSize;
+        yy1 = y + y1 * gridSize;
+        yy2 = y + y2 * gridSize;
+    }
+    else if (rotate == 1){
+        xx1 = x + (hLines.size() - y1 - 1) * gridSize;
+        xx2 = x + (hLines.size() - y2 - 1) * gridSize;
+        yy1 = y + x1 * gridSize;
+        yy2 = y + x2 * gridSize;
+    }
+    else if (rotate == 2){
+        xx1 = x + (vLines.size() - x1 - 1) * gridSize;
+        xx2 = x + (vLines.size() - x2 - 1) * gridSize;
+        yy1 = y + (hLines.size() - y1 - 1) * gridSize;
+        yy2 = y + (hLines.size() - y2 - 1) * gridSize;
+    }
+    else if (rotate == 3){
+        xx1 = x + y1 * gridSize;
+        xx2 = x + y2 * gridSize;
+        yy1 = y + (vLines.size() - x1 - 1) * gridSize;
+        yy2 = y + (vLines.size() - x2 - 1) * gridSize;
+    }
+
+    line.setLine(xx1, yy1, xx2, yy2);
+}
+
+/**
+  get grid size
+*/
+qreal BoardWidget::getGridSize() const{
+    if ((rotate % 2) == 0)
+        return fabs(vLines[1]->line().x1() - vLines[0]->line().x1());
+    else
+        return fabs(vLines[1]->line().y1() - vLines[0]->line().y1());
+}
+
+/**
+  grid coordinate to view coordinate
+*/
+void BoardWidget::sgfToViewCoordinate(int sgfX, int sgfY, qreal& boardX, qreal& boardY) const{
+    if ((rotate % 2) == 0){
+        boardX = vLines[sgfX]->line().x1();
+        boardY = hLines[sgfY]->line().y1();
     }
     else{
-        QFileInfo finfo( settings.value("sound/path").toString() );
-        if (finfo.exists())
-            setStoneSoundPath(finfo.filePath());
+        boardX = hLines[sgfY]->line().x1();
+        boardY = vLines[sgfX]->line().y1();
     }
 }
 
 /**
-* paint board to boardWidget
+  view coordinate to sgf coordinate
 */
-void BoardWidget::paintBoard(){
-    if (offscreenBuffer1.isNull())
-        return;
+void BoardWidget::viewToSgfCoordinate(qreal boardX, qreal boardY, int& sgfX, int& sgfY) const{
+    qreal size = getGridSize();
 
-    offscreenBuffer1.fill(Qt::transparent);
-    paintBoard(&offscreenBuffer1, showCoordinates, false);
-    offscreenBuffer2 = QPixmap();
-    repaint();
-}
-
-/**
-* paint board to paint device.
-*/
-void BoardWidget::paintBoard(QPaintDevice* pd, bool showCoordinate, bool monochrome){
-    QPainter p(pd);
-
-    int boardType_ = -1;
-    int blackType_ = -1;
-    int whiteType_ = -1;
-    QColor blackColor_ = Qt::black;
-    QColor whiteColor_ = Qt::white;
-    QColor focusBlackColor_ = Qt::white;
-    QColor focusWhiteColor_ = Qt::black;
-    if (monochrome){
-        qSwap(boardType, boardType_);
-        qSwap(blackType, blackType_);
-        qSwap(whiteType, whiteType_);
-        qSwap(blackColor, blackColor_);
-        qSwap(whiteColor, whiteColor_);
-        qSwap(focusBlackColor, focusBlackColor_);
-        qSwap(focusWhiteColor, focusWhiteColor_);
-    }
-
-    paintWidth  = pd->width();
-    paintHeight = pd->height();
-
-    p.setRenderHints(QPainter::Antialiasing/*|QPainter::TextAntialiasing|QPainter::SmoothPixmapTransform*/);
-    QFont font;
-    font.setStyleHint(QFont::SansSerif);
-    font.setWeight(QFont::Normal);
-    font.setStyleStrategy(QFont::PreferAntialias);
-    p.setFont(font);
-
-    drawBoard(p, 8.0, showCoordinate);
-    drawStonesAndMarkers(p);
-    drawTerritories(p);
-
-    if (monochrome){
-        qSwap(boardType, boardType_);
-        qSwap(blackType, blackType_);
-        qSwap(whiteType, whiteType_);
-        qSwap(blackColor, blackColor_);
-        qSwap(whiteColor, whiteColor_);
-        qSwap(focusBlackColor, focusBlackColor_);
-        qSwap(focusWhiteColor, focusWhiteColor_);
-    }
-
-    // if pd is not offscreen buffer, redraw offscreenBuffer1 because reset buffer for boardWidget control.
-    if (pd != &offscreenBuffer1)
-        paintBoard();
-}
-
-/**
-* print
-*/
-void BoardWidget::print(QPrinter* printer){
-    int  boardType_  = -1;    // black and white
-    int  whiteType_  = -1;    // fill color
-    int  blackType_  = -1;    // fill color
-    bool showNumber_ = true;
-    int  moveNumber_ = -1;
-    QColor blackColor_ = Qt::black;
-    QColor whiteColor_ = Qt::white;
-    QColor focusBlackColor_ = Qt::white;
-    QColor focusWhiteColor_ = Qt::black;
-
-    qSwap(boardType, boardType_);
-    qSwap(whiteType, whiteType_);
-    qSwap(blackType, blackType_);
-    qSwap(showMoveNumber, showNumber_);
-    qSwap(showMoveNumberCount, moveNumber_);
-    qSwap(blackColor, blackColor_);
-    qSwap(whiteColor, whiteColor_);
-    qSwap(focusBlackColor, focusBlackColor_);
-    qSwap(focusWhiteColor, focusWhiteColor_);
-
-    paintWidth  = printer->width();
-    paintHeight = printer->height();
-
-    QPainter p(printer);
-    for (int i=0; i<printer->numCopies(); ++i){
-        board.clear();
-        board.resize(ysize);
-        for(int i=0; i<ysize; ++i)
-            board[i].resize(xsize);
-        BoardBuffer buf = board;
-
-        print( *printer, p, buf );
-    }
-
-    p.end();
-
-    qSwap(boardType, boardType_);
-    qSwap(whiteType, whiteType_);
-    qSwap(blackType, blackType_);
-    qSwap(showMoveNumber, showNumber_);
-    qSwap(showMoveNumberCount, moveNumber_);
-    qSwap(blackColor, blackColor_);
-    qSwap(whiteColor, whiteColor_);
-    qSwap(focusBlackColor, focusBlackColor_);
-    qSwap(focusWhiteColor, focusWhiteColor_);
-
-    createBoardBuffer();
-    paintBoard();
-}
-
-void BoardWidget::print(QPrinter& printer, QPainter& p, BoardBuffer& buf){
-    p.save();
-
-    p.setFont( printFont );
-
-    int startNumber = 1;
-    int endNumber = 0;
-    int moveNumberInPage = 0;
-    QString rangai;
-    QStringList comments;
-
-    int page = 0;
-    int fig = 0;
-    newPage(printer, p, page, fig, moveNumberInPage);
-    printBoard(printer, p, buf, page, fig);
-
-    if (printType < 3){
-        printNodeList(printer, p, nodeList, page, fig, startNumber, endNumber, moveNumberInPage, buf, rangai, comments);
+    if ((rotate % 2) == 0){
+        sgfX = (fabs(boardX - vLines[0]->line().x1()) + size / 2.0) / size;
+        sgfY = (fabs(boardY - hLines[0]->line().y1()) + size / 2.0) / size;
     }
     else{
-        go::nodePtr node = goData.root;
-        printBranch(printer, p, node, page, fig, startNumber, endNumber, moveNumberInPage, buf, rangai, comments);
+        sgfX = (fabs(boardY - vLines[0]->line().y1()) + size / 2.0) / size;
+        sgfY = (fabs(boardX - hLines[0]->line().x1()) + size / 2.0) / size;
     }
+}
 
-    printRangai(printer, p, page, fig, startNumber, endNumber, moveNumberInPage, rangai, comments);
+void BoardWidget::setVCoordinatePosition(int pos, const QRectF& rect, QGraphicsSimpleTextItem* left, QGraphicsSimpleTextItem* right){
+    if (rotate == 0){
+        qreal x1 = board->rect().left();
+        qreal x2 = board->rect().right();
+        qreal y1 = hLines[pos]->line().y1();
+        qreal y2 = y1;
+        left->setPos(x1 - (rect.width() - left->boundingRect().width()) / 2.0 - left->boundingRect().width() - 4
+                   , y1 - left->boundingRect().height() / 2);
+        right->setPos(x2 + (rect.width() - right->boundingRect().width()) / 2.0 + 4
+                    , y2 - right->boundingRect().height() / 2);
+    }
+    else if (rotate == 1){
+        qreal x1 = hLines[pos]->line().x1();
+        qreal x2 = x1;
+        qreal y1 = board->rect().top();
+        qreal y2 = board->rect().bottom();
+        left->setPos(x1 - left->boundingRect().width() / 2
+                   , y1 - left->boundingRect().height() - 4);
+        right->setPos(x2 - right->boundingRect().width() / 2
+                    , y2 + 4);
+    }
+    else if (rotate == 2){
+        qreal x1 = board->rect().right();
+        qreal x2 = board->rect().left();
+        qreal y1 = hLines[pos]->line().y1();
+        qreal y2 = y1;
+        left->setPos(x1 + (rect.width() - left->boundingRect().width()) / 2.0 + 4
+                   , y1 - left->boundingRect().height() / 2);
+        right->setPos(x2 - (rect.width() - right->boundingRect().width()) / 2.0 - right->boundingRect().width() - 4
+                    , y2 - right->boundingRect().height() / 2);
+    }
+    else if (rotate == 3){
+        qreal x1 = hLines[pos]->line().x1();
+        qreal x2 = x1;
+        qreal y1 = board->rect().bottom();
+        qreal y2 = board->rect().top();
+        left->setPos(x1 - left->boundingRect().width() / 2
+                   , y1 + 4);
+        right->setPos(x2 - right->boundingRect().width() / 2
+                    , y2 - right->boundingRect().height() - 4);
+    }
+}
 
-    p.restore();
+void BoardWidget::setHCoordinatePosition(int pos, const QRectF& rect, QGraphicsSimpleTextItem* top, QGraphicsSimpleTextItem* bottom){
+    if (rotate == 0){
+        qreal x1 = vLines[pos]->line().x1();
+        qreal x2 = x1;
+        qreal y1 = board->rect().top();
+        qreal y2 = board->rect().bottom();
+        top->setPos(x1 - top->boundingRect().width() / 2
+                  , y1 - top->boundingRect().height() - 4);
+        bottom->setPos(x2 - bottom->boundingRect().width() / 2
+                     , y2 + 4);
+    }
+    else if (rotate == 1){
+        qreal x1 = board->rect().right();
+        qreal x2 = board->rect().left();
+        qreal y1 = vLines[pos]->line().y1();
+        qreal y2 = y1;
+        top->setPos(x1 + (rect.width() - top->boundingRect().width()) / 2 + 4
+                  , y1 - top->boundingRect().height() / 2);
+        bottom->setPos(x2 - (rect.width() - bottom->boundingRect().width()) / 2 - bottom->boundingRect().width() - 4
+                     , y2 - bottom->boundingRect().height() / 2);
+    }
+    else if (rotate == 2){
+        qreal x1 = vLines[pos]->line().x1();
+        qreal x2 = x1;
+        qreal y1 = board->rect().bottom();
+        qreal y2 = board->rect().top();
+        top->setPos(x1 - top->boundingRect().width() / 2
+                  , y1 + 4);
+        bottom->setPos(x2 - bottom->boundingRect().width() / 2
+                     , y2 - bottom->boundingRect().height() - 4);
+    }
+    else if (rotate == 3){
+        qreal x1 = board->rect().left();
+        qreal x2 = board->rect().right();
+        qreal y1 = vLines[pos]->line().y1();
+        qreal y2 = y1;
+        top->setPos(x1 - (rect.width() - top->boundingRect().width()) / 2 - top->boundingRect().width() - 4
+                  , y1 - top->boundingRect().height() / 2);
+        bottom->setPos(x2 + (rect.width() - bottom->boundingRect().width()) / 2 + 4
+                     , y2 - bottom->boundingRect().height() / 2);
+    }
 }
 
 /**
-* print node list
-*
-* print for:
-*   current board
-*
-*
+  get next color
 */
-void BoardWidget::printNodeList(QPrinter& printer, QPainter& p, const go::nodeList& nodeList, int& page, int& fig, int& startNumber, int& endNumber, int& moveNumberInPage, BoardBuffer& buf, QString& rangai, QStringList& comments){
-    foreach (const go::nodePtr& node, nodeList){
-        printNode(printer, p, node, page, endNumber, moveNumberInPage, buf, rangai, comments);
+Go::Color BoardWidget::getNextColor() const{
+    Go::NodePtr node = currentNode;
+    while(node){
+        if (node->nextColor == Go::white)
+            return Go::white;
+        else if (node->nextColor == Go::black)
+            return Go::black;
+        else if (node->color == Go::white)
+            return Go::black;
+        else if (node->color == Go::black)
+            return Go::white;
 
-        if (printType == 0 && node == currentNode)
-            break;
-        else if (printType == 2 && moveNumberInPage == printMovesPerPage){
-            printRangai(printer, p, page, fig, startNumber, endNumber, moveNumberInPage, rangai, comments);
-            newPage(printer, p, page, fig, moveNumberInPage);
-            printBoard(printer, p, buf, page, fig);
-            startNumber = endNumber + 1;
-        }
+        node = node->parent();
     }
+    return Go::empty;
 }
 
-void BoardWidget::printBranch(QPrinter& printer, QPainter& p, go::nodePtr node, int& page, int& fig, int& startNumber, int& endNumber, int& moveNumberInPage, BoardBuffer& buf, QString& rangai, QStringList& comments){
-    printNode(printer, p, node, page, endNumber, moveNumberInPage, buf, rangai, comments);
+/**
+  Set Document
+*/
+void BoardWidget::setDocument(SgfDocument* doc){
+    document_ = doc;
+    setCurrentGame(doc->gameList[0], true);
+};
 
-    go::nodeList::iterator iter = node->childNodes.begin();
-    if (iter == node->childNodes.end())
+/**
+  Set Current Game
+*/
+void BoardWidget::setCurrentGame(Go::NodePtr game, bool forceChange){
+    if (forceChange == false && game == currentGame)
         return;
 
-    bool craeteNewPage = node->childNodes.size() > 1 || (printType == 4 && moveNumberInPage == printMovesPerPage);
-    BoardBuffer board2, buf2;
-    if ( craeteNewPage ){
-        board2 = board;
-        buf2   = buf;
-    }
+    currentGame = game;
+    gameInformation = currentGame->getInformation();
+    currentNodeList.clear();
 
-    int startNumber2 = startNumber;
-    int endNumber2   = endNumber;
-    int moveNumberInPage2 = moveNumberInPage;
+    // create board items(board, shadow, lines, coordinate)
+    createBoard();
 
-    while (++iter != node->childNodes.end()){
-        printRangai(printer, p, page, fig, startNumber, endNumber, moveNumberInPage, rangai, comments);
+    emit currentGameChanged(currentGame);
 
-        startNumber = 1;
-        endNumber   = 0;
-        moveNumberInPage = 0;
-
-        newPage(printer, p, page, fig, moveNumberInPage);
-        printBoard(printer, p, buf, page, fig);
-        printBranch(printer, p, *iter, page, fig, startNumber, endNumber, moveNumberInPage, buf, rangai, comments);
-
-        board = board2;
-        buf   = buf2;
-    }
-
-    if ( craeteNewPage ){
-        printRangai(printer, p, page, fig, startNumber, endNumber, moveNumberInPage, rangai, comments);
-        newPage(printer, p, page, fig, moveNumberInPage2);
-        printBoard(printer, p, buf, page, fig);
-        startNumber2 = endNumber2 + 1;
-    }
-
-    startNumber = startNumber2;
-    endNumber   = endNumber2;
-    moveNumberInPage = moveNumberInPage2;
-
-    iter = node->childNodes.begin();
-    printBranch(printer, p, *iter, page, fig, startNumber, endNumber, moveNumberInPage, buf, rangai, comments);
-}
-
-void BoardWidget::printNode(QPrinter& printer, QPainter& p, go::nodePtr node, int page, int& moveNumber, int& moveNumberInPage, BoardBuffer& buf, QString& rangai, QStringList& comments){
-    p.save();
-
-    QFont font( p.font() );
-    if (node->isStone() && !node->isPass()){
-        ++moveNumber;
-        ++moveNumberInPage;
-
-        int bx, by;
-        sgfToBoardCoordinate(node->position.x, node->position.y, bx, by);
-        board[by][bx].color  = node->color;
-        board[by][bx].number = moveNumber;
-        removeDeadStones(bx, by);
-
-        if (buf[by][bx].empty()){
-            drawStone(p, bx, by, node->color);
-            buf[by][bx].color  = node->color;
-            buf[by][bx].number = moveNumber;
-
-            if (moveNumber < 10)
-                font.setPointSizeF(boxSize * 0.41);
-            else if (moveNumber < 99)
-                font.setPointSizeF(boxSize * 0.38);
-            else
-                font.setPointSizeF(boxSize * 0.35);
-
-            font.setWeight(QFont::Black);
-            p.setFont(font);
-
-            QString s = QString("%1").arg(moveNumber);
-            p.setPen( node->isBlack() ? Qt::white : Qt::black );
-            p.drawText(xlines[bx] - boxSize, ylines[by] - boxSize, boxSize * 2, boxSize * 2, Qt::AlignCenter, s);
-        }
-        else{
-            QString s = QString( tr("%1(%2)") ).arg(moveNumber).arg( getXYString(bx, by) );
-            if (!rangai.isEmpty())
-                rangai.append(", ");
-            rangai.append(s);
-        }
-    }
-
-    if (printIncludeComments && node->comment.isEmpty() == false)
-        comments.push_back( tr("Move %1: " ).arg(moveNumber).append(node->comment) );
-
-    p.restore();
-}
-
-void BoardWidget::printHeader(QPrinter& printer, QPainter& p, int& page){
-    p.save();
-
-    QMap<QString, QString> props;
-    props.insert("file", printFileName);
-    props.insert("page", QString::number(page));
-
-    QRect r = p.boundingRect(0, 0, printer.width(), 0, Qt::AlignTop|Qt::AlignHCenter, "AAA");
-    headerRect.setRect(0, 0, printer.width(), r.height()+5);
-
-    QString header1, header2, header3;
-    replaceSgfProperty(&goData, headerLeftFormat,   header1, props);
-    replaceSgfProperty(&goData, headerCenterFormat, header2, props);
-    replaceSgfProperty(&goData, headerRightFormat,  header3, props);
-
-    p.drawText(headerRect, Qt::AlignTop|Qt::AlignLeft,    header1);
-    p.drawText(headerRect, Qt::AlignTop|Qt::AlignHCenter, header2);
-    p.drawText(headerRect, Qt::AlignTop|Qt::AlignRight,   header3);
-
-    p.setPen( QPen(Qt::gray, 2) );
-    p.drawLine( 0, headerRect.bottom(), printer.width(), headerRect.bottom() );
-
-    headerRect.setBottom( headerRect.bottom() + 10 );
-
-    p.restore();
-}
-
-void BoardWidget::printFooter(QPrinter& printer, QPainter& p, int& page){
-    p.save();
-
-    QMap<QString, QString> props;
-    props.insert("file", printFileName);
-    props.insert("page", QString::number(page));
-
-    QRect r = p.boundingRect(0, 0, printer.width(), 0, Qt::AlignBottom|Qt::AlignHCenter, "AAA");
-    footerRect.setRect(0, printer.height()-r.height()-5, printer.width(), r.height()+5);
-
-    QString footer1, footer2, footer3;
-    replaceSgfProperty(&goData, footerLeftFormat,   footer1, props);
-    replaceSgfProperty(&goData, footerCenterFormat, footer2, props);
-    replaceSgfProperty(&goData, footerRightFormat,  footer3, props);
-
-    p.drawText(footerRect, Qt::AlignBottom|Qt::AlignLeft,    footer1);
-    p.drawText(footerRect, Qt::AlignBottom|Qt::AlignHCenter, footer2);
-    p.drawText(footerRect, Qt::AlignBottom|Qt::AlignRight,   footer3);
-
-    p.setPen( QPen(Qt::gray, 2) );
-    p.drawLine(0, footerRect.top(), printer.width(), footerRect.top());
-
-    footerRect.setTop( footerRect.top() - 10);
-
-    p.restore();
-}
-
-void BoardWidget::printTitle(QPrinter& printer, QPainter& p, int& page){
-    p.save();
-
-    QMap<QString, QString> props;
-    props.insert("file", printFileName);
-    props.insert("page", QString::number(page));
-
-    QFont f(p.font());
-    f.setPointSizeF( printFont.pointSizeF() * 1.5 );
-    p.setFont(f);
-
-    QRect r = p.boundingRect(0, 0, printer.width(), 0, Qt::AlignTop|Qt::AlignLeft, "AAA");
-    headerRect.setRect(0, headerRect.bottom(), printer.width(), r.height()+7);
-    if (goData.root->gameName.isEmpty() == false)
-        p.drawText(headerRect, Qt::AlignTop|Qt::AlignLeft, goData.root->gameName);
-    else if (goData.root->event.isEmpty() == false)
-        p.drawText(headerRect, Qt::AlignTop|Qt::AlignLeft, goData.root->event);
-
-    f.setPointSizeF( printFont.pointSizeF() );
-    p.setFont(f);
-
-    int center = headerRect.width() / 2;
-    int space  = 80;
-    r = p.boundingRect(0, 0, 0, 0, Qt::AlignTop|Qt::AlignLeft, "AAA");
-    headerRect.setRect( 0, headerRect.bottom(), printer.width(), r.height()+5 );
-    p.drawText(0, headerRect.top(), center, headerRect.height(), Qt::AlignTop|Qt::AlignLeft, tr("Black"));
-    p.drawText(space, headerRect.top(), center-space, headerRect.height(), Qt::AlignTop|Qt::AlignLeft, goData.root->blackPlayer + " " + goData.root->blackRank);
-    p.drawText(center, headerRect.top(), headerRect.width()-center, headerRect.height(), Qt::AlignTop|Qt::AlignLeft, tr("White"));
-    p.drawText(center+space, headerRect.top(), headerRect.width()-center-space, headerRect.height(), Qt::AlignTop|Qt::AlignLeft, goData.root->whitePlayer + " " + goData.root->whiteRank);
-
-    headerRect.setRect( 0, headerRect.bottom(), printer.width(), r.height()+5 );
-    p.drawText(0, headerRect.top(), center, headerRect.height(), Qt::AlignTop|Qt::AlignLeft, tr("Date"));
-    p.drawText(space, headerRect.top(), center-space, headerRect.height(), Qt::AlignTop|Qt::AlignLeft, goData.root->date);
-    p.drawText(center, headerRect.top(), headerRect.width()-center, headerRect.height(), Qt::AlignTop|Qt::AlignLeft, tr("Result"));
-    p.drawText(center+space, headerRect.top(), headerRect.width()-center-space, headerRect.height(), Qt::AlignTop|Qt::AlignLeft, goData.root->result);
-
-    p.setPen( QPen(Qt::gray, 2) );
-    p.drawLine( 0, headerRect.bottom(), printer.width(), headerRect.bottom() );
-
-    headerRect.setBottom( headerRect.bottom() + 10);
-
-    p.restore();
-}
-
-void BoardWidget::printCaption(QPrinter& printer, QPainter& p, int& fig, int startNumber, int endNumber, bool draw){
-    p.setTransform(QTransform());
-
-    p.save();
-
-    QFont f(p.font());
-    f.setPointSizeF( printFont.pointSizeF() * 1.5 );
-    p.setFont(f);
-
-    QString text = QString( tr("Figure %1 (%2 - %3)") ).arg(draw ? ++fig : fig+1).arg(startNumber).arg(endNumber);
-    QRect r = p.boundingRect(0, headerRect.bottom()+5, qMin(paintHeight, paintWidth), printer.height(), Qt::AlignHCenter, text);
-
-    if (draw == true)
-        p.drawText(r, Qt::AlignHCenter, text);
-
-    p.restore();
-
-    QTransform transform;
-    transform.translate(0, r.bottom() + 5);
-    p.setTransform(transform);
-
-    if (draw == false){
-        paintHeight -= 25 + r.height();
-        if (paintHeight > paintWidth)
-            paintHeight = paintWidth;
-        else
-            paintWidth = paintHeight;
-    }
-}
-
-void BoardWidget::printRangai(QPrinter& printer, QPainter& p, int& page, int& fig, int& startNumber, int& endNumber, int& moveNumberInPage, QString& rangai, QStringList& comments){
-    printCaption(printer, p, fig, startNumber, endNumber, true);
-
-    p.save();
-
-    QRect r, r2;
-    if (printer.height() > printer.width()){
-        r.setRect(0, coordinatesRect.bottom() + 10, printer.width(), printer.height() - coordinatesRect.bottom() - 10);
-        p.drawText(r, Qt::TextWordWrap|Qt::AlignLeft, rangai, &r2);
-    }
-    else{
-        r.setRect(coordinatesRect.right() + 15, 0, printer.width() - coordinatesRect.right() - 10, coordinatesRect.height());
-        p.drawText(r, Qt::TextWordWrap|Qt::AlignLeft, rangai, &r2);
-    }
-
-    if (rangai.isEmpty() == false)
-        r.setTop( r2.bottom() + 10 );
-
-    foreach(const QString comment, comments){
-        QRect test = p.boundingRect(r, Qt::AlignLeft, comment);
-        if (test.bottom() > footerRect.top() - p.transform().dy()){
-            newPage(printer, p, page, fig, moveNumberInPage);
-            r.setRect( 0, headerRect.bottom(), printer.width(), paintHeight );
-        }
-        QRect r2;
-        p.drawText(r.left(), r.top(), printer.width() - r.left(), printer.height()-r.top(), Qt::TextWordWrap|Qt::AlignLeft, comment, &r2);
-
-        r.moveTop( r2.bottom() + 10 );
-    }
-
-    p.restore();
-
-    rangai.clear();
-    comments.clear();
-}
-
-void BoardWidget::printBoard(QPrinter& printer, QPainter& p, BoardBuffer& buf, int& page, int& fig){
-    printCaption(printer, p, fig, 0, 0, false);
-    drawBoard(p, 14.0, printShowCoordinate);
-
-    buf = board;
-    for (int y=0; y<board.size(); ++y){
-        for (int x=0; x<board[y].size(); ++x){
-            if (board[y][x].black())
-                drawStone(p, x, y, go::black);
-            else if (board[y][x].white())
-                drawStone(p, x, y, go::white);
-        }
-    }
-}
-
-void BoardWidget::newPage(QPrinter& printer, QPainter& p, int& page, int& fig, int& moveNumberInPage){
-    ++page;
-    moveNumberInPage = 0;
-
-    if (page > 1)
-        printer.newPage();
-
-    p.setTransform( QTransform() );
-
-    printHeader(printer, p, page);
-    printFooter(printer, p, page);
-
-    static int paintHeightForFirstPage;
-    if (page == 1){
-        printTitle(printer, p, page);
-        paintHeightForFirstPage = footerRect.top() - headerRect.bottom();
-    }
-    paintHeight = paintHeightForFirstPage;
-}
-
-void BoardWidget::setPrintOption(int type, int movesPerPage, bool showCoordinate, bool includeComments, const QFont& font, const QString& fileName, const QString& headerLeftFormat_, const QString& headerCenterFormat_, const QString& headerRightFormat_, const QString& footerLeftFormat_, const QString& footerCenterFormat_, const QString& footerRightFormat_){
-    printType = type;
-    printMovesPerPage    = movesPerPage;
-    printShowCoordinate  = showCoordinate;
-    printIncludeComments = includeComments;
-    printFont            = font;
-    printFileName        = fileName;
-    headerLeftFormat     = headerLeftFormat_;
-    headerCenterFormat   = headerCenterFormat_;
-    headerRightFormat    = headerRightFormat_;
-    footerLeftFormat     = footerLeftFormat_;
-    footerCenterFormat   = footerCenterFormat_;
-    footerRightFormat    = footerRightFormat_;
+    setCurrentNode(game, forceChange);
 }
 
 /**
+  Set Current Node
 */
-void BoardWidget::clear(){
-    int xsize = goData.root->xsize;
-    int ysize = goData.root->ysize;
+void BoardWidget::setCurrentNode(Go::NodePtr node, bool forceChange){
+    if (forceChange == false && node == currentNode)
+        return;
 
-    setDirty(false);
-    goData.clear();
-    goData.root->xsize = xsize;
-    goData.root->ysize = ysize;
-    nodeList.clear();
-    capturedBlack = 0;
-    capturedWhite = 0;
-    setCurrentNode();
-    paintBoard();
-    undoStack.clear();
+    // get game information in new current node
+    currentNode = node;
+    gameInformation = currentNode->getInformation();
 
-    emit cleared();
-}
-
-/**
-*/
-void BoardWidget::getData(go::fileBase& data){
-    data.set(goData);
-}
-
-/**
-*/
-void BoardWidget::setData(const go::fileBase& data){
-    clear();
-    data.get(goData);
-    createBoardBuffer();
-    paintBoard();
-    nodeList.clear();
-    setCurrentNode();
-}
-
-/**
-*/
-void BoardWidget::addData(const go::fileBase& data){
-    go::data d;
-    data.get(d);
-
-    goData.rootList += d.rootList;
-    setDirty(true);
-}
-
-/*
-void BoardWidget::insertData(const go::nodePtr node, const go::fileBase& data){
-    go::data d;
-    data.get(d);
-
-    node->childNodes.push_back( d.root );
-    d.root->parent_ = node;
-
-    createNodeList();
-    setDirty(true);
-}
-*/
-
-void BoardWidget::setRoot(go::informationPtr& info){
-    goData.root = info;
-    nodeList.clear();
-    setCurrentNode();
-    paintBoard();
-    undoStack.clear();
-}
-
-bool BoardWidget::forward(int n){
-    go::nodeList::const_iterator iter = qFind(nodeList.begin(), nodeList.end(), currentNode);
-    if (iter == nodeList.end())
-        return false;
-
-    if (n > 0){
-        while (n > 0 && iter != nodeList.end()){
-            --n;
-            ++iter;
-        }
-        setCurrentNode(*iter);
-    }
-    else if (n < 0){
-        while (n < 0 && iter != nodeList.begin()){
-            ++n;
-            --iter;
-        }
-        setCurrentNode(*iter);
-    }
-
-    return true;
-}
-
-/**
-*/
-void BoardWidget::addStoneNodeCommand(int sgfX, int sgfY){
-    insertStoneNodeCommand(-1, sgfX, sgfY);
-}
-
-/**
-*/
-void BoardWidget::insertStoneNodeCommand(int index, int sgfX, int sgfY){
-    if (sgfX >= 0 && sgfY >= 0){
-        int boardX, boardY;
-        sgfToBoardCoordinate(sgfX, sgfY, boardX, boardY);
-
-        if (board[boardY][boardX].empty() == false)
-            return;
-
-        if (forward(sgfX, sgfY))
-            return;
-
-        board[boardY][boardX].color = color;
-        if (isKill(boardX, boardY) == false && isDead(boardX, boardY) == true){
-            board[boardY][boardX].color = go::empty;
-            return;
-        }
-    }
-
-    go::nodePtr node;
-    if (color == go::black)
-        node = go::createBlackNode(currentNode, sgfX, sgfY);
+    // create buffer
+    Go::NodeList::iterator iter = qFind(currentNodeList.begin(), currentNodeList.end(), currentNode);
+    if (iter == currentNodeList.end())
+        createBuffer(true);
     else
-        node = go::createWhiteNode(currentNode, sgfX, sgfY);
+        createBuffer(false);
 
-    if (index < 0)
-        addNodeCommand(currentNode, node);
-    else
-        insertNodeCommand(currentNode, index, node);
-}
-
-void BoardWidget::addMarkCommand(int sgfX, int sgfY, bool ctrl){
-    int boardX, boardY;
-    sgfToBoardCoordinate(sgfX, sgfY, boardX, boardY);
-
-    switch (editMode){
-        case eAlternateMove:
-            return;
-
-        case eAddBlack:
-            addStoneCommand(currentNode, sgfX, sgfY, go::black);
-            break;
-
-        case eAddWhite:
-            addStoneCommand(currentNode, sgfX, sgfY, go::white);
-            break;
-
-        case eAddEmpty:
-            addStoneCommand(currentNode, sgfX, sgfY, go::empty);
-            break;
-
-        case eLabelMark:{
-            QString label = createMarkCharacter(currentNode->marks);
-            addMarkCommand(currentNode, sgfX, sgfY, go::mark::eCharacter, label);
-            break;
-        }
-
-        case eManualMark:{
-            QString label = createMarkManually(currentNode->marks);
-            addMarkCommand(currentNode, sgfX, sgfY, go::mark::eCharacter, label);
-            break;
-        }
-
-        case eCircleMark:
-            addMarkCommand(currentNode, sgfX, sgfY, go::mark::eCircle);
-            break;
-
-        case eCrossMark:
-            addMarkCommand(currentNode, sgfX, sgfY, go::mark::eCross);
-            break;
-
-        case eSquareMark:
-            addMarkCommand(currentNode, sgfX, sgfY, go::mark::eSquare);
-            break;
-
-        case eTriangleMark:
-            addMarkCommand(currentNode, sgfX, sgfY, go::mark::eTriangle);
-            break;
-
-        case eDeleteMarker:
-            deleteMarkCommand(currentNode, sgfX, sgfY);
-            break;
-
-        default:
-            return;
-    }
-}
-
-/**
-*/
-void BoardWidget::addNodeCommand(go::nodePtr parentNode, go::nodePtr childNode, bool select){
-    if (editMode == eTutorBothSides || editMode == eTutorOneSide)
-        return;
-
-    undoStack.push( new AddNodeCommand(this, parentNode, childNode, select) );
-}
-
-/**
-*/
-void BoardWidget::insertNodeCommand(go::nodePtr parentNode, int index, go::nodePtr childNode, bool select){
-    if (editMode == eTutorBothSides || editMode == eTutorOneSide)
-        return;
-
-    undoStack.push( new InsertNodeCommand(this, parentNode, index, childNode, select) );
-}
-
-/**
-*/
-void BoardWidget::deleteNodeCommand(go::nodePtr node, bool deleteChildren){
-    if (editMode == eTutorBothSides || editMode == eTutorOneSide)
-        return;
-    else if( node == goData.root )
-        return;
-
-    undoStack.push( new DeleteNodeCommand(this, node, deleteChildren) );
-}
-
-/**
-*/
-void BoardWidget::addStoneCommand(go::nodePtr node, int sgfX, int sgfY, go::color color){
-    int boardX, boardY;
-    sgfToBoardCoordinate(sgfX, sgfY, boardX, boardY);
-
-    go::point p(sgfX, sgfY);
-    foreach(const go::stone& stone, node->emptyStones){
-        if (stone.p == p){
-            undoStack.push( new DeleteStoneCommand(this, node, sgfX, sgfY) );
-            return;
-        }
-    }
-    foreach(const go::stone& stone, node->blackStones){
-        if (stone.p == p){
-            undoStack.push( new DeleteStoneCommand(this, node, sgfX, sgfY) );
-            return;
-        }
-    }
-    foreach(const go::stone& stone, node->whiteStones){
-        if (stone.p == p){
-            undoStack.push( new DeleteStoneCommand(this, node, sgfX, sgfY) );
-            return;
-        }
-    }
-
-    if (color != go::empty && board[boardY][boardX].empty() == false)
-        return;
-
-    go::nodePtr stoneNode( node->isStone() ? go::nodePtr(new go::node(node)) : node );
-    if (stoneNode != node)
-        addNodeCommand(node, stoneNode);
-
-    undoStack.push( new AddStoneCommand(this, stoneNode, sgfX, sgfY, color) );
-}
-
-/**
-*/
-void BoardWidget::addMarkCommand(go::nodePtr node, int sgfX, int sgfY, go::mark::eType type, const QString& label){
-    switch (type){
-        case go::mark::eCross:
-        case go::mark::eCircle:
-        case go::mark::eSquare:
-        case go::mark::eTriangle:
-        case go::mark::eSelect:
-        case go::mark::eCharacter:
-            undoStack.push( new AddMarkCommand(this, node, sgfX, sgfY, type, label) );
-            break;
-
-        default:
-            return;
-    }
-}
-
-/**
-*/
-void BoardWidget::deleteMarkCommand(go::nodePtr node, int sgfX, int sgfY){
-    go::point p(sgfX, sgfY);
-    foreach(const go::mark& mark, node->marks){
-        if (mark.p == p){
-            undoStack.push( new DeleteMarkCommand(this, node, sgfX, sgfY) );
-            return;
-        }
-    }
-    foreach(const go::stone& stone, node->emptyStones){
-        if (stone.p == p){
-            undoStack.push( new DeleteMarkCommand(this, node, sgfX, sgfY) );
-            return;
-        }
-    }
-    foreach(const go::stone& stone, node->blackStones){
-        if (stone.p == p){
-            undoStack.push( new DeleteMarkCommand(this, node, sgfX, sgfY) );
-            return;
-        }
-    }
-    foreach(const go::stone& stone, node->whiteStones){
-        if (stone.p == p){
-            undoStack.push( new DeleteMarkCommand(this, node, sgfX, sgfY) );
-            return;
-        }
-    }
-}
-
-/**
-*/
-void BoardWidget::setMoveNumberCommand(go::nodePtr node, int moveNumber){
-    if( node->moveNumber == moveNumber )
-        return;
-
-    undoStack.push( new SetMoveNumberCommand(this, node, moveNumber) );
-}
-
-/**
-*/
-void BoardWidget::unsetMoveNumberCommand(go::nodePtr node){
-    if( node->moveNumber == -1 )
-        return;
-
-    undoStack.push( new UnsetMoveNumberCommand(this, node) );
-}
-
-/**
-*/
-void BoardWidget::setNodeNameCommand(go::nodePtr node, const QString& nodeName){
-    if( node->name == nodeName)
-        return;
-
-    undoStack.push( new SetNodeNameCommand(this, node, nodeName) );
-}
-
-/**
-*/
-void BoardWidget::setCommentCommand(go::nodePtr node, const QString& comment){
-    if( node->comment == comment)
-        return;
-
-//    undoStack.push( new SetCommentCommand(this, node, comment) );
-    node->comment = comment;
-    modifyNode(node);
-}
-
-void BoardWidget::rotateSgfCommand(){
-    RotateSgfCommand* command = new RotateSgfCommand(this, tr("Rotate SGF"));
-    rotateSgf(goData.root, command);
-    undoStack.push(command);
-
-    setDirty(true);
-}
-
-void BoardWidget::flipSgfHorizontallyCommand(){
-    RotateSgfCommand* command = new RotateSgfCommand(this, tr("Flip SGF Horizontally"));
-    flipSgf(goData.root, goData.root->xsize, 0, command);
-    undoStack.push(command);
-
-    setDirty(true);
-}
-
-void BoardWidget::flipSgfVerticallyCommand(){
-    RotateSgfCommand* command = new RotateSgfCommand(this, tr("Flip SGF Vertically"));
-    flipSgf(goData.root, 0, goData.root->ysize, command);
-    undoStack.push(command);
-
-    setDirty(true);
-}
-
-/**
-* add node at end of child list of parent node.
-*/
-void BoardWidget::addNode(go::nodePtr parent, go::nodePtr node, bool select){
-    parent->childNodes.push_back(node);
-    node->parent_ = parent;
-
-    setDirty(true);
-    emit nodeAdded(parent, node, select);
-
-    if (select)
-        setCurrentNode(node);
-}
-
-/**
-*/
-void BoardWidget::insertNode(go::nodePtr parent, int index, go::nodePtr node, bool select){
-    parent->childNodes.insert(parent->childNodes.begin() + index, node);
-    node->parent_ = parent;
-
-    setDirty(true);
-    emit nodeAdded(parent, node, select);
-
-    if (select)
-        setCurrentNode(node);
-}
-
-/**
-*/
-void BoardWidget::deleteNode(go::nodePtr node, bool deleteChildren){
-    if( node == goData.root )
-        return;
-
-    go::nodePtr parent = node->parent();
-    if (parent){
-        if (deleteChildren == false){
-            go::nodeList::iterator iter = qFind(parent->childNodes.begin(), parent->childNodes.end(), node);
-            go::nodeList::iterator iter2 = node->childNodes.begin();
-            while (iter2 != node->childNodes.end()){
-                iter = parent->childNodes.insert(iter, *iter2);
-                (*iter)->parent_ = parent;
-                ++iter;
-                ++iter2;
-            }
-        }
-
-        go::nodeList::iterator iter = qFind(parent->childNodes.begin(), parent->childNodes.end(), node);
-        if (iter != parent->childNodes.end())
-            parent->childNodes.erase(iter);
-    }
-
-    setCurrentNode(parent);
-
-    setDirty(true);
-    emit nodeDeleted(node, deleteChildren);
-
-    createNodeList();
-}
-
-/**
-*/
-void BoardWidget::modifyNode(go::nodePtr node, bool recreateBoardBuffer){
-    if (recreateBoardBuffer)
-        createBoardBuffer();
-    paintBoard();
-    setDirty(true);
-    emit nodeModified(node);
-}
-
-/**
-*/
-void BoardWidget::pass(){
-    if (editMode == ePlayGame){
-        if (color == playGame->color())
-            playGame->move(-1, -1);
-    }
-    else
-        addStoneNodeCommand(-1, -1);
-}
-
-/**
-* public slot
-*/
-void BoardWidget::setCurrentNode(go::nodePtr node){
-    if (editMode == eFinalScore)
-        return;
-
-    if (node == NULL)
-        node = goData.root;
-
-    if (currentNode == node && !nodeList.empty())
-        return;
-
-    currentNode  = node;
-    go::nodeList::iterator iter = qFind(nodeList.begin(), nodeList.end(), node);
-    if (iter == nodeList.end())
-        createNodeList();
-
-    createBoardBuffer();
-
-    if (playSound && node->isStone())
-        stoneSound.play();
-
-    paintBoard();
+    // emit
     emit currentNodeChanged(currentNode);
+
+    // play sound
+    if (playSound && inBoard(currentNode))
+        moveSound->play();
 }
 
 /**
+  create board
 */
-void BoardWidget::playGameLButtonDown(int sgfX, int sgfY){
-    if (color == playGame->color())
-        playGame->move(sgfX, sgfY);
-}
+void BoardWidget::createBoard(){
+    // delete lines and stars
+    qDeleteAll(hLines);
+    qDeleteAll(vLines);
+    hLines.clear();
+    vLines.clear();
 
-void BoardWidget::setBoardSize(int xsize, int ysize){
-    bool isWhiteFirst = whiteFirst();
-    clear();
-    goData.root->xsize = xsize;
-    goData.root->ysize = ysize;
-    whiteFirst(isWhiteFirst);
-    setCurrentNode();
+    qDeleteAll(stars);
+    stars.clear();
 
-    paintBoard();
-}
+    qDeleteAll(coordinateLeft);
+    qDeleteAll(coordinateRight);
+    qDeleteAll(coordinateTop);
+    qDeleteAll(coordinateBottom);
+    coordinateLeft.clear();
+    coordinateRight.clear();
+    coordinateTop.clear();
+    coordinateBottom.clear();
 
-void BoardWidget::rotateSgf(go::nodePtr node, QUndoCommand* command){
-    go::point p = node->position;
-    p.x = goData.root->ysize - node->position.y - 1;
-    p.y = node->position.x;
-    new MovePositionCommand(this, node, p, command);
+    board->setVisible(monochrome == false);
+    shadow->setVisible(monochrome == false);
 
-    go::nodeList::iterator iter = node->childNodes.begin();
-    while (iter != node->childNodes.end()){
-        rotateSgf(*iter, command);
-        ++iter;
+    // create lines
+    int xsize = gameInformation->xsize;
+    int ysize = gameInformation->ysize;
+    for (int y=0; y<ysize; ++y){
+        QGraphicsLineItem* item = scene()->addLine(0, 0, 0, 0, QPen(Qt::black));
+        item->setZValue(2);
+        hLines.push_back(item);
+    }
+    for (int x=0; x<xsize; ++x){
+        QGraphicsLineItem* item = scene()->addLine(0, 0, 0, 0, QPen(Qt::black));
+        item->setZValue(2);
+        vLines.push_back(item);
     }
 
-    rotateStoneSgf(node, node->emptyStones, command);
-    rotateStoneSgf(node, node->blackStones, command);
-    rotateStoneSgf(node, node->whiteStones, command);
-    rotateMarkSgf(node, node->marks, command);
-    rotateMarkSgf(node, node->blackTerritories, command);
-    rotateMarkSgf(node, node->whiteTerritories, command);
-}
+    // create stars
+    QList<int> xpos, ypos;
+    getStarPosition(xpos, ypos);
+    for (int y=0; y<ypos.size(); ++y)
+        for (int x=0; x<xpos.size(); ++x){
+            QGraphicsEllipseItem* item = scene()->addEllipse(x, y, 2, 2, QPen(Qt::black), QBrush(Qt::black));
+            item->setZValue(2);
+            stars.push_back(item);
+        }
 
-void BoardWidget::rotateStoneSgf(go::nodePtr node, go::stoneList& stoneList, QUndoCommand* command){
-    go::stoneList::iterator iter = stoneList.begin();
-    while (iter != stoneList.end()){
-        go::point p = iter->p;
-        p.x = goData.root->ysize - iter->p.y - 1;
-        p.y = iter->p.x;
-
-        new MoveStoneCommand(this, node, &(*iter), p, command);
-
-        ++iter;
+    // create coordinate
+    for (int i=gameInformation->ysize; i>0; --i){
+        QGraphicsSimpleTextItem* left  = scene()->addSimpleText(QString::number(i), QFont(coordinateFont, 10));
+        QGraphicsSimpleTextItem* right = scene()->addSimpleText(QString::number(i), QFont(coordinateFont, 10));
+        left->setZValue(2);
+        right->setZValue(2);
+        left->setBrush( QBrush(coordinateColor) );
+        right->setBrush( QBrush(coordinateColor) );
+        coordinateLeft.push_back(left);
+        coordinateRight.push_back(right);
     }
-}
-
-void BoardWidget::rotateMarkSgf(go::nodePtr node, go::markList& markList, QUndoCommand* command){
-    go::markList::iterator iter = markList.begin();
-    while (iter != markList.end()){
-        go::point p = iter->p;
-        p.x = goData.root->ysize - iter->p.y - 1;
-        p.y = iter->p.x;
-
-        new MoveMarkCommand(this, node, &(*iter), p, command);
-
-        ++iter;
-    }
-}
-
-void BoardWidget::flipSgf(go::nodePtr node, int xsize, int ysize, QUndoCommand* command){
-    go::point p = node->position;
-    if (xsize)
-        p.x = xsize - p.x - 1;
-    if (ysize)
-        p.y = ysize - p.y - 1;
-    new MovePositionCommand(this, node, p, command);
-
-    go::nodeList::iterator iter = node->childNodes.begin();
-    while (iter != node->childNodes.end()){
-        flipSgf(*iter, xsize, ysize, command);
-        ++iter;
+    for (int i=0; i<gameInformation->xsize; ++i){
+        int n = i % (document()->showCoordinateWithI ? 26 : 25);
+        if (document()->showCoordinateWithI == false && n > 7)
+            ++n;
+        QGraphicsSimpleTextItem* top    = scene()->addSimpleText(QString().sprintf("%c", 'A' + n), QFont(coordinateFont, 10));
+        QGraphicsSimpleTextItem* bottom = scene()->addSimpleText(QString().sprintf("%c", 'A' + n), QFont(coordinateFont, 10));
+        top->setZValue(2);
+        bottom->setZValue(2);
+        top->setBrush( QBrush(coordinateColor) );
+        bottom->setBrush( QBrush(coordinateColor) );
+        coordinateTop.push_back(top);
+        coordinateBottom.push_back(bottom);
     }
 
-    flipStoneSgf(node, node->emptyStones, xsize, ysize, command);
-    flipStoneSgf(node, node->blackStones, xsize, ysize, command);
-    flipStoneSgf(node, node->whiteStones, xsize, ysize, command);
-    flipMarkSgf(node, node->marks, xsize, ysize, command);
-    flipMarkSgf(node, node->blackTerritories, xsize, ysize, command);
-    flipMarkSgf(node, node->whiteTerritories, xsize, ysize, command);
-}
-
-void BoardWidget::flipStoneSgf(go::nodePtr node, go::stoneList& stoneList, int xsize, int ysize, QUndoCommand* command){
-    go::stoneList::iterator iter = stoneList.begin();
-    while (iter != stoneList.end()){
-        go::point pos = iter->p;
-        if (xsize)
-            pos.x = xsize - pos.x - 1;
-        if (ysize)
-            pos.y = ysize - pos.y - 1;
-
-        new MoveStoneCommand(this, node, &(*iter), pos, command);
-
-        ++iter;
-    }
-}
-
-void BoardWidget::flipMarkSgf(go::nodePtr node, go::markList& markList, int xsize, int ysize, QUndoCommand* command){
-    go::markList::iterator iter = markList.begin();
-    while (iter != markList.end()){
-        go::point pos = iter->p;
-        if (xsize)
-            pos.x = xsize - pos.x - 1;
-        if (ysize)
-            pos.y = ysize - pos.y - 1;
-
-        new MoveMarkCommand(this, node, &(*iter), pos, command);
-
-        ++iter;
-    }
-}
-
-void BoardWidget::setEditMode(eEditMode editMode){
-    if (this->editMode <= eDeleteMarker)
-        backupEditMode = this->editMode;
-    this->editMode = editMode;
-
-    repaint();
-}
-
-int  BoardWidget::rotateBoard(){
-    if (++rotateBoard_ > 3)
-        rotateBoard_ = 0;
-
-    createBoardBuffer();
-    paintBoard();
-
-    return rotateBoard_;
-}
-
-void BoardWidget::flipBoardHorizontally(bool flip){
-    flipBoardHorizontally_ = flip;
-
-    createBoardBuffer();
-    paintBoard();
-}
-
-void BoardWidget::flipBoardVertically(bool flip){
-    flipBoardVertically_ = flip;
-
-    createBoardBuffer();
-    paintBoard();
-}
-
-void BoardWidget::resetBoard(){
-    rotateBoard_ = 0;
-    flipBoardHorizontally_ = false;
-    flipBoardVertically_ = false;
-
-    createBoardBuffer();
-    paintBoard();
+    setItemsPosition();
 }
 
 /**
+  set scene items position
 */
-go::nodePtr BoardWidget::findNodeFromMoveNumber(int moveNumber){
-    go::nodeList::iterator iter = nodeList.begin();
+void BoardWidget::setItemsPosition(){
+    setItemsPosition(geometry());
+}
 
-    int number = 0;
-    while (iter != nodeList.end()){
-        if ((*iter)->isStone() && ++number == moveNumber)
-            return *iter;
-        ++iter;
+void BoardWidget::setItemsPosition(const QRectF& rect){
+    // get coordinate item size
+    QRectF coordinateRect;
+    foreach(QGraphicsSimpleTextItem* item, coordinateLeft){
+        coordinateRect.setWidth(qMax(coordinateRect.width(), item->boundingRect().width()));
+        coordinateRect.setHeight(qMax(coordinateRect.height(), item->boundingRect().height()));
+    }
+    foreach(QGraphicsSimpleTextItem* item, coordinateTop){
+        coordinateRect.setWidth(qMax(coordinateRect.width(), item->boundingRect().width()));
+        coordinateRect.setHeight(qMax(coordinateRect.height(), item->boundingRect().height()));
     }
 
-    return go::nodePtr();
+    // calculate board size
+    int width  = rect.width();
+    int height = rect.height();
+    if (showCoordinate){
+        width  -= coordinateRect.width()  * 2 + 10;
+        height -= coordinateRect.height() * 2 + 10;
+    }
+
+    int xsize = gameInformation->xsize;
+    int ysize = gameInformation->ysize;
+    if (rotate % 2)
+        qSwap(xsize, ysize);
+
+    int gridW = width  / (xsize + 1);
+    int gridH = height / (ysize + 1);
+    int gridSize = qMin(gridW, gridH);
+    int w = gridSize * (xsize - 1);
+    int h = gridSize * (ysize - 1);
+
+    int x = (rect.width() - w) / 2;
+    int y = (rect.height() - h) / 2;
+    int margin = gridSize * 0.6;
+    QRect boardRect(QPoint(x-margin, y-margin), QPoint(x+w+margin, y+h+margin));
+
+    // set position of shadow.
+    shadow->setRect(boardRect.left()+3, boardRect.top()+3, boardRect.width(), boardRect.height());
+
+    // set position of board.
+    board->setRect(boardRect);
+
+    // set position of vertical lines.
+    int i = 0;
+    foreach(QGraphicsLineItem* item, vLines){
+        QLineF line;
+        getGridLinePosition(x, y, gridSize, i, 0, i, hLines.size()-1, line);
+        item->setLine(line);
+        ++i;
+    }
+
+    // set position of horizontal lines.
+    i = 0;
+    foreach(QGraphicsLineItem* item, hLines){
+        QLineF line;
+        getGridLinePosition(x, y, gridSize, 0, i, vLines.size()-1, i, line);
+        item->setLine(line);
+        ++i;
+    }
+
+    // set position of stars.
+    QList<int> xpos, ypos;
+    getStarPosition(xpos, ypos);
+    for (int y=0, n=0; y<ypos.size(); ++y){
+        for (int x=0; x<xpos.size(); ++x, ++n){
+            qreal xx, yy;
+            sgfToViewCoordinate(xpos[x], ypos[y], xx, yy);
+            stars[n]->setRect(xx-2, yy-2, 4, 4);
+        }
+    }
+
+    // set positions of coordinate
+    for (int i=0; i<gameInformation->ysize; ++i){
+        setVCoordinatePosition(i, coordinateRect, coordinateLeft[i], coordinateRight[i]);
+        coordinateLeft[i]->setVisible(showCoordinate);
+        coordinateRight[i]->setVisible(showCoordinate);
+    }
+    for (int i=0; i<gameInformation->xsize; ++i){
+        setHCoordinatePosition(i, coordinateRect, coordinateTop[i], coordinateBottom[i]);
+        coordinateTop[i]->setVisible(showCoordinate);
+        coordinateBottom[i]->setVisible(showCoordinate);
+    }
+
+    // set position of stones and move number.
+    createStonePixmap();
+    createBoardItemList();
+
+    // set scene rect
+    QRect r = boardRect;
+    if (showCoordinate){
+        r.setLeft( r.left() - coordinateRect.width() - 5 );
+        r.setRight( r.right() + coordinateRect.width() + 5);
+        r.setTop( r.top() - coordinateRect.height() - 5 );
+        r.setBottom( r.bottom() + coordinateRect.height() + 5);
+    }
+    else{
+        r.setRight(shadow->rect().right());
+        r.setBottom(shadow->rect().bottom());
+    }
+    scene()->setSceneRect(r);
 }
 
 /**
+  set graphics text item position
 */
-void BoardWidget::createNodeList(){
-    nodeList.clear();
+void BoardWidget::setTextItemPosition(QGraphicsSimpleTextItem* text, int x, int y){
+    qreal size = getGridSize() * 0.95;
+    if (text){
+        qreal number_size;
+        if (text->text().size() > 2)
+            number_size = size * 0.36;
+        else if (text->text().size() > 1)
+            number_size = size * 0.44;
+        else
+            number_size = size * 0.5;
 
-    go::nodePtr node = currentNode;
-    while ((node = node->parent()) != NULL)
-        nodeList.push_front(node);
+        QFont f = text->font();
+        f.setPointSizeF(number_size);
+        text->setFont(f);
+        QRectF r = text->boundingRect();
 
-    nodeList.push_back( node = currentNode );
-    while (!node->childNodes.empty()){
-        node = node->childNodes.front();
-        nodeList.push_back(node);
+        qreal xx, yy;
+        sgfToViewCoordinate(x, y, xx, yy);
+        text->setPos(xx-r.width()*0.5, yy-r.height()*0.5);
     }
 }
 
 /**
+  create buffer
 */
-void BoardWidget::createBoardBuffer(){
-    xsize = (rotateBoard_ == 0 || rotateBoard_ == 2) ? goData.root->xsize : goData.root->ysize;
-    ysize = (rotateBoard_ == 0 || rotateBoard_ == 2) ? goData.root->ysize : goData.root->xsize;
+void BoardWidget::createBuffer(bool erase){
+    if (erase)
+        eraseBuffer();
+
+    // create boardBuffer
+    boardBuffer.clear();
+    boardBuffer.resize(gameInformation->ysize);
+    for (int i=0; i<boardBuffer.size(); ++i)
+        boardBuffer[i].resize(gameInformation->xsize);
+
+    number = 0;
+    moveNumber = 0;
     capturedBlack = 0;
     capturedWhite = 0;
-
-    board.clear();
-    board.resize(ysize);
-    for (int i=0; i<ysize; ++i)
-        board[i].resize(xsize);
-
-    currentMoveNumber = 0;
-    go::nodeList::iterator iter = nodeList.begin();
-    while (iter != nodeList.end()){
-        if ((*iter)->moveNumber > 0){
-            for (int y=0; y<board.size(); ++y)
-                for (int x=0; x<board[y].size(); ++x)
-                    board[y][x].number = 0;
-            currentMoveNumber = (*iter)->moveNumber - 1;
-        }
-        else if ( (*iter)->parent() &&
-                  ( (moveNumberMode == eResetInBranch && (*iter)->parent()->childNodes.size() > 1) ||
-                    (moveNumberMode == eResetInVariation && (*iter)->parent()->childNodes.size() > 1 && *iter != (*iter)->parent()->childNodes.front()) ) ){
-            for (int y=0; y<board.size(); ++y)
-                for (int x=0; x<board[y].size(); ++x)
-                    board[y][x].number = 0;
-            currentMoveNumber = 0;
-        }
-
-        if ((*iter)->isStone())
-            ++currentMoveNumber;
-
-        putStone(*iter, currentMoveNumber);
-        putDim(*iter);
-
-        if (*iter == currentNode)
-            break;
-
-        ++iter;
-    }
-
-    go::markList::iterator iter2 = currentNode->blackTerritories.begin();
-    while (iter2 != currentNode->blackTerritories.end()){
-        int boardX, boardY;
-        sgfToBoardCoordinate(iter2->p.x, iter2->p.y, boardX, boardY);
-        if (boardX >= 0 && boardX < xsize && boardY >= 0 && boardY < ysize){
-            board[boardY][boardX].color |= go::blackTerritory;
-        }
-        ++iter2;
-    }
-
-    iter2 = currentNode->whiteTerritories.begin();
-    while (iter2 != currentNode->whiteTerritories.end()){
-        int boardX, boardY;
-        sgfToBoardCoordinate(iter2->p.x, iter2->p.y, boardX, boardY);
-        if (boardX >= 0 && boardX < xsize && boardY >= 0 && boardY < ysize){
-            board[boardY][boardX].color |= go::whiteTerritory;
-        }
-        ++iter2;
-    }
-}
-
-void BoardWidget::drawBoard(QPainter& p, qreal pointSize, bool showCoordinates){
-    p.save();
-
-    QFont font = p.font();
-    font.setPointSizeF(pointSize);
-
-    p.setFont(font);
-    p.setPen(Qt::black);
-
-    drawBoardImage(p, showCoordinates);
-    drawCoordinates(p, showCoordinates);
-
-    p.restore();
-}
-
-/**
-*/
-void BoardWidget::drawBoardImage(QPainter& p, bool showCoordinates){
-    p.save();
-
-    QRectF coordRect = p.boundingRect(QRectF(0.0, 0.0, 1.0, 1.0), Qt::AlignCenter, "99999");
-    int w = static_cast<int>( (paintWidth  - (showCoordinates ? coordRect.width() : 0.0)) / xsize );
-    int h = static_cast<int>( (paintHeight - (showCoordinates ? coordRect.width() : 0.0)) / ysize );
-    boxSize = qMin(w, h);
-    w = boxSize * (xsize - 1);
-    h = boxSize * (ysize - 1);
-    int margin = int(boxSize * 0.5);
-
-    int l = (paintWidth - w) / 2;
-    int r = l + boxSize * (xsize - 1);
-    int t = (paintHeight - h) / 2;
-    int b = t + boxSize * (ysize - 1);
-
-    // create board and stone image
-    boardRect.setRect(l - margin, t - margin, w + margin * 2, h + margin * 2);
-    coordinatesRect = boardRect;
-    if (boardType >= 0){
-        boardImage2 = QPixmap(boardRect.size());
-        QPainter board(&boardImage2);
-        if (boardType == 0 || boardType == 1)
-            board.fillRect(0, 0, boardRect.width(), boardRect.height(), QBrush(boardImage1));
-        else
-            board.fillRect(0, 0, boardRect.width(), boardRect.height(), boardColor);
-    }
-
-    if (blackType == 0 || blackType == 1)
-        black2 = black1.scaled(boxSize, boxSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-    else{
-        black2 = QPixmap(boxSize, boxSize);
-        black2.fill( Qt::transparent );
-        QPainter p2(&black2);
-        p2.setRenderHints(QPainter::Antialiasing/*|QPainter::TextAntialiasing|QPainter::SmoothPixmapTransform*/);
-        p2.setPen(Qt::black);
-        p2.setBrush(blackColor);
-        p2.drawEllipse(1, 1, boxSize-2, boxSize-2);
-    }
-
-    if (whiteType == 0 || whiteType == 1)
-        white2 = white1.scaled(boxSize, boxSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-    else{
-        white2 = QPixmap(boxSize, boxSize);
-        white2.fill( Qt::transparent );
-        QPainter p2(&white2);
-        p2.setRenderHints(QPainter::Antialiasing/*|QPainter::TextAntialiasing|QPainter::SmoothPixmapTransform*/);
-        p2.setPen(Qt::black);
-        p2.setBrush(whiteColor);
-        p2.drawEllipse(1, 1, boxSize-2, boxSize-2);
-    }
-
-    if (boardType >= 0){
-        p.fillRect(boardRect.left()+3, boardRect.top()+3, boardRect.width(), boardRect.height(), QColor(10, 10, 10, 120));
-        p.drawPixmap(boardRect.topLeft(), boardImage2);
-    }
-
-    // horizontal line
-    ylines.clear();
-    for (int i=0; i<ysize; ++i){
-        QPen pen = p.pen();
-        pen.setWidth( i == 0 || i == ysize-1 ? 2 : 1 );
-        p.setPen(pen);
-
-        int y = t + i * boxSize;
-        p.drawLine(l, y, r, y);
-        ylines.push_back(y);
-    }
-
-    // vertical line
-    xlines.clear();
-    for (int i=0; i<xsize; ++i){
-        QPen pen = p.pen();
-        pen.setWidth( i == 0 || i == xsize-1 ? 2 : 1 );
-        p.setPen(pen);
-
-        int x = l + i * boxSize;
-        p.drawLine(x, t, x, b);
-        xlines.push_back(x);
-    }
-
-    // draw stars
-    QList<int> xstar, ystar;
-    getStartPosition(xstar, xsize);
-    getStartPosition(ystar, ysize);
-    for (int y=0; y<ystar.size(); ++y){
-        for (int x=0; x<xstar.size(); ++x){
-            int cx = xlines[ xstar[x] ];
-            int cy = ylines[ ystar[y] ];
-
-            QPainterPath path;
-            path.addEllipse(cx-3, cy-3, 6, 6);
-            p.fillPath(path, QBrush(Qt::black));
-        }
-    }
-
-    p.restore();
-}
-
-void BoardWidget::getStartPosition(QList<int>& star, int size){
-    if (size >= 7 && size <= 9){
-        star.push_back(2);
-        star.push_back(size-3);
-    }
-    else if (size > 9){
-        star.push_back(3);
-        star.push_back(size-4);
-        if (size % 2)
-            star.push_back(size / 2);
-    }
-}
-
-/**
-*/
-void BoardWidget::drawCoordinates(QPainter& p, bool showCoordinates){
-    if (showCoordinates == false)
-        return;
-
-    p.save();
-
-    p.setPen( coordinateColor );
-
-    QRect r = p.boundingRect(0, 0, 1, 1, Qt::AlignCenter, "999");
-
-    for (int i=0; i<xsize; ++i){
-        QString s;
-        if (rotateBoard_ == 0)
-            s = getXString(flipBoardHorizontally_ ? xsize-i-1 : i);
-        else if (rotateBoard_ == 1)
-            s = getYString(flipBoardHorizontally_ ? i : xsize-i-1);
-        else if (rotateBoard_ == 2)
-            s = getXString(flipBoardHorizontally_ ? i : xsize-i-1);
-        else if (rotateBoard_ == 3)
-            s = getYString(flipBoardHorizontally_ ? xsize-i-1 : i);
-
-        p.drawText(QRectF(xlines[i]-r.width()/2.0, boardRect.top()-r.height(), r.width(), r.height()), Qt::AlignCenter, s);
-        p.drawText(QRectF(xlines[i]-r.width()/2.0, boardRect.bottom()+5, r.width(), r.height()), Qt::AlignCenter, s);
-    }
-    coordinatesRect.setTop( boardRect.top() - r.height() );
-    coordinatesRect.setBottom( boardRect.bottom() + 5 + r.height() );
-
-    for (int i=0; i<ysize; ++i){
-        QString s;
-        if (rotateBoard_ == 0)
-            s = getYString(flipBoardVertically_ ? ysize-i-1 : i);
-        else if (rotateBoard_ == 1)
-            s = getXString(flipBoardVertically_ ? ysize-i-1 : i);
-        else if (rotateBoard_ == 2)
-            s = getYString(flipBoardVertically_ ? i : ysize-i-1);
-        else if (rotateBoard_ == 3)
-            s = getXString(flipBoardVertically_ ? i : ysize-i-1);
-
-        p.drawText(QRectF(boardRect.left()-r.width(), ylines[i]-r.height()/2.0, r.width(), r.height()), Qt::AlignCenter, s);
-        p.drawText(QRectF(boardRect.right()+3, ylines[i]-r.height()/2.0, r.width(), r.height()), Qt::AlignCenter, s);
-    }
-    coordinatesRect.setLeft( boardRect.left() - r.width() );
-    coordinatesRect.setRight( boardRect.right() + 3 + r.width() );
-
-    p.restore();
-}
-
-/**
-*/
-void BoardWidget::drawStonesAndMarkers(QPainter& p){
-    p.save();
-
-    QFont font(p.font());
-    font.setPointSizeF(boxSize * 0.5);
-    p.setFont(font);
-
-    drawStones(p);
-
-    p.setRenderHints(QPainter::Antialiasing|QPainter::TextAntialiasing);
-
-    if (currentNode->childNodes.size() > 1)
-        drawBranchMoves(p, currentNode->childNodes.begin(), currentNode->childNodes.end());
-
-    foreach(const go::mark& m, currentNode->marks){
-        if (m.t == go::mark::eCross)
-            drawCross(p, m);
-        else if (m.t == go::mark::eTriangle)
-            drawTriangle(p, m);
-        else if (m.t == go::mark::eCircle)
-            drawCircle(p, m);
-        else if (m.t == go::mark::eSquare)
-            drawSquare(p, m);
-        else if (m.t == go::mark::eSelect)
-            drawSelect(p, m);
-        else if (m.t == go::mark::eCharacter)
-            drawCharacter(p, m);
-    }
-
-    if (showMoveNumber && showMoveNumberCount == 0)
-        if (currentNode->isStone())
-            drawCurrentMark(p, currentNode);
-
-    p.restore();
-}
-
-void BoardWidget::drawStones(QPainter& p){
-    p.save();
-
-    QFont font( p.font() );
-
-    for (int y=0; y<board.size(); ++y){
-        for (int x=0; x<board[y].size(); ++x){
-            // draw stone
-            if (board[y][x].black())
-                drawStone(p, x, y, go::black, board[y][x].whiteTerritory() || board[y][x].dame() ? 0.4 : 1.0);
-            else if (board[y][x].white())
-                drawStone(p, x, y, go::white, board[y][x].blackTerritory() || board[y][x].dame() ? 0.4 : 1.0);
-
-            // draw dim
-            if (board[y][x].dim)
-                drawDim(p, x, y);
-
-            if (board[y][x].empty())
-                continue;
-
-            // draw move number
-            if (showMoveNumber == false || showMoveNumberCount == 0 || board[y][x].number == 0 || (showMoveNumberCount != -1 && currentMoveNumber - showMoveNumberCount + 1 > board[y][x].number))
-                continue;
-
-            if (board[y][x].number < 10)
-                font.setPointSizeF(boxSize * 0.41);
-            else if (board[y][x].number < 99)
-                font.setPointSizeF(boxSize * 0.38);
-            else
-                font.setPointSizeF(boxSize * 0.35);
-
-            font.setWeight(board[y][x].number == currentMoveNumber ? QFont::Black: QFont::Normal);
-            p.setFont(font);
-
-            QString s = QString("%1").arg(board[y][x].number);
-            p.setPen( board[y][x].number == currentMoveNumber ? board[y][x].black() ? focusBlackColor : focusWhiteColor : board[y][x].black() ? Qt::white : Qt::black );
-            p.drawText(QRectF(xlines[x] - boxSize * 0.5, ylines[y] - boxSize * 0.5, boxSize, boxSize), Qt::AlignCenter, s);
-        }
-    }
-
-    p.restore();
-}
-
-/**
-*/
-void BoardWidget::drawBranchMoves(QPainter& p, go::nodeList::iterator first, go::nodeList::iterator last){
-    if (showBranchMoves == false)
-        return;
-
-    p.save();
-    p.setPen( branchColor );
-
-    char s[] = "A";
-    while (first != last){
-        int boardX, boardY;
-        sgfToBoardCoordinate((*first)->getX(), (*first)->getY(), boardX, boardY);
-        if (boardX >= 0 && boardX < xsize && boardY >= 0 && boardY < ysize){
-            eraseImage(p, boardX, boardY);
-            p.drawText(xlines[boardX] - boxSize, ylines[boardY] - boxSize, boxSize * 2, boxSize * 2, Qt::AlignCenter, s);
-            ++s[0];
-        }
-        ++first;
-    }
-
-    p.restore();
-}
-
-/**
-*/
-void BoardWidget::drawCross(QPainter& p, const go::mark& mark){
-    QPainterPath path = createCrossPath();
-    drawMark(p, path, mark);
-}
-
-/**
-*/
-void BoardWidget::drawTriangle(QPainter& p, const go::mark& mark){
-    QPainterPath path = createTrianglePath();
-    drawMark(p, path, mark);
-}
-
-/**
-*/
-void BoardWidget::drawCircle(QPainter& p, const go::mark& mark){
-    QPainterPath path = createCirclePath();
-    drawMark(p, path, mark);
-}
-
-/**
-*/
-void BoardWidget::drawSquare(QPainter& p, const go::mark& mark){
-    QPainterPath path = createSquarePath();
-    drawMark(p, path, mark);
-}
-
-/**
-*/
-void BoardWidget::drawSelect(QPainter& p, const go::mark& mark){
-    QPainterPath path = createSquarePath();
-    drawMark(p, path, mark, true);
-}
-
-/**
-*/
-void BoardWidget::drawCharacter(QPainter& p, const go::mark& mark){
-    if (showMarker == false)
-        return;
-
-    p.save();
-
-    QFont font( p.font() );
-    font.setWeight(QFont::Black);
-    p.setFont(font);
-
-    int boardX, boardY;
-    sgfToBoardCoordinate(mark.p.x, mark.p.y, boardX, boardY);
-
-    if (boardX >= 0 && boardX < xsize && boardY >= 0 && boardY < ysize){
-        int x = xlines[boardX];
-        int y = ylines[boardY];
-
-        stoneInfo& info = board[boardY][boardX];
-        if (info.empty())
-            p.setPen( Qt::black );
-        else
-            p.setPen( info.black() ? Qt::white : Qt::black );
-        eraseImage(p, boardX, boardY);
-
-        p.drawText(x-boxSize, y-boxSize, boxSize*2, boxSize*2, Qt::AlignCenter, mark.s);
-    }
-
-    p.restore();
-}
-
-/**
-*/
-void BoardWidget::drawMark(QPainter& p, const QPainterPath& path, const go::mark& mark, bool fill){
-    if (showMarker == false)
-        return;
-
-    int boardX, boardY;
-    sgfToBoardCoordinate(mark.p.x, mark.p.y, boardX, boardY);
-
-    if (boardX >= 0 && boardX < xsize && boardY >= 0 && boardY < ysize){
-        if (fill)
-            fillPath(p, path, boardX, boardY);
-        else
-            drawPath(p, path, boardX, boardY);
-    }
-}
-
-/**
-*/
-void BoardWidget::drawPath(QPainter& p, const QPainterPath& path, int boardX, int boardY){
-    p.save();
-
-    stoneInfo& info = board[boardY][boardX];
-    if (info.empty())
-        p.setPen( QPen(Qt::black, 2) );
-    else
-        p.setPen( info.black() ? QPen(Qt::white, 2) : QPen(Qt::black, 2) );
-    eraseImage(p, boardX, boardY);
-
-    int x = xlines[boardX];
-    int y = ylines[boardY];
-    p.translate(x, y);
-
-    p.drawPath(path);
-
-    p.restore();
-}
-
-/**
-*/
-void BoardWidget::fillPath(QPainter& p, const QPainterPath& path, int boardX, int boardY){
-    p.save();
-
-    stoneInfo& info = board[boardY][boardX];
-    if (info.empty())
-        p.setPen( QPen(Qt::black, 2) );
-    else
-        p.setPen( info.black() ? QPen(Qt::white, 2) : QPen(Qt::black, 2) );
-
-    int x = xlines[boardX];
-    int y = ylines[boardY];
-    p.translate(x, y);
-
-    p.fillPath(path, QBrush(p.pen().color()));
-
-    p.restore();
-}
-
-/**
-*/
-void BoardWidget::drawTerritories(QPainter& p){
-    p.save();
-
-    qreal w = boxSize * 0.33;
-
-    for (int by=0; by<ysize; ++by){
-        for (int bx=0; bx<xsize; ++bx){
-            if (!board[by][bx].territory() && (editMode != eFinalScore || !board[by][bx].empty()))
-                continue;
-
-            int x = xlines[bx];
-            int y = ylines[by];
-
-            QColor color = board[by][bx].whiteTerritory() ? Qt::white : board[by][bx].blackTerritory() ? Qt::black : Qt::red;
-            p.fillRect( QRectF(x-w/2, y-w/2, w, w), color);
-        }
-    }
-
-    p.restore();
-}
-
-/**
-*/
-void BoardWidget::drawCurrentMark(QPainter& p, go::nodePtr node){
-    if (node->isPass())
-        return;
-
-    p.save();
-
-    QBrush brush;
-    if (node->isBlack()){
-        p.setPen( QPen(focusBlackColor, 2) );
-        brush = QBrush(focusBlackColor);
-    }
-    else{
-        p.setPen( QPen(focusWhiteColor, 2) );
-        brush = QBrush(focusWhiteColor);
-    }
-
-    int boardX, boardY;
-    sgfToBoardCoordinate(node->getX(), node->getY(), boardX, boardY);
-    int x = xlines[boardX];
-    int y = ylines[boardY];
-    p.translate(x, y);
-
-    if (focusType == 0){
-        QPainterPath path = createFocusTrianglePath();
-        p.fillPath(path, brush);
-    }
-    else if (focusType == 1){
-        QPainterPath path = createCirclePath();
-        p.drawPath(path);
-    }
-    else if (focusType == 2){
-        QPainterPath path = createCrossPath();
-        p.drawPath(path);
-    }
-    else if (focusType == 3){
-        QPainterPath path = createSquarePath();
-        p.drawPath(path);
-    }
-    else if (focusType == 4){
-        QPainterPath path = createTrianglePath();
-        p.drawPath(path);
-    }
-
-    p.restore();
-}
-
-QPainterPath BoardWidget::createFocusTrianglePath() const{
-    QPainterPath path;
-    qreal w = boxSize * 0.25;
-    qreal h = boxSize * 0.15;
-    QPolygonF polygon(3);
-    polygon[0] = QPointF(0, -h);
-    polygon[1] = QPointF(-w, h);
-    polygon[2] = QPointF(w, h);
-    path.addPolygon(polygon);
-    path.closeSubpath();
-    return path;
-}
-
-QPainterPath BoardWidget::createCirclePath() const{
-    QPainterPath path;
-    qreal w = boxSize * 0.42;
-    path.addEllipse(-w/2, -w/2, w, w);
-    return path;
-}
-
-QPainterPath BoardWidget::createCrossPath() const{
-    QPainterPath path;
-    qreal w = boxSize * 0.18;
-
-    path.moveTo(-w, -w);
-    path.lineTo(w, w);
-
-    path.moveTo(w, -w);
-    path.lineTo(-w, w);
-
-    return path;
-}
-
-QPainterPath BoardWidget::createSquarePath() const{
-    QPainterPath path;
-    qreal w = boxSize * 0.4;
-    path.addRect(-w/2, -w/2, w, w);
-    return path;
-}
-
-QPainterPath BoardWidget::createTrianglePath() const{
-    QPainterPath path;
-    qreal w = boxSize * 0.22;
-    qreal h = boxSize * 0.18;
-    QPolygonF polygon(3);
-    polygon[0] = QPointF(0, -h);
-    polygon[1] = QPointF(-w, h);
-    polygon[2] = QPointF(w, h);
-    path.addPolygon(polygon);
-    path.closeSubpath();
-    return path;
-}
-
-/**
-*/
-void BoardWidget::drawStone(QPainter& p, int bx, int by, go::color color, qreal opacity){
-    p.save();
-
-    int x = xlines[bx];
-    int y = ylines[by];
-    if (color == go::black){
-        if (blackType >= 0){
-            p.setOpacity(opacity);
-            p.drawPixmap(x - boxSize/2, y - boxSize/2, black2);
-        }
-        else{
-            p.setPen(Qt::black);
-            p.setBrush(blackColor);
-            p.drawEllipse(x - boxSize/2, y - boxSize/2, boxSize-2, boxSize-2);
-        }
-    }
-    else{
-        if (whiteType >= 0){
-            p.setOpacity(opacity);
-            p.drawPixmap(x - boxSize/2, y - boxSize/2, white2);
-        }
-        else{
-            p.setPen(Qt::black);
-            p.setBrush(whiteColor);
-            p.drawEllipse(x - boxSize/2, y - boxSize/2, boxSize-2, boxSize-2);
-        }
-    }
-
-    p.restore();
-}
-
-/**
-*/
-void BoardWidget::drawDim(QPainter& p, int bx, int by){
-    QRect r(int(xlines[bx]-boxSize*0.5), int(ylines[by]-boxSize*0.5), boxSize, boxSize);
-    p.fillRect(r, QColor(0, 0, 0, 130));
-}
-
-/**
-*/
-void BoardWidget::eraseImage(QPainter& p, int boardX, int boardY){
-    stoneInfo& info = board[boardY][boardX];
-    if (info.empty()){
-        int dx = xlines[boardX] - boxSize / 2;
-        int dy = ylines[boardY] - boxSize / 2;
-        p.drawPixmap(dx, dy, boardImage2, dx - boardRect.left(), dy - boardRect.top(), boxSize, boxSize);
-    }
-    else
-        drawStone(p, boardX, boardY, info.black() ? go::black : go::white);
-}
-
-/**
-*/
-void BoardWidget::putStone(go::nodePtr node, int moveNumber){
-    if (node->isWhite())
-        color = go::black;
-    else if (node->isBlack())
-        color = go::white;
-    else if (node->nextColor != go::empty)
-        color = node->nextColor;
-
-    go::stoneList stones;
-    stones << node->emptyStones << node->blackStones << node->whiteStones;
-    foreach(const go::stone& stone, stones){
-        int boardX, boardY;
-        sgfToBoardCoordinate(stone.p.x, stone.p.y, boardX, boardY);
-        if (boardX >= 0 && boardX < xsize && boardY >= 0 && boardY < ysize){
-            board[boardY][boardX].color  = stone.c;
-            board[boardY][boardX].number = 0;
-            board[boardY][boardX].node   = node;
-        }
-    }
-
-    if (node->isStone()){
-        int boardX, boardY;
-        sgfToBoardCoordinate(node->getX(), node->getY(), boardX, boardY);
-
-        if (boardX >= 0 && boardX < xsize && boardY >= 0 && boardY < ysize){
-            board[boardY][boardX].color  = node->isBlack() ? go::black : go::white;
-            board[boardY][boardX].number = moveNumber;
-            board[boardY][boardX].node   = node;
-            removeDeadStones(boardX, boardY);
-        }
-    }
-}
-
-/**
-*/
-void BoardWidget::putDim(go::nodePtr node){
-    foreach(const go::mark& mark, node->dims){
-        int boardX, boardY;
-        sgfToBoardCoordinate(mark.p.x, mark.p.y, boardX, boardY);
-        if (boardX >= 0 && boardX < xsize && boardY >= 0 && boardY < ysize)
-            board[boardY][boardX].dim = true;
-    }
-}
-
-/**
-*/
-void BoardWidget::removeDeadStones(int x, int y){
-    if (board[y][x].empty())
-        return;
-
-    // check kill enemy
-    int c = board[y][x].black() ? go::white : go::black;
-    int* tmp = new int[xsize * ysize];
-
-    memset(tmp, 0, sizeof(int) * xsize * ysize);
-    if (y > 0 && board[y-1][x].color == c && isDead(tmp, c, x, y - 1))
-        dead(tmp);
-
-    memset(tmp, 0, sizeof(int) * xsize * ysize);
-    if (y < ysize-1 && board[y+1][x].color == c && isDead(tmp, c, x, y + 1))
-        dead(tmp);
-
-    memset(tmp, 0, sizeof(int) * xsize * ysize);
-    if (x > 0 && board[y][x-1].color == c && isDead(tmp, c, x - 1, y))
-        dead(tmp);
-
-    memset(tmp, 0, sizeof(int) * xsize * ysize);
-    if (x < xsize-1 && board[y][x+1].color == c && isDead(tmp, c, x + 1, y))
-        dead(tmp);
-
-
-    // check suicide
-    c = board[y][x].black() ? go::black : go::white;
-
-    memset(tmp, 0, sizeof(int) * xsize * ysize);
-    if (isDead(tmp, c, x, y))
-        dead(tmp);
-
-    delete[] tmp;
-}
-
-/**
-*/
-bool BoardWidget::isDead(int* tmp, int c, int x, int y){
-    if (tmp[y*xsize+x])
-        return true;
-    else if (board[y][x].empty())
-        return false;
-    else if ((board[y][x].color & c) == 0)
-        return true;
-    tmp[y*xsize+x] = board[y][x].color;
-
-    if (y > 0 && !isDead(tmp, c, x, y - 1))
-        return false;
-
-    if (y < ysize-1 && !isDead(tmp, c, x, y + 1))
-        return false;
-
-    if (x > 0 && !isDead(tmp, c, x - 1, y))
-        return false;
-
-    if (x < xsize-1 && !isDead(tmp, c, x + 1, y))
-        return false;
-
-    return true;
-}
-
-/**
-*/
-bool BoardWidget::isDead(int x, int y){
-    int size = xsize * ysize;
-    int* tmp = new int[size];
-    memset(tmp, 0, sizeof(int)*size);
-
-    int c = board[y][x].color;
-    bool dead = isDead(tmp, c, x, y);
-
-    delete[] tmp;
-
-    return dead;
-}
-
-/**
-*/
-bool BoardWidget::isKill(int x, int y){
-    int* tmp = new int[xsize * ysize];
-
-    go::color c = board[y][x].color == go::black ? go::white : go::black;
-
-    memset(tmp, 0, sizeof(int)* xsize * ysize);
-    bool dead = (y > 0 && board[y-1][x].color == c && isDead(tmp, c, x, y - 1));
-
-    memset(tmp, 0, sizeof(int)* xsize * ysize);
-    dead = !dead ? (y < ysize-1 && board[y+1][x].color == c && isDead(tmp, c, x, y + 1)) : true;
-
-    memset(tmp, 0, sizeof(int)* xsize * ysize);
-    dead = !dead ? (x > 0 && board[y][x-1].color == c && isDead(tmp, c, x - 1, y)) : true;
-
-    memset(tmp, 0, sizeof(int)* xsize * ysize);
-    dead = !dead ? (x < xsize-1 && board[y][x+1].color == c && isDead(tmp, c, x + 1, y)) : true;
-
-    delete[] tmp;
-
-    return dead;
-}
-
-/**
-*/
-void BoardWidget::dead(int* tmp){
-    for (int y=0; y<ysize; ++y){
-        for (int x=0; x<xsize; ++x){
-            if (tmp[y*xsize+x]){
-                if (board[y][x].color == go::black)
-                    ++capturedBlack;
-
-                if (board[y][x].color == go::white)
-                    ++capturedWhite;
-
-                board[y][x].color = go::empty;
-                board[y][x].node.reset();
-            }
-        }
-    }
-}
-
-/**
-*/
-bool BoardWidget::forward(int sgfX, int sgfY){
-    go::nodeList::iterator iter = currentNode->childNodes.begin();
-    while (iter != currentNode->childNodes.end()){
-        if ((*iter)->getX() == sgfX && (*iter)->getY() == sgfY){
-            setCurrentNode(*iter);
-            return true;
-        }
-        ++iter;
-    }
-
-    return false;
-}
-
-QString BoardWidget::createMarkCharacter(go::markList& markList){
-    QStringList marks;
-    foreach(go::mark m, markList)
-        if (m.t == go::mark::eCharacter)
-            marks.push_back(m.s);
-    qSort(marks);
-
-    int c = 'A';
-    if (labelType == 1)
-        c = 'a';
-    else if (labelType == 2)
-        c = 1;
-    else if (labelType == 3 || labelType == 4)
-        c = 0;
-
-    QString s;
-    while (true){
-        if (labelType == 2)
-            s.sprintf("%d", c);
-        else if (labelType == 3)
-            s = katakana[c];
-        else if (labelType == 4)
-            s = kana_iroha[c];
-        else
-            s = QChar(c);
-
-        QStringList::iterator iter2 = qFind(marks.begin(), marks.end(), s);
-        if (iter2 == marks.end())
-            break;
-        ++iter2;
-        ++c;
-
-        if ((labelType == 3 && c == katakana_size) || (labelType == 4 && c == kana_iroha_size))
-            break;
-    }
-
-    return s;
-}
-
-QString BoardWidget::createMarkManually(go::markList& markList){
-    return QInputDialog::getText(this, QString(), tr("Input Label"));
-}
-
-bool BoardWidget::removeMark(go::markList& markList, const go::point& p){
-    go::markList::iterator iter = markList.begin();
-    while (iter != markList.end()){
-        if (iter->p == p){
-            markList.erase(iter);
-            return true;
-        }
-        ++iter;
-    }
-    return false;
-}
-
-QString BoardWidget::toString(go::nodePtr node) const{
-    if (node->isStone() == false)
-        return "Other";
-    else if (node->isPass())
-        return "Pass";
-    else
-        return getXYString(node->position.x, node->position.y);
-}
-
-QString BoardWidget::getXString(int x, bool showI) const{
-    int a = x % 25;
-    if (showI == false && a > 7)
-        ++a;
-
-    return QString("%1").arg(QChar('A' + a));
-}
-
-QString BoardWidget::getXString(int x) const{
-    return getXString(x, showCoordinatesI);
-}
-
-QString  BoardWidget::getYString(int y) const{
-    return QString("%1").arg(goData.root->ysize - y);
-}
-
-QString  BoardWidget::getXYString(int x, int y, bool showI) const{
-    if (x < 0 || x >= goData.root->xsize || y < 0 || y >= goData.root->ysize)
-        return "";
-
-    QString s = getXString(x, showI);
-    s.append( getYString(y) );
-    return s;
-}
-
-QString BoardWidget::getXYString(int x, int y) const{
-    return getXYString(x, y, showCoordinatesI);
-}
-
-void BoardWidget::boardToSgfCoordinate(int boardX, int boardY, int& sgfX, int& sgfY){
-    if (rotateBoard_ == 0){
-        sgfX = boardX;
-        sgfY = boardY;
-    }
-    else if (rotateBoard_ == 1){
-        sgfX = boardY;
-        sgfY = xsize - boardX - 1;
-    }
-    else if (rotateBoard_ == 2){
-        sgfX = xsize - boardX - 1;
-        sgfY = ysize - boardY - 1;
-    }
-    else{
-        sgfX = ysize - boardY - 1;
-        sgfY = boardX;
-    }
-
-    if (flipBoardHorizontally_){
-        if (rotateBoard_ == 0 || rotateBoard_ == 2)
-            sgfX = goData.root->xsize - sgfX - 1;
-        else
-            sgfY = goData.root->ysize - sgfY - 1;
-    }
-
-    if (flipBoardVertically_){
-        if (rotateBoard_ == 0 || rotateBoard_ == 2)
-            sgfY = goData.root->ysize - sgfY - 1;
-        else
-            sgfX = goData.root->xsize - sgfX - 1;
-    }
-}
-
-void BoardWidget::sgfToBoardCoordinate(int sgfX, int sgfY, int& boardX, int& boardY){
-    if (rotateBoard_ == 0){
-        boardX = sgfX;
-        boardY = sgfY;
-    }
-    else if (rotateBoard_ == 1){
-        boardX = xsize - sgfY - 1;
-        boardY = sgfX;
-    }
-    else if (rotateBoard_ == 2){
-        boardX = xsize - sgfX - 1;
-        boardY = ysize - sgfY - 1;
-    }
-    else{
-        boardX = sgfY;
-        boardY = ysize - sgfX - 1;
-    }
-
-    if (flipBoardHorizontally_)
-        boardX = xsize - boardX - 1;
-
-    if (flipBoardVertically_)
-        boardY = ysize - boardY - 1;
-}
-
-void BoardWidget::setFinalScoreMode(bool mode){
-    if (mode){
-        if (editMode != ePlayGame && editMode != eFinalScore)
-            backupEditMode = editMode;
-        editMode = eFinalScore;
-        finalScore();
-        int alive_b=0, alive_w=0, dead_b=0, dead_w=0, bt=0, wt=0;
-        getFinalScore(alive_b, alive_w, dead_b, dead_w, bt, wt);
-        emit updateTerritory(alive_b, alive_w, dead_b, dead_w, capturedBlack, capturedWhite, bt, wt, goData.root->komi);
-    }
-    else{
-        editMode = backupEditMode;
-        createBoardBuffer();
-    }
-
-    paintBoard();
-}
-
-void BoardWidget::whiteFirst(bool whiteFirst){
-    goData.root->nextColor = whiteFirst ? go::white : go::black;
-    createBoardBuffer();
-}
-
-void BoardWidget::finalScore(){
-    char* tmp = new char[xsize * ysize];
-
-    for (int y=0; y<ysize; ++y){
-        for (int x=0; x<xsize; ++x){
-            memset(tmp, 0, xsize*ysize);
-            int c = go::empty;
-            whichTerritory(x, y, tmp, c);
-            if (board[y][x].empty() && (c & go::blackTerritory || c & go::whiteTerritory))
-                board[y][x].color = c;
-        }
-    }
-
-    delete[] tmp;
-
-    for (int y=0; y<ysize; ++y){
-        for (int x=0; x<xsize; ++x){
-            if ((board[y][x].blackTerritory() || board[y][x].whiteTerritory())){
-                if (isDame(x, y))
-                    board[y][x].color = (board[y][x].color & (go::black|go::white)) | go::dame;
-            }
-        }
-    }
-
-    bool changed = false;
+    Go::NodeList::iterator node = currentNodeList.begin();
     do{
-        changed =false;
+        if ((*node)->isStone())
+            ++moveNumber;
 
-        for (int y=0; y<ysize; ++y){
-            for (int x=0; x<xsize; ++x){
-                if ((board[y][x].dame()) == 0)
-                    continue;
-                int c1 = y > 0 ? board[y-1][x].color : go::dame;
-                int c2 = x < xsize-1 ? board[y][x+1].color : go::dame;
-                int c3 = y < ysize-1 ? board[y+1][x].color : go::dame;
-                int c4 = x > 0 ? board[y][x-1].color : go::dame;
-                int b = go::black | go::blackTerritory | go::dame;
-                int w = go::white | go::whiteTerritory | go::dame;
-                bool isb = c1 & b && c2 & b && c3 & b && c4 & b;
-                bool isw = c1 & w && c2 & w && c3 & w && c4 & w;
-                if (isb || isw){
-                    if (y > 0 && !hasTerritory(x, y, x, y-1))
-                        continue;
-                    if (y < ysize-1 && !hasTerritory(x, y, x, y+1))
-                        continue;
-                    if (x < xsize-1 && !hasTerritory(x, y, x+1, y))
-                        continue;
-                    if (x > 0  && !hasTerritory(x, y, x-1, y))
-                        continue;
+        if ( inBoard(*node) ){
+            TerritoryInfo& ti = boardBuffer[(*node)->y()][(*node)->x()];
 
-                    changed = true;
-                    if (isb)
-                        board[y][x].color = (board[y][x].color & go::white) | go::blackTerritory;
-                    else
-                        board[y][x].color = (board[y][x].color & go::black) | go::whiteTerritory;
+            // reset move number
+            Go::NodePtr parent = (*node)->parent();
+            bool isBranch = parent && parent->childNodes.size() > 1;
+            bool firstChild = parent && parent->childNodes.indexOf(*node) == 0;
+            bool resetMoveNumber = (*node)->moveNumber > 0;
+            if ((isBranch && resetMoveNumberMode == ResetMoveNumber::allBranch) || (!firstChild && resetMoveNumberMode != ResetMoveNumber::noReset))
+                resetMoveNumber = true;
+
+            if (resetMoveNumber){
+                number = 0;
+                moveNumber = (*node)->moveNumber ? (*node)->moveNumber : 1;
+                for (int y=0; y<boardBuffer.size(); ++y){
+                    for (int x=0; x<boardBuffer[y].size(); ++x){
+                        if (boardBuffer[y][x].number)
+                            boardBuffer[y][x].number = 0;
+                    }
+                }
+            }
+
+            // add stone to buffer
+            ti.color = (*node)->color;
+            ti.moveNumber = moveNumber;
+            ti.number = ++number;
+            killStones((*node)->x(), (*node)->y());
+        }
+
+        // add stones
+        foreach(const Go::Stone& stone, (*node)->whiteStones)
+            boardBuffer[stone.position.y][stone.position.x].color = stone.color;
+        foreach(const Go::Stone& stone, (*node)->blackStones)
+            boardBuffer[stone.position.y][stone.position.x].color = stone.color;
+        foreach(const Go::Stone& stone, (*node)->emptyStones)
+            boardBuffer[stone.position.y][stone.position.x].color = stone.color;
+
+        // add dims
+        foreach(const Go::Mark& dim, (*node)->dims)
+            boardBuffer[dim.position.y][dim.position.x].dim = &dim;
+    } while(*node++ != currentNode);
+
+    // add mark
+    foreach(const Go::Mark& mark, currentNode->marks)
+        boardBuffer[mark.position.y][mark.position.x].mark = &mark;
+    foreach(const Go::Line& line, currentNode->lines)
+        boardBuffer[line.position1.y][line.position1.x].lineList.push_back(line);
+    foreach(const Go::Mark& mark, currentNode->whiteTerritories)
+        boardBuffer[mark.position.y][mark.position.x].territory = Go::white;
+    foreach(const Go::Mark& mark, currentNode->blackTerritories)
+        boardBuffer[mark.position.y][mark.position.x].territory = Go::black;
+
+    createBoardItemList();
+}
+
+/**
+  create mark items
+*/
+void BoardWidget::createBoardItemList(){
+    if (currentNode == NULL)
+        return;
+
+    createStoneItemList();
+    createNumberItemList();
+    createMarkItemList();
+}
+
+/**
+  create stone items
+*/
+void BoardWidget::createStoneItemList(){
+    qDeleteAll(stones);
+    stones.clear();
+
+    for(int y=0; y<boardBuffer.size(); ++y){
+        for(int x=0; x<boardBuffer.size(); ++x){
+            TerritoryInfo& ti = boardBuffer[y][x];
+
+            if (ti.color != Go::empty){
+                QGraphicsItem* item = createStoneItem(x, y, ti.color);
+                stones.push_back(item);
+                ti.stoneItem = item;
+            }
+        }
+    }
+}
+
+/**
+  create number item list
+*/
+void BoardWidget::createNumberItemList(){
+    qDeleteAll(numbers);
+    numbers.clear();
+
+    for(int y=0; y<boardBuffer.size(); ++y){
+        for(int x=0; x<boardBuffer.size(); ++x){
+            TerritoryInfo& ti = boardBuffer[y][x];
+
+            if (showMoveNumber && ti.number > 0 && ti.color != Go::empty){
+                if (showMoveNumberCount == -1 || number - ti.number < showMoveNumberCount){
+                    QGraphicsSimpleTextItem* item = createMoveNumberItem(x, y, ti.moveNumber);
+                    if (ti.number == number){
+                        QFont f = item->font();
+                        f.setWeight(QFont::Bold);
+                        item->setFont(f);
+                        item->setBrush(QBrush(focusColor));
+                    }
+                    numbers.push_back(item);
+                }
+                else if (showMoveNumberCount == 0 && ti.number == number)
+                    createFocusItem(x, y);
+            }
+        }
+    }
+}
+
+/**
+  create mark items
+*/
+void BoardWidget::createMarkItemList(){
+    qDeleteAll(marks);
+    marks.clear();
+
+    for(int y=0; y<boardBuffer.size(); ++y){
+        for(int x=0; x<boardBuffer.size(); ++x){
+            TerritoryInfo& ti = boardBuffer[y][x];
+
+            if (ti.territory != Go::empty){
+                QGraphicsItem* item = createTerritoryItem(x, y, ti.territory);
+                marks.push_back(item);
+                if (ti.stoneItem)
+                    ti.stoneItem->setOpacity(0.3);
+            }
+            else if (ti.stoneItem)
+                ti.stoneItem->setOpacity(1.0);
+
+
+            if (showMarker){
+                if (ti.mark && showMarker){
+                    QGraphicsItem* item = createMarkItem(*ti.mark);
+                    marks.push_back(item);
+                }
+
+                foreach(const Go::Line& line, ti.lineList){
+                    QGraphicsItem* item = createLineItem(line.position1.x, line.position1.y, line.position2.x, line.position2.y, line.type);
+                    marks.push_back(item);
+                }
+
+                if (ti.dim){
+                    QGraphicsItem* item = createMarkItem(*ti.dim);
+                    marks.push_back(item);
                 }
             }
         }
-    } while (changed);
+    }
+    createVariationItemList(currentNode);
 }
 
-void BoardWidget::estimateScore(){
+ /**
+  erase buffer
+*/
+void BoardWidget::eraseBuffer(){
+    // clear buffer
+    currentNodeList.clear();
 
-}
-
-void BoardWidget::whichTerritory(int x, int y, char* tmp, int& c){
-    if (tmp[y*xsize+x] != 0)
-        return;
-    tmp[y*xsize+x] = 1;
-
-    if (c == go::dame)
-        return;
-    else if (board[y][x].whiteTerritory()){
-        c = go::whiteTerritory;
-        return;
-    }
-    else if (board[y][x].blackTerritory()){
-        c = go::blackTerritory;
-        return;
-    }
-    else if ((board[y][x].black() && c == go::whiteTerritory) || (board[y][x].white() && c == go::blackTerritory)){
-        c = go::dame;
-        return;
-    }
-    else if (board[y][x].black()){
-        c = go::blackTerritory;
-        return;
-    }
-    else if (board[y][x].white()){
-        c = go::whiteTerritory;
-        return;
+    // create currentNodeList
+    Go::NodePtr n = currentNode;
+    while(n){
+        currentNodeList.push_front(n);
+        n = n->parent();
     }
 
-    if (y > 0)
-        whichTerritory(x, y-1, tmp, c);
-    if (y < ysize-1)
-        whichTerritory(x, y+1, tmp, c);
-    if (x > 0)
-        whichTerritory(x-1, y, tmp, c);
-    if (x < xsize-1)
-        whichTerritory(x+1, y, tmp, c);
+    n = currentNode;
+    while(n->childNodes.empty() == false){
+        n = n->childNodes.front();
+        currentNodeList.push_back(n);
+    }
 }
 
-void BoardWidget::reverseTerritory(int x, int y){
-    if (board[y][x].white() && !board[y][x].blackTerritory() && !board[y][x].dame())
-        setTerritory(x, y, go::blackTerritory);
-    else if (board[y][x].black() && !board[y][x].whiteTerritory() && !board[y][x].dame())
-        setTerritory(x, y, go::whiteTerritory);
-    else if ( (board[y][x].white() || board[y][x].black()) && (board[y][x].blackTerritory() || board[y][x].whiteTerritory() ||  board[y][x].dame()) )
-        unsetTerritory(x, y);
+/**
+  create territories
+*/
+void BoardWidget::createTerritories(){
+    for (int y=0; y<boardBuffer.size(); ++y)
+        for (int x=0; x<boardBuffer[y].size(); ++x)
+            setTerritories(x, y);
+    createMarkItemList();
 
-    finalScore();
-    paintBoard();
-}
+    int total = boardBuffer.size() * boardBuffer[0].size();
+    int alive_b = 0, alive_w = 0, dead_b = 0, dead_w = 0, blackTerritory = 0, whiteTerritory = 0;
 
-void BoardWidget::setTerritory(int x, int y, int c){
-    if ( c & go::blackTerritory && (board[y][x].black() || board[y][x].blackTerritory()) )
-        return;
-    else if ( c & go::whiteTerritory && (board[y][x].white() || board[y][x].whiteTerritory()) )
-        return;
+    for (int y=0; y<boardBuffer.size(); ++y){
+        for (int x=0; x<boardBuffer[y].size(); ++x){
+            TerritoryInfo& ti = boardBuffer[y][x];
+            if (ti.territory == Go::black)
+                ++blackTerritory;
+            else if (ti.territory == Go::white)
+                ++whiteTerritory;
 
-    board[y][x].color |= c;
-    if (c == go::blackTerritory)
-        board[y][x].color &= ~go::whiteTerritory;
-    else
-        board[y][x].color &= ~go::blackTerritory;
-
-    if (y > 0)
-        setTerritory(x, y-1, c);
-    if (y < ysize-1)
-        setTerritory(x, y+1, c);
-    if (x > 0)
-        setTerritory(x-1, y, c);
-    if (x < xsize-1)
-        setTerritory(x+1, y, c);
-}
-
-void BoardWidget::unsetTerritory(int x, int y){
-    if ( !board[y][x].blackTerritory() && !board[y][x].whiteTerritory() && !board[y][x].dame() )
-        return;
-
-    board[y][x].color &= go::black | go::white;
-
-    if (y > 0)
-        unsetTerritory(x, y-1);
-    if (y < ysize-1)
-        unsetTerritory(x, y+1);
-    if (x > 0)
-        unsetTerritory(x-1, y);
-    if (x < xsize-1)
-        unsetTerritory(x+1, y);
-}
-
-void BoardWidget::getFinalScore(int& alive_b, int& alive_w, int& dead_b, int& dead_w, int& bt, int& wt){
-    for (int y=0; y<ysize; ++y){
-        for (int x=0; x<xsize; ++x){
-            if (board[y][x].blackTerritory()){
-                ++bt;
-                if (board[y][x].white())
+            if (ti.color == Go::white){
+                if (ti.territory == Go::black)
                     ++dead_w;
+                else
+                    ++alive_w;
             }
-            else if (board[y][x].whiteTerritory()){
-                ++wt;
-                if (board[y][x].black())
+            else if (ti.color == Go::black){
+                if (ti.territory == Go::white)
                     ++dead_b;
+                else
+                    ++alive_b;
             }
-            else if (board[y][x].dame()){
-                if (board[y][x].white())
-                    ++dead_w;
-                else if (board[y][x].black())
-                    ++dead_b;
-            }
-            else if (board[y][x].black())
-                ++alive_b;
-            else if (board[y][x].white())
-                ++alive_w;
+        }
+    }
+
+
+    emit scoreUpdated(total, alive_b, alive_w, dead_b, dead_w, capturedBlack, capturedWhite, blackTerritory, whiteTerritory);
+}
+
+void BoardWidget::setTerritories(int x, int y){
+    if (boardBuffer[y][x].isStone() && boardBuffer[y][x].isTerritory() == false)
+        return;
+
+    int size = boardBuffer.size() * boardBuffer[0].size();
+    char* buf = new char[size];
+    memset(buf, 0, size);
+
+    bool black=false, white=false;
+    getTerritory(x, y, buf, black, white);
+    setTerritories(buf, black && white ? Go::dame : black ? Go::black : Go::white);
+
+    delete[] buf;
+}
+
+void BoardWidget::setTerritories(char* buf, Go::Color color){
+    int xsize = boardBuffer[0].size();
+    for (int y=0; y<boardBuffer.size(); ++y){
+        for (int x=0; x<boardBuffer[y].size(); ++x){
+            if (buf[y * xsize + x] == 0)
+                continue;
+            if (boardBuffer[y][x].isStone() == false || color != Go::dame)
+                boardBuffer[y][x].territory = color;
+            else
+                boardBuffer[y][x].territory = Go::empty;
         }
     }
 }
 
-bool BoardWidget::isDame(int x, int y){
-    int c = board[y][x].color;
-    return isDame(c, x-1, y-1, x+1, y-1) || isDame(c, x+1, y-1, x+1, y+1) || isDame(c, x-1, y+1, x+1, y+1) || isDame(c, x-1, y-1, x-1, y+1) || isDame(c, x-1, y-1, x+1, y+1) || isDame(c, x+1, y-1, x-1, y+1);
-}
-
-bool BoardWidget::isDame(int c, int x1, int y1, int x2, int y2){
-    bool area1 = x1 >= 0 && x1 < xsize && y1 >= 0 && y1 < ysize;
-    bool area2 = x2 >= 0 && x2 < xsize && y2 >= 0 && y2 < ysize;
-    if (!area1 && !area2)
-        return false;
-
-    go::color enemy = c & go::whiteTerritory ? go::black : go::white;
-    go::color myTerritory = c & go::whiteTerritory ? go::whiteTerritory : go::blackTerritory;
-    bool b1 = x1 >= 0 && x1 < xsize && y1 >= 0 && y1 < ysize ? board[y1][x1].color & enemy && !(board[y1][x1].color & myTerritory) : true;
-    bool b2 = x2 >= 0 && x2 < xsize && y2 >= 0 && y2 < ysize ? board[y2][x2].color & enemy && !(board[y2][x2].color & myTerritory) : true;
-
-    return b1 && b2;
-}
-
-bool BoardWidget::hasTerritory(int x1, int y1, int x2, int  y2){
-    if (x2 < 0 || x2 >= xsize || y2 < 0 || y2 >= ysize)
-        return true;
-
-    go::color c1;
-    go::color c2;
-    if (board[y2][x2].black() && !board[y2][x2].whiteTerritory()){
-        c1 = go::black;
-        c2 = go::blackTerritory;
+void BoardWidget::getTerritory(int x, int y, char* buf, bool& black, bool& white){
+    if (black && white)
+        return;
+    else if (x < 0 || y < 0 || y >= boardBuffer.size() || x >= boardBuffer[y].size())
+        return;
+    else if ((boardBuffer[y][x].color == Go::black && boardBuffer[y][x].isTerritory() ==false) || boardBuffer[y][x].territory == Go::black){
+        black = true;
+        return;
     }
-    else if (board[y2][x2].white() && !board[y2][x2].blackTerritory()){
-        c1 = go::white;
-        c2 = go::whiteTerritory;
+    else if ((boardBuffer[y][x].color == Go::white && boardBuffer[y][x].isTerritory() ==false) || boardBuffer[y][x].territory == Go::white){
+        white = true;
+        return;
     }
-    else if (board[y2][x2].territory())
-        return true;
-    else // if dame
-        return true;
 
-    char* tmp = new char[ysize*xsize];
-    memset(tmp, 0, ysize*xsize);
-    tmp[y1*xsize+x1] = true;
-    bool ret = hasTerritory(c1, c2, tmp, x2, y2);
-    delete[] tmp;
-    return ret;
+    int xsize = boardBuffer[0].size();
+    if (buf[y*xsize+x])
+        return;
+    buf[y*xsize+x] = 1;
+
+    getTerritory(x-1, y, buf, black, white);
+    getTerritory(x+1, y, buf, black, white);
+    getTerritory(x, y-1, buf, black, white);
+    getTerritory(x, y+1, buf, black, white);
+
+    return;
 }
 
-bool BoardWidget::hasTerritory(go::color c1, go::color c2, char* tmp, int x, int  y){
-    if (x < 0 || x >= xsize || y < 0 || y >= ysize)
-        return false;
+void BoardWidget::setDeadStones(int x, int y){
+    Go::Color color = boardBuffer[y][x].color;
+    Go::Color territory = Go::dame;
+    if (boardBuffer[y][x].isTerritory() == false)
+        territory = color == Go::black ? Go::white : Go::black;
 
-    if (tmp[y*xsize+x])
-        return false;
-    tmp[y*xsize+x] = true;
+    int size = boardBuffer.size() * boardBuffer[0].size();
+    char* buf = new char[size];
+    memset(buf, 0, size);
 
-    if ((board[y][x].color & c1) == 0 && (board[y][x].color & c2) == 0 && !board[y][x].dame())
-        return false;
-    if (board[y][x].color & c2/* || board[y][x].dame()*/)
-        return true;
+    setDeadStones(x, y, color, territory, buf);
 
-    if (hasTerritory(c1, c2, tmp, x, y-1))
-        return true;
-    else if (hasTerritory(c1, c2, tmp, x, y+1))
-        return true;
-    else if (hasTerritory(c1, c2, tmp, x-1, y))
-        return true;
-    else if (hasTerritory(c1, c2, tmp, x+1, y))
-        return true;
+    delete[] buf;
+
+    createTerritories();
+}
+
+void BoardWidget::setDeadStones(int x, int y, Go::Color color, Go::Color territory, char* buf){
+    if (x < 0 || y < 0 || y >= boardBuffer.size() || x >= boardBuffer[y].size())
+        return;
+    else if (boardBuffer[y][x].color != Go::empty && boardBuffer[y][x].color != color && boardBuffer[y][x].isTerritory() == false)
+        return;
+
+    int xsize = boardBuffer[0].size();
+    if (buf[y*xsize+x])
+        return;
+    buf[y*xsize+x] = 1;
+
+    if (boardBuffer[y][x].color != Go::empty && (territory == Go::dame || boardBuffer[y][x].color != color))
+        boardBuffer[y][x].territory = Go::empty;
     else
-        return false;
+        boardBuffer[y][x].territory = territory;
+
+    setDeadStones(x-1, y, color, territory, buf);
+    setDeadStones(x+1, y, color, territory, buf);
+    setDeadStones(x, y-1, color, territory, buf);
+    setDeadStones(x, y+1, color, territory, buf);
 }
 
-void BoardWidget::playWithComputer(PlayGame* game){
-    playGame = game;
-    if (playGame){
-        if (editMode != ePlayGame && editMode != eFinalScore)
-            backupEditMode = editMode;
-        editMode = ePlayGame;
+/**
+  create focus item
+*/
+QAbstractGraphicsShapeItem* BoardWidget::createFocusItem(int x, int y){
+    QAbstractGraphicsShapeItem* focus = NULL;
+    if (showMoveNumberCount != 0)
+        return focus;
 
-        if (playGame->isNewGame()){
-            if (goData.root->handicap > 0)
-                whiteFirst(true);
-        }
+    if (focusType == 0){
+        focus = scene()->addPath( createTrianglePath(x, y) );
+        focus->setBrush(QBrush(focusColor));
     }
-    else
-        editMode = backupEditMode;
+    else if (focusType == 1)
+        focus = scene()->addPath( createCirclePath(x, y) );
+    else if (focusType == 2)
+        focus = scene()->addPath( createCrossPath(x, y) );
+    else if (focusType == 3)
+        focus = scene()->addPath( createSquarePath(x, y) );
+    else if (focusType == 4)
+        focus = scene()->addPath( createTrianglePath(x, y) );
+
+    focus->setPen(QPen(focusColor, 2));
+    focus->setZValue(5);
+
+    marks.push_back(focus);
+    return focus;
 }
 
-void BoardWidget::autoReplay(){
-    if (autoReplayTimer.isActive())
-        autoReplayTimer.stop();
-    else
-        autoReplayTimer.start( autoReplayInterval );
+/**
+  create variation label item list
+*/
+void BoardWidget::createVariationItemList(Go::NodePtr node){
+    // return if show no markup
+    if ((getShowVariations() != 0 && getShowVariations() != 1) || tutorMode != TutorMode::noTutor)
+        return;
+
+    // get variation list
+    Go::NodeList variations;
+    if (getShowVariations() == 0)   // show children
+        variations = node->childNodes;
+    else if (getShowVariations() == 1){   // show siblings
+        Go::NodePtr p = node->parent();
+        if (p)
+            variations = p->childNodes;
+    }
+
+    // not show variations if variasion count is 0 or 1
+    if (variations.size() <= 1)
+        return;
+
+    // create variation label
+    char label = 'A';
+    foreach(const Go::NodePtr& v, variations){
+        QString str(label++);
+
+        if (inBoard(v) == false)
+            continue;
+        else if (v == node)
+            continue;
+
+        TerritoryInfo& ti = boardBuffer[v->y()][v->x()];
+        if (ti.mark)
+            continue;
+
+        GraphicsLabelTextItem* item = new GraphicsLabelTextItem(str);
+        item->setZValue(4);
+        item->setBrush( QBrush(branchColor) );
+
+        if (ti.color == Go::empty)
+            item->setBackgroundBrush(board->brush());
+
+        setTextItemPosition(item, v->x(), v->y());
+        scene()->addItem(item);
+        this->variations.push_back(item);
+
+        marks.push_back(item);
+    }
 }
 
-void BoardWidget::autoReplayTimer_timeout(){
-    go::nodeList::iterator iter = qFind(nodeList.begin(), nodeList.end(), currentNode);
-    if (iter != nodeList.end() && ++iter != nodeList.end())
-        setCurrentNode( *iter );
+/**
+  create graphic stone item
+*/
+QGraphicsItem* BoardWidget::createStoneItem(int x, int y, Go::Color color){
+    qreal size = getGridSize();
+    qreal xx, yy;
+    sgfToViewCoordinate(x, y, xx, yy);
+    int sceneX = xx - size / 2;
+    int sceneY = yy - size / 2;
+
+    QGraphicsItem* stone = NULL;
+    if (monochrome){
+        QColor c = color == Go::white ? Qt::white : Qt::black;
+        stone = scene()->addEllipse( sceneX, sceneY, size, size, QPen(Qt::black), QBrush(c) );
+    }
     else{
-        autoReplayTimer.stop();
-        emit automaticReplayEnded();
+        Preference::ResourceType type = color == Go::white ? whiteStoneType : blackStoneType;
+        if (type == Preference::color){
+            QColor& c = color == Go::white ? whiteStoneColor : blackStoneColor;
+            stone = scene()->addEllipse( sceneX, sceneY, size, size, QPen(Qt::black), QBrush(c) );
+        }
+        else{
+            QPixmap& p = color == Go::white ? whiteStonePixmap : blackStonePixmap;
+            QGraphicsPixmapItem* item = scene()->addPixmap(p);
+            item->setOffset(sceneX, sceneY);
+            stone = item;
+        }
     }
+
+    if (boardBuffer[y][x].territory != Go::empty)
+        stone->setOpacity(0.3);
+
+    stone->setZValue(3);
+
+    return stone;
+}
+
+/**
+ create scaled stone pixmap
+*/
+void BoardWidget::createStonePixmap(){
+    qreal size = getGridSize();
+
+    if (whiteStoneType != Preference::color){
+        QString whiteImage = whiteStoneType == Preference::file ? whiteStoneImage : WHITE_STONE_IMAGE;
+        QPixmap pixmap(whiteImage);
+        whiteStonePixmap = pixmap.scaled(size, size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    }
+    else
+        whiteStonePixmap = QPixmap();
+
+    if (blackStoneType != Preference::color){
+        QString blackImage = blackStoneType == Preference::file ? blackStoneImage : BLACK_STONE_IMAGE;
+        QPixmap pixmap(blackImage);
+        blackStonePixmap = pixmap.scaled(size, size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    }
+    else
+        blackStonePixmap = QPixmap();
+}
+
+/**
+  create move number item
+*/
+QGraphicsSimpleTextItem* BoardWidget::createMoveNumberItem(int x, int y, int number){
+    QString text = QString::number(number);
+    QGraphicsSimpleTextItem* item = scene()->addSimpleText(text, QFont(labelFont));
+    Go::Color color = boardBuffer[y][x].color;
+    item->setBrush(QBrush(color == Go::black ? Qt::white : Qt::black));
+    setTextItemPosition(item, x, y);
+    item->setZValue(4);
+    return item;
+}
+
+/**
+  create graphic stone item
+*/
+QGraphicsItem* BoardWidget::createMarkItem(const Go::Mark& mark){
+    QGraphicsItem* item = NULL;
+    if (mark.type == Go::Mark::cross)
+        item = scene()->addPath( createCrossPath(mark.position.x, mark.position.y) );
+    else if (mark.type == Go::Mark::circle)
+        item = scene()->addPath( createCirclePath(mark.position.x, mark.position.y) );
+    else if (mark.type == Go::Mark::square)
+        item = scene()->addPath( createSquarePath(mark.position.x, mark.position.y) );
+    else if (mark.type == Go::Mark::triangle)
+        item = scene()->addPath( createTrianglePath(mark.position.x, mark.position.y) );
+    else if (mark.type == Go::Mark::character){
+//        item = scene()->addSimpleText(mark.text);
+        item = new GraphicsLabelTextItem(mark.text);
+        setTextItemPosition((GraphicsLabelTextItem*)item, mark.position.x, mark.position.y);
+        scene()->addItem(item);
+    }
+    else if (mark.type == Go::Mark::dim){
+        item = scene()->addRect( createRectPath(mark.position.x, mark.position.y), QPen(Qt::NoPen), QBrush(Qt::black) );
+        item->setOpacity(0.65);
+    }
+    else if (mark.type == Go::Mark::select)
+        item = scene()->addPath( createSelectPath(mark.position.x, mark.position.y) );
+    else
+        return NULL;
+
+    if (mark.type == Go::Mark::character){
+        GraphicsLabelTextItem* text = static_cast<GraphicsLabelTextItem*>(item);
+        if (boardBuffer[mark.position.y][mark.position.x].color == Go::black)
+            text->setBrush( QBrush(Qt::white) );
+        else if (boardBuffer[mark.position.y][mark.position.x].color == Go::white)
+            text->setBrush( QBrush(Qt::black) );
+        else{
+            text->setBrush( QBrush(Qt::black) );
+            text->setBackgroundBrush( board->brush() );
+        }
+        text->setFont(QFont(labelFont));
+    }
+    else if (mark.type == Go::Mark::dim){
+    }
+    else if (mark.type == Go::Mark::select){
+        QAbstractGraphicsShapeItem* shape = static_cast<QAbstractGraphicsShapeItem*>(item);
+        shape->setPen( QPen(Qt::NoPen) );
+
+        if (boardBuffer[mark.position.y][mark.position.x].color == Go::black)
+            shape->setBrush( QBrush(Qt::white) );
+        else
+            shape->setBrush( QBrush(Qt::black) );
+    }
+    else{
+        QAbstractGraphicsShapeItem* shape = static_cast<QAbstractGraphicsShapeItem*>(item);
+        if (boardBuffer[mark.position.y][mark.position.x].color == Go::black)
+            shape->setPen( QPen(Qt::white, 2) );
+        else
+            shape->setPen( QPen(Qt::black, 2) );
+    }
+
+    item->setZValue(4);
+    return item;
+}
+
+/**
+  create territory item
+*/
+QGraphicsItem* BoardWidget::createTerritoryItem(int x, int y, Go::Color color){
+    QAbstractGraphicsShapeItem* item = scene()->addPath( createTerritoryPath(x, y) );
+    item->setPen( QPen(Qt::NoPen) );
+
+    if (color == Go::black)
+        item->setBrush( QBrush(Qt::black) );
+    else if (color == Go::white)
+        item->setBrush( QBrush(Qt::white) );
+    else if (color == Go::dame)
+        item->setBrush( QBrush(Qt::red) );
+
+    item->setZValue(4);
+    return item;
+}
+
+/**
+  create cross path
+*/
+QPainterPath BoardWidget::createCrossPath(int x, int y){
+    qreal size = getGridSize() * 0.4;
+    qreal xx, yy;
+    sgfToViewCoordinate(x, y, xx, yy);
+    int sceneX = xx - size / 2;
+    int sceneY = yy - size / 2;
+
+    QPainterPath path;
+    path.moveTo(sceneX, sceneY);
+    path.lineTo(sceneX+size, sceneY+size);
+    path.moveTo(sceneX+size, sceneY);
+    path.lineTo(sceneX, sceneY+size);
+
+    return path;
+}
+
+/**
+  create circle path
+*/
+QPainterPath BoardWidget::createCirclePath(int x, int y){
+    qreal size = getGridSize() * 0.5;
+    qreal xx, yy;
+    sgfToViewCoordinate(x, y, xx, yy);
+    int sceneX = xx - size / 2;
+    int sceneY = yy - size / 2;
+
+    QPainterPath path;
+    path.addEllipse(sceneX, sceneY, size, size);
+
+    return path;
+}
+
+/**
+  create square path
+*/
+QPainterPath BoardWidget::createSquarePath(int x, int y){
+    qreal size = getGridSize() * 0.45;
+    qreal xx, yy;
+    sgfToViewCoordinate(x, y, xx, yy);
+    int sceneX = xx - size / 2;
+    int sceneY = yy - size / 2;
+
+    QPainterPath path;
+    path.addRect(sceneX, sceneY, size, size);
+
+    return path;
+}
+
+/**
+  create triangle path
+*/
+QPainterPath BoardWidget::createTrianglePath(int x, int y){
+    qreal xsize = getGridSize() * 0.5;
+    qreal ysize = getGridSize() * 0.4;
+    qreal xx, yy;
+    sgfToViewCoordinate(x, y, xx, yy);
+    int sceneX = xx - xsize / 2;
+    int sceneY = yy - ysize / 2;
+
+    QPainterPath path;
+    path.moveTo(sceneX+xsize/2, sceneY);
+    path.lineTo(sceneX, sceneY+ysize);
+    path.lineTo(sceneX+xsize, sceneY+ysize);
+    path.lineTo(sceneX+xsize/2, sceneY);
+
+    return path;
+}
+
+/**
+  create black territory path
+*/
+QPainterPath BoardWidget::createTerritoryPath(int x, int y){
+    qreal size = getGridSize() * 0.35;
+    qreal xx, yy;
+    sgfToViewCoordinate(x, y, xx, yy);
+    int sceneX = xx - size / 2;
+    int sceneY = yy - size / 2;
+
+    QPainterPath path;
+    path.addRect(sceneX, sceneY, size, size);
+
+    return path;
+}
+
+/**
+  create select path
+*/
+QPainterPath BoardWidget::createSelectPath(int x, int y){
+    qreal size = getGridSize() * 0.45;
+    qreal xx, yy;
+    sgfToViewCoordinate(x, y, xx, yy);
+    int sceneX = xx - size / 2;
+    int sceneY = yy - size / 2;
+
+    QPainterPath path;
+    path.addRect(sceneX, sceneY, size, size);
+
+    return path;
+}
+
+/**
+  create line or arrow item
+*/
+GraphicsArrowItem* BoardWidget::createLineItem(int x1, int y1, int x2, int y2, Go::Line::Type type){
+    qreal xx1, yy1, xx2, yy2;
+    sgfToViewCoordinate(x1, y1, xx1, yy1);
+    sgfToViewCoordinate(x2, y2, xx2, yy2);
+
+    GraphicsArrowItem* item;
+    GraphicsArrowItem::Shape shape = type == Go::Line::arrow ? GraphicsArrowItem::normal : GraphicsArrowItem::none;
+    item = new GraphicsArrowItem(xx1, yy1, xx2, yy2, GraphicsArrowItem::none, shape);
+
+    item->setPen( QPen(Qt::blue, 3) );
+    item->setZValue(4);
+    scene()->addItem(item);
+
+    return item;
+}
+
+/**
+  create rect path
+*/
+QRectF BoardWidget::createRectPath(int x, int y){
+    qreal size = getGridSize();
+    qreal xx, yy;
+    sgfToViewCoordinate(x, y, xx, yy);
+
+    return QRect(QPoint(xx-size/2, yy-size/2), QSize(size, size));
+}
+
+/**
+  alternate move
+*/
+void BoardWidget::alternateMove(int x, int y){
+    if (boardBuffer[y][x].isStone())
+        return;
+
+    if (moveToChildItem(x, y) == false){
+        Go::Color nextColor = getNextColor();
+        boardBuffer[y][x].color = nextColor;
+        if (canKillStones(x, y) == true || isDeadStones(x, y) == false)
+            createChildItem(x, y);
+        else
+            boardBuffer[y][x].color = Go::empty;
+    }
+}
+
+/**
+  add stone
+*/
+void BoardWidget::addStone(int x, int y, Go::Color color){
+    TerritoryInfo& ti = boardBuffer[y][x];
+
+    Go::Point p(x, y);
+
+    if (ti.color != Go::empty && ti.moveNumber == 0){
+        bool removed = removeStone(currentNode->blackStones, p) ||
+                       removeStone(currentNode->whiteStones, p) ||
+                       removeStone(currentNode->emptyStones, p);
+        if (removed)
+            return;
+    }
+
+    if ((color == Go::empty && ti.color != Go::empty) || (color != Go::empty && ti.color == Go::empty)){
+        // if currentNode is stone, create child node and add stone to new node.
+        if (currentNode->isStone()){
+            Go::NodePtr node(new Go::Node(currentNode));
+            addItem(currentNode, node);
+            setCurrentNode(node);
+        }
+
+        AddStoneCommand* command = new AddStoneCommand(document(), currentNode, Go::Stone(p, color));
+        document()->getUndoStack()->push(command);
+    }
+}
+
+/**
+  remove stone
+*/
+bool BoardWidget::removeStone(const Go::StoneList& stoneList, const Go::Point& p){
+    foreach(const Go::Stone& s, stoneList){
+        if (s.position == p){
+            RemoveStoneCommand* command = new RemoveStoneCommand(document(), currentNode, p);
+            document()->getUndoStack()->push(command);
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
+  add label
+*/
+void BoardWidget::addLabel(int x, int y, bool autoLabel){
+    TerritoryInfo& ti = boardBuffer[y][x];
+    if(ti.mark){
+        RemoveMarkCommand* command = new RemoveMarkCommand(document(), currentNode, Go::Point(x, y));
+        document()->getUndoStack()->push(command);
+        return;
+    }
+
+    QString str;
+    if (autoLabel == false){
+        str = QInputDialog::getText(this, QString(), tr("Input label"));
+        if (str.isEmpty())
+            return;
+    }
+    else{
+        int c = labelType == Preference::number ? 0 : labelType == Preference::small ? 'a' - 1 : 'A' - 1;
+
+        QStringList strList;
+        foreach(const Go::Mark& mark, currentNode->marks){
+            if (mark.type == Go::Mark::character)
+                strList.push_back(mark.text);
+        }
+
+        do{
+            if (labelType == Preference::number)
+                str = QString::number(++c);
+            else
+                str.sprintf("%c", ++c);
+        } while(strList.indexOf(str) >= 0);
+    }
+    AddMarkCommand* command = new AddMarkCommand(document(), currentNode, Go::Mark(x, y, str));
+    document()->getUndoStack()->push(command);
+}
+
+/**
+  add mark(circle, cross, square, triangle)
+*/
+void BoardWidget::addMarker(int x, int y, Go::Mark::Type mark){
+    TerritoryInfo& ti = boardBuffer[y][x];
+    if(ti.mark){
+        RemoveMarkCommand* command = new RemoveMarkCommand(document(), currentNode, Go::Point(x, y));
+        document()->getUndoStack()->push(command);
+    }
+    else{
+        AddMarkCommand* command = new AddMarkCommand(document(), currentNode, Go::Mark(x, y, mark));
+        document()->getUndoStack()->push(command);
+    }
+}
+
+/**
+  remove marker
+*/
+void BoardWidget::removeMarker(int x, int y){
+    Go::Point p(x, y);
+    TerritoryInfo& ti = boardBuffer[y][x];
+    if(ti.mark){
+        RemoveMarkCommand* command = new RemoveMarkCommand(document(), currentNode, p);
+        document()->getUndoStack()->push(command);
+    }
+    else{
+        removeStone(currentNode->blackStones, p) ||
+            removeStone(currentNode->whiteStones, p) ||
+            removeStone(currentNode->emptyStones, p);
+    }
+}
+
+/**
+  Move next node
+*/
+void BoardWidget::forward(int step){
+    Go::NodeList::const_iterator iter = qFind(currentNodeList, currentNode);
+    if (iter == currentNodeList.end())
+        return;
+
+    Go::NodeList::const_iterator pos = iter;
+    for (int i=0; i<step; ++i){
+        if (++iter == currentNodeList.end())
+            break;
+        pos = iter;
+    }
+    setCurrentNode(*pos);
+}
+
+/**
+  Move previous node
+*/
+void BoardWidget::back(int step){
+    Go::NodeList::const_iterator iter = qFind(currentNodeList, currentNode);
+    if (iter == currentNodeList.end())
+        return;
+
+    for (int i=0; i<step; ++i){
+        if (iter == currentNodeList.begin())
+            break;
+        --iter;
+    }
+    setCurrentNode(*iter);
+}
+
+/**
+  set edit mode
+*/
+void BoardWidget::setEditMode(EditMode::Mode mode){
+    editMode = mode;
+}
+
+/**
+  set tutor mode
+*/
+void BoardWidget::setTutorMode(TutorMode::Mode mode){
+    tutorMode = mode;
+    moveEnemy = false;
+
+    if (tutorMode == TutorMode::noTutor)
+        scene()->setBackgroundBrush(QBrush(backgroundColor));
+    else
+        scene()->setBackgroundBrush(QBrush(tutorBackgroundColor));
+
+    if (tutorMode == TutorMode::replay){
+        replayTimer = new QTimer(this);
+        connect(replayTimer, SIGNAL(timeout()), SLOT(on_automaticReplay_timeout()));
+        replayTimer->start(replayInterval);
+    }
+    else if (replayTimer){
+        replayTimer->deleteLater();
+        replayTimer = NULL;
+    }
+
+    createBuffer(false);
+}
+
+/**
+*/
+void BoardWidget::setScoreMode(ScoreMode::Mode mode){
+    scoreMode = mode;
+    createBuffer(false);
+    if (mode == ScoreMode::final)
+        createTerritories();
+}
+
+/**
+  set show move number
+*/
+void BoardWidget::setShowMoveNumber(bool show){
+    showMoveNumber = show;
+    createBuffer(false);
+}
+
+/**
+  set reset move number in branch
+*/
+void BoardWidget::setResetMoveNumberMode(ResetMoveNumber::Mode mode){
+    resetMoveNumberMode = mode;
+    createBuffer(false);
+}
+
+/**
+  set show move number count
+*/
+void BoardWidget::setShowMoveNumberCount(int cnt){
+    showMoveNumberCount = cnt;
+    createBuffer(false);
+}
+
+/**
+  set show coordinate
+*/
+void BoardWidget::setShowCoordinate(bool show){
+    showCoordinate = show;
+    setItemsPosition();
+}
+
+/**
+  set show coordinate with i
+*/
+void BoardWidget::setShowCoordinateWithI(bool show){
+    document()->showCoordinateWithI = show;
+    createBoard();
+    document()->modifyGame(currentGame);
+}
+
+/**
+  set show marker
+*/
+void BoardWidget::setShowMarker(bool show){
+    showMarker = show;
+    createBuffer(false);
+}
+
+/**
+  set show variations
+*/
+void BoardWidget::setShowVariations(int variation){
+    currentGame->gameInformation->variation = variation;
+    createBuffer(false);
+}
+
+/**
+  set monochrome
+*/
+void BoardWidget::setMonochrome(bool mono){
+    monochrome = mono;
+    createBoard();
+}
+
+/**
+  set board type
+*/
+void BoardWidget::setBoardType(Preference::ResourceType type){
+    boardType = type;
+    if (type == Preference::internal)
+        board->setBrush(QBrush(QPixmap(BOARD_IMAGE)));
+    else if (type == Preference::color)
+        board->setBrush(QBrush(boardColor));
+    else if (type == Preference::file)
+        board->setBrush(QBrush(QPixmap(boardImage)));
+}
+
+/**
+  set board color
+*/
+void BoardWidget::setBoardColor(const QColor& color){
+    boardColor = color;
+    if (boardType == Preference::color)
+        board->setBrush(QBrush(boardColor));
+}
+
+/**
+  set board image
+*/
+void BoardWidget::setBoardImage(const QString& file){
+    boardImage = file;
+    if (boardType == Preference::file)
+        board->setBrush(QBrush(QPixmap(boardImage)));
+}
+
+/**
+  set coordinate color
+*/
+void BoardWidget::setCoordinateColor(const QColor& color){
+    QBrush brush(coordinateColor = color);
+
+    foreach(QGraphicsSimpleTextItem* text, coordinateLeft)
+        text->setBrush(brush);
+
+    foreach(QGraphicsSimpleTextItem* text, coordinateRight)
+        text->setBrush(brush);
+
+    foreach(QGraphicsSimpleTextItem* text, coordinateTop)
+        text->setBrush(brush);
+
+    foreach(QGraphicsSimpleTextItem* text, coordinateBottom)
+        text->setBrush(brush);
+}
+
+/**
+  set coordinate font
+*/
+void BoardWidget::setCoordinateFont(const QString& fontName){
+    QFont font(coordinateFont = fontName, 10);
+
+    foreach(QGraphicsSimpleTextItem* text, coordinateLeft)
+        text->setFont(font);
+
+    foreach(QGraphicsSimpleTextItem* text, coordinateRight)
+        text->setFont(font);
+
+    foreach(QGraphicsSimpleTextItem* text, coordinateTop)
+        text->setFont(font);
+
+    foreach(QGraphicsSimpleTextItem* text, coordinateBottom)
+        text->setFont(font);
+}
+
+/**
+  set background color
+*/
+void BoardWidget::setBackgroundColor(const QColor& color){
+    scene()->setBackgroundBrush( QBrush(backgroundColor = color) );
+}
+
+/**
+  set tutor background color
+*/
+void BoardWidget::setTutorBackgroundColor(const QColor& color){
+    tutorBackgroundColor = color;
+    if (tutorMode != TutorMode::noTutor)
+        scene()->setBackgroundBrush( QBrush(tutorBackgroundColor) );
+}
+
+/**
+  set white stone type
+*/
+void BoardWidget::setWhiteStoneType(Preference::ResourceType type){
+    if (whiteStoneType == type)
+        return;
+
+    whiteStoneType = type;
+    createStonePixmap();
+    createBuffer(true);
+}
+
+/**
+  set white stone color
+*/
+void BoardWidget::setWhiteStoneColor(const QColor& color){
+    whiteStoneColor = color;
+    if (whiteStoneType == Preference::color)
+        createBuffer(true);
+}
+
+/**
+  set white stone image
+*/
+void BoardWidget::setWhiteStoneImage(const QString& file){
+    whiteStoneImage = file;
+    if (whiteStoneType == Preference::file){
+        createStonePixmap();
+        createBuffer(true);
+    }
+}
+
+/**
+  set black stone type
+*/
+void BoardWidget::setBlackStoneType(Preference::ResourceType type){
+    if (blackStoneType == type)
+        return;
+
+    blackStoneType = type;
+    createStonePixmap();
+    createBuffer(true);
+}
+
+/**
+  set black stone color
+*/
+void BoardWidget::setBlackStoneColor(const QColor& color){
+    blackStoneColor = color;
+    if (blackStoneType == Preference::color)
+        createBuffer(true);
+}
+
+/**
+  set black stone image
+*/
+void BoardWidget::setBlackStoneImage(const QString& file){
+    blackStoneImage = file;
+    if (blackStoneType == Preference::file){
+        createStonePixmap();
+        createBuffer(true);
+    }
+}
+
+/**
+  set branch color
+*/
+void BoardWidget::setBranchColor(const QColor& color){
+    branchColor = color;
+    createBuffer(true);
+}
+
+/**
+  set focus color
+*/
+void BoardWidget::setFocusColor(const QColor& color){
+    focusColor = color;
+    createBuffer(false);
+}
+
+/**
+  set focus type
+*/
+void BoardWidget::setFocusType(int type){
+    focusType = type;
+    createBuffer(false);
+}
+
+/**
+  set label type
+*/
+void BoardWidget::setLabelType(Preference::LabelType type){
+    labelType = type;
+}
+
+/**
+  set label font
+*/
+void BoardWidget::setLabelFont(const QString& fontName){
+    labelFont = fontName;
+    createBuffer(false);
+}
+
+/**
+  set automatic replay interval
+*/
+void BoardWidget::setAutomaticReplayInterval(int interval){
+    replayInterval = interval;
+    if (replayTimer)
+        replayTimer->setInterval(replayInterval);
+}
+
+/**
+  set sound file
+*/
+void BoardWidget::setPlaySound(bool play){
+    playSound = play;
+}
+
+/**
+  set sound file
+*/
+void BoardWidget::setMoveSoundFile(const QString& file){
+    moveSound->setFilePath(file);
+}
+
+/**
+  rotate view
+*/
+void BoardWidget::setRotate(int rotate_){
+    if (rotate_ < 0 || rotate_ > 3)
+        return;
+    rotate = rotate_;
+    setItemsPosition();
+}
+
+/**
+  flip view horizontally
+*/
+void BoardWidget::setFlipHorizontally(bool flip){
+    flipHorizontally = flip;
+    setItemsPosition();
+}
+
+/**
+  flip view vertically
+*/
+void BoardWidget::setFlipVertically(bool flip){
+    flipVertically = flip;
+    setItemsPosition();
+}
+
+/**
+  add item
+*/
+void BoardWidget::addItem(Go::NodePtr parent, Go::NodePtr node, int index){
+    document()->getUndoStack()->push( new AddNodeCommand(document(), parent, node, index) );
+}
+
+/**
+  draw image
+*/
+void BoardWidget::drawImage(QImage& image){
+    QRectF r(0, 0, image.width(), image.height());
+
+    setItemsPosition(r);
+
+    QPainter p(&image);
+    p.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
+    board->scene()->render(&p, r, r);
+
+    setItemsPosition(geometry());
+}
+
+/**
+  Get Star Position
+*/
+void BoardWidget::getStarPosition(QList<int>& xpos, QList<int>& ypos){
+    int xsize = gameInformation->xsize;
+    int ysize = gameInformation->ysize;
+
+    if (xsize > 6){
+        xpos.push_back(xsize > 9 ? 3 : 2);
+        xpos.push_back(xsize > 9 ? xsize-4 : xsize-3);
+        if (xsize % 2 != 0 && xsize >= 9)
+            xpos.push_back(xsize / 2);
+    }
+
+    if (ysize > 6){
+        ypos.push_back(ysize > 9 ? 3 : 2);
+        ypos.push_back(ysize > 9 ? ysize-4 : ysize-3);
+        if (ysize % 2 != 0 && ysize >= 9)
+            ypos.push_back(ysize / 2);
+    }
+}
+
+/**
+  kill stone
+*/
+void BoardWidget::killStones(int x, int y){
+    Go::Color color = boardBuffer[y][x].color;
+    if (color == Go::empty)
+        return;
+
+    int xsize = gameInformation->xsize;
+    int ysize = gameInformation->ysize;
+
+    char* buf = new char[ysize * xsize];
+
+    memset(buf, 0, ysize*xsize);
+    if (isDeadStones(x-1, y, color == Go::black ? Go::white : Go::black, buf) == true)
+        killStones(buf);
+
+    memset(buf, 0, ysize*xsize);
+    if (isDeadStones(x+1, y, color == Go::black ? Go::white : Go::black, buf) == true)
+        killStones(buf);
+
+    memset(buf, 0, ysize*xsize);
+    if (isDeadStones(x, y-1, color == Go::black ? Go::white : Go::black, buf) == true)
+        killStones(buf);
+
+    memset(buf, 0, ysize*xsize);
+    if (isDeadStones(x, y+1, color == Go::black ? Go::white : Go::black, buf) == true)
+        killStones(buf);
+
+    // if suicide move, kill myself
+    memset(buf, 0, ysize*xsize);
+    if (isDeadStones(x, y, color, buf) == true)
+        killStones(buf);
+
+    delete[] buf;
+}
+
+/**
+  kill stone
+*/
+void BoardWidget::killStones(char* buf){
+    for (int y=0; y<boardBuffer.size(); ++y){
+        for (int x=0; x<boardBuffer[y].size(); ++x){
+            if (buf[y*gameInformation->xsize+x]){
+                if (boardBuffer[y][x].color == Go::black)
+                    ++capturedBlack;
+                else if (boardBuffer[y][x].color == Go::white)
+                    ++capturedWhite;
+
+                boardBuffer[y][x].color = Go::empty;
+            }
+        }
+    }
+}
+
+/**
+*/
+bool BoardWidget::canKillStones(int x, int y){
+    Go::Color color = boardBuffer[y][x].color;
+    if (color == Go::empty)
+        return false;
+    color = color == Go::black ? Go::white : Go::black;
+
+    int xsize = gameInformation->xsize;
+    int ysize = gameInformation->ysize;
+    QVector<char> buf(ysize * xsize);
+
+    if (inBoard(x-1, y) && isDeadStones(x-1, y, color, buf.data()) == true)
+        return true;
+
+    buf.fill(0);
+    if (inBoard(x+1, y) && isDeadStones(x+1, y, color, buf.data()) == true)
+        return true;
+
+    buf.fill(0);
+    if (inBoard(x, y-1) && isDeadStones(x, y-1, color, buf.data()) == true)
+        return true;
+
+    buf.fill(0);
+    if (inBoard(x, y+1) && isDeadStones(x, y+1, color, buf.data()) == true)
+        return true;
+
+    return false;
+}
+
+/**
+*/
+bool BoardWidget::isDeadStones(int x, int y){
+    Go::Color color = boardBuffer[y][x].color;
+    if (color == Go::empty)
+        return false;
+
+    int xsize = gameInformation->xsize;
+    int ysize = gameInformation->ysize;
+    QVector<char> buf(ysize * xsize);
+
+    if (isDeadStones(x, y, color, buf.data()) == false)
+        return false;
+
+    return true;
+}
+
+/**
+*/
+bool BoardWidget::isDeadStones(int x, int y, Go::Color color, char* buf){
+    if (x < 0 || x >= gameInformation->xsize || y < 0 || y >= gameInformation->ysize)
+        return true;
+    else if (boardBuffer[y][x].color == Go::empty)
+        return false;
+    else if (boardBuffer[y][x].color != color)
+        return true;
+
+    if (buf[y * gameInformation->xsize + x])
+        return true;
+
+    buf[y * gameInformation->xsize + x] = 1;
+
+    if (isDeadStones(x-1, y, color, buf) == false)
+        return false;
+
+    if (isDeadStones(x+1, y, color, buf) == false)
+        return false;
+
+    if (isDeadStones(x, y-1, color, buf) == false)
+        return false;
+
+    if (isDeadStones(x, y+1, color, buf) == false)
+        return false;
+
+    return true;
+}
+
+/**
+*/
+bool BoardWidget::inBoard(Go::NodePtr node){
+    if (node->isStone() == false || node->isPass() == true)
+        return false;
+
+    if (node->position.x >= gameInformation->xsize || node->position.y >= gameInformation->ysize)
+        return false;
+
+    return true;
+}
+
+/**
+*/
+bool BoardWidget::inBoard(int x, int y){
+    if (x < 0 || y < 0 || x >= boardBuffer[0].size() || y >= boardBuffer.size())
+        return false;
+
+    return true;
+}
+
+/**
+*/
+bool BoardWidget::moveToChildItem(int x, int y){
+    foreach (const Go::NodePtr& node, currentNode->childNodes){
+        if (node->x() == x && node->y() == y){
+            setCurrentNode(node);
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/**
+*/
+bool BoardWidget::createChildItem(int x, int y){
+    // create node
+    Go::Color nextColor = getNextColor();
+    Go::NodePtr node;
+    if (nextColor == Go::black)
+        node = Go::createBlackNode(currentNode, x, y);
+    else if (nextColor == Go::white)
+        node = Go::createWhiteNode(currentNode, x, y);
+    else
+        return false;
+
+    addItem(currentNode, node);
+    setCurrentNode(node);
+
+    return true;
+}
+
+/**
+  Slot
+  node added
+*/
+/*
+void BoardWidget::on_sgfdocument_nodeAdded(Go::NodePtr node){
+    setCurrentNode(node);
+}
+*/
+
+/**
+  Slot
+  node deleted
+*/
+void BoardWidget::on_sgfdocument_nodeDeleted(Go::NodePtr node, bool /*removeChild*/){
+    setCurrentNode(node->parent());
+    Go::NodeList::iterator iter = qFind(currentNodeList.begin(), currentNodeList.end(), node);
+    if (iter != currentNodeList.end()){
+        iter = currentNodeList.erase(iter);
+        createBuffer(true);
+    }
+}
+
+/**
+  Slot
+  node modified
+*/
+void BoardWidget::on_sgfdocument_nodeModified(Go::NodePtr /*node*/, bool needRecreateBoard){
+    if (needRecreateBoard == false)
+        return;
+    createBuffer(true);
+}
+
+/**
+  Slot
+  node modified
+*/
+void BoardWidget::on_sgfdocument_gameModified(Go::NodePtr game){
+    if (game != currentGame)
+        return;
+
+    Go::NodePtr node = currentNode;
+    setCurrentGame(game, true);
+    setCurrentNode(node);
+}
+
+/**
+  Slot
+  automatic replay
+*/
+void BoardWidget::on_automaticReplay_timeout(){
+    forward();
+}
+
+/**
+  Slot
+  move enemy at tutor one side
+*/
+void BoardWidget::on_tutorOneSide_timeout(){
+    QTimer* timer = static_cast<QTimer*>(sender());
+    timer->stop();
+    timer->deleteLater();
+
+    forward();
+    moveEnemy = false;
 }

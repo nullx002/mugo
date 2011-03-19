@@ -17,12 +17,14 @@
 */
 #include <QDebug>
 #include <QSettings>
-#include "boardsizedialog.h"
-#include "ui_boardsizedialog.h"
+#include <QTextCodec>
+#include "newdocumentdialog.h"
+#include "ui_newdocumentdialog.h"
+#include "mugoapp.h"
 
-BoardSizeDialog::BoardSizeDialog(QWidget *parent) :
+NewDocumentDialog::NewDocumentDialog(QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::BoardSizeDialog)
+    ui(new Ui::NewDocumentDialog)
 {
     ui->setupUi(this);
 
@@ -31,6 +33,7 @@ BoardSizeDialog::BoardSizeDialog(QWidget *parent) :
     xsize = settings.value("xsize", 19).toInt();
     ysize = settings.value("ysize", 19).toInt();
     komi  = settings.value("komi", 6.5).toDouble();
+    codec = mugoApp()->defaultCodec();
 
     // check board size radio button
     if (xsize == ysize){
@@ -53,9 +56,24 @@ BoardSizeDialog::BoardSizeDialog(QWidget *parent) :
 
     // set komi
     ui->komiSpinBox->setValue(komi);
+
+    // set encoding combobox
+    const QList<QTextCodec*>& codecs = mugoApp()->codecs();
+    QList<QTextCodec*>::const_iterator iter = codecs.begin();
+    foreach(QAction* act, mugoApp()->encodingActions()){
+        if (act->isSeparator())
+            ui->encodingComboBox->insertSeparator(ui->encodingComboBox->count());
+        else
+            ui->encodingComboBox->addItem(act->text());
+
+        if (*iter == mugoApp()->defaultCodec())
+            ui->encodingComboBox->setCurrentIndex(ui->encodingComboBox->count()-1);
+
+        ++iter;
+    }
 }
 
-BoardSizeDialog::~BoardSizeDialog()
+NewDocumentDialog::~NewDocumentDialog()
 {
     delete ui;
 }
@@ -64,7 +82,7 @@ BoardSizeDialog::~BoardSizeDialog()
 * slot
 * ok button was clicked.
 */
-void BoardSizeDialog::accept()
+void NewDocumentDialog::accept()
 {
     QDialog::accept();
     if (ui->radio19Button->isChecked())
@@ -80,19 +98,28 @@ void BoardSizeDialog::accept()
         ysize = ui->ysizeSpinBox->value();
     }
 
+    // komi
     komi = ui->komiSpinBox->value();
+
+    // encoding
+    int encodingIndex = ui->encodingComboBox->currentIndex();
+    const QList<QTextCodec*>& codecs = mugoApp()->codecs();
+    codec = codecs[encodingIndex];
 
     QSettings settings;
     settings.setValue("komi",  komi);
     settings.setValue("xsize", xsize);
     settings.setValue("ysize", ysize);
+    settings.setValue("defaultCodec", codec->name());
+
+    mugoApp()->setDefaultCodec(codec);
 }
 
 /**
 * slot
 * custom radio button was toggled.
 */
-void BoardSizeDialog::on_radioCustomButton_toggled(bool checked)
+void NewDocumentDialog::on_radioCustomButton_toggled(bool checked)
 {
     // if custom radio button is checked, enable custom spin button.
     ui->customSpinBox->setEnabled(checked);
@@ -102,7 +129,7 @@ void BoardSizeDialog::on_radioCustomButton_toggled(bool checked)
 * slot
 * rectangular radio button was toggled.
 */
-void BoardSizeDialog::on_radioRectangularButton_toggled(bool checked)
+void NewDocumentDialog::on_radioRectangularButton_toggled(bool checked)
 {
     // row count and column count spin box is enabled if rectangular radio button is checked.
     ui->xsizeSpinBox->setEnabled(checked);

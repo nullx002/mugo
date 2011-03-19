@@ -16,17 +16,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include <QDebug>
-#include <QColorDialog>
 #include <QSettings>
-#include <QStyleFactory>
-#include "appdef.h"
+#include <QFileDialog>
+#include <QColorDialog>
+#include <QTextCodec>
 #include "mugoapp.h"
 #include "setupdialog.h"
 #include "ui_setupdialog.h"
-#include "appdef.h"
-#ifdef Q_WS_WIN
-#  include "qtdotnetstyle.h"
-#endif
 
 SetupDialog::SetupDialog(QWidget *parent) :
     QDialog(parent),
@@ -45,33 +41,32 @@ SetupDialog::SetupDialog(QWidget *parent) :
     // board/coordinat ecolor
     coordinateColor = settings.value("board/coordinateColor", COORDINATE_COLOR).value<QColor>();
     m_ui->coordinateColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(coordinateColor.red()).arg(coordinateColor.green()).arg(coordinateColor.blue()) );
+    m_ui->coordinateFontComboBox->setCurrentFont( QFont(settings.value("board/coordinateFont", "Sans").toString()) );
 
     // board/background
     bgColor = settings.value("board/bgColor", BG_COLOR).value<QColor>();
     m_ui->bgColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(bgColor.red()).arg(bgColor.green()).arg(bgColor.blue()) );
 
-    // board/bg in tutor
-    tutorColor = settings.value("board/bgTutorColor", BG_TUTOR_COLOR).value<QColor>();
+    // board/background in tutor
+    tutorColor = settings.value("board/tutorBgColor", TUTOR_BG_COLOR).value<QColor>();
     m_ui->bgTutorColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(tutorColor.red()).arg(tutorColor.green()).arg(tutorColor.blue()) );
 
     // stones/white
-    m_ui->whiteTypeComboBox->setCurrentIndex( settings.value("board/whiteType").toInt() );
-    whiteColor = settings.value("board/whiteColor", WHITE_COLOR).value<QColor>();
+    m_ui->whiteTypeComboBox->setCurrentIndex( settings.value("stone/whiteType").toInt() );
+    whiteColor = settings.value("stone/whiteColor", WHITE_STONE_COLOR).value<QColor>();
     m_ui->whiteColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(whiteColor.red()).arg(whiteColor.green()).arg(whiteColor.blue()) );
-    m_ui->whitePathEdit->setText( settings.value("board/whitePath").toString() );
+    m_ui->whitePathEdit->setText( settings.value("stone/whitePath").toString() );
 
     // stones/black
-    m_ui->blackTypeComboBox->setCurrentIndex( settings.value("board/blackType").toInt() );
-    blackColor = settings.value("board/blackColor", BLACK_COLOR).value<QColor>();
+    m_ui->blackTypeComboBox->setCurrentIndex( settings.value("stone/blackType").toInt() );
+    blackColor = settings.value("stone/blackColor", BLACK_STONE_COLOR).value<QColor>();
     m_ui->blackColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(blackColor.red()).arg(blackColor.green()).arg(blackColor.blue()) );
-    m_ui->blackPathEdit->setText( settings.value("board/blackPath").toString() );
+    m_ui->blackPathEdit->setText( settings.value("stone/blackPath").toString() );
 
     // markers/focus
     m_ui->focusTypeComboBox->setCurrentIndex( settings.value("marker/focusType").toInt() );
-    focusWhiteColor = settings.value("marker/focusWhiteColor", FOCUS_WHITE_COLOR).value<QColor>();
-    m_ui->focusWhiteColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(focusWhiteColor.red()).arg(focusWhiteColor.green()).arg(focusWhiteColor.blue()) );
-    focusBlackColor = settings.value("marker/focusBlackColor", FOCUS_BLACK_COLOR).value<QColor>();
-    m_ui->focusBlackColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(focusBlackColor.red()).arg(focusBlackColor.green()).arg(focusBlackColor.blue()) );
+    focusColor = settings.value("marker/focusColor", FOCUS_COLOR).value<QColor>();
+    m_ui->focusColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(focusColor.red()).arg(focusColor.green()).arg(focusColor.blue()) );
 
     // markers/branch
     branchColor = settings.value("marker/branchColor", BRANCH_COLOR).value<QColor>();
@@ -79,55 +74,39 @@ SetupDialog::SetupDialog(QWidget *parent) :
 
     // markers/label
     m_ui->labelTypeComboBox->setCurrentIndex( settings.value("marker/labelType").toInt() );
+    m_ui->labelFontComboBox->setCurrentFont( QFont(settings.value("marker/labelFont", "Sans").toString()) );
 
     // navigation
     m_ui->stepsOfFastMoveSpinBox->setValue( settings.value("navigation/stepsOfFastMove", FAST_MOVE_STEPS).toInt() );
-    m_ui->reproductionSpeedSpinBox->setValue( settings.value("navigation/autoReplayInterval", AUTO_REPLAY_INTERVAL).toInt() );
+    m_ui->autoReplayIntervalSpinBox->setValue( settings.value("navigation/autoReplayInterval", AUTO_REPLAY_INTERVAL).toInt() );
 
     // sound
     m_ui->soundTypeComboBox->setCurrentIndex( settings.value("sound/type").toInt() );
     m_ui->soundPathEdit->setText( settings.value("sound/path").toString() );
+    m_ui->playSoundCheckBox->setChecked( settings.value("sound/play", true).toBool() );
 
     // save name
-    m_ui->saveNameEdit->setText( settings.value("saveName", SAVE_NAME).toString() );
+    m_ui->saveNameEdit->setText( settings.value("saveFileName", SAVE_FILE_NAME).toString() );
 
     // encoding
-    QString defaultCodec = settings.value("codec" ,"UTF-8").toString();
-    for (int i=0; i<codecNames.size(); ++i){
-        m_ui->defaultEncodingComboBox->addItem( codecActions[i]->text() );
-        if (defaultCodec == codecNames[i])
-            m_ui->defaultEncodingComboBox->setCurrentIndex( m_ui->defaultEncodingComboBox->count() - 1 );
-    }
+    const QList<QTextCodec*>& codecs = mugoApp()->codecs();
+    QList<QTextCodec*>::const_iterator iter = codecs.begin();
+    foreach(QAction* act, mugoApp()->encodingActions()){
+        if (act->isSeparator())
+            m_ui->defaultEncodingComboBox->insertSeparator(m_ui->defaultEncodingComboBox->count());
+        else
+            m_ui->defaultEncodingComboBox->addItem(act->text());
 
-    // window style
-    m_ui->windowStyleList->addItem( tr("Default") );
-    m_ui->windowStyleList->addItems( QStyleFactory::keys() );
-    QString style = settings.value("style").toString();
-    if (style.isEmpty())
-        m_ui->windowStyleList->setCurrentRow(0);
-    else
-        for (int i=0; i<m_ui->windowStyleList->count(); ++i)
-            if (m_ui->windowStyleList->item(i)->text() == style){
-                m_ui->windowStyleList->setCurrentRow(i);
-                break;
-            }
+        if (*iter == mugoApp()->defaultCodec())
+            m_ui->defaultEncodingComboBox->setCurrentIndex(m_ui->defaultEncodingComboBox->count()-1);
+
+        ++iter;
+    }
 }
 
 SetupDialog::~SetupDialog()
 {
     delete m_ui;
-}
-
-void SetupDialog::changeEvent(QEvent *e)
-{
-    QDialog::changeEvent(e);
-    switch (e->type()) {
-    case QEvent::LanguageChange:
-        m_ui->retranslateUi(this);
-        break;
-    default:
-        break;
-    }
 }
 
 void SetupDialog::accept(){
@@ -140,49 +119,44 @@ void SetupDialog::accept(){
     settings.setValue("board/boardColor", boardColor);
     settings.setValue("board/boardPath", m_ui->boardPathEdit->text());
     settings.setValue("board/coordinateColor", coordinateColor);
+    settings.setValue("board/coordinateFont", m_ui->coordinateFontComboBox->currentFont().family());
     settings.setValue("board/bgColor", bgColor);
-    settings.setValue("board/bgTutorColor", tutorColor);
+    settings.setValue("board/tutorBgColor", tutorColor);
 
     // stones
-    settings.setValue("board/whiteType", m_ui->whiteTypeComboBox->currentIndex());
-    settings.setValue("board/whiteColor", whiteColor);
-    settings.setValue("board/whitePath", m_ui->whitePathEdit->text());
+    settings.setValue("stone/whiteType", m_ui->whiteTypeComboBox->currentIndex());
+    settings.setValue("stone/whiteColor", whiteColor);
+    settings.setValue("stone/whitePath", m_ui->whitePathEdit->text());
 
-    settings.setValue("board/blackType", m_ui->blackTypeComboBox->currentIndex());
-    settings.setValue("board/blackColor", blackColor);
-    settings.setValue("board/blackPath", m_ui->blackPathEdit->text());
+    settings.setValue("stone/blackType", m_ui->blackTypeComboBox->currentIndex());
+    settings.setValue("stone/blackColor", blackColor);
+    settings.setValue("stone/blackPath", m_ui->blackPathEdit->text());
 
     // markers
     settings.setValue("marker/focusType", m_ui->focusTypeComboBox->currentIndex());
-    settings.setValue("marker/focusWhiteColor", focusWhiteColor);
-    settings.setValue("marker/focusBlackColor", focusBlackColor);
+    settings.setValue("marker/focusColor", focusColor);
     settings.setValue("marker/branchColor", branchColor);
     settings.setValue("marker/labelType", m_ui->labelTypeComboBox->currentIndex());
+    settings.setValue("marker/labelFont", m_ui->labelFontComboBox->currentFont().family() );
 
     // navigation
     settings.setValue("navigation/stepsOfFastMove", m_ui->stepsOfFastMoveSpinBox->value());
-    settings.setValue("navigation/autoReplayInterval", m_ui->reproductionSpeedSpinBox->value());
+    settings.setValue("navigation/autoReplayInterval", m_ui->autoReplayIntervalSpinBox->value());
 
     // sound
     settings.setValue("sound/type", m_ui->soundTypeComboBox->currentIndex());
     settings.setValue("sound/path", m_ui->soundPathEdit->text());
+    settings.setValue("sound/play", m_ui->playSoundCheckBox->isChecked());
 
     // save name
-    settings.setValue("saveName", m_ui->saveNameEdit->text());
+    settings.setValue("saveFileName", m_ui->saveNameEdit->text());
 
     // encoding
-    int codec = m_ui->defaultEncodingComboBox->currentIndex();
-    settings.setValue("codec", codecNames[codec]);
-
-    // window style
-    QString oldStyle = settings.value("style").toString();
-    QString newStyle = m_ui->windowStyleList->currentItem()->text();
-    int style = m_ui->windowStyleList->currentRow();
-    if (style == 0)
-        settings.remove("style");
-    else
-        settings.setValue("style", newStyle);
-    qobject_cast<Application*>(qApp)->setWindowStyle(style ? newStyle : "");
+    int encodingIndex = m_ui->defaultEncodingComboBox->currentIndex();
+    const QList<QTextCodec*>& codecs = mugoApp()->codecs();
+    QTextCodec* codec = codecs[encodingIndex];
+    mugoApp()->setDefaultCodec(codec);
+    settings.setValue("defaultCodec", codec->name());
 }
 
 /**
@@ -197,8 +171,8 @@ void SetupDialog::on_categoryList_currentRowChanged(int currentRow){
 * board type is changed
 */
 void SetupDialog::on_boardTypeComboBox_currentIndexChanged(int index){
-    m_ui->boardPathEdit->setEnabled(index == 1);
-    m_ui->boardPathButton->setEnabled(index == 1);
+    m_ui->boardPathEdit->setEnabled(index == 2);
+    m_ui->boardPathButton->setEnabled(index == 2);
 }
 
 /**
@@ -219,7 +193,7 @@ void SetupDialog::on_boardColorButton_clicked(){
 * board path borwse button is clicked
 */
 void SetupDialog::on_boardPathButton_clicked(){
-    QString fname = getOpenFileName(this, QString(), QString(), tr("All Image Files(*.bmp *.gif *.jpg *.jpeg *.png *.tif *.tiff);;All Files(*.*)"));
+    QString fname = QFileDialog::getOpenFileName(this, QString(), QString(), tr("All Image Files(*.bmp *.gif *.jpg *.jpeg *.png *.tif *.tiff);;All Files(*.*)"));
     if (!fname.isEmpty())
         m_ui->boardPathEdit->setText(fname);
 }
@@ -266,8 +240,8 @@ void SetupDialog::on_bgTutorColorButton_clicked(){
 * white stone type is changed
 */
 void SetupDialog::on_whiteTypeComboBox_currentIndexChanged(int index){
-    m_ui->whitePathEdit->setEnabled(index == 1);
-    m_ui->whitePathButton->setEnabled(index == 1);
+    m_ui->whitePathEdit->setEnabled(index == 2);
+    m_ui->whitePathButton->setEnabled(index == 2);
 }
 
 /**
@@ -287,7 +261,7 @@ void SetupDialog::on_whiteColorButton_clicked(){
 * white stone type is changed
 */
 void SetupDialog::on_whitePathButton_clicked(){
-    QString fname = getOpenFileName(this, QString(), QString(), tr("All Image Files(*.bmp *.gif *.jpg *.jpeg *.png *.tif *.tiff);;All Files(*.*)"));
+    QString fname = QFileDialog::getOpenFileName(this, QString(), QString(), tr("All Image Files(*.bmp *.gif *.jpg *.jpeg *.png *.tif *.tiff);;All Files(*.*)"));
     if (!fname.isEmpty())
         m_ui->whitePathEdit->setText(fname);
 }
@@ -297,8 +271,8 @@ void SetupDialog::on_whitePathButton_clicked(){
 * black stone type is changed
 */
 void SetupDialog::on_blackTypeComboBox_currentIndexChanged(int index){
-    m_ui->blackPathEdit->setEnabled(index == 1);
-    m_ui->blackPathButton->setEnabled(index == 1);
+    m_ui->blackPathEdit->setEnabled(index == 2);
+    m_ui->blackPathButton->setEnabled(index == 2);
 }
 
 /**
@@ -318,33 +292,21 @@ void SetupDialog::on_blackColorButton_clicked(){
 * black stone type is changed
 */
 void SetupDialog::on_blackPathButton_clicked(){
-    QString fname = getOpenFileName(this, QString(), QString(), tr("All Image Files(*.bmp *.gif *.jpg *.jpeg *.png *.tif *.tiff);;All Files(*.*)"));
+    QString fname = QFileDialog::getOpenFileName(this, QString(), QString(), tr("All Image Files(*.bmp *.gif *.jpg *.jpeg *.png *.tif *.tiff);;All Files(*.*)"));
     if (!fname.isEmpty())
         m_ui->blackPathEdit->setText(fname);
 }
 
 /**
 * slot
-* focus color (white stone) button clicked
+* focus color button clicked
 */
-void SetupDialog::on_focusWhiteColorButton_clicked(){
-    QColorDialog dlg(focusWhiteColor, this);
+void SetupDialog::on_focusColorButton_clicked(){
+    QColorDialog dlg(focusColor, this);
     if (dlg.exec() != QDialog::Accepted)
         return;
-    focusWhiteColor = dlg.selectedColor();
-    m_ui->focusWhiteColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(focusWhiteColor.red()).arg(focusWhiteColor.green()).arg(focusWhiteColor.blue()) );
-}
-
-/**
-* slot
-* focus color (black stone) button clicked
-*/
-void SetupDialog::on_focusBlackColorButton_clicked(){
-    QColorDialog dlg(focusBlackColor, this);
-    if (dlg.exec() != QDialog::Accepted)
-        return;
-    focusBlackColor = dlg.selectedColor();
-    m_ui->focusBlackColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(focusBlackColor.red()).arg(focusBlackColor.green()).arg(focusBlackColor.blue()) );
+    focusColor = dlg.selectedColor();
+    m_ui->focusColorButton->setStyleSheet( QString("border:1px solid black; background-color:rgb(%1, %2, %3)").arg(focusColor.red()).arg(focusColor.green()).arg(focusColor.blue()) );
 }
 
 /**
@@ -373,7 +335,7 @@ void SetupDialog::on_soundTypeComboBox_currentIndexChanged(int index){
 * sound path browse button
 */
 void SetupDialog::on_soundPathButton_clicked(){
-    QString fname = getOpenFileName(this, QString(), QString(), tr("Sound Files(*.wav *.mp3);;All Files(*.*)"));
+    QString fname = QFileDialog::getOpenFileName(this, QString(), QString(), tr("Sound Files(*.wav *.mp3);;All Files(*.*)"));
     if (!fname.isEmpty())
         m_ui->soundPathEdit->setText(fname);
 }

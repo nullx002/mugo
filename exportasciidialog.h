@@ -21,6 +21,8 @@
 #include <QtGui/QDialog>
 #include "boardwidget.h"
 
+
+
 namespace Ui {
     class ExportAsciiDialog;
 }
@@ -28,7 +30,7 @@ namespace Ui {
 class ExportAsciiDialog : public QDialog {
     Q_OBJECT
 public:
-    ExportAsciiDialog(QWidget *parent, const BoardWidget::BoardBuffer& buffer);
+    ExportAsciiDialog(QWidget *parent, const BoardWidget::BoardBuffer& buf);
     ~ExportAsciiDialog();
 
     void createAscii(int index);
@@ -39,9 +41,6 @@ public:
 
 public slots:
     virtual void accept();
-
-protected:
-    void changeEvent(QEvent *e);
 
 private:
     Ui::ExportAsciiDialog *m_ui;

@@ -15,28 +15,23 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#ifndef ENGINELIST_H
-#define ENGINELIST_H
+#include <QUndoStack>
+#include "document.h"
 
-#include <QList>
-#include <QString>
+/**
+  Constructor
+*/
+Document::Document(QTextCodec* codec_, QObject* parent)
+    : QObject(parent)
+    , undoStack(new QUndoStack())
+    , codec(codec_)
+    , dirty(false)
+{
+}
 
-class Engine{
-    public:
-        QString path;
-        QString parameters;
-        QString name;
-        bool    analysis;
-};
-
-class EngineList{
-    public:
-        EngineList();
-
-        void save();
-        void load();
-
-        QList<Engine> engines;
-};
-
-#endif // ENGINELIST_H
+/**
+  Destructor
+*/
+Document::~Document(){
+    delete undoStack;
+}
