@@ -29,12 +29,16 @@ public:
 
     QUndoStack* undoStack(){ return &undoStack_; }
 
+    const QString& name() const{ return name_; }
+    void setName(const QString& name){ name_ = name; }
+
 signals:
 
 public slots:
 
 private:
     QUndoStack undoStack_;
+    QString name_;
 };
 
 #endif // DOCUMENT_H

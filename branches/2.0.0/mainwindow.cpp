@@ -25,7 +25,8 @@
 */
 MainWindow::MainWindow(const QString& fname, QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    ui(new Ui::MainWindow),
+    docID(0)
 {
     // initialize view
     ui->setupUi(this);
@@ -81,6 +82,7 @@ void MainWindow::closeEvent(QCloseEvent* e){
 */
 bool MainWindow::fileNew(QTextCodec* codec, int xsize, int ysize, double komi, int handicap){
     SgfDocument* doc = new SgfDocument(xsize, ysize, komi, handicap, this);
+    doc->setName( tr("Untitled-%1").arg(++docID) );
     createNewTab(doc);
 
     return true;
@@ -121,11 +123,21 @@ bool MainWindow::createNewTab(Document* doc){
     SgfDocument* sgfDoc = qobject_cast<SgfDocument*>(doc);
     if (sgfDoc){
         BoardWidget* board = new BoardWidget(sgfDoc);
-        ui->boardTabWidget->addTab(board, "board");
+        ui->boardTabWidget->addTab(board, doc->name());
+        ui->boardTabWidget->setCurrentWidget(board);
         return true;
     }
 
     return false;
+}
+
+/**
+  file new
+  create new document in new tab
+*/
+void MainWindow::on_actionNew_triggered()
+{
+    fileNew();
 }
 
 /**
