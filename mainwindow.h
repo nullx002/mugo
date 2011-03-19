@@ -52,11 +52,14 @@ protected:
     bool createNewTab(Document* doc);
 
 private slots:
+    void on_actionNew_triggered();
     void on_boardTabWidget_tabCloseRequested(int index);
     void on_boardTabWidget_currentChanged(QWidget*);
 
 private:
     Ui::MainWindow *ui;
+
+    int docID;
 
     QUndoGroup undoGroup;
     QAction* undoAction;
