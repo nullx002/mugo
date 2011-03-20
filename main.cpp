@@ -16,6 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include <QtGui/QApplication>
+#include <QSettings>
 #include <QTextCodec>
 #include "mugoapp.h"
 #include "mainwindow.h"
@@ -27,6 +28,12 @@ MugoApplication::MugoApplication(int& argc, char** argv) : QApplication(argc, ar
     setApplicationName(SETTING_NAME);
     setApplicationVersion(APP_VERSION);
     setOrganizationDomain(AUTHOR);
+
+    // Settings
+    QSettings settings;
+
+    // default codec
+    defaultCodec_ = QTextCodec::codecForName( settings.value("defaultCodec", "UTF-8").toByteArray() );
 }
 
 int main(int argc, char* argv[])

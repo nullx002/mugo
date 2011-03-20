@@ -101,13 +101,13 @@ void BoardWidget::onRButtonUp(QMouseEvent* e){
 */
 bool BoardWidget::setGame(const Go::NodePtr& game){
     // if game is not found in game list, return false
-    Go::NodeList::const_iterator iter = qFind(document_->gameList, game);
+    Go::NodeList::const_iterator iter = qFind(document_->gameList.begin(), document_->gameList.end(), game);
     if (iter == document_->gameList.end())
         return false;
 
     // change current game
     currentGame_ = game;
-    rootGameInformation_ = currentGame_->gameInformation();
+    rootInformation_ = currentGame_->information();
 
     // create vertical lines
     qDeleteAll(vLines);
@@ -147,10 +147,10 @@ bool BoardWidget::setGame(const Go::NodePtr& game){
 /**
   set game information
 */
-bool BoardWidget::setGameInformation(const Go::InformationPtr& gameInformation){
+bool BoardWidget::setInformation(const Go::InformationPtr& information){
     // change game information, and emit currentGameInformationChanged
-    currentGameInformation_ = gameInformation;
-    emit gameInformationChanged(currentGameInformation_);
+    currentInformation_ = information;
+    emit informationChanged(currentInformation_);
     return true;
 }
 
@@ -159,13 +159,13 @@ bool BoardWidget::setGameInformation(const Go::InformationPtr& gameInformation){
 */
 bool BoardWidget::setNode(const Go::NodePtr& node){
     // if node isn't in the node list, create node list
-    Go::NodeList::const_iterator iter = qFind(currentNodeList_, node);
+    Go::NodeList::const_iterator iter = qFind(currentNodeList_.begin(), currentNodeList_.end(), node);
     if (iter == currentNodeList_.end())
         createNodeList(node);
 
     // change game information
-    if (node->gameInformation())
-        setGameInformation(node->gameInformation());
+    if (node->information())
+        setInformation(node->information());
 
     // change current node, and emit currentNodeChanged
     currentNode_ = node;
@@ -310,6 +310,9 @@ void BoardWidget::createBoardBuffer(){
     }
 }
 
+/**
+  kill around stone
+*/
 void BoardWidget::killStone(int x, int y){
     Go::Color color = buffer[y][x] == Go::eBlack ? Go::eWhite : Go::eBlack;
     killStone(x-1, y, color);
@@ -318,6 +321,9 @@ void BoardWidget::killStone(int x, int y){
     killStone(x, y+1, color);
 }
 
+/**
+  kill stone
+*/
 void BoardWidget::killStone(int x, int y, Go::Color color){
     if (x < 0 || x >= xsize() || y < 0 || y >= ysize())
         return;
@@ -342,6 +348,10 @@ void BoardWidget::killStone(int x, int y, Go::Color color){
     }
 }
 
+/**
+  @retval true  this group is dead
+  @retval false this group is alive
+*/
 bool BoardWidget::isDeadStone(int x, int y){
     if (buffer[y][x] == Go::eDame)
         return false;
@@ -351,6 +361,10 @@ bool BoardWidget::isDeadStone(int x, int y){
     return false;
 }
 
+/**
+  @retval true  this group is dead
+  @retval false this group is alive
+*/
 bool BoardWidget::isDeadStone(int x, int y, Go::Color color){
     if (x < 0 || x >= xsize() || y < 0 || y >= ysize())
         return false;
@@ -362,6 +376,10 @@ bool BoardWidget::isDeadStone(int x, int y, Go::Color color){
     return isDeadStone(x, y, color, checked);
 }
 
+/**
+  @retval true  this group is dead
+  @retval false this group is alive
+*/
 bool BoardWidget::isDeadStone(int x, int y, Go::Color color, QVector< QVector<bool> >& checked){
     if (x < 0 || x >= xsize() || y < 0 || y >= ysize())
         return true;
@@ -387,6 +405,10 @@ bool BoardWidget::isDeadStone(int x, int y, Go::Color color, QVector< QVector<bo
     return true;
 }
 
+/**
+  @retval true  (x,y) position's stone can kill arround group
+  @retval false (x,y) position's stone can't kill arround group
+*/
 bool BoardWidget::isKillStone(int x, int y){
     Go::Color color;
     if (buffer[y][x] == Go::eBlack)
@@ -516,7 +538,7 @@ bool BoardWidget::alternateMove(int sgfX, int sgfY){
   move next node
 */
 void BoardWidget::forward(int step){
-    Go::NodeList::const_iterator iter = qFind(currentNodeList_, currentNode_);
+    Go::NodeList::const_iterator iter = qFind(currentNodeList_.begin(), currentNodeList_.end(), currentNode_);
     if (iter == currentNodeList_.end())
         return;
 
@@ -533,7 +555,7 @@ void BoardWidget::forward(int step){
   move previousn node
 */
 void BoardWidget::back(int step){
-    Go::NodeList::const_iterator iter = qFind(currentNodeList_, currentNode_);
+    Go::NodeList::const_iterator iter = qFind(currentNodeList_.begin(), currentNodeList_.end(), currentNode_);
     if (iter == currentNodeList_.end())
         return;
 
@@ -558,7 +580,7 @@ void BoardWidget::on_document_nodeAdded(Go::NodePtr node){
 */
 void BoardWidget::on_document_nodeDeleted(Go::NodePtr node){
     // return if deleted node isn't in the current node list
-    Go::NodeList::const_iterator iter = qFind(currentNodeList_, node);
+    Go::NodeList::const_iterator iter = qFind(currentNodeList_.begin(), currentNodeList_.end(), node);
     if (iter == currentNodeList_.end())
         return;
 
@@ -566,6 +588,6 @@ void BoardWidget::on_document_nodeDeleted(Go::NodePtr node){
     createNodeList(node->parent());
 
     // if current node was deleted, select parent
-    if (qFind(currentNodeList_, currentNode_) == currentNodeList_.end())
+    if (qFind(currentNodeList_.begin(), currentNodeList_.end(), currentNode_) == currentNodeList_.end())
         setNode(node->parent());
 }

@@ -47,17 +47,17 @@ public:
     const SgfDocument* document() const{ return document_; }
     SgfDocument* document(){ return document_; }
 
-    int xsize() const { return rootGameInformation_->xsize(); }
-    int ysize() const { return rootGameInformation_->ysize(); }
+    int xsize() const { return rootInformation_->xsize(); }
+    int ysize() const { return rootInformation_->ysize(); }
 
 signals:
     void gameChanged(const Go::NodePtr& game);
-    void gameInformationChanged(const Go::InformationPtr& gameInformation);
+    void informationChanged(const Go::InformationPtr& information);
     void nodeChanged(const Go::NodePtr& node);
 
 public slots:
     bool setGame(const Go::NodePtr& game);
-    bool setGameInformation(const Go::InformationPtr& gameInformation);
+    bool setInformation(const Go::InformationPtr& information);
     bool setNode(const Go::NodePtr& node);
 
 protected:
@@ -102,8 +102,8 @@ protected:
 
     SgfDocument* document_;
     Go::NodePtr currentGame_;
-    Go::InformationPtr rootGameInformation_;
-    Go::InformationPtr currentGameInformation_;
+    Go::InformationPtr rootInformation_;
+    Go::InformationPtr currentInformation_;
     Go::NodePtr currentNode_;
     Go::NodeList currentNodeList_;
     int capturedWhite_;

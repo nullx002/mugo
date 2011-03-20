@@ -24,3 +24,11 @@ Document::Document(QObject* parent) :
     QObject(parent)
 {
 }
+
+/**
+  set file info and set base name to document name
+*/
+void Document::setFileInfo(const QFileInfo& fileInfo){
+    fileInfo_ = fileInfo;
+    name_ = fileInfo.baseName();
+}

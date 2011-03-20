@@ -27,11 +27,21 @@ namespace Ui {
     class MainWindow;
 }
 
+class ViewData{
+public:
+    ViewData() : boardWidget(NULL){}
+
+    BoardWidget* boardWidget;
+};
+
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
+    typedef QMap<Document*, ViewData> DocViewData;
+
     // constructor, destructor
     explicit MainWindow(const QString& fname, QWidget *parent = 0);
     ~MainWindow();
@@ -39,7 +49,7 @@ public:
 public slots:
     // new, open, save, close
     bool fileNew(QTextCodec* codec=NULL, int xsize=19, int ysize=19, double komi=6.5, int handicap=0);
-    bool fileOpen(const QString& fname, QTextCodec* codec=NULL, bool newTab=true);
+    bool fileOpen(const QString& fname, QTextCodec* codec=NULL, bool guessCodec=true, bool newTab=true);
 
 protected:
     void changeEvent(QEvent* e);
@@ -51,8 +61,18 @@ protected:
     // create new tab
     bool createNewTab(Document* doc);
 
+    // file dialog
+    bool getOpenFileName(QString& fname, QTextCodec*& codec);
+
+    // read
+    SgfDocument* readSgfDocument(const QString& fname, QTextCodec* codec, bool guessCodec);
+
 private slots:
+    // file menu
     void on_actionNew_triggered();
+    void on_actionOpen_triggered();
+
+    // board tab widget
     void on_boardTabWidget_tabCloseRequested(int index);
     void on_boardTabWidget_currentChanged(QWidget*);
 
@@ -60,6 +80,7 @@ private:
     Ui::MainWindow *ui;
 
     int docID;
+    DocViewData docView;
 
     QUndoGroup undoGroup;
     QAction* undoAction;
