@@ -20,23 +20,32 @@
 /**
     Constructs sgf document
 */
-SgfDocument::SgfDocument(int xsize, int ysize, qreal komi, int handicap, QObject* parent) :
-    Document(parent)
+SgfDocument::SgfDocument(int xsize, int ysize, qreal komi, int handicap, QObject* parent)
+    : Document(parent)
 {
     // create game information
-    Go::InformationPtr gameInfo(new Go::GameInformation);
-    gameInfo->setXSize(xsize);
-    gameInfo->setYSize(ysize);
-    gameInfo->setKomi(komi);
-    gameInfo->setHandicap(handicap);
+    Go::InformationPtr info(new Go::Information);
+    info->setXSize(xsize);
+    info->setYSize(ysize);
+    info->setKomi(komi);
+    info->setHandicap(handicap);
 
     // create game node
     Go::NodePtr game(new Go::Node);
-    game->setGameInformation(gameInfo);
+    game->setInformation(info);
     game->setNextColor(Go::eBlack);
 
     // add game into game list
     gameList.push_back(game);
+}
+
+/**
+    Constructs sgf document
+*/
+SgfDocument::SgfDocument(Go::NodeList& gameList_, QObject* parent)
+    : Document(parent)
+    , gameList(gameList_)
+{
 }
 
 /**

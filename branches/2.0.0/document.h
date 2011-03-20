@@ -20,6 +20,7 @@
 
 #include <QObject>
 #include <QUndoStack>
+#include <QFileInfo>
 
 /**
   Base class of mugo document.
@@ -38,6 +39,10 @@ public:
     const QString& name() const{ return name_; }
     void setName(const QString& name){ name_ = name; }
 
+    // file info
+    const QFileInfo& fileInfo() const{ return fileInfo_; }
+    void setFileInfo(const QFileInfo& fileInfo);
+
 signals:
 
 public slots:
@@ -45,6 +50,7 @@ public slots:
 private:
     QUndoStack undoStack_;
     QString name_;
+    QFileInfo fileInfo_;
 };
 
 #endif // DOCUMENT_H

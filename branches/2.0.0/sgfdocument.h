@@ -30,7 +30,8 @@ class SgfDocument : public Document
     Q_OBJECT
 public:
     // constructor
-    explicit SgfDocument(int xsize=19, int ysize=19, qreal komi=6.5, int handicap=0, QObject *parent = 0);
+    SgfDocument(int xsize=19, int ysize=19, qreal komi=6.5, int handicap=0, QObject* parent = 0);
+    SgfDocument(Go::NodeList& gameList, QObject* parent = 0);
 
 signals:
     void nodeAdded(Go::NodePtr node);

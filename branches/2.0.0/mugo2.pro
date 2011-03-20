@@ -11,12 +11,16 @@ SOURCES += main.cpp \
     document.cpp \
     sgfdocument.cpp \
     godata.cpp \
-    sgfcommand.cpp
+    sgfcommand.cpp \
+    filebase.cpp \
+    sgf.cpp
 HEADERS += mainwindow.h \
     boardwidget.h \
     document.h \
     sgfdocument.h \
     mugoapp.h \
     godata.h \
-    sgfcommand.h
+    sgfcommand.h \
+    filebase.h \
+    sgf.h
 FORMS += mainwindow.ui
