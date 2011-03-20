@@ -62,7 +62,6 @@ Node::Node(const NodePtr& parent)
   Destructor
 */
 Node::~Node(){
-    qDebug() << "destructor: " << name_;
 }
 
 

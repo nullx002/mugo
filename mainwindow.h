@@ -71,6 +71,7 @@ private slots:
     // file menu
     void on_actionNew_triggered();
     void on_actionOpen_triggered();
+    void on_actionExit_triggered();
 
     // board tab widget
     void on_boardTabWidget_tabCloseRequested(int index);

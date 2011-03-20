@@ -136,6 +136,10 @@ void MainWindow::initializeMenu(){
     // File
     ui->actionNew->setShortcut(QKeySequence::New);
     ui->actionOpen->setShortcut(QKeySequence::Open);
+    ui->actionCloseTab->setShortcut(QKeySequence::Close);
+    ui->actionSave->setShortcut(QKeySequence::Save);
+    ui->actionSaveAs->setShortcut(QKeySequence::SaveAs);
+    ui->actionExit->setShortcut(QKeySequence::Quit);
 
     // Edit -> undo/redo
     undoAction = undoGroup.createUndoAction(this);
@@ -268,6 +272,14 @@ void MainWindow::on_actionOpen_triggered()
         return;
 
     fileOpen(fname, codec, codec == NULL);
+}
+
+/**
+  exit application
+*/
+void MainWindow::on_actionExit_triggered()
+{
+    close();
 }
 
 /**
