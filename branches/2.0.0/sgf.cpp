@@ -62,7 +62,8 @@ bool Sgf::parse(QString::const_iterator first, QString::const_iterator last){
             game->setParent();
             gameList.push_back(game);
         }
-        ++first;
+        else
+            ++first;
     }
     return true;
 }
