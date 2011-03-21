@@ -48,8 +48,8 @@ BoardWidget::BoardWidget(SgfDocument* doc, QWidget* parent) :
 /**
   resize event
 */
-void BoardWidget::resizeEvent(QResizeEvent*){
-    setItemsPosition();
+void BoardWidget::resizeEvent(QResizeEvent* e){
+    setItemsPosition(e->size());
 }
 
 /**
@@ -113,7 +113,7 @@ bool BoardWidget::setGame(const Go::NodePtr& game){
     qDeleteAll(vLines);
     vLines.clear();
     for(int i=0; i<xsize(); ++i){
-        QGraphicsLineItem* line = scene()->addLine(0, 0, 0, 0);
+        QGraphicsLineItem* line = scene()->addLine(0, 0, 0, 0, QPen(Qt::black));
         line->setZValue(2);
         vLines.push_back(line);
     }
@@ -122,9 +122,18 @@ bool BoardWidget::setGame(const Go::NodePtr& game){
     qDeleteAll(hLines);
     hLines.clear();
     for(int i=0; i<ysize(); ++i){
-        QGraphicsLineItem* line = scene()->addLine(0, 0, 0, 0);
+        QGraphicsLineItem* line = scene()->addLine(0, 0, 0, 0, QPen(Qt::black));
         line->setZValue(2);
         hLines.push_back(line);
+    }
+
+    // create star
+    QList<int> xstarpos, ystarpos;
+    getStarPositions(xstarpos, ystarpos);
+    for (int i=0; i<xstarpos.size()*ystarpos.size(); ++i){
+        QGraphicsEllipseItem* star = scene()->addEllipse(0, 0, 5, 5, QPen(Qt::black), QBrush(Qt::black));
+        star->setZValue(2);
+        stars.push_back(star);
     }
 
     // create buffer
@@ -181,16 +190,16 @@ bool BoardWidget::setNode(const Go::NodePtr& node){
   set scene items position in board area
 */
 void BoardWidget::setItemsPosition(){
-    setItemsPosition(geometry());
+    setItemsPosition(geometry().size());
 }
 
 /**
   set scene items position in rect area
 */
-void BoardWidget::setItemsPosition(const QRectF& rect){
+void BoardWidget::setItemsPosition(const QSize& size){
     // calculate board size
-    int width  = rect.width();
-    int height = rect.height();
+    int width  = size.width();
+    int height = size.height();
 
     int gridW = width  / (xsize() + 1);
     int gridH = height / (ysize() + 1);
@@ -198,8 +207,8 @@ void BoardWidget::setItemsPosition(const QRectF& rect){
     int w = gridSize * (xsize() - 1);
     int h = gridSize * (ysize() - 1);
 
-    int x = (rect.width() - w) / 2;
-    int y = (rect.height() - h) / 2;
+    int x = (width - w) / 2;
+    int y = (height - h) / 2;
     int margin = gridSize * 0.6;
     QRect boardRect(QPoint(x-margin, y-margin), QPoint(x+w+margin, y+h+margin));
 
@@ -217,6 +226,7 @@ void BoardWidget::setItemsPosition(const QRectF& rect){
     // move items position to current board size
     setVLinesPosition(x, y, gridSize);
     setHLinesPosition(x, y, gridSize);
+    setStarsPosition();
 
     // move all datas position to current board size
     setDataPosition();
@@ -245,6 +255,23 @@ void BoardWidget::setHLinesPosition(int x, int y, int gridSize){
         hLines[i]->setLine(x, y, x+len, y);
         y += gridSize;
     }
+}
+
+/**
+  set star position
+*/
+void BoardWidget::setStarsPosition(){
+    QList<int> xpos, ypos;
+    getStarPositions(xpos, ypos);
+    for (int y=0, i=0; y<ypos.size(); ++y){
+        qreal yy = hLines[ypos[y]]->line().y1();
+        for (int x=0; x<xpos.size(); ++x, ++i){
+            qreal xx = vLines[xpos[x]]->line().x1();
+            qreal r = stars[i]->rect().width() / 2;
+            stars[i]->setPos(xx-r, yy-r);
+        }
+    }
+
 }
 
 /**
@@ -470,6 +497,35 @@ QGraphicsItem* BoardWidget::createStoneItem(Go::Color color, int sgfX, int sgfY)
     scene()->addItem(stone);
 
     return stone;
+}
+
+/**
+  get star positions
+*/
+void BoardWidget::getStarPositions(QList<int>& xstarpos, QList<int>& ystarpos) const{
+    if (xsize() > 6 && xsize() < 10){
+        xstarpos.push_back(2);
+        xstarpos.push_back(xsize()-3);
+    }
+    if (xsize() > 10){
+        xstarpos.push_back(3);
+        xstarpos.push_back(xsize()-4);
+
+        if (xsize() > 6 && xsize() % 2 == 1)
+            xstarpos.push_back(xsize() / 2);
+    }
+
+    if (ysize() > 6 && ysize() < 10){
+        ystarpos.push_back(2);
+        ystarpos.push_back(ysize()-3);
+    }
+    if (ysize() > 10){
+        ystarpos.push_back(3);
+        ystarpos.push_back(ysize()-4);
+
+        if (ysize() > 6 && ysize() % 2 == 1)
+            ystarpos.push_back(ysize() / 2);
+    }
 }
 
 /**
