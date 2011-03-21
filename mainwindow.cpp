@@ -74,11 +74,11 @@ void MainWindow::changeEvent(QEvent *e)
 */
 void MainWindow::closeEvent(QCloseEvent* e){
     for (int i=0; i<ui->boardTabWidget->count(); ++i){
-//        BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->widget(i));
-//        if (maybeSave(board) == false){
-//            e->ignore();
-//            return;
-//        }
+        BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->widget(i));
+        if (maybeSave(board->document()) == false){
+            e->ignore();
+            return;
+        }
     }
     e->accept();
 }
@@ -131,7 +131,7 @@ bool MainWindow::fileOpen(const QString& fname, QTextCodec* codec, bool guessCod
 
 /**
   overwrite save.
-  if document isn't saved, call save as.
+  if document isn't saved, call save as and show save dialog.
 */
 bool MainWindow::fileSave(SgfDocument* doc){
     if (doc->fileInfo().suffix() != "sgf")
@@ -148,7 +148,7 @@ bool MainWindow::fileSaveAs(SgfDocument* doc){
     QString initialPath;
     QFileInfo fi = doc->fileInfo();
     if (fi.absoluteFilePath().isEmpty() == false){
-        fi.setFile( fi.baseName() + ".sgf");
+        fi.setFile(fi.absoluteDir().absolutePath(), fi.completeBaseName() + ".sgf");
         initialPath = fi.absoluteFilePath();
     }
     else
@@ -172,7 +172,13 @@ bool MainWindow::fileSaveAs(SgfDocument* doc){
 */
 bool MainWindow::fileSaveAs(SgfDocument* doc, const QFileInfo& fileInfo){
     Go::Sgf sgf(doc->gameList);
-    return sgf.save(fileInfo, doc->codec());
+    if (sgf.save(fileInfo, doc->codec()) == false)
+        return false;
+
+    doc->setDirty(false);
+    doc->setFileInfo(fileInfo);
+
+    return true;
 }
 
 /**
@@ -181,6 +187,10 @@ bool MainWindow::fileSaveAs(SgfDocument* doc, const QFileInfo& fileInfo){
 */
 bool MainWindow::closeTab(BoardWidget* board){
     if (maybeSave(board->document()) == true){
+        // remove document and view datas.
+//        ViewData& view = docView[board->document()];
+        docView.remove(board->document());
+
         int index = ui->boardTabWidget->indexOf(board);
         ui->boardTabWidget->removeTab(index);
         return true;
