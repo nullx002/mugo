@@ -75,6 +75,9 @@ protected:
     bool closeTab(BoardWidget* board);
     bool maybeSave(SgfDocument* doc);
 
+    // view
+    void updateView(const Go::NodePtr& node);
+
 private slots:
     // file menu
     void on_actionSaveAs_triggered();
@@ -83,9 +86,18 @@ private slots:
     void on_actionOpen_triggered();
     void on_actionExit_triggered();
 
+    // document
+    void on_sgfDocument_nodeModified(const Go::NodePtr& node);
+
     // board tab widget
     void on_boardTabWidget_tabCloseRequested(int index);
     void on_boardTabWidget_currentChanged(QWidget*);
+
+    // board widget
+    void on_board_nodeChanged(const Go::NodePtr& node);
+
+    // comment widget
+    void on_commentEdit_textChanged();
 
 private:
     Ui::MainWindow *ui;

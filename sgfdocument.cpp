@@ -83,3 +83,11 @@ void SgfDocument::deleteNode(Go::NodePtr node, bool removeChildren){
     setDirty();
     emit nodeDeleted(node);
 }
+
+/**
+  modify node
+*/
+void SgfDocument::modifyNode(Go::NodePtr node){
+    setDirty();
+    emit nodeModified(node);
+}

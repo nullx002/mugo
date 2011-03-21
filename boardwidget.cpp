@@ -29,8 +29,8 @@ BoardWidget::BoardWidget(SgfDocument* doc, QWidget* parent) :
     document_(doc),
     editMode_(eAlternateMove)
 {
-    connect(document_, SIGNAL(nodeAdded(Go::NodePtr)), SLOT(on_document_nodeAdded(Go::NodePtr)));
-    connect(document_, SIGNAL(nodeDeleted(Go::NodePtr)), SLOT(on_document_nodeDeleted(Go::NodePtr)));
+    connect(document_, SIGNAL(nodeAdded(const Go::NodePtr&)), SLOT(on_document_nodeAdded(const Go::NodePtr&)));
+    connect(document_, SIGNAL(nodeDeleted(const Go::NodePtr&)), SLOT(on_document_nodeDeleted(const Go::NodePtr&)));
 
     setScene( new QGraphicsScene(this) );
     setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
@@ -169,7 +169,7 @@ bool BoardWidget::setNode(const Go::NodePtr& node){
 
     // change current node, and emit currentNodeChanged
     currentNode_ = node;
-    emit nodeChanged(currentGame_);
+    emit nodeChanged(currentNode_);
 
     // create buffer
     createBoardBuffer();
@@ -570,7 +570,7 @@ void BoardWidget::back(int step){
 /**
     node added
 */
-void BoardWidget::on_document_nodeAdded(Go::NodePtr node){
+void BoardWidget::on_document_nodeAdded(const Go::NodePtr& node){
     // createNodeList(currentNode_);
     setNode(node);
 }
@@ -578,7 +578,7 @@ void BoardWidget::on_document_nodeAdded(Go::NodePtr node){
 /**
     node deleted
 */
-void BoardWidget::on_document_nodeDeleted(Go::NodePtr node){
+void BoardWidget::on_document_nodeDeleted(const Go::NodePtr& node){
     // return if deleted node isn't in the current node list
     Go::NodeList::const_iterator iter = qFind(currentNodeList_.begin(), currentNodeList_.end(), node);
     if (iter == currentNodeList_.end())

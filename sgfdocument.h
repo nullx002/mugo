@@ -36,10 +36,12 @@ public:
 signals:
     void nodeAdded(Go::NodePtr node);
     void nodeDeleted(Go::NodePtr node);
+    void nodeModified(Go::NodePtr node);
 
 public slots:
-    void addNode(Go::NodePtr parent, Go::NodePtr node, int index=-1);
+    void addNode(const Go::NodePtr parent, Go::NodePtr node, int index=-1);
     void deleteNode(Go::NodePtr node, bool removeChildren=true);
+    void modifyNode(Go::NodePtr node);
 
 public:
     Go::NodeList gameList;

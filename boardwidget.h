@@ -44,9 +44,17 @@ public:
     // constructor
     explicit BoardWidget(SgfDocument* doc, QWidget *parent = 0);
 
+    // document
     const SgfDocument* document() const{ return document_; }
     SgfDocument* document(){ return document_; }
 
+    // get current game, node
+    Go::NodePtr currentGame() const{ return currentGame_; }
+    Go::NodePtr currentNode() const{ return currentNode_; }
+    Go::InformationPtr rootInformation() const{ return rootInformation_; }
+    Go::InformationPtr currentInformation() const{ return currentInformation_; }
+
+    // get board size
     int xsize() const { return rootInformation_->xsize(); }
     int ysize() const { return rootInformation_->ysize(); }
 
@@ -120,8 +128,8 @@ protected:
     EditMode editMode_;
 
 private slots:
-    void on_document_nodeAdded(Go::NodePtr node);
-    void on_document_nodeDeleted(Go::NodePtr node);
+    void on_document_nodeAdded(const Go::NodePtr& node);
+    void on_document_nodeDeleted(const Go::NodePtr& node);
 };
 
 #endif // BOARDWIDGET_H

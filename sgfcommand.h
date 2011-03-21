@@ -44,5 +44,26 @@ private:
     int index_;
 };
 
+/**
+  set comment command
+*/
+class SetCommentCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(AddNodeCommand)
+
+public:
+    SetCommentCommand(SgfDocument* doc, Go::NodePtr node, const QString& comment, QUndoCommand* parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+    void setComment(const QString& comment){ comment_ = comment; }
+    const QString& comment() const{ return comment_; }
+
+private:
+    SgfDocument* document_;
+    Go::NodePtr node_;
+    QString comment_;
+    QString prevComment_;
+};
+
 
 #endif // SGFCOMMAND_H

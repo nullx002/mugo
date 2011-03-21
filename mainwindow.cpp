@@ -15,6 +15,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#include <QDebug>
 #include <QCloseEvent>
 #include <QFileDialog>
 #include <QLabel>
@@ -25,6 +26,7 @@
 #include "ui_mainwindow.h"
 #include "sgfdocument.h"
 #include "sgf.h"
+#include "sgfcommand.h"
 
 /**
   Constructor
@@ -239,6 +241,10 @@ bool MainWindow::createNewTab(Document* doc){
         ui->boardTabWidget->setCurrentWidget(board);
 
         data.boardWidget = board;
+
+        connect(sgfDoc, SIGNAL(nodeModified(const Go::NodePtr&)), SLOT(on_sgfDocument_nodeModified(const Go::NodePtr&)));
+        connect(board, SIGNAL(nodeChanged(const Go::NodePtr&)), SLOT(on_board_nodeChanged(const Go::NodePtr&)));
+
         return true;
     }
 
@@ -393,6 +399,14 @@ bool MainWindow::maybeSave(SgfDocument* doc){
 }
 
 /**
+  udpate view with node information
+*/
+void MainWindow::updateView(const Go::NodePtr& node){
+    if (ui->commentEdit->toPlainText() != node->comment())
+        ui->commentEdit->setPlainText(node->comment());
+}
+
+/**
   create new document in new tab
 */
 void MainWindow::on_actionNew_triggered()
@@ -418,10 +432,12 @@ void MainWindow::on_actionOpen_triggered()
 */
 void MainWindow::on_actionSave_triggered()
 {
+    // get active board widget
     BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
     if (board == NULL)
         return;
 
+    // save active document
     fileSave(board->document());
 }
 
@@ -430,10 +446,12 @@ void MainWindow::on_actionSave_triggered()
 */
 void MainWindow::on_actionSaveAs_triggered()
 {
+    // get active board widget
     BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
     if (board == NULL)
         return;
 
+    // save active document
     fileSaveAs(board->document());
 }
 
@@ -442,7 +460,26 @@ void MainWindow::on_actionSaveAs_triggered()
 */
 void MainWindow::on_actionExit_triggered()
 {
+    // window close
     close();
+}
+
+/**
+  node modified
+*/
+void MainWindow::on_sgfDocument_nodeModified(const Go::NodePtr& node)
+{
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // if modified node isn't current node, return
+    if (board->currentNode() != node)
+        return;
+
+    // update view
+    updateView(node);
 }
 
 /**
@@ -458,6 +495,9 @@ void MainWindow::on_boardTabWidget_currentChanged(QWidget* widget)
     // change undo stack of current tab to active undo stack
     SgfDocument* doc = board->document();
     undoGroup.setActiveStack(doc->undoStack());
+
+    // update view
+    updateView(board->currentNode());
 }
 
 /**
@@ -465,9 +505,41 @@ void MainWindow::on_boardTabWidget_currentChanged(QWidget* widget)
 */
 void MainWindow::on_boardTabWidget_tabCloseRequested(int index)
 {
+    // get active board widget
     BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->widget(index));
     if (board == NULL)
         return;
 
+    // close requested tab
     closeTab(board);
+}
+
+/**
+  current node changed
+*/
+void MainWindow::on_board_nodeChanged(const Go::NodePtr& node){
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // if sender isn't active, can't update view
+    if (sender() != board)
+        return;
+    updateView(node);
+}
+
+/**
+  comment text changed
+*/
+void MainWindow::on_commentEdit_textChanged()
+{
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // create new node, and add to document
+    if (board->currentNode()->comment() != ui->commentEdit->toPlainText())
+        board->document()->undoStack()->push( new SetCommentCommand(board->document(), board->currentNode(), ui->commentEdit->toPlainText()) );
 }
