@@ -197,6 +197,7 @@ public:
     Color nextColor() const;
     void setNextColor(Color color){ nextColor_ = color; }
 
+    // node type
     bool isStone() const{ return color_ == Go::eBlack || color_ == Go::eWhite; }
     bool isPass() const{ return isStone() && (x_ < 0 || y_ < 0); }
 
@@ -207,8 +208,13 @@ public:
     int y() const{ return y_; }
     void setY(int y){ y_ = y; }
 
+    // move number
     int moveNumber() const{ return moveNumber_; }
     void setMoveNumber(int moveNumber){ moveNumber_ = moveNumber; }
+
+    // comment
+    const QString& comment() const{ return comment_; }
+    void setComment(const QString& comment){ comment_ = comment; }
 
 private:
     WeakNodePtr parent_;
@@ -221,6 +227,7 @@ private:
     int x_;
     int y_;
     int moveNumber_;
+    QString comment_;
 };
 
 typedef Node::NodePtr NodePtr;

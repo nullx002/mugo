@@ -20,7 +20,7 @@
 #include "sgfdocument.h"
 
 /**
-  Constructor
+  Constructs add node command
 */
 AddNodeCommand::AddNodeCommand(SgfDocument* doc, Go::NodePtr parentNode, Go::NodePtr node, int index, QUndoCommand* parent)
     : QUndoCommand(parent)
@@ -47,4 +47,33 @@ void AddNodeCommand::redo(){
 */
 void AddNodeCommand::undo(){
     document_->deleteNode(node_);
+}
+
+/**
+  Constructs set comment command
+*/
+SetCommentCommand::SetCommentCommand(SgfDocument* doc, Go::NodePtr node, const QString& comment, QUndoCommand* parent)
+    : QUndoCommand(parent)
+    , document_(doc)
+    , node_(node)
+    , comment_(comment)
+{
+    prevComment_ = node_->comment();
+}
+
+/**
+  redo set comment ommand
+*/
+void SetCommentCommand::redo(){
+    setText( tr("Comment") );
+    node_->setComment(comment_);
+    document_->modifyNode(node_);
+}
+
+/**
+  undo setcomment command
+*/
+void SetCommentCommand::undo(){
+    node_->setComment(prevComment_);
+    document_->modifyNode(node_);
 }
