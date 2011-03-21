@@ -34,8 +34,9 @@ namespace Go{
 */
 class FileBase{
 public:
-    // constructor
+    // constructor, destructor
     FileBase(Go::NodeList& gameList);
+    virtual ~FileBase(){}
 
     // read
     virtual bool load(const QFileInfo& fileInfo, QTextCodec* defaultCodec, bool guessCodec=true);

@@ -29,8 +29,9 @@ class Document : public QObject
 {
     Q_OBJECT
 public:
-    // constructor
+    // constructor, destructor
     explicit Document(QObject *parent = 0);
+    virtual ~Document(){}
 
     // undo stack
     QUndoStack* undoStack(){ return &undoStack_; }
