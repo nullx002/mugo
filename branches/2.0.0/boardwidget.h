@@ -79,11 +79,13 @@ protected:
 
     // set graphics items position
     void setItemsPosition();
-    void setItemsPosition(const QRectF& rect);
+    void setItemsPosition(const QSize& size);
     void setVLinesPosition(int x, int y, int gridSize);
     void setHLinesPosition(int x, int y, int gridSize);
+    void setStarsPosition();
     void setDataPosition();
 
+    // get items position
     qreal getGridSize() const{ return fabs(vLines[1]->line().x1() - vLines[0]->line().x1()); }
 
     // create buffer
@@ -98,6 +100,9 @@ protected:
 
     // create stone item
     QGraphicsItem* createStoneItem(Go::Color color, int sgfX, int sgfY);
+
+    // get star positions
+    void getStarPositions(QList<int>& xstarpos, QList<int>& ystarpos) const;
 
     // transform coordinates
     bool viewToSgfCoordinate(qreal viewX, qreal viewY, int& sgfX, int& sgfY) const;
@@ -124,6 +129,7 @@ protected:
     QGraphicsRectItem* shadow;
     QList<QGraphicsLineItem*> vLines;
     QList<QGraphicsLineItem*> hLines;
+    QList<QGraphicsEllipseItem*> stars;
 
     EditMode editMode_;
 
