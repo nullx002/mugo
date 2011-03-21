@@ -40,12 +40,13 @@ MainWindow::MainWindow(const QString& fname, QWidget *parent) :
     ui->setupUi(this);
     initializeMenu();
 
+    ui->boardTabWidget->removeTab(0);
+
     // open or create new tab
     if (fname.isEmpty())
         fileNew();
     else
         fileOpen(fname);
-    ui->boardTabWidget->removeTab(0);
 }
 
 /**
@@ -190,11 +191,19 @@ bool MainWindow::fileSaveAs(SgfDocument* doc, const QFileInfo& fileInfo){
 bool MainWindow::closeTab(BoardWidget* board){
     if (maybeSave(board->document()) == true){
         // remove document and view datas.
-//        ViewData& view = docView[board->document()];
-        docView.remove(board->document());
+        Document* doc = board->document();
+//        ViewData& view = docView[doc];
+        docView.remove(doc);
 
-        int index = ui->boardTabWidget->indexOf(board);
-        ui->boardTabWidget->removeTab(index);
+        // remove view
+//        int index = ui->boardTabWidget->indexOf(board);
+//        ui->boardTabWidget->removeTab(index);
+        delete board;
+
+        // remove doc
+        undoGroup.removeStack(doc->undoStack());
+        delete doc;
+
         return true;
     }
     return false;
@@ -494,7 +503,7 @@ void MainWindow::on_boardTabWidget_currentChanged(QWidget* widget)
 
     // change undo stack of current tab to active undo stack
     SgfDocument* doc = board->document();
-    undoGroup.setActiveStack(doc->undoStack());
+    doc->undoStack()->setActive(false);
 
     // update view
     updateView(board->currentNode());
