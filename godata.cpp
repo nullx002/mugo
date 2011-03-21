@@ -36,6 +36,18 @@ NodePtr createStoneNode(Color color, int x, int y){
 
 
 /**
+  Constructs empty game information
+*/
+Information::Information()
+    : variationStyle_(0)
+    , xsize_(19)
+    , ysize_(19)
+    , komi_(6.5)
+    , handicap_(0)
+{
+}
+
+/**
   Constructs empty node
 */
 Node::Node()

@@ -19,8 +19,11 @@
 #define FILEBASE_H
 
 
-#include <QFileInfo>
 #include "godata.h"
+
+class QFileInfo;
+class QFile;
+class QTextStream;
 
 
 namespace Go{
@@ -40,13 +43,18 @@ public:
     virtual bool load(QFile& file, QTextCodec* defaultCodec, bool guessCodec=true);
 
     // write
-    virtual bool save(const QFileInfo& fileInfo);
-    virtual bool save(const QString& filePath);
-    virtual bool save(QFile& file) = 0;
+    virtual bool save(const QFileInfo& fileInfo, QTextCodec* codec = NULL);
+    virtual bool save(const QString& filePath, QTextCodec* codec = NULL);
+    virtual bool save(QFile& file, QTextCodec* codec = NULL);
+    virtual bool save(QTextStream& str);
 
 protected:
+    // read
     virtual QTextCodec* guessCodec(const QByteArray& ba);
     virtual bool parse(const QString& str) = 0;
+
+    // write
+    virtual bool write(QTextStream& str) = 0;
 
     InformationPtr gameInformation(NodePtr& node);
 

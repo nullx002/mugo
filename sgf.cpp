@@ -17,6 +17,8 @@
 */
 #include <QDebug>
 #include <QStringList>
+#include <QTextCodec>
+#include "mugoapp.h"
 #include "sgf.h"
 
 
@@ -303,6 +305,13 @@ Miscellaneous Properties    FG, PM, VW
         }
     }
 
+    // Node Annotation Properties: C, DM, GB, GW, HO, N, UC, V
+    // Move Annotation Properties: BM, DO, IT, TE
+    // Setup Properties: AB, AE, AW, PL
+    // Markup Properties: AR, CR, DD, LB, LN, MA, SL, SQ, TR
+    // Timing Properties: BL, OB, OW, WL
+    // Miscellaneous Properties: FG, PM, VW
+
     return true;
 }
 
@@ -328,10 +337,145 @@ void Sgf::parseMove(const QString& value, int& x, int& y){
 }
 
 /**
-  save sgf
+  write sgf to stream
 */
-bool Sgf::save(QFile& file){
-    return false;
+bool Sgf::write(QTextStream& str){
+    foreach(const NodePtr& game, gameList){
+        str << '(';
+
+        if (write(str, game) == false)
+            return false;
+
+        str << ")\n";
+   }
+
+    return true;
+}
+
+/**
+  write node to stream
+*/
+bool Sgf::write(QTextStream& str, const NodePtr& node){
+    // the node must be started with ';'
+    str << ';';
+
+    // if node has information, write it
+    if (node->information()){
+        if (writeRootInformation(str, node->information()) == false)
+            return false;
+        if (writeGameInformation(str, node->information()) == false)
+            return false;
+    }
+
+    // write node properties
+    if (writeNode(str, node) == false)
+        return false;
+
+    // write all children.
+    foreach(const NodePtr& child, node->children())
+        write(str, child);
+
+    return true;
+}
+
+/**
+  write root game information to stream
+  write following properties: AP, CA, FF, GM, ST, SZ
+*/
+bool Sgf::writeRootInformation(QTextStream& str, const InformationPtr& info){
+    if (!info)
+        return false;
+
+    str << "GM[1]FF[4]";
+    str << "CA[" << str.codec()->name() << ']';
+    str << "AP[" << APP_NAME  << ':' << APP_VERSION << ']';
+    str << "ST[" << info->variationStyle() << ']';
+    if (info->xsize() == info->ysize())
+        str << "SZ[" << info->xsize() << ']';
+    else
+        str << "SZ[" << info->xsize() << ':' << info->ysize() << ']';
+
+    return true;
+}
+
+/**
+  write root game information to stream
+  write following properties: AN, BR, BT, CP, DT, EV, GN, GC, ON, OT, PB, PC, PW, RE, RO, RU, SO, TM, US, WR, WT
+*/
+bool Sgf::writeGameInformation(QTextStream& str, const InformationPtr& info){
+#define WRITE_PROP(NAME, VALUE) if (VALUE.isEmpty() == false) str << NAME"[" << VALUE << ']'
+
+    if (!info)
+        return false;
+
+    // black
+    WRITE_PROP("PB", info->blackPlayer());
+    WRITE_PROP("BR", info->blackRank());
+    WRITE_PROP("BT", info->blackTeam());
+
+    // white
+    WRITE_PROP("PW", info->whitePlayer());
+    WRITE_PROP("WR", info->whiteRank());
+    WRITE_PROP("WT", info->whiteTeam());
+
+    // when and where
+    WRITE_PROP("DT", info->date());
+    WRITE_PROP("PC", info->place());
+
+    // game name
+    WRITE_PROP("EV", info->event());
+    WRITE_PROP("GN", info->gameName());
+    WRITE_PROP("RO", info->round());
+
+    // result
+    WRITE_PROP("RE", info->result());
+
+    // rule
+    WRITE_PROP("RU", info->rule());
+    WRITE_PROP("TM", info->time());
+    WRITE_PROP("OT", info->overtime());
+
+    // annotation
+    WRITE_PROP("AN", info->annotation());
+    WRITE_PROP("CP", info->copyright());
+    WRITE_PROP("GC", info->gameComment());
+    WRITE_PROP("ON", info->opening());
+    WRITE_PROP("SO", info->source());
+    WRITE_PROP("US", info->user());
+
+    return true;
+}
+
+/**
+  write node properties to stream
+*/
+bool Sgf::writeNode(QTextStream& str, const NodePtr& node){
+/*
+Setup Properties            AB, AE, AW, PL
+Node Annotation Properties  C, DM, GB, GW, HO, N, UC, V
+Move Annotation Properties  BM, DO, IT, TE
+Markup Properties           AR, CR, DD, LB, LN, MA, SL, SQ, TR
+Timing Properties           BL, OB, OW, WL
+Miscellaneous Properties    FG, PM, VW
+*/
+    // Move Properties: B, KO, MN, W
+    // unsupported property: KO
+    if (node->color() != eDame){
+        char pos[3] = {0};
+        if (node->x() >= 0 && node->y() >= 0){
+            pos[0] = char('a' + node->x());
+            pos[1] = char('a' + node->y());
+        }
+        if (node->color() == eBlack)
+            str << "B[" << pos << ']';
+        else if (node->color() == eWhite)
+            str << "W[" << pos << ']';
+    }
+
+    if (node->moveNumber() > 0)
+        str << "MN[" << node->moveNumber() << ']';
+
+    return true;
 }
 
 

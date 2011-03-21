@@ -15,13 +15,16 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#include "mugoapp.h"
 #include "document.h"
 
 /**
   Constructs an empty document.
 */
-Document::Document(QObject* parent) :
-    QObject(parent)
+Document::Document(QObject* parent)
+    : QObject(parent)
+    , dirty_(false)
+    , codec_(mugoApp()->defaultCodec())
 {
 }
 

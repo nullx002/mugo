@@ -43,6 +43,14 @@ public:
     const QFileInfo& fileInfo() const{ return fileInfo_; }
     void setFileInfo(const QFileInfo& fileInfo);
 
+    // dirty
+    bool dirty() const{ return dirty_; }
+    void setDirty(bool dirty=true){ dirty_ = dirty; }
+
+    // codec
+    QTextCodec* codec(){ return codec_; }
+    void setCodec(QTextCodec* codec){ codec_ = codec; }
+
 signals:
 
 public slots:
@@ -51,6 +59,8 @@ private:
     QUndoStack undoStack_;
     QString name_;
     QFileInfo fileInfo_;
+    bool dirty_;
+    QTextCodec* codec_;
 };
 
 #endif // DOCUMENT_H
