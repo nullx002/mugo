@@ -36,6 +36,10 @@ enum Color{ eDame, eBlack, eWhite };
 */
 class Information{
 public:
+    // constructor
+    Information();
+
+    // application name
     const QString& applicationName() const{ return applicationName_; }
     void setApplicationName(const QString& applicationName){ applicationName_ = applicationName; }
 
@@ -71,6 +75,7 @@ public:
     void setWhiteTeam(const QString& team){ whiteTeam_ = team; }
 
     // result
+    const QString& result() const{ return result_; }
     void setResult(const QString& result){ result_ = result; }
 
     // rule
@@ -78,25 +83,39 @@ public:
     void  setKomi(qreal komi){ komi_ = komi; }
     int   handicap() const{ return handicap_; }
     void  setHandicap(int handicap){ handicap_ = handicap; }
+    const QString& time(){ return time_; }
     void setTime(const QString& time){ time_ = time; }
+    const QString& overtime(){ return overtime_; }
     void setOvertime(const QString& overtime){ overtime_ = overtime; }
+    const QString& rule(){ return rule_; }
     void setRule(const QString& rule){ rule_ = rule; }
 
     // when and where
+    const QString& date() const{ return date_; }
     void setDate(const QString& date){ date_ = date; }
+    const QString& place() const{ return place_; }
     void setPlace(const QString& place){ place_ = place; }
 
     // game name
+    const QString& event() const{ return event_; }
     void setEvent(const QString& event){ event_ = event; }
+    const QString& gameName() const{ return gameName_; }
     void setGameName(const QString& name){ gameName_ = name; }
+    const QString& round() const{ return round_; }
     void setRound(const QString& round){ round_ = round; }
 
     // annotation
+    const QString& copyright() const{ return copyright_; }
     void setCopyright(const QString& copyright){ copyright_ = copyright; }
+    const QString& gameComment() const{ return gameComment_; }
     void setGameComment(const QString& comment){ gameComment_ = comment; }
+    const QString& opening() const{ return opening_; }
     void setOpening(const QString& opening){ opening_ = opening; }
+    const QString& source() const{ return source_; }
     void setSource(const QString& source){ source_ = source; }
+    const QString& user() const{ return user_; }
     void setUser(const QString& user){ user_ = user; }
+    const QString& annotation() const{ return annotation_; }
     void setAnnotation(const QString& annotation){ annotation_ = annotation; }
 
 private:

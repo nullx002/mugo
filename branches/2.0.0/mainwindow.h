@@ -50,6 +50,9 @@ public slots:
     // new, open, save, close
     bool fileNew(QTextCodec* codec=NULL, int xsize=19, int ysize=19, double komi=6.5, int handicap=0);
     bool fileOpen(const QString& fname, QTextCodec* codec=NULL, bool guessCodec=true, bool newTab=true);
+    bool fileSave(SgfDocument* doc);
+    bool fileSaveAs(SgfDocument* doc);
+    bool fileSaveAs(SgfDocument* doc, const QFileInfo& fileInfo);
 
 protected:
     void changeEvent(QEvent* e);
@@ -63,12 +66,19 @@ protected:
 
     // file dialog
     bool getOpenFileName(QString& fname, QTextCodec*& codec);
+    bool getSaveFileName(const QString& initialPath, QString& fname, QTextCodec*& codec);
 
     // read
     SgfDocument* readSgfDocument(const QString& fname, QTextCodec* codec, bool guessCodec);
 
+    // save
+    bool closeTab(BoardWidget* board);
+    bool maybeSave(SgfDocument* doc);
+
 private slots:
     // file menu
+    void on_actionSaveAs_triggered();
+    void on_actionSave_triggered();
     void on_actionNew_triggered();
     void on_actionOpen_triggered();
     void on_actionExit_triggered();

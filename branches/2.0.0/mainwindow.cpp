@@ -19,6 +19,7 @@
 #include <QFileDialog>
 #include <QLabel>
 #include <QComboBox>
+#include <QMessageBox>
 #include "mugoapp.h"
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -129,6 +130,65 @@ bool MainWindow::fileOpen(const QString& fname, QTextCodec* codec, bool guessCod
 }
 
 /**
+  overwrite save.
+  if document isn't saved, call save as.
+*/
+bool MainWindow::fileSave(SgfDocument* doc){
+    if (doc->fileInfo().suffix() != "sgf")
+        return fileSaveAs(doc);
+    else
+        return fileSaveAs(doc, doc->fileInfo());
+}
+
+/**
+  show file save dialog, and save document
+*/
+bool MainWindow::fileSaveAs(SgfDocument* doc){
+    // initial path for save dialog
+    QString initialPath;
+    QFileInfo fi = doc->fileInfo();
+    if (fi.absoluteFilePath().isEmpty() == false){
+        fi.setFile( fi.baseName() + ".sgf");
+        initialPath = fi.absoluteFilePath();
+    }
+    else
+        initialPath = doc->name() + ".sgf";
+
+    // show file chooser dialog
+    QString fname;
+    QTextCodec* codec = doc->codec();
+    if (getSaveFileName(initialPath, fname, codec) == false)
+        return false;
+
+    // save
+    fi.setFile(fname);
+    if (fi.suffix().isEmpty())
+        fi.setFile( fname + ".sgf" );
+    return fileSaveAs(doc, fi);
+}
+
+/**
+  save document with file name
+*/
+bool MainWindow::fileSaveAs(SgfDocument* doc, const QFileInfo& fileInfo){
+    Go::Sgf sgf(doc->gameList);
+    return sgf.save(fileInfo, doc->codec());
+}
+
+/**
+  close tab.
+  save document before close if need.
+*/
+bool MainWindow::closeTab(BoardWidget* board){
+    if (maybeSave(board->document()) == true){
+        int index = ui->boardTabWidget->indexOf(board);
+        ui->boardTabWidget->removeTab(index);
+        return true;
+    }
+    return false;
+}
+
+/**
   initialize menu
   create action and actino group
 */
@@ -176,7 +236,7 @@ bool MainWindow::createNewTab(Document* doc){
 }
 
 /**
-  open file dialog
+  show open file dialog
 */
 bool MainWindow::getOpenFileName(QString& fname, QTextCodec*& codec){
     QString filter = "All Go Format (*.sgf *.ugf *.ugi *.ngf *.gib);;Smart Game Format (*.sgf);;ugf (*.ugf *.ugi);;ngf (*.ngf);;gib (*.gib);;All Files (*.*)";
@@ -236,6 +296,56 @@ bool MainWindow::getOpenFileName(QString& fname, QTextCodec*& codec){
 }
 
 /**
+  get save file name
+*/
+bool MainWindow::getSaveFileName(const QString& initialPath, QString& fname, QTextCodec*& codec){
+    QString filter = "Smart Game Format (*.sgf);;All Files (*.*)";
+    fname = QFileDialog::getSaveFileName(this, QString(), initialPath, filter, NULL);
+    if (fname.isEmpty())
+        return false;
+
+    // os dialog can't choose codec.
+    codec = mugoApp()->defaultCodec();
+
+/*
+    QFileDialog dlg(this, QString(), initialPath, filter);
+    dlg.setAcceptMode(QFileDialog::AcceptSave);
+
+    QLayout* layout = dlg.layout();
+    QLabel* label = new QLabel(tr("Encoding:"), &dlg);
+    QComboBox* combo = new QComboBox(&dlg);
+    layout->addWidget(label);
+    layout->addWidget(combo);
+
+    QList<QAction*> actions;
+    foreach(QAction* act, ui->menuReload->actions()){
+        if (act->isSeparator() == false){
+            combo->addItem(act->text());
+            if (encodingActionToCodec[act]->name() == codec->name())
+                combo->setCurrentIndex( combo->count() - 1 );
+            actions.push_back(act);
+        }
+        else{
+            combo->insertSeparator(combo->count());
+            actions.push_back(NULL);
+        }
+    }
+
+    if (dlg.exec() != QDialog::Accepted)
+        return false;
+
+    if (dlg.selectedFiles().size() == 0)
+        return false;
+
+    fname = dlg.selectedFiles()[0];
+    codec = encodingActionToCodec[actions[combo->currentIndex()]];
+*/
+
+    return true;
+}
+
+/**
+  read sgf file
 */
 SgfDocument* MainWindow::readSgfDocument(const QString& fname, QTextCodec* codec, bool guessCodec){
     QFileInfo info(fname);
@@ -251,6 +361,25 @@ SgfDocument* MainWindow::readSgfDocument(const QString& fname, QTextCodec* codec
     }
 
     return NULL;
+}
+
+/**
+ maybe save
+*/
+bool MainWindow::maybeSave(SgfDocument* doc){
+    if (doc->dirty() == false)
+        return true;
+
+    QMessageBox::StandardButton ret =
+                    QMessageBox::warning(this, APP_NAME,
+                        tr("%1 has been modified.\n"
+                           "Do you want to save your changes?").arg(doc->name()),
+                        QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+    if (ret == QMessageBox::Save)
+        return fileSave(doc);
+    else if (ret == QMessageBox::Cancel)
+        return false;
+    return true;
 }
 
 /**
@@ -272,6 +401,30 @@ void MainWindow::on_actionOpen_triggered()
         return;
 
     fileOpen(fname, codec, codec == NULL);
+}
+
+/**
+  save document
+*/
+void MainWindow::on_actionSave_triggered()
+{
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    fileSave(board->document());
+}
+
+/**
+  save as document
+*/
+void MainWindow::on_actionSaveAs_triggered()
+{
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    fileSaveAs(board->document());
 }
 
 /**
@@ -302,5 +455,9 @@ void MainWindow::on_boardTabWidget_currentChanged(QWidget* widget)
 */
 void MainWindow::on_boardTabWidget_tabCloseRequested(int index)
 {
-    qDebug("tab close requested");
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->widget(index));
+    if (board == NULL)
+        return;
+
+    closeTab(board);
 }

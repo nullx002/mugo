@@ -33,14 +33,18 @@ public:
     // constructor
     Sgf(NodeList& gameList);
 
-    // write
-    virtual bool save(QFile& file);
-
 protected:
     // read
     virtual QTextCodec* guessCodec(const QByteArray& ba);
     virtual bool parse(const QString& str);
     bool parse(QString::const_iterator first, QString::const_iterator last);
+
+    // write
+    virtual bool write(QTextStream& str);
+    virtual bool write(QTextStream& str, const NodePtr& node);
+    virtual bool writeRootInformation(QTextStream& str, const InformationPtr& info);
+    virtual bool writeGameInformation(QTextStream& str, const InformationPtr& info);
+    virtual bool writeNode(QTextStream& str, const NodePtr& node);
 
 private:
     bool parseBranch(QString::const_iterator& first, QString::const_iterator last, NodePtr parent);

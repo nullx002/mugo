@@ -16,6 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include <QTextCodec>
+#include <QFileInfo>
+#include <QTextStream>
 #include "filebase.h"
 
 
@@ -77,17 +79,35 @@ QTextCodec* FileBase::guessCodec(const QByteArray&){
 /**
   save
 */
-bool FileBase::save(const QFileInfo& fileInfo){
-    return save(fileInfo.filePath());
+bool FileBase::save(const QFileInfo& fileInfo, QTextCodec* codec){
+    return save(fileInfo.filePath(), codec);
 }
 
 /**
   save
 */
-bool FileBase::save(const QString& filePath){
+bool FileBase::save(const QString& filePath, QTextCodec* codec){
     QFile file(filePath);
-    file.open(QIODevice::WriteOnly);
-    return save(file);
+    if (file.open(QIODevice::WriteOnly | QIODevice::Text) == false)
+        return false;
+    return save(file, codec);
+}
+
+/**
+  save
+*/
+bool FileBase::save(QFile& file, QTextCodec* codec){
+    QTextStream str(&file);
+    if (codec)
+        str.setCodec(codec);
+    return write(str);
+}
+
+/**
+  save
+*/
+bool FileBase::save(QTextStream& str){
+    return write(str);
 }
 
 /**

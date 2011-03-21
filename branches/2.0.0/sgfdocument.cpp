@@ -58,6 +58,7 @@ void SgfDocument::addNode(Go::NodePtr parent, Go::NodePtr node, int index){
         parent->children().insert(parent->children().begin()+index, node);
     node->setParent(parent);
 
+    setDirty();
     emit nodeAdded(node);
 }
 
@@ -79,5 +80,6 @@ void SgfDocument::deleteNode(Go::NodePtr node, bool removeChildren){
         }
     }
 
+    setDirty();
     emit nodeDeleted(node);
 }
