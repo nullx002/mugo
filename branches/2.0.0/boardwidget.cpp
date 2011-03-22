@@ -209,7 +209,7 @@ void BoardWidget::setItemsPosition(const QSize& size){
 
     int x = (width - w) / 2;
     int y = (height - h) / 2;
-    int margin = gridSize * 0.6;
+    int margin = int(gridSize * 0.6);
     QRect boardRect(QPoint(x-margin, y-margin), QPoint(x+w+margin, y+h+margin));
 
     // set position of shadow.
@@ -219,7 +219,7 @@ void BoardWidget::setItemsPosition(const QSize& size){
     board->setRect(boardRect);
 
     // set scene rect
-    QRect r = boardRect;
+    QRectF r = boardRect;
     r.setRight(shadow->rect().right());
     r.setBottom(shadow->rect().bottom());
 
@@ -535,8 +535,8 @@ bool BoardWidget::viewToSgfCoordinate(qreal viewX, qreal viewY, int& sgfX, int& 
     qreal size = getGridSize();
 
 //    if ((rotate % 2) == 0){
-        sgfX = (viewX - vLines[0]->line().x1() + size / 2.0) / size;
-        sgfY = (viewY - hLines[0]->line().y1() + size / 2.0) / size;
+        sgfX = static_cast<int>( (viewX - vLines[0]->line().x1() + size / 2.0) / size );
+        sgfY = static_cast<int>( (viewY - hLines[0]->line().y1() + size / 2.0) / size );
 //    }
 //    else{
 //        sgfX = (fabs(viewY - vLines[0]->line().y1()) + size / 2.0) / size;

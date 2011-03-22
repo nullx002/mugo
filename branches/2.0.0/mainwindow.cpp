@@ -220,7 +220,11 @@ void MainWindow::initializeMenu(){
     ui->actionCloseTab->setShortcut(QKeySequence::Close);
     ui->actionSave->setShortcut(QKeySequence::Save);
     ui->actionSaveAs->setShortcut(QKeySequence::SaveAs);
+#ifdef Q_WS_WIN
+    ui->actionExit->setShortcut(Qt::CTRL + Qt::Key_Q);
+#else
     ui->actionExit->setShortcut(QKeySequence::Quit);
+#endif
 
     // Edit -> undo/redo
     undoAction = undoGroup.createUndoAction(this);
