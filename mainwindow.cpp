@@ -201,7 +201,7 @@ bool MainWindow::closeTab(BoardWidget* board){
         delete board;
 
         // remove doc
-        undoGroup.removeStack(doc->undoStack());
+        doc->undoStack()->setActive(false);
         delete doc;
 
         return true;
@@ -507,7 +507,8 @@ void MainWindow::on_boardTabWidget_currentChanged(QWidget* widget)
 
     // change undo stack of current tab to active undo stack
     SgfDocument* doc = board->document();
-    doc->undoStack()->setActive(false);
+//    undoGroup.setActiveStack( board->document()->undoStack() );
+    doc->undoStack()->setActive(true);
 
     // update view
     updateView(board->currentNode());
