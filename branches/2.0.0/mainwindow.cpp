@@ -41,6 +41,8 @@ MainWindow::MainWindow(const QString& fname, QWidget *parent) :
     initializeMenu();
 
     ui->boardTabWidget->removeTab(0);
+    ui->undoDockWidget->setVisible(false);
+    ui->undoView->setGroup(&undoGroup);
 
     // open or create new tab
     if (fname.isEmpty())
@@ -551,7 +553,19 @@ void MainWindow::on_commentEdit_textChanged()
     if (board == NULL)
         return;
 
+    static Go::Node* lastCommentNode = NULL;
+    static SetCommentCommand* lastCommentCommand = NULL;
+
     // create new node, and add to document
-    if (board->currentNode()->comment() != ui->commentEdit->toPlainText())
-        board->document()->undoStack()->push( new SetCommentCommand(board->document(), board->currentNode(), ui->commentEdit->toPlainText()) );
+    if (board->currentNode()->comment() == ui->commentEdit->toPlainText())
+        return;
+
+    if (lastCommentNode != board->currentNode().data()){
+        lastCommentCommand = new SetCommentCommand(board->document(), board->currentNode(), ui->commentEdit->toPlainText());
+        board->document()->undoStack()->push(lastCommentCommand);
+    }
+    else
+        lastCommentCommand->setComment(ui->commentEdit->toPlainText());
+
+    lastCommentNode = board->currentNode().data();
 }

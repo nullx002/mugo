@@ -55,7 +55,7 @@ public:
     virtual void redo();
     virtual void undo();
 
-    void setComment(const QString& comment){ comment_ = comment; }
+    void setComment(const QString& comment);
     const QString& comment() const{ return comment_; }
 
 private:

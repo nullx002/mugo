@@ -71,9 +71,17 @@ void SetCommentCommand::redo(){
 }
 
 /**
-  undo setcomment command
+  undo set comment command
 */
 void SetCommentCommand::undo(){
     node_->setComment(prevComment_);
     document_->modifyNode(node_);
+}
+
+/**
+  set comment
+*/
+void SetCommentCommand::setComment(const QString& comment){
+    comment_ = comment;
+    redo();
 }
