@@ -20,8 +20,11 @@
 
 #include <QMainWindow>
 #include <QUndoGroup>
+#include "sgfdocument.h"
 #include "boardwidget.h"
-#include "document.h"
+#
+class QFileInfo;
+class QTreeWidget;
 
 namespace Ui {
     class MainWindow;
@@ -29,9 +32,10 @@ namespace Ui {
 
 class ViewData{
 public:
-    ViewData() : boardWidget(NULL){}
+    ViewData() : boardWidget(NULL), branchWidget(NULL){}
 
     BoardWidget* boardWidget;
+    QTreeWidget* branchWidget;
 };
 
 
@@ -94,6 +98,7 @@ private slots:
     void on_boardTabWidget_currentChanged(QWidget*);
 
     // board widget
+    void on_board_gameChanged(const Go::NodePtr& game);
     void on_board_nodeChanged(const Go::NodePtr& node);
 
     // comment widget

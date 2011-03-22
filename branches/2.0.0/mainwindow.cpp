@@ -20,11 +20,11 @@
 #include <QFileDialog>
 #include <QLabel>
 #include <QComboBox>
+#include <QTreeWidget>
 #include <QMessageBox>
 #include "mugoapp.h"
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "sgfdocument.h"
 #include "sgf.h"
 #include "sgfcommand.h"
 
@@ -40,7 +40,6 @@ MainWindow::MainWindow(const QString& fname, QWidget *parent) :
     ui->setupUi(this);
     initializeMenu();
 
-    ui->boardTabWidget->removeTab(0);
     ui->undoDockWidget->setVisible(false);
     ui->undoView->setGroup(&undoGroup);
 
@@ -249,16 +248,23 @@ void MainWindow::initializeMenu(){
 bool MainWindow::createNewTab(Document* doc){
     SgfDocument* sgfDoc = qobject_cast<SgfDocument*>(doc);
     if (sgfDoc){
+        connect(sgfDoc, SIGNAL(nodeModified(const Go::NodePtr&)), SLOT(on_sgfDocument_nodeModified(const Go::NodePtr&)));
         ViewData& data = docView[doc];
 
-        BoardWidget* board = new BoardWidget(sgfDoc);
-        ui->boardTabWidget->addTab(board, doc->name());
-        ui->boardTabWidget->setCurrentWidget(board);
+        // new tree widget
+        QTreeWidget* branch = new QTreeWidget;
+        branch->setHeaderHidden(true);
+        ui->branchStackedWidget->addWidget(branch);
+        data.branchWidget = branch;
 
-        data.boardWidget = board;
-
-        connect(sgfDoc, SIGNAL(nodeModified(const Go::NodePtr&)), SLOT(on_sgfDocument_nodeModified(const Go::NodePtr&)));
+        // new board widget
+        BoardWidget* board = new BoardWidget;
+        connect(board, SIGNAL(gameChanged(const Go::NodePtr&)), SLOT(on_board_gameChanged(const Go::NodePtr&)));
         connect(board, SIGNAL(nodeChanged(const Go::NodePtr&)), SLOT(on_board_nodeChanged(const Go::NodePtr&)));
+        board->setDocument(sgfDoc);
+        ui->boardTabWidget->addTab(board, sgfDoc->name());
+        ui->boardTabWidget->setCurrentWidget(board);
+        data.boardWidget = board;
 
         return true;
     }
@@ -507,8 +513,11 @@ void MainWindow::on_boardTabWidget_currentChanged(QWidget* widget)
     if (board == NULL)
         return;
 
-    // change undo stack of current tab to active undo stack
+    // set undo stack of new current tab to active stack.
     undoGroup.setActiveStack( board->document()->undoStack() );
+
+    // activate branch view of new current tab
+    ui->branchStackedWidget->setCurrentWidget( docView[board->document()].branchWidget );
 
     // update view
     updateView(board->currentNode());
@@ -529,11 +538,34 @@ void MainWindow::on_boardTabWidget_tabCloseRequested(int index)
 }
 
 /**
+  current game changed
+*/
+void MainWindow::on_board_gameChanged(const Go::NodePtr& game){
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(sender());
+    if (board == NULL)
+        return;
+
+    // get branch widget
+    QTreeWidget* branch = docView[board->document()].branchWidget;
+    if (branch == NULL)
+        return;
+
+//    branch->clear();
+    QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << "Game Info");
+    branch->addTopLevelItem(item);
+
+    QTreeWidgetItem* item2 = new QTreeWidgetItem(QStringList() << "Game Info AAA");
+    item->addChild(item2);
+
+}
+
+/**
   current node changed
 */
 void MainWindow::on_board_nodeChanged(const Go::NodePtr& node){
     // get active board widget
-    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    BoardWidget* board = qobject_cast<BoardWidget*>(sender());
     if (board == NULL)
         return;
 
