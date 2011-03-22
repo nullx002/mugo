@@ -42,6 +42,7 @@ public:
     };
 
     // constructor
+    explicit BoardWidget(QWidget *parent = 0);
     explicit BoardWidget(SgfDocument* doc, QWidget *parent = 0);
 
     // document
@@ -59,11 +60,13 @@ public:
     int ysize() const { return rootInformation_->ysize(); }
 
 signals:
+    void documentChanged(SgfDocument* doc);
     void gameChanged(const Go::NodePtr& game);
     void informationChanged(const Go::InformationPtr& information);
     void nodeChanged(const Go::NodePtr& node);
 
 public slots:
+    bool setDocument(SgfDocument* doc);
     bool setGame(const Go::NodePtr& game);
     bool setInformation(const Go::InformationPtr& information);
     bool setNode(const Go::NodePtr& node);
@@ -76,6 +79,9 @@ protected:
     void wheelEvent(QWheelEvent* e);
     void onLButtonUp(QMouseEvent* e);
     void onRButtonUp(QMouseEvent* e);
+
+    // initialize
+    void initialize();
 
     // set graphics items position
     void setItemsPosition();

@@ -24,14 +24,32 @@
 /**
   Constructor
 */
+BoardWidget::BoardWidget(QWidget* parent) :
+    QGraphicsView(parent),
+    document_(NULL),
+    editMode_(eAlternateMove)
+{
+    initialize();
+}
+
+/**
+  Constructor
+*/
 BoardWidget::BoardWidget(SgfDocument* doc, QWidget* parent) :
     QGraphicsView(parent),
     document_(doc),
     editMode_(eAlternateMove)
 {
-    connect(document_, SIGNAL(nodeAdded(const Go::NodePtr&)), SLOT(on_document_nodeAdded(const Go::NodePtr&)));
-    connect(document_, SIGNAL(nodeDeleted(const Go::NodePtr&)), SLOT(on_document_nodeDeleted(const Go::NodePtr&)));
+    initialize();
 
+    // set current game
+    setGame(document_->gameList.front());
+}
+
+/**
+  initialize
+*/
+void BoardWidget::initialize(){
     setScene( new QGraphicsScene(this) );
     setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
 
@@ -40,9 +58,6 @@ BoardWidget::BoardWidget(SgfDocument* doc, QWidget* parent) :
     board  = scene()->addRect(0, 0, 1, 1, QPen(Qt::NoPen), QBrush(BOARD_COLOR));
     shadow->setZValue(0);
     board->setZValue(1);
-
-    // set current game
-    setGame(document_->gameList.front());
 }
 
 /**
@@ -94,6 +109,16 @@ void BoardWidget::onLButtonUp(QMouseEvent* e){
   mouse right button up event
 */
 void BoardWidget::onRButtonUp(QMouseEvent* e){
+}
+
+/**
+  set current document
+*/
+bool BoardWidget::setDocument(SgfDocument* doc){
+    document_ = doc;
+    connect(document_, SIGNAL(nodeAdded(const Go::NodePtr&)), SLOT(on_document_nodeAdded(const Go::NodePtr&)));
+    connect(document_, SIGNAL(nodeDeleted(const Go::NodePtr&)), SLOT(on_document_nodeDeleted(const Go::NodePtr&)));
+    return setGame(document_->gameList.front());
 }
 
 /**
@@ -197,6 +222,9 @@ void BoardWidget::setItemsPosition(){
   set scene items position in rect area
 */
 void BoardWidget::setItemsPosition(const QSize& size){
+    if (document_ == NULL)
+        return;
+
     // calculate board size
     int width  = size.width();
     int height = size.height();
