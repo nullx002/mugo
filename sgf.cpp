@@ -306,6 +306,17 @@ Miscellaneous Properties    FG, PM, VW
     }
 
     // Node Annotation Properties: C, DM, GB, GW, HO, N, UC, V
+    else if (key == "C")  // comment
+        node->setComment(valueList.join(":"));
+    else if (key == "N")  // node name
+        node->setName(valueList.join(":"));
+//    else if (key == "DM")  // even
+//    else if (key == "GB")  // good for black
+//    else if (key == "GW")  // good for white
+//    else if (key == "HO")  // hotspot
+//    else if (key == "UC")  // unclear
+//    else if (key == "V")   // [real] value: positive values are good for black, negative values are good for white
+
     // Move Annotation Properties: BM, DO, IT, TE
     // Setup Properties: AB, AE, AW, PL
     // Markup Properties: AR, CR, DD, LB, LN, MA, SL, SQ, TR
@@ -474,6 +485,12 @@ Miscellaneous Properties    FG, PM, VW
 
     if (node->moveNumber() > 0)
         str << "MN[" << node->moveNumber() << ']';
+
+    // Node Annotation Properties: C, N, DM, GB, GW, HO, UC, V
+    if (node->comment().isEmpty() == false)
+        str << "C[" << node->comment() << ']';
+    if (node->name().isEmpty() == false)
+        str << "N[" << node->name() << ']';
 
     return true;
 }

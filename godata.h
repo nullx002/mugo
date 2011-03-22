@@ -212,6 +212,10 @@ public:
     int moveNumber() const{ return moveNumber_; }
     void setMoveNumber(int moveNumber){ moveNumber_ = moveNumber; }
 
+    // name
+    const QString& name() const{ return name_; }
+    void setName(const QString& name){ name_ = name; }
+
     // comment
     const QString& comment() const{ return comment_; }
     void setComment(const QString& comment){ comment_ = comment; }
