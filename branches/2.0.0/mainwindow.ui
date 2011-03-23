@@ -131,7 +131,7 @@
       <number>0</number>
      </property>
      <item>
-      <widget class="QPlainTextEdit" name="commentEdit"/>
+      <widget class="QStackedWidget" name="commentStackedWidget"/>
      </item>
     </layout>
    </widget>

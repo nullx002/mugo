@@ -21,6 +21,7 @@
 #include <QLabel>
 #include <QComboBox>
 #include <QTreeWidget>
+#include <QPlainTextEdit>
 #include <QMessageBox>
 #include "mugoapp.h"
 #include "mainwindow.h"
@@ -251,21 +252,27 @@ bool MainWindow::createNewTab(Document* doc){
         connect(sgfDoc, SIGNAL(nodeModified(const Go::NodePtr&)), SLOT(on_sgfDocument_nodeModified(const Go::NodePtr&)));
         ViewData& data = docView[doc];
 
+        // new comment widget
+        QPlainTextEdit* comment = new QPlainTextEdit;
+        data.commentEdit = comment;
+        connect(comment, SIGNAL(textChanged()), SLOT(on_commentEdit_textChanged()));
+        ui->commentStackedWidget->addWidget(comment);
+
         // new tree widget
         QTreeWidget* branch = new QTreeWidget;
+        data.branchWidget = branch;
         branch->setHeaderHidden(true);
         branch->setIndentation(17);
         ui->branchStackedWidget->addWidget(branch);
-        data.branchWidget = branch;
 
         // new board widget
         BoardWidget* board = new BoardWidget;
+        data.boardWidget = board;
         connect(board, SIGNAL(gameChanged(const Go::NodePtr&)), SLOT(on_board_gameChanged(const Go::NodePtr&)));
         connect(board, SIGNAL(nodeChanged(const Go::NodePtr&)), SLOT(on_board_nodeChanged(const Go::NodePtr&)));
         board->setDocument(sgfDoc);
         ui->boardTabWidget->addTab(board, sgfDoc->name());
         ui->boardTabWidget->setCurrentWidget(board);
-        data.boardWidget = board;
 
         return true;
     }
@@ -423,9 +430,10 @@ bool MainWindow::maybeSave(SgfDocument* doc){
 /**
   udpate all views by node information
 */
-void MainWindow::updateView(const Go::NodePtr& node){
-    if (ui->commentEdit->toPlainText() != node->comment())
-        ui->commentEdit->setPlainText(node->comment());
+void MainWindow::updateView(SgfDocument* doc){
+    ViewData& view = docView[doc];
+    if (view.commentEdit->toPlainText() != view.boardWidget->currentNode()->comment())
+        view.commentEdit->setPlainText(view.boardWidget->currentNode()->comment());
 }
 
 /**
@@ -557,7 +565,7 @@ void MainWindow::on_sgfDocument_nodeModified(const Go::NodePtr& node)
         return;
 
     // update view
-    updateView(node);
+    updateView(board->document());
 }
 
 /**
@@ -573,11 +581,14 @@ void MainWindow::on_boardTabWidget_currentChanged(QWidget* widget)
     // set undo stack of new current tab to active stack.
     undoGroup.setActiveStack( board->document()->undoStack() );
 
+    // activate comment widget of new current tab
+    ui->commentStackedWidget->setCurrentWidget( docView[board->document()].commentEdit );
+
     // activate branch widget of new current tab
     ui->branchStackedWidget->setCurrentWidget( docView[board->document()].branchWidget );
 
     // update view
-    updateView(board->currentNode());
+    updateView(board->document());
 }
 
 /**
@@ -621,10 +632,7 @@ void MainWindow::on_board_nodeChanged(const Go::NodePtr& node){
     if (board == NULL)
         return;
 
-    // if sender isn't active, can't update view
-    if (sender() != board)
-        return;
-    updateView(node);
+    updateView(board->document());
 }
 
 /**
@@ -632,24 +640,34 @@ void MainWindow::on_board_nodeChanged(const Go::NodePtr& node){
 */
 void MainWindow::on_commentEdit_textChanged()
 {
-    // get active board widget
-    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
-    if (board == NULL)
+    // find sender's document
+    Document* doc = NULL;
+    DocViewData::const_iterator iter = docView.begin();
+    while (iter != docView.end()){
+        if (iter->commentEdit == sender()){
+            doc = iter.key();
+            break;
+        }
+        ++iter;
+    }
+
+    SgfDocument* sgfDoc = qobject_cast<SgfDocument*>(doc);
+    if (sgfDoc == NULL)
         return;
 
     static Go::Node* lastCommentNode = NULL;
     static SetCommentCommand* lastCommentCommand = NULL;
 
-    // create new node, and add to document
-    if (board->currentNode()->comment() == ui->commentEdit->toPlainText())
+    ViewData& view = docView[doc];
+    if (view.boardWidget->currentNode()->comment() == view.commentEdit->toPlainText())
         return;
 
-    if (lastCommentNode != board->currentNode().data()){
-        lastCommentCommand = new SetCommentCommand(board->document(), board->currentNode(), ui->commentEdit->toPlainText());
-        board->document()->undoStack()->push(lastCommentCommand);
+    if (lastCommentNode != view.boardWidget->currentNode().data()){
+        lastCommentCommand = new SetCommentCommand(sgfDoc, view.boardWidget->currentNode(), view.commentEdit->toPlainText());
+        doc->undoStack()->push(lastCommentCommand);
     }
     else
-        lastCommentCommand->setComment(ui->commentEdit->toPlainText());
+        lastCommentCommand->setComment(view.commentEdit->toPlainText());
 
-    lastCommentNode = board->currentNode().data();
+    lastCommentNode = view.boardWidget->currentNode().data();
 }
