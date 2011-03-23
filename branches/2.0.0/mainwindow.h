@@ -25,6 +25,7 @@
 #
 class QFileInfo;
 class QTreeWidget;
+class QTreeWidgetItem;
 
 namespace Ui {
     class MainWindow;
@@ -81,6 +82,9 @@ protected:
 
     // view
     void updateView(const Go::NodePtr& node);
+    void createBranchItems(QTreeWidget* branch, const Go::NodePtr& node);
+    void createBranchItems(QTreeWidgetItem* parent, const Go::NodePtr& node);
+    QTreeWidgetItem* createBranchItem(const Go::NodePtr& node);
 
 private slots:
     // file menu

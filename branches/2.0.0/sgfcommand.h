@@ -27,7 +27,7 @@ class SgfDocument;
 
 
 /**
-  add node command
+  This command creates new node in paretNode
 */
 class AddNodeCommand : public QUndoCommand{
     Q_DECLARE_TR_FUNCTIONS(AddNodeCommand)
@@ -45,7 +45,7 @@ private:
 };
 
 /**
-  set comment command
+  This command sets comment to specified node
 */
 class SetCommentCommand : public QUndoCommand{
     Q_DECLARE_TR_FUNCTIONS(AddNodeCommand)

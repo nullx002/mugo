@@ -652,7 +652,9 @@ void BoardWidget::back(int step){
 }
 
 /**
-    node added
+  node added
+
+  @param[in] node
 */
 void BoardWidget::on_document_nodeAdded(const Go::NodePtr& node){
     // createNodeList(currentNode_);
@@ -660,7 +662,9 @@ void BoardWidget::on_document_nodeAdded(const Go::NodePtr& node){
 }
 
 /**
-    node deleted
+  node deleted
+
+  @param[in] node
 */
 void BoardWidget::on_document_nodeDeleted(const Go::NodePtr& node){
     // return if deleted node isn't in the current node list
