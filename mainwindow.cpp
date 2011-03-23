@@ -420,11 +420,41 @@ bool MainWindow::maybeSave(SgfDocument* doc){
 }
 
 /**
-  udpate view with node information
+  udpate all views by node information
 */
 void MainWindow::updateView(const Go::NodePtr& node){
     if (ui->commentEdit->toPlainText() != node->comment())
         ui->commentEdit->setPlainText(node->comment());
+}
+
+/**
+  create tree items in branch widget
+*/
+void MainWindow::createBranchItems(QTreeWidget* branch, const Go::NodePtr& node){
+    QTreeWidgetItem* item = createBranchItem(node);
+    branch->addTopLevelItem(item);
+    foreach (const Go::NodePtr& child, node->children())
+        createBranchItems(item, child);
+}
+
+void MainWindow::createBranchItems(QTreeWidgetItem* parent, const Go::NodePtr& node){
+    QTreeWidgetItem* item = createBranchItem(node);
+    parent->addChild(item);
+    foreach (const Go::NodePtr& child, node->children())
+        createBranchItems(parent, child);
+}
+
+QTreeWidgetItem* MainWindow::createBranchItem(const Go::NodePtr& node){
+    QString nodeName;
+    if (node->name().isEmpty() == false)
+        nodeName = node->name();
+    else if (node->information())
+        nodeName = tr("Game Info");
+    else
+        nodeName = "node";
+
+    QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << nodeName);
+    return item;
 }
 
 /**
@@ -516,7 +546,7 @@ void MainWindow::on_boardTabWidget_currentChanged(QWidget* widget)
     // set undo stack of new current tab to active stack.
     undoGroup.setActiveStack( board->document()->undoStack() );
 
-    // activate branch view of new current tab
+    // activate branch widget of new current tab
     ui->branchStackedWidget->setCurrentWidget( docView[board->document()].branchWidget );
 
     // update view
@@ -551,13 +581,8 @@ void MainWindow::on_board_gameChanged(const Go::NodePtr& game){
     if (branch == NULL)
         return;
 
-//    branch->clear();
-    QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << "Game Info");
-    branch->addTopLevelItem(item);
-
-    QTreeWidgetItem* item2 = new QTreeWidgetItem(QStringList() << "Game Info AAA");
-    item->addChild(item2);
-
+    branch->clear();
+    createBranchItems(branch, game);
 }
 
 /**
