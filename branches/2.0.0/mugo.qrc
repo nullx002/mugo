@@ -1,0 +1,10 @@
+<RCC>
+    <qresource prefix="/">
+        <file>pics/mugo.png</file>
+        <file>res/green_64.png</file>
+        <file>res/black_128.png</file>
+        <file>res/black_128_ds.png</file>
+        <file>res/white_128.png</file>
+        <file>res/white_128_ds.png</file>
+    </qresource>
+</RCC>

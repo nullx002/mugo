@@ -22,6 +22,7 @@
 namespace Go{
 
 
+
 /**
   create black or white node
 */
@@ -33,6 +34,21 @@ NodePtr createStoneNode(Color color, int x, int y){
 
     return node;
 }
+
+/**
+  get coordinate string from xy position
+*/
+QString coordinateString(int xsize, int ysize, int x, int y, bool showI){
+    int len = 'Z' - 'A' + (showI ? 1 : 0);
+    int xx = 'A' + x % len;
+    if (showI == false && xx >= 'I')
+        ++xx;
+
+    QString str;
+    str.sprintf("%c%d", xx, ysize - y);
+    return str;
+}
+
 
 
 /**

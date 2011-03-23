@@ -82,9 +82,9 @@ protected:
 
     // view
     void updateView(const Go::NodePtr& node);
-    void createBranchItems(QTreeWidget* branch, const Go::NodePtr& node);
-    void createBranchItems(QTreeWidgetItem* parent, const Go::NodePtr& node);
-    QTreeWidgetItem* createBranchItem(const Go::NodePtr& node);
+    void createBranchItems(BoardWidget* board, QTreeWidget* branch, const Go::NodePtr& node);
+    void createBranchItems(BoardWidget* board, QTreeWidgetItem* parent, const Go::NodePtr& node, bool shouldCreateChild);
+    QTreeWidgetItem* createBranchItem(BoardWidget* board, const Go::NodePtr& node);
 
 private slots:
     // file menu
