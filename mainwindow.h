@@ -26,6 +26,7 @@
 class QFileInfo;
 class QTreeWidget;
 class QTreeWidgetItem;
+class QPlainTextEdit;
 
 namespace Ui {
     class MainWindow;
@@ -33,10 +34,11 @@ namespace Ui {
 
 class ViewData{
 public:
-    ViewData() : boardWidget(NULL), branchWidget(NULL){}
+    ViewData() : boardWidget(NULL), branchWidget(NULL), commentEdit(NULL){}
 
     BoardWidget* boardWidget;
     QTreeWidget* branchWidget;
+    QPlainTextEdit* commentEdit;
 };
 
 
@@ -81,7 +83,7 @@ protected:
     bool maybeSave(SgfDocument* doc);
 
     // view
-    void updateView(const Go::NodePtr& node);
+    void updateView(SgfDocument* doc);
     void createBranchItems(BoardWidget* board, QTreeWidget* branch, const Go::NodePtr& node);
     void createBranchItems(BoardWidget* board, QTreeWidgetItem* parent, const Go::NodePtr& node, bool shouldCreateChild);
     QTreeWidgetItem* createBranchItem(BoardWidget* board, const Go::NodePtr& node);
