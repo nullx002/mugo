@@ -254,6 +254,7 @@ bool MainWindow::createNewTab(Document* doc){
         // new tree widget
         QTreeWidget* branch = new QTreeWidget;
         branch->setHeaderHidden(true);
+        branch->setIndentation(17);
         ui->branchStackedWidget->addWidget(branch);
         data.branchWidget = branch;
 
@@ -428,32 +429,58 @@ void MainWindow::updateView(const Go::NodePtr& node){
 }
 
 /**
-  create tree items in branch widget
+  create tree items in branch view
 */
-void MainWindow::createBranchItems(QTreeWidget* branch, const Go::NodePtr& node){
-    QTreeWidgetItem* item = createBranchItem(node);
-    branch->addTopLevelItem(item);
-    foreach (const Go::NodePtr& child, node->children())
-        createBranchItems(item, child);
+void MainWindow::createBranchItems(BoardWidget* board, QTreeWidget* branch, const Go::NodePtr& game){
+    createBranchItems(board, branch->invisibleRootItem(), game, false);
 }
 
-void MainWindow::createBranchItems(QTreeWidgetItem* parent, const Go::NodePtr& node){
-    QTreeWidgetItem* item = createBranchItem(node);
+/**
+  create tree items in branch view
+*/
+void MainWindow::createBranchItems(BoardWidget* board, QTreeWidgetItem* parent, const Go::NodePtr& node, bool shouldCreateChild){
+    QTreeWidgetItem* item = createBranchItem(board, node);
     parent->addChild(item);
     foreach (const Go::NodePtr& child, node->children())
-        createBranchItems(parent, child);
+        if (shouldCreateChild || node->children().size() > 1)
+            createBranchItems(board, item, child, node->children().size() > 1);
+        else
+            createBranchItems(board, parent, child, false);
 }
 
-QTreeWidgetItem* MainWindow::createBranchItem(const Go::NodePtr& node){
-    QString nodeName;
-    if (node->name().isEmpty() == false)
-        nodeName = node->name();
-    else if (node->information())
-        nodeName = tr("Game Info");
-    else
-        nodeName = "node";
+/**
+  create tree item for branch view
+*/
+QTreeWidgetItem* MainWindow::createBranchItem(BoardWidget* board, const Go::NodePtr& node){
+    static QIcon green(":/res/green_64.png");
+    static QIcon black(":/res/black_128.png");
+    static QIcon white(":/res/white_128.png");
 
-    QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << nodeName);
+    QTreeWidgetItem* item = new QTreeWidgetItem();
+
+    // set node icon
+    if (node->color() == Go::eBlack)
+        item->setIcon(0, black);
+    else if (node->color() == Go::eWhite)
+        item->setIcon(0, white);
+    else
+        item->setIcon(0, green);
+
+    // set node name
+    QStringList nodeName;
+    if (node->isStone())
+        nodeName.push_back( Go::coordinateString(board->xsize(), board->ysize(), node->x(), node->y(), false) );
+    else if (node->information())
+        nodeName.push_back("Game Info");
+
+    if (node->name().isEmpty() == false)
+        nodeName.push_back(node->name());
+
+    if (node->comment().isEmpty() == false)
+        nodeName.push_back("Comment");
+
+    item->setText(0, nodeName.join(" "));
+
     return item;
 }
 
@@ -582,7 +609,7 @@ void MainWindow::on_board_gameChanged(const Go::NodePtr& game){
         return;
 
     branch->clear();
-    createBranchItems(branch, game);
+    createBranchItems(board, branch, game);
 }
 
 /**

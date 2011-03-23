@@ -24,3 +24,4 @@ HEADERS += mainwindow.h \
     filebase.h \
     sgf.h
 FORMS += mainwindow.ui
+RESOURCES += mugo.qrc

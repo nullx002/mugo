@@ -239,6 +239,7 @@ typedef Node::NodeList NodeList;
 
 
 NodePtr createStoneNode(Color color, int x, int y);
+QString coordinateString(int xsize, int ysize, int x, int y, bool showI = false);
 
 
 /**
