@@ -88,6 +88,7 @@ protected:
     void updateView(GoDocument* doc);
     void createBranchItems(BoardWidget* board, QTreeWidget* branch, const Go::NodePtr& node);
     void createBranchItems(BoardWidget* board, QTreeWidgetItem* parent, const Go::NodePtr& node, bool shouldCreateChild);
+    void addBranchItem(QTreeWidget* branch, const Go::NodePtr& node);
     QTreeWidgetItem* createBranchItem(BoardWidget* board, const Go::NodePtr& node);
 
 private slots:
@@ -115,6 +116,9 @@ private slots:
 
     /// @name slot for comment widget
     void on_commentEdit_textChanged();
+
+    /// @name slot for branch widget
+    void on_branchWidget_currentItemChanged(QTreeWidgetItem* current,QTreeWidgetItem* previous);
     //@}
 
 private:

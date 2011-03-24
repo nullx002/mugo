@@ -20,6 +20,7 @@
 
 #include <QObject>
 #include <QSharedPointer>
+#include <QMetaType>
 
 
 namespace Go{
@@ -173,7 +174,7 @@ public:
 
     // constructor, destructor
     Node();
-    Node(const NodePtr& parent);
+    Node(const NodePtr& parentNode);
     ~Node();
 
     // parent
@@ -256,7 +257,11 @@ Color Node::nextColor() const{
 }
 
 
+
 }
+
+
+Q_DECLARE_METATYPE(Go::NodePtr);
 
 
 #endif // GODATA_H

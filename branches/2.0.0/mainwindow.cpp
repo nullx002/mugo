@@ -29,6 +29,7 @@
 #include "sgf.h"
 #include "sgfcommand.h"
 
+
 /**
   Constructor
 */
@@ -194,7 +195,7 @@ bool MainWindow::closeDocument(GoDocument* doc){
 
     // delete views
     ViewData& view = docView[doc];
-   delete view.commentEdit;
+    delete view.commentEdit;
     delete view.branchWidget;
     delete view.boardWidget;
 
@@ -269,6 +270,7 @@ bool MainWindow::createNewTab(Document* doc){
 
         // new tree widget
         QTreeWidget* branch = new QTreeWidget;
+        connect(branch, SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)), SLOT(on_branchWidget_currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)));
         data.branchWidget = branch;
         branch->setHeaderHidden(true);
         branch->setIndentation(17);
@@ -447,6 +449,12 @@ void MainWindow::createBranchItems(BoardWidget* board, QTreeWidgetItem* parent, 
 }
 
 /**
+  add tree item in branch view
+*/
+void MainWindow::addBranchItem(QTreeWidget* branch, const Go::NodePtr& node){
+}
+
+/**
   create tree item for branch view
 */
 QTreeWidgetItem* MainWindow::createBranchItem(BoardWidget* board, const Go::NodePtr& node){
@@ -478,6 +486,9 @@ QTreeWidgetItem* MainWindow::createBranchItem(BoardWidget* board, const Go::Node
         nodeName.push_back("Comment");
 
     item->setText(0, nodeName.join(" "));
+
+    // set node to tree item data
+    item->setData(0, Qt::UserRole, QVariant::fromValue<Go::NodePtr>(node));
 
     return item;
 }
@@ -575,6 +586,15 @@ void MainWindow::on_actionExit_triggered()
 */
 void MainWindow::on_sgfDocument_nodeAdded(const Go::NodePtr& node)
 {
+    // get document
+    GoDocument* doc = qobject_cast<GoDocument*>(sender());
+    if (doc == NULL)
+        return;
+
+    // get tree widget
+    QTreeWidget* branch = docView[doc].branchWidget;
+
+    addBranchItem(branch, node);
 }
 
 /**
@@ -697,4 +717,26 @@ void MainWindow::on_commentEdit_textChanged()
         lastCommentCommand->setComment(view.commentEdit->toPlainText());
 
     lastCommentNode = view.boardWidget->currentNode().data();
+}
+
+/**
+  current item was changed in branch view
+*/
+void MainWindow::on_branchWidget_currentItemChanged(QTreeWidgetItem* current,QTreeWidgetItem* previous){
+    // find sender's document
+    Document* doc = NULL;
+    DocViewData::const_iterator iter = docView.begin();
+    while (iter != docView.end()){
+        if (iter->branchWidget == sender()){
+            doc = iter.key();
+            break;
+        }
+        ++iter;
+    }
+
+    if (doc == NULL)
+        return;
+
+    Go::NodePtr node = current->data(0, Qt::UserRole).value<Go::NodePtr>();
+    docView[doc].boardWidget->setNode(node);
 }

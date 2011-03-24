@@ -78,8 +78,8 @@ Node::Node()
   Constructs empty node with parent.
 
 */
-Node::Node(const NodePtr& parent)
-    : parent_(parent)
+Node::Node(const NodePtr& parentNode)
+    : parent_(parentNode)
     , color_(eDame)
     , nextColor_(eDame)
     , moveNumber_(-1)
