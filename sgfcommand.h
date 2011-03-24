@@ -23,35 +23,41 @@
 #include <QUndoCommand>
 #include "godata.h"
 
-class SgfDocument;
+class GoDocument;
 
 
 /**
+  @defgroup Command
+*/
+
+/**
+  @ingroup Command
   This command creates new node in paretNode
 */
 class AddNodeCommand : public QUndoCommand{
     Q_DECLARE_TR_FUNCTIONS(AddNodeCommand)
 
 public:
-    AddNodeCommand(SgfDocument* doc, Go::NodePtr parentNode, Go::NodePtr node, int index, QUndoCommand* parent = 0);
+    AddNodeCommand(GoDocument* doc, Go::NodePtr parentNode, Go::NodePtr node, int index, QUndoCommand* parent = 0);
     virtual void redo();
     virtual void undo();
 
 private:
-    SgfDocument* document_;
+    GoDocument* document_;
     Go::NodePtr parentNode_;
     Go::NodePtr node_;
     int index_;
 };
 
 /**
+  @ingroup Command
   This command sets comment to specified node
 */
 class SetCommentCommand : public QUndoCommand{
     Q_DECLARE_TR_FUNCTIONS(AddNodeCommand)
 
 public:
-    SetCommentCommand(SgfDocument* doc, Go::NodePtr node, const QString& comment, QUndoCommand* parent = 0);
+    SetCommentCommand(GoDocument* doc, Go::NodePtr node, const QString& comment, QUndoCommand* parent = 0);
     virtual void redo();
     virtual void undo();
 
@@ -59,7 +65,7 @@ public:
     const QString& comment() const{ return comment_; }
 
 private:
-    SgfDocument* document_;
+    GoDocument* document_;
     Go::NodePtr node_;
     QString comment_;
     QString prevComment_;

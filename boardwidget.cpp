@@ -35,7 +35,7 @@ BoardWidget::BoardWidget(QWidget* parent) :
 /**
   Constructor
 */
-BoardWidget::BoardWidget(SgfDocument* doc, QWidget* parent) :
+BoardWidget::BoardWidget(GoDocument* doc, QWidget* parent) :
     QGraphicsView(parent),
     document_(doc),
     editMode_(eAlternateMove)
@@ -114,7 +114,7 @@ void BoardWidget::onRButtonUp(QMouseEvent* e){
 /**
   set current document
 */
-bool BoardWidget::setDocument(SgfDocument* doc){
+bool BoardWidget::setDocument(GoDocument* doc){
     document_ = doc;
     connect(document_, SIGNAL(nodeAdded(const Go::NodePtr&)), SLOT(on_document_nodeAdded(const Go::NodePtr&)));
     connect(document_, SIGNAL(nodeDeleted(const Go::NodePtr&)), SLOT(on_document_nodeDeleted(const Go::NodePtr&)));

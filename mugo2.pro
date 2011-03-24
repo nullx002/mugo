@@ -13,7 +13,8 @@ SOURCES += main.cpp \
     godata.cpp \
     sgfcommand.cpp \
     filebase.cpp \
-    sgf.cpp
+    sgf.cpp \
+    godocument.cpp
 HEADERS += mainwindow.h \
     boardwidget.h \
     document.h \
@@ -22,6 +23,7 @@ HEADERS += mainwindow.h \
     godata.h \
     sgfcommand.h \
     filebase.h \
-    sgf.h
+    sgf.h \
+    godocument.h
 FORMS += mainwindow.ui
 RESOURCES += mugo.qrc
