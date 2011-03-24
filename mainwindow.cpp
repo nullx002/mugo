@@ -734,6 +734,7 @@ void MainWindow::on_branchWidget_currentItemChanged(QTreeWidgetItem* current,QTr
         ++iter;
     }
 
+    // document isn't found
     if (doc == NULL)
         return;
 
