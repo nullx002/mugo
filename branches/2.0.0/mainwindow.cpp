@@ -737,6 +737,7 @@ void MainWindow::on_branchWidget_currentItemChanged(QTreeWidgetItem* current,QTr
     if (doc == NULL)
         return;
 
+    // select node no board widget
     Go::NodePtr node = current->data(0, Qt::UserRole).value<Go::NodePtr>();
     docView[doc].boardWidget->setNode(node);
 }
