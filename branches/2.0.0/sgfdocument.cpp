@@ -16,78 +16,53 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include "sgfdocument.h"
+#include "sgf.h"
 
 /**
-    Constructs sgf document
+  Constructs of sgf document
+*/
+SgfDocument::SgfDocument(QObject* parent)
+    : GoDocument(parent)
+{
+}
+
+/**
+  Constructs of sgf document
+*/
+SgfDocument::SgfDocument(Go::NodeList& gameList, QObject* parent)
+    : GoDocument(gameList, parent)
+{
+}
+
+/**
+  Constructs of sgf document
 */
 SgfDocument::SgfDocument(int xsize, int ysize, qreal komi, int handicap, QObject* parent)
-    : Document(parent)
-{
-    // create game information
-    Go::InformationPtr info(new Go::Information);
-    info->setXSize(xsize);
-    info->setYSize(ysize);
-    info->setKomi(komi);
-    info->setHandicap(handicap);
-
-    // create game node
-    Go::NodePtr game(new Go::Node);
-    game->setInformation(info);
-    game->setNextColor(Go::eBlack);
-
-    // add game into game list
-    gameList.push_back(game);
-}
-
-/**
-    Constructs sgf document
-*/
-SgfDocument::SgfDocument(Go::NodeList& gameList_, QObject* parent)
-    : Document(parent)
-    , gameList(gameList_)
+    : GoDocument(xsize, ysize, komi, handicap, parent)
 {
 }
 
 /**
-  add node
+  open sgf document from file
 */
-void SgfDocument::addNode(Go::NodePtr parent, Go::NodePtr node, int index){
-    if (index < 0)
-        parent->children().push_back(node);
-    else
-        parent->children().insert(parent->children().begin()+index, node);
-    node->setParent(parent);
+bool SgfDocument::open(const QString& fname, QTextCodec* codec, bool guessCodec){
+    Go::NodeList gl;
+    Go::Sgf sgf(gl);
+    if (sgf.load(fname, codec, guessCodec) == false)
+        return false;
 
-    setDirty();
-    emit nodeAdded(node);
+    gameList = gl;
+    return GoDocument::open(fname, codec, guessCodec);
 }
 
 /**
-  delete node
+  save sgf document to file
 */
-void SgfDocument::deleteNode(Go::NodePtr node, bool removeChildren){
-    Go::NodePtr parent = node->parent();
-    if (!parent)
-        return;
+bool SgfDocument::save(const QString& fname, QTextCodec* codec){
+    QTextCodec* c = codec ? codec : this->codec();
+    Go::Sgf sgf(gameList);
+    if (sgf.save(fname, c) == false)
+        return false;
 
-    if (removeChildren)
-        parent->children().removeOne(node);
-    else{
-        Go::NodeList::iterator before = qFind(parent->children().begin(), parent->children().end(), node);
-        foreach(Go::NodePtr child, node->children()){
-            child->setParent(parent);
-            parent->children().insert(before, child);
-        }
-    }
-
-    setDirty();
-    emit nodeDeleted(node);
-}
-
-/**
-  modify node
-*/
-void SgfDocument::modifyNode(Go::NodePtr node){
-    setDirty();
-    emit nodeModified(node);
+    return GoDocument::save(fname, c);
 }

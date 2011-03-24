@@ -92,7 +92,7 @@ void MainWindow::closeEvent(QCloseEvent* e){
   create new document in new tab
 */
 bool MainWindow::fileNew(QTextCodec* codec, int xsize, int ysize, double komi, int handicap){
-    SgfDocument* doc = new SgfDocument(xsize, ysize, komi, handicap, this);
+    GoDocument* doc = new GoDocument(xsize, ysize, komi, handicap, this);
     doc->setName( tr("Untitled-%1").arg(++docID) );
     createNewTab(doc);
 
@@ -119,9 +119,17 @@ bool MainWindow::fileOpen(const QString& fname, QTextCodec* codec, bool guessCod
         codec = mugoApp()->defaultCodec();
 
     // open document if document isn't opened.
-    SgfDocument* doc = readSgfDocument(fname, codec, guessCodec);
-    if (doc == NULL)
-        return false;
+    QFileInfo info(fname);
+    QString ext = info.suffix().toLower();
+
+    GoDocument* doc = NULL;
+    if (ext.compare("sgf") == 0){
+        doc = new SgfDocument(this);
+        if (doc->open(fname, codec, guessCodec) == false){
+            delete doc;
+            return false;
+        }
+    }
 
     // show document in new tab
     createNewTab(doc);
@@ -138,7 +146,7 @@ bool MainWindow::fileOpen(const QString& fname, QTextCodec* codec, bool guessCod
   overwrite save.
   if document isn't saved, call save as and show save dialog.
 */
-bool MainWindow::fileSave(SgfDocument* doc){
+bool MainWindow::fileSave(GoDocument* doc){
     if (doc->fileInfo().suffix() != "sgf")
         return fileSaveAs(doc);
     else
@@ -148,7 +156,7 @@ bool MainWindow::fileSave(SgfDocument* doc){
 /**
   show file save dialog, and save document
 */
-bool MainWindow::fileSaveAs(SgfDocument* doc){
+bool MainWindow::fileSaveAs(GoDocument* doc){
     // initial path for save dialog
     QString initialPath;
     QFileInfo fi = doc->fileInfo();
@@ -175,15 +183,8 @@ bool MainWindow::fileSaveAs(SgfDocument* doc){
 /**
   save document with file name
 */
-bool MainWindow::fileSaveAs(SgfDocument* doc, const QFileInfo& fileInfo){
-    Go::Sgf sgf(doc->gameList);
-    if (sgf.save(fileInfo, doc->codec()) == false)
-        return false;
-
-    doc->setDirty(false);
-    doc->setFileInfo(fileInfo);
-
-    return true;
+bool MainWindow::fileSaveAs(GoDocument* doc, const QFileInfo& fileInfo){
+    return doc->save(fileInfo.filePath());
 }
 
 /**
@@ -390,28 +391,9 @@ bool MainWindow::getSaveFileName(const QString& initialPath, QString& fname, QTe
 }
 
 /**
-  read sgf file
-*/
-SgfDocument* MainWindow::readSgfDocument(const QString& fname, QTextCodec* codec, bool guessCodec){
-    QFileInfo info(fname);
-    QString ext = info.suffix().toLower();
-
-    Go::NodeList gameList;
-    if (ext.compare("sgf") == 0){
-        Go::Sgf sgf(gameList);
-        sgf.load(fname, codec, guessCodec);
-        SgfDocument* doc = new SgfDocument(gameList, this);
-        doc->setFileInfo(QFileInfo(fname));
-        return doc;
-    }
-
-    return NULL;
-}
-
-/**
  maybe save
 */
-bool MainWindow::maybeSave(SgfDocument* doc){
+bool MainWindow::maybeSave(GoDocument* doc){
     if (doc->dirty() == false)
         return true;
 
@@ -430,7 +412,7 @@ bool MainWindow::maybeSave(SgfDocument* doc){
 /**
   udpate all views by node information
 */
-void MainWindow::updateView(SgfDocument* doc){
+void MainWindow::updateView(GoDocument* doc){
     ViewData& view = docView[doc];
     if (view.commentEdit->toPlainText() != view.boardWidget->currentNode()->comment())
         view.commentEdit->setPlainText(view.boardWidget->currentNode()->comment());

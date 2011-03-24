@@ -22,7 +22,7 @@
 /**
   Constructs add node command
 */
-AddNodeCommand::AddNodeCommand(SgfDocument* doc, Go::NodePtr parentNode, Go::NodePtr node, int index, QUndoCommand* parent)
+AddNodeCommand::AddNodeCommand(GoDocument* doc, Go::NodePtr parentNode, Go::NodePtr node, int index, QUndoCommand* parent)
     : QUndoCommand(parent)
     , document_(doc)
     , parentNode_(parentNode)
@@ -52,7 +52,7 @@ void AddNodeCommand::undo(){
 /**
   Constructs set comment command
 */
-SetCommentCommand::SetCommentCommand(SgfDocument* doc, Go::NodePtr node, const QString& comment, QUndoCommand* parent)
+SetCommentCommand::SetCommentCommand(GoDocument* doc, Go::NodePtr node, const QString& comment, QUndoCommand* parent)
     : QUndoCommand(parent)
     , document_(doc)
     , node_(node)

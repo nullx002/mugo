@@ -56,7 +56,7 @@ signals:
 
 public slots:
 
-private:
+protected:
     QUndoStack undoStack_;
     QString name_;
     QFileInfo fileInfo_;

@@ -18,33 +18,32 @@
 #ifndef SGFDOCUMENT_H
 #define SGFDOCUMENT_H
 
-#include "document.h"
-#include "godata.h"
+#include "godocument.h"
 
 
 /**
-  sgf document
+  document class of sgf format
 */
-class SgfDocument : public Document
+class SgfDocument : public GoDocument
 {
     Q_OBJECT
 public:
     // constructor
-    SgfDocument(int xsize=19, int ysize=19, qreal komi=6.5, int handicap=0, QObject* parent = 0);
+    SgfDocument(QObject* parent = 0);
     SgfDocument(Go::NodeList& gameList, QObject* parent = 0);
+    SgfDocument(int xsize=19, int ysize=19, qreal komi=6.5, int handicap=0, QObject* parent = 0);
+
+    // open
+    virtual bool open(const QString& fname, QTextCodec* codec, bool guessCodec);
+
+    // save
+    virtual bool save(const QString& fname, QTextCodec* codec=NULL);
 
 signals:
-    void nodeAdded(Go::NodePtr node);
-    void nodeDeleted(Go::NodePtr node);
-    void nodeModified(Go::NodePtr node);
 
 public slots:
-    void addNode(const Go::NodePtr parent, Go::NodePtr node, int index=-1);
-    void deleteNode(Go::NodePtr node, bool removeChildren=true);
-    void modifyNode(Go::NodePtr node);
 
 public:
-    Go::NodeList gameList;
 };
 
 #endif // SGFDOCUMENT_H

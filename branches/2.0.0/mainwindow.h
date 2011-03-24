@@ -57,9 +57,9 @@ public slots:
     // new, open, save, close
     bool fileNew(QTextCodec* codec=NULL, int xsize=19, int ysize=19, double komi=6.5, int handicap=0);
     bool fileOpen(const QString& fname, QTextCodec* codec=NULL, bool guessCodec=true, bool newTab=true);
-    bool fileSave(SgfDocument* doc);
-    bool fileSaveAs(SgfDocument* doc);
-    bool fileSaveAs(SgfDocument* doc, const QFileInfo& fileInfo);
+    bool fileSave(GoDocument* doc);
+    bool fileSaveAs(GoDocument* doc);
+    bool fileSaveAs(GoDocument* doc, const QFileInfo& fileInfo);
 
 protected:
     void changeEvent(QEvent* e);
@@ -75,15 +75,12 @@ protected:
     bool getOpenFileName(QString& fname, QTextCodec*& codec);
     bool getSaveFileName(const QString& initialPath, QString& fname, QTextCodec*& codec);
 
-    // read
-    SgfDocument* readSgfDocument(const QString& fname, QTextCodec* codec, bool guessCodec);
-
     // save
     bool closeTab(BoardWidget* board);
-    bool maybeSave(SgfDocument* doc);
+    bool maybeSave(GoDocument* doc);
 
     // view
-    void updateView(SgfDocument* doc);
+    void updateView(GoDocument* doc);
     void createBranchItems(BoardWidget* board, QTreeWidget* branch, const Go::NodePtr& node);
     void createBranchItems(BoardWidget* board, QTreeWidgetItem* parent, const Go::NodePtr& node, bool shouldCreateChild);
     QTreeWidgetItem* createBranchItem(BoardWidget* board, const Go::NodePtr& node);

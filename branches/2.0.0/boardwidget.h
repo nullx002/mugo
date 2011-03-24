@@ -21,7 +21,7 @@
 #include <math.h>
 #include <QGraphicsView>
 #include <QGraphicsRectItem>
-#include "sgfdocument.h"
+#include "godocument.h"
 
 /**
   GraphicsView of Goban
@@ -43,11 +43,11 @@ public:
 
     // constructor
     explicit BoardWidget(QWidget *parent = 0);
-    explicit BoardWidget(SgfDocument* doc, QWidget *parent = 0);
+    explicit BoardWidget(GoDocument* doc, QWidget *parent = 0);
 
     // document
-    const SgfDocument* document() const{ return document_; }
-    SgfDocument* document(){ return document_; }
+    const GoDocument* document() const{ return document_; }
+    GoDocument* document(){ return document_; }
 
     // get current game, node
     Go::NodePtr currentGame() const{ return currentGame_; }
@@ -60,13 +60,13 @@ public:
     int ysize() const { return rootInformation_->ysize(); }
 
 signals:
-    void documentChanged(SgfDocument* doc);
+    void documentChanged(GoDocument* doc);
     void gameChanged(const Go::NodePtr& game);
     void informationChanged(const Go::InformationPtr& information);
     void nodeChanged(const Go::NodePtr& node);
 
 public slots:
-    bool setDocument(SgfDocument* doc);
+    bool setDocument(GoDocument* doc);
     bool setGame(const Go::NodePtr& game);
     bool setInformation(const Go::InformationPtr& information);
     bool setNode(const Go::NodePtr& node);
@@ -119,7 +119,7 @@ protected:
     void back(int step=1);
     void forward(int step=1);
 
-    SgfDocument* document_;
+    GoDocument* document_;
     Go::NodePtr currentGame_;
     Go::InformationPtr rootInformation_;
     Go::InformationPtr currentInformation_;
