@@ -92,7 +92,7 @@ void MainWindow::closeEvent(QCloseEvent* e){
   create new document in new tab
 */
 bool MainWindow::fileNew(QTextCodec* codec, int xsize, int ysize, double komi, int handicap){
-    GoDocument* doc = new GoDocument(xsize, ysize, komi, handicap, this);
+    SgfDocument* doc = new SgfDocument(xsize, ysize, komi, handicap, this);
     doc->setName( tr("Untitled-%1").arg(++docID) );
     createNewTab(doc);
 
