@@ -42,6 +42,9 @@ public:
 };
 
 
+/**
+  Main Window
+*/
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -54,58 +57,65 @@ public:
     ~MainWindow();
 
 public slots:
-    // new, open, save, close
+    /// @name new, open, save, close
     bool fileNew(QTextCodec* codec=NULL, int xsize=19, int ysize=19, double komi=6.5, int handicap=0);
     bool fileOpen(const QString& fname, QTextCodec* codec=NULL, bool guessCodec=true, bool newTab=true);
     bool fileSave(GoDocument* doc);
     bool fileSaveAs(GoDocument* doc);
     bool fileSaveAs(GoDocument* doc, const QFileInfo& fileInfo);
+    bool closeDocument(GoDocument* doc);
+    bool closeAllDocuments();
 
 protected:
+    /// @name event
     void changeEvent(QEvent* e);
     void closeEvent(QCloseEvent* e);
 
-    // initialize
+    /// @name initialize
     void initializeMenu();
 
-    // create new tab
+    /// @name create new tab
     bool createNewTab(Document* doc);
 
-    // file dialog
+    /// @name file dialog
     bool getOpenFileName(QString& fname, QTextCodec*& codec);
     bool getSaveFileName(const QString& initialPath, QString& fname, QTextCodec*& codec);
 
-    // save
-    bool closeTab(BoardWidget* board);
+    /// @name save
     bool maybeSave(GoDocument* doc);
 
-    // view
+    /// @name view
     void updateView(GoDocument* doc);
     void createBranchItems(BoardWidget* board, QTreeWidget* branch, const Go::NodePtr& node);
     void createBranchItems(BoardWidget* board, QTreeWidgetItem* parent, const Go::NodePtr& node, bool shouldCreateChild);
     QTreeWidgetItem* createBranchItem(BoardWidget* board, const Go::NodePtr& node);
 
 private slots:
-    // file menu
-    void on_actionSaveAs_triggered();
-    void on_actionSave_triggered();
+    //@{
+    /// @name slot for file menu
     void on_actionNew_triggered();
     void on_actionOpen_triggered();
+    void on_actionCloseTab_triggered();
+    void on_actionCloseAllTabs_triggered();
+    void on_actionSave_triggered();
+    void on_actionSaveAs_triggered();
     void on_actionExit_triggered();
 
-    // document
+    /// @name slot for document
+    void on_sgfDocument_nodeAdded(const Go::NodePtr& node);
     void on_sgfDocument_nodeModified(const Go::NodePtr& node);
 
-    // board tab widget
+    /// @name slot for board tab widget
     void on_boardTabWidget_tabCloseRequested(int index);
     void on_boardTabWidget_currentChanged(QWidget*);
 
-    // board widget
+    /// @name slot for board widget
     void on_board_gameChanged(const Go::NodePtr& game);
     void on_board_nodeChanged(const Go::NodePtr& node);
 
-    // comment widget
+    /// @name slot for comment widget
     void on_commentEdit_textChanged();
+    //@}
 
 private:
     Ui::MainWindow *ui;
