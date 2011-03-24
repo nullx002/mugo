@@ -78,14 +78,10 @@ void MainWindow::changeEvent(QEvent *e)
   close event
 */
 void MainWindow::closeEvent(QCloseEvent* e){
-    for (int i=0; i<ui->boardTabWidget->count(); ++i){
-        BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->widget(i));
-        if (maybeSave(board->document()) == false){
-            e->ignore();
-            return;
-        }
-    }
-    e->accept();
+    if (closeAllDocuments())
+        e->accept();
+    else
+        e->ignore();
 }
 
 /**
@@ -115,6 +111,7 @@ bool MainWindow::fileOpen(const QString& fname, QTextCodec* codec, bool guessCod
         ++iter;
     }
 
+    // if codec isn't designated, use default codec of application
     if (codec == NULL)
         codec = mugoApp()->defaultCodec();
 
@@ -188,28 +185,38 @@ bool MainWindow::fileSaveAs(GoDocument* doc, const QFileInfo& fileInfo){
 }
 
 /**
-  close tab.
+  close document.
   save document before close if need.
 */
-bool MainWindow::closeTab(BoardWidget* board){
-    if (maybeSave(board->document()) == true){
-        // remove document and view datas.
-        Document* doc = board->document();
-//        ViewData& view = docView[doc];
-        docView.remove(doc);
+bool MainWindow::closeDocument(GoDocument* doc){
+    if (maybeSave(doc) == false)
+        return false;
 
-        // remove view
-//        int index = ui->boardTabWidget->indexOf(board);
-//        ui->boardTabWidget->removeTab(index);
-        delete board;
+    // delete views
+    ViewData& view = docView[doc];
+   delete view.commentEdit;
+    delete view.branchWidget;
+    delete view.boardWidget;
 
-        // remove doc
-        undoGroup.setActiveStack(0);
-        delete doc;
+    // delete document
+    undoGroup.setActiveStack(0);
+    docView.remove(doc);
+    delete doc;
 
-        return true;
+    return true;
+}
+
+/**
+  close all documents
+*/
+bool MainWindow::closeAllDocuments(){
+    while (ui->boardTabWidget->count()){
+        BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->widget(0));
+        if (closeDocument(board->document()) == false)
+            return false;
     }
-    return false;
+
+    return true;
 }
 
 /**
@@ -250,6 +257,7 @@ void MainWindow::initializeMenu(){
 bool MainWindow::createNewTab(Document* doc){
     SgfDocument* sgfDoc = qobject_cast<SgfDocument*>(doc);
     if (sgfDoc){
+        connect(sgfDoc, SIGNAL(nodeAdded(const Go::NodePtr&)), SLOT(on_sgfDocument_nodeAdded(const Go::NodePtr&)));
         connect(sgfDoc, SIGNAL(nodeModified(const Go::NodePtr&)), SLOT(on_sgfDocument_nodeModified(const Go::NodePtr&)));
         ViewData& data = docView[doc];
 
@@ -475,6 +483,7 @@ QTreeWidgetItem* MainWindow::createBranchItem(BoardWidget* board, const Go::Node
 }
 
 /**
+  File -> New
   create new document in new tab
 */
 void MainWindow::on_actionNew_triggered()
@@ -483,6 +492,7 @@ void MainWindow::on_actionNew_triggered()
 }
 
 /**
+  File -> Open
   open document in new tab
 */
 void MainWindow::on_actionOpen_triggered()
@@ -496,7 +506,33 @@ void MainWindow::on_actionOpen_triggered()
 }
 
 /**
-  save document
+  File -> Close Tab
+  close active tab
+*/
+void MainWindow::on_actionCloseTab_triggered()
+{
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // close active tab
+    closeDocument(board->document());
+}
+
+/**
+  File -> Close All Tab
+  close all tab
+*/
+void MainWindow::on_actionCloseAllTabs_triggered()
+{
+    // close all tab
+    closeAllDocuments();
+}
+
+/**
+  File -> Save
+  save the document of active tab to file
 */
 void MainWindow::on_actionSave_triggered()
 {
@@ -510,7 +546,8 @@ void MainWindow::on_actionSave_triggered()
 }
 
 /**
-  save as document
+  File -> Save As
+  save the document of active tab to the specified file
 */
 void MainWindow::on_actionSaveAs_triggered()
 {
@@ -524,12 +561,20 @@ void MainWindow::on_actionSaveAs_triggered()
 }
 
 /**
+  File -> Exit
   exit application
 */
 void MainWindow::on_actionExit_triggered()
 {
     // window close
     close();
+}
+
+/**
+  node added
+*/
+void MainWindow::on_sgfDocument_nodeAdded(const Go::NodePtr& node)
+{
 }
 
 /**
@@ -584,7 +629,7 @@ void MainWindow::on_boardTabWidget_tabCloseRequested(int index)
         return;
 
     // close requested tab
-    closeTab(board);
+    closeDocument(board->document());
 }
 
 /**
