@@ -431,37 +431,43 @@ void MainWindow::updateView(GoDocument* doc){
 /**
   create tree items in branch view
 */
-void MainWindow::createBranchItems(BoardWidget* board, QTreeWidget* branch, const Go::NodePtr& game){
-    createBranchItems(board, branch->invisibleRootItem(), game, false);
+void MainWindow::createBranchItems(Document* doc, QTreeWidget* branch, const Go::NodePtr& game){
+    createBranchItems(doc, branch->invisibleRootItem(), game, false);
 }
 
 /**
   create tree items in branch view
 */
-void MainWindow::createBranchItems(BoardWidget* board, QTreeWidgetItem* parent, const Go::NodePtr& node, bool shouldCreateChild){
-    QTreeWidgetItem* item = createBranchItem(board, node);
+void MainWindow::createBranchItems(Document* doc, QTreeWidgetItem* parent, const Go::NodePtr& node, bool shouldCreateChild){
+    QTreeWidgetItem* item = createBranchItem(doc, node);
     parent->addChild(item);
     foreach (const Go::NodePtr& child, node->children())
         if (shouldCreateChild || node->children().size() > 1)
-            createBranchItems(board, item, child, node->children().size() > 1);
+            createBranchItems(doc, item, child, node->children().size() > 1);
         else
-            createBranchItems(board, parent, child, false);
+            createBranchItems(doc, parent, child, false);
 }
 
 /**
   add tree item in branch view
 */
-void MainWindow::addBranchItem(QTreeWidget* branch, const Go::NodePtr& node){
+void MainWindow::addBranchItem(Document* doc, QTreeWidget* branch, const Go::NodePtr& node){
+    Go::NodePtr parentNode = node->parent();
+    if (parentNode->children().size() > 1){
+    }
+    else{
+    }
 }
 
 /**
   create tree item for branch view
 */
-QTreeWidgetItem* MainWindow::createBranchItem(BoardWidget* board, const Go::NodePtr& node){
+QTreeWidgetItem* MainWindow::createBranchItem(Document* doc, const Go::NodePtr& node){
     static QIcon green(":/res/green_64.png");
     static QIcon black(":/res/black_128.png");
     static QIcon white(":/res/white_128.png");
 
+    ViewData& view = docView[doc];
     QTreeWidgetItem* item = new QTreeWidgetItem();
 
     // set node icon
@@ -475,7 +481,7 @@ QTreeWidgetItem* MainWindow::createBranchItem(BoardWidget* board, const Go::Node
     // set node name
     QStringList nodeName;
     if (node->isStone())
-        nodeName.push_back( Go::coordinateString(board->xsize(), board->ysize(), node->x(), node->y(), false) );
+        nodeName.push_back( Go::coordinateString(view.boardWidget->xsize(), view.boardWidget->ysize(), node->x(), node->y(), false) );
     else if (node->information())
         nodeName.push_back("Game Info");
 
@@ -489,6 +495,7 @@ QTreeWidgetItem* MainWindow::createBranchItem(BoardWidget* board, const Go::Node
 
     // set node to tree item data
     item->setData(0, Qt::UserRole, QVariant::fromValue<Go::NodePtr>(node));
+    view.nodeToTreeItem[node] = item;
 
     return item;
 }
@@ -594,7 +601,7 @@ void MainWindow::on_sgfDocument_nodeAdded(const Go::NodePtr& node)
     // get tree widget
     QTreeWidget* branch = docView[doc].branchWidget;
 
-    addBranchItem(branch, node);
+    addBranchItem(doc, branch, node);
 }
 
 /**
@@ -667,7 +674,7 @@ void MainWindow::on_board_gameChanged(const Go::NodePtr& game){
         return;
 
     branch->clear();
-    createBranchItems(board, branch, game);
+    createBranchItems(board->document(), branch, game);
 }
 
 /**
