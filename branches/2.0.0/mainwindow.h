@@ -39,6 +39,7 @@ public:
     BoardWidget* boardWidget;
     QTreeWidget* branchWidget;
     QPlainTextEdit* commentEdit;
+    QMap<Go::NodePtr, QTreeWidgetItem*> nodeToTreeItem;
 };
 
 
@@ -86,10 +87,10 @@ protected:
 
     /// @name view
     void updateView(GoDocument* doc);
-    void createBranchItems(BoardWidget* board, QTreeWidget* branch, const Go::NodePtr& node);
-    void createBranchItems(BoardWidget* board, QTreeWidgetItem* parent, const Go::NodePtr& node, bool shouldCreateChild);
-    void addBranchItem(QTreeWidget* branch, const Go::NodePtr& node);
-    QTreeWidgetItem* createBranchItem(BoardWidget* board, const Go::NodePtr& node);
+    void createBranchItems(Document* doc, QTreeWidget* branch, const Go::NodePtr& node);
+    void createBranchItems(Document* doc, QTreeWidgetItem* parent, const Go::NodePtr& node, bool shouldCreateChild);
+    void addBranchItem(Document* doc, QTreeWidget* branch, const Go::NodePtr& node);
+    QTreeWidgetItem* createBranchItem(Document* doc, const Go::NodePtr& node);
 
 private slots:
     //@{
