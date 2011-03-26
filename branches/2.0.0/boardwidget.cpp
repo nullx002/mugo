@@ -24,10 +24,11 @@
 /**
   Constructor
 */
-BoardWidget::BoardWidget(QWidget* parent) :
-    QGraphicsView(parent),
-    document_(NULL),
-    editMode_(eAlternateMove)
+BoardWidget::BoardWidget(QWidget* parent)
+    : QGraphicsView(parent)
+    , document_(NULL)
+    , editMode_(eAlternateMove)
+    , showVariation_(true)
 {
     initialize();
 }
@@ -35,10 +36,11 @@ BoardWidget::BoardWidget(QWidget* parent) :
 /**
   Constructor
 */
-BoardWidget::BoardWidget(GoDocument* doc, QWidget* parent) :
-    QGraphicsView(parent),
-    document_(doc),
-    editMode_(eAlternateMove)
+BoardWidget::BoardWidget(GoDocument* doc, QWidget* parent)
+    : QGraphicsView(parent)
+    , document_(doc)
+    , editMode_(eAlternateMove)
+    , showVariation_(true)
 {
     initialize();
 
@@ -342,13 +344,24 @@ void BoardWidget::createBoardBuffer(){
         ++iter;
     }
 
+    // create graphics items
     for(int y=0; y<ysize(); ++y){
         for(int x=0; x<xsize(); ++x){
+            // delete branch marker
+            if (data[y][x].branch){
+                delete data[y][x].branch;
+                data[y][x].branch = NULL;
+            }
+
+            // if this position already has stone, continue
             if (buffer[y][x] == data[y][x].color)
                 continue;
 
-            if (data[y][x].stone)
+            // delete current stone
+            if (data[y][x].stone){
                 delete data[y][x].stone;
+                data[y][x].stone = NULL;
+            }
             data[y][x].color = buffer[y][x];
 
             if (buffer[y][x] != Go::eDame){
@@ -359,10 +372,11 @@ void BoardWidget::createBoardBuffer(){
 
                 data[y][x].stone = stone;
             }
-            else
-                data[y][x].stone = NULL;
         }
     }
+
+    // create graphics items of branch marker
+    createBranchMarkers();
 }
 
 /**
@@ -525,6 +539,74 @@ QGraphicsItem* BoardWidget::createStoneItem(Go::Color color, int sgfX, int sgfY)
     scene()->addItem(stone);
 
     return stone;
+}
+
+/**
+  create branch markers
+*/
+void BoardWidget::createBranchMarkers(){
+    if (showVariation_ == false)
+        return;
+
+    if (rootInformation_->variationStyle() == 0)
+        createChildBranchMarkers();
+    else if (rootInformation_->variationStyle() == 1)
+        createSiblingsranchMarkers();
+}
+
+/**
+  show variations of successor node (children)
+*/
+void BoardWidget::createChildBranchMarkers(){
+    char c = 'A';
+    foreach(const Go::NodePtr& node, currentNode_->children()){
+        // create text item
+        QString str(c);
+        QGraphicsSimpleTextItem* branch = scene()->addSimpleText(str);
+        branch->setZValue(4);
+        data[node->y()][node->x()].branch = branch;
+
+        // set item position
+        qreal x, y;
+        if (sgfToViewCoordinate(node->x(), node->y(), x, y) == false)
+            return;
+        branch->setPos(x-branch->boundingRect().size().width()/2.0, y-branch->boundingRect().size().height()/2.0);
+
+        ++c;
+    }
+}
+
+/**
+  show variations of current node (siblings)
+*/
+void BoardWidget::createSiblingsranchMarkers(){
+    // if current is root node, can't show variations
+    Go::NodePtr parent = currentNode_->parent();
+    if (!parent)
+        return;
+
+    char c = 'A';
+    foreach(const Go::NodePtr& node, parent->children()){
+        // current node is not shown
+        if (node == currentNode_){
+            ++c;
+            continue;
+        }
+
+        // create text item
+        QString str(c);
+        QGraphicsSimpleTextItem* branch = scene()->addSimpleText(str);
+        branch->setZValue(4);
+        data[node->y()][node->x()].branch = branch;
+
+        // set item position
+        qreal x, y;
+        if (sgfToViewCoordinate(node->x(), node->y(), x, y) == false)
+            return;
+        branch->setPos(x-branch->boundingRect().size().width()/2.0, y-branch->boundingRect().size().height()/2.0);
+
+        ++c;
+    }
 }
 
 /**

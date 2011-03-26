@@ -244,8 +244,8 @@ void MainWindow::initializeMenu(){
     redoAction = undoGroup.createRedoAction(this);
     redoAction->setShortcut(QKeySequence::Redo);
 //    redoAction->setIcon( QIcon(":/res/redo.png") );
-    ui->menuEdit->insertAction(ui->menuEdit->actions().at(0), undoAction);
     ui->menuEdit->insertAction(ui->menuEdit->actions().at(0), redoAction);
+    ui->menuEdit->insertAction(ui->menuEdit->actions().at(0), undoAction);
 //    ui->menuEdit->insertAction(ui->menuEdit->actions().at(0), redoAction);
 //    ui->menuEdit->insertAction(redoAction, undoAction);
 //    ui->editToolBar->insertAction(ui->editToolBar->actions().at(0), redoAction);
