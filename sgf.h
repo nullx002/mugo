@@ -40,10 +40,10 @@ protected:
 
     // write
     virtual bool write(QTextStream& str);
-    virtual bool write(QTextStream& str, const NodePtr& node);
-    virtual bool writeRootInformation(QTextStream& str, const InformationPtr& info);
-    virtual bool writeGameInformation(QTextStream& str, const InformationPtr& info);
-    virtual bool writeNode(QTextStream& str, const NodePtr& node);
+    virtual bool write(QTextStream& str, QTextStream& temp, const NodePtr& node);
+    virtual bool writeRootInformation(QTextStream& str, QTextStream& temp, const InformationPtr& info);
+    virtual bool writeGameInformation(QTextStream& str, QTextStream& temp, const InformationPtr& info);
+    virtual bool writeNode(QTextStream& str, QTextStream& temp, const NodePtr& node);
 
 private:
     bool parse(QString::const_iterator first, QString::const_iterator last);
@@ -58,6 +58,9 @@ private:
     void parseMove(const QString& value, int& x, int& y);
     void parseMove(const QString& value, QList<QPoint>& posList);
     QString positionToSgfProperty(int x, int y);
+    void WriteProperty(QTextStream& str, QTextStream& temp, const QString& key, QString value);
+    void WriteProperty(QTextStream& str, QTextStream& temp, const QString& key, int value);
+    void WriteProperty(QTextStream& str, QTextStream& temp, const QString& key, qreal value);
 };
 
 
