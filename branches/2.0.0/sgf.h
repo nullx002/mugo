@@ -37,7 +37,6 @@ protected:
     // read
     virtual QTextCodec* guessCodec(const QByteArray& ba);
     virtual bool parse(const QString& str);
-    bool parse(QString::const_iterator first, QString::const_iterator last);
 
     // write
     virtual bool write(QTextStream& str);
@@ -47,13 +46,14 @@ protected:
     virtual bool writeNode(QTextStream& str, const NodePtr& node);
 
 private:
-    bool parseBranch(QString::const_iterator& first, QString::const_iterator last, NodePtr parent);
-    bool parseNode(QString::const_iterator& first, QString::const_iterator last, NodePtr parent, NodePtr& node);
+    bool parse(QString::const_iterator first, QString::const_iterator last);
+    bool parseBranch(QString::const_iterator& first, QString::const_iterator last, InformationPtr& info, NodePtr parent);
+    bool parseNode(QString::const_iterator& first, QString::const_iterator last, InformationPtr& info, NodePtr& node);
     bool parseNodeName(QString::const_iterator& first, QString::const_iterator last, QString& key);
     bool parseNodeValueList(QString::const_iterator& first, QString::const_iterator last, QStringList& valueList);
     bool parseNodeValue(QString::const_iterator& first, QString::const_iterator last, QString& value);
     bool skipSpace(QString::const_iterator& first, QString::const_iterator last);
-    bool addPropertyToNode(NodePtr& node, const QString& key, const QStringList& valueList);
+    bool addPropertyToNode(InformationPtr& info, NodePtr& node, const QString& key, const QStringList& valueList);
     void parseNumber(const QString& value, int& v1, int& v2);
     void parseMove(const QString& value, int& x, int& y);
 };
