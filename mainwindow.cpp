@@ -545,13 +545,72 @@ QTreeWidgetItem* MainWindow::createBranchItem(Document* doc, const Go::NodePtr& 
     if (node->isStone())
         nodeName.push_back( Go::coordinateString(view.boardWidget->xsize(), view.boardWidget->ysize(), node->x(), node->y(), false) );
     else if (node->information())
-        nodeName.push_back("Game Info");
+        nodeName.push_back( tr("Game Info") );
 
     if (node->name().isEmpty() == false)
         nodeName.push_back(node->name());
 
     if (node->comment().isEmpty() == false)
-        nodeName.push_back("Comment");
+        nodeName.push_back( tr("Comment") );
+
+    // Node Annotation
+    switch(node->nodeAnnotation()){
+        case Go::Node::eGoodForBlack:
+            nodeName.push_back( tr("[Good for Black]") );
+            break;
+        case Go::Node::eVeryGoodForBlack:
+            nodeName.push_back( tr("[Very Good for Black]") );
+            break;
+        case Go::Node::eGoodForWhite:
+            nodeName.push_back( tr("[Good for White]") );
+            break;
+        case Go::Node::eVeryGoodForWhite:
+            nodeName.push_back( tr("[Very Good for White]") );
+            break;
+        case Go::Node::eEven:
+            nodeName.push_back( tr("[Even]") );
+            break;
+        case Go::Node::eUnclear:
+            nodeName.push_back( tr("[Unclear]") );
+            break;
+    }
+    switch(node->nodeAnnotation2()){
+        case Go::Node::eHotspot:
+            nodeName.push_back( tr("[Hotspot]") );
+            break;
+    }
+
+    // Move Annotation
+    switch(node->moveAnnotation()){
+        case Go::Node::eGoodMove:
+            nodeName.push_back( tr("[Good Move]") );
+            break;
+        case Go::Node::eVeryGoodMove:
+            nodeName.push_back( tr("[Very Good Move]") );
+            break;
+        case Go::Node::eBadMove:
+            nodeName.push_back( tr("[Bad Move]") );
+            break;
+        case Go::Node::eVeryBadMove:
+            nodeName.push_back( tr("[Very Bad Move]") );
+            break;
+        case Go::Node::eDoubtful:
+            nodeName.push_back( tr("[Doubtful]") );
+            break;
+        case Go::Node::eInteresting:
+            nodeName.push_back( tr("[Interesting]") );
+            break;
+    }
+
+    // estimated score
+    if (node->hasEstimatedScore()){
+        if (node->estimatedScore() > 0)
+            nodeName.push_back( tr("(B+%1)").arg(node->estimatedScore()) );
+        else if (node->estimatedScore() < 0)
+            nodeName.push_back( tr("(W+%1)").arg(node->estimatedScore() * -1) );
+        else
+            nodeName.push_back( tr("(Even)") );
+    }
 
     item->setText(0, nodeName.join(" "));
 

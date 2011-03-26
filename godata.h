@@ -172,6 +172,10 @@ public:
     typedef QWeakPointer<Node> WeakNodePtr;
     typedef QList<NodePtr> NodeList;
 
+    enum NodeAnnotation{ eNoNodeAnnotation, eGoodForBlack, eVeryGoodForBlack, eGoodForWhite, eVeryGoodForWhite, eEven, eUnclear };
+    enum NodeAnnotation2{ eNoNodeAnnotation2, eHotspot };
+    enum MoveAnnotation{ eNoMoveAnnotation, eGoodMove, eVeryGoodMove, eBadMove, eVeryBadMove, eDoubtful, eInteresting };
+
     // constructor, destructor
     Node();
     Node(const NodePtr& parentNode);
@@ -221,6 +225,23 @@ public:
     const QString& comment() const{ return comment_; }
     void setComment(const QString& comment){ comment_ = comment; }
 
+    // node annotation
+    NodeAnnotation nodeAnnotation() const{ return nodeAnnotation_; }
+    void setNodeAnnotation(NodeAnnotation annotation){ nodeAnnotation_ = annotation; }
+
+    bool hasEstimatedScore() const{ return hasEstimatedScore_; }
+    void clearEstimatedScore(){ hasEstimatedScore_ = false; }
+    qreal estimatedScore() const{ return estimatedScore_; }
+    void setEstimatedScore(qreal score){ hasEstimatedScore_ = true; estimatedScore_ = score; }
+
+    // node annotation 2
+    NodeAnnotation2 nodeAnnotation2() const{ return nodeAnnotation2_; }
+    void setNodeAnnotation2(NodeAnnotation2 annotation){ nodeAnnotation2_ = annotation; }
+
+    // move annotation
+    MoveAnnotation moveAnnotation() const{ return moveAnnotation_; }
+    void setMoveAnnotation(MoveAnnotation annotation){ moveAnnotation_ = annotation; }
+
 private:
     WeakNodePtr parent_;
     NodeList children_;
@@ -233,6 +254,11 @@ private:
     int y_;
     int moveNumber_;
     QString comment_;
+    NodeAnnotation nodeAnnotation_;
+    NodeAnnotation2 nodeAnnotation2_;
+    MoveAnnotation moveAnnotation_;
+    bool hasEstimatedScore_;
+    qreal estimatedScore_;
 };
 
 typedef Node::NodePtr NodePtr;

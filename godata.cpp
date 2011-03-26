@@ -69,7 +69,14 @@ Information::Information()
 Node::Node()
     : color_(eDame)
     , nextColor_(eDame)
+    , x_(-1)
+    , y_(-1)
     , moveNumber_(-1)
+    , nodeAnnotation_()
+    , nodeAnnotation2_()
+    , moveAnnotation_()
+    , hasEstimatedScore_(false)
+    , estimatedScore_(0.0)
 
 {
 }
@@ -82,7 +89,14 @@ Node::Node(const NodePtr& parentNode)
     : parent_(parentNode)
     , color_(eDame)
     , nextColor_(eDame)
+    , x_(-1)
+    , y_(-1)
     , moveNumber_(-1)
+    , nodeAnnotation_()
+    , nodeAnnotation2_()
+    , moveAnnotation_()
+    , hasEstimatedScore_(false)
+    , estimatedScore_(0.0)
 {
 }
 
