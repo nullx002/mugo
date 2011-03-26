@@ -35,10 +35,11 @@ public:
     };
 
     struct Data{
-        Data() : color(Go::eDame), stone(NULL){}
+        Data() : color(Go::eDame), stone(NULL), branch(NULL){}
 
         Go::Color color;
         QGraphicsItem* stone;
+        QGraphicsSimpleTextItem* branch;
     };
 
     // constructor
@@ -107,6 +108,11 @@ protected:
     // create stone item
     QGraphicsItem* createStoneItem(Go::Color color, int sgfX, int sgfY);
 
+    // create branch markers
+    void createBranchMarkers();
+    void createChildBranchMarkers();
+    void createSiblingsranchMarkers();
+
     // get star positions
     void getStarPositions(QList<int>& xstarpos, QList<int>& ystarpos) const;
 
@@ -138,6 +144,7 @@ protected:
     QList<QGraphicsEllipseItem*> stars;
 
     EditMode editMode_;
+    bool showVariation_;
 
 private slots:
     void on_document_nodeAdded(const Go::NodePtr& node);
