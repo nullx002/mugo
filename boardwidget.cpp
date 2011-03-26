@@ -338,6 +338,18 @@ void BoardWidget::createBoardBuffer(){
             killStone(node->x(), node->y());
         }
 
+        // add empty stones
+        foreach (const QPoint& p, node->emptyStones())
+            buffer[p.y()][p.x()] = Go::eDame;
+
+        // add black stones
+        foreach (const QPoint& p, node->blackStones())
+            buffer[p.y()][p.x()] = Go::eBlack;
+
+        // add white stones
+        foreach (const QPoint& p, node->whiteStones())
+            buffer[p.y()][p.x()] = Go::eWhite;
+
         if (node == currentNode_)
             break;
 
