@@ -32,6 +32,13 @@ namespace Ui {
     class MainWindow;
 }
 
+
+inline
+bool operator <(const Go::NodePtr& node1, const Go::NodePtr& node2){
+    return node1.data() < node2.data();
+}
+
+
 class ViewData{
 public:
     ViewData() : boardWidget(NULL), branchWidget(NULL), commentEdit(NULL){}
@@ -87,10 +94,15 @@ protected:
 
     /// @name view
     void updateView(GoDocument* doc);
-    void createBranchItems(Document* doc, QTreeWidget* branch, const Go::NodePtr& node);
-    void createBranchItems(Document* doc, QTreeWidgetItem* parent, const Go::NodePtr& node, bool shouldCreateChild);
+
+    /// @name branch view
+    void createBranchItems(Document* doc, const Go::NodePtr& game);
+    void createBranchItems(Document* doc, QTreeWidgetItem* parent, const Go::NodePtr& node);
     void addBranchItem(Document* doc, QTreeWidget* branch, const Go::NodePtr& node);
+    bool shouldNest(const Go::NodePtr& node);
+    void rebuildBranchItems(ViewData& view, const Go::NodePtr& node);
     QTreeWidgetItem* createBranchItem(Document* doc, const Go::NodePtr& node);
+    QTreeWidgetItem* getParentItem(QTreeWidgetItem* item);
 
 private slots:
     //@{
@@ -105,6 +117,7 @@ private slots:
 
     /// @name slot for document
     void on_sgfDocument_nodeAdded(const Go::NodePtr& node);
+    void on_sgfDocument_nodeDeleted(const Go::NodePtr& node);
     void on_sgfDocument_nodeModified(const Go::NodePtr& node);
 
     /// @name slot for board tab widget

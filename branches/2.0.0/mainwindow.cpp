@@ -259,6 +259,7 @@ bool MainWindow::createNewTab(Document* doc){
     SgfDocument* sgfDoc = qobject_cast<SgfDocument*>(doc);
     if (sgfDoc){
         connect(sgfDoc, SIGNAL(nodeAdded(const Go::NodePtr&)), SLOT(on_sgfDocument_nodeAdded(const Go::NodePtr&)));
+        connect(sgfDoc, SIGNAL(nodeDeleted(const Go::NodePtr&)), SLOT(on_sgfDocument_nodeDeleted(const Go::NodePtr&)));
         connect(sgfDoc, SIGNAL(nodeModified(const Go::NodePtr&)), SLOT(on_sgfDocument_nodeModified(const Go::NodePtr&)));
         ViewData& data = docView[doc];
 
@@ -431,32 +432,80 @@ void MainWindow::updateView(GoDocument* doc){
 /**
   create tree items in branch view
 */
-void MainWindow::createBranchItems(Document* doc, QTreeWidget* branch, const Go::NodePtr& game){
-    createBranchItems(doc, branch->invisibleRootItem(), game, false);
+void MainWindow::createBranchItems(Document* doc, const Go::NodePtr& game){
+    // get branch view
+    QTreeWidget* branch = docView[doc].branchWidget;
+    if (branch == NULL)
+        return;
+
+    // create items in branch view
+    branch->clear();
+    createBranchItems(doc, branch->invisibleRootItem(), game);
 }
 
 /**
   create tree items in branch view
 */
-void MainWindow::createBranchItems(Document* doc, QTreeWidgetItem* parent, const Go::NodePtr& node, bool shouldCreateChild){
+void MainWindow::createBranchItems(Document* doc, QTreeWidgetItem* parent, const Go::NodePtr& node){
     QTreeWidgetItem* item = createBranchItem(doc, node);
     parent->addChild(item);
     foreach (const Go::NodePtr& child, node->children())
-        if (shouldCreateChild || node->children().size() > 1)
-            createBranchItems(doc, item, child, node->children().size() > 1);
+        if (shouldNest(child))
+            createBranchItems(doc, item, child);
         else
-            createBranchItems(doc, parent, child, false);
+            createBranchItems(doc, parent, child);
 }
 
 /**
   add tree item in branch view
 */
 void MainWindow::addBranchItem(Document* doc, QTreeWidget* branch, const Go::NodePtr& node){
-    Go::NodePtr parentNode = node->parent();
-    if (parentNode->children().size() > 1){
+    // create new tree item
+    QTreeWidgetItem* item = createBranchItem(doc, node);
+
+    ViewData& view = docView[doc];
+    rebuildBranchItems(view, node->parent() ? node->parent() : node);
+}
+
+/**
+  node should be nested.
+*/
+bool MainWindow::shouldNest(const Go::NodePtr& node){
+    Go::NodePtr parent = node->parent();
+    if (!parent)
+        return false;
+    else if (parent->children().size() > 1)
+        return true;
+
+    Go::NodePtr parentOfParent = parent->parent();
+    if (!parentOfParent)
+        return false;
+    else if (parentOfParent->children().size() > 1)
+        return true;
+
+    return false;
+}
+
+/**
+  re-create tree view to node and descendent node
+*/
+void MainWindow::rebuildBranchItems(ViewData& view, const Go::NodePtr& node){
+    QTreeWidgetItem* item = view.nodeToTreeItem[node];
+    QTreeWidgetItem* parentItem = view.nodeToTreeItem[node->parent()];
+    if (parentItem){
+        if (shouldNest(node) == false)
+            parentItem = getParentItem(parentItem);
+
+        QTreeWidgetItem* currentParent = getParentItem(item);
+        if (currentParent != parentItem){
+            if (currentParent)
+                currentParent->removeChild(item);
+            parentItem->addChild(item);
+        }
     }
-    else{
-    }
+
+    foreach(const Go::NodePtr& child, node->children())
+        rebuildBranchItems(view, child);
 }
 
 /**
@@ -498,6 +547,22 @@ QTreeWidgetItem* MainWindow::createBranchItem(Document* doc, const Go::NodePtr& 
     view.nodeToTreeItem[node] = item;
 
     return item;
+}
+
+/**
+  get parent of item.
+  if item is top level item, return invisible root item.
+*/
+QTreeWidgetItem* MainWindow::getParentItem(QTreeWidgetItem* item){
+    QTreeWidgetItem* parent = item->parent();
+    if (parent)
+        return parent;
+
+    QTreeWidget* tree = item->treeWidget();
+    if (tree)
+        return tree->invisibleRootItem();
+
+    return NULL;
 }
 
 /**
@@ -605,6 +670,26 @@ void MainWindow::on_sgfDocument_nodeAdded(const Go::NodePtr& node)
 }
 
 /**
+  node deleted
+*/
+void MainWindow::on_sgfDocument_nodeDeleted(const Go::NodePtr& node){
+    // get document
+    GoDocument* doc = qobject_cast<GoDocument*>(sender());
+    if (doc == NULL)
+        return;
+
+    // get tree item
+    ViewData& view = docView[doc];
+    QTreeWidgetItem* item = view.nodeToTreeItem[node];
+
+    // delete tree item from branch view
+    delete item;
+
+    // re-create tree view items
+    this->rebuildBranchItems(view, node->parent());
+}
+
+/**
   node modified
 */
 void MainWindow::on_sgfDocument_nodeModified(const Go::NodePtr& node)
@@ -663,18 +748,13 @@ void MainWindow::on_boardTabWidget_tabCloseRequested(int index)
   current game changed
 */
 void MainWindow::on_board_gameChanged(const Go::NodePtr& game){
-    // get active board widget
+    // get sender board
     BoardWidget* board = qobject_cast<BoardWidget*>(sender());
     if (board == NULL)
         return;
 
-    // get branch widget
-    QTreeWidget* branch = docView[board->document()].branchWidget;
-    if (branch == NULL)
-        return;
-
-    branch->clear();
-    createBranchItems(board->document(), branch, game);
+    // create items in brahch view
+    createBranchItems(board->document(), game);
 }
 
 /**
@@ -686,6 +766,13 @@ void MainWindow::on_board_nodeChanged(const Go::NodePtr& node){
     if (board == NULL)
         return;
 
+    // select node in branch view
+    ViewData& view = docView[board->document()];
+    QTreeWidgetItem* item = view.nodeToTreeItem[node];
+    if (item && view.branchWidget->currentItem() != item)
+        view.branchWidget->setCurrentItem(item);
+
+    // update all views
     updateView(board->document());
 }
 
@@ -729,7 +816,10 @@ void MainWindow::on_commentEdit_textChanged()
 /**
   current item was changed in branch view
 */
-void MainWindow::on_branchWidget_currentItemChanged(QTreeWidgetItem* current,QTreeWidgetItem* previous){
+void MainWindow::on_branchWidget_currentItemChanged(QTreeWidgetItem* current,QTreeWidgetItem* /*previous*/){
+    if (current == NULL)
+        return;
+
     // find sender's document
     Document* doc = NULL;
     DocViewData::const_iterator iter = docView.begin();
