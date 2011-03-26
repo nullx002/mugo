@@ -49,6 +49,13 @@
     <property name="title">
      <string>&amp;File</string>
     </property>
+    <widget class="QMenu" name="menuCollection">
+     <property name="title">
+      <string>Collection</string>
+     </property>
+     <addaction name="actionCollectionExtract"/>
+     <addaction name="actionCollectionImport"/>
+    </widget>
     <addaction name="actionNew"/>
     <addaction name="actionOpen"/>
     <addaction name="actionOpenURL"/>
@@ -63,7 +70,7 @@
     <addaction name="actionExportBoardAsImage"/>
     <addaction name="actionExportAsciiToClipboard"/>
     <addaction name="separator"/>
-    <addaction name="actionCollection"/>
+    <addaction name="menuCollection"/>
     <addaction name="separator"/>
     <addaction name="actionPrint"/>
     <addaction name="separator"/>
@@ -75,31 +82,130 @@
     <property name="title">
      <string>&amp;Edit</string>
     </property>
+    <addaction name="separator"/>
+    <addaction name="actionCopySGFToClipboard"/>
+    <addaction name="actionCopyCurrentBranchToClipboard"/>
+    <addaction name="actionPasteSGFToNewTab"/>
+    <addaction name="actionPasteSGFIntoCollection"/>
+    <addaction name="separator"/>
+    <addaction name="actionGameInformation"/>
+    <addaction name="separator"/>
+    <addaction name="actionDeleteAfterCurrent"/>
+    <addaction name="actionDeleteOnlyCurrent"/>
+    <addaction name="actionPass"/>
+    <addaction name="separator"/>
+    <addaction name="actionAlternateMove"/>
+    <addaction name="actionStonesAndMarkers"/>
+    <addaction name="separator"/>
+    <addaction name="actionAnnotation"/>
+    <addaction name="actionMoveNumber"/>
+    <addaction name="actionEditNodeName"/>
+    <addaction name="separator"/>
+    <addaction name="actionWhiteFirst"/>
+    <addaction name="separator"/>
+    <addaction name="actionRotateSGFClockwise"/>
+    <addaction name="actionFlipSGFHorizontally"/>
+    <addaction name="actionFlipSGFVertically"/>
    </widget>
    <widget class="QMenu" name="menuNavigation">
     <property name="title">
      <string>&amp;Navigation</string>
     </property>
+    <addaction name="actionMoveFirst"/>
+    <addaction name="actionFastRewind"/>
+    <addaction name="actionMovePrevious"/>
+    <addaction name="actionMoveNext"/>
+    <addaction name="actionFastForward"/>
+    <addaction name="actionMoveLast"/>
+    <addaction name="separator"/>
+    <addaction name="actionBack_to_Parent"/>
+    <addaction name="actionPrevious_Branch"/>
+    <addaction name="actionNext_Branch"/>
+    <addaction name="separator"/>
+    <addaction name="actionJump_to_Move_Number"/>
+    <addaction name="actionJump_to_Clicked"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
      <string>&amp;View</string>
     </property>
+    <widget class="QMenu" name="menuMove_Number">
+     <property name="title">
+      <string>Move Number</string>
+     </property>
+     <addaction name="actionShow_Move_Number"/>
+     <addaction name="actionReset_Move_Number_in_Branch"/>
+     <addaction name="separator"/>
+     <addaction name="actionNo_Move_Number"/>
+     <addaction name="actionLast_1_Move"/>
+     <addaction name="actionLast_2_Moves"/>
+     <addaction name="actionLast_5_Moves"/>
+     <addaction name="actionLast_10_Moves"/>
+     <addaction name="actionLast_20_Moves"/>
+     <addaction name="actionLast_50_Moves"/>
+     <addaction name="actionAll_Moves"/>
+    </widget>
+    <addaction name="menuMove_Number"/>
+    <addaction name="separator"/>
+    <addaction name="actionShow_Coordinates"/>
+    <addaction name="actionShow_Coordinates_With_I"/>
+    <addaction name="actionShow_Markers"/>
+    <addaction name="actionShow_Branch_Moves"/>
+    <addaction name="actionBranch_Mode"/>
+    <addaction name="separator"/>
+    <addaction name="actionRotateClockwise"/>
+    <addaction name="actionFlipHorizontally"/>
+    <addaction name="actionFlipVertically"/>
+    <addaction name="actionResetBoard"/>
    </widget>
    <widget class="QMenu" name="menuTools">
     <property name="title">
      <string>&amp;Tools</string>
     </property>
+    <widget class="QMenu" name="menuLanguage">
+     <property name="title">
+      <string>Language</string>
+     </property>
+     <addaction name="actionSystem_Default"/>
+     <addaction name="separator"/>
+     <addaction name="actionEnglish"/>
+     <addaction name="actionJapanese"/>
+    </widget>
+    <addaction name="actionCount_Territory"/>
+    <addaction name="actionEstimate_Score"/>
+    <addaction name="separator"/>
+    <addaction name="actionPlay_with_Computer"/>
+    <addaction name="separator"/>
+    <addaction name="actionAutomatic_Replay"/>
+    <addaction name="actionTutor_One_Side"/>
+    <addaction name="actionTutor_Both_Sides"/>
+    <addaction name="separator"/>
+    <addaction name="actionPlay_Sound"/>
+    <addaction name="separator"/>
+    <addaction name="menuLanguage"/>
+    <addaction name="actionOptions"/>
    </widget>
    <widget class="QMenu" name="menuWindow">
     <property name="title">
      <string>&amp;Window</string>
     </property>
+    <widget class="QMenu" name="menuToolbars">
+     <property name="title">
+      <string>Toolbars</string>
+     </property>
+    </widget>
+    <addaction name="menuToolbars"/>
+    <addaction name="separator"/>
+    <addaction name="actionPrevious_Tab"/>
+    <addaction name="actionNext_Tab"/>
+    <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
      <string>&amp;Help</string>
     </property>
+    <addaction name="actionAbout"/>
+    <addaction name="actionAboutQt"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -109,13 +215,19 @@
    <addaction name="menuWindow"/>
    <addaction name="menuHelp"/>
   </widget>
-  <widget class="QToolBar" name="mainToolBar">
+  <widget class="QToolBar" name="fileToolBar">
+   <property name="windowTitle">
+    <string>File Toolbar</string>
+   </property>
    <attribute name="toolBarArea">
     <enum>TopToolBarArea</enum>
    </attribute>
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionNew"/>
+   <addaction name="actionOpen"/>
+   <addaction name="actionSave"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <widget class="QDockWidget" name="commentDockWidget">
@@ -163,11 +275,69 @@
    </attribute>
    <widget class="QWidget" name="undoDockWidgetContents">
     <layout class="QHBoxLayout" name="horizontalLayout">
+     <property name="margin">
+      <number>0</number>
+     </property>
      <item>
       <widget class="QUndoView" name="undoView"/>
      </item>
     </layout>
    </widget>
+  </widget>
+  <widget class="QToolBar" name="editToolBar">
+   <property name="windowTitle">
+    <string>Edit ToolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+  </widget>
+  <widget class="QToolBar" name="navigationToolBar">
+   <property name="windowTitle">
+    <string>Navigation ToolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+  </widget>
+  <widget class="QToolBar" name="viewToolBar">
+   <property name="windowTitle">
+    <string>View ToolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+  </widget>
+  <widget class="QToolBar" name="collectionToolBar">
+   <property name="windowTitle">
+    <string>Collection ToolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+  </widget>
+  <widget class="QToolBar" name="playToolBar">
+   <property name="windowTitle">
+    <string>Play ToolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
   </widget>
   <action name="actionNew">
    <property name="text">
@@ -219,11 +389,6 @@
     <string>Export Ascii To Clipboard...</string>
    </property>
   </action>
-  <action name="actionCollection">
-   <property name="text">
-    <string>Collection</string>
-   </property>
-  </action>
   <action name="actionPrint">
    <property name="text">
     <string>&amp;Print...</string>
@@ -237,6 +402,326 @@
   <action name="actionExit">
    <property name="text">
     <string>E&amp;xit</string>
+   </property>
+  </action>
+  <action name="actionCollectionExtract">
+   <property name="text">
+    <string>&amp;Extract</string>
+   </property>
+  </action>
+  <action name="actionCollectionImport">
+   <property name="text">
+    <string>&amp;Import</string>
+   </property>
+  </action>
+  <action name="actionCopySGFToClipboard">
+   <property name="text">
+    <string>&amp;Copy SGF to Clipboard</string>
+   </property>
+  </action>
+  <action name="actionCopyCurrentBranchToClipboard">
+   <property name="text">
+    <string>Copy Current Branch To Clipboard</string>
+   </property>
+  </action>
+  <action name="actionPasteSGFToNewTab">
+   <property name="text">
+    <string>&amp;Paste SGF to New Tab</string>
+   </property>
+  </action>
+  <action name="actionPasteSGFIntoCollection">
+   <property name="text">
+    <string>Paste SGF into Collection</string>
+   </property>
+  </action>
+  <action name="actionGameInformation">
+   <property name="text">
+    <string>Game Information</string>
+   </property>
+  </action>
+  <action name="actionDeleteAfterCurrent">
+   <property name="text">
+    <string>&amp;Delete After Current</string>
+   </property>
+  </action>
+  <action name="actionDeleteOnlyCurrent">
+   <property name="text">
+    <string>Delete Only Current</string>
+   </property>
+  </action>
+  <action name="actionPass">
+   <property name="text">
+    <string>Pass</string>
+   </property>
+  </action>
+  <action name="actionAlternateMove">
+   <property name="text">
+    <string>Alternate Move</string>
+   </property>
+  </action>
+  <action name="actionStonesAndMarkers">
+   <property name="text">
+    <string>Stones &amp; &amp;Markers</string>
+   </property>
+  </action>
+  <action name="actionAnnotation">
+   <property name="text">
+    <string>Annotation</string>
+   </property>
+  </action>
+  <action name="actionMoveNumber">
+   <property name="text">
+    <string>Move Number</string>
+   </property>
+  </action>
+  <action name="actionEditNodeName">
+   <property name="text">
+    <string>Edit Node Name</string>
+   </property>
+  </action>
+  <action name="actionWhiteFirst">
+   <property name="text">
+    <string>&amp;White First</string>
+   </property>
+  </action>
+  <action name="actionRotateSGFClockwise">
+   <property name="text">
+    <string>Rotate SGF Clockwise</string>
+   </property>
+  </action>
+  <action name="actionFlipSGFVertically">
+   <property name="text">
+    <string>Flip SGF Vertically</string>
+   </property>
+  </action>
+  <action name="actionFlipSGFHorizontally">
+   <property name="text">
+    <string>Flip SGF Horizontally</string>
+   </property>
+  </action>
+  <action name="actionMoveFirst">
+   <property name="text">
+    <string>Move First</string>
+   </property>
+  </action>
+  <action name="actionFastRewind">
+   <property name="text">
+    <string>Fast Rewind</string>
+   </property>
+  </action>
+  <action name="actionMovePrevious">
+   <property name="text">
+    <string>Move Previous</string>
+   </property>
+  </action>
+  <action name="actionMoveNext">
+   <property name="text">
+    <string>Move Next</string>
+   </property>
+  </action>
+  <action name="actionFastForward">
+   <property name="text">
+    <string>Fast Forward</string>
+   </property>
+  </action>
+  <action name="actionMoveLast">
+   <property name="text">
+    <string>Move Last</string>
+   </property>
+  </action>
+  <action name="actionBack_to_Parent">
+   <property name="text">
+    <string>Back to Parent</string>
+   </property>
+  </action>
+  <action name="actionPrevious_Branch">
+   <property name="text">
+    <string>Previous Branch</string>
+   </property>
+  </action>
+  <action name="actionNext_Branch">
+   <property name="text">
+    <string>Next Branch</string>
+   </property>
+  </action>
+  <action name="actionJump_to_Move_Number">
+   <property name="text">
+    <string>Jump to Move Number</string>
+   </property>
+  </action>
+  <action name="actionJump_to_Clicked">
+   <property name="text">
+    <string>Jump to Clicked</string>
+   </property>
+  </action>
+  <action name="actionShow_Move_Number">
+   <property name="text">
+    <string>Show Move Number</string>
+   </property>
+  </action>
+  <action name="actionReset_Move_Number_in_Branch">
+   <property name="text">
+    <string>Reset Move Number in Branch</string>
+   </property>
+  </action>
+  <action name="actionNo_Move_Number">
+   <property name="text">
+    <string>No Move Number</string>
+   </property>
+  </action>
+  <action name="actionLast_1_Move">
+   <property name="text">
+    <string>Last 1 Move</string>
+   </property>
+  </action>
+  <action name="actionLast_2_Moves">
+   <property name="text">
+    <string>Last 2 Moves</string>
+   </property>
+  </action>
+  <action name="actionLast_5_Moves">
+   <property name="text">
+    <string>Last 5 Moves</string>
+   </property>
+  </action>
+  <action name="actionLast_10_Moves">
+   <property name="text">
+    <string>Last 10 Moves</string>
+   </property>
+  </action>
+  <action name="actionLast_20_Moves">
+   <property name="text">
+    <string>Last 20 Moves</string>
+   </property>
+  </action>
+  <action name="actionLast_50_Moves">
+   <property name="text">
+    <string>Last 50 Moves</string>
+   </property>
+  </action>
+  <action name="actionAll_Moves">
+   <property name="text">
+    <string>All Moves</string>
+   </property>
+  </action>
+  <action name="actionShow_Coordinates">
+   <property name="text">
+    <string>Show Coordinates</string>
+   </property>
+  </action>
+  <action name="actionShow_Coordinates_With_I">
+   <property name="text">
+    <string>Show Coordinates With I</string>
+   </property>
+  </action>
+  <action name="actionShow_Markers">
+   <property name="text">
+    <string>Show Markers</string>
+   </property>
+  </action>
+  <action name="actionShow_Branch_Moves">
+   <property name="text">
+    <string>Show Branch Moves</string>
+   </property>
+  </action>
+  <action name="actionBranch_Mode">
+   <property name="text">
+    <string>Branch Mode</string>
+   </property>
+  </action>
+  <action name="actionRotateClockwise">
+   <property name="text">
+    <string>Rotate Clockwise</string>
+   </property>
+  </action>
+  <action name="actionFlipHorizontally">
+   <property name="text">
+    <string>Flip Horizontally</string>
+   </property>
+  </action>
+  <action name="actionFlipVertically">
+   <property name="text">
+    <string>Flip Vertically</string>
+   </property>
+  </action>
+  <action name="actionResetBoard">
+   <property name="text">
+    <string>Reset Board</string>
+   </property>
+  </action>
+  <action name="actionCount_Territory">
+   <property name="text">
+    <string>Count Territory</string>
+   </property>
+  </action>
+  <action name="actionEstimate_Score">
+   <property name="text">
+    <string>Estimate Score</string>
+   </property>
+  </action>
+  <action name="actionPlay_with_Computer">
+   <property name="text">
+    <string>Play with Computer</string>
+   </property>
+  </action>
+  <action name="actionAutomatic_Replay">
+   <property name="text">
+    <string>Automatic Replay</string>
+   </property>
+  </action>
+  <action name="actionTutor_One_Side">
+   <property name="text">
+    <string>Tutor One Side</string>
+   </property>
+  </action>
+  <action name="actionTutor_Both_Sides">
+   <property name="text">
+    <string>Tutor Both Sides</string>
+   </property>
+  </action>
+  <action name="actionPlay_Sound">
+   <property name="text">
+    <string>Play Sound</string>
+   </property>
+  </action>
+  <action name="actionOptions">
+   <property name="text">
+    <string>Options...</string>
+   </property>
+  </action>
+  <action name="actionSystem_Default">
+   <property name="text">
+    <string>System Default</string>
+   </property>
+  </action>
+  <action name="actionEnglish">
+   <property name="text">
+    <string>English</string>
+   </property>
+  </action>
+  <action name="actionJapanese">
+   <property name="text">
+    <string>Japanese</string>
+   </property>
+  </action>
+  <action name="actionPrevious_Tab">
+   <property name="text">
+    <string>Previous Tab</string>
+   </property>
+  </action>
+  <action name="actionNext_Tab">
+   <property name="text">
+    <string>Next Tab</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About...</string>
+   </property>
+  </action>
+  <action name="actionAboutQt">
+   <property name="text">
+    <string>About Qt...</string>
    </property>
   </action>
  </widget>

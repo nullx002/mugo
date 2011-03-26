@@ -244,12 +244,25 @@ void MainWindow::initializeMenu(){
     redoAction = undoGroup.createRedoAction(this);
     redoAction->setShortcut(QKeySequence::Redo);
 //    redoAction->setIcon( QIcon(":/res/redo.png") );
-    ui->menuEdit->addAction(undoAction);
-    ui->menuEdit->addAction(redoAction);
+    ui->menuEdit->insertAction(ui->menuEdit->actions().at(0), undoAction);
+    ui->menuEdit->insertAction(ui->menuEdit->actions().at(0), redoAction);
 //    ui->menuEdit->insertAction(ui->menuEdit->actions().at(0), redoAction);
 //    ui->menuEdit->insertAction(redoAction, undoAction);
 //    ui->editToolBar->insertAction(ui->editToolBar->actions().at(0), redoAction);
 //    ui->editToolBar->insertAction(redoAction, undoAction);
+
+    // Window
+    ui->menuWindow->insertAction( ui->menuWindow->actions().at(1), ui->undoDockWidget->toggleViewAction() );
+    ui->menuWindow->insertAction( ui->menuWindow->actions().at(1), ui->branchDockWidget->toggleViewAction() );
+    ui->menuWindow->insertAction( ui->menuWindow->actions().at(1), ui->commentDockWidget->toggleViewAction() );
+
+    // Window -> Toolbars
+    ui->menuToolbars->addAction( ui->fileToolBar->toggleViewAction() );
+    ui->menuToolbars->addAction( ui->editToolBar->toggleViewAction() );
+    ui->menuToolbars->addAction( ui->navigationToolBar->toggleViewAction() );
+    ui->menuToolbars->addAction( ui->viewToolBar->toggleViewAction() );
+    ui->menuToolbars->addAction( ui->collectionToolBar->toggleViewAction() );
+    ui->menuToolbars->addAction( ui->playToolBar->toggleViewAction() );
 }
 
 /**
