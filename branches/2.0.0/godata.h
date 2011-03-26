@@ -21,7 +21,7 @@
 #include <QObject>
 #include <QSharedPointer>
 #include <QMetaType>
-
+#include <QPoint>
 
 namespace Go{
 
@@ -242,6 +242,14 @@ public:
     MoveAnnotation moveAnnotation() const{ return moveAnnotation_; }
     void setMoveAnnotation(MoveAnnotation annotation){ moveAnnotation_ = annotation; }
 
+    // add stnoes
+    const QList<QPoint>& emptyStones() const{ return emptyStones_; }
+    QList<QPoint>& emptyStones(){ return emptyStones_; }
+    const QList<QPoint>& blackStones() const{ return blackStones_; }
+    QList<QPoint>& blackStones(){ return blackStones_; }
+    const QList<QPoint>& whiteStones() const{ return whiteStones_; }
+    QList<QPoint>& whiteStones(){ return whiteStones_; }
+
 private:
     WeakNodePtr parent_;
     NodeList children_;
@@ -259,6 +267,9 @@ private:
     MoveAnnotation moveAnnotation_;
     bool hasEstimatedScore_;
     qreal estimatedScore_;
+    QList<QPoint> emptyStones_;
+    QList<QPoint> blackStones_;
+    QList<QPoint> whiteStones_;
 };
 
 typedef Node::NodePtr NodePtr;

@@ -56,6 +56,8 @@ private:
     bool addPropertyToNode(InformationPtr& info, NodePtr& node, const QString& key, const QStringList& valueList);
     void parseNumber(const QString& value, int& v1, int& v2);
     void parseMove(const QString& value, int& x, int& y);
+    void parseMove(const QString& value, QList<QPoint>& posList);
+    QString positionToSgfProperty(int x, int y);
 };
 
 

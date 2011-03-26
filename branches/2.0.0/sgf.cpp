@@ -180,8 +180,13 @@ bool Sgf::parseNodeValue(QString::const_iterator& first, QString::const_iterator
     while (first != last){
         if (*first == ']')
             return true;
-        else if (*first == '\\')
+        else if (*first == '\\'){
             ++first;
+            if (*first == '\r' || *first == '\n'){
+                ++first;
+                continue;
+            }
+        }
         value.push_back(*first);
         ++first;
     }
@@ -337,19 +342,26 @@ Miscellaneous Properties    FG, PM, VW
         node->setMoveAnnotation(valueList[0].toInt() == 1 ? Go::Node::eGoodMove : Go::Node::eVeryGoodMove);
 
     // Setup Properties: AB, AE, AW, PL
-/*
-    else if (key == "AE")  // add empty
+    else if (key == "AE" || key == "AB" || key == "AW"){  // add empty, add black, add white
         foreach(const QString& v, valueList){
+            QList<QPoint> posList;
+            parseMove(v, posList);
+            foreach(const QPoint& pos, posList)
+                if (key == "AE")  // add empty
+                    node->emptyStones().push_back(pos);
+                else if (key == "AB")  // add black
+                    node->blackStones().push_back(pos);
+                else if (key == "AW")  // add white
+                    node->whiteStones().push_back(pos);
         }
-    else if (key == "AB")  // add black
-    else if (key == "AW")  // add white
+    }
     else if (key == "PL"){  // whose turn
         if (valueList[0] == "B")
             node->setNextColor(Go::eBlack);
         else if (valueList[0] == "W")
             node->setNextColor(Go::eWhite);
     }
-*/
+
     // Markup Properties: AR, CR, DD, LB, LN, MA, SL, SQ, TR
     // Timing Properties: BL, OB, OW, WL
     // Miscellaneous Properties: FG, PM, VW
@@ -377,8 +389,49 @@ void Sgf::parseNumber(const QString& value, int& v1, int& v2){
 void Sgf::parseMove(const QString& value, int& x, int& y){
     if (value.size() != 2)
         return;
-    x = value[0].unicode() - L'a';
-    y = value[1].unicode() - L'a';
+    x = value[0].unicode() < L'a' ? value[0].unicode() - L'A' + 26 : value[0].unicode() - L'a';
+    y = value[1].unicode() < L'a' ? value[1].unicode() - L'A' + 26 : value[1].unicode() - L'a';
+}
+
+/**
+  convert move property to int group
+*/
+void Sgf::parseMove(const QString& value, QList<QPoint>& posList){
+    QStringList valueList = value.split(':');
+    if (valueList.size() == 0 || valueList.size() > 2)
+        return;
+
+    QList<QPoint> temp_plist;
+    foreach(const QString& v, valueList){
+        if (v.size() != 2)
+            return;
+
+        int x, y;
+        parseMove(v, x, y);
+        temp_plist.push_back( QPoint(x, y) );
+    }
+
+    if (temp_plist.size() == 1)
+        posList.push_back(temp_plist[0]);
+    else{
+        if (temp_plist[0].x() > temp_plist[1].x())
+            qSwap(temp_plist[0].rx(), temp_plist[1].rx());
+        if (temp_plist[0].y() > temp_plist[1].y())
+            qSwap(temp_plist[0].ry(), temp_plist[1].ry());
+        for (int y=temp_plist[0].y(); y<=temp_plist[1].y(); ++y)
+            for (int x=temp_plist[0].x(); x<=temp_plist[1].x(); ++x)
+                posList.push_back(QPoint(x, y));
+    }
+}
+
+/**
+  convert position to sgf property
+*/
+QString Sgf::positionToSgfProperty(int x, int y){
+    char s[3] = {0};
+    s[0] = x < 26 ? 'a' + x : 'A' + x - 26;
+    s[1] = y < 26 ? 'a' + y : 'A' + y - 26;
+    return QString(s);
 }
 
 /**
@@ -496,7 +549,6 @@ bool Sgf::writeGameInformation(QTextStream& str, const InformationPtr& info){
 */
 bool Sgf::writeNode(QTextStream& str, const NodePtr& node){
 /*
-Setup Properties            AB, AE, AW, PL
 Markup Properties           AR, CR, DD, LB, LN, MA, SL, SQ, TR
 Timing Properties           BL, OB, OW, WL
 Miscellaneous Properties    FG, PM, VW
@@ -551,7 +603,7 @@ Miscellaneous Properties    FG, PM, VW
     if (node->hasEstimatedScore())
         str << "V[" << node->estimatedScore() << ']';
 
-    //Move Annotation Properties  BM, DO, IT, TE
+    //Move Annotation Properties: BM, DO, IT, TE
     switch(node->moveAnnotation()){
         case Go::Node::eGoodMove:
             str << "TE[1]";
@@ -572,6 +624,16 @@ Miscellaneous Properties    FG, PM, VW
             str << "IT[]";
             break;
     }
+
+    // Setup Properties: AB, AE, AW, PL
+    foreach(const QPoint& p, node->emptyStones())
+        str << "AE[" << positionToSgfProperty(p.x(), p.y()) << ']';
+
+    foreach(const QPoint& p, node->blackStones())
+        str << "AB[" << positionToSgfProperty(p.x(), p.y()) << ']';
+
+    foreach(const QPoint& p, node->whiteStones())
+        str << "AW[" << positionToSgfProperty(p.x(), p.y()) << ']';
 
     return true;
 }
