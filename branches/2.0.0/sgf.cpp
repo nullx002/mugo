@@ -17,6 +17,7 @@
 */
 #include <QDebug>
 #include <QStringList>
+#include <QTextStream>
 #include <QTextCodec>
 #include "mugoapp.h"
 #include "sgf.h"
@@ -438,13 +439,19 @@ QString Sgf::positionToSgfProperty(int x, int y){
   write sgf to stream
 */
 bool Sgf::write(QTextStream& str){
+    QString s;
+    QTextStream temp(&s, QIODevice::WriteOnly);
     foreach(const NodePtr& game, gameList){
-        str << '(';
+        temp << '(';
 
-        if (write(str, game) == false)
+        if (write(str, temp, game) == false)
             return false;
 
-        str << ")\n";
+        temp << ")\n";
+
+        temp.flush();
+        str << s;
+        s.clear();
    }
 
     return true;
@@ -453,25 +460,32 @@ bool Sgf::write(QTextStream& str){
 /**
   write node to stream
 */
-bool Sgf::write(QTextStream& str, const NodePtr& node){
+bool Sgf::write(QTextStream& str, QTextStream& temp, const NodePtr& node){
     // the node must be started with ';'
-    str << ';';
+    temp << ';';
 
     // if node has information, write it
     if (node->information()){
-        if (writeRootInformation(str, node->information()) == false)
+        if (writeRootInformation(str, temp, node->information()) == false)
             return false;
-        if (writeGameInformation(str, node->information()) == false)
+        if (writeGameInformation(str, temp, node->information()) == false)
             return false;
     }
 
     // write node properties
-    if (writeNode(str, node) == false)
+    if (writeNode(str, temp, node) == false)
         return false;
 
     // write all children.
-    foreach(const NodePtr& child, node->children())
-        write(str, child);
+    foreach(const NodePtr& child, node->children()){
+        if (node->children().size() > 1)
+            temp << '(';
+
+        write(str, temp, child);
+
+        if (node->children().size() > 1)
+            temp << ')';
+    }
 
     return true;
 }
@@ -480,18 +494,18 @@ bool Sgf::write(QTextStream& str, const NodePtr& node){
   write root game information to stream
   write following properties: AP, CA, FF, GM, ST, SZ
 */
-bool Sgf::writeRootInformation(QTextStream& str, const InformationPtr& info){
+bool Sgf::writeRootInformation(QTextStream& str, QTextStream& temp, const InformationPtr& info){
     if (!info)
         return false;
 
-    str << "GM[1]FF[4]";
-    str << "CA[" << str.codec()->name() << ']';
-    str << "AP[" << APP_NAME  << ':' << APP_VERSION << ']';
-    str << "ST[" << info->variationStyle() << ']';
+    temp << "GM[1]FF[4]";
+    temp << "CA[" << str.codec()->name() << ']';
+    temp << "AP[" << APP_NAME  << ':' << APP_VERSION << ']';
+    temp << "ST[" << info->variationStyle() << ']';
     if (info->xsize() == info->ysize())
-        str << "SZ[" << info->xsize() << ']';
+        temp << "SZ[" << info->xsize() << ']';
     else
-        str << "SZ[" << info->xsize() << ':' << info->ysize() << ']';
+        temp << "SZ[" << info->xsize() << ':' << info->ysize() << ']';
 
     return true;
 }
@@ -500,46 +514,65 @@ bool Sgf::writeRootInformation(QTextStream& str, const InformationPtr& info){
   write root game information to stream
   write following properties: AN, BR, BT, CP, DT, EV, GN, GC, ON, OT, PB, PC, PW, RE, RO, RU, SO, TM, US, WR, WT
 */
-bool Sgf::writeGameInformation(QTextStream& str, const InformationPtr& info){
-#define WRITE_PROP(NAME, VALUE) if (VALUE.isEmpty() == false) str << NAME"[" << VALUE << ']'
-
+bool Sgf::writeGameInformation(QTextStream& str, QTextStream& temp, const InformationPtr& info){
     if (!info)
         return false;
 
     // black
-    WRITE_PROP("PB", info->blackPlayer());
-    WRITE_PROP("BR", info->blackRank());
-    WRITE_PROP("BT", info->blackTeam());
+    if (info->blackPlayer().isEmpty() == false)
+        WriteProperty(str, temp, "PB", info->blackPlayer());
+    if (info->blackRank().isEmpty() == false)
+        WriteProperty(str, temp, "BR", info->blackRank());
+    if (info->blackTeam().isEmpty() == false)
+        WriteProperty(str, temp, "BT", info->blackTeam());
 
     // white
-    WRITE_PROP("PW", info->whitePlayer());
-    WRITE_PROP("WR", info->whiteRank());
-    WRITE_PROP("WT", info->whiteTeam());
+    if (info->whitePlayer().isEmpty() == false)
+        WriteProperty(str, temp, "PW", info->whitePlayer());
+    if (info->whiteRank().isEmpty() == false)
+        WriteProperty(str, temp, "WR", info->whiteRank());
+    if (info->whiteTeam().isEmpty() == false)
+        WriteProperty(str, temp, "WT", info->whiteTeam());
 
     // when and where
-    WRITE_PROP("DT", info->date());
-    WRITE_PROP("PC", info->place());
+    if (info->date().isEmpty() == false)
+        WriteProperty(str, temp, "DT", info->date());
+    if (info->place().isEmpty() == false)
+        WriteProperty(str, temp, "PC", info->place());
 
     // game name
-    WRITE_PROP("EV", info->event());
-    WRITE_PROP("GN", info->gameName());
-    WRITE_PROP("RO", info->round());
+    if (info->event().isEmpty() == false)
+        WriteProperty(str, temp, "EV", info->event());
+    if (info->gameName().isEmpty() == false)
+        WriteProperty(str, temp, "GN", info->gameName());
+    if (info->round().isEmpty() == false)
+        WriteProperty(str, temp, "RO", info->round());
 
     // result
-    WRITE_PROP("RE", info->result());
+    if (info->result().isEmpty() == false)
+        WriteProperty(str, temp, "RE", info->result());
 
     // rule
-    WRITE_PROP("RU", info->rule());
-    WRITE_PROP("TM", info->time());
-    WRITE_PROP("OT", info->overtime());
+    if (info->rule().isEmpty() == false)
+        WriteProperty(str, temp, "RU", info->rule());
+    if (info->time().isEmpty() == false)
+        WriteProperty(str, temp, "TM", info->time());
+    if (info->overtime().isEmpty() == false)
+        WriteProperty(str, temp, "OT", info->overtime());
 
     // annotation
-    WRITE_PROP("AN", info->annotation());
-    WRITE_PROP("CP", info->copyright());
-    WRITE_PROP("GC", info->gameComment());
-    WRITE_PROP("ON", info->opening());
-    WRITE_PROP("SO", info->source());
-    WRITE_PROP("US", info->user());
+    if (info->annotation().isEmpty() == false)
+        WriteProperty(str, temp, "AN", info->annotation());
+    if (info->copyright().isEmpty() == false)
+        WriteProperty(str, temp, "CP", info->copyright());
+    if (info->gameComment().isEmpty() == false)
+        WriteProperty(str, temp, "GC", info->gameComment());
+    if (info->opening().isEmpty() == false)
+        WriteProperty(str, temp, "ON", info->opening());
+    if (info->source().isEmpty() == false)
+        WriteProperty(str, temp, "SO", info->source());
+    if (info->user().isEmpty() == false)
+        WriteProperty(str, temp, "US", info->user());
 
     return true;
 }
@@ -547,7 +580,7 @@ bool Sgf::writeGameInformation(QTextStream& str, const InformationPtr& info){
 /**
   write node properties to stream
 */
-bool Sgf::writeNode(QTextStream& str, const NodePtr& node){
+bool Sgf::writeNode(QTextStream& str, QTextStream& temp, const NodePtr& node){
 /*
 Markup Properties           AR, CR, DD, LB, LN, MA, SL, SQ, TR
 Timing Properties           BL, OB, OW, WL
@@ -562,80 +595,107 @@ Miscellaneous Properties    FG, PM, VW
             pos[1] = char('a' + node->y());
         }
         if (node->color() == eBlack)
-            str << "B[" << pos << ']';
+            WriteProperty(str, temp, "B", pos);
         else if (node->color() == eWhite)
-            str << "W[" << pos << ']';
+            WriteProperty(str, temp, "W", pos);
     }
 
     if (node->moveNumber() > 0)
-        str << "MN[" << node->moveNumber() << ']';
+        WriteProperty(str, temp, "MN", node->moveNumber());
 
     // Node Annotation Properties: C, N, DM, GB, GW, HO, UC, V
     if (node->comment().isEmpty() == false)
-        str << "C[" << node->comment() << ']';
+        WriteProperty(str, temp, "C", node->comment());
     if (node->name().isEmpty() == false)
-        str << "N[" << node->name() << ']';
+        WriteProperty(str, temp, "N", node->name());
     switch(node->nodeAnnotation()){
         case Go::Node::eGoodForBlack:
-            str << "GB[1]";
+            WriteProperty(str, temp, "GB", "1");
             break;
         case Go::Node::eVeryGoodForBlack:
-            str << "GB[2]";
+            WriteProperty(str, temp, "GB", "2");
             break;
         case Go::Node::eGoodForWhite:
-            str << "GW[1]";
+            WriteProperty(str, temp, "GW", "1");
             break;
         case Go::Node::eVeryGoodForWhite:
-            str << "GW[2]";
+            WriteProperty(str, temp, "GW", "2");
             break;
         case Go::Node::eEven:
-            str << "DM[]";
+            WriteProperty(str, temp, "DM", "");
             break;
         case Go::Node::eUnclear:
-            str << "UC[]";
+            WriteProperty(str, temp, "UC", "");
             break;
     }
     switch(node->nodeAnnotation2()){
         case Go::Node::eHotspot:
-            str << "HO[]";
+            WriteProperty(str, temp, "HO", "");
             break;
     }
     if (node->hasEstimatedScore())
-        str << "V[" << node->estimatedScore() << ']';
+        WriteProperty(str, temp, "V", node->estimatedScore());
 
     //Move Annotation Properties: BM, DO, IT, TE
     switch(node->moveAnnotation()){
         case Go::Node::eGoodMove:
-            str << "TE[1]";
+            WriteProperty(str, temp, "TE", "1");
             break;
         case Go::Node::eVeryGoodMove:
-            str << "TE[2]";
+            WriteProperty(str, temp, "TE", "2");
             break;
         case Go::Node::eBadMove:
-            str << "BM[1]";
+            WriteProperty(str, temp, "BM", "1");
             break;
         case Go::Node::eVeryBadMove:
-            str << "BM[2]";
+            WriteProperty(str, temp, "BM", "2");
             break;
         case Go::Node::eDoubtful:
-            str << "DO[]";
+            WriteProperty(str, temp, "DO", "");
             break;
         case Go::Node::eInteresting:
-            str << "IT[]";
+            WriteProperty(str, temp, "IT", "");
             break;
     }
 
     // Setup Properties: AB, AE, AW, PL
     foreach(const QPoint& p, node->emptyStones())
-        str << "AE[" << positionToSgfProperty(p.x(), p.y()) << ']';
+        WriteProperty(str, temp, "AE", positionToSgfProperty(p.x(), p.y()));
 
     foreach(const QPoint& p, node->blackStones())
-        str << "AB[" << positionToSgfProperty(p.x(), p.y()) << ']';
+        WriteProperty(str, temp, "AB", positionToSgfProperty(p.x(), p.y()));
 
     foreach(const QPoint& p, node->whiteStones())
-        str << "AW[" << positionToSgfProperty(p.x(), p.y()) << ']';
+        WriteProperty(str, temp, "AW", positionToSgfProperty(p.x(), p.y()));
 
     return true;
+}
+
+/**
+  write property to temporary stream.
+  if length of temporary stream is longer than 50, write to stream.
+*/
+void Sgf::WriteProperty(QTextStream& str, QTextStream& temp, const QString& key, QString value){
+    value.replace("\\", "\\\\");
+    value.replace("]", "\\]");
+    if (temp.string()->size() + value.size() > 50){
+        temp.flush();
+        str << *temp.string() << '\n';
+        temp.string()->clear();
+    }
+    temp << key << '[' << value << ']';
+}
+
+void Sgf::WriteProperty(QTextStream& str, QTextStream& temp, const QString& key, int value){
+    QString a;
+    a.sprintf("%d", value);
+    WriteProperty(str, temp, key, a);
+}
+
+void Sgf::WriteProperty(QTextStream& str, QTextStream& temp, const QString& key, qreal value){
+    QString a;
+    a.sprintf("%f", value);
+    WriteProperty(str, temp, key, a);
 }
 
 
