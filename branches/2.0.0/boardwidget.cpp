@@ -560,6 +560,9 @@ void BoardWidget::createBranchMarkers(){
 void BoardWidget::createChildBranchMarkers(){
     char c = 'A';
     foreach(const Go::NodePtr& node, currentNode_->children()){
+        if (!node->isStone() || node->isPass())
+            continue;
+
         // create text item
         QString str(c);
         QGraphicsSimpleTextItem* branch = scene()->addSimpleText(str);
@@ -587,6 +590,9 @@ void BoardWidget::createSiblingsranchMarkers(){
 
     char c = 'A';
     foreach(const Go::NodePtr& node, parent->children()){
+        if (!node->isStone() || node->isPass())
+            continue;
+
         // current node is not shown
         if (node == currentNode_){
             ++c;
