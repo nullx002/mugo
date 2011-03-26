@@ -340,11 +340,19 @@
    </attribute>
   </widget>
   <action name="actionNew">
+   <property name="icon">
+    <iconset resource="mugo.qrc">
+     <normaloff>:/res/filenew.png</normaloff>:/res/filenew.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;New</string>
    </property>
   </action>
   <action name="actionOpen">
+   <property name="icon">
+    <iconset resource="mugo.qrc">
+     <normaloff>:/res/fileopen.png</normaloff>:/res/fileopen.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Open...</string>
    </property>
@@ -370,6 +378,10 @@
    </property>
   </action>
   <action name="actionSave">
+   <property name="icon">
+    <iconset resource="mugo.qrc">
+     <normaloff>:/res/filesave.png</normaloff>:/res/filesave.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Save</string>
    </property>
@@ -733,6 +745,8 @@
    <header>qundoview.h</header>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="mugo.qrc"/>
+ </resources>
  <connections/>
 </ui>
