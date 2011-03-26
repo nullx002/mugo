@@ -542,8 +542,10 @@ QTreeWidgetItem* MainWindow::createBranchItem(Document* doc, const Go::NodePtr& 
 
     // set node name
     QStringList nodeName;
-    if (node->isStone())
+    if (node->isStone() && !node->isPass())
         nodeName.push_back( Go::coordinateString(view.boardWidget->xsize(), view.boardWidget->ysize(), node->x(), node->y(), false) );
+    else if (node->isStone())
+        nodeName.push_back( tr("Pass") );
     else if (node->information())
         nodeName.push_back( tr("Game Info") );
 

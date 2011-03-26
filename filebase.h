@@ -42,6 +42,7 @@ public:
     virtual bool load(const QFileInfo& fileInfo, QTextCodec* defaultCodec, bool guessCodec=true);
     virtual bool load(const QString& filePath, QTextCodec* defaultCodec, bool guessCodec=true);
     virtual bool load(QFile& file, QTextCodec* defaultCodec, bool guessCodec=true);
+    virtual bool load(const QString& str);
 
     // write
     virtual bool save(const QFileInfo& fileInfo, QTextCodec* codec = NULL);

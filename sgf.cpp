@@ -54,7 +54,8 @@ bool Sgf::parse(QString::const_iterator first, QString::const_iterator last){
     while (first != last){
         if (*first == '('){
             NodePtr root(new Node);
-            if (parseBranch(first, last, root) == false)
+            InformationPtr info;
+            if (parseBranch(first, last, info, root) == false)
                 return false;
 
             if (root->children().size() != 1)
@@ -73,7 +74,7 @@ bool Sgf::parse(QString::const_iterator first, QString::const_iterator last){
 /**
   read branch
 */
-bool Sgf::parseBranch(QString::const_iterator& first, QString::const_iterator last, NodePtr parent){
+bool Sgf::parseBranch(QString::const_iterator& first, QString::const_iterator last, InformationPtr& info, NodePtr parent){
     if (*first != '(')
         return false;
     ++first;
@@ -84,13 +85,13 @@ bool Sgf::parseBranch(QString::const_iterator& first, QString::const_iterator la
             return true;
         }
         else if (*first == '('){
-            if (parseBranch(first, last, parent) == false)
+            if (parseBranch(first, last, info, parent) == false)
                 return false;
         }
 //        else if (*first == ';'){  // root node of cyber oro does not start ';'
         else if (first->isSpace() == false){
             NodePtr node(new Node(parent));
-            if (parseNode(first, last, parent, node) == false)
+            if (parseNode(first, last, info, node) == false)
                 return false;
             parent->children().push_back(node);
             parent = node;
@@ -104,10 +105,9 @@ bool Sgf::parseBranch(QString::const_iterator& first, QString::const_iterator la
 /**
   read node
 */
-bool Sgf::parseNode(QString::const_iterator& first, QString::const_iterator last, NodePtr parent, NodePtr& node){
-    if (*first != ';')
-        return false;
-    ++first;
+bool Sgf::parseNode(QString::const_iterator& first, QString::const_iterator last, InformationPtr& info, NodePtr& node){
+    if (*first == ';')
+        ++first;
 
     while (first != last){
         if (*first == ';' || *first == '(' || *first == ')')
@@ -121,7 +121,7 @@ bool Sgf::parseNode(QString::const_iterator& first, QString::const_iterator last
         if (parseNodeValueList(first, last, valueList) == false)
             return false;
 
-        addPropertyToNode(node, key, valueList);
+        addPropertyToNode(info, node, key, valueList);
 
         if (*first == ';' || *first == '(' || *first == ')' || *first == '[')
             return true;
@@ -203,7 +203,7 @@ bool Sgf::skipSpace(QString::const_iterator& first, QString::const_iterator last
 /**
   set sgf property to node
 */
-bool Sgf::addPropertyToNode(NodePtr& node, const QString& key, const QStringList& valueList){
+bool Sgf::addPropertyToNode(InformationPtr& info, NodePtr& node, const QString& key, const QStringList& valueList){
 /*
 Root Properties             AP, CA, FF, GM, ST, SZ
 Game Info Properties        AN, BR, BT, CP, DT, EV, GN, GC, ON, OT, PB, PC, PW, RE, RO, RU, SO, TM, US, WR, WT
@@ -283,19 +283,29 @@ Miscellaneous Properties    FG, PM, VW
 
     // Move Properties: B, KO, MN, W
     else if (key == "B"){  // black move
+        if (info == NULL)
+            return false;
         int x = -1, y = -1;
         parseMove(valueList[0], x, y);
         node->setColor(eBlack);
-        node->setPos(x, y);
+        if (x < 0 || x >= info->xsize() || y < 0 || y >= info->ysize())
+            node->setPos(-1, -1);
+        else
+            node->setPos(x, y);
     }
 //    else if (key == "KO")  // execute a given move
     else if (key == "MN")  // move number
         node->setMoveNumber(valueList[0].toInt());
     else if (key == "W"){  // white move
+        if (info == NULL)
+            return false;
         int x = -1, y = -1;
         parseMove(valueList[0], x, y);
         node->setColor(eWhite);
-        node->setPos(x, y);
+        if (x < 0 || x >= info->xsize() || y < 0 || y >= info->ysize())
+            node->setPos(-1, -1);
+        else
+            node->setPos(x, y);
     }
 
     // Node Annotation Properties: C, DM, GB, GW, HO, N, UC, V
@@ -343,6 +353,9 @@ Miscellaneous Properties    FG, PM, VW
     // Markup Properties: AR, CR, DD, LB, LN, MA, SL, SQ, TR
     // Timing Properties: BL, OB, OW, WL
     // Miscellaneous Properties: FG, PM, VW
+
+    if (!info && node->information())
+        info = node->information();
 
     return true;
 }

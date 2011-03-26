@@ -69,6 +69,13 @@ bool FileBase::load(QFile& file, QTextCodec* defaultCodec, bool guessCodec){
 }
 
 /**
+  load
+*/
+bool FileBase::load(const QString& str){
+    return parse(str);
+}
+
+/**
   guess codec
   return NULL if codec isn't understood.
 */
@@ -100,7 +107,7 @@ bool FileBase::save(QFile& file, QTextCodec* codec){
     QTextStream str(&file);
     if (codec)
         str.setCodec(codec);
-    return write(str);
+    return save(str);
 }
 
 /**
