@@ -205,120 +205,141 @@ bool Sgf::skipSpace(QString::const_iterator& first, QString::const_iterator last
 */
 bool Sgf::addPropertyToNode(NodePtr& node, const QString& key, const QStringList& valueList){
 /*
-Move Properties             B, KO, MN, W
-Setup Properties            AB, AE, AW, PL
-Node Annotation Properties  C, DM, GB, GW, HO, N, UC, V
-Move Annotation Properties  BM, DO, IT, TE
-Markup Properties           AR, CR, DD, LB, LN, MA, SL, SQ, TR
 Root Properties             AP, CA, FF, GM, ST, SZ
 Game Info Properties        AN, BR, BT, CP, DT, EV, GN, GC, ON, OT, PB, PC, PW, RE, RO, RU, SO, TM, US, WR, WT
+Move Properties             B, KO, MN, W
+Node Annotation Properties  C, DM, GB, GW, HO, N, UC, V
+Move Annotation Properties  BM, DO, IT, TE
+Setup Properties            AB, AE, AW, PL
+Markup Properties           AR, CR, DD, LB, LN, MA, SL, SQ, TR
 Timing Properties           BL, OB, OW, WL
 Miscellaneous Properties    FG, PM, VW
 */
+    if (valueList.empty())
+        return false;
+
     // Root Properties: AP, CA, FF, GM, ST, SZ
     if (key == "AP")  // application name
-        gameInformation(node)->setApplicationName(valueList.join(":"));
+        gameInformation(node)->setApplicationName(valueList[0]);
 //    else if (key == "CA")  // character set
 //    else if (key == "FF")  // file format
 //    else if (key == "GM")  // game type, only support 1
     else if (key == "ST")  // how variations should be shown
-        gameInformation(node)->setVariationStyle(valueList.empty() == false ? valueList[0].toInt() : 0);
+        gameInformation(node)->setVariationStyle(valueList[0].toInt());
     else if (key == "SZ"){  // board size
-        if (valueList.empty() == false){
-            int xsize = 0, ysize = 0;
-            parseNumber(valueList[0], xsize, ysize);
-            if (xsize > 0 && ysize > 0)
-                gameInformation(node)->setSize(xsize, ysize);
-            else if (xsize > 0)
-                gameInformation(node)->setSize(xsize, xsize);
-            else
-                gameInformation(node)->setSize(19, 19);
-        }
+        int xsize = 0, ysize = 0;
+        parseNumber(valueList[0], xsize, ysize);
+        if (xsize > 0 && ysize > 0)
+            gameInformation(node)->setSize(xsize, ysize);
+        else if (xsize > 0)
+            gameInformation(node)->setSize(xsize, xsize);
         else
             gameInformation(node)->setSize(19, 19);
     }
 
     // Game Info Properties: AN, BR, BT, CP, DT, EV, GN, GC, ON, OT, PB, PC, PW, RE, RO, RU, SO, TM, US, WR, WT
     else if (key == "AN")  // name of the person, who made the annotation to the game
-        gameInformation(node)->setAnnotation(valueList.join(":"));
+        gameInformation(node)->setAnnotation(valueList[0]);
     else if (key == "BR")  // black rank
-        gameInformation(node)->setBlackRank(valueList.join(":"));
+        gameInformation(node)->setBlackRank(valueList[0]);
     else if (key == "BT")  // black team
-        gameInformation(node)->setBlackTeam(valueList.join(":"));
+        gameInformation(node)->setBlackTeam(valueList[0]);
     else if (key == "CP")  // copyright
-        gameInformation(node)->setCopyright(valueList.join(":"));
+        gameInformation(node)->setCopyright(valueList[0]);
     else if (key == "DT")  // date
-        gameInformation(node)->setDate(valueList.join(":"));
+        gameInformation(node)->setDate(valueList[0]);
     else if (key == "EV")  // event name
-        gameInformation(node)->setEvent(valueList.join(":"));
+        gameInformation(node)->setEvent(valueList[0]);
     else if (key == "GN")  // game name
-        gameInformation(node)->setGameName(valueList.join(":"));
+        gameInformation(node)->setGameName(valueList[0]);
     else if (key == "GC")  // extra information about the game
-        gameInformation(node)->setGameComment(valueList.join(":"));
+        gameInformation(node)->setGameComment(valueList[0]);
     else if (key == "ON")  // opening, fuseki
-        gameInformation(node)->setOpening(valueList.join(":"));
+        gameInformation(node)->setOpening(valueList[0]);
     else if (key == "OT")  // overtime, byo-yomi
-        gameInformation(node)->setOvertime(valueList.join(":"));
+        gameInformation(node)->setOvertime(valueList[0]);
     else if (key == "PB")  // black player
-        gameInformation(node)->setBlackPlayer(valueList.join(":"));
+        gameInformation(node)->setBlackPlayer(valueList[0]);
     else if (key == "PC")  // place where game was played
-        gameInformation(node)->setPlace(valueList.join(":"));
+        gameInformation(node)->setPlace(valueList[0]);
     else if (key == "PW")  // white player
-        gameInformation(node)->setWhitePlayer(valueList.join(":"));
+        gameInformation(node)->setWhitePlayer(valueList[0]);
     else if (key == "RE")  // result
-        gameInformation(node)->setResult(valueList.join(":"));
+        gameInformation(node)->setResult(valueList[0]);
     else if (key == "RO")  // round
-        gameInformation(node)->setRound(valueList.join(":"));
+        gameInformation(node)->setRound(valueList[0]);
     else if (key == "RU")  // rule
-        gameInformation(node)->setRule(valueList.join(":"));
+        gameInformation(node)->setRule(valueList[0]);
     else if (key == "SO")  // source
-        gameInformation(node)->setSource(valueList.join(":"));
+        gameInformation(node)->setSource(valueList[0]);
     else if (key == "TM")  // time
-        gameInformation(node)->setTime(valueList.join(":"));
+        gameInformation(node)->setTime(valueList[0]);
     else if (key == "US")  // user
-        gameInformation(node)->setUser(valueList.join(":"));
+        gameInformation(node)->setUser(valueList[0]);
     else if (key == "WR")  // white rank
-        gameInformation(node)->setWhiteRank(valueList.join(":"));
+        gameInformation(node)->setWhiteRank(valueList[0]);
     else if (key == "WT")  // white team
-        gameInformation(node)->setWhiteTeam(valueList.join(":"));
+        gameInformation(node)->setWhiteTeam(valueList[0]);
 
     // Move Properties: B, KO, MN, W
     else if (key == "B"){  // black move
-        if (valueList.empty() == false){
-            int x = -1, y = -1;
-            parseMove(valueList[0], x, y);
-            node->setColor(eBlack);
-            node->setPos(x, y);
-        }
+        int x = -1, y = -1;
+        parseMove(valueList[0], x, y);
+        node->setColor(eBlack);
+        node->setPos(x, y);
     }
 //    else if (key == "KO")  // execute a given move
-    else if (key == "MN"){  // move number
-        if (valueList.empty() == false)
-            node->setMoveNumber(valueList[0].toInt());
-    }
+    else if (key == "MN")  // move number
+        node->setMoveNumber(valueList[0].toInt());
     else if (key == "W"){  // white move
-        if (valueList.empty() == false){
-            int x = -1, y = -1;
-            parseMove(valueList[0], x, y);
-            node->setColor(eWhite);
-            node->setPos(x, y);
-        }
+        int x = -1, y = -1;
+        parseMove(valueList[0], x, y);
+        node->setColor(eWhite);
+        node->setPos(x, y);
     }
 
     // Node Annotation Properties: C, DM, GB, GW, HO, N, UC, V
     else if (key == "C")  // comment
-        node->setComment(valueList.join(":"));
+        node->setComment(valueList[0]);
     else if (key == "N")  // node name
-        node->setName(valueList.join(":"));
-//    else if (key == "DM")  // even
-//    else if (key == "GB")  // good for black
-//    else if (key == "GW")  // good for white
-//    else if (key == "HO")  // hotspot
-//    else if (key == "UC")  // unclear
-//    else if (key == "V")   // [real] value: positive values are good for black, negative values are good for white
+        node->setName(valueList[0]);
+    else if (key == "GB")  // good for black
+        node->setNodeAnnotation(valueList[0].toInt() == 1 ? Go::Node::eGoodForBlack : Go::Node::eVeryGoodForBlack);
+    else if (key == "GW")  // good for white
+        node->setNodeAnnotation(valueList[0].toInt() == 1 ? Go::Node::eGoodForWhite : Go::Node::eVeryGoodForWhite);
+    else if (key == "DM")  // even
+        node->setNodeAnnotation(Go::Node::eEven);
+    else if (key == "UC")  // unclear
+        node->setNodeAnnotation(Go::Node::eUnclear);
+    else if (key == "HO")  // hotspot
+        node->setNodeAnnotation2(Go::Node::eHotspot);
+    else if (key == "V")   // [real] value: positive values are good for black, negative values are good for white
+        node->setEstimatedScore(valueList[0].toDouble());
 
     // Move Annotation Properties: BM, DO, IT, TE
+    else if (key == "BM")  // move is bad
+        node->setMoveAnnotation(valueList[0].toInt() == 1 ? Go::Node::eBadMove: Go::Node::eVeryBadMove);
+    else if (key == "DO")  // move is doubtful
+        node->setMoveAnnotation(Go::Node::eDoubtful);
+    else if (key == "IT")  // move is interesting
+        node->setMoveAnnotation(Go::Node::eInteresting);
+    else if (key == "TE")  // move is tesuji (good move)
+        node->setMoveAnnotation(valueList[0].toInt() == 1 ? Go::Node::eGoodMove : Go::Node::eVeryGoodMove);
+
     // Setup Properties: AB, AE, AW, PL
+/*
+    else if (key == "AE")  // add empty
+        foreach(const QString& v, valueList){
+        }
+    else if (key == "AB")  // add black
+    else if (key == "AW")  // add white
+    else if (key == "PL"){  // whose turn
+        if (valueList[0] == "B")
+            node->setNextColor(Go::eBlack);
+        else if (valueList[0] == "W")
+            node->setNextColor(Go::eWhite);
+    }
+*/
     // Markup Properties: AR, CR, DD, LB, LN, MA, SL, SQ, TR
     // Timing Properties: BL, OB, OW, WL
     // Miscellaneous Properties: FG, PM, VW
@@ -463,8 +484,6 @@ bool Sgf::writeGameInformation(QTextStream& str, const InformationPtr& info){
 bool Sgf::writeNode(QTextStream& str, const NodePtr& node){
 /*
 Setup Properties            AB, AE, AW, PL
-Node Annotation Properties  C, DM, GB, GW, HO, N, UC, V
-Move Annotation Properties  BM, DO, IT, TE
 Markup Properties           AR, CR, DD, LB, LN, MA, SL, SQ, TR
 Timing Properties           BL, OB, OW, WL
 Miscellaneous Properties    FG, PM, VW
@@ -491,6 +510,55 @@ Miscellaneous Properties    FG, PM, VW
         str << "C[" << node->comment() << ']';
     if (node->name().isEmpty() == false)
         str << "N[" << node->name() << ']';
+    switch(node->nodeAnnotation()){
+        case Go::Node::eGoodForBlack:
+            str << "GB[1]";
+            break;
+        case Go::Node::eVeryGoodForBlack:
+            str << "GB[2]";
+            break;
+        case Go::Node::eGoodForWhite:
+            str << "GW[1]";
+            break;
+        case Go::Node::eVeryGoodForWhite:
+            str << "GW[2]";
+            break;
+        case Go::Node::eEven:
+            str << "DM[]";
+            break;
+        case Go::Node::eUnclear:
+            str << "UC[]";
+            break;
+    }
+    switch(node->nodeAnnotation2()){
+        case Go::Node::eHotspot:
+            str << "HO[]";
+            break;
+    }
+    if (node->hasEstimatedScore())
+        str << "V[" << node->estimatedScore() << ']';
+
+    //Move Annotation Properties  BM, DO, IT, TE
+    switch(node->moveAnnotation()){
+        case Go::Node::eGoodMove:
+            str << "TE[1]";
+            break;
+        case Go::Node::eVeryGoodMove:
+            str << "TE[2]";
+            break;
+        case Go::Node::eBadMove:
+            str << "BM[1]";
+            break;
+        case Go::Node::eVeryBadMove:
+            str << "BM[2]";
+            break;
+        case Go::Node::eDoubtful:
+            str << "DO[]";
+            break;
+        case Go::Node::eInteresting:
+            str << "IT[]";
+            break;
+    }
 
     return true;
 }
