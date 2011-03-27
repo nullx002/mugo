@@ -85,7 +85,6 @@ protected:
     void initialize();
 
     // set graphics items position
-    void setItemsPosition();
     void setItemsPosition(const QSize& size);
     void setVLinesPosition(int x, int y, int gridSize);
     void setHLinesPosition(int x, int y, int gridSize);
@@ -142,7 +141,10 @@ protected:
     QList<QGraphicsLineItem*> vLines;
     QList<QGraphicsLineItem*> hLines;
     QList<QGraphicsEllipseItem*> stars;
+    QGraphicsItem* blackStone_;
+    QGraphicsItem* whiteStone_;
 
+    Go::Color nextColor_;
     EditMode editMode_;
     bool showVariation_;
 

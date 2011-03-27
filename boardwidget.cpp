@@ -27,6 +27,9 @@
 BoardWidget::BoardWidget(QWidget* parent)
     : QGraphicsView(parent)
     , document_(NULL)
+    , blackStone_(NULL)
+    , whiteStone_(NULL)
+    , nextColor_(Go::eBlack)
     , editMode_(eAlternateMove)
     , showVariation_(true)
 {
@@ -39,6 +42,9 @@ BoardWidget::BoardWidget(QWidget* parent)
 BoardWidget::BoardWidget(GoDocument* doc, QWidget* parent)
     : QGraphicsView(parent)
     , document_(doc)
+    , blackStone_(NULL)
+    , whiteStone_(NULL)
+    , nextColor_(Go::eBlack)
     , editMode_(eAlternateMove)
     , showVariation_(true)
 {
@@ -60,19 +66,60 @@ void BoardWidget::initialize(){
     board  = scene()->addRect(0, 0, 1, 1, QPen(Qt::NoPen), QBrush(BOARD_COLOR));
     shadow->setZValue(0);
     board->setZValue(1);
+
+    setMouseTracking(true);
 }
 
 /**
   resize event
 */
 void BoardWidget::resizeEvent(QResizeEvent* e){
+    // set items position
     setItemsPosition(e->size());
+
+    // create black and white stones
+    // these point to next stone.
+    delete blackStone_;
+    blackStone_ = createStoneItem(Go::eBlack, 0, 0);
+    blackStone_->hide();
+    blackStone_->setOpacity(0.5);
+    delete whiteStone_;
+    whiteStone_ = createStoneItem(Go::eWhite, 0, 0);
+    whiteStone_->hide();
+    whiteStone_->setOpacity(0.5);
 }
 
 /**
   mouse move event
 */
 void BoardWidget::mouseMoveEvent(QMouseEvent* e){
+    blackStone_->hide();
+    whiteStone_->hide();
+
+    // get sgf position from mouse event
+    int sgfX, sgfY;
+    if (viewToSgfCoordinate(e->x(), e->y(), sgfX, sgfY) == false)
+        return;
+
+    // if event position has stone, transparent stone isn't shown.
+    if (data[sgfY][sgfX].color != Go::eDame)
+        return;
+
+    // get stone position from sgf coordinate
+    qreal x, y;
+    if (sgfToViewCoordinate(sgfX, sgfY, x, y) == false)
+        return;
+
+    // stone size
+    qreal size = getGridSize() * 0.95;
+
+    // point where you put next stone.
+    QGraphicsEllipseItem* blackEllipse = dynamic_cast<QGraphicsEllipseItem*>(blackStone_);
+    QGraphicsEllipseItem* whiteEllipse = dynamic_cast<QGraphicsEllipseItem*>(whiteStone_);
+    blackEllipse->setRect(x-size/2.0, y-size/2.0, size, size);
+    whiteEllipse->setRect(x-size/2.0, y-size/2.0, size, size);
+    blackStone_->setVisible(nextColor_ == Go::eBlack);
+    whiteStone_->setVisible(nextColor_ == Go::eWhite);
 }
 
 /**
@@ -214,13 +261,6 @@ bool BoardWidget::setNode(const Go::NodePtr& node){
 }
 
 /**
-  set scene items position in board area
-*/
-void BoardWidget::setItemsPosition(){
-    setItemsPosition(geometry().size());
-}
-
-/**
   set scene items position in rect area
 */
 void BoardWidget::setItemsPosition(const QSize& size){
@@ -349,6 +389,9 @@ void BoardWidget::createBoardBuffer(){
         // add white stones
         foreach (const QPoint& p, node->whiteStones())
             buffer[p.y()][p.x()] = Go::eWhite;
+
+        // next color
+        nextColor_ = node->nextColor();
 
         if (node == currentNode_)
             break;
@@ -663,8 +706,9 @@ bool BoardWidget::viewToSgfCoordinate(qreal viewX, qreal viewY, int& sgfX, int& 
     qreal size = getGridSize();
 
 //    if ((rotate % 2) == 0){
-        sgfX = static_cast<int>( (viewX - vLines[0]->line().x1() + size / 2.0) / size );
-        sgfY = static_cast<int>( (viewY - hLines[0]->line().y1() + size / 2.0) / size );
+        sgfX = floor( (viewX - vLines[0]->line().x1() + size / 2.0) / size );
+        sgfY = floor( (viewY - hLines[0]->line().y1() + size / 2.0) / size );
+qDebug() << viewX << vLines[0]->line().x1() << ( (viewX - vLines[0]->line().x1() + size / 2.0) / size ) << sgfX;
 //    }
 //    else{
 //        sgfX = (fabs(viewY - vLines[0]->line().y1()) + size / 2.0) / size;
