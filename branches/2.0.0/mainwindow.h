@@ -67,7 +67,7 @@ public:
 public slots:
     /// @name new, open, save, close
     bool fileNew(QTextCodec* codec=NULL, int xsize=19, int ysize=19, double komi=6.5, int handicap=0);
-    bool fileOpen(const QString& fname, QTextCodec* codec=NULL, bool guessCodec=true, bool newTab=true);
+    bool fileOpen(const QString& fname, QTextCodec* codec=NULL, bool guessCodec=true);
     bool fileSave(GoDocument* doc);
     bool fileSaveAs(GoDocument* doc);
     bool fileSaveAs(GoDocument* doc, const QFileInfo& fileInfo);
@@ -81,6 +81,7 @@ protected:
 
     /// @name initialize
     void initializeMenu();
+    void createEncodingMenu();
 
     /// @name create new tab
     bool createNewTab(Document* doc);
@@ -109,11 +110,51 @@ private slots:
     /// @name slot for file menu
     void on_actionNew_triggered();
     void on_actionOpen_triggered();
+    void on_actionOpenURL_triggered();
     void on_actionCloseTab_triggered();
     void on_actionCloseAllTabs_triggered();
     void on_actionSave_triggered();
     void on_actionSaveAs_triggered();
+    void on_actionExportBoardAsImage_triggered();
+    void on_actionExportAsciiToClipboard_triggered();
+    void on_actionPrint_triggered();
     void on_actionExit_triggered();
+
+    /// @name slot for file reload menu
+    void on_actionSystem_triggered();
+    void on_actionUTF8_triggered();
+    void on_actionISO_8859_1_triggered();
+    void on_actionISO_8859_15_triggered();
+    void on_actionWindows_1252_triggered();
+    void on_actionISO_8859_14_triggered();
+    void on_actionISO_8859_7_triggered();
+    void on_actionWindows_1253_triggered();
+    void on_actionISO_8859_10_triggered();
+    void on_actionISO_8859_3_triggered();
+    void on_actionISO_8859_4_triggered();
+    void on_actionISO_8859_13_triggered();
+    void on_actionWindows_1257_triggered();
+    void on_actionISO_8859_2_triggered();
+    void on_actionWindows_1250_triggered();
+    void on_actionISO_8859_5_triggered();
+    void on_actionWindows_1251_triggered();
+    void on_actionKOI8_R_triggered();
+    void on_actionKOI8_U_triggered();
+    void on_actionISO_8859_16_triggered();
+    void on_actionISO_8859_11_triggered();
+    void on_actionISO_8859_9_triggered();
+    void on_actionWindows_1254_triggered();
+    void on_actionWindows_1258_triggered();
+    void on_actionISO_8859_6_triggered();
+    void on_actionWindows_1256_triggered();
+    void on_actionWindows_1255_triggered();
+    void on_actionISO8859_8_triggered();
+    void on_actionGB2312_triggered();
+    void on_actionBig5_triggered();
+    void on_actionEucKR_triggered();
+    void on_actionEucJP_triggered();
+    void on_actionISO_2022_JP_triggered();
+    void on_actionShiftJIS_triggered();
 
     /// @name slot for document
     void on_sgfDocument_nodeAdded(const Go::NodePtr& node);

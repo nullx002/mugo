@@ -69,17 +69,15 @@ class MugoApplication : public QApplication{
         void setDefaultCodec(QTextCodec* codec){ defaultCodec_ = codec; }
         QTextCodec* defaultCodec() const{ return defaultCodec_; }
 
-/*
         void setEncodingActions( const QList<QAction*>& actions ){ encodingActions_ = actions; }
         const QList<QAction*>& encodingActions() const{ return encodingActions_; }
 
         void setCodecs( QList<QTextCodec*>& codecs ){ codecs_ = codecs; }
         const QList<QTextCodec*>& codecs() const{ return codecs_; }
-*/
 
     private:
         QTextCodec* defaultCodec_;
-        QList<QAction*>    encodingActions_;
+        QList<QAction*> encodingActions_;
         QList<QTextCodec*> codecs_;
 };
 

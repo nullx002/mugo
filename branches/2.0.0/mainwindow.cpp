@@ -16,13 +16,14 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include <QDebug>
+#include <QTextCodec>
 #include <QCloseEvent>
+#include <QMessageBox>
 #include <QFileDialog>
 #include <QLabel>
 #include <QComboBox>
 #include <QTreeWidget>
 #include <QPlainTextEdit>
-#include <QMessageBox>
 #include "mugoapp.h"
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -100,19 +101,19 @@ bool MainWindow::fileNew(QTextCodec* codec, int xsize, int ysize, double komi, i
   open exist file in new tab.
   if file is already opened, document will be active.
 */
-bool MainWindow::fileOpen(const QString& fname, QTextCodec* codec, bool guessCodec, bool newTab){
+bool MainWindow::fileOpen(const QString& fname, QTextCodec* codec, bool guessCodec){
     // find document from opened document list,
     // and show document if document found.
     DocViewData::iterator iter = docView.begin();
     while (iter != docView.end()){
         if (iter.key()->fileInfo() == fname){
-            ui->boardTabWidget->setCurrentWidget( iter.value().boardWidget );
-            return true;
+            ui->boardTabWidget->setCurrentWidget( docView[iter.key()].boardWidget );
+            break;
         }
         ++iter;
     }
 
-    // if codec isn't designated, use default codec of application
+    // if codec isn't designated, default codec of application is used.
     if (codec == NULL)
         codec = mugoApp()->defaultCodec();
 
@@ -120,7 +121,7 @@ bool MainWindow::fileOpen(const QString& fname, QTextCodec* codec, bool guessCod
     QFileInfo info(fname);
     QString ext = info.suffix().toLower();
 
-    GoDocument* doc = NULL;
+    SgfDocument* doc = NULL;
     if (ext.compare("sgf") == 0){
         doc = new SgfDocument(this);
         if (doc->open(fname, codec, guessCodec) == false){
@@ -225,17 +226,16 @@ bool MainWindow::closeAllDocuments(){
   create action and actino group
 */
 void MainWindow::initializeMenu(){
+    // Encoding
+    createEncodingMenu();
+
     // File
     ui->actionNew->setShortcut(QKeySequence::New);
     ui->actionOpen->setShortcut(QKeySequence::Open);
     ui->actionCloseTab->setShortcut(QKeySequence::Close);
     ui->actionSave->setShortcut(QKeySequence::Save);
     ui->actionSaveAs->setShortcut(QKeySequence::SaveAs);
-#ifdef Q_WS_WIN
-    ui->actionExit->setShortcut(Qt::CTRL + Qt::Key_Q);
-#else
     ui->actionExit->setShortcut(QKeySequence::Quit);
-#endif
 
     // Edit -> undo/redo
     undoAction = undoGroup.createUndoAction(this);
@@ -263,6 +263,175 @@ void MainWindow::initializeMenu(){
     ui->menuToolbars->addAction( ui->viewToolBar->toggleViewAction() );
     ui->menuToolbars->addAction( ui->collectionToolBar->toggleViewAction() );
     ui->menuToolbars->addAction( ui->playToolBar->toggleViewAction() );
+}
+
+/**
+  create reload menu
+*/
+void MainWindow::createEncodingMenu(){
+    QAction* actions[] = {
+        ui->actionSystem,
+        ui->actionUTF8,
+        ui->actionISO_8859_1,
+        ui->actionISO_8859_15,
+        ui->actionWindows_1252,
+        ui->actionISO_8859_14,
+        ui->actionISO_8859_7,
+        ui->actionWindows_1253,
+        ui->actionISO_8859_10,
+        ui->actionISO_8859_3,
+        ui->actionISO_8859_4,
+        ui->actionISO_8859_13,
+        ui->actionWindows_1257,
+        ui->actionISO_8859_2,
+        ui->actionWindows_1250,
+        ui->actionISO_8859_5,
+        ui->actionWindows_1251,
+        ui->actionKOI8_R,
+        ui->actionKOI8_U,
+        ui->actionISO_8859_16,
+        ui->actionISO_8859_11,
+        ui->actionISO_8859_9,
+        ui->actionWindows_1254,
+        ui->actionWindows_1258,
+        ui->actionISO_8859_6,
+        ui->actionWindows_1256,
+        ui->actionWindows_1255,
+        ui->actionISO8859_8,
+        ui->actionGB2312,
+        ui->actionBig5,
+        ui->actionEucKR,
+        ui->actionEucJP,
+        ui->actionISO_2022_JP,
+        ui->actionShiftJIS,
+    };
+
+    const char* codecs[] = {
+        "System",
+        "UTF8",
+        "ISO-8859-1",
+        "ISO-8859-15",
+        "Windows_1252",
+        "ISO_8859_14",
+        "ISO_8859_7",
+        "Windows_1253",
+        "ISO_8859_10",
+        "ISO_8859_3",
+        "ISO_8859_4",
+        "ISO_8859_13",
+        "Windows_1257",
+        "ISO_8859_2",
+        "Windows_1250",
+        "ISO_8859_5",
+        "Windows_1251",
+        "KOI8_R",
+        "KOI8_U",
+        "ISO_8859_16",
+        "ISO_8859_11",
+        "ISO_8859_9",
+        "Windows_1254",
+        "Windows_1258",
+        "ISO_8859_6",
+        "Windows_1256",
+        "Windows_1255",
+        "ISO8859_8",
+        "GB2312",
+        "Big5",
+        "EucKR",
+        "EucJP",
+        "ISO-2022-JP",
+        "ShiftJIS",
+    };
+
+    int N = sizeof(actions) / sizeof(actions[0]);
+
+    QActionGroup* group = new QActionGroup(this);
+    QList<QAction*> actionList;
+    QList<QTextCodec*> codecList;
+
+    for (int i=0; i<N; ++i){
+        group->addAction(actions[i]);
+        actionList.push_back(actions[i]);
+        codecList.push_back(QTextCodec::codecForName(codecs[i]));
+    }
+    mugoApp()->setEncodingActions(actionList);
+    mugoApp()->setCodecs(codecList);
+
+/*
+"System"
+
+"UTF-8"
+
+"ISO-8859-1"
+"ISO-8859-15"
+"windows-1252"
+"ISO-8859-14"
+"ISO-8859-7"
+"windows-1253"
+"ISO-8859-10"
+"ISO-8859-3"
+
+"ISO-8859-4"
+"ISO-8859-13"
+"windows-1257"
+"ISO-8859-2"
+"windows-1250"
+"ISO-8859-5"
+"windows-1251"
+"KOI8-R"
+"KOI8-U"
+"ISO-8859-16"
+
+"TIS-620" (ISO-8859-11)
+"ISO-8859-9"
+"windows-1254"
+"windows-1258"
+
+"ISO-8859-6"
+"windows-1256"
+"windows-1255"
+"ISO-8859-8"
+
+"GB2312"
+"Big5"
+
+"EUC-KR"
+
+"EUC-JP"
+"ISO-2022-JP"
+"Shift_JIS"
+
+
+
+
+"UTF-32LE"
+"UTF-32BE"
+"UTF-32"
+"UTF-16LE"
+"UTF-16BE"
+"UTF-16"
+"roman8"
+"TIS-620"
+"WINSAMI2"
+"Apple Roman"
+"IBM866"
+"IBM874"
+"IBM850"
+"Iscii-Mlm"
+"Iscii-Knd"
+"Iscii-Tlg"
+"Iscii-Tml"
+"Iscii-Ori"
+"Iscii-Gjr"
+"Iscii-Pnj"
+"Iscii-Bng"
+"Iscii-Dev"
+"TSCII"
+"GB18030"
+"GBK"
+"cp949"
+"Big5-HKSCS"
+*/
 }
 
 /**
@@ -663,6 +832,14 @@ void MainWindow::on_actionOpen_triggered()
 }
 
 /**
+  File -> Open URL
+*/
+void MainWindow::on_actionOpenURL_triggered()
+{
+    QMessageBox::information(this, "mugo2", "Not Implemented");
+}
+
+/**
   File -> Close Tab
   close active tab
 */
@@ -718,6 +895,30 @@ void MainWindow::on_actionSaveAs_triggered()
 }
 
 /**
+  File -> Export Board as Image
+*/
+void MainWindow::on_actionExportBoardAsImage_triggered()
+{
+    QMessageBox::information(this, "mugo2", "Not Implemented");
+}
+
+/**
+  File -> Export Ascii to Clipboard
+*/
+void MainWindow::on_actionExportAsciiToClipboard_triggered()
+{
+    QMessageBox::information(this, "mugo2", "Not Implemented");
+}
+
+/**
+  File -> Print
+*/
+void MainWindow::on_actionPrint_triggered()
+{
+    QMessageBox::information(this, "mugo2", "Not Implemented");
+}
+
+/**
   File -> Exit
   exit application
 */
@@ -725,6 +926,293 @@ void MainWindow::on_actionExit_triggered()
 {
     // window close
     close();
+}
+
+/**
+  File -> Reload -> System
+*/
+void MainWindow::on_actionSystem_triggered()
+{
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // get codec
+    int i = mugoApp()->encodingActions().indexOf(ui->actionSystem);
+    QTextCodec* codec = mugoApp()->codecs().at(i);
+
+    // file name
+    QFileInfo fileInfo = board->document()->fileInfo();
+
+    // reload
+    if (closeDocument(board->document()) == false)
+        return;
+    fileOpen(fileInfo.filePath(), codec, false);
+}
+
+/**
+  File -> Reload -> UTF-8
+*/
+void MainWindow::on_actionUTF8_triggered()
+{
+    qDebug() << "utf-8";
+}
+
+/**
+  File -> Reload -> ISO-8859-1
+*/
+void MainWindow::on_actionISO_8859_1_triggered()
+{
+    qDebug() << "iso-8859-1";
+}
+
+/**
+  File -> Reload -> ISO-8859-15
+*/
+void MainWindow::on_actionISO_8859_15_triggered()
+{
+    qDebug() << "iso-8859-15";
+}
+
+/**
+  File -> Reload -> Windows-1252
+*/
+void MainWindow::on_actionWindows_1252_triggered()
+{
+    qDebug() << "windows-1252";
+}
+
+/**
+  File -> Reload -> ISO-8859-14
+*/
+void MainWindow::on_actionISO_8859_14_triggered()
+{
+    qDebug() << "iso-8859-14";
+}
+
+/**
+  File -> Reload -> ISO-8859-7
+*/
+void MainWindow::on_actionISO_8859_7_triggered()
+{
+    qDebug() << "iso-8859-7";
+}
+
+/**
+  File -> Reload -> Windows-1253
+*/
+void MainWindow::on_actionWindows_1253_triggered()
+{
+    qDebug() << "windows-1253";
+}
+
+/**
+  File -> Reload -> ISO-8859-10
+*/
+void MainWindow::on_actionISO_8859_10_triggered()
+{
+    qDebug() << "iso-8859-10";
+}
+
+/**
+  File -> Reload -> ISO-8859-3
+*/
+void MainWindow::on_actionISO_8859_3_triggered()
+{
+    qDebug() << "iso-8859-3";
+}
+
+/**
+  File -> Reload -> ISO-8859-4
+*/
+void MainWindow::on_actionISO_8859_4_triggered()
+{
+    qDebug() << "iso-8859-4";
+}
+
+/**
+  File -> Reload -> ISO-8859-13
+*/
+void MainWindow::on_actionISO_8859_13_triggered()
+{
+    qDebug() << "iso-8859-13";
+}
+
+/**
+  File -> Reload -> Windows-1257
+*/
+void MainWindow::on_actionWindows_1257_triggered()
+{
+    qDebug() << "windows 1257";
+}
+
+/**
+  File -> Reload -> ISO-8859-2
+*/
+void MainWindow::on_actionISO_8859_2_triggered()
+{
+    qDebug() << "iso-8859-2";
+}
+
+/**
+  File -> Reload -> Windows-1250
+*/
+void MainWindow::on_actionWindows_1250_triggered()
+{
+    qDebug() << "windows 1250";
+}
+
+/**
+  File -> Reload -> ISO-8859-5
+*/
+void MainWindow::on_actionISO_8859_5_triggered()
+{
+    qDebug() << "iso-8859-5";
+}
+
+/**
+  File -> Reload -> Windows-1251
+*/
+void MainWindow::on_actionWindows_1251_triggered()
+{
+    qDebug() << "windows 1251";
+}
+
+/**
+  File -> Reload -> KOI8-R
+*/
+void MainWindow::on_actionKOI8_R_triggered()
+{
+    qDebug() << "koi8-r";
+}
+
+/**
+  File -> Reload -> KOI8-U
+*/
+void MainWindow::on_actionKOI8_U_triggered()
+{
+    qDebug() << "koi8-u";
+}
+
+/**
+  File -> Reload -> ISO-8859-16
+*/
+void MainWindow::on_actionISO_8859_16_triggered()
+{
+    qDebug() << "iso-8859-16";
+}
+
+/**
+  File -> Reload -> ISO-8859-11
+*/
+void MainWindow::on_actionISO_8859_11_triggered()
+{
+    qDebug() << "iso-8859-11";
+}
+
+/**
+  File -> Reload -> ISO-8859-9
+*/
+void MainWindow::on_actionISO_8859_9_triggered()
+{
+    qDebug() << "iso-8859-9";
+}
+
+/**
+  File -> Reload -> Windows-1254
+*/
+void MainWindow::on_actionWindows_1254_triggered()
+{
+    qDebug() << "windows 1254";
+}
+
+/**
+  File -> Reload -> Windows-1258
+*/
+void MainWindow::on_actionWindows_1258_triggered()
+{
+    qDebug() << "windows 1258";
+}
+
+/**
+  File -> Reload -> ISO-8859-6
+*/
+void MainWindow::on_actionISO_8859_6_triggered()
+{
+    qDebug() << "iso-8859-6";
+}
+
+/**
+  File -> Reload -> Windows-1256
+*/
+void MainWindow::on_actionWindows_1256_triggered()
+{
+    qDebug() << "windows 1256";
+}
+
+/**
+  File -> Reload -> Windows-1255
+*/
+void MainWindow::on_actionWindows_1255_triggered()
+{
+    qDebug() << "windows 1255";
+}
+
+/**
+  File -> Reload -> ISO-8859-8
+*/
+void MainWindow::on_actionISO8859_8_triggered()
+{
+    qDebug() << "iso-8859-8";
+}
+
+/**
+  File -> Reload -> GB2312
+*/
+void MainWindow::on_actionGB2312_triggered()
+{
+    qDebug() << "GB2312";
+}
+
+/**
+  File -> Reload -> Big5
+*/
+void MainWindow::on_actionBig5_triggered()
+{
+    qDebug() << "Big5";
+}
+
+/**
+  File -> Reload -> EUC-KR
+*/
+void MainWindow::on_actionEucKR_triggered()
+{
+    qDebug() << "euc-kr";
+}
+
+/**
+  File -> Reload -> EUC-JP
+*/
+void MainWindow::on_actionEucJP_triggered()
+{
+    qDebug() << "euc-jp";
+}
+
+/**
+  File -> Reload -> JIS
+*/
+void MainWindow::on_actionISO_2022_JP_triggered()
+{
+    qDebug() << "jis";
+}
+
+/**
+  File -> Reload -> Shift_JIS
+*/
+void MainWindow::on_actionShiftJIS_triggered()
+{
+    qDebug() << "shift_jis";
 }
 
 /**

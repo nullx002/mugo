@@ -113,7 +113,7 @@ void BoardWidget::mouseMoveEvent(QMouseEvent* e){
     // stone size
     qreal size = getGridSize() * 0.95;
 
-    // point where you put next stone.
+    // transparent stone is shown at mouse position.
     QGraphicsEllipseItem* blackEllipse = dynamic_cast<QGraphicsEllipseItem*>(blackStone_);
     QGraphicsEllipseItem* whiteEllipse = dynamic_cast<QGraphicsEllipseItem*>(whiteStone_);
     blackEllipse->setRect(x-size/2.0, y-size/2.0, size, size);
@@ -167,7 +167,13 @@ bool BoardWidget::setDocument(GoDocument* doc){
     document_ = doc;
     connect(document_, SIGNAL(nodeAdded(const Go::NodePtr&)), SLOT(on_document_nodeAdded(const Go::NodePtr&)));
     connect(document_, SIGNAL(nodeDeleted(const Go::NodePtr&)), SLOT(on_document_nodeDeleted(const Go::NodePtr&)));
-    return setGame(document_->gameList.front());
+    if (setGame(document_->gameList.front()) == false)
+        return false;
+
+    // set items position
+    setItemsPosition(geometry().size());
+
+    return true;
 }
 
 /**
@@ -708,7 +714,6 @@ bool BoardWidget::viewToSgfCoordinate(qreal viewX, qreal viewY, int& sgfX, int& 
 //    if ((rotate % 2) == 0){
         sgfX = floor( (viewX - vLines[0]->line().x1() + size / 2.0) / size );
         sgfY = floor( (viewY - hLines[0]->line().y1() + size / 2.0) / size );
-qDebug() << viewX << vLines[0]->line().x1() << ( (viewX - vLines[0]->line().x1() + size / 2.0) / size ) << sgfX;
 //    }
 //    else{
 //        sgfX = (fabs(viewY - vLines[0]->line().y1()) + size / 2.0) / size;
