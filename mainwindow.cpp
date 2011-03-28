@@ -297,7 +297,7 @@ void MainWindow::createEncodingMenu(){
         ui->actionISO_8859_6,
         ui->actionWindows_1256,
         ui->actionWindows_1255,
-        ui->actionISO8859_8,
+        ui->actionISO_8859_8,
         ui->actionGB2312,
         ui->actionBig5,
         ui->actionEucKR,
@@ -581,6 +581,27 @@ bool MainWindow::getSaveFileName(const QString& initialPath, QString& fname, QTe
 */
 
     return true;
+}
+
+/**
+  Reload document with specified codec
+*/
+bool MainWindow::reload(QTextCodec* codec)
+{
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return false;
+
+    // file name
+    QFileInfo fileInfo = board->document()->fileInfo();
+    if (!fileInfo.isReadable())
+        return false;
+
+    // reload
+    if (closeDocument(board->document()) == false)
+        return false;
+    return fileOpen(fileInfo.filePath(), codec, false);
 }
 
 /**
@@ -933,22 +954,10 @@ void MainWindow::on_actionExit_triggered()
 */
 void MainWindow::on_actionSystem_triggered()
 {
-    // get active board widget
-    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
-    if (board == NULL)
-        return;
-
     // get codec
     int i = mugoApp()->encodingActions().indexOf(ui->actionSystem);
     QTextCodec* codec = mugoApp()->codecs().at(i);
-
-    // file name
-    QFileInfo fileInfo = board->document()->fileInfo();
-
-    // reload
-    if (closeDocument(board->document()) == false)
-        return;
-    fileOpen(fileInfo.filePath(), codec, false);
+    reload(codec);
 }
 
 /**
@@ -956,7 +965,10 @@ void MainWindow::on_actionSystem_triggered()
 */
 void MainWindow::on_actionUTF8_triggered()
 {
-    qDebug() << "utf-8";
+    // get codec
+    int i = mugoApp()->encodingActions().indexOf(ui->actionUTF8);
+    QTextCodec* codec = mugoApp()->codecs().at(i);
+    reload(codec);
 }
 
 /**
@@ -964,7 +976,10 @@ void MainWindow::on_actionUTF8_triggered()
 */
 void MainWindow::on_actionISO_8859_1_triggered()
 {
-    qDebug() << "iso-8859-1";
+    // get codec
+    int i = mugoApp()->encodingActions().indexOf(ui->actionISO_8859_1);
+    QTextCodec* codec = mugoApp()->codecs().at(i);
+    reload(codec);
 }
 
 /**
@@ -972,7 +987,10 @@ void MainWindow::on_actionISO_8859_1_triggered()
 */
 void MainWindow::on_actionISO_8859_15_triggered()
 {
-    qDebug() << "iso-8859-15";
+    // get codec
+    int i = mugoApp()->encodingActions().indexOf(ui->actionISO_8859_15);
+    QTextCodec* codec = mugoApp()->codecs().at(i);
+    reload(codec);
 }
 
 /**
@@ -980,7 +998,10 @@ void MainWindow::on_actionISO_8859_15_triggered()
 */
 void MainWindow::on_actionWindows_1252_triggered()
 {
-    qDebug() << "windows-1252";
+    // get codec
+    int i = mugoApp()->encodingActions().indexOf(ui->actionWindows_1252);
+    QTextCodec* codec = mugoApp()->codecs().at(i);
+    reload(codec);
 }
 
 /**
@@ -988,7 +1009,10 @@ void MainWindow::on_actionWindows_1252_triggered()
 */
 void MainWindow::on_actionISO_8859_14_triggered()
 {
-    qDebug() << "iso-8859-14";
+    // get codec
+    int i = mugoApp()->encodingActions().indexOf(ui->actionISO_8859_14);
+    QTextCodec* codec = mugoApp()->codecs().at(i);
+    reload(codec);
 }
 
 /**
@@ -996,7 +1020,10 @@ void MainWindow::on_actionISO_8859_14_triggered()
 */
 void MainWindow::on_actionISO_8859_7_triggered()
 {
-    qDebug() << "iso-8859-7";
+    // get codec
+    int i = mugoApp()->encodingActions().indexOf(ui->actionISO_8859_7);
+    QTextCodec* codec = mugoApp()->codecs().at(i);
+    reload(codec);
 }
 
 /**
@@ -1004,7 +1031,10 @@ void MainWindow::on_actionISO_8859_7_triggered()
 */
 void MainWindow::on_actionWindows_1253_triggered()
 {
-    qDebug() << "windows-1253";
+    // get codec
+    int i = mugoApp()->encodingActions().indexOf(ui->actionWindows_1253);
+    QTextCodec* codec = mugoApp()->codecs().at(i);
+    reload(codec);
 }
 
 /**
@@ -1012,7 +1042,10 @@ void MainWindow::on_actionWindows_1253_triggered()
 */
 void MainWindow::on_actionISO_8859_10_triggered()
 {
-    qDebug() << "iso-8859-10";
+    // get codec
+    int i = mugoApp()->encodingActions().indexOf(ui->actionISO_8859_10);
+    QTextCodec* codec = mugoApp()->codecs().at(i);
+    reload(codec);
 }
 
 /**
@@ -1020,7 +1053,10 @@ void MainWindow::on_actionISO_8859_10_triggered()
 */
 void MainWindow::on_actionISO_8859_3_triggered()
 {
-    qDebug() << "iso-8859-3";
+    // get codec
+    int i = mugoApp()->encodingActions().indexOf(ui->actionISO_8859_3);
+    QTextCodec* codec = mugoApp()->codecs().at(i);
+    reload(codec);
 }
 
 /**
@@ -1028,7 +1064,10 @@ void MainWindow::on_actionISO_8859_3_triggered()
 */
 void MainWindow::on_actionISO_8859_4_triggered()
 {
-    qDebug() << "iso-8859-4";
+    // get codec
+    int i = mugoApp()->encodingActions().indexOf(ui->actionISO_8859_4);
+    QTextCodec* codec = mugoApp()->codecs().at(i);
+    reload(codec);
 }
 
 /**
@@ -1036,7 +1075,10 @@ void MainWindow::on_actionISO_8859_4_triggered()
 */
 void MainWindow::on_actionISO_8859_13_triggered()
 {
-    qDebug() << "iso-8859-13";
+    // get codec
+    int i = mugoApp()->encodingActions().indexOf(ui->actionISO_8859_13);
+    QTextCodec* codec = mugoApp()->codecs().at(i);
+    reload(codec);
 }
 
 /**
@@ -1044,7 +1086,10 @@ void MainWindow::on_actionISO_8859_13_triggered()
 */
 void MainWindow::on_actionWindows_1257_triggered()
 {
-    qDebug() << "windows 1257";
+    // get codec
+    int i = mugoApp()->encodingActions().indexOf(ui->actionWindows_1257);
+    QTextCodec* codec = mugoApp()->codecs().at(i);
+    reload(codec);
 }
 
 /**
@@ -1052,7 +1097,10 @@ void MainWindow::on_actionWindows_1257_triggered()
 */
 void MainWindow::on_actionISO_8859_2_triggered()
 {
-    qDebug() << "iso-8859-2";
+    // get codec
+    int i = mugoApp()->encodingActions().indexOf(ui->actionISO_8859_2);
+    QTextCodec* codec = mugoApp()->codecs().at(i);
+    reload(codec);
 }
 
 /**
@@ -1060,7 +1108,10 @@ void MainWindow::on_actionISO_8859_2_triggered()
 */
 void MainWindow::on_actionWindows_1250_triggered()
 {
-    qDebug() << "windows 1250";
+    // get codec
+    int i = mugoApp()->encodingActions().indexOf(ui->actionWindows_1250);
+    QTextCodec* codec = mugoApp()->codecs().at(i);
+    reload(codec);
 }
 
 /**
@@ -1068,7 +1119,10 @@ void MainWindow::on_actionWindows_1250_triggered()
 */
 void MainWindow::on_actionISO_8859_5_triggered()
 {
-    qDebug() << "iso-8859-5";
+    // get codec
+    int i = mugoApp()->encodingActions().indexOf(ui->actionISO_8859_5);
+    QTextCodec* codec = mugoApp()->codecs().at(i);
+    reload(codec);
 }
 
 /**
@@ -1076,7 +1130,10 @@ void MainWindow::on_actionISO_8859_5_triggered()
 */
 void MainWindow::on_actionWindows_1251_triggered()
 {
-    qDebug() << "windows 1251";
+    // get codec
+    int i = mugoApp()->encodingActions().indexOf(ui->actionWindows_1251);
+    QTextCodec* codec = mugoApp()->codecs().at(i);
+    reload(codec);
 }
 
 /**
@@ -1084,7 +1141,10 @@ void MainWindow::on_actionWindows_1251_triggered()
 */
 void MainWindow::on_actionKOI8_R_triggered()
 {
-    qDebug() << "koi8-r";
+    // get codec
+    int i = mugoApp()->encodingActions().indexOf(ui->actionKOI8_R);
+    QTextCodec* codec = mugoApp()->codecs().at(i);
+    reload(codec);
 }
 
 /**
@@ -1092,7 +1152,10 @@ void MainWindow::on_actionKOI8_R_triggered()
 */
 void MainWindow::on_actionKOI8_U_triggered()
 {
-    qDebug() << "koi8-u";
+    // get codec
+    int i = mugoApp()->encodingActions().indexOf(ui->actionKOI8_U);
+    QTextCodec* codec = mugoApp()->codecs().at(i);
+    reload(codec);
 }
 
 /**
@@ -1100,7 +1163,10 @@ void MainWindow::on_actionKOI8_U_triggered()
 */
 void MainWindow::on_actionISO_8859_16_triggered()
 {
-    qDebug() << "iso-8859-16";
+    // get codec
+    int i = mugoApp()->encodingActions().indexOf(ui->actionISO_8859_16);
+    QTextCodec* codec = mugoApp()->codecs().at(i);
+    reload(codec);
 }
 
 /**
@@ -1108,7 +1174,10 @@ void MainWindow::on_actionISO_8859_16_triggered()
 */
 void MainWindow::on_actionISO_8859_11_triggered()
 {
-    qDebug() << "iso-8859-11";
+    // get codec
+    int i = mugoApp()->encodingActions().indexOf(ui->actionISO_8859_11);
+    QTextCodec* codec = mugoApp()->codecs().at(i);
+    reload(codec);
 }
 
 /**
@@ -1116,7 +1185,10 @@ void MainWindow::on_actionISO_8859_11_triggered()
 */
 void MainWindow::on_actionISO_8859_9_triggered()
 {
-    qDebug() << "iso-8859-9";
+    // get codec
+    int i = mugoApp()->encodingActions().indexOf(ui->actionISO_8859_9);
+    QTextCodec* codec = mugoApp()->codecs().at(i);
+    reload(codec);
 }
 
 /**
@@ -1124,7 +1196,10 @@ void MainWindow::on_actionISO_8859_9_triggered()
 */
 void MainWindow::on_actionWindows_1254_triggered()
 {
-    qDebug() << "windows 1254";
+    // get codec
+    int i = mugoApp()->encodingActions().indexOf(ui->actionWindows_1254);
+    QTextCodec* codec = mugoApp()->codecs().at(i);
+    reload(codec);
 }
 
 /**
@@ -1132,7 +1207,10 @@ void MainWindow::on_actionWindows_1254_triggered()
 */
 void MainWindow::on_actionWindows_1258_triggered()
 {
-    qDebug() << "windows 1258";
+    // get codec
+    int i = mugoApp()->encodingActions().indexOf(ui->actionWindows_1258);
+    QTextCodec* codec = mugoApp()->codecs().at(i);
+    reload(codec);
 }
 
 /**
@@ -1140,7 +1218,10 @@ void MainWindow::on_actionWindows_1258_triggered()
 */
 void MainWindow::on_actionISO_8859_6_triggered()
 {
-    qDebug() << "iso-8859-6";
+    // get codec
+    int i = mugoApp()->encodingActions().indexOf(ui->actionISO_8859_6);
+    QTextCodec* codec = mugoApp()->codecs().at(i);
+    reload(codec);
 }
 
 /**
@@ -1148,7 +1229,10 @@ void MainWindow::on_actionISO_8859_6_triggered()
 */
 void MainWindow::on_actionWindows_1256_triggered()
 {
-    qDebug() << "windows 1256";
+    // get codec
+    int i = mugoApp()->encodingActions().indexOf(ui->actionWindows_1256);
+    QTextCodec* codec = mugoApp()->codecs().at(i);
+    reload(codec);
 }
 
 /**
@@ -1156,7 +1240,10 @@ void MainWindow::on_actionWindows_1256_triggered()
 */
 void MainWindow::on_actionWindows_1255_triggered()
 {
-    qDebug() << "windows 1255";
+    // get codec
+    int i = mugoApp()->encodingActions().indexOf(ui->actionWindows_1255);
+    QTextCodec* codec = mugoApp()->codecs().at(i);
+    reload(codec);
 }
 
 /**
@@ -1164,7 +1251,10 @@ void MainWindow::on_actionWindows_1255_triggered()
 */
 void MainWindow::on_actionISO8859_8_triggered()
 {
-    qDebug() << "iso-8859-8";
+    // get codec
+    int i = mugoApp()->encodingActions().indexOf(ui->actionISO_8859_8);
+    QTextCodec* codec = mugoApp()->codecs().at(i);
+    reload(codec);
 }
 
 /**
@@ -1172,7 +1262,10 @@ void MainWindow::on_actionISO8859_8_triggered()
 */
 void MainWindow::on_actionGB2312_triggered()
 {
-    qDebug() << "GB2312";
+    // get codec
+    int i = mugoApp()->encodingActions().indexOf(ui->actionGB2312);
+    QTextCodec* codec = mugoApp()->codecs().at(i);
+    reload(codec);
 }
 
 /**
@@ -1180,7 +1273,10 @@ void MainWindow::on_actionGB2312_triggered()
 */
 void MainWindow::on_actionBig5_triggered()
 {
-    qDebug() << "Big5";
+    // get codec
+    int i = mugoApp()->encodingActions().indexOf(ui->actionBig5);
+    QTextCodec* codec = mugoApp()->codecs().at(i);
+    reload(codec);
 }
 
 /**
@@ -1188,7 +1284,10 @@ void MainWindow::on_actionBig5_triggered()
 */
 void MainWindow::on_actionEucKR_triggered()
 {
-    qDebug() << "euc-kr";
+    // get codec
+    int i = mugoApp()->encodingActions().indexOf(ui->actionEucKR);
+    QTextCodec* codec = mugoApp()->codecs().at(i);
+    reload(codec);
 }
 
 /**
@@ -1196,7 +1295,10 @@ void MainWindow::on_actionEucKR_triggered()
 */
 void MainWindow::on_actionEucJP_triggered()
 {
-    qDebug() << "euc-jp";
+    // get codec
+    int i = mugoApp()->encodingActions().indexOf(ui->actionEucJP);
+    QTextCodec* codec = mugoApp()->codecs().at(i);
+    reload(codec);
 }
 
 /**
@@ -1204,7 +1306,10 @@ void MainWindow::on_actionEucJP_triggered()
 */
 void MainWindow::on_actionISO_2022_JP_triggered()
 {
-    qDebug() << "jis";
+    // get codec
+    int i = mugoApp()->encodingActions().indexOf(ui->actionISO_2022_JP);
+    QTextCodec* codec = mugoApp()->codecs().at(i);
+    reload(codec);
 }
 
 /**
@@ -1212,7 +1317,10 @@ void MainWindow::on_actionISO_2022_JP_triggered()
 */
 void MainWindow::on_actionShiftJIS_triggered()
 {
-    qDebug() << "shift_jis";
+    // get codec
+    int i = mugoApp()->encodingActions().indexOf(ui->actionShiftJIS);
+    QTextCodec* codec = mugoApp()->codecs().at(i);
+    reload(codec);
 }
 
 /**
