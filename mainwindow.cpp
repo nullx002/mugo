@@ -1509,3 +1509,168 @@ void MainWindow::on_branchWidget_currentItemChanged(QTreeWidgetItem* current,QTr
     Go::NodePtr node = current->data(0, Qt::UserRole).value<Go::NodePtr>();
     docView[doc].boardWidget->setNode(node);
 }
+
+void MainWindow::on_actionCopySGFToClipboard_triggered()
+{
+
+}
+
+void MainWindow::on_actionCopyCurrentBranchToClipboard_triggered()
+{
+
+}
+
+void MainWindow::on_actionPasteSGFToNewTab_triggered()
+{
+
+}
+
+void MainWindow::on_actionPasteSGFIntoCollection_triggered()
+{
+
+}
+
+void MainWindow::on_actionGameInformation_triggered()
+{
+
+}
+
+void MainWindow::on_actionDeleteAfterCurrent_triggered()
+{
+
+}
+
+void MainWindow::on_actionDeleteOnlyCurrent_triggered()
+{
+
+}
+
+void MainWindow::on_actionPass_triggered()
+{
+
+}
+
+void MainWindow::on_actionAlternateMove_triggered()
+{
+
+}
+
+void MainWindow::on_actionAddBlackStones_triggered()
+{
+}
+
+void MainWindow::on_actionAddWhiteStones_triggered()
+{
+}
+
+void MainWindow::on_actionAddEmpty_triggered()
+{
+}
+
+void MainWindow::on_actionAddLabel_triggered()
+{
+}
+
+void MainWindow::on_actionAddLabelManually_triggered()
+{
+}
+
+void MainWindow::on_actionAddCircle_triggered()
+{
+}
+
+void MainWindow::on_actionAddTriangle_triggered()
+{
+}
+
+void MainWindow::on_actionAddSquare_triggered()
+{
+}
+
+void MainWindow::on_actionAddCross_triggered()
+{
+}
+
+void MainWindow::on_actionDeleteMarker_triggered()
+{
+}
+
+void MainWindow::on_actionGoodMove_triggered()
+{
+}
+
+void MainWindow::on_actionVeryGoodMove_triggered()
+{
+}
+
+void MainWindow::on_actionBadMove_triggered()
+{
+}
+
+void MainWindow::on_actionVeryBadMove_triggered()
+{
+}
+
+void MainWindow::on_actionDoubtfulMove_triggered()
+{
+}
+
+void MainWindow::on_actionInterestingMove_triggered()
+{
+}
+
+void MainWindow::on_actionEven_triggered()
+{
+}
+
+void MainWindow::on_actionGoodForBlack_triggered()
+{
+}
+
+void MainWindow::on_actionVeryGoodforBlack_triggered()
+{
+}
+
+void MainWindow::on_actionGoodforWhite_triggered()
+{
+}
+
+void MainWindow::on_actionVeryGoodforWhite_triggered()
+{
+}
+
+void MainWindow::on_actionUnclear_triggered()
+{
+}
+
+void MainWindow::on_actionHotspot_triggered()
+{
+}
+
+void MainWindow::on_actionSetMoveNumber_triggered()
+{
+}
+
+void MainWindow::on_actionUnsetMoveNumber_triggered()
+{
+}
+
+void MainWindow::on_actionEditNodeName_triggered()
+{
+}
+
+void MainWindow::on_actionWhiteFirst_triggered()
+{
+}
+
+void MainWindow::on_actionRotateSGFClockwise_triggered()
+{
+}
+
+void MainWindow::on_actionFlipSGFVertically_triggered()
+{
+}
+
+void MainWindow::on_actionFlipSGFHorizontally_triggered()
+{
+}

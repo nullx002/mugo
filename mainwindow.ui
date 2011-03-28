@@ -129,6 +129,50 @@
     <property name="title">
      <string>&amp;Edit</string>
     </property>
+    <widget class="QMenu" name="menuStonesAndMarkers">
+     <property name="title">
+      <string>Stones &amp; &amp;Markers</string>
+     </property>
+     <addaction name="actionAddBlackStones"/>
+     <addaction name="actionAddWhiteStones"/>
+     <addaction name="actionAddEmpty"/>
+     <addaction name="separator"/>
+     <addaction name="actionAddLabel"/>
+     <addaction name="actionAddLabelManually"/>
+     <addaction name="actionAddCircle"/>
+     <addaction name="actionAddTriangle"/>
+     <addaction name="actionAddSquare"/>
+     <addaction name="actionAddCross"/>
+     <addaction name="separator"/>
+     <addaction name="actionDeleteMarker"/>
+    </widget>
+    <widget class="QMenu" name="menuAnnotation">
+     <property name="title">
+      <string>Annotation</string>
+     </property>
+     <addaction name="actionGoodMove"/>
+     <addaction name="actionVeryGoodMove"/>
+     <addaction name="actionBadMove"/>
+     <addaction name="actionVeryBadMove"/>
+     <addaction name="actionDoubtfulMove"/>
+     <addaction name="actionInterestingMove"/>
+     <addaction name="separator"/>
+     <addaction name="actionEven"/>
+     <addaction name="actionGoodForBlack"/>
+     <addaction name="actionVeryGoodforBlack"/>
+     <addaction name="actionGoodforWhite"/>
+     <addaction name="actionVeryGoodforWhite"/>
+     <addaction name="actionUnclear"/>
+     <addaction name="separator"/>
+     <addaction name="actionHotspot"/>
+    </widget>
+    <widget class="QMenu" name="menuMoveNumber">
+     <property name="title">
+      <string>Move Number</string>
+     </property>
+     <addaction name="actionSetMoveNumber"/>
+     <addaction name="actionUnsetMoveNumber"/>
+    </widget>
     <addaction name="separator"/>
     <addaction name="actionCopySGFToClipboard"/>
     <addaction name="actionCopyCurrentBranchToClipboard"/>
@@ -142,10 +186,10 @@
     <addaction name="actionPass"/>
     <addaction name="separator"/>
     <addaction name="actionAlternateMove"/>
-    <addaction name="actionStonesAndMarkers"/>
+    <addaction name="menuStonesAndMarkers"/>
     <addaction name="separator"/>
-    <addaction name="actionAnnotation"/>
-    <addaction name="actionMoveNumber"/>
+    <addaction name="menuAnnotation"/>
+    <addaction name="menuMoveNumber"/>
     <addaction name="actionEditNodeName"/>
     <addaction name="separator"/>
     <addaction name="actionWhiteFirst"/>
@@ -169,8 +213,8 @@
     <addaction name="actionPrevious_Branch"/>
     <addaction name="actionNext_Branch"/>
     <addaction name="separator"/>
-    <addaction name="actionJump_to_Move_Number"/>
-    <addaction name="actionJump_to_Clicked"/>
+    <addaction name="actionJumpToMoveNumber"/>
+    <addaction name="actionJumpToClicked"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -180,8 +224,8 @@
      <property name="title">
       <string>Move Number</string>
      </property>
-     <addaction name="actionShow_Move_Number"/>
-     <addaction name="actionReset_Move_Number_in_Branch"/>
+     <addaction name="actionShowMoveNumber"/>
+     <addaction name="actionResetMoveNumberInBranch"/>
      <addaction name="separator"/>
      <addaction name="actionNo_Move_Number"/>
      <addaction name="actionLast_1_Move"/>
@@ -780,24 +824,134 @@
     <string>Pass</string>
    </property>
   </action>
+  <action name="actionAddBlackStones">
+   <property name="text">
+    <string>Add Black Stones</string>
+   </property>
+  </action>
+  <action name="actionAddWhiteStones">
+   <property name="text">
+    <string>Add White Stones</string>
+   </property>
+  </action>
+  <action name="actionAddEmpty">
+   <property name="text">
+    <string>Add Empty</string>
+   </property>
+  </action>
+  <action name="actionAddLabel">
+   <property name="text">
+    <string>Add Label</string>
+   </property>
+  </action>
+  <action name="actionAddLabelManually">
+   <property name="text">
+    <string>Add Label Manually</string>
+   </property>
+  </action>
+  <action name="actionAddCircle">
+   <property name="text">
+    <string>Add Circle</string>
+   </property>
+  </action>
+  <action name="actionAddTriangle">
+   <property name="text">
+    <string>Add Triangle</string>
+   </property>
+  </action>
+  <action name="actionAddSquare">
+   <property name="text">
+    <string>Add Square</string>
+   </property>
+  </action>
+  <action name="actionAddCross">
+   <property name="text">
+    <string>Add Cross</string>
+   </property>
+  </action>
+  <action name="actionDeleteMarker">
+   <property name="text">
+    <string>Delete Marker</string>
+   </property>
+  </action>
+  <action name="actionGoodMove">
+   <property name="text">
+    <string>Good Move</string>
+   </property>
+  </action>
+  <action name="actionVeryGoodMove">
+   <property name="text">
+    <string>Very Good Move</string>
+   </property>
+  </action>
+  <action name="actionBadMove">
+   <property name="text">
+    <string>Bad Move</string>
+   </property>
+  </action>
+  <action name="actionVeryBadMove">
+   <property name="text">
+    <string>Very Bad Move</string>
+   </property>
+  </action>
+  <action name="actionDoubtfulMove">
+   <property name="text">
+    <string>Doubtful Move</string>
+   </property>
+  </action>
+  <action name="actionInterestingMove">
+   <property name="text">
+    <string>Interesting Move</string>
+   </property>
+  </action>
+  <action name="actionEven">
+   <property name="text">
+    <string>Even</string>
+   </property>
+  </action>
+  <action name="actionGoodForBlack">
+   <property name="text">
+    <string>Good for Black</string>
+   </property>
+  </action>
+  <action name="actionVeryGoodforBlack">
+   <property name="text">
+    <string>Very Good for Black</string>
+   </property>
+  </action>
+  <action name="actionGoodforWhite">
+   <property name="text">
+    <string>Good for White</string>
+   </property>
+  </action>
+  <action name="actionVeryGoodforWhite">
+   <property name="text">
+    <string>Very Good for White</string>
+   </property>
+  </action>
+  <action name="actionUnclear">
+   <property name="text">
+    <string>Unclear</string>
+   </property>
+  </action>
+  <action name="actionHotspot">
+   <property name="text">
+    <string>Hotspot</string>
+   </property>
+  </action>
+  <action name="actionSetMoveNumber">
+   <property name="text">
+    <string>Set Move Number</string>
+   </property>
+  </action>
+  <action name="actionUnsetMoveNumber">
+   <property name="text">
+    <string>Unset Move Number</string>
+   </property>
+  </action>
   <action name="actionAlternateMove">
    <property name="text">
     <string>Alternate Move</string>
-   </property>
-  </action>
-  <action name="actionStonesAndMarkers">
-   <property name="text">
-    <string>Stones &amp; &amp;Markers</string>
-   </property>
-  </action>
-  <action name="actionAnnotation">
-   <property name="text">
-    <string>Annotation</string>
-   </property>
-  </action>
-  <action name="actionMoveNumber">
-   <property name="text">
-    <string>Move Number</string>
    </property>
   </action>
   <action name="actionEditNodeName">
@@ -870,22 +1024,22 @@
     <string>Next Branch</string>
    </property>
   </action>
-  <action name="actionJump_to_Move_Number">
+  <action name="actionJumpToMoveNumber">
    <property name="text">
     <string>Jump to Move Number</string>
    </property>
   </action>
-  <action name="actionJump_to_Clicked">
+  <action name="actionJumpToClicked">
    <property name="text">
     <string>Jump to Clicked</string>
    </property>
   </action>
-  <action name="actionShow_Move_Number">
+  <action name="actionShowMoveNumber">
    <property name="text">
     <string>Show Move Number</string>
    </property>
   </action>
-  <action name="actionReset_Move_Number_in_Branch">
+  <action name="actionResetMoveNumberInBranch">
    <property name="text">
     <string>Reset Move Number in Branch</string>
    </property>
