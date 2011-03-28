@@ -42,7 +42,7 @@
      <x>0</x>
      <y>0</y>
      <width>600</width>
-     <height>24</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -92,7 +92,7 @@
      <addaction name="actionISO_8859_6"/>
      <addaction name="actionWindows_1256"/>
      <addaction name="actionWindows_1255"/>
-     <addaction name="actionISO8859_8"/>
+     <addaction name="actionISO_8859_8"/>
      <addaction name="separator"/>
      <addaction name="actionGB2312"/>
      <addaction name="actionBig5"/>
@@ -674,7 +674,7 @@
     <string>Hebrew (Windows-1255)</string>
    </property>
   </action>
-  <action name="actionISO8859_8">
+  <action name="actionISO_8859_8">
    <property name="checkable">
     <bool>true</bool>
    </property>

@@ -90,7 +90,8 @@ protected:
     bool getOpenFileName(QString& fname, QTextCodec*& codec);
     bool getSaveFileName(const QString& initialPath, QString& fname, QTextCodec*& codec);
 
-    /// @name save
+    /// @name load/save
+    bool reload(QTextCodec* codec);
     bool maybeSave(GoDocument* doc);
 
     /// @name view
