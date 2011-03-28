@@ -157,6 +157,47 @@ private slots:
     void on_actionISO_2022_JP_triggered();
     void on_actionShiftJIS_triggered();
 
+    /// @name slot for edit
+    void on_actionCopySGFToClipboard_triggered();
+    void on_actionCopyCurrentBranchToClipboard_triggered();
+    void on_actionPasteSGFToNewTab_triggered();
+    void on_actionPasteSGFIntoCollection_triggered();
+    void on_actionGameInformation_triggered();
+    void on_actionDeleteAfterCurrent_triggered();
+    void on_actionDeleteOnlyCurrent_triggered();
+    void on_actionAlternateMove_triggered();
+    void on_actionPass_triggered();
+    void on_actionAddBlackStones_triggered();
+    void on_actionAddWhiteStones_triggered();
+    void on_actionAddEmpty_triggered();
+    void on_actionAddLabel_triggered();
+    void on_actionAddLabelManually_triggered();
+    void on_actionAddCircle_triggered();
+    void on_actionAddTriangle_triggered();
+    void on_actionAddSquare_triggered();
+    void on_actionAddCross_triggered();
+    void on_actionDeleteMarker_triggered();
+    void on_actionGoodMove_triggered();
+    void on_actionVeryGoodMove_triggered();
+    void on_actionBadMove_triggered();
+    void on_actionVeryBadMove_triggered();
+    void on_actionDoubtfulMove_triggered();
+    void on_actionInterestingMove_triggered();
+    void on_actionEven_triggered();
+    void on_actionGoodForBlack_triggered();
+    void on_actionVeryGoodforBlack_triggered();
+    void on_actionGoodforWhite_triggered();
+    void on_actionVeryGoodforWhite_triggered();
+    void on_actionUnclear_triggered();
+    void on_actionHotspot_triggered();
+    void on_actionSetMoveNumber_triggered();
+    void on_actionUnsetMoveNumber_triggered();
+    void on_actionEditNodeName_triggered();
+    void on_actionWhiteFirst_triggered();
+    void on_actionRotateSGFClockwise_triggered();
+    void on_actionFlipSGFVertically_triggered();
+    void on_actionFlipSGFHorizontally_triggered();
+
     /// @name slot for document
     void on_sgfDocument_nodeAdded(const Go::NodePtr& node);
     void on_sgfDocument_nodeDeleted(const Go::NodePtr& node);
