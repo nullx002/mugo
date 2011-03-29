@@ -27,6 +27,8 @@ class QFileInfo;
 class QTreeWidget;
 class QTreeWidgetItem;
 class QPlainTextEdit;
+class QStandardItemModel;
+
 
 namespace Ui {
     class MainWindow;
@@ -47,6 +49,7 @@ public:
     QTreeWidget* branchWidget;
     QPlainTextEdit* commentEdit;
     QMap<Go::NodePtr, QTreeWidgetItem*> nodeToTreeItem;
+    QStandardItemModel* collectionModel;
 };
 
 
@@ -107,6 +110,10 @@ protected:
     void rebuildBranchItems(ViewData& view, const Go::NodePtr& node);
     QTreeWidgetItem* createBranchItem(Document* doc, const Go::NodePtr& node);
     QTreeWidgetItem* getParentItem(QTreeWidgetItem* item);
+
+    /// @name collection model
+    void createCollectionModel(GoDocument* doc, QStandardItemModel* model);
+
     //@}
 
 private slots:
