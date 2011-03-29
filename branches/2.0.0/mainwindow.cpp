@@ -24,6 +24,7 @@
 #include <QComboBox>
 #include <QTreeWidget>
 #include <QPlainTextEdit>
+#include <QClipboard>
 #include "mugoapp.h"
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -1510,9 +1511,26 @@ void MainWindow::on_branchWidget_currentItemChanged(QTreeWidgetItem* current,QTr
     docView[doc].boardWidget->setNode(node);
 }
 
+/**
+  Edit -> Copy SGF to Clipboard
+  sgf of all tree to clipboard
+*/
 void MainWindow::on_actionCopySGFToClipboard_triggered()
 {
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
 
+    // create sgf
+    Go::Sgf sgf(board->document()->gameList);
+    QString s;
+    QTextStream str(&s);
+    sgf.save(str);
+
+    // write sgf to clipboard
+    QClipboard* clipboard = QApplication::clipboard();
+    clipboard->setText(s);
 }
 
 void MainWindow::on_actionCopyCurrentBranchToClipboard_triggered()

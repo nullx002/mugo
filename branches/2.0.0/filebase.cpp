@@ -114,7 +114,10 @@ bool FileBase::save(QFile& file, QTextCodec* codec){
   save
 */
 bool FileBase::save(QTextStream& str){
-    return write(str);
+    if (write(str) == false)
+        return false;
+    str.flush();
+    return true;
 }
 
 /**
