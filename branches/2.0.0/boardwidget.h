@@ -53,6 +53,7 @@ public:
     // get current game, node
     Go::NodePtr currentGame() const{ return currentGame_; }
     Go::NodePtr currentNode() const{ return currentNode_; }
+    Go::NodeList currentNodeList() const{ return currentNodeList_; }
     Go::InformationPtr rootInformation() const{ return rootInformation_; }
     Go::InformationPtr currentInformation() const{ return currentInformation_; }
 
