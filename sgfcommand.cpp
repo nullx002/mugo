@@ -85,3 +85,38 @@ void SetCommentCommand::setComment(const QString& comment){
     comment_ = comment;
     redo();
 }
+
+/**
+  Constructs add game command
+*/
+AddGameCommand::AddGameCommand(GoDocument* doc, Go::NodePtr game, QUndoCommand* parent)
+    : QUndoCommand(parent)
+    , document_(doc)
+{
+    gameList_.push_back(game);
+}
+
+/**
+  Constructs add game command
+*/
+AddGameCommand::AddGameCommand(GoDocument* doc, const Go::NodeList& gameList, QUndoCommand* parent)
+    : QUndoCommand(parent)
+    , document_(doc)
+    , gameList_(gameList)
+{
+}
+
+/**
+  redo add game command
+*/
+void AddGameCommand::redo(){
+    setText( tr("Add Game into SGF Collection") );
+    document_->addGameList(gameList_);
+}
+
+/**
+  undo add node command
+*/
+void AddGameCommand::undo(){
+    document_->deleteGameList(gameList_);
+}

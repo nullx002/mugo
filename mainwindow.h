@@ -28,6 +28,7 @@ class QTreeWidget;
 class QTreeWidgetItem;
 class QPlainTextEdit;
 class QStandardItemModel;
+class QStandardItem;
 
 
 namespace Ui {
@@ -113,6 +114,7 @@ protected:
 
     /// @name collection model
     void createCollectionModel(GoDocument* doc, QStandardItemModel* model);
+    QList<QStandardItem*> createCollectionRow(const Go::NodePtr& game);
 
     //@}
 
@@ -209,9 +211,12 @@ private slots:
     void on_actionFlipSGFHorizontally_triggered();
 
     /// @name slot for document
+    void on_sgfDocument_documentModified();
+    void on_sgfDocument_gameAdded(const Go::NodePtr& game);
+    void on_sgfDocument_gameDeleted(const Go::NodePtr& game);
+    void on_sgfDocument_nodeModified(const Go::NodePtr& node);
     void on_sgfDocument_nodeAdded(const Go::NodePtr& node);
     void on_sgfDocument_nodeDeleted(const Go::NodePtr& node);
-    void on_sgfDocument_nodeModified(const Go::NodePtr& node);
 
     /// @name slot for board tab widget
     void on_boardTabWidget_tabCloseRequested(int index);

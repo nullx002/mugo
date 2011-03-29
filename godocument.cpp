@@ -77,6 +77,73 @@ bool GoDocument::save(const QString& fname, QTextCodec* codec){
     return true;
 }
 
+
+/**
+  modify document
+*/
+void GoDocument::modifyDocument(){
+    setDirty();
+    emit documentModified();
+}
+
+/**
+  add game
+*/
+void GoDocument::addGame(Go::NodePtr game){
+    gameList.push_back(game);
+
+    modifyDocument();
+    emit gameAdded(game);
+}
+
+/**
+  add game list
+*/
+void GoDocument::addGameList(const Go::NodeList& gameList){
+    this->gameList.append(gameList);
+
+    modifyDocument();
+    foreach(const Go::NodePtr& game, gameList)
+        emit gameAdded(game);
+}
+
+/**
+  delete game
+*/
+bool GoDocument::deleteGame(Go::NodePtr game){
+    if (gameList.removeOne(game)){
+        modifyDocument();
+        emit gameDeleted(game);
+        return true;
+    }
+    return false;
+}
+
+/**
+  delete game list
+*/
+bool GoDocument::deleteGameList(const Go::NodeList& gameList){
+    bool deleted = false;
+    foreach(const Go::NodePtr& game, gameList){
+        if (this->gameList.removeOne(game)){
+            deleted = true;
+            emit gameDeleted(game);
+        }
+    }
+
+    if (deleted)
+        modifyDocument();
+    return deleted;
+}
+
+/**
+  modify node
+*/
+void GoDocument::modifyNode(const Go::NodePtr& node){
+    modifyDocument();
+    emit nodeModified(node);
+}
+
 /**
   add node
 */
@@ -87,17 +154,17 @@ void GoDocument::addNode(Go::NodePtr parent, Go::NodePtr node, int index){
         parent->children().insert(parent->children().begin()+index, node);
     node->setParent(parent);
 
-    setDirty();
+    modifyDocument();
     emit nodeAdded(node);
 }
 
 /**
   delete node
 */
-void GoDocument::deleteNode(Go::NodePtr node, bool removeChildren){
+bool  GoDocument::deleteNode(Go::NodePtr node, bool removeChildren){
     Go::NodePtr parent = node->parent();
     if (!parent)
-        return;
+        return false;
 
     if (removeChildren)
         parent->children().removeOne(node);
@@ -109,14 +176,8 @@ void GoDocument::deleteNode(Go::NodePtr node, bool removeChildren){
         }
     }
 
-    setDirty();
+    modifyDocument();
     emit nodeDeleted(node);
-}
 
-/**
-  modify node
-*/
-void GoDocument::modifyNode(Go::NodePtr node){
-    setDirty();
-    emit nodeModified(node);
+    return true;
 }

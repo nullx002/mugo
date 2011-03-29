@@ -41,14 +41,22 @@ public:
     virtual bool save(const QString& fname, QTextCodec* codec=NULL);
 
 signals:
-    void nodeAdded(Go::NodePtr node);
-    void nodeDeleted(Go::NodePtr node);
-    void nodeModified(Go::NodePtr node);
+    void documentModified();
+    void gameAdded(const Go::NodePtr& game);
+    void gameDeleted(const Go::NodePtr& game);
+    void nodeModified(const Go::NodePtr& node);
+    void nodeAdded(const Go::NodePtr& node);
+    void nodeDeleted(const Go::NodePtr& node);
 
 public slots:
-    void addNode(const Go::NodePtr parent, Go::NodePtr node, int index=-1);
-    void deleteNode(Go::NodePtr node, bool removeChildren=true);
-    void modifyNode(Go::NodePtr node);
+    void modifyDocument();
+    void addGame(Go::NodePtr game);
+    void addGameList(const Go::NodeList& gameList);
+    bool deleteGame(Go::NodePtr game);
+    bool deleteGameList(const Go::NodeList& gameList);
+    void modifyNode(const Go::NodePtr& node);
+    void addNode(Go::NodePtr parent, Go::NodePtr node, int index=-1);
+    bool deleteNode(Go::NodePtr node, bool removeChildren=true);
 
 public:
     Go::NodeList gameList;

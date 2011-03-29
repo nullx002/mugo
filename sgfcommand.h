@@ -23,6 +23,7 @@
 #include <QUndoCommand>
 #include "godata.h"
 
+
 class GoDocument;
 
 
@@ -69,6 +70,28 @@ private:
     Go::NodePtr node_;
     QString comment_;
     QString prevComment_;
+};
+
+/**
+  @defgroup Command
+*/
+
+/**
+  @ingroup Command
+  This command add game into document
+*/
+class AddGameCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(AddGameCommand)
+
+public:
+    AddGameCommand(GoDocument* doc, const Go::NodeList& gameList, QUndoCommand* parent = 0);
+    AddGameCommand(GoDocument* doc, Go::NodePtr game, QUndoCommand* parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+private:
+    GoDocument* document_;
+    Go::NodeList gameList_;
 };
 
 
