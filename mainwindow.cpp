@@ -1522,8 +1522,12 @@ void MainWindow::on_actionCopySGFToClipboard_triggered()
     if (board == NULL)
         return;
 
+    // output only current game
+    Go::NodeList game;
+    game.push_back(board->currentGame());
+
     // create sgf
-    Go::Sgf sgf(board->document()->gameList);
+    Go::Sgf sgf(game);
     QString s;
     QTextStream str(&s);
     sgf.save(str);
@@ -1533,9 +1537,44 @@ void MainWindow::on_actionCopySGFToClipboard_triggered()
     clipboard->setText(s);
 }
 
+/**
+  Edit -> Copy Current Branch to Clipboard
+  sgf of current brnach to clipboard
+*/
 void MainWindow::on_actionCopyCurrentBranchToClipboard_triggered()
 {
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
 
+    // create node tree of current branch
+    Go::NodePtr root, current;
+    Go::NodeList nodeList = board->currentNodeList();
+    foreach(const Go::NodePtr& node, nodeList){
+        Go::NodePtr newNode( new Go::Node(*node) );
+        if (!root)
+            root = current = newNode;
+        else{
+            current->children().push_back(newNode);
+            current = newNode;
+        }
+        current->children().clear();
+    }
+
+    // output only current branch
+    Go::NodeList game;
+    game.push_back(root);
+
+    // create sgf
+    Go::Sgf sgf(game);
+    QString s;
+    QTextStream str(&s);
+    sgf.save(str);
+
+    // write sgf to clipboard
+    QClipboard* clipboard = QApplication::clipboard();
+    clipboard->setText(s);
 }
 
 void MainWindow::on_actionPasteSGFToNewTab_triggered()
