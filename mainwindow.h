@@ -75,6 +75,7 @@ public slots:
     bool closeAllDocuments();
 
 protected:
+    //@{
     /// @name event
     void changeEvent(QEvent* e);
     void closeEvent(QCloseEvent* e);
@@ -93,6 +94,7 @@ protected:
     /// @name load/save
     bool reload(QTextCodec* codec);
     bool maybeSave(GoDocument* doc);
+    void setNewDocumentName(GoDocument* doc){ doc->setName( tr("Untitled-%1").arg(++docID) ); }
 
     /// @name view
     void updateView(GoDocument* doc);
@@ -105,6 +107,7 @@ protected:
     void rebuildBranchItems(ViewData& view, const Go::NodePtr& node);
     QTreeWidgetItem* createBranchItem(Document* doc, const Go::NodePtr& node);
     QTreeWidgetItem* getParentItem(QTreeWidgetItem* item);
+    //@}
 
 private slots:
     //@{

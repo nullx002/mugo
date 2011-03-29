@@ -92,7 +92,7 @@ void MainWindow::closeEvent(QCloseEvent* e){
 */
 bool MainWindow::fileNew(QTextCodec* codec, int xsize, int ysize, double komi, int handicap){
     SgfDocument* doc = new SgfDocument(xsize, ysize, komi, handicap, this);
-    doc->setName( tr("Untitled-%1").arg(++docID) );
+    setNewDocumentName(doc);
     createNewTab(doc);
 
     return true;
@@ -237,6 +237,7 @@ void MainWindow::initializeMenu(){
     ui->actionSave->setShortcut(QKeySequence::Save);
     ui->actionSaveAs->setShortcut(QKeySequence::SaveAs);
     ui->actionExit->setShortcut(QKeySequence::Quit);
+    ui->actionPasteSGFToNewTab->setShortcut(QKeySequence::Paste);
 
     // Edit -> undo/redo
     undoAction = undoGroup.createUndoAction(this);
@@ -1577,14 +1578,49 @@ void MainWindow::on_actionCopyCurrentBranchToClipboard_triggered()
     clipboard->setText(s);
 }
 
+/**
+  Edit -> Paste SGF to New Tab
+*/
 void MainWindow::on_actionPasteSGFToNewTab_triggered()
 {
+    // read clipboard
+    QClipboard* clipboard = QApplication::clipboard();
+    QString text = clipboard->text();
+
+    // parse sgf
+    Go::NodeList gameList;
+    Go::Sgf sgf(gameList);
+    if (sgf.load(text) == false)
+        return;
+
+    // open new document from clipboard
+    SgfDocument* doc = new SgfDocument(gameList, this);
+    setNewDocumentName(doc);
+    createNewTab(doc);
 
 }
 
+/**
+  Edit -> Paste SGF into Collection
+*/
 void MainWindow::on_actionPasteSGFIntoCollection_triggered()
 {
+/*
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
 
+    // read clipboard
+    QClipboard* clipboard = QApplication::clipboard();
+    QString text = clipboard->text();
+
+    // parse sgf
+    Go::NodeList gameList;
+    Go::Sgf sgf(gameList);
+    if (sgf.load(text) == false)
+        return;
+*/
 }
 
 void MainWindow::on_actionGameInformation_triggered()
