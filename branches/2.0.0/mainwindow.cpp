@@ -444,6 +444,9 @@ void MainWindow::createEncodingMenu(){
 bool MainWindow::createNewTab(Document* doc){
     GoDocument* goDoc = qobject_cast<GoDocument*>(doc);
     if (goDoc){
+        connect(goDoc, SIGNAL(documentModified()), SLOT(on_sgfDocument_documentModified()));
+        connect(goDoc, SIGNAL(gameAdded(const Go::NodePtr&)), SLOT(on_sgfDocument_gameAdded(const Go::NodePtr&)));
+        connect(goDoc, SIGNAL(gameDeleted(const Go::NodePtr&)), SLOT(on_sgfDocument_gameDeleted(const Go::NodePtr&)));
         connect(goDoc, SIGNAL(nodeAdded(const Go::NodePtr&)), SLOT(on_sgfDocument_nodeAdded(const Go::NodePtr&)));
         connect(goDoc, SIGNAL(nodeDeleted(const Go::NodePtr&)), SLOT(on_sgfDocument_nodeDeleted(const Go::NodePtr&)));
         connect(goDoc, SIGNAL(nodeModified(const Go::NodePtr&)), SLOT(on_sgfDocument_nodeModified(const Go::NodePtr&)));
@@ -464,7 +467,7 @@ bool MainWindow::createNewTab(Document* doc){
         ui->branchStackedWidget->addWidget(branch);
 
         // new collection model
-        QStandardItemModel* model = new QStandardItemModel(goDoc->gameList.size(), 5);
+        QStandardItemModel* model = new QStandardItemModel(0, 5);
         model->setHorizontalHeaderLabels(QStringList() << tr("White") << tr("Black") << tr("Result") << tr("Date") << tr("Game Name"));
         createCollectionModel(goDoc, model);
         data.collectionModel = model;
@@ -845,20 +848,31 @@ QTreeWidgetItem* MainWindow::getParentItem(QTreeWidgetItem* item){
 void MainWindow::createCollectionModel(GoDocument* doc, QStandardItemModel* model){
     for (int i=0; i<doc->gameList.size(); ++i){
         Go::NodePtr& game = doc->gameList[i];
-        model->setItem( i, 0, new QStandardItem(game->information()->whitePlayer()) );
-        model->setItem( i, 1, new QStandardItem(game->information()->blackPlayer()) );
-        model->setItem( i, 2, new QStandardItem(game->information()->result()) );
-        model->setItem( i, 3, new QStandardItem(game->information()->date()) );
-
-        const QString& gameName = game->information()->gameName();
-        const QString& event = game->information()->event();
-        if (gameName.isEmpty() == false && event.isEmpty() == true)
-            model->setItem( i, 4, new QStandardItem(gameName) );
-        else if (gameName.isEmpty() == true && event.isEmpty() == false)
-            model->setItem( i, 4, new QStandardItem(event) );
-        else if (gameName.isEmpty() == false && event.isEmpty() == false)
-            model->setItem( i, 4, new QStandardItem(gameName + ':' + event) );
+        QList<QStandardItem*> items = createCollectionRow(game);
+        model->appendRow(items);
     }
+}
+
+/**
+  create collection row items
+*/
+QList<QStandardItem*> MainWindow::createCollectionRow(const Go::NodePtr& game){
+    QList<QStandardItem*> items;
+    items.push_back( new QStandardItem(game->information()->whitePlayer()) );
+    items.push_back( new QStandardItem(game->information()->blackPlayer()) );
+    items.push_back( new QStandardItem(game->information()->result()) );
+    items.push_back( new QStandardItem(game->information()->date()) );
+
+    const QString& gameName = game->information()->gameName();
+    const QString& event = game->information()->event();
+    if (gameName.isEmpty() == false && event.isEmpty() == true)
+        items.push_back( new QStandardItem(gameName) );
+    else if (gameName.isEmpty() == true && event.isEmpty() == false)
+        items.push_back( new QStandardItem(event) );
+    else if (gameName.isEmpty() == false && event.isEmpty() == false)
+        items.push_back( new QStandardItem(gameName + ':' + event) );
+
+    return items;
 }
 
 /**
@@ -1356,6 +1370,51 @@ void MainWindow::on_actionShiftJIS_triggered()
 }
 
 /**
+  document modified
+*/
+void MainWindow::on_sgfDocument_documentModified(){
+}
+
+/**
+  game added
+*/
+void MainWindow::on_sgfDocument_gameAdded(const Go::NodePtr& game){
+    // get document
+    GoDocument* doc = qobject_cast<GoDocument*>(sender());
+    if (doc == NULL)
+        return;
+
+    ViewData& view = docView[doc];
+
+    QList<QStandardItem*> items = this->createCollectionRow(game);
+    view.collectionModel->appendRow(items);
+}
+
+/**
+  game deleted
+*/
+void MainWindow::on_sgfDocument_gameDeleted(const Go::NodePtr& game){
+}
+
+/**
+  node modified
+*/
+void MainWindow::on_sgfDocument_nodeModified(const Go::NodePtr& node)
+{
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // if modified node isn't current node, return
+    if (board->currentNode() != node)
+        return;
+
+    // update view
+    updateView(board->document());
+}
+
+/**
   node added
 */
 void MainWindow::on_sgfDocument_nodeAdded(const Go::NodePtr& node)
@@ -1389,24 +1448,6 @@ void MainWindow::on_sgfDocument_nodeDeleted(const Go::NodePtr& node){
 
     // re-create tree view items
     this->rebuildBranchItems(view, node->parent());
-}
-
-/**
-  node modified
-*/
-void MainWindow::on_sgfDocument_nodeModified(const Go::NodePtr& node)
-{
-    // get active board widget
-    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
-    if (board == NULL)
-        return;
-
-    // if modified node isn't current node, return
-    if (board->currentNode() != node)
-        return;
-
-    // update view
-    updateView(board->document());
 }
 
 /**
@@ -1633,7 +1674,7 @@ void MainWindow::on_actionPasteSGFToNewTab_triggered()
     SgfDocument* doc = new SgfDocument(gameList, this);
     setNewDocumentName(doc);
     createNewTab(doc);
-
+    doc->modifyDocument();
 }
 
 /**
@@ -1641,7 +1682,6 @@ void MainWindow::on_actionPasteSGFToNewTab_triggered()
 */
 void MainWindow::on_actionPasteSGFIntoCollection_triggered()
 {
-/*
     // get active board widget
     BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
     if (board == NULL)
@@ -1656,7 +1696,9 @@ void MainWindow::on_actionPasteSGFIntoCollection_triggered()
     Go::Sgf sgf(gameList);
     if (sgf.load(text) == false)
         return;
-*/
+
+    // add game into collection
+    board->document()->undoStack()->push( new AddGameCommand(board->document(), gameList) );
 }
 
 void MainWindow::on_actionGameInformation_triggered()
