@@ -25,6 +25,7 @@
 #include <QTreeWidget>
 #include <QPlainTextEdit>
 #include <QClipboard>
+#include <QStandardItemModel>
 #include "mugoapp.h"
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -199,6 +200,7 @@ bool MainWindow::closeDocument(GoDocument* doc){
     ViewData& view = docView[doc];
     delete view.commentEdit;
     delete view.branchWidget;
+    delete view.collectionModel;
     delete view.boardWidget;
 
     // delete document
@@ -440,11 +442,11 @@ void MainWindow::createEncodingMenu(){
   show document in new tab
 */
 bool MainWindow::createNewTab(Document* doc){
-    SgfDocument* sgfDoc = qobject_cast<SgfDocument*>(doc);
-    if (sgfDoc){
-        connect(sgfDoc, SIGNAL(nodeAdded(const Go::NodePtr&)), SLOT(on_sgfDocument_nodeAdded(const Go::NodePtr&)));
-        connect(sgfDoc, SIGNAL(nodeDeleted(const Go::NodePtr&)), SLOT(on_sgfDocument_nodeDeleted(const Go::NodePtr&)));
-        connect(sgfDoc, SIGNAL(nodeModified(const Go::NodePtr&)), SLOT(on_sgfDocument_nodeModified(const Go::NodePtr&)));
+    GoDocument* goDoc = qobject_cast<GoDocument*>(doc);
+    if (goDoc){
+        connect(goDoc, SIGNAL(nodeAdded(const Go::NodePtr&)), SLOT(on_sgfDocument_nodeAdded(const Go::NodePtr&)));
+        connect(goDoc, SIGNAL(nodeDeleted(const Go::NodePtr&)), SLOT(on_sgfDocument_nodeDeleted(const Go::NodePtr&)));
+        connect(goDoc, SIGNAL(nodeModified(const Go::NodePtr&)), SLOT(on_sgfDocument_nodeModified(const Go::NodePtr&)));
         ViewData& data = docView[doc];
 
         // new comment widget
@@ -461,13 +463,19 @@ bool MainWindow::createNewTab(Document* doc){
         branch->setIndentation(17);
         ui->branchStackedWidget->addWidget(branch);
 
+        // new collection model
+        QStandardItemModel* model = new QStandardItemModel(goDoc->gameList.size(), 5);
+        model->setHorizontalHeaderLabels(QStringList() << tr("White") << tr("Black") << tr("Result") << tr("Date") << tr("Game Name"));
+        createCollectionModel(goDoc, model);
+        data.collectionModel = model;
+
         // new board widget
         BoardWidget* board = new BoardWidget;
         data.boardWidget = board;
         connect(board, SIGNAL(gameChanged(const Go::NodePtr&)), SLOT(on_board_gameChanged(const Go::NodePtr&)));
         connect(board, SIGNAL(nodeChanged(const Go::NodePtr&)), SLOT(on_board_nodeChanged(const Go::NodePtr&)));
-        board->setDocument(sgfDoc);
-        ui->boardTabWidget->addTab(board, sgfDoc->name());
+        board->setDocument(goDoc);
+        ui->boardTabWidget->addTab(board, goDoc->name());
         ui->boardTabWidget->setCurrentWidget(board);
 
         return true;
@@ -829,6 +837,28 @@ QTreeWidgetItem* MainWindow::getParentItem(QTreeWidgetItem* item){
         return tree->invisibleRootItem();
 
     return NULL;
+}
+
+/**
+  create model for collection view
+*/
+void MainWindow::createCollectionModel(GoDocument* doc, QStandardItemModel* model){
+    for (int i=0; i<doc->gameList.size(); ++i){
+        Go::NodePtr& game = doc->gameList[i];
+        model->setItem( i, 0, new QStandardItem(game->information()->whitePlayer()) );
+        model->setItem( i, 1, new QStandardItem(game->information()->blackPlayer()) );
+        model->setItem( i, 2, new QStandardItem(game->information()->result()) );
+        model->setItem( i, 3, new QStandardItem(game->information()->date()) );
+
+        const QString& gameName = game->information()->gameName();
+        const QString& event = game->information()->event();
+        if (gameName.isEmpty() == false && event.isEmpty() == true)
+            model->setItem( i, 4, new QStandardItem(gameName) );
+        else if (gameName.isEmpty() == true && event.isEmpty() == false)
+            model->setItem( i, 4, new QStandardItem(event) );
+        else if (gameName.isEmpty() == false && event.isEmpty() == false)
+            model->setItem( i, 4, new QStandardItem(gameName + ':' + event) );
+    }
 }
 
 /**
@@ -1400,6 +1430,12 @@ void MainWindow::on_boardTabWidget_currentChanged(QWidget* widget)
 
     // update view
     updateView(board->document());
+
+    // change collection view
+    ViewData& view = docView[board->document()];
+    int index = board->document()->gameList.indexOf(board->currentGame());
+    ui->collectionTreeView->setModel( view.collectionModel );
+    ui->collectionTreeView->setCurrentIndex( view.collectionModel->index(index, 0) );
 }
 
 /**

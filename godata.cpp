@@ -104,6 +104,7 @@ Node::Node(const NodePtr& parentNode)
   Destructor
 */
 Node::~Node(){
+//    qDebug() << "Node::~Node";
 }
 
 

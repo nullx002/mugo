@@ -430,9 +430,31 @@
     <bool>false</bool>
    </attribute>
   </widget>
+  <widget class="QDockWidget" name="collectionDockWidget">
+   <property name="windowTitle">
+    <string>Collection View</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>4</number>
+   </attribute>
+   <widget class="QWidget" name="collectionDockWidgetContents">
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <property name="margin">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="QTreeView" name="collectionTreeView">
+       <property name="alternatingRowColors">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
   <action name="actionNew">
    <property name="icon">
-    <iconset>
+    <iconset resource="mugo.qrc">
      <normaloff>:/res/filenew.png</normaloff>:/res/filenew.png</iconset>
    </property>
    <property name="text">
@@ -441,7 +463,7 @@
   </action>
   <action name="actionOpen">
    <property name="icon">
-    <iconset>
+    <iconset resource="mugo.qrc">
      <normaloff>:/res/fileopen.png</normaloff>:/res/fileopen.png</iconset>
    </property>
    <property name="text">
@@ -465,7 +487,7 @@
   </action>
   <action name="actionSave">
    <property name="icon">
-    <iconset>
+    <iconset resource="mugo.qrc">
      <normaloff>:/res/filesave.png</normaloff>:/res/filesave.png</iconset>
    </property>
    <property name="text">
@@ -802,9 +824,6 @@
   <action name="actionPasteSGFIntoCollection">
    <property name="text">
     <string>Paste SGF into Collection</string>
-   </property>
-   <property name="shortcut">
-    <string>A, S, D, F</string>
    </property>
   </action>
   <action name="actionGameInformation">
@@ -1216,6 +1235,8 @@
    <header>qundoview.h</header>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="mugo.qrc"/>
+ </resources>
  <connections/>
 </ui>
