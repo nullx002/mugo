@@ -20,16 +20,16 @@
 
 #include <QMainWindow>
 #include <QUndoGroup>
+#include <QModelIndex>
 #include "sgfdocument.h"
 #include "boardwidget.h"
-#
+
 class QFileInfo;
 class QTreeWidget;
 class QTreeWidgetItem;
 class QPlainTextEdit;
 class QStandardItemModel;
 class QStandardItem;
-
 
 namespace Ui {
     class MainWindow;
@@ -231,6 +231,10 @@ private slots:
 
     /// @name slot for branch widget
     void on_branchWidget_currentItemChanged(QTreeWidgetItem* current,QTreeWidgetItem* previous);
+
+    /// @name slot for collection view
+    void on_collectionTreeView_activated(QModelIndex index);
+
     //@}
 
 private:

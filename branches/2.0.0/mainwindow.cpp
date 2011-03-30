@@ -239,6 +239,9 @@ void MainWindow::initializeMenu(){
     ui->actionSave->setShortcut(QKeySequence::Save);
     ui->actionSaveAs->setShortcut(QKeySequence::SaveAs);
     ui->actionExit->setShortcut(QKeySequence::Quit);
+
+    // Edit
+    ui->actionCopySGFToClipboard->setShortcut(QKeySequence::Copy);
     ui->actionPasteSGFToNewTab->setShortcut(QKeySequence::Paste);
 
     // Edit -> undo/redo
@@ -1370,6 +1373,263 @@ void MainWindow::on_actionShiftJIS_triggered()
 }
 
 /**
+  Edit -> Copy SGF to Clipboard
+  sgf of all tree to clipboard
+*/
+void MainWindow::on_actionCopySGFToClipboard_triggered()
+{
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // output only current game
+    Go::NodeList game;
+    game.push_back(board->currentGame());
+
+    // create sgf
+    Go::Sgf sgf(game);
+    QString s;
+    QTextStream str(&s);
+    sgf.save(str);
+
+    // write sgf to clipboard
+    QClipboard* clipboard = QApplication::clipboard();
+    clipboard->setText(s);
+}
+
+/**
+  Edit -> Copy Current Branch to Clipboard
+  sgf of current brnach to clipboard
+*/
+void MainWindow::on_actionCopyCurrentBranchToClipboard_triggered()
+{
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // create node tree of current branch
+    Go::NodePtr root, current;
+    Go::NodeList nodeList = board->currentNodeList();
+    foreach(const Go::NodePtr& node, nodeList){
+        Go::NodePtr newNode( new Go::Node(*node) );
+        if (!root)
+            root = current = newNode;
+        else{
+            current->children().push_back(newNode);
+            current = newNode;
+        }
+        current->children().clear();
+    }
+
+    // output only current branch
+    Go::NodeList game;
+    game.push_back(root);
+
+    // create sgf
+    Go::Sgf sgf(game);
+    QString s;
+    QTextStream str(&s);
+    sgf.save(str);
+
+    // write sgf to clipboard
+    QClipboard* clipboard = QApplication::clipboard();
+    clipboard->setText(s);
+}
+
+/**
+  Edit -> Paste SGF to New Tab
+*/
+void MainWindow::on_actionPasteSGFToNewTab_triggered()
+{
+    // read clipboard
+    QClipboard* clipboard = QApplication::clipboard();
+    QString text = clipboard->text();
+
+    // parse sgf
+    Go::NodeList gameList;
+    Go::Sgf sgf(gameList);
+    if (sgf.load(text) == false)
+        return;
+
+    // open new document from clipboard
+    SgfDocument* doc = new SgfDocument(gameList, this);
+    setNewDocumentName(doc);
+    createNewTab(doc);
+    doc->modifyDocument();
+}
+
+/**
+  Edit -> Paste SGF into Collection
+*/
+void MainWindow::on_actionPasteSGFIntoCollection_triggered()
+{
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // read clipboard
+    QClipboard* clipboard = QApplication::clipboard();
+    QString text = clipboard->text();
+
+    // parse sgf
+    Go::NodeList gameList;
+    Go::Sgf sgf(gameList);
+    if (sgf.load(text) == false)
+        return;
+
+    // add game into collection
+    board->document()->undoStack()->push( new AddGameCommand(board->document(), gameList) );
+}
+
+void MainWindow::on_actionGameInformation_triggered()
+{
+
+}
+
+void MainWindow::on_actionDeleteAfterCurrent_triggered()
+{
+
+}
+
+void MainWindow::on_actionDeleteOnlyCurrent_triggered()
+{
+
+}
+
+void MainWindow::on_actionPass_triggered()
+{
+
+}
+
+void MainWindow::on_actionAlternateMove_triggered()
+{
+
+}
+
+void MainWindow::on_actionAddBlackStones_triggered()
+{
+}
+
+void MainWindow::on_actionAddWhiteStones_triggered()
+{
+}
+
+void MainWindow::on_actionAddEmpty_triggered()
+{
+}
+
+void MainWindow::on_actionAddLabel_triggered()
+{
+}
+
+void MainWindow::on_actionAddLabelManually_triggered()
+{
+}
+
+void MainWindow::on_actionAddCircle_triggered()
+{
+}
+
+void MainWindow::on_actionAddTriangle_triggered()
+{
+}
+
+void MainWindow::on_actionAddSquare_triggered()
+{
+}
+
+void MainWindow::on_actionAddCross_triggered()
+{
+}
+
+void MainWindow::on_actionDeleteMarker_triggered()
+{
+}
+
+void MainWindow::on_actionGoodMove_triggered()
+{
+}
+
+void MainWindow::on_actionVeryGoodMove_triggered()
+{
+}
+
+void MainWindow::on_actionBadMove_triggered()
+{
+}
+
+void MainWindow::on_actionVeryBadMove_triggered()
+{
+}
+
+void MainWindow::on_actionDoubtfulMove_triggered()
+{
+}
+
+void MainWindow::on_actionInterestingMove_triggered()
+{
+}
+
+void MainWindow::on_actionEven_triggered()
+{
+}
+
+void MainWindow::on_actionGoodForBlack_triggered()
+{
+}
+
+void MainWindow::on_actionVeryGoodforBlack_triggered()
+{
+}
+
+void MainWindow::on_actionGoodforWhite_triggered()
+{
+}
+
+void MainWindow::on_actionVeryGoodforWhite_triggered()
+{
+}
+
+void MainWindow::on_actionUnclear_triggered()
+{
+}
+
+void MainWindow::on_actionHotspot_triggered()
+{
+}
+
+void MainWindow::on_actionSetMoveNumber_triggered()
+{
+}
+
+void MainWindow::on_actionUnsetMoveNumber_triggered()
+{
+}
+
+void MainWindow::on_actionEditNodeName_triggered()
+{
+}
+
+void MainWindow::on_actionWhiteFirst_triggered()
+{
+}
+
+void MainWindow::on_actionRotateSGFClockwise_triggered()
+{
+}
+
+void MainWindow::on_actionFlipSGFVertically_triggered()
+{
+}
+
+void MainWindow::on_actionFlipSGFHorizontally_triggered()
+{
+}
+
+/**
   dirty flag changed
 */
 void MainWindow::on_sgfDocument_dirtyChanged(bool dirty){
@@ -1626,258 +1886,15 @@ void MainWindow::on_branchWidget_currentItemChanged(QTreeWidgetItem* current,QTr
 }
 
 /**
-  Edit -> Copy SGF to Clipboard
-  sgf of all tree to clipboard
+  game changed in collection view
 */
-void MainWindow::on_actionCopySGFToClipboard_triggered()
+void MainWindow::on_collectionTreeView_activated(QModelIndex index)
 {
     // get active board widget
     BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
     if (board == NULL)
         return;
 
-    // output only current game
-    Go::NodeList game;
-    game.push_back(board->currentGame());
-
-    // create sgf
-    Go::Sgf sgf(game);
-    QString s;
-    QTextStream str(&s);
-    sgf.save(str);
-
-    // write sgf to clipboard
-    QClipboard* clipboard = QApplication::clipboard();
-    clipboard->setText(s);
-}
-
-/**
-  Edit -> Copy Current Branch to Clipboard
-  sgf of current brnach to clipboard
-*/
-void MainWindow::on_actionCopyCurrentBranchToClipboard_triggered()
-{
-    // get active board widget
-    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
-    if (board == NULL)
-        return;
-
-    // create node tree of current branch
-    Go::NodePtr root, current;
-    Go::NodeList nodeList = board->currentNodeList();
-    foreach(const Go::NodePtr& node, nodeList){
-        Go::NodePtr newNode( new Go::Node(*node) );
-        if (!root)
-            root = current = newNode;
-        else{
-            current->children().push_back(newNode);
-            current = newNode;
-        }
-        current->children().clear();
-    }
-
-    // output only current branch
-    Go::NodeList game;
-    game.push_back(root);
-
-    // create sgf
-    Go::Sgf sgf(game);
-    QString s;
-    QTextStream str(&s);
-    sgf.save(str);
-
-    // write sgf to clipboard
-    QClipboard* clipboard = QApplication::clipboard();
-    clipboard->setText(s);
-}
-
-/**
-  Edit -> Paste SGF to New Tab
-*/
-void MainWindow::on_actionPasteSGFToNewTab_triggered()
-{
-    // read clipboard
-    QClipboard* clipboard = QApplication::clipboard();
-    QString text = clipboard->text();
-
-    // parse sgf
-    Go::NodeList gameList;
-    Go::Sgf sgf(gameList);
-    if (sgf.load(text) == false)
-        return;
-
-    // open new document from clipboard
-    SgfDocument* doc = new SgfDocument(gameList, this);
-    setNewDocumentName(doc);
-    createNewTab(doc);
-    doc->modifyDocument();
-}
-
-/**
-  Edit -> Paste SGF into Collection
-*/
-void MainWindow::on_actionPasteSGFIntoCollection_triggered()
-{
-    // get active board widget
-    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
-    if (board == NULL)
-        return;
-
-    // read clipboard
-    QClipboard* clipboard = QApplication::clipboard();
-    QString text = clipboard->text();
-
-    // parse sgf
-    Go::NodeList gameList;
-    Go::Sgf sgf(gameList);
-    if (sgf.load(text) == false)
-        return;
-
-    // add game into collection
-    board->document()->undoStack()->push( new AddGameCommand(board->document(), gameList) );
-}
-
-void MainWindow::on_actionGameInformation_triggered()
-{
-
-}
-
-void MainWindow::on_actionDeleteAfterCurrent_triggered()
-{
-
-}
-
-void MainWindow::on_actionDeleteOnlyCurrent_triggered()
-{
-
-}
-
-void MainWindow::on_actionPass_triggered()
-{
-
-}
-
-void MainWindow::on_actionAlternateMove_triggered()
-{
-
-}
-
-void MainWindow::on_actionAddBlackStones_triggered()
-{
-}
-
-void MainWindow::on_actionAddWhiteStones_triggered()
-{
-}
-
-void MainWindow::on_actionAddEmpty_triggered()
-{
-}
-
-void MainWindow::on_actionAddLabel_triggered()
-{
-}
-
-void MainWindow::on_actionAddLabelManually_triggered()
-{
-}
-
-void MainWindow::on_actionAddCircle_triggered()
-{
-}
-
-void MainWindow::on_actionAddTriangle_triggered()
-{
-}
-
-void MainWindow::on_actionAddSquare_triggered()
-{
-}
-
-void MainWindow::on_actionAddCross_triggered()
-{
-}
-
-void MainWindow::on_actionDeleteMarker_triggered()
-{
-}
-
-void MainWindow::on_actionGoodMove_triggered()
-{
-}
-
-void MainWindow::on_actionVeryGoodMove_triggered()
-{
-}
-
-void MainWindow::on_actionBadMove_triggered()
-{
-}
-
-void MainWindow::on_actionVeryBadMove_triggered()
-{
-}
-
-void MainWindow::on_actionDoubtfulMove_triggered()
-{
-}
-
-void MainWindow::on_actionInterestingMove_triggered()
-{
-}
-
-void MainWindow::on_actionEven_triggered()
-{
-}
-
-void MainWindow::on_actionGoodForBlack_triggered()
-{
-}
-
-void MainWindow::on_actionVeryGoodforBlack_triggered()
-{
-}
-
-void MainWindow::on_actionGoodforWhite_triggered()
-{
-}
-
-void MainWindow::on_actionVeryGoodforWhite_triggered()
-{
-}
-
-void MainWindow::on_actionUnclear_triggered()
-{
-}
-
-void MainWindow::on_actionHotspot_triggered()
-{
-}
-
-void MainWindow::on_actionSetMoveNumber_triggered()
-{
-}
-
-void MainWindow::on_actionUnsetMoveNumber_triggered()
-{
-}
-
-void MainWindow::on_actionEditNodeName_triggered()
-{
-}
-
-void MainWindow::on_actionWhiteFirst_triggered()
-{
-}
-
-void MainWindow::on_actionRotateSGFClockwise_triggered()
-{
-}
-
-void MainWindow::on_actionFlipSGFVertically_triggered()
-{
-}
-
-void MainWindow::on_actionFlipSGFHorizontally_triggered()
-{
+    // game change in board
+    board->setGame( board->document()->gameList[index.row()] );
 }
