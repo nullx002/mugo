@@ -170,9 +170,6 @@ bool BoardWidget::setDocument(GoDocument* doc){
     if (setGame(document_->gameList.front()) == false)
         return false;
 
-    // set items position
-    setItemsPosition(geometry().size());
-
     return true;
 }
 
@@ -223,6 +220,9 @@ bool BoardWidget::setGame(const Go::NodePtr& game){
         data[i].resize(xsize());
         buffer[i].resize(xsize());
     }
+
+    // set items position
+    setItemsPosition(geometry().size());
 
     // emit gameChanged
     emit gameChanged(currentGame_);
