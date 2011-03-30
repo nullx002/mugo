@@ -175,6 +175,8 @@ bool BoardWidget::setDocument(GoDocument* doc){
 
 /**
   set current game
+
+  @todo current stones, branch and stars must be deleted before change game
 */
 bool BoardWidget::setGame(const Go::NodePtr& game){
     // if game is not found in game list, return false
@@ -185,6 +187,7 @@ bool BoardWidget::setGame(const Go::NodePtr& game){
     // change current game
     currentGame_ = game;
     rootInformation_ = currentGame_->information();
+    currentNode_.clear();
 
     // create vertical lines
     qDeleteAll(vLines);
@@ -362,8 +365,16 @@ void BoardWidget::setDataPosition(){
                 delete d.stone;
                 d.stone = createStoneItem(d.color, x, y);
             }
+
+            if (d.branch){
+                delete d.branch;
+                d.branch = NULL;
+            }
         }
     }
+
+    // create graphics items of branch marker
+    createBranchMarkers();
 }
 
 /**
@@ -606,7 +617,7 @@ QGraphicsItem* BoardWidget::createStoneItem(Go::Color color, int sgfX, int sgfY)
   create branch markers
 */
 void BoardWidget::createBranchMarkers(){
-    if (showVariation_ == false)
+    if (!currentNode_ || showVariation_ == false)
         return;
 
     if (rootInformation_->variationStyle() == 0)
