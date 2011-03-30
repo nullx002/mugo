@@ -77,7 +77,6 @@ bool GoDocument::save(const QString& fname, QTextCodec* codec){
     return true;
 }
 
-
 /**
   modify document
 */
@@ -111,28 +110,32 @@ void GoDocument::addGameList(const Go::NodeList& gameList){
   delete game
 */
 bool GoDocument::deleteGame(Go::NodePtr game){
-    if (gameList.removeOne(game)){
-        modifyDocument();
-        emit gameDeleted(game);
-        return true;
-    }
-    return false;
+    int index = gameList.indexOf(game);
+    if (index < 0)
+        return false;
+
+    modifyDocument();
+    gameList.removeAt(index);
+
+    emit gameDeleted(game, index);
+    return true;
 }
 
 /**
   delete game list
 */
-bool GoDocument::deleteGameList(const Go::NodeList& gameList){
+bool GoDocument::deleteGameList(const Go::NodeList& gameList_){
     bool deleted = false;
-    foreach(const Go::NodePtr& game, gameList){
-        if (this->gameList.removeOne(game)){
+    foreach(const Go::NodePtr& game, gameList_){
+        int index = gameList.indexOf(game);
+        if (index >= 0){
             deleted = true;
-            emit gameDeleted(game);
+            gameList.removeAt(index);
+            modifyDocument();
+            emit gameDeleted(game, index);
         }
     }
 
-    if (deleted)
-        modifyDocument();
     return deleted;
 }
 

@@ -211,9 +211,9 @@ private slots:
     void on_actionFlipSGFHorizontally_triggered();
 
     /// @name slot for document
-    void on_sgfDocument_documentModified();
+    void on_sgfDocument_dirtyChanged(bool dirty);
     void on_sgfDocument_gameAdded(const Go::NodePtr& game);
-    void on_sgfDocument_gameDeleted(const Go::NodePtr& game);
+    void on_sgfDocument_gameDeleted(const Go::NodePtr& game, int index);
     void on_sgfDocument_nodeModified(const Go::NodePtr& node);
     void on_sgfDocument_nodeAdded(const Go::NodePtr& node);
     void on_sgfDocument_nodeDeleted(const Go::NodePtr& node);

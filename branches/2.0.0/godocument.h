@@ -43,7 +43,7 @@ public:
 signals:
     void documentModified();
     void gameAdded(const Go::NodePtr& game);
-    void gameDeleted(const Go::NodePtr& game);
+    void gameDeleted(const Go::NodePtr& game, int index);
     void nodeModified(const Go::NodePtr& node);
     void nodeAdded(const Go::NodePtr& node);
     void nodeDeleted(const Go::NodePtr& node);
