@@ -35,3 +35,14 @@ void Document::setFileInfo(const QFileInfo& fileInfo){
     fileInfo_ = fileInfo;
     name_ = fileInfo.baseName();
 }
+
+/**
+  set dirty flag
+*/
+void Document::setDirty(bool dirty){
+    if (dirty_ == dirty)
+        return;
+
+    dirty_ = dirty;
+    emit dirtyChanged(dirty);
+}

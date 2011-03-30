@@ -444,9 +444,9 @@ void MainWindow::createEncodingMenu(){
 bool MainWindow::createNewTab(Document* doc){
     GoDocument* goDoc = qobject_cast<GoDocument*>(doc);
     if (goDoc){
-        connect(goDoc, SIGNAL(documentModified()), SLOT(on_sgfDocument_documentModified()));
+        connect(goDoc, SIGNAL(dirtyChanged(bool)), SLOT(on_sgfDocument_dirtyChanged(bool)));
         connect(goDoc, SIGNAL(gameAdded(const Go::NodePtr&)), SLOT(on_sgfDocument_gameAdded(const Go::NodePtr&)));
-        connect(goDoc, SIGNAL(gameDeleted(const Go::NodePtr&)), SLOT(on_sgfDocument_gameDeleted(const Go::NodePtr&)));
+        connect(goDoc, SIGNAL(gameDeleted(const Go::NodePtr&, int)), SLOT(on_sgfDocument_gameDeleted(const Go::NodePtr&, int)));
         connect(goDoc, SIGNAL(nodeAdded(const Go::NodePtr&)), SLOT(on_sgfDocument_nodeAdded(const Go::NodePtr&)));
         connect(goDoc, SIGNAL(nodeDeleted(const Go::NodePtr&)), SLOT(on_sgfDocument_nodeDeleted(const Go::NodePtr&)));
         connect(goDoc, SIGNAL(nodeModified(const Go::NodePtr&)), SLOT(on_sgfDocument_nodeModified(const Go::NodePtr&)));
@@ -1370,9 +1370,25 @@ void MainWindow::on_actionShiftJIS_triggered()
 }
 
 /**
-  document modified
+  dirty flag changed
 */
-void MainWindow::on_sgfDocument_documentModified(){
+void MainWindow::on_sgfDocument_dirtyChanged(bool dirty){
+    // get document
+    GoDocument* doc = qobject_cast<GoDocument*>(sender());
+    if (doc == NULL)
+        return;
+
+    // get view
+    ViewData& view = docView[doc];
+
+    // create tab text string
+    QString name = doc->name();
+    if (dirty)
+        name += " *";
+
+    // set tab text
+    int index = ui->boardTabWidget->indexOf(view.boardWidget);
+    ui->boardTabWidget->setTabText(index, name);
 }
 
 /**
@@ -1384,8 +1400,10 @@ void MainWindow::on_sgfDocument_gameAdded(const Go::NodePtr& game){
     if (doc == NULL)
         return;
 
+    // get view
     ViewData& view = docView[doc];
 
+    // create collection model
     QList<QStandardItem*> items = this->createCollectionRow(game);
     view.collectionModel->appendRow(items);
 }
@@ -1393,7 +1411,25 @@ void MainWindow::on_sgfDocument_gameAdded(const Go::NodePtr& game){
 /**
   game deleted
 */
-void MainWindow::on_sgfDocument_gameDeleted(const Go::NodePtr& game){
+void MainWindow::on_sgfDocument_gameDeleted(const Go::NodePtr&, int index){
+    // get document
+    GoDocument* doc = qobject_cast<GoDocument*>(sender());
+    if (doc == NULL)
+        return;
+
+    // get view
+    ViewData& view = docView[doc];
+
+/*
+    // create collection model
+    view.collectionModel->setRowCount(0);
+    foreach(const Go::NodePtr& game, doc->gameList){
+        QList<QStandardItem*> items = this->createCollectionRow(game);
+        view.collectionModel->appendRow(items);
+    }
+*/
+    // remove deleted game from collection model
+    view.collectionModel->removeRow(index);
 }
 
 /**

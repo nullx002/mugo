@@ -46,13 +46,14 @@ public:
 
     // dirty
     bool dirty() const{ return dirty_; }
-    void setDirty(bool dirty=true){ dirty_ = dirty; }
+    void setDirty(bool dirty=true);
 
     // codec
     QTextCodec* codec(){ return codec_; }
     void setCodec(QTextCodec* codec){ codec_ = codec; }
 
 signals:
+    void dirtyChanged(bool dirty);
 
 public slots:
 
