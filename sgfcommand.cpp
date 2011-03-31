@@ -120,3 +120,30 @@ void AddGameCommand::redo(){
 void AddGameCommand::undo(){
     document_->deleteGameList(gameList_);
 }
+
+/**
+  Constructs set game information command
+*/
+SetGameInformationCommand::SetGameInformationCommand(GoDocument* doc, Go::NodePtr node, Go::InformationPtr info, QUndoCommand* parent)
+    : QUndoCommand(parent)
+    , document_(doc)
+    , node_(node)
+    , info_(info)
+{
+    prevInfo_ = node_->information();
+}
+
+/**
+  redo set game information command
+*/
+void SetGameInformationCommand::redo(){
+    setText( tr("Set Game Information") );
+    document_->setInformation(node_, info_);
+}
+
+/**
+  undo set game information command
+*/
+void SetGameInformationCommand::undo(){
+    document_->setInformation(node_, prevInfo_);
+}

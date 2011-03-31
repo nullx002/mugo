@@ -86,6 +86,15 @@ void GoDocument::modifyDocument(){
 }
 
 /**
+  set information to node
+*/
+void GoDocument::setInformation(Go::NodePtr node, Go::InformationPtr info){
+    node->setInformation(info);
+    modifyDocument();
+    emit informationChanged(node, info);
+}
+
+/**
   add game
 */
 void GoDocument::addGame(Go::NodePtr game){
