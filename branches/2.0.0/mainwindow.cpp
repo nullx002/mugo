@@ -29,6 +29,7 @@
 #include "mugoapp.h"
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "gameinformationdialog.h"
 #include "sgf.h"
 #include "sgfcommand.h"
 
@@ -1484,9 +1485,19 @@ void MainWindow::on_actionPasteSGFIntoCollection_triggered()
     board->document()->undoStack()->push( new AddGameCommand(board->document(), gameList) );
 }
 
+/**
+  Edit -> Game Information
+*/
 void MainWindow::on_actionGameInformation_triggered()
 {
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
 
+    // show dialog
+    GameInformationDialog dlg(this, board->document(), board->currentGame());
+    dlg.exec();
 }
 
 void MainWindow::on_actionDeleteAfterCurrent_triggered()
