@@ -20,6 +20,7 @@
 
 #include <QtGui/QDialog>
 #include "godata.h"
+#include "godocument.h"
 
 namespace Ui {
     class GameInformationDialog;
@@ -31,7 +32,7 @@ namespace Ui {
 class GameInformationDialog : public QDialog {
     Q_OBJECT
 public:
-    GameInformationDialog(QWidget* parent, Go::InformationPtr& info);
+    GameInformationDialog(QWidget* parent, GoDocument* doc, Go::NodePtr node);
     ~GameInformationDialog();
 
 protected:
@@ -40,7 +41,8 @@ protected:
 
 private:
     Ui::GameInformationDialog* m_ui;
-    Go::InformationPtr gameInfo;
+    GoDocument* document_;
+    Go::NodePtr node_;
 };
 
 #endif // GAMEINFORMATIONDIALOG_H

@@ -18,49 +18,51 @@
 #include <QDebug>
 #include "gameinformationdialog.h"
 #include "ui_gameinformationdialog.h"
+#include "sgfcommand.h"
 
 /**
   Constructs game information dialog
 */
-GameInformationDialog::GameInformationDialog(QWidget *parent, Go::InformationPtr& info)
+GameInformationDialog::GameInformationDialog(QWidget *parent, GoDocument* doc, Go::NodePtr node)
     : QDialog(parent)
     , m_ui(new Ui::GameInformationDialog)
-    , gameInfo(info)
+    , document_(doc)
+    , node_(node)
 {
     m_ui->setupUi(this);
 
     // white player
-    m_ui->whitePlayer->setText( gameInfo->whitePlayer() );
-    m_ui->whiteRank->setText( gameInfo->whiteRank() );
-    m_ui->whiteTeam->setText( gameInfo->whiteTeam() );
+    m_ui->whitePlayer->setText( node_->information()->whitePlayer() );
+    m_ui->whiteRank->setText( node_->information()->whiteRank() );
+    m_ui->whiteTeam->setText( node_->information()->whiteTeam() );
 
     // black player
-    m_ui->blackPlayer->setText( gameInfo->blackPlayer() );
-    m_ui->blackRank->setText( gameInfo->blackRank() );
-    m_ui->blackTeam->setText( gameInfo->blackTeam() );
+    m_ui->blackPlayer->setText( node_->information()->blackPlayer() );
+    m_ui->blackRank->setText( node_->information()->blackRank() );
+    m_ui->blackTeam->setText( node_->information()->blackTeam() );
 
     // rule
-    m_ui->komi->setText( QString("%1").arg(gameInfo->komi()) );
-    m_ui->handicap->setText( QString("%1").arg(gameInfo->handicap()) );
-    m_ui->result->setText( gameInfo->result() );
-    m_ui->time->setText( gameInfo->time() );
-    m_ui->overtime->setText( gameInfo->overtime() );
-    m_ui->rule->setText( gameInfo->rule() );
+    m_ui->komi->setText( QString("%1").arg(node_->information()->komi()) );
+    m_ui->handicap->setText( QString("%1").arg(node_->information()->handicap()) );
+    m_ui->result->setText( node_->information()->result() );
+    m_ui->time->setText( node_->information()->time() );
+    m_ui->overtime->setText( node_->information()->overtime() );
+    m_ui->rule->setText( node_->information()->rule() );
 
     // when / where
-    m_ui->gameName->setText( gameInfo->gameName() );
-    m_ui->date->setText( gameInfo->date() );
-    m_ui->round->setText( gameInfo->round() );
-    m_ui->place->setText( gameInfo->place() );
-    m_ui->event->setText( gameInfo->event() );
+    m_ui->gameName->setText( node_->information()->gameName() );
+    m_ui->date->setText( node_->information()->date() );
+    m_ui->round->setText( node_->information()->round() );
+    m_ui->place->setText( node_->information()->place() );
+    m_ui->event->setText( node_->information()->event() );
 
     // other
-    m_ui->annotation->setText( gameInfo->annotation() );
-    m_ui->source->setText( gameInfo->source() );
-    m_ui->gameComment->setPlainText( gameInfo->gameComment() );
-    m_ui->copyright->setPlainText( gameInfo->copyright() );
-    m_ui->user->setText( gameInfo->user() );
-    m_ui->opening->setText( gameInfo->opening() );
+    m_ui->annotation->setText( node_->information()->annotation() );
+    m_ui->source->setText( node_->information()->source() );
+    m_ui->gameComment->setPlainText( node_->information()->gameComment() );
+    m_ui->copyright->setPlainText( node_->information()->copyright() );
+    m_ui->user->setText( node_->information()->user() );
+    m_ui->opening->setText( node_->information()->opening() );
 }
 
 /**
@@ -124,4 +126,7 @@ void GameInformationDialog::accept()
     temp->setCopyright( m_ui->copyright->toPlainText() );
     temp->setUser( m_ui->user->text() );
     temp->setOpening( m_ui->opening->text() );
+
+    // process command
+    document_->undoStack()->push( new SetGameInformationCommand(document_, node_, temp) );
 }
