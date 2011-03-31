@@ -179,6 +179,9 @@ bool BoardWidget::setDocument(GoDocument* doc){
   @todo current stones, branch and stars must be deleted before change game
 */
 bool BoardWidget::setGame(const Go::NodePtr& game){
+    if (currentGame_ == game)
+        return false;
+
     // if game is not found in game list, return false
     Go::NodeList::const_iterator iter = qFind(document_->gameList.begin(), document_->gameList.end(), game);
     if (iter == document_->gameList.end())
@@ -186,7 +189,6 @@ bool BoardWidget::setGame(const Go::NodePtr& game){
 
     // change current game
     currentGame_ = game;
-    rootInformation_ = currentGame_->information();
     currentNode_.clear();
 
     // create vertical lines
@@ -240,6 +242,9 @@ bool BoardWidget::setGame(const Go::NodePtr& game){
   set game information
 */
 bool BoardWidget::setInformation(const Go::InformationPtr& information){
+    if (currentInformation_ == information)
+        return false;
+
     // change game information, and emit currentGameInformationChanged
     currentInformation_ = information;
     emit informationChanged(currentInformation_);
@@ -250,6 +255,9 @@ bool BoardWidget::setInformation(const Go::InformationPtr& information){
   set current node
 */
 bool BoardWidget::setNode(const Go::NodePtr& node){
+    if (currentNode_ == node)
+        return false;
+
     // if node isn't in the node list, create node list
     Go::NodeList::const_iterator iter = qFind(currentNodeList_.begin(), currentNodeList_.end(), node);
     if (iter == currentNodeList_.end())
@@ -620,9 +628,9 @@ void BoardWidget::createBranchMarkers(){
     if (!currentNode_ || showVariation_ == false)
         return;
 
-    if (rootInformation_->variationStyle() == 0)
+    if (currentGame_->information()->variationStyle() == 0)
         createChildBranchMarkers();
-    else if (rootInformation_->variationStyle() == 1)
+    else if (currentGame_->information()->variationStyle() == 1)
         createSiblingsranchMarkers();
 }
 
