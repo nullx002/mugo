@@ -78,7 +78,7 @@ private:
 
 /**
   @ingroup Command
-  This command add game into document
+  This command adds game into document
 */
 class AddGameCommand : public QUndoCommand{
     Q_DECLARE_TR_FUNCTIONS(AddGameCommand)
@@ -92,6 +92,24 @@ public:
 private:
     GoDocument* document_;
     Go::NodeList gameList_;
+};
+
+/**
+  @ingroup Command
+  This command changes game information to game node
+*/
+class SetGameInformationCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(SetGameInformationCommand)
+public:
+    SetGameInformationCommand(GoDocument* doc, Go::NodePtr node, Go::InformationPtr info, QUndoCommand* parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+private:
+    GoDocument* document_;
+    Go::NodePtr node_;
+    Go::InformationPtr info_;
+    Go::InformationPtr prevInfo_;
 };
 
 

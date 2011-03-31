@@ -14,7 +14,8 @@ SOURCES += main.cpp \
     sgfcommand.cpp \
     filebase.cpp \
     sgf.cpp \
-    godocument.cpp
+    godocument.cpp \
+    gameinformationdialog.cpp
 HEADERS += mainwindow.h \
     boardwidget.h \
     document.h \
@@ -24,6 +25,8 @@ HEADERS += mainwindow.h \
     sgfcommand.h \
     filebase.h \
     sgf.h \
-    godocument.h
-FORMS += mainwindow.ui
+    godocument.h \
+    gameinformationdialog.h
+FORMS += mainwindow.ui \
+    gameinformationdialog.ui
 RESOURCES += mugo.qrc
