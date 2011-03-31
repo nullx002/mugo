@@ -647,6 +647,14 @@ void MainWindow::updateView(GoDocument* doc){
     ViewData& view = docView[doc];
     if (view.commentEdit->toPlainText() != view.boardWidget->currentNode()->comment())
         view.commentEdit->setPlainText(view.boardWidget->currentNode()->comment());
+
+    Go::InformationPtr info = view.boardWidget->rootInformation();
+    QString title;
+    if (info->whitePlayer().isEmpty() ==false && info->blackPlayer().isEmpty() == false)
+        title = tr("%1 %2(W) vs %3 %4(B)").arg(info->whitePlayer()).arg(info->whiteRank()).arg(info->blackPlayer()).arg(info->blackRank());
+    else
+        title = doc->name();
+    setWindowTitle(title);
 }
 
 /**

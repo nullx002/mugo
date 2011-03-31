@@ -54,12 +54,12 @@ public:
     Go::NodePtr currentGame() const{ return currentGame_; }
     Go::NodePtr currentNode() const{ return currentNode_; }
     Go::NodeList currentNodeList() const{ return currentNodeList_; }
-    Go::InformationPtr rootInformation() const{ return rootInformation_; }
+    Go::InformationPtr rootInformation() const{ return currentGame_->information(); }
     Go::InformationPtr currentInformation() const{ return currentInformation_; }
 
     // get board size
-    int xsize() const { return rootInformation_->xsize(); }
-    int ysize() const { return rootInformation_->ysize(); }
+    int xsize() const { return currentGame_->information()->xsize(); }
+    int ysize() const { return currentGame_->information()->ysize(); }
 
 signals:
     void documentChanged(GoDocument* doc);
@@ -127,7 +127,6 @@ protected:
 
     GoDocument* document_;
     Go::NodePtr currentGame_;
-    Go::InformationPtr rootInformation_;
     Go::InformationPtr currentInformation_;
     Go::NodePtr currentNode_;
     Go::NodeList currentNodeList_;
