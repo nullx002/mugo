@@ -101,7 +101,9 @@ protected:
     void setNewDocumentName(GoDocument* doc){ doc->setName( tr("Untitled-%1").arg(++docID) ); }
 
     /// @name view
-    void updateView(GoDocument* doc);
+    void updateAllViews(GoDocument* doc);
+    void updateNodeView(ViewData& view, const Go::NodePtr& node);
+    void updateCommentView(ViewData& view, const Go::NodePtr& node);
 
     /// @name branch view
     void createBranchItems(Document* doc, const Go::NodePtr& game);

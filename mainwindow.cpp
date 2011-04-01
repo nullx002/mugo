@@ -643,10 +643,9 @@ bool MainWindow::maybeSave(GoDocument* doc){
 /**
   udpate all views by node information
 */
-void MainWindow::updateView(GoDocument* doc){
+void MainWindow::updateAllViews(GoDocument* doc){
     ViewData& view = docView[doc];
-    if (view.commentEdit->toPlainText() != view.boardWidget->currentNode()->comment())
-        view.commentEdit->setPlainText(view.boardWidget->currentNode()->comment());
+    updateNodeView(view, view.boardWidget->currentNode());
 
     Go::InformationPtr info = view.boardWidget->rootInformation();
     QString title;
@@ -655,6 +654,24 @@ void MainWindow::updateView(GoDocument* doc){
     else
         title = doc->name();
     setWindowTitle(title);
+}
+
+/**
+  udpate views by node
+*/
+void MainWindow::updateNodeView(ViewData& view, const Go::NodePtr& node){
+    updateCommentView(view, node);
+}
+
+/**
+  update comment view
+*/
+void MainWindow::updateCommentView(ViewData& view, const Go::NodePtr& node){
+    if (view.boardWidget->currentNode() != node)
+        return;
+
+    if (view.commentEdit->toPlainText() != node->comment())
+        view.commentEdit->setPlainText(node->comment());
 }
 
 /**
@@ -1721,12 +1738,9 @@ void MainWindow::on_sgfDocument_nodeModified(const Go::NodePtr& node)
     if (board == NULL)
         return;
 
-    // if modified node isn't current node, return
-    if (board->currentNode() != node)
-        return;
-
     // update view
-    updateView(board->document());
+    ViewData& view = docView[board->document()];
+    updateNodeView(view, node);
 }
 
 /**
@@ -1785,7 +1799,7 @@ void MainWindow::on_boardTabWidget_currentChanged(QWidget* widget)
     ui->branchStackedWidget->setCurrentWidget( docView[board->document()].branchWidget );
 
     // update view
-    updateView(board->document());
+    updateAllViews(board->document());
 
     // change collection view
     ViewData& view = docView[board->document()];
@@ -1836,8 +1850,8 @@ void MainWindow::on_board_nodeChanged(const Go::NodePtr& node){
     if (item && view.branchWidget->currentItem() != item)
         view.branchWidget->setCurrentItem(item);
 
-    // update all views
-    updateView(board->document());
+    // update view
+    updateCommentView(view, node);
 }
 
 /**
