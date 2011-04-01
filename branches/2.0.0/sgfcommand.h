@@ -22,7 +22,7 @@
 #include <QCoreApplication>
 #include <QUndoCommand>
 #include "godata.h"
-
+#include "boardwidget.h"
 
 class GoDocument;
 
@@ -39,12 +39,13 @@ class AddNodeCommand : public QUndoCommand{
     Q_DECLARE_TR_FUNCTIONS(AddNodeCommand)
 
 public:
-    AddNodeCommand(GoDocument* doc, Go::NodePtr parentNode, Go::NodePtr node, int index, QUndoCommand* parent = 0);
+    AddNodeCommand(GoDocument* doc, Go::NodePtr game, Go::NodePtr parentNode, Go::NodePtr node, int index, QUndoCommand* parent = 0);
     virtual void redo();
     virtual void undo();
 
 private:
     GoDocument* document_;
+    Go::NodePtr game_;
     Go::NodePtr parentNode_;
     Go::NodePtr node_;
     int index_;
@@ -58,7 +59,7 @@ class SetCommentCommand : public QUndoCommand{
     Q_DECLARE_TR_FUNCTIONS(AddNodeCommand)
 
 public:
-    SetCommentCommand(GoDocument* doc, Go::NodePtr node, const QString& comment, QUndoCommand* parent = 0);
+    SetCommentCommand(GoDocument* doc, Go::NodePtr game, Go::NodePtr node, const QString& comment, QUndoCommand* parent = 0);
     virtual void redo();
     virtual void undo();
 
@@ -67,6 +68,7 @@ public:
 
 private:
     GoDocument* document_;
+    Go::NodePtr game_;
     Go::NodePtr node_;
     QString comment_;
     QString prevComment_;
@@ -78,7 +80,7 @@ private:
 
 /**
   @ingroup Command
-  This command adds game into document
+  This command adds game into document (sgf collection)
 */
 class AddGameCommand : public QUndoCommand{
     Q_DECLARE_TR_FUNCTIONS(AddGameCommand)
@@ -110,6 +112,24 @@ private:
     Go::NodePtr node_;
     Go::InformationPtr info_;
     Go::InformationPtr prevInfo_;
+};
+
+/**
+  @ingroup Command
+  This command loads game from sgf collection
+*/
+class ChangeGameCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(ChangeGameCommand)
+public:
+    ChangeGameCommand(GoDocument* doc, BoardWidget* board, Go::NodePtr game, QUndoCommand* parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+private:
+    GoDocument* document_;
+    BoardWidget* board_;
+    Go::NodePtr game_;
+    Go::NodePtr prevGame_;
 };
 
 

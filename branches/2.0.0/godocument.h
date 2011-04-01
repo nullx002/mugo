@@ -45,9 +45,9 @@ signals:
     void informationChanged(const Go::NodePtr&, const Go::InformationPtr&);
     void gameAdded(const Go::NodePtr& game);
     void gameDeleted(const Go::NodePtr& game, int index);
-    void nodeModified(const Go::NodePtr& node);
-    void nodeAdded(const Go::NodePtr& node);
-    void nodeDeleted(const Go::NodePtr& node);
+    void nodeModified(const Go::NodePtr& game, const Go::NodePtr& node);
+    void nodeAdded(const Go::NodePtr& game, const Go::NodePtr& node);
+    void nodeDeleted(const Go::NodePtr& game, const Go::NodePtr& node);
 
 public slots:
     void modifyDocument();
@@ -56,9 +56,9 @@ public slots:
     void addGameList(const Go::NodeList& gameList);
     bool deleteGame(Go::NodePtr game);
     bool deleteGameList(const Go::NodeList& gameList);
-    void modifyNode(const Go::NodePtr& node);
-    void addNode(Go::NodePtr parent, Go::NodePtr node, int index=-1);
-    bool deleteNode(Go::NodePtr node, bool removeChildren=true);
+    void modifyNode(const Go::NodePtr& game, const Go::NodePtr& node);
+    void addNode(const Go::NodePtr& game, Go::NodePtr parent, Go::NodePtr node, int index=-1);
+    bool deleteNode(const Go::NodePtr& game, Go::NodePtr node, bool removeChildren=true);
 
 public:
     Go::NodeList gameList;

@@ -22,9 +22,10 @@
 /**
   Constructs add node command
 */
-AddNodeCommand::AddNodeCommand(GoDocument* doc, Go::NodePtr parentNode, Go::NodePtr node, int index, QUndoCommand* parent)
+AddNodeCommand::AddNodeCommand(GoDocument* doc, Go::NodePtr game, Go::NodePtr parentNode, Go::NodePtr node, int index, QUndoCommand* parent)
     : QUndoCommand(parent)
     , document_(doc)
+    , game_(game)
     , parentNode_(parentNode)
     , node_(node)
     , index_(index)
@@ -39,22 +40,23 @@ void AddNodeCommand::redo(){
         setText( tr("Move") );
     else
         setText( tr("Add Empty Node") );
-    document_->addNode(parentNode_, node_, index_);
+    document_->addNode(game_, parentNode_, node_, index_);
 }
 
 /**
   undo add node command
 */
 void AddNodeCommand::undo(){
-    document_->deleteNode(node_);
+    document_->deleteNode(game_, node_);
 }
 
 /**
   Constructs set comment command
 */
-SetCommentCommand::SetCommentCommand(GoDocument* doc, Go::NodePtr node, const QString& comment, QUndoCommand* parent)
+SetCommentCommand::SetCommentCommand(GoDocument* doc, Go::NodePtr game, Go::NodePtr node, const QString& comment, QUndoCommand* parent)
     : QUndoCommand(parent)
     , document_(doc)
+    , game_(game)
     , node_(node)
     , comment_(comment)
 {
@@ -67,7 +69,7 @@ SetCommentCommand::SetCommentCommand(GoDocument* doc, Go::NodePtr node, const QS
 void SetCommentCommand::redo(){
     setText( tr("Comment") );
     node_->setComment(comment_);
-    document_->modifyNode(node_);
+    document_->modifyNode(game_, node_);
 }
 
 /**
@@ -75,7 +77,7 @@ void SetCommentCommand::redo(){
 */
 void SetCommentCommand::undo(){
     node_->setComment(prevComment_);
-    document_->modifyNode(node_);
+    document_->modifyNode(game_, node_);
 }
 
 /**
@@ -146,4 +148,31 @@ void SetGameInformationCommand::redo(){
 */
 void SetGameInformationCommand::undo(){
     document_->setInformation(node_, prevInfo_);
+}
+
+/**
+  Constructs change game command
+*/
+ChangeGameCommand::ChangeGameCommand(GoDocument* doc, BoardWidget* board, Go::NodePtr game, QUndoCommand* parent)
+    : QUndoCommand(parent)
+    , document_(doc)
+    , board_(board)
+    , game_(game)
+{
+    prevGame_ = board_->currentGame();
+}
+
+/**
+  redo change game command
+*/
+void ChangeGameCommand::redo(){
+    setText( tr("Change Game") );
+    board_->setGame(game_);
+}
+
+/**
+  undo change game command
+*/
+void ChangeGameCommand::undo(){
+    board_->setGame(prevGame_);
 }

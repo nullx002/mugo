@@ -451,9 +451,9 @@ bool MainWindow::createNewTab(Document* doc){
         connect(goDoc, SIGNAL(dirtyChanged(bool)), SLOT(on_sgfDocument_dirtyChanged(bool)));
         connect(goDoc, SIGNAL(gameAdded(const Go::NodePtr&)), SLOT(on_sgfDocument_gameAdded(const Go::NodePtr&)));
         connect(goDoc, SIGNAL(gameDeleted(const Go::NodePtr&, int)), SLOT(on_sgfDocument_gameDeleted(const Go::NodePtr&, int)));
-        connect(goDoc, SIGNAL(nodeAdded(const Go::NodePtr&)), SLOT(on_sgfDocument_nodeAdded(const Go::NodePtr&)));
-        connect(goDoc, SIGNAL(nodeDeleted(const Go::NodePtr&)), SLOT(on_sgfDocument_nodeDeleted(const Go::NodePtr&)));
-        connect(goDoc, SIGNAL(nodeModified(const Go::NodePtr&)), SLOT(on_sgfDocument_nodeModified(const Go::NodePtr&)));
+        connect(goDoc, SIGNAL(nodeAdded(const Go::NodePtr&, const Go::NodePtr&)), SLOT(on_sgfDocument_nodeAdded(const Go::NodePtr&, const Go::NodePtr&)));
+        connect(goDoc, SIGNAL(nodeDeleted(const Go::NodePtr&, const Go::NodePtr&)), SLOT(on_sgfDocument_nodeDeleted(const Go::NodePtr&, const Go::NodePtr&)));
+        connect(goDoc, SIGNAL(nodeModified(const Go::NodePtr&, const Go::NodePtr&)), SLOT(on_sgfDocument_nodeModified(const Go::NodePtr&, const Go::NodePtr&)));
         ViewData& data = docView[doc];
 
         // new comment widget
@@ -678,12 +678,16 @@ void MainWindow::updateCommentView(ViewData& view, const Go::NodePtr& node){
   create tree items in branch view
 */
 void MainWindow::createBranchItems(Document* doc, const Go::NodePtr& game){
+    // view data
+    ViewData& view = docView[doc];
+
     // get branch view
-    QTreeWidget* branch = docView[doc].branchWidget;
+    QTreeWidget* branch = view.branchWidget;
     if (branch == NULL)
         return;
 
     // create items in branch view
+    view.nodeToTreeItem.clear();
     branch->clear();
     createBranchItems(doc, branch->invisibleRootItem(), game);
 }
@@ -1731,48 +1735,66 @@ void MainWindow::on_sgfDocument_gameDeleted(const Go::NodePtr&, int index){
 /**
   node modified
 */
-void MainWindow::on_sgfDocument_nodeModified(const Go::NodePtr& node)
-{
-    // get active board widget
-    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
-    if (board == NULL)
+void MainWindow::on_sgfDocument_nodeModified(const Go::NodePtr& game, const Go::NodePtr& node){
+    // get document
+    GoDocument* doc = qobject_cast<GoDocument*>(sender());
+    if (doc == NULL)
+        return;
+
+    // get view data
+    ViewData& view = docView[doc];
+
+    // if added node isn't in the current game, there isn't needed to update view.
+    if (game != view.boardWidget->currentGame())
         return;
 
     // update view
-    ViewData& view = docView[board->document()];
     updateNodeView(view, node);
 }
 
 /**
   node added
 */
-void MainWindow::on_sgfDocument_nodeAdded(const Go::NodePtr& node)
-{
+void MainWindow::on_sgfDocument_nodeAdded(const Go::NodePtr& game, const Go::NodePtr& node){
     // get document
     GoDocument* doc = qobject_cast<GoDocument*>(sender());
     if (doc == NULL)
         return;
 
-    // get tree widget
-    QTreeWidget* branch = docView[doc].branchWidget;
+    // get view data
+    ViewData& view = docView[doc];
 
+    // if added node isn't in the current game, there isn't needed to update view.
+    if (game != view.boardWidget->currentGame())
+        return;
+
+    // add node in branch view
+    QTreeWidget* branch = view.branchWidget;
     addBranchItem(doc, branch, node);
 }
 
 /**
   node deleted
 */
-void MainWindow::on_sgfDocument_nodeDeleted(const Go::NodePtr& node){
+void MainWindow::on_sgfDocument_nodeDeleted(const Go::NodePtr& game, const Go::NodePtr& node){
     // get document
     GoDocument* doc = qobject_cast<GoDocument*>(sender());
     if (doc == NULL)
         return;
 
-    // get tree item
+    // get view data
     ViewData& view = docView[doc];
-    QTreeWidgetItem* item = view.nodeToTreeItem[node];
 
-    // delete tree item from branch view
+    // if added node isn't in the current game, there isn't needed to update view.
+    if (game != view.boardWidget->currentGame())
+        return;
+
+    // delete tree item in branch view
+    ViewData::NodeTreeMap::iterator iter = view.nodeToTreeItem.find(node);
+    if (iter == view.nodeToTreeItem.end())
+        return;
+    QTreeWidgetItem* item = iter.value();
+    view.nodeToTreeItem.erase(iter);
     delete item;
 
     // re-create tree view items
@@ -1833,6 +1855,9 @@ void MainWindow::on_board_gameChanged(const Go::NodePtr& game){
 
     // create items in brahch view
     createBranchItems(board->document(), game);
+
+    // update all views
+    updateAllViews(board->document());
 }
 
 /**
@@ -1882,7 +1907,7 @@ void MainWindow::on_commentEdit_textChanged()
         return;
 
     if (lastCommentNode != view.boardWidget->currentNode().data()){
-        lastCommentCommand = new SetCommentCommand(sgfDoc, view.boardWidget->currentNode(), view.commentEdit->toPlainText());
+        lastCommentCommand = new SetCommentCommand(sgfDoc, view.boardWidget->currentGame(), view.boardWidget->currentNode(), view.commentEdit->toPlainText());
         doc->undoStack()->push(lastCommentCommand);
     }
     else
@@ -1929,5 +1954,5 @@ void MainWindow::on_collectionTreeView_activated(QModelIndex index)
         return;
 
     // game change in board
-    board->setGame( board->document()->gameList[index.row()] );
+    board->document()->undoStack()->push( new ChangeGameCommand(board->document(), board, board->document()->gameList[index.row()]) );
 }
