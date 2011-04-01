@@ -454,6 +454,7 @@ bool MainWindow::createNewTab(Document* doc){
         connect(goDoc, SIGNAL(nodeAdded(const Go::NodePtr&, const Go::NodePtr&)), SLOT(on_sgfDocument_nodeAdded(const Go::NodePtr&, const Go::NodePtr&)));
         connect(goDoc, SIGNAL(nodeDeleted(const Go::NodePtr&, const Go::NodePtr&)), SLOT(on_sgfDocument_nodeDeleted(const Go::NodePtr&, const Go::NodePtr&)));
         connect(goDoc, SIGNAL(nodeModified(const Go::NodePtr&, const Go::NodePtr&)), SLOT(on_sgfDocument_nodeModified(const Go::NodePtr&, const Go::NodePtr&)));
+        connect(goDoc, SIGNAL(informationChanged(const Go::NodePtr&, const Go::InformationPtr&)), SLOT(on_sgfDocument_informationChanged(const Go::NodePtr&, const Go::InformationPtr&)));
         ViewData& data = docView[doc];
 
         // new comment widget
@@ -1799,6 +1800,19 @@ void MainWindow::on_sgfDocument_nodeDeleted(const Go::NodePtr& game, const Go::N
 
     // re-create tree view items
     this->rebuildBranchItems(view, node->parent());
+}
+
+/**
+  game information changed
+*/
+void MainWindow::on_sgfDocument_informationChanged(const Go::NodePtr&, const Go::InformationPtr&){
+    // get document
+    GoDocument* doc = qobject_cast<GoDocument*>(sender());
+    if (doc == NULL)
+        return;
+
+    // update views
+    updateAllViews(doc);
 }
 
 /**
