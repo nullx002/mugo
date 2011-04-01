@@ -221,6 +221,7 @@ private slots:
     void on_sgfDocument_nodeModified(const Go::NodePtr& game, const Go::NodePtr& node);
     void on_sgfDocument_nodeAdded(const Go::NodePtr& game, const Go::NodePtr& node);
     void on_sgfDocument_nodeDeleted(const Go::NodePtr& game, const Go::NodePtr& node);
+    void on_sgfDocument_informationChanged(const Go::NodePtr&, const Go::InformationPtr&);
 
     /// @name slot for board tab widget
     void on_boardTabWidget_tabCloseRequested(int index);
