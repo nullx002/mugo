@@ -52,7 +52,7 @@ public:
 
     // get current game, node
     Go::NodePtr currentGame() const{ return currentGame_; }
-    Go::NodePtr currentNode() const{ return currentNode_; }
+    Go::NodePtr currentNode() const{ return currentNode_ ? currentNode_ : currentGame_; }
     Go::NodeList currentNodeList() const{ return currentNodeList_; }
     Go::InformationPtr rootInformation() const{ return currentGame_->information(); }
     Go::InformationPtr currentInformation() const{ return currentInformation_; }
@@ -149,8 +149,8 @@ protected:
     bool showVariation_;
 
 private slots:
-    void on_document_nodeAdded(const Go::NodePtr& node);
-    void on_document_nodeDeleted(const Go::NodePtr& node);
+    void on_document_nodeAdded(const Go::NodePtr& game, const Go::NodePtr& node);
+    void on_document_nodeDeleted(const Go::NodePtr& game, const Go::NodePtr& node);
 };
 
 #endif // BOARDWIDGET_H

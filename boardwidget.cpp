@@ -165,8 +165,8 @@ void BoardWidget::onRButtonUp(QMouseEvent* e){
 */
 bool BoardWidget::setDocument(GoDocument* doc){
     document_ = doc;
-    connect(document_, SIGNAL(nodeAdded(const Go::NodePtr&)), SLOT(on_document_nodeAdded(const Go::NodePtr&)));
-    connect(document_, SIGNAL(nodeDeleted(const Go::NodePtr&)), SLOT(on_document_nodeDeleted(const Go::NodePtr&)));
+    connect(document_, SIGNAL(nodeAdded(const Go::NodePtr&, const Go::NodePtr&)), SLOT(on_document_nodeAdded(const Go::NodePtr&, const Go::NodePtr&)));
+    connect(document_, SIGNAL(nodeDeleted(const Go::NodePtr&, const Go::NodePtr&)), SLOT(on_document_nodeDeleted(const Go::NodePtr&, const Go::NodePtr&)));
     if (setGame(document_->gameList.front()) == false)
         return false;
 
@@ -776,7 +776,7 @@ bool BoardWidget::alternateMove(int sgfX, int sgfY){
 
     // create new node, and add to document
     Go::NodePtr node( Go::createStoneNode(currentNode_->nextColor(), sgfX, sgfY) );
-    document()->undoStack()->push( new AddNodeCommand(document(), currentNode_, node, -1) );
+    document()->undoStack()->push( new AddNodeCommand(document(), currentGame_, currentNode_, node, -1) );
 
     /* new node will be selected in on_document_nodeAdded
     // activate created node
@@ -824,8 +824,10 @@ void BoardWidget::back(int step){
 
   @param[in] node
 */
-void BoardWidget::on_document_nodeAdded(const Go::NodePtr& node){
-    // createNodeList(currentNode_);
+void BoardWidget::on_document_nodeAdded(const Go::NodePtr& game, const Go::NodePtr& node){
+    if (currentGame_ != game)
+        return;
+
     setNode(node);
 }
 
@@ -834,7 +836,10 @@ void BoardWidget::on_document_nodeAdded(const Go::NodePtr& node){
 
   @param[in] node
 */
-void BoardWidget::on_document_nodeDeleted(const Go::NodePtr& node){
+void BoardWidget::on_document_nodeDeleted(const Go::NodePtr& game, const Go::NodePtr& node){
+    if (currentGame_ != game)
+        return;
+
     // return if deleted node isn't in the current node list
     Go::NodeList::const_iterator iter = qFind(currentNodeList_.begin(), currentNodeList_.end(), node);
     if (iter == currentNodeList_.end())

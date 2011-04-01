@@ -151,15 +151,15 @@ bool GoDocument::deleteGameList(const Go::NodeList& gameList_){
 /**
   modify node
 */
-void GoDocument::modifyNode(const Go::NodePtr& node){
+void GoDocument::modifyNode(const Go::NodePtr& game, const Go::NodePtr& node){
     modifyDocument();
-    emit nodeModified(node);
+    emit nodeModified(game, node);
 }
 
 /**
   add node
 */
-void GoDocument::addNode(Go::NodePtr parent, Go::NodePtr node, int index){
+void GoDocument::addNode(const Go::NodePtr& game, Go::NodePtr parent, Go::NodePtr node, int index){
     if (index < 0)
         parent->children().push_back(node);
     else
@@ -167,13 +167,13 @@ void GoDocument::addNode(Go::NodePtr parent, Go::NodePtr node, int index){
     node->setParent(parent);
 
     modifyDocument();
-    emit nodeAdded(node);
+    emit nodeAdded(game, node);
 }
 
 /**
   delete node
 */
-bool  GoDocument::deleteNode(Go::NodePtr node, bool removeChildren){
+bool  GoDocument::deleteNode(const Go::NodePtr& game, Go::NodePtr node, bool removeChildren){
     Go::NodePtr parent = node->parent();
     if (!parent)
         return false;
@@ -189,7 +189,7 @@ bool  GoDocument::deleteNode(Go::NodePtr node, bool removeChildren){
     }
 
     modifyDocument();
-    emit nodeDeleted(node);
+    emit nodeDeleted(game, node);
 
     return true;
 }
