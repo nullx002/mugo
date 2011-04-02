@@ -681,6 +681,10 @@ void MainWindow::updateAllViews(GoDocument* doc){
 */
 void MainWindow::updateNodeView(ViewData& view, const Go::NodePtr& node){
     updateCommentView(view, node);
+
+    ViewData::NodeTreeMap::const_iterator iter = view.nodeToTreeItem.find(node);
+    if (iter != view.nodeToTreeItem.end())
+        iter.value()->setText(0, getBranchItemText(view, node));
 }
 
 /**
@@ -797,7 +801,37 @@ QTreeWidgetItem* MainWindow::createBranchItem(Document* doc, const Go::NodePtr& 
         item->setIcon(0, green);
 
     // set node name
+    item->setText( 0, getBranchItemText(view, node) );
+
+    // set node to tree item data
+    item->setData(0, Qt::UserRole, QVariant::fromValue<Go::NodePtr>(node));
+    view.nodeToTreeItem[node] = item;
+
+    return item;
+}
+
+/**
+  get parent of item.
+  if item is top level item, return invisible root item.
+*/
+QTreeWidgetItem* MainWindow::getParentItem(QTreeWidgetItem* item){
+    QTreeWidgetItem* parent = item->parent();
+    if (parent)
+        return parent;
+
+    QTreeWidget* tree = item->treeWidget();
+    if (tree)
+        return tree->invisibleRootItem();
+
+    return NULL;
+}
+
+/**
+  create tree item text
+*/
+QString MainWindow::getBranchItemText(const ViewData& view, const Go::NodePtr& node){
     QStringList nodeName;
+
     if (node->isStone() && !node->isPass())
         nodeName.push_back( Go::coordinateString(view.boardWidget->xsize(), view.boardWidget->ysize(), node->x(), node->y(), false) );
     else if (node->isStone())
@@ -870,29 +904,7 @@ QTreeWidgetItem* MainWindow::createBranchItem(Document* doc, const Go::NodePtr& 
             nodeName.push_back( tr("(Even)") );
     }
 
-    item->setText(0, nodeName.join(" "));
-
-    // set node to tree item data
-    item->setData(0, Qt::UserRole, QVariant::fromValue<Go::NodePtr>(node));
-    view.nodeToTreeItem[node] = item;
-
-    return item;
-}
-
-/**
-  get parent of item.
-  if item is top level item, return invisible root item.
-*/
-QTreeWidgetItem* MainWindow::getParentItem(QTreeWidgetItem* item){
-    QTreeWidgetItem* parent = item->parent();
-    if (parent)
-        return parent;
-
-    QTreeWidget* tree = item->treeWidget();
-    if (tree)
-        return tree->invisibleRootItem();
-
-    return NULL;
+    return nodeName.join(" ");
 }
 
 /**
@@ -1875,7 +1887,7 @@ void MainWindow::on_sgfDocument_nodeDeleted(const Go::NodePtr& game, const Go::N
     delete item;
 
     // re-create tree view items
-    this->rebuildBranchItems(view, node->parent());
+    rebuildBranchItems(view, node->parent());
 }
 
 /**
@@ -1985,25 +1997,31 @@ void MainWindow::on_commentEdit_textChanged()
         ++iter;
     }
 
-    SgfDocument* sgfDoc = qobject_cast<SgfDocument*>(doc);
-    if (sgfDoc == NULL)
+    // set comment command needs GoDocument.
+    GoDocument* goDoc = qobject_cast<GoDocument*>(doc);
+    if (goDoc == NULL)
         return;
 
-    static Go::Node* lastCommentNode = NULL;
-    static SetCommentCommand* lastCommentCommand = NULL;
-
+    // if text was not changed, command doesn't execute.
     ViewData& view = docView[doc];
     if (view.boardWidget->currentNode()->comment() == view.commentEdit->toPlainText())
         return;
 
-    if (lastCommentNode != view.boardWidget->currentNode().data()){
-        lastCommentCommand = new SetCommentCommand(sgfDoc, view.boardWidget->currentGame(), view.boardWidget->currentNode(), view.commentEdit->toPlainText());
+    static SetCommentCommand* lastCommentCommand = NULL;
+    static Go::Node* lastNode = NULL;
+    const QUndoCommand* lastCommand = NULL;
+    int index = doc->undoStack()->index() - 1;
+    if (index >= 0 && index < doc->undoStack()->count())
+        lastCommand = doc->undoStack()->command(index);
+
+    if (lastNode != view.boardWidget->currentNode() || lastCommentCommand != lastCommand){
+        lastCommentCommand = new SetCommentCommand(goDoc, view.boardWidget->currentGame(), view.boardWidget->currentNode(), view.commentEdit->toPlainText());
         doc->undoStack()->push(lastCommentCommand);
     }
     else
         lastCommentCommand->setComment(view.commentEdit->toPlainText());
 
-    lastCommentNode = view.boardWidget->currentNode().data();
+    lastNode = view.boardWidget->currentNode().data();
 }
 
 /**
