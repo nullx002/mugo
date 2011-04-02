@@ -911,6 +911,7 @@ QString MainWindow::getBranchItemText(const ViewData& view, const Go::NodePtr& n
   create model for collection view
 */
 void MainWindow::createCollectionModel(GoDocument* doc, QStandardItemModel* model){
+    model->setRowCount(0);
     for (int i=0; i<doc->gameList.size(); ++i){
         Go::NodePtr& game = doc->gameList[i];
         QList<QStandardItem*> items = createCollectionRow(game);
@@ -1809,14 +1810,6 @@ void MainWindow::on_sgfDocument_gameDeleted(const Go::NodePtr&, int index){
     // get view
     ViewData& view = docView[doc];
 
-/*
-    // create collection model
-    view.collectionModel->setRowCount(0);
-    foreach(const Go::NodePtr& game, doc->gameList){
-        QList<QStandardItem*> items = this->createCollectionRow(game);
-        view.collectionModel->appendRow(items);
-    }
-*/
     // remove deleted game from collection model
     view.collectionModel->removeRow(index);
 }
@@ -1900,6 +1893,8 @@ void MainWindow::on_sgfDocument_informationChanged(const Go::NodePtr&, const Go:
         return;
 
     // update views
+    ViewData& view = docView[doc];
+    createCollectionModel(doc, view.collectionModel);
     updateAllViews(doc);
 }
 
@@ -2061,6 +2056,11 @@ void MainWindow::on_collectionTreeView_activated(QModelIndex index)
     if (board == NULL)
         return;
 
+    // if selected game is already loaded, doing nothing.
+    Go::NodePtr game = board->document()->gameList[index.row()];
+    if (game == board->currentGame())
+        return;
+
     // game change in board
-    board->document()->undoStack()->push( new ChangeGameCommand(board->document(), board, board->document()->gameList[index.row()]) );
+    board->document()->undoStack()->push( new ChangeGameCommand(board->document(), board, game) );
 }
