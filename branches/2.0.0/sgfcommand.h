@@ -133,4 +133,5 @@ private:
 };
 
 
+
 #endif // SGFCOMMAND_H

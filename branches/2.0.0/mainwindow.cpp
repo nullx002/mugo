@@ -116,22 +116,10 @@ bool MainWindow::fileOpen(const QString& fname, QTextCodec* codec, bool guessCod
         ++iter;
     }
 
-    // if codec isn't designated, default codec of application is used.
-    if (codec == NULL)
-        codec = mugoApp()->defaultCodec();
-
-    // open document if document isn't opened.
-    QFileInfo info(fname);
-    QString ext = info.suffix().toLower();
-
-    SgfDocument* doc = NULL;
-    if (ext.compare("sgf") == 0){
-        doc = new SgfDocument(this);
-        if (doc->open(fname, codec, guessCodec) == false){
-            delete doc;
-            return false;
-        }
-    }
+    // open document
+    GoDocument* doc = openDocument(fname, codec, guessCodec);
+    if (doc == NULL)
+        return false;
 
     // show document in new tab
     createNewTab(doc);
@@ -258,6 +246,10 @@ void MainWindow::initializeMenu(){
 //    ui->menuEdit->insertAction(redoAction, undoAction);
 //    ui->editToolBar->insertAction(ui->editToolBar->actions().at(0), redoAction);
 //    ui->editToolBar->insertAction(redoAction, undoAction);
+
+    // Collection
+    ui->collectionDockWidget->toggleViewAction()->setIcon( QIcon(":/res/gamelist.png") );
+    ui->collectionToolBar->insertAction( ui->collectionToolBar->actions().at(0), ui->collectionDockWidget->toggleViewAction() );
 
     // Window
     ui->menuWindow->insertAction( ui->menuWindow->actions().at(1), ui->undoDockWidget->toggleViewAction() );
@@ -599,6 +591,34 @@ bool MainWindow::getSaveFileName(const QString& initialPath, QString& fname, QTe
 */
 
     return true;
+}
+
+/**
+  open document from file, view isn't be created.
+*/
+/**
+  open exist file in new tab.
+  if file is already opened, document will be active.
+*/
+GoDocument* MainWindow::openDocument(const QString& fname, QTextCodec* codec, bool guessCodec){
+    // if codec isn't designated, default codec of application is used.
+    if (codec == NULL)
+        codec = mugoApp()->defaultCodec();
+
+    // open document if document isn't opened.
+    QFileInfo info(fname);
+    QString ext = info.suffix().toLower();
+
+    SgfDocument* doc = NULL;
+    if (ext.compare("sgf") == 0){
+        doc = new SgfDocument(this);
+        if (doc->open(fname, codec, guessCodec) == false){
+            delete doc;
+            return NULL;
+        }
+    }
+
+    return doc;
 }
 
 /**
@@ -1030,6 +1050,60 @@ void MainWindow::on_actionExit_triggered()
 }
 
 /**
+  File -> Collection -> Import
+  add file into sgf collection
+*/
+void MainWindow::on_actionCollectionImport_triggered()
+{
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // show open file dialog
+    QString fname;
+    QTextCodec* codec = NULL;
+    if (getOpenFileName(fname, codec) == false)
+        return;
+
+    // open document
+    GoDocument* doc = openDocument(fname, codec, true);
+    if (doc == NULL)
+        return;
+
+    // add game into sgf collection
+    board->document()->undoStack()->push( new AddGameCommand(board->document(), doc->gameList) );
+}
+
+/**
+  File -> Collection -> Extract
+  extract game from sgf collection
+*/
+void MainWindow::on_actionCollectionExtract_triggered()
+{
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // selected index
+    QModelIndex index = ui->collectionTreeView->currentIndex();
+
+    // create new game
+    Go::NodePtr srcGame = board->document()->gameList[index.row()];
+    Go::NodePtr dstGame;
+    Go::copyNode(dstGame, srcGame);
+    Go::NodeList gameList;
+    gameList.push_back(dstGame);
+
+    // show new game
+    GoDocument* doc = new SgfDocument(gameList);
+    setNewDocumentName(doc);
+    createNewTab(doc);
+    doc->modifyDocument();
+}
+
+/**
   File -> Reload -> System
 */
 void MainWindow::on_actionSystem_triggered()
@@ -1452,6 +1526,9 @@ void MainWindow::on_actionCopyCurrentBranchToClipboard_triggered()
             current = newNode;
         }
         current->children().clear();
+
+        if (current->information())
+            current->setInformation( Go::InformationPtr(new Go::Information(*node->information())) );
     }
 
     // output only current branch

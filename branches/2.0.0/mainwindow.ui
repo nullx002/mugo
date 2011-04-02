@@ -53,8 +53,8 @@
      <property name="title">
       <string>Collection</string>
      </property>
-     <addaction name="actionCollectionExtract"/>
      <addaction name="actionCollectionImport"/>
+     <addaction name="actionCollectionExtract"/>
     </widget>
     <widget class="QMenu" name="menuReload">
      <property name="title">
@@ -320,61 +320,6 @@
    <addaction name="actionOpen"/>
    <addaction name="actionSave"/>
   </widget>
-  <widget class="QStatusBar" name="statusBar"/>
-  <widget class="QDockWidget" name="commentDockWidget">
-   <property name="windowTitle">
-    <string>Comment  View</string>
-   </property>
-   <attribute name="dockWidgetArea">
-    <number>2</number>
-   </attribute>
-   <widget class="QWidget" name="commentDockWidgetContents">
-    <layout class="QHBoxLayout" name="commentHorizontalLayout">
-     <property name="margin">
-      <number>0</number>
-     </property>
-     <item>
-      <widget class="QStackedWidget" name="commentStackedWidget"/>
-     </item>
-    </layout>
-   </widget>
-  </widget>
-  <widget class="QDockWidget" name="branchDockWidget">
-   <property name="windowTitle">
-    <string>Branch View</string>
-   </property>
-   <attribute name="dockWidgetArea">
-    <number>2</number>
-   </attribute>
-   <widget class="QWidget" name="branchDockWidgetContents">
-    <layout class="QHBoxLayout" name="branchHorizontalLayout">
-     <property name="margin">
-      <number>0</number>
-     </property>
-     <item>
-      <widget class="QStackedWidget" name="branchStackedWidget"/>
-     </item>
-    </layout>
-   </widget>
-  </widget>
-  <widget class="QDockWidget" name="undoDockWidget">
-   <property name="windowTitle">
-    <string>Undo View</string>
-   </property>
-   <attribute name="dockWidgetArea">
-    <number>1</number>
-   </attribute>
-   <widget class="QWidget" name="undoDockWidgetContents">
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <property name="margin">
-      <number>0</number>
-     </property>
-     <item>
-      <widget class="QUndoView" name="undoView"/>
-     </item>
-    </layout>
-   </widget>
-  </widget>
   <widget class="QToolBar" name="editToolBar">
    <property name="windowTitle">
     <string>Edit ToolBar</string>
@@ -418,6 +363,9 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="separator"/>
+   <addaction name="actionCollectionImport"/>
+   <addaction name="actionCollectionExtract"/>
   </widget>
   <widget class="QToolBar" name="playToolBar">
    <property name="windowTitle">
@@ -429,6 +377,43 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QDockWidget" name="commentDockWidget">
+   <property name="windowTitle">
+    <string>Comment  View</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="QWidget" name="commentDockWidgetContents">
+    <layout class="QHBoxLayout" name="commentHorizontalLayout">
+     <property name="margin">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="QStackedWidget" name="commentStackedWidget"/>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="branchDockWidget">
+   <property name="windowTitle">
+    <string>Branch View</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="QWidget" name="branchDockWidgetContents">
+    <layout class="QHBoxLayout" name="branchHorizontalLayout">
+     <property name="margin">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="QStackedWidget" name="branchStackedWidget"/>
+     </item>
+    </layout>
+   </widget>
   </widget>
   <widget class="QDockWidget" name="collectionDockWidget">
    <property name="windowTitle">
@@ -451,6 +436,24 @@
         <bool>true</bool>
        </property>
       </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="undoDockWidget">
+   <property name="windowTitle">
+    <string>Undo View</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>1</number>
+   </attribute>
+   <widget class="QWidget" name="undoDockWidgetContents">
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <property name="margin">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="QUndoView" name="undoView"/>
      </item>
     </layout>
    </widget>
@@ -800,11 +803,19 @@
    </property>
   </action>
   <action name="actionCollectionExtract">
+   <property name="icon">
+    <iconset resource="mugo.qrc">
+     <normaloff>:/res/sgfextract.png</normaloff>:/res/sgfextract.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Extract</string>
    </property>
   </action>
   <action name="actionCollectionImport">
+   <property name="icon">
+    <iconset resource="mugo.qrc">
+     <normaloff>:/res/sgfimport.png</normaloff>:/res/sgfimport.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Import</string>
    </property>

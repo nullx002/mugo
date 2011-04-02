@@ -49,7 +49,34 @@ QString coordinateString(int xsize, int ysize, int x, int y, bool showI){
     return str;
 }
 
+/**
+  copy node list
+*/
+void copyNodeList(NodeList& dstList, const NodeList& srcList){
+    foreach(const NodePtr& src, srcList){
+        NodePtr dst;
+        copyNode(dst, src);
+        dstList.push_back(dst);
+    }
+}
 
+/**
+  copy node
+*/
+void copyNode(NodePtr& dst, const NodePtr& src){
+    // copy src to dst
+    NodePtr node(new Node(*src));
+    node->children().clear();
+    if (src->information())
+        node->setInformation( InformationPtr(new Information(*src->information())) );
+    dst = node;
+
+    foreach(const NodePtr& srcChild, src->children()){
+        NodePtr newChild;
+        copyNode(newChild, srcChild);
+        dst->children().push_back(newChild);
+    }
+}
 
 /**
   Constructs empty game information
