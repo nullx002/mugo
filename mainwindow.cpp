@@ -193,7 +193,8 @@ bool MainWindow::closeDocument(GoDocument* doc){
     delete view.boardWidget;
 
     // delete document
-    undoGroup.setActiveStack(0);
+    if (undoGroup.activeStack() == doc->undoStack())
+        undoGroup.setActiveStack(0);
     docView.remove(doc);
     delete doc;
 
@@ -234,18 +235,16 @@ void MainWindow::initializeMenu(){
     ui->actionPasteSGFToNewTab->setShortcut(QKeySequence::Paste);
 
     // Edit -> undo/redo
-    undoAction = undoGroup.createUndoAction(this);
+    QAction* undoAction = undoGroup.createUndoAction(this);
     undoAction->setShortcut(QKeySequence::Undo);
-//    undoAction->setIcon( QIcon(":/res/undo.png") );
-    redoAction = undoGroup.createRedoAction(this);
+    undoAction->setIcon( QIcon(":/res/undo.png") );
+    QAction* redoAction = undoGroup.createRedoAction(this);
     redoAction->setShortcut(QKeySequence::Redo);
-//    redoAction->setIcon( QIcon(":/res/redo.png") );
+    redoAction->setIcon( QIcon(":/res/redo.png") );
     ui->menuEdit->insertAction(ui->menuEdit->actions().at(0), redoAction);
     ui->menuEdit->insertAction(ui->menuEdit->actions().at(0), undoAction);
-//    ui->menuEdit->insertAction(ui->menuEdit->actions().at(0), redoAction);
-//    ui->menuEdit->insertAction(redoAction, undoAction);
-//    ui->editToolBar->insertAction(ui->editToolBar->actions().at(0), redoAction);
-//    ui->editToolBar->insertAction(redoAction, undoAction);
+    ui->editToolBar->addAction(redoAction);
+    ui->editToolBar->insertAction(redoAction, undoAction);
 
     // Collection
     ui->collectionDockWidget->toggleViewAction()->setIcon( QIcon(":/res/gamelist.png") );

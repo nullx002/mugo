@@ -254,8 +254,6 @@ private:
     DocViewData docView;
 
     QUndoGroup undoGroup;
-    QAction* undoAction;
-    QAction* redoAction;
 };
 
 #endif // MAINWINDOW_H
