@@ -116,6 +116,7 @@ protected:
     void rebuildBranchItems(ViewData& view, const Go::NodePtr& node);
     QTreeWidgetItem* createBranchItem(Document* doc, const Go::NodePtr& node);
     QTreeWidgetItem* getParentItem(QTreeWidgetItem* item);
+    QString getBranchItemText(const ViewData& view, const Go::NodePtr& node);
 
     /// @name collection model
     void createCollectionModel(GoDocument* doc, QStandardItemModel* model);
