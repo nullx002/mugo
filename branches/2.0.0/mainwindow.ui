@@ -64,6 +64,10 @@
      <property name="title">
       <string>Reload</string>
      </property>
+     <property name="icon">
+      <iconset resource="mugo.qrc">
+       <normaloff>:/res/reload.png</normaloff>:/res/reload.png</iconset>
+     </property>
      <addaction name="actionSystem"/>
      <addaction name="separator"/>
      <addaction name="actionUTF8"/>
@@ -334,6 +338,8 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="separator"/>
+   <addaction name="actionGameInformation"/>
   </widget>
   <widget class="QToolBar" name="navigationToolBar">
    <property name="windowTitle">
@@ -845,6 +851,10 @@
    </property>
   </action>
   <action name="actionGameInformation">
+   <property name="icon">
+    <iconset resource="mugo.qrc">
+     <normaloff>:/res/gameinfo.png</normaloff>:/res/gameinfo.png</iconset>
+   </property>
    <property name="text">
     <string>Game Information</string>
    </property>

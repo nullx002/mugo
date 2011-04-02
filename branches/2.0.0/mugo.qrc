@@ -15,5 +15,7 @@
         <file>res/sgfimport.png</file>
         <file>res/redo.png</file>
         <file>res/undo.png</file>
+        <file>res/gameinfo.png</file>
+        <file>res/reload.png</file>
     </qresource>
 </RCC>

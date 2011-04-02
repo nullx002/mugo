@@ -243,7 +243,7 @@ void MainWindow::initializeMenu(){
     redoAction->setIcon( QIcon(":/res/redo.png") );
     ui->menuEdit->insertAction(ui->menuEdit->actions().at(0), redoAction);
     ui->menuEdit->insertAction(ui->menuEdit->actions().at(0), undoAction);
-    ui->editToolBar->addAction(redoAction);
+    ui->editToolBar->insertAction(ui->editToolBar->actions().at(0), redoAction);
     ui->editToolBar->insertAction(redoAction, undoAction);
 
     // Collection
