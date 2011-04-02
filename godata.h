@@ -277,6 +277,8 @@ typedef Node::NodeList NodeList;
 
 
 NodePtr createStoneNode(Color color, int x, int y);
+void copyNodeList(Go::NodeList& dstList, const Go::NodeList& srcList);
+void copyNode(Go::NodePtr& dst, const Go::NodePtr& src);
 QString coordinateString(int xsize, int ysize, int x, int y, bool showI = false);
 
 

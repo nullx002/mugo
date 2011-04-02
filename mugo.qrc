@@ -10,5 +10,8 @@
         <file>res/filenew.png</file>
         <file>res/fileopen.png</file>
         <file>res/filesave.png</file>
+        <file>res/gamelist.png</file>
+        <file>res/sgfextract.png</file>
+        <file>res/sgfimport.png</file>
     </qresource>
 </RCC>

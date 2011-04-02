@@ -98,6 +98,7 @@ protected:
     bool getSaveFileName(const QString& initialPath, QString& fname, QTextCodec*& codec);
 
     /// @name load/save
+    GoDocument* openDocument(const QString& fname, QTextCodec* codec, bool guessCodec);
     bool reload(QTextCodec* codec);
     bool maybeSave(GoDocument* doc);
     void setNewDocumentName(GoDocument* doc){ doc->setName( tr("Untitled-%1").arg(++docID) ); }
@@ -136,6 +137,10 @@ private slots:
     void on_actionExportAsciiToClipboard_triggered();
     void on_actionPrint_triggered();
     void on_actionExit_triggered();
+
+    /// @name slot for file collection menu
+    void on_actionCollectionImport_triggered();
+    void on_actionCollectionExtract_triggered();
 
     /// @name slot for file reload menu
     void on_actionSystem_triggered();
