@@ -74,6 +74,7 @@ bool GoDocument::save(const QString& fname, QTextCodec* codec){
     setFileInfo(QFileInfo(fname));
     setCodec(codec);
     setDirty(false);
+    emit saved();
     return true;
 }
 

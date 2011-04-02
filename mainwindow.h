@@ -104,7 +104,7 @@ protected:
     void setNewDocumentName(GoDocument* doc){ doc->setName( tr("Untitled-%1").arg(++docID) ); }
 
     /// @name view
-    void updateAllViews(GoDocument* doc);
+    void updateTitle(GoDocument* doc);
     void updateNodeView(ViewData& view, const Go::NodePtr& node);
     void updateCommentView(ViewData& view, const Go::NodePtr& node);
 
@@ -222,6 +222,7 @@ private slots:
 
     /// @name slot for document
     void on_sgfDocument_dirtyChanged(bool dirty);
+    void on_sgfDocument_saved();
     void on_sgfDocument_gameAdded(const Go::NodePtr& game);
     void on_sgfDocument_gameDeleted(const Go::NodePtr& game, int index);
     void on_sgfDocument_nodeModified(const Go::NodePtr& game, const Go::NodePtr& node);

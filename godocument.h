@@ -41,6 +41,7 @@ public:
     virtual bool save(const QString& fname, QTextCodec* codec=NULL);
 
 signals:
+    void saved();
     void documentModified();
     void informationChanged(const Go::NodePtr&, const Go::InformationPtr&);
     void gameAdded(const Go::NodePtr& game);

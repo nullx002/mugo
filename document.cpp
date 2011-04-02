@@ -33,7 +33,7 @@ Document::Document(QObject* parent)
 */
 void Document::setFileInfo(const QFileInfo& fileInfo){
     fileInfo_ = fileInfo;
-    name_ = fileInfo.baseName();
+    name_ = fileInfo.fileName();
 }
 
 /**

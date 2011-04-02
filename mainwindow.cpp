@@ -440,6 +440,7 @@ bool MainWindow::createNewTab(Document* doc){
     GoDocument* goDoc = qobject_cast<GoDocument*>(doc);
     if (goDoc){
         connect(goDoc, SIGNAL(dirtyChanged(bool)), SLOT(on_sgfDocument_dirtyChanged(bool)));
+        connect(goDoc, SIGNAL(saved()), SLOT(on_sgfDocument_saved()));
         connect(goDoc, SIGNAL(gameAdded(const Go::NodePtr&)), SLOT(on_sgfDocument_gameAdded(const Go::NodePtr&)));
         connect(goDoc, SIGNAL(gameDeleted(const Go::NodePtr&, int)), SLOT(on_sgfDocument_gameDeleted(const Go::NodePtr&, int)));
         connect(goDoc, SIGNAL(nodeAdded(const Go::NodePtr&, const Go::NodePtr&)), SLOT(on_sgfDocument_nodeAdded(const Go::NodePtr&, const Go::NodePtr&)));
@@ -663,9 +664,11 @@ bool MainWindow::maybeSave(GoDocument* doc){
 /**
   udpate all views by node information
 */
-void MainWindow::updateAllViews(GoDocument* doc){
+void MainWindow::updateTitle(GoDocument* doc){
     ViewData& view = docView[doc];
-    updateNodeView(view, view.boardWidget->currentNode());
+
+    if (ui->boardTabWidget->currentWidget() != view.boardWidget)
+        return;
 
     Go::InformationPtr info = view.boardWidget->rootInformation();
     QString title;
@@ -673,6 +676,12 @@ void MainWindow::updateAllViews(GoDocument* doc){
         title = tr("%1 %2(W) vs %3 %4(B)").arg(info->whitePlayer()).arg(info->whiteRank()).arg(info->blackPlayer()).arg(info->blackRank());
     else
         title = doc->name();
+
+    if (doc->dirty())
+        title += " * - mugo";
+    else
+        title += " - mugo";
+
     setWindowTitle(title);
 }
 
@@ -1779,6 +1788,17 @@ void MainWindow::on_sgfDocument_dirtyChanged(bool dirty){
     // set tab text
     int index = ui->boardTabWidget->indexOf(view.boardWidget);
     ui->boardTabWidget->setTabText(index, name);
+
+    // set window title
+    updateTitle(doc);
+}
+
+/**
+  document saved
+*/
+void MainWindow::on_sgfDocument_saved(){
+    // update tab text
+    on_sgfDocument_dirtyChanged(false);
 }
 
 /**
@@ -1895,7 +1915,7 @@ void MainWindow::on_sgfDocument_informationChanged(const Go::NodePtr&, const Go:
     // update views
     ViewData& view = docView[doc];
     createCollectionModel(doc, view.collectionModel);
-    updateAllViews(doc);
+    updateTitle(doc);
 }
 
 /**
@@ -1918,7 +1938,7 @@ void MainWindow::on_boardTabWidget_currentChanged(QWidget* widget)
     ui->branchStackedWidget->setCurrentWidget( docView[board->document()].branchWidget );
 
     // update view
-    updateAllViews(board->document());
+    updateTitle(board->document());
 
     // change collection view
     ViewData& view = docView[board->document()];
@@ -1954,7 +1974,7 @@ void MainWindow::on_board_gameChanged(const Go::NodePtr& game){
     createBranchItems(board->document(), game);
 
     // update all views
-    updateAllViews(board->document());
+    updateTitle(board->document());
 }
 
 /**
