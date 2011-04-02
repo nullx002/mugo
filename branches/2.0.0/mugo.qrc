@@ -13,5 +13,7 @@
         <file>res/gamelist.png</file>
         <file>res/sgfextract.png</file>
         <file>res/sgfimport.png</file>
+        <file>res/redo.png</file>
+        <file>res/undo.png</file>
     </qresource>
 </RCC>
