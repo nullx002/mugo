@@ -218,7 +218,7 @@ bool  GoDocument::deleteNode(const Go::NodePtr& game, Go::NodePtr node, bool rem
     }
 
     modifyDocument();
-    emit nodeDeleted(game, node);
+    emit nodeDeleted(game, node, removeChildren);
 
     return true;
 }

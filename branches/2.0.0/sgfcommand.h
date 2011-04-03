@@ -53,6 +53,26 @@ private:
 
 /**
   @ingroup Command
+  This command deletes new node in paretNode
+*/
+class RemoveNodeCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(RemoveNodeCommand)
+
+public:
+    RemoveNodeCommand(GoDocument* doc, Go::NodePtr game, Go::NodePtr node, QUndoCommand* parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+private:
+    GoDocument* document_;
+    Go::NodePtr game_;
+    Go::NodePtr parentNode_;
+    Go::NodePtr node_;
+    int index_;
+};
+
+/**
+  @ingroup Command
   This command sets comment to specified node
 */
 class SetCommentCommand : public QUndoCommand{
