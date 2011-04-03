@@ -17,5 +17,7 @@
         <file>res/undo.png</file>
         <file>res/gameinfo.png</file>
         <file>res/reload.png</file>
+        <file>res/collectiondown.png</file>
+        <file>res/collectionup.png</file>
     </qresource>
 </RCC>

@@ -127,6 +127,8 @@ protected:
 private slots:
     //@{
     /// @name slot for file menu
+    void on_actionMoveDown_triggered();
+    void on_actionMoveUp_triggered();
     void on_actionNew_triggered();
     void on_actionOpen_triggered();
     void on_actionOpenURL_triggered();
@@ -225,6 +227,8 @@ private slots:
     void on_sgfDocument_saved();
     void on_sgfDocument_gameAdded(const Go::NodePtr& game);
     void on_sgfDocument_gameDeleted(const Go::NodePtr& game, int index);
+    void on_sgfDocument_gameMovedUp(const Go::NodePtr& game);
+    void on_sgfDocument_gameMovedDown(const Go::NodePtr& game);
     void on_sgfDocument_nodeModified(const Go::NodePtr& game, const Go::NodePtr& node);
     void on_sgfDocument_nodeAdded(const Go::NodePtr& game, const Go::NodePtr& node);
     void on_sgfDocument_nodeDeleted(const Go::NodePtr& game, const Go::NodePtr& node);

@@ -443,6 +443,8 @@ bool MainWindow::createNewTab(Document* doc){
         connect(goDoc, SIGNAL(saved()), SLOT(on_sgfDocument_saved()));
         connect(goDoc, SIGNAL(gameAdded(const Go::NodePtr&)), SLOT(on_sgfDocument_gameAdded(const Go::NodePtr&)));
         connect(goDoc, SIGNAL(gameDeleted(const Go::NodePtr&, int)), SLOT(on_sgfDocument_gameDeleted(const Go::NodePtr&, int)));
+        connect(goDoc, SIGNAL(gameMovedUp(const Go::NodePtr&)), SLOT(on_sgfDocument_gameMovedUp(const Go::NodePtr&)));
+        connect(goDoc, SIGNAL(gameMovedDown(const Go::NodePtr&)), SLOT(on_sgfDocument_gameMovedDown(const Go::NodePtr&)));
         connect(goDoc, SIGNAL(nodeAdded(const Go::NodePtr&, const Go::NodePtr&)), SLOT(on_sgfDocument_nodeAdded(const Go::NodePtr&, const Go::NodePtr&)));
         connect(goDoc, SIGNAL(nodeDeleted(const Go::NodePtr&, const Go::NodePtr&)), SLOT(on_sgfDocument_nodeDeleted(const Go::NodePtr&, const Go::NodePtr&)));
         connect(goDoc, SIGNAL(nodeModified(const Go::NodePtr&, const Go::NodePtr&)), SLOT(on_sgfDocument_nodeModified(const Go::NodePtr&, const Go::NodePtr&)));
@@ -946,6 +948,8 @@ QList<QStandardItem*> MainWindow::createCollectionRow(const Go::NodePtr& game){
         items.push_back( new QStandardItem(event) );
     else if (gameName.isEmpty() == false && event.isEmpty() == false)
         items.push_back( new QStandardItem(gameName + ':' + event) );
+    else
+        items.push_back( new QStandardItem("") );
 
     return items;
 }
@@ -1122,6 +1126,50 @@ void MainWindow::on_actionCollectionExtract_triggered()
     setNewDocumentName(doc);
     createNewTab(doc);
     doc->modifyDocument();
+}
+
+/**
+  File -> Collection -> Move Up
+*/
+void MainWindow::on_actionMoveUp_triggered()
+{
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // get view data
+    ViewData& view = docView[board->document()];
+
+    // get selected game
+    QModelIndex index = ui->collectionTreeView->currentIndex();
+    if (index.row() < 1)
+        return;
+
+    // command
+    board->document()->undoStack()->push( new MoveUpGameCommand(board->document(), board->document()->gameList[index.row()]) );
+}
+
+/**
+  File -> Collection -> Move Down
+*/
+void MainWindow::on_actionMoveDown_triggered()
+{
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // get view data
+    ViewData& view = docView[board->document()];
+
+    // get selected game
+    QModelIndex index = ui->collectionTreeView->currentIndex();
+    if (index.row() < 0 || index.row() == view.collectionModel->rowCount() - 1)
+        return;
+
+    // command
+    board->document()->undoStack()->push( new MoveDownGameCommand(board->document(), board->document()->gameList[index.row()]) );
 }
 
 /**
@@ -1832,6 +1880,44 @@ void MainWindow::on_sgfDocument_gameDeleted(const Go::NodePtr&, int index){
 
     // remove deleted game from collection model
     view.collectionModel->removeRow(index);
+}
+
+/**
+  game moved up in sgf collection
+*/
+void MainWindow::on_sgfDocument_gameMovedUp(const Go::NodePtr& game){
+    // get document
+    GoDocument* doc = qobject_cast<GoDocument*>(sender());
+    if (doc == NULL)
+        return;
+
+    // get view
+    ViewData& view = docView[doc];
+
+    // move up game
+    int index = doc->gameList.indexOf(game);
+    QList<QStandardItem*> items = view.collectionModel->takeRow(index+1);
+    view.collectionModel->insertRow(index, items);
+    ui->collectionTreeView->setCurrentIndex( view.collectionModel->indexFromItem(items[0]) );
+}
+
+/**
+  game moved down in sgf collection
+*/
+void MainWindow::on_sgfDocument_gameMovedDown(const Go::NodePtr& game){
+    // get document
+    GoDocument* doc = qobject_cast<GoDocument*>(sender());
+    if (doc == NULL)
+        return;
+
+    // get view
+    ViewData& view = docView[doc];
+
+    // move down game
+    int index = doc->gameList.indexOf(game);
+    QList<QStandardItem*> items = view.collectionModel->takeRow(index-1);
+    view.collectionModel->insertRow(index, items);
+    ui->collectionTreeView->setCurrentIndex( view.collectionModel->indexFromItem(items[0]) );
 }
 
 /**

@@ -59,6 +59,9 @@
      </property>
      <addaction name="actionCollectionImport"/>
      <addaction name="actionCollectionExtract"/>
+     <addaction name="separator"/>
+     <addaction name="actionMoveUp"/>
+     <addaction name="actionMoveDown"/>
     </widget>
     <widget class="QMenu" name="menuReload">
      <property name="title">
@@ -376,6 +379,9 @@
    <addaction name="separator"/>
    <addaction name="actionCollectionImport"/>
    <addaction name="actionCollectionExtract"/>
+   <addaction name="separator"/>
+   <addaction name="actionMoveUp"/>
+   <addaction name="actionMoveDown"/>
   </widget>
   <widget class="QToolBar" name="playToolBar">
    <property name="windowTitle">
@@ -828,6 +834,24 @@
    </property>
    <property name="text">
     <string>&amp;Import</string>
+   </property>
+  </action>
+  <action name="actionMoveUp">
+   <property name="icon">
+    <iconset resource="mugo.qrc">
+     <normaloff>:/res/collectionup.png</normaloff>:/res/collectionup.png</iconset>
+   </property>
+   <property name="text">
+    <string>Move Up</string>
+   </property>
+  </action>
+  <action name="actionMoveDown">
+   <property name="icon">
+    <iconset resource="mugo.qrc">
+     <normaloff>:/res/collectiondown.png</normaloff>:/res/collectiondown.png</iconset>
+   </property>
+   <property name="text">
+    <string>Move Down</string>
    </property>
   </action>
   <action name="actionCopySGFToClipboard">
