@@ -150,6 +150,34 @@ bool GoDocument::deleteGameList(const Go::NodeList& gameList_){
 }
 
 /**
+  move game
+*/
+void GoDocument::moveUpGame(const Go::NodePtr& game){
+    int index = gameList.indexOf(game);
+
+    // swap
+    gameList[index] = gameList[index-1];
+    gameList[index-1] = game;
+
+    modifyDocument();
+    emit gameMovedUp(game);
+}
+
+/**
+  move game
+*/
+void GoDocument::moveDownGame(const Go::NodePtr& game){
+    int index = gameList.indexOf(game);
+
+    // swap
+    gameList[index] = gameList[index+1];
+    gameList[index+1] = game;
+
+    modifyDocument();
+    emit gameMovedDown(game);
+}
+
+/**
   modify node
 */
 void GoDocument::modifyNode(const Go::NodePtr& game, const Go::NodePtr& node){

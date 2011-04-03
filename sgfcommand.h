@@ -75,8 +75,22 @@ private:
 };
 
 /**
-  @defgroup Command
+  @ingroup Command
+  This command changes game information to game node
 */
+class SetGameInformationCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(SetGameInformationCommand)
+public:
+    SetGameInformationCommand(GoDocument* doc, Go::NodePtr node, Go::InformationPtr info, QUndoCommand* parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+private:
+    GoDocument* document_;
+    Go::NodePtr node_;
+    Go::InformationPtr info_;
+    Go::InformationPtr prevInfo_;
+};
 
 /**
   @ingroup Command
@@ -98,20 +112,36 @@ private:
 
 /**
   @ingroup Command
-  This command changes game information to game node
+  This command game move up in the document (sgf collection)
 */
-class SetGameInformationCommand : public QUndoCommand{
-    Q_DECLARE_TR_FUNCTIONS(SetGameInformationCommand)
+class MoveUpGameCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(MoveUpGameCommand)
+
 public:
-    SetGameInformationCommand(GoDocument* doc, Go::NodePtr node, Go::InformationPtr info, QUndoCommand* parent = 0);
+    MoveUpGameCommand(GoDocument* doc, const Go::NodePtr& game, QUndoCommand* parent = 0);
     virtual void redo();
     virtual void undo();
 
 private:
     GoDocument* document_;
-    Go::NodePtr node_;
-    Go::InformationPtr info_;
-    Go::InformationPtr prevInfo_;
+    Go::NodePtr game_;
+};
+
+/**
+  @ingroup Command
+  This command game move down in the document (sgf collection)
+*/
+class MoveDownGameCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(MoveDownGameCommand)
+
+public:
+    MoveDownGameCommand(GoDocument* doc, const Go::NodePtr& game, QUndoCommand* parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+private:
+    GoDocument* document_;
+    Go::NodePtr game_;
 };
 
 /**

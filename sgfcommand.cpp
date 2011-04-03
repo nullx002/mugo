@@ -89,6 +89,33 @@ void SetCommentCommand::setComment(const QString& comment){
 }
 
 /**
+  Constructs set game information command
+*/
+SetGameInformationCommand::SetGameInformationCommand(GoDocument* doc, Go::NodePtr node, Go::InformationPtr info, QUndoCommand* parent)
+    : QUndoCommand(parent)
+    , document_(doc)
+    , node_(node)
+    , info_(info)
+{
+    prevInfo_ = node_->information();
+}
+
+/**
+  redo set game information command
+*/
+void SetGameInformationCommand::redo(){
+    setText( tr("Set Game Information") );
+    document_->setInformation(node_, info_);
+}
+
+/**
+  undo set game information command
+*/
+void SetGameInformationCommand::undo(){
+    document_->setInformation(node_, prevInfo_);
+}
+
+/**
   Constructs add game command
 */
 AddGameCommand::AddGameCommand(GoDocument* doc, Go::NodePtr game, QUndoCommand* parent)
@@ -124,30 +151,53 @@ void AddGameCommand::undo(){
 }
 
 /**
-  Constructs set game information command
+  Constructs game move up command
 */
-SetGameInformationCommand::SetGameInformationCommand(GoDocument* doc, Go::NodePtr node, Go::InformationPtr info, QUndoCommand* parent)
+MoveUpGameCommand::MoveUpGameCommand(GoDocument* doc, const Go::NodePtr& game, QUndoCommand* parent)
     : QUndoCommand(parent)
     , document_(doc)
-    , node_(node)
-    , info_(info)
+    , game_(game)
 {
-    prevInfo_ = node_->information();
 }
 
 /**
-  redo set game information command
+  redo game move up command
 */
-void SetGameInformationCommand::redo(){
-    setText( tr("Set Game Information") );
-    document_->setInformation(node_, info_);
+void MoveUpGameCommand::redo(){
+    setText( tr("Game Move Up in SGF Collection") );
+    document_->moveUpGame(game_);
 }
 
 /**
-  undo set game information command
+  undo game move up command
 */
-void SetGameInformationCommand::undo(){
-    document_->setInformation(node_, prevInfo_);
+void MoveUpGameCommand::undo(){
+    document_->moveDownGame(game_);
+}
+
+/**
+  Constructs game move down command
+*/
+MoveDownGameCommand::MoveDownGameCommand(GoDocument* doc, const Go::NodePtr& game, QUndoCommand* parent)
+    : QUndoCommand(parent)
+    , document_(doc)
+    , game_(game)
+{
+}
+
+/**
+  redo game move down command
+*/
+void MoveDownGameCommand::redo(){
+    setText( tr("Game Move Down in SGF Collection") );
+    document_->moveDownGame(game_);
+}
+
+/**
+  undo game move down command
+*/
+void MoveDownGameCommand::undo(){
+    document_->moveUpGame(game_);
 }
 
 /**
