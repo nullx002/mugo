@@ -19,5 +19,10 @@
         <file>res/reload.png</file>
         <file>res/collectiondown.png</file>
         <file>res/collectionup.png</file>
+        <file>res/print.png</file>
+        <file>res/saveimage.png</file>
+        <file>res/remove.png</file>
+        <file>res/removeself.png</file>
+        <file>res/pass.png</file>
     </qresource>
 </RCC>

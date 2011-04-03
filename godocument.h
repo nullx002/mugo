@@ -50,7 +50,7 @@ signals:
     void gameMovedDown(const Go::NodePtr& game);
     void nodeModified(const Go::NodePtr& game, const Go::NodePtr& node);
     void nodeAdded(const Go::NodePtr& game, const Go::NodePtr& node);
-    void nodeDeleted(const Go::NodePtr& game, const Go::NodePtr& node);
+    void nodeDeleted(const Go::NodePtr& game, const Go::NodePtr& node, bool removeChildren);
 
 public slots:
     void modifyDocument();

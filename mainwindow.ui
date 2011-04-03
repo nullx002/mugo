@@ -14,7 +14,7 @@
    <string>MainWindow</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="mugo.qrc">
+   <iconset>
     <normaloff>:/pics/mugo.png</normaloff>:/pics/mugo.png</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
@@ -68,7 +68,7 @@
       <string>Reload</string>
      </property>
      <property name="icon">
-      <iconset resource="mugo.qrc">
+      <iconset>
        <normaloff>:/res/reload.png</normaloff>:/res/reload.png</iconset>
      </property>
      <addaction name="actionSystem"/>
@@ -343,6 +343,9 @@
    </attribute>
    <addaction name="separator"/>
    <addaction name="actionGameInformation"/>
+   <addaction name="separator"/>
+   <addaction name="actionDeleteAfterCurrent"/>
+   <addaction name="actionPass"/>
   </widget>
   <widget class="QToolBar" name="navigationToolBar">
    <property name="windowTitle">
@@ -476,7 +479,7 @@
   </widget>
   <action name="actionNew">
    <property name="icon">
-    <iconset resource="mugo.qrc">
+    <iconset>
      <normaloff>:/res/filenew.png</normaloff>:/res/filenew.png</iconset>
    </property>
    <property name="text">
@@ -485,7 +488,7 @@
   </action>
   <action name="actionOpen">
    <property name="icon">
-    <iconset resource="mugo.qrc">
+    <iconset>
      <normaloff>:/res/fileopen.png</normaloff>:/res/fileopen.png</iconset>
    </property>
    <property name="text">
@@ -509,7 +512,7 @@
   </action>
   <action name="actionSave">
    <property name="icon">
-    <iconset resource="mugo.qrc">
+    <iconset>
      <normaloff>:/res/filesave.png</normaloff>:/res/filesave.png</iconset>
    </property>
    <property name="text">
@@ -522,6 +525,10 @@
    </property>
   </action>
   <action name="actionExportBoardAsImage">
+   <property name="icon">
+    <iconset>
+     <normaloff>:/res/saveimage.png</normaloff>:/res/saveimage.png</iconset>
+   </property>
    <property name="text">
     <string>Export Board As Image...</string>
    </property>
@@ -532,6 +539,10 @@
    </property>
   </action>
   <action name="actionPrint">
+   <property name="icon">
+    <iconset>
+     <normaloff>:/res/print.png</normaloff>:/res/print.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Print...</string>
    </property>
@@ -820,7 +831,7 @@
   </action>
   <action name="actionCollectionExtract">
    <property name="icon">
-    <iconset resource="mugo.qrc">
+    <iconset>
      <normaloff>:/res/sgfextract.png</normaloff>:/res/sgfextract.png</iconset>
    </property>
    <property name="text">
@@ -829,7 +840,7 @@
   </action>
   <action name="actionCollectionImport">
    <property name="icon">
-    <iconset resource="mugo.qrc">
+    <iconset>
      <normaloff>:/res/sgfimport.png</normaloff>:/res/sgfimport.png</iconset>
    </property>
    <property name="text">
@@ -838,7 +849,7 @@
   </action>
   <action name="actionMoveUp">
    <property name="icon">
-    <iconset resource="mugo.qrc">
+    <iconset>
      <normaloff>:/res/collectionup.png</normaloff>:/res/collectionup.png</iconset>
    </property>
    <property name="text">
@@ -847,7 +858,7 @@
   </action>
   <action name="actionMoveDown">
    <property name="icon">
-    <iconset resource="mugo.qrc">
+    <iconset>
      <normaloff>:/res/collectiondown.png</normaloff>:/res/collectiondown.png</iconset>
    </property>
    <property name="text">
@@ -876,7 +887,7 @@
   </action>
   <action name="actionGameInformation">
    <property name="icon">
-    <iconset resource="mugo.qrc">
+    <iconset>
      <normaloff>:/res/gameinfo.png</normaloff>:/res/gameinfo.png</iconset>
    </property>
    <property name="text">
@@ -884,16 +895,28 @@
    </property>
   </action>
   <action name="actionDeleteAfterCurrent">
+   <property name="icon">
+    <iconset>
+     <normaloff>:/res/remove.png</normaloff>:/res/remove.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Delete After Current</string>
    </property>
   </action>
   <action name="actionDeleteOnlyCurrent">
+   <property name="icon">
+    <iconset>
+     <normaloff>:/res/removeself.png</normaloff>:/res/removeself.png</iconset>
+   </property>
    <property name="text">
     <string>Delete Only Current</string>
    </property>
   </action>
   <action name="actionPass">
+   <property name="icon">
+    <iconset>
+     <normaloff>:/res/pass.png</normaloff>:/res/pass.png</iconset>
+   </property>
    <property name="text">
     <string>Pass</string>
    </property>
@@ -1287,8 +1310,6 @@
    <header>qundoview.h</header>
   </customwidget>
  </customwidgets>
- <resources>
-  <include location="mugo.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

@@ -113,10 +113,11 @@ protected:
     void createBranchItems(Document* doc, QTreeWidgetItem* parent, const Go::NodePtr& node);
     void addBranchItem(Document* doc, QTreeWidget* branch, const Go::NodePtr& node);
     bool shouldNest(const Go::NodePtr& node);
-    void rebuildBranchItems(ViewData& view, const Go::NodePtr& node);
+    void rebuildBranchItems(Document* doc, ViewData& view, const Go::NodePtr& node);
     QTreeWidgetItem* createBranchItem(Document* doc, const Go::NodePtr& node);
     QTreeWidgetItem* getParentItem(QTreeWidgetItem* item);
     QString getBranchItemText(const ViewData& view, const Go::NodePtr& node);
+    void removeBranchItems(ViewData& view, const Go::NodePtr& node, bool removeChildren);
 
     /// @name collection model
     void createCollectionModel(GoDocument* doc, QStandardItemModel* model);
@@ -231,7 +232,7 @@ private slots:
     void on_sgfDocument_gameMovedDown(const Go::NodePtr& game);
     void on_sgfDocument_nodeModified(const Go::NodePtr& game, const Go::NodePtr& node);
     void on_sgfDocument_nodeAdded(const Go::NodePtr& game, const Go::NodePtr& node);
-    void on_sgfDocument_nodeDeleted(const Go::NodePtr& game, const Go::NodePtr& node);
+    void on_sgfDocument_nodeDeleted(const Go::NodePtr& game, const Go::NodePtr& node, bool);
     void on_sgfDocument_informationChanged(const Go::NodePtr&, const Go::InformationPtr&);
 
     /// @name slot for board tab widget
