@@ -1709,6 +1709,9 @@ void MainWindow::on_actionGameInformation_triggered()
     dlg.exec();
 }
 
+/**
+  Edit -> Delete After Current
+*/
 void MainWindow::on_actionDeleteAfterCurrent_triggered()
 {
     // get active board widget
@@ -1720,12 +1723,24 @@ void MainWindow::on_actionDeleteAfterCurrent_triggered()
         return;
 
     // process command
-    board->document()->undoStack()->push( new RemoveNodeCommand(board->document(), board->currentGame(), board->currentNode()) );
+    board->document()->undoStack()->push( new RemoveNodeCommand(board->document(), board->currentGame(), board->currentNode(), true) );
 }
 
+/**
+  Edit -> Delete Current Only
+*/
 void MainWindow::on_actionDeleteOnlyCurrent_triggered()
 {
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
 
+    if (!board->currentNode()->parent())
+        return;
+
+    // process command
+    board->document()->undoStack()->push( new RemoveNodeCommand(board->document(), board->currentGame(), board->currentNode(), false) );
 }
 
 void MainWindow::on_actionPass_triggered()

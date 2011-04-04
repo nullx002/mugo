@@ -53,11 +53,12 @@ void AddNodeCommand::undo(){
 /**
   Constructs remove node command
 */
-RemoveNodeCommand::RemoveNodeCommand(GoDocument* doc, Go::NodePtr game, Go::NodePtr node, QUndoCommand* parent)
+RemoveNodeCommand::RemoveNodeCommand(GoDocument* doc, Go::NodePtr game, Go::NodePtr node, bool removeChildren, QUndoCommand* parent)
     : QUndoCommand(parent)
     , document_(doc)
     , game_(game)
     , node_(node)
+    , removeChildren_(removeChildren)
 {
     parentNode_ = node->parent();
     index_ = parentNode_->children().indexOf(node_);
@@ -68,7 +69,7 @@ RemoveNodeCommand::RemoveNodeCommand(GoDocument* doc, Go::NodePtr game, Go::Node
 */
 void RemoveNodeCommand::redo(){
     setText( tr("Remove Node") );
-    document_->deleteNode(game_, node_);
+    document_->deleteNode(game_, node_, removeChildren_);
 }
 
 /**
