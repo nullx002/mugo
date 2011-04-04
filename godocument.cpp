@@ -215,6 +215,7 @@ bool  GoDocument::deleteNode(const Go::NodePtr& game, Go::NodePtr node, bool rem
             child->setParent(parent);
             parent->children().insert(before, child);
         }
+        parent->children().removeOne(node);
     }
 
     modifyDocument();
