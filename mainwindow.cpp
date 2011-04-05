@@ -785,11 +785,11 @@ void MainWindow::rebuildBranchItems(Document* doc, ViewData& view, const Go::Nod
             parentItem = getParentItem(parentItem);
 
         QTreeWidgetItem* currentParent = getParentItem(item);
-        if (currentParent != parentItem){
+//        if (currentParent != parentItem){
             if (currentParent)
                 currentParent->removeChild(item);
             parentItem->addChild(item);
-        }
+//        }
     }
 
     foreach(const Go::NodePtr& child, node->children())
@@ -2039,6 +2039,9 @@ void MainWindow::on_sgfDocument_nodeDeleted(const Go::NodePtr& game, const Go::N
 
     // re-create tree view items
     rebuildBranchItems(doc, view, node->parent());
+
+    if (node->children().empty() == false)
+        view.branchWidget->expandItem( view.nodeToTreeItem[node->children()[0]] );
 }
 
 /**
