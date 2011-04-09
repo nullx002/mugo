@@ -28,6 +28,94 @@ class GoDocument;
 
 
 /**
+  @ingroup Command
+  This command adds game into document (sgf collection)
+*/
+class AddGameCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(AddGameCommand)
+
+public:
+    AddGameCommand(GoDocument* doc, const Go::NodeList& gameList, QUndoCommand* parent = 0);
+    AddGameCommand(GoDocument* doc, Go::NodePtr game, QUndoCommand* parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+private:
+    GoDocument* document_;
+    Go::NodeList gameList_;
+};
+
+/**
+  @ingroup Command
+  This command game move up in the document (sgf collection)
+*/
+class MoveUpGameCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(MoveUpGameCommand)
+
+public:
+    MoveUpGameCommand(GoDocument* doc, const Go::NodePtr& game, QUndoCommand* parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+private:
+    GoDocument* document_;
+    Go::NodePtr game_;
+};
+
+/**
+  @ingroup Command
+  This command game move down in the document (sgf collection)
+*/
+class MoveDownGameCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(MoveDownGameCommand)
+
+public:
+    MoveDownGameCommand(GoDocument* doc, const Go::NodePtr& game, QUndoCommand* parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+private:
+    GoDocument* document_;
+    Go::NodePtr game_;
+};
+
+/**
+  @ingroup Command
+  This command loads game from sgf collection
+*/
+class ChangeGameCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(ChangeGameCommand)
+public:
+    ChangeGameCommand(GoDocument* doc, BoardWidget* board, Go::NodePtr game, QUndoCommand* parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+private:
+    GoDocument* document_;
+    BoardWidget* board_;
+    Go::NodePtr game_;
+    Go::NodePtr prevGame_;
+};
+
+/**
+  @ingroup Command
+  This command changes game information to game node
+*/
+class SetGameInformationCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(SetGameInformationCommand)
+public:
+    SetGameInformationCommand(GoDocument* doc, Go::NodePtr node, Go::InformationPtr info, QUndoCommand* parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+private:
+    GoDocument* document_;
+    Go::NodePtr node_;
+    Go::InformationPtr info_;
+    Go::InformationPtr prevInfo_;
+};
+
+/**
   @defgroup Command
 */
 
@@ -98,90 +186,23 @@ private:
 
 /**
   @ingroup Command
-  This command changes game information to game node
+  This command adds stone into specified node
 */
-class SetGameInformationCommand : public QUndoCommand{
-    Q_DECLARE_TR_FUNCTIONS(SetGameInformationCommand)
+class AddStoneCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(AddStoneCommand)
+
 public:
-    SetGameInformationCommand(GoDocument* doc, Go::NodePtr node, Go::InformationPtr info, QUndoCommand* parent = 0);
+    AddStoneCommand(GoDocument* doc, Go::NodePtr game, Go::NodePtr node, int x, int y, const Go::Color color, QUndoCommand* parent = 0);
     virtual void redo();
     virtual void undo();
 
 private:
     GoDocument* document_;
+    Go::NodePtr game_;
     Go::NodePtr node_;
-    Go::InformationPtr info_;
-    Go::InformationPtr prevInfo_;
-};
-
-/**
-  @ingroup Command
-  This command adds game into document (sgf collection)
-*/
-class AddGameCommand : public QUndoCommand{
-    Q_DECLARE_TR_FUNCTIONS(AddGameCommand)
-
-public:
-    AddGameCommand(GoDocument* doc, const Go::NodeList& gameList, QUndoCommand* parent = 0);
-    AddGameCommand(GoDocument* doc, Go::NodePtr game, QUndoCommand* parent = 0);
-    virtual void redo();
-    virtual void undo();
-
-private:
-    GoDocument* document_;
-    Go::NodeList gameList_;
-};
-
-/**
-  @ingroup Command
-  This command game move up in the document (sgf collection)
-*/
-class MoveUpGameCommand : public QUndoCommand{
-    Q_DECLARE_TR_FUNCTIONS(MoveUpGameCommand)
-
-public:
-    MoveUpGameCommand(GoDocument* doc, const Go::NodePtr& game, QUndoCommand* parent = 0);
-    virtual void redo();
-    virtual void undo();
-
-private:
-    GoDocument* document_;
-    Go::NodePtr game_;
-};
-
-/**
-  @ingroup Command
-  This command game move down in the document (sgf collection)
-*/
-class MoveDownGameCommand : public QUndoCommand{
-    Q_DECLARE_TR_FUNCTIONS(MoveDownGameCommand)
-
-public:
-    MoveDownGameCommand(GoDocument* doc, const Go::NodePtr& game, QUndoCommand* parent = 0);
-    virtual void redo();
-    virtual void undo();
-
-private:
-    GoDocument* document_;
-    Go::NodePtr game_;
-};
-
-/**
-  @ingroup Command
-  This command loads game from sgf collection
-*/
-class ChangeGameCommand : public QUndoCommand{
-    Q_DECLARE_TR_FUNCTIONS(ChangeGameCommand)
-public:
-    ChangeGameCommand(GoDocument* doc, BoardWidget* board, Go::NodePtr game, QUndoCommand* parent = 0);
-    virtual void redo();
-    virtual void undo();
-
-private:
-    GoDocument* document_;
-    BoardWidget* board_;
-    Go::NodePtr game_;
-    Go::NodePtr prevGame_;
+    int x_;
+    int y_;
+    Go::Color color_;
 };
 
 

@@ -193,8 +193,8 @@ private slots:
     void on_actionDeleteOnlyCurrent_triggered();
     void on_actionAlternateMove_triggered();
     void on_actionPass_triggered();
-    void on_actionAddBlackStones_triggered();
-    void on_actionAddWhiteStones_triggered();
+    void on_actionAddBlackStone_triggered();
+    void on_actionAddWhiteStone_triggered();
     void on_actionAddEmpty_triggered();
     void on_actionAddLabel_triggered();
     void on_actionAddLabelManually_triggered();
@@ -203,6 +203,7 @@ private slots:
     void on_actionAddSquare_triggered();
     void on_actionAddCross_triggered();
     void on_actionDeleteMarker_triggered();
+    void on_menuStonesAndMarkers_triggered(bool);
     void on_actionGoodMove_triggered();
     void on_actionVeryGoodMove_triggered();
     void on_actionBadMove_triggered();
@@ -258,10 +259,15 @@ private slots:
 private:
     Ui::MainWindow *ui;
 
+    // document
     int docID;
     DocViewData docView;
 
+    // undo
     QUndoGroup undoGroup;
+
+    // marker
+    QAction* stonesAndMarkersAction;
 };
 
 #endif // MAINWINDOW_H
