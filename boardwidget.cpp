@@ -767,6 +767,13 @@ bool BoardWidget::alternateMove(int sgfX, int sgfY){
     if (data[sgfY][sgfX].color != Go::eDame)
         return false;
 
+    // activate stone if next move already exists.
+    foreach(const Go::NodePtr& child, currentNode_->children())
+        if (child->x() == sgfX && child->y() == sgfY){
+            setNode(child);
+            return false;
+        }
+
     // can not suicide move
     buffer[sgfY][sgfX] = currentNode_->nextColor();
     if (isDeadStone(sgfX, sgfY) && isKillStone(sgfX, sgfY) == false){
