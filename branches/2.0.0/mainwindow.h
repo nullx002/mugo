@@ -186,7 +186,7 @@ private slots:
     /// @name slot for edit
     void on_actionCopySGFToClipboard_triggered();
     void on_actionCopyCurrentBranchToClipboard_triggered();
-    void on_actionPasteSGFToNewTab_triggered();
+    void on_actionPasteSGFInNewTab_triggered();
     void on_actionPasteSGFIntoCollection_triggered();
     void on_actionGameInformation_triggered();
     void on_actionDeleteAfterCurrent_triggered();
