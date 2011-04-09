@@ -127,6 +127,7 @@ protected:
     // move stone
     bool alternateMove(int sgfX, int sgfY);
     bool addStone(int sgfX, int sgfY, Go::Color color);
+    bool removeStone(int sgfX, int sgfY, QList<QPoint>& stones);
     void back(int step=1);
     void forward(int step=1);
 

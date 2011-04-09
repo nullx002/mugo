@@ -205,6 +205,26 @@ private:
     Go::Color color_;
 };
 
+/**
+  @ingroup Command
+  This command adds stone into specified node
+*/
+class RemoveStoneCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(RemoveStoneCommand)
+
+public:
+    RemoveStoneCommand(GoDocument* doc, Go::NodePtr game, Go::NodePtr node, QList<QPoint>& stones, const QPoint& pos, QUndoCommand* parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+private:
+    GoDocument* document_;
+    Go::NodePtr game_;
+    Go::NodePtr node_;
+    QList<QPoint>& stones_;
+    QPoint pos_;
+    int index_;
+};
 
 
 #endif // SGFCOMMAND_H
