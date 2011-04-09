@@ -225,16 +225,16 @@ private slots:
     void on_actionFlipSGFHorizontally_triggered();
 
     /// @name slot for document
-    void on_sgfDocument_dirtyChanged(bool dirty);
-    void on_sgfDocument_saved();
-    void on_sgfDocument_gameAdded(const Go::NodePtr& game);
-    void on_sgfDocument_gameDeleted(const Go::NodePtr& game, int index);
-    void on_sgfDocument_gameMovedUp(const Go::NodePtr& game);
-    void on_sgfDocument_gameMovedDown(const Go::NodePtr& game);
-    void on_sgfDocument_nodeModified(const Go::NodePtr& game, const Go::NodePtr& node);
-    void on_sgfDocument_nodeAdded(const Go::NodePtr& game, const Go::NodePtr& node);
-    void on_sgfDocument_nodeDeleted(const Go::NodePtr& game, const Go::NodePtr& node, bool);
-    void on_sgfDocument_informationChanged(const Go::NodePtr&, const Go::InformationPtr&);
+    void on_goDocument_dirtyChanged(bool dirty);
+    void on_goDocument_saved();
+    void on_goDocument_gameAdded(const Go::NodePtr& game);
+    void on_goDocument_gameDeleted(const Go::NodePtr& game, int index);
+    void on_goDocument_gameMovedUp(const Go::NodePtr& game);
+    void on_goDocument_gameMovedDown(const Go::NodePtr& game);
+    void on_goDocument_nodeModified(const Go::NodePtr& game, const Go::NodePtr& node);
+    void on_goDocument_nodeAdded(const Go::NodePtr& game, const Go::NodePtr& node);
+    void on_goDocument_nodeDeleted(const Go::NodePtr& game, const Go::NodePtr& node, bool);
+    void on_goDocument_informationChanged(const Go::NodePtr&, const Go::InformationPtr&);
 
     /// @name slot for board tab widget
     void on_boardTabWidget_tabCloseRequested(int index);

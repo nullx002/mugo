@@ -69,6 +69,10 @@ RemoveNodeCommand::RemoveNodeCommand(GoDocument* doc, Go::NodePtr game, Go::Node
 */
 void RemoveNodeCommand::redo(){
     setText( tr("Remove Node") );
+
+    if (removeChildren_ == false)
+        children_ = node_->children();
+
     document_->deleteNode(game_, node_, removeChildren_);
 }
 
@@ -76,6 +80,13 @@ void RemoveNodeCommand::redo(){
   undo remove node command
 */
 void RemoveNodeCommand::undo(){
+    if (removeChildren_ == false){
+        foreach(Go::NodePtr child, children_){
+            child->setParent(node_);
+            node_->parent()->children().removeOne(child);
+        }
+    }
+
     document_->addNode(game_, parentNode_, node_, index_);
 }
 

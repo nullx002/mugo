@@ -71,7 +71,7 @@ public slots:
     bool setDocument(GoDocument* doc);
     bool setGame(const Go::NodePtr& game);
     bool setInformation(const Go::InformationPtr& information);
-    bool setNode(const Go::NodePtr& node);
+    bool setNode(const Go::NodePtr& node, bool forceChange=false);
 
 protected:
     // event
@@ -150,7 +150,7 @@ protected:
 
 private slots:
     void on_document_nodeAdded(const Go::NodePtr& game, const Go::NodePtr& node);
-    void on_document_nodeDeleted(const Go::NodePtr& game, const Go::NodePtr& node);
+    void on_document_nodeDeleted(const Go::NodePtr& game, const Go::NodePtr& node, bool removeChildren);
 };
 
 #endif // BOARDWIDGET_H
