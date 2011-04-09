@@ -776,20 +776,24 @@ bool MainWindow::shouldNest(const Go::NodePtr& node){
 void MainWindow::rebuildBranchItems(Document* doc, ViewData& view, const Go::NodePtr& node){
     QTreeWidgetItem* item = view.nodeToTreeItem[node];
     if (item == NULL)
-        // add node in branch view
+        // create tree item if tree item does'nt exist
         item = createBranchItem(doc, node);
 
-    QTreeWidgetItem* parentItem = view.nodeToTreeItem[node->parent()];
-    if (parentItem){
-        if (shouldNest(node) == false)
-            parentItem = getParentItem(parentItem);
+    // get new parent widget
+    QTreeWidgetItem* parentItem = node->parent() ? view.nodeToTreeItem[node->parent()] : view.branchWidget->invisibleRootItem();
+    if (shouldNest(node) == false)
+        parentItem = getParentItem(parentItem);
 
-        QTreeWidgetItem* currentParent = getParentItem(item);
-//        if (currentParent != parentItem){
-            if (currentParent)
-                currentParent->removeChild(item);
-            parentItem->addChild(item);
-//        }
+    // get new position
+    int currentIndex = parentItem->indexOfChild(item);
+    int newIndex = branchIndex(view, node);
+
+    // move item to new position
+    QTreeWidgetItem* currentParentItem = getParentItem(item);
+    if (currentParentItem != parentItem || currentIndex != newIndex){
+        if (currentParentItem)
+            currentParentItem->removeChild(item);
+        parentItem->insertChild(newIndex, item);
     }
 
     foreach(const Go::NodePtr& child, node->children())
@@ -928,6 +932,10 @@ QString MainWindow::getBranchItemText(const ViewData& view, const Go::NodePtr& n
     return nodeName.join(" ");
 }
 
+/**
+  remove branch tree item
+  this function will be called when node deleted
+*/
 void MainWindow::removeBranchItems(ViewData& view, const Go::NodePtr& node, bool removeChildren){
     ViewData::NodeTreeMap::iterator iter = view.nodeToTreeItem.find(node);
     if (iter == view.nodeToTreeItem.end())
@@ -949,6 +957,31 @@ void MainWindow::removeBranchItems(ViewData& view, const Go::NodePtr& node, bool
     if (removeChildren)
         foreach(const Go::NodePtr& child, node->children())
             removeBranchItems(view, child, removeChildren);
+}
+
+/**
+  get tree item index
+*/
+int MainWindow::branchIndex(ViewData& view, const Go::NodePtr& node){
+    int index1 = -1;
+    int index2 = -1;
+    Go::NodePtr parent = node->parent();
+    if (!parent)
+        return 0;
+
+    foreach(const Go::NodePtr& child, parent->children()){
+        if (shouldNest(child))
+            ++index2;
+        else{
+            QTreeWidgetItem* parentItem = view.nodeToTreeItem[parent];
+            index1 = getParentItem(parentItem)->indexOfChild(parentItem) + 1;
+        }
+
+        if (node == child)
+            break;
+    }
+
+    return index2 != -1 ? index2 : index1;
 }
 
 /**
@@ -2033,6 +2066,9 @@ void MainWindow::on_sgfDocument_nodeDeleted(const Go::NodePtr& game, const Go::N
     // if added node isn't in the current game, there isn't needed to update view.
     if (game != view.boardWidget->currentGame())
         return;
+
+    // activate parent node
+    view.boardWidget->setNode(node->parent());
 
     // delete tree item in branch view
     removeBranchItems(view, node, removeChildren);
