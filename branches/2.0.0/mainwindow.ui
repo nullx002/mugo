@@ -944,7 +944,7 @@
    </property>
    <property name="icon">
     <iconset resource="mugo.qrc">
-     <normaloff>:/res/black_128.png</normaloff>:/res/black_128.png</iconset>
+     <normaloff>:/res/black_128_ds.png</normaloff>:/res/black_128_ds.png</iconset>
    </property>
    <property name="text">
     <string>Add Black Stone</string>
@@ -956,7 +956,7 @@
    </property>
    <property name="icon">
     <iconset resource="mugo.qrc">
-     <normaloff>:/res/white_128.png</normaloff>:/res/white_128.png</iconset>
+     <normaloff>:/res/white_128_ds.png</normaloff>:/res/white_128_ds.png</iconset>
    </property>
    <property name="text">
     <string>Add White Stone</string>
