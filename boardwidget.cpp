@@ -114,12 +114,17 @@ void BoardWidget::mouseMoveEvent(QMouseEvent* e){
     qreal size = getGridSize() * 0.95;
 
     // transparent stone is shown at mouse position.
+    Go::Color color = nextColor_;
+    if (editMode_ == eAddBlack)
+        color = Go::eBlack;
+    else if (editMode_ == eAddWhite)
+        color = Go::eWhite;
     QGraphicsEllipseItem* blackEllipse = dynamic_cast<QGraphicsEllipseItem*>(blackStone_);
     QGraphicsEllipseItem* whiteEllipse = dynamic_cast<QGraphicsEllipseItem*>(whiteStone_);
     blackEllipse->setRect(x-size/2.0, y-size/2.0, size, size);
     whiteEllipse->setRect(x-size/2.0, y-size/2.0, size, size);
-    blackStone_->setVisible(nextColor_ == Go::eBlack);
-    whiteStone_->setVisible(nextColor_ == Go::eWhite);
+    blackStone_->setVisible(color == Go::eBlack);
+    whiteStone_->setVisible(color == Go::eWhite);
 }
 
 /**
@@ -150,8 +155,33 @@ void BoardWidget::onLButtonUp(QMouseEvent* e){
     if (viewToSgfCoordinate(e->x(), e->y(), sgfX, sgfY) == false)
         return;
 
-    if (editMode_ == eAlternateMove)
-        alternateMove(sgfX, sgfY);
+    switch(editMode_){
+        case eAlternateMove:
+            alternateMove(sgfX, sgfY);
+            break;
+        case eAddBlack:
+            addStone(sgfX, sgfY, Go::eBlack);
+            break;
+        case eAddWhite:
+            addStone(sgfX, sgfY, Go::eWhite);
+            break;
+        case eAddEmpty:
+            break;
+        case eAddLabel:
+            break;
+        case eAddLabelManually:
+            break;
+        case eAddCircle:
+            break;
+        case eAddSquare:
+            break;
+        case eAddTriangle:
+            break;
+        case eAddCross:
+            break;
+        case eRemoveMarker:
+            break;
+    }
 }
 
 /**
@@ -167,6 +197,7 @@ bool BoardWidget::setDocument(GoDocument* doc){
     document_ = doc;
     connect(document_, SIGNAL(nodeAdded(const Go::NodePtr&, const Go::NodePtr&)), SLOT(on_document_nodeAdded(const Go::NodePtr&, const Go::NodePtr&)));
     connect(document_, SIGNAL(nodeDeleted(const Go::NodePtr&, const Go::NodePtr&, bool)), SLOT(on_document_nodeDeleted(const Go::NodePtr&, const Go::NodePtr&, bool)));
+    connect(document_, SIGNAL(nodeModified(const Go::NodePtr&, const Go::NodePtr&)), SLOT(on_document_nodeModified(const Go::NodePtr&, const Go::NodePtr&)));
     if (setGame(document_->gameList.front()) == false)
         return false;
 
@@ -785,12 +816,23 @@ bool BoardWidget::alternateMove(int sgfX, int sgfY){
     Go::NodePtr node( Go::createStoneNode(currentNode_->nextColor(), sgfX, sgfY) );
     document()->undoStack()->push( new AddNodeCommand(document(), currentGame_, currentNode_, node, -1) );
 
-    /* new node will be selected in on_document_nodeAdded
-    // activate created node
-    setNode(node);
-    */
-
     return true;
+}
+
+/**
+  add stone
+  create and put stone.
+  this stone don't kill enemy stones.
+*/
+bool BoardWidget::addStone(int sgfX, int sgfY, Go::Color color){
+    // if stone already exist, can't put new stone.
+    if (data[sgfY][sgfX].color != Go::eDame)
+        return false;
+
+    // create new node, and add to document
+    document()->undoStack()->push( new AddStoneCommand(document(), currentGame_, currentNode_, sgfX, sgfY, color) );
+
+    return false;
 }
 
 /**
@@ -857,4 +899,15 @@ void BoardWidget::on_document_nodeDeleted(const Go::NodePtr& game, const Go::Nod
     // re-create node list
     createNodeList(node->parent());
     setNode(node->parent(), true);
+}
+
+/**
+  node modified
+*/
+void BoardWidget::on_document_nodeModified(const Go::NodePtr& /*game*/, const Go::NodePtr& node){
+    if (node != currentNode_)
+        return;
+
+    // create buffer
+    createBoardBuffer();
 }

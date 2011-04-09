@@ -244,7 +244,28 @@ void MainWindow::initializeMenu(){
     ui->menuEdit->insertAction(ui->menuEdit->actions().at(0), redoAction);
     ui->menuEdit->insertAction(ui->menuEdit->actions().at(0), undoAction);
     ui->editToolBar->insertAction(ui->editToolBar->actions().at(0), redoAction);
-    ui->editToolBar->insertAction(redoAction, undoAction);
+    ui->editToolBar->insertAction(ui->editToolBar->actions().at(0), undoAction);
+
+    // Edit -> Marker
+    // action group
+    QActionGroup* markerGroup = new QActionGroup(this);
+    markerGroup->addAction(ui->actionAlternateMove);
+    markerGroup->addAction(ui->actionAddBlackStone);
+    markerGroup->addAction(ui->actionAddWhiteStone);
+    markerGroup->addAction(ui->actionAddEmpty);
+    markerGroup->addAction(ui->actionAddLabel);
+    markerGroup->addAction(ui->actionAddLabelManually);
+    markerGroup->addAction(ui->actionAddCircle);
+    markerGroup->addAction(ui->actionAddCross);
+    markerGroup->addAction(ui->actionAddSquare);
+    markerGroup->addAction(ui->actionAddTriangle);
+    markerGroup->addAction(ui->actionDeleteMarker);
+    int alternateMoveIndex = ui->editToolBar->actions().indexOf(ui->actionAlternateMove);
+    ui->editToolBar->insertAction(ui->editToolBar->actions().at(alternateMoveIndex+1), ui->menuStonesAndMarkers->menuAction());
+    ui->menuStonesAndMarkers->menuAction()->setCheckable(true);
+    ui->menuStonesAndMarkers->menuAction()->setIcon( ui->actionAddCircle->icon() );
+    connect(ui->menuStonesAndMarkers->menuAction(), SIGNAL(triggered(bool)), SLOT(on_menuStonesAndMarkers_triggered(bool)));
+    stonesAndMarkersAction = ui->actionAddCircle;
 
     // Collection
     ui->collectionDockWidget->toggleViewAction()->setIcon( QIcon(":/res/gamelist.png") );
@@ -864,6 +885,14 @@ QString MainWindow::getBranchItemText(const ViewData& view, const Go::NodePtr& n
     if (node->comment().isEmpty() == false)
         nodeName.push_back( tr("Comment") );
 
+    // Add Stones
+    if (node->blackStones().empty() == false)
+        nodeName.push_back( tr("Add Black") );
+    if (node->whiteStones().empty() == false)
+        nodeName.push_back( tr("Add White") );
+    if (node->emptyStones().empty() == false)
+        nodeName.push_back( tr("Add Empty") );
+
     // Node Annotation
     switch(node->nodeAnnotation()){
         case Go::Node::eGoodForBlack:
@@ -929,7 +958,7 @@ QString MainWindow::getBranchItemText(const ViewData& view, const Go::NodePtr& n
             nodeName.push_back( tr("(Even)") );
     }
 
-    return nodeName.join(" ");
+    return nodeName.join(", ");
 }
 
 /**
@@ -1793,49 +1822,218 @@ void MainWindow::on_actionPass_triggered()
     board->document()->undoStack()->push( new AddNodeCommand(board->document(), board->currentGame(), board->currentNode(), node, -1) );
 }
 
+/**
+  Edit -> Alternate Move
+*/
 void MainWindow::on_actionAlternateMove_triggered()
 {
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
 
+    // set edit mode
+    board->setEditMode(BoardWidget::eAlternateMove);
+    ui->menuStonesAndMarkers->menuAction()->setChecked(false);
 }
 
-void MainWindow::on_actionAddBlackStones_triggered()
+/**
+  Edit -> Stone & Markes -> Add Black Stone
+*/
+void MainWindow::on_actionAddBlackStone_triggered()
 {
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // set edit mode
+    board->setEditMode(BoardWidget::eAddBlack);
+
+    // change menu icon
+    stonesAndMarkersAction = ui->actionAddBlackStone;
+    ui->menuStonesAndMarkers->menuAction()->setIcon( ui->actionAddBlackStone->icon() );
+    ui->menuStonesAndMarkers->menuAction()->setChecked(true);
 }
 
-void MainWindow::on_actionAddWhiteStones_triggered()
+/**
+  Edit -> Stone & Markes -> Add White Stone
+*/
+void MainWindow::on_actionAddWhiteStone_triggered()
 {
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // set edit mode
+    board->setEditMode(BoardWidget::eAddWhite);
+
+    // change menu icon
+    stonesAndMarkersAction = ui->actionAddWhiteStone;
+    ui->menuStonesAndMarkers->menuAction()->setIcon( ui->actionAddWhiteStone->icon() );
+    ui->menuStonesAndMarkers->menuAction()->setChecked(true);
 }
 
+/**
+  Edit -> Stone & Markes -> Add Empty
+*/
 void MainWindow::on_actionAddEmpty_triggered()
 {
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // set edit mode
+    board->setEditMode(BoardWidget::eAddEmpty);
+
+    // change menu icon
+    stonesAndMarkersAction = ui->actionAddEmpty;
+    ui->menuStonesAndMarkers->menuAction()->setIcon( ui->actionAddEmpty->icon() );
+    ui->menuStonesAndMarkers->menuAction()->setChecked(true);
 }
 
+/**
+  Edit -> Stone & Markes -> Add Label
+*/
 void MainWindow::on_actionAddLabel_triggered()
 {
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // set edit mode
+    board->setEditMode(BoardWidget::eAddLabel);
+
+    // change menu icon
+    stonesAndMarkersAction = ui->actionAddLabel;
+    ui->menuStonesAndMarkers->menuAction()->setIcon( ui->actionAddLabel->icon() );
+    ui->menuStonesAndMarkers->menuAction()->setChecked(true);
 }
 
+/**
+  Edit -> Stone & Markes -> Add Label Manually
+*/
 void MainWindow::on_actionAddLabelManually_triggered()
 {
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // set edit mode
+    board->setEditMode(BoardWidget::eAddLabelManually);
+
+    // change menu icon
+    stonesAndMarkersAction = ui->actionAddLabelManually;
+    ui->menuStonesAndMarkers->menuAction()->setIcon( ui->actionAddLabelManually->icon() );
+    ui->menuStonesAndMarkers->menuAction()->setChecked(true);
 }
 
+/**
+  Edit -> Stone & Markes -> Add Circle
+*/
 void MainWindow::on_actionAddCircle_triggered()
 {
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // set edit mode
+    board->setEditMode(BoardWidget::eAddCircle);
+
+    // change menu icon
+    stonesAndMarkersAction = ui->actionAddCircle;
+    ui->menuStonesAndMarkers->menuAction()->setIcon( ui->actionAddCircle->icon() );
+    ui->menuStonesAndMarkers->menuAction()->setChecked(true);
 }
 
+/**
+  Edit -> Stone & Markes -> Add Triangle
+*/
 void MainWindow::on_actionAddTriangle_triggered()
 {
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // set edit mode
+    board->setEditMode(BoardWidget::eAddTriangle);
+
+    // change menu icon
+    stonesAndMarkersAction = ui->actionAddTriangle;
+    ui->menuStonesAndMarkers->menuAction()->setIcon( ui->actionAddTriangle->icon() );
+    ui->menuStonesAndMarkers->menuAction()->setChecked(true);
 }
 
+/**
+  Edit -> Stone & Markes -> Add Square
+*/
 void MainWindow::on_actionAddSquare_triggered()
 {
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // set edit mode
+    board->setEditMode(BoardWidget::eAddSquare);
+
+    // change menu icon
+    stonesAndMarkersAction = ui->actionAddSquare;
+    ui->menuStonesAndMarkers->menuAction()->setIcon( ui->actionAddSquare->icon() );
+    ui->menuStonesAndMarkers->menuAction()->setChecked(true);
 }
 
+/**
+  Edit -> Stone & Markes -> Add Cross
+*/
 void MainWindow::on_actionAddCross_triggered()
 {
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // set edit mode
+    board->setEditMode(BoardWidget::eAddCross);
+
+    // change menu icon
+    stonesAndMarkersAction = ui->actionAddCross;
+    ui->menuStonesAndMarkers->menuAction()->setIcon( ui->actionAddCross->icon() );
+    ui->menuStonesAndMarkers->menuAction()->setChecked(true);
 }
 
+/**
+  Edit -> Stone & Markes -> Delete Marker
+*/
 void MainWindow::on_actionDeleteMarker_triggered()
 {
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // set edit mode
+    board->setEditMode(BoardWidget::eRemoveMarker);
+
+    // change menu icon
+    stonesAndMarkersAction = ui->actionDeleteMarker;
+    ui->menuStonesAndMarkers->menuAction()->setIcon( ui->actionDeleteMarker->icon() );
+    ui->menuStonesAndMarkers->menuAction()->setChecked(true);
+}
+
+void MainWindow::on_menuStonesAndMarkers_triggered(bool checked){
+    if (checked){
+        ui->actionAlternateMove->setChecked(false);
+        stonesAndMarkersAction->trigger();
+    }
+    else
+        ui->menuStonesAndMarkers->menuAction()->setChecked(true);
 }
 
 void MainWindow::on_actionGoodMove_triggered()

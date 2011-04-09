@@ -144,8 +144,8 @@
      <property name="title">
       <string>Stones &amp; &amp;Markers</string>
      </property>
-     <addaction name="actionAddBlackStones"/>
-     <addaction name="actionAddWhiteStones"/>
+     <addaction name="actionAddBlackStone"/>
+     <addaction name="actionAddWhiteStone"/>
      <addaction name="actionAddEmpty"/>
      <addaction name="separator"/>
      <addaction name="actionAddLabel"/>
@@ -342,10 +342,12 @@
     <bool>false</bool>
    </attribute>
    <addaction name="separator"/>
-   <addaction name="actionGameInformation"/>
+   <addaction name="actionAlternateMove"/>
    <addaction name="separator"/>
    <addaction name="actionDeleteAfterCurrent"/>
    <addaction name="actionPass"/>
+   <addaction name="separator"/>
+   <addaction name="actionGameInformation"/>
   </widget>
   <widget class="QToolBar" name="navigationToolBar">
    <property name="windowTitle">
@@ -921,52 +923,137 @@
     <string>Pass</string>
    </property>
   </action>
-  <action name="actionAddBlackStones">
+  <action name="actionAlternateMove">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>:/res/movealternate.png</normaloff>:/res/movealternate.png</iconset>
+   </property>
    <property name="text">
-    <string>Add Black Stones</string>
+    <string>Alternate Move</string>
    </property>
   </action>
-  <action name="actionAddWhiteStones">
+  <action name="actionAddBlackStone">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>:/res/black_128.png</normaloff>:/res/black_128.png</iconset>
+   </property>
    <property name="text">
-    <string>Add White Stones</string>
+    <string>Add Black Stone</string>
+   </property>
+  </action>
+  <action name="actionAddWhiteStone">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>:/res/white_128.png</normaloff>:/res/white_128.png</iconset>
+   </property>
+   <property name="text">
+    <string>Add White Stone</string>
    </property>
   </action>
   <action name="actionAddEmpty">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>:/res/empty.png</normaloff>:/res/empty.png</iconset>
+   </property>
    <property name="text">
     <string>Add Empty</string>
    </property>
   </action>
   <action name="actionAddLabel">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>:/res/text.png</normaloff>:/res/text.png</iconset>
+   </property>
    <property name="text">
     <string>Add Label</string>
    </property>
   </action>
   <action name="actionAddLabelManually">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>:/res/text2.png</normaloff>:/res/text2.png</iconset>
+   </property>
    <property name="text">
     <string>Add Label Manually</string>
    </property>
   </action>
   <action name="actionAddCircle">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>:/res/circle.png</normaloff>:/res/circle.png</iconset>
+   </property>
    <property name="text">
     <string>Add Circle</string>
    </property>
   </action>
   <action name="actionAddTriangle">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>:/res/triangle.png</normaloff>:/res/triangle.png</iconset>
+   </property>
    <property name="text">
     <string>Add Triangle</string>
    </property>
   </action>
   <action name="actionAddSquare">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>:/res/square.png</normaloff>:/res/square.png</iconset>
+   </property>
    <property name="text">
     <string>Add Square</string>
    </property>
   </action>
   <action name="actionAddCross">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>:/res/cross.png</normaloff>:/res/cross.png</iconset>
+   </property>
    <property name="text">
     <string>Add Cross</string>
    </property>
   </action>
   <action name="actionDeleteMarker">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>:/res/rubbereraser.png</normaloff>:/res/rubbereraser.png</iconset>
+   </property>
    <property name="text">
     <string>Delete Marker</string>
    </property>
@@ -1044,11 +1131,6 @@
   <action name="actionUnsetMoveNumber">
    <property name="text">
     <string>Unset Move Number</string>
-   </property>
-  </action>
-  <action name="actionAlternateMove">
-   <property name="text">
-    <string>Alternate Move</string>
    </property>
   </action>
   <action name="actionEditNodeName">

@@ -61,6 +61,10 @@ public:
     int xsize() const { return currentGame_->information()->xsize(); }
     int ysize() const { return currentGame_->information()->ysize(); }
 
+    // Edit Mode
+    EditMode editMode() const{ return editMode_; }
+    void setEditMode(EditMode mode){ editMode_ = mode; }
+
 signals:
     void documentChanged(GoDocument* doc);
     void gameChanged(const Go::NodePtr& game);
@@ -122,6 +126,7 @@ protected:
 
     // move stone
     bool alternateMove(int sgfX, int sgfY);
+    bool addStone(int sgfX, int sgfY, Go::Color color);
     void back(int step=1);
     void forward(int step=1);
 
@@ -151,6 +156,7 @@ protected:
 private slots:
     void on_document_nodeAdded(const Go::NodePtr& game, const Go::NodePtr& node);
     void on_document_nodeDeleted(const Go::NodePtr& game, const Go::NodePtr& node, bool removeChildren);
+    void on_document_nodeModified(const Go::NodePtr& game, const Go::NodePtr& node);
 };
 
 #endif // BOARDWIDGET_H

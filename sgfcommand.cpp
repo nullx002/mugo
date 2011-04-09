@@ -19,141 +19,6 @@
 #include "sgfcommand.h"
 #include "sgfdocument.h"
 
-/**
-  Constructs add node command
-*/
-AddNodeCommand::AddNodeCommand(GoDocument* doc, Go::NodePtr game, Go::NodePtr parentNode, Go::NodePtr node, int index, QUndoCommand* parent)
-    : QUndoCommand(parent)
-    , document_(doc)
-    , game_(game)
-    , parentNode_(parentNode)
-    , node_(node)
-    , index_(index)
-{
-}
-
-/**
-  redo add node command
-*/
-void AddNodeCommand::redo(){
-    if (node_->isStone())
-        setText( tr("Move") );
-    else
-        setText( tr("Add Empty Node") );
-    document_->addNode(game_, parentNode_, node_, index_);
-}
-
-/**
-  undo add node command
-*/
-void AddNodeCommand::undo(){
-    document_->deleteNode(game_, node_);
-}
-
-/**
-  Constructs remove node command
-*/
-RemoveNodeCommand::RemoveNodeCommand(GoDocument* doc, Go::NodePtr game, Go::NodePtr node, bool removeChildren, QUndoCommand* parent)
-    : QUndoCommand(parent)
-    , document_(doc)
-    , game_(game)
-    , node_(node)
-    , removeChildren_(removeChildren)
-{
-    parentNode_ = node->parent();
-    index_ = parentNode_->children().indexOf(node_);
-}
-
-/**
-  redo remove node command
-*/
-void RemoveNodeCommand::redo(){
-    setText( tr("Remove Node") );
-
-    if (removeChildren_ == false)
-        children_ = node_->children();
-
-    document_->deleteNode(game_, node_, removeChildren_);
-}
-
-/**
-  undo remove node command
-*/
-void RemoveNodeCommand::undo(){
-    if (removeChildren_ == false){
-        foreach(Go::NodePtr child, children_){
-            child->setParent(node_);
-            node_->parent()->children().removeOne(child);
-        }
-    }
-
-    document_->addNode(game_, parentNode_, node_, index_);
-}
-
-/**
-  Constructs set comment command
-*/
-SetCommentCommand::SetCommentCommand(GoDocument* doc, Go::NodePtr game, Go::NodePtr node, const QString& comment, QUndoCommand* parent)
-    : QUndoCommand(parent)
-    , document_(doc)
-    , game_(game)
-    , node_(node)
-    , comment_(comment)
-{
-    prevComment_ = node_->comment();
-}
-
-/**
-  redo set comment ommand
-*/
-void SetCommentCommand::redo(){
-    setText( tr("Comment") );
-    node_->setComment(comment_);
-    document_->modifyNode(game_, node_);
-}
-
-/**
-  undo set comment command
-*/
-void SetCommentCommand::undo(){
-    node_->setComment(prevComment_);
-    document_->modifyNode(game_, node_);
-}
-
-/**
-  set comment
-*/
-void SetCommentCommand::setComment(const QString& comment){
-    comment_ = comment;
-    redo();
-}
-
-/**
-  Constructs set game information command
-*/
-SetGameInformationCommand::SetGameInformationCommand(GoDocument* doc, Go::NodePtr node, Go::InformationPtr info, QUndoCommand* parent)
-    : QUndoCommand(parent)
-    , document_(doc)
-    , node_(node)
-    , info_(info)
-{
-    prevInfo_ = node_->information();
-}
-
-/**
-  redo set game information command
-*/
-void SetGameInformationCommand::redo(){
-    setText( tr("Set Game Information") );
-    document_->setInformation(node_, info_);
-}
-
-/**
-  undo set game information command
-*/
-void SetGameInformationCommand::undo(){
-    document_->setInformation(node_, prevInfo_);
-}
 
 /**
   Constructs add game command
@@ -265,4 +130,188 @@ void ChangeGameCommand::redo(){
 */
 void ChangeGameCommand::undo(){
     board_->setGame(prevGame_);
+}
+
+/**
+  Constructs set game information command
+*/
+SetGameInformationCommand::SetGameInformationCommand(GoDocument* doc, Go::NodePtr node, Go::InformationPtr info, QUndoCommand* parent)
+    : QUndoCommand(parent)
+    , document_(doc)
+    , node_(node)
+    , info_(info)
+{
+    prevInfo_ = node_->information();
+}
+
+/**
+  redo set game information command
+*/
+void SetGameInformationCommand::redo(){
+    setText( tr("Set Game Information") );
+    document_->setInformation(node_, info_);
+}
+
+/**
+  undo set game information command
+*/
+void SetGameInformationCommand::undo(){
+    document_->setInformation(node_, prevInfo_);
+}
+
+/**
+  Constructs add node command
+*/
+AddNodeCommand::AddNodeCommand(GoDocument* doc, Go::NodePtr game, Go::NodePtr parentNode, Go::NodePtr node, int index, QUndoCommand* parent)
+    : QUndoCommand(parent)
+    , document_(doc)
+    , game_(game)
+    , parentNode_(parentNode)
+    , node_(node)
+    , index_(index)
+{
+}
+
+/**
+  redo add node command
+*/
+void AddNodeCommand::redo(){
+    if (node_->isStone())
+        setText( tr("Move") );
+    else
+        setText( tr("Add Empty Node") );
+    document_->addNode(game_, parentNode_, node_, index_);
+}
+
+/**
+  undo add node command
+*/
+void AddNodeCommand::undo(){
+    document_->deleteNode(game_, node_);
+}
+
+/**
+  Constructs remove node command
+*/
+RemoveNodeCommand::RemoveNodeCommand(GoDocument* doc, Go::NodePtr game, Go::NodePtr node, bool removeChildren, QUndoCommand* parent)
+    : QUndoCommand(parent)
+    , document_(doc)
+    , game_(game)
+    , node_(node)
+    , removeChildren_(removeChildren)
+{
+    parentNode_ = node->parent();
+    index_ = parentNode_->children().indexOf(node_);
+}
+
+/**
+  redo remove node command
+*/
+void RemoveNodeCommand::redo(){
+    setText( tr("Remove Node") );
+
+    if (removeChildren_ == false)
+        children_ = node_->children();
+
+    document_->deleteNode(game_, node_, removeChildren_);
+}
+
+/**
+  undo remove node command
+*/
+void RemoveNodeCommand::undo(){
+    if (removeChildren_ == false){
+        foreach(Go::NodePtr child, children_){
+            child->setParent(node_);
+            node_->parent()->children().removeOne(child);
+        }
+    }
+
+    document_->addNode(game_, parentNode_, node_, index_);
+}
+
+/**
+  Constructs set comment command
+*/
+SetCommentCommand::SetCommentCommand(GoDocument* doc, Go::NodePtr game, Go::NodePtr node, const QString& comment, QUndoCommand* parent)
+    : QUndoCommand(parent)
+    , document_(doc)
+    , game_(game)
+    , node_(node)
+    , comment_(comment)
+{
+    prevComment_ = node_->comment();
+}
+
+/**
+  redo set comment ommand
+*/
+void SetCommentCommand::redo(){
+    setText( tr("Comment") );
+    node_->setComment(comment_);
+    document_->modifyNode(game_, node_);
+}
+
+/**
+  undo set comment command
+*/
+void SetCommentCommand::undo(){
+    node_->setComment(prevComment_);
+    document_->modifyNode(game_, node_);
+}
+
+/**
+  set comment
+*/
+void SetCommentCommand::setComment(const QString& comment){
+    comment_ = comment;
+    redo();
+}
+
+/**
+  Constructs add stone command
+*/
+AddStoneCommand::AddStoneCommand(GoDocument* doc, Go::NodePtr game, Go::NodePtr node, int x, int y, const Go::Color color, QUndoCommand* parent)
+    : QUndoCommand(parent)
+    , document_(doc)
+    , game_(game)
+    , node_(node)
+    , x_(x)
+    , y_(y)
+    , color_(color)
+{
+}
+
+/**
+  redo add stone command
+*/
+void AddStoneCommand::redo(){
+    if(color_ == Go::eBlack){
+        setText( tr("Add Black Stone") );
+        node_->blackStones().push_back( QPoint(x_, y_) );
+    }
+    else if(color_ == Go::eWhite){
+        setText( tr("Add White Stone") );
+        node_->whiteStones().push_back( QPoint(x_, y_) );
+    }
+    else if(color_ == Go::eDame){
+        setText( tr("Add Empty Stone") );
+        node_->emptyStones().push_back( QPoint(x_, y_) );
+    }
+
+    document_->modifyNode(game_, node_);
+}
+
+/**
+  undo add stone command
+*/
+void AddStoneCommand::undo(){
+    if (color_ == Go::eBlack)
+        node_->blackStones().pop_back();
+    else if (color_ == Go::eWhite)
+        node_->whiteStones().pop_back();
+    else if (color_ == Go::eDame)
+        node_->emptyStones().pop_back();
+
+    document_->modifyNode(game_, node_);
 }
