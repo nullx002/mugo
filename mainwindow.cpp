@@ -232,7 +232,7 @@ void MainWindow::initializeMenu(){
 
     // Edit
     ui->actionCopySGFToClipboard->setShortcut(QKeySequence::Copy);
-    ui->actionPasteSGFToNewTab->setShortcut(QKeySequence::Paste);
+    ui->actionPasteSGFInNewTab->setShortcut(QKeySequence::Paste);
 
     // Edit -> undo/redo
     QAction* undoAction = undoGroup.createUndoAction(this);
@@ -1713,7 +1713,7 @@ void MainWindow::on_actionCopyCurrentBranchToClipboard_triggered()
 /**
   Edit -> Paste SGF to New Tab
 */
-void MainWindow::on_actionPasteSGFToNewTab_triggered()
+void MainWindow::on_actionPasteSGFInNewTab_triggered()
 {
     // read clipboard
     QClipboard* clipboard = QApplication::clipboard();

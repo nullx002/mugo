@@ -14,7 +14,7 @@
    <string>MainWindow</string>
   </property>
   <property name="windowIcon">
-   <iconset>
+   <iconset resource="mugo.qrc">
     <normaloff>:/pics/mugo.png</normaloff>:/pics/mugo.png</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
@@ -68,7 +68,7 @@
       <string>Reload</string>
      </property>
      <property name="icon">
-      <iconset>
+      <iconset resource="mugo.qrc">
        <normaloff>:/res/reload.png</normaloff>:/res/reload.png</iconset>
      </property>
      <addaction name="actionSystem"/>
@@ -187,7 +187,7 @@
     <addaction name="separator"/>
     <addaction name="actionCopySGFToClipboard"/>
     <addaction name="actionCopyCurrentBranchToClipboard"/>
-    <addaction name="actionPasteSGFToNewTab"/>
+    <addaction name="actionPasteSGFInNewTab"/>
     <addaction name="actionPasteSGFIntoCollection"/>
     <addaction name="separator"/>
     <addaction name="actionGameInformation"/>
@@ -481,7 +481,7 @@
   </widget>
   <action name="actionNew">
    <property name="icon">
-    <iconset>
+    <iconset resource="mugo.qrc">
      <normaloff>:/res/filenew.png</normaloff>:/res/filenew.png</iconset>
    </property>
    <property name="text">
@@ -490,7 +490,7 @@
   </action>
   <action name="actionOpen">
    <property name="icon">
-    <iconset>
+    <iconset resource="mugo.qrc">
      <normaloff>:/res/fileopen.png</normaloff>:/res/fileopen.png</iconset>
    </property>
    <property name="text">
@@ -514,7 +514,7 @@
   </action>
   <action name="actionSave">
    <property name="icon">
-    <iconset>
+    <iconset resource="mugo.qrc">
      <normaloff>:/res/filesave.png</normaloff>:/res/filesave.png</iconset>
    </property>
    <property name="text">
@@ -528,7 +528,7 @@
   </action>
   <action name="actionExportBoardAsImage">
    <property name="icon">
-    <iconset>
+    <iconset resource="mugo.qrc">
      <normaloff>:/res/saveimage.png</normaloff>:/res/saveimage.png</iconset>
    </property>
    <property name="text">
@@ -542,7 +542,7 @@
   </action>
   <action name="actionPrint">
    <property name="icon">
-    <iconset>
+    <iconset resource="mugo.qrc">
      <normaloff>:/res/print.png</normaloff>:/res/print.png</iconset>
    </property>
    <property name="text">
@@ -833,7 +833,7 @@
   </action>
   <action name="actionCollectionExtract">
    <property name="icon">
-    <iconset>
+    <iconset resource="mugo.qrc">
      <normaloff>:/res/sgfextract.png</normaloff>:/res/sgfextract.png</iconset>
    </property>
    <property name="text">
@@ -842,7 +842,7 @@
   </action>
   <action name="actionCollectionImport">
    <property name="icon">
-    <iconset>
+    <iconset resource="mugo.qrc">
      <normaloff>:/res/sgfimport.png</normaloff>:/res/sgfimport.png</iconset>
    </property>
    <property name="text">
@@ -851,7 +851,7 @@
   </action>
   <action name="actionMoveUp">
    <property name="icon">
-    <iconset>
+    <iconset resource="mugo.qrc">
      <normaloff>:/res/collectionup.png</normaloff>:/res/collectionup.png</iconset>
    </property>
    <property name="text">
@@ -860,7 +860,7 @@
   </action>
   <action name="actionMoveDown">
    <property name="icon">
-    <iconset>
+    <iconset resource="mugo.qrc">
      <normaloff>:/res/collectiondown.png</normaloff>:/res/collectiondown.png</iconset>
    </property>
    <property name="text">
@@ -877,9 +877,9 @@
     <string>Copy Current Branch To Clipboard</string>
    </property>
   </action>
-  <action name="actionPasteSGFToNewTab">
+  <action name="actionPasteSGFInNewTab">
    <property name="text">
-    <string>&amp;Paste SGF to New Tab</string>
+    <string>&amp;Paste SGF in New Tab</string>
    </property>
   </action>
   <action name="actionPasteSGFIntoCollection">
@@ -889,7 +889,7 @@
   </action>
   <action name="actionGameInformation">
    <property name="icon">
-    <iconset>
+    <iconset resource="mugo.qrc">
      <normaloff>:/res/gameinfo.png</normaloff>:/res/gameinfo.png</iconset>
    </property>
    <property name="text">
@@ -898,7 +898,7 @@
   </action>
   <action name="actionDeleteAfterCurrent">
    <property name="icon">
-    <iconset>
+    <iconset resource="mugo.qrc">
      <normaloff>:/res/remove.png</normaloff>:/res/remove.png</iconset>
    </property>
    <property name="text">
@@ -907,7 +907,7 @@
   </action>
   <action name="actionDeleteOnlyCurrent">
    <property name="icon">
-    <iconset>
+    <iconset resource="mugo.qrc">
      <normaloff>:/res/removeself.png</normaloff>:/res/removeself.png</iconset>
    </property>
    <property name="text">
@@ -916,7 +916,7 @@
   </action>
   <action name="actionPass">
    <property name="icon">
-    <iconset>
+    <iconset resource="mugo.qrc">
      <normaloff>:/res/pass.png</normaloff>:/res/pass.png</iconset>
    </property>
    <property name="text">
@@ -931,7 +931,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="mugo.qrc">
      <normaloff>:/res/movealternate.png</normaloff>:/res/movealternate.png</iconset>
    </property>
    <property name="text">
@@ -943,7 +943,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="mugo.qrc">
      <normaloff>:/res/black_128.png</normaloff>:/res/black_128.png</iconset>
    </property>
    <property name="text">
@@ -955,7 +955,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="mugo.qrc">
      <normaloff>:/res/white_128.png</normaloff>:/res/white_128.png</iconset>
    </property>
    <property name="text">
@@ -967,7 +967,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="mugo.qrc">
      <normaloff>:/res/empty.png</normaloff>:/res/empty.png</iconset>
    </property>
    <property name="text">
@@ -979,7 +979,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="mugo.qrc">
      <normaloff>:/res/text.png</normaloff>:/res/text.png</iconset>
    </property>
    <property name="text">
@@ -991,7 +991,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="mugo.qrc">
      <normaloff>:/res/text2.png</normaloff>:/res/text2.png</iconset>
    </property>
    <property name="text">
@@ -1003,7 +1003,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="mugo.qrc">
      <normaloff>:/res/circle.png</normaloff>:/res/circle.png</iconset>
    </property>
    <property name="text">
@@ -1015,7 +1015,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="mugo.qrc">
      <normaloff>:/res/triangle.png</normaloff>:/res/triangle.png</iconset>
    </property>
    <property name="text">
@@ -1027,7 +1027,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="mugo.qrc">
      <normaloff>:/res/square.png</normaloff>:/res/square.png</iconset>
    </property>
    <property name="text">
@@ -1039,7 +1039,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="mugo.qrc">
      <normaloff>:/res/cross.png</normaloff>:/res/cross.png</iconset>
    </property>
    <property name="text">
@@ -1051,7 +1051,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="mugo.qrc">
      <normaloff>:/res/rubbereraser.png</normaloff>:/res/rubbereraser.png</iconset>
    </property>
    <property name="text">
@@ -1392,6 +1392,8 @@
    <header>qundoview.h</header>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="mugo.qrc"/>
+ </resources>
  <connections/>
 </ui>
