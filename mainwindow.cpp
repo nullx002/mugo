@@ -1778,9 +1778,19 @@ void MainWindow::on_actionDeleteOnlyCurrent_triggered()
     board->document()->undoStack()->push( new RemoveNodeCommand(board->document(), board->currentGame(), board->currentNode(), false) );
 }
 
+/**
+  Edit -> Pass
+*/
 void MainWindow::on_actionPass_triggered()
 {
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
 
+    // create new node, and add to document
+    Go::NodePtr node( Go::createStoneNode(board->currentNode()->nextColor(), -1, -1) );
+    board->document()->undoStack()->push( new AddNodeCommand(board->document(), board->currentGame(), board->currentNode(), node, -1) );
 }
 
 void MainWindow::on_actionAlternateMove_triggered()
