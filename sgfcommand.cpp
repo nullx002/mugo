@@ -315,3 +315,36 @@ void AddStoneCommand::undo(){
 
     document_->modifyNode(game_, node_);
 }
+
+/**
+  Constructs remove stone command
+*/
+RemoveStoneCommand::RemoveStoneCommand(GoDocument* doc, Go::NodePtr game, Go::NodePtr node, QList<QPoint>& stones, const QPoint& pos, QUndoCommand* parent)
+    : QUndoCommand(parent)
+    , document_(doc)
+    , game_(game)
+    , node_(node)
+    , stones_(stones)
+    , pos_(pos)
+{
+}
+
+/**
+  redo remove stone command
+*/
+void RemoveStoneCommand::redo(){
+    setText( tr("Remove Stone") );
+    index_ = stones_.indexOf(pos_);
+    stones_.removeAt(index_);
+
+    document_->modifyNode(game_, node_);
+}
+
+/**
+  undo remove  stone command
+*/
+void RemoveStoneCommand::undo(){
+    stones_.insert(index_, pos_);
+
+    document_->modifyNode(game_, node_);
+}

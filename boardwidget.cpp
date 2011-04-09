@@ -119,6 +119,8 @@ void BoardWidget::mouseMoveEvent(QMouseEvent* e){
         color = Go::eBlack;
     else if (editMode_ == eAddWhite)
         color = Go::eWhite;
+    else if (editMode_ != eAlternateMove)
+        color = Go::eDame;
     QGraphicsEllipseItem* blackEllipse = dynamic_cast<QGraphicsEllipseItem*>(blackStone_);
     QGraphicsEllipseItem* whiteEllipse = dynamic_cast<QGraphicsEllipseItem*>(whiteStone_);
     blackEllipse->setRect(x-size/2.0, y-size/2.0, size, size);
@@ -166,6 +168,7 @@ void BoardWidget::onLButtonUp(QMouseEvent* e){
             addStone(sgfX, sgfY, Go::eWhite);
             break;
         case eAddEmpty:
+            addStone(sgfX, sgfY, Go::eDame);
             break;
         case eAddLabel:
             break;
@@ -825,12 +828,36 @@ bool BoardWidget::alternateMove(int sgfX, int sgfY){
   this stone don't kill enemy stones.
 */
 bool BoardWidget::addStone(int sgfX, int sgfY, Go::Color color){
+    // remove stone if stone already added
+    bool removed = false;
+    removed = removeStone(sgfX, sgfY, currentNode_->blackStones());
+    removed |= removeStone(sgfX, sgfY, currentNode_->whiteStones());
+    removed |= removeStone(sgfX, sgfY, currentNode_->emptyStones());
+    if (removed)
+        return true;
+
     // if stone already exist, can't put new stone.
-    if (data[sgfY][sgfX].color != Go::eDame)
+    if (color != Go::eDame && data[sgfY][sgfX].color != Go::eDame)
+        return false;
+    else if (color == Go::eDame && data[sgfY][sgfX].color == Go::eDame)
         return false;
 
     // create new node, and add to document
     document()->undoStack()->push( new AddStoneCommand(document(), currentGame_, currentNode_, sgfX, sgfY, color) );
+
+    return true;
+}
+
+/**
+  remove stone
+*/
+bool BoardWidget::removeStone(int sgfX, int sgfY, QList<QPoint>& stones){
+    foreach(const QPoint& p, stones){
+        if (p.x() == sgfX && p.y() == sgfY){
+            document()->undoStack()->push( new RemoveStoneCommand(document(), currentGame_, currentNode_, stones, p) );
+            return true;
+        }
+    }
 
     return false;
 }
