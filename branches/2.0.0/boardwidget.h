@@ -34,12 +34,19 @@ public:
         eAlternateMove, eAddBlack, eAddWhite, eAddEmpty, eAddLabel, eAddLabelManually, eAddCircle, eAddCross, eAddTriangle, eAddSquare, eRemoveMarker,
     };
 
+    typedef QSharedPointer<QGraphicsItem> GraphicsItemPtr;
+    typedef QSharedPointer<QGraphicsSimpleTextItem> TextItemPtr;
+
     struct Data{
-        Data() : color(Go::eDame), stone(NULL), branch(NULL){}
+        Data() : color(Go::eDame), number(-1), focus(false){}
 
         Go::Color color;
-        QGraphicsItem* stone;
-        QGraphicsSimpleTextItem* branch;
+        int number;
+        GraphicsItemPtr stoneItem;
+        TextItemPtr branchItem;
+        TextItemPtr numberItem;
+        TextItemPtr markerItem;
+        bool focus;
     };
 
     // constructor
@@ -117,6 +124,9 @@ protected:
     void createChildBranchMarkers();
     void createSiblingsranchMarkers();
 
+    // create move number
+    void createMoveNumber(int sgfX, int sgfY, int number, bool active);
+
     // get star positions
     void getStarPositions(QList<int>& xstarpos, QList<int>& ystarpos) const;
 
@@ -152,6 +162,7 @@ protected:
 
     Go::Color nextColor_;
     EditMode editMode_;
+    bool showMoveNumber_;
     bool showVariation_;
 
 private slots:

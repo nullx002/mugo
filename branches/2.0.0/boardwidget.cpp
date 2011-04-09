@@ -31,6 +31,7 @@ BoardWidget::BoardWidget(QWidget* parent)
     , whiteStone_(NULL)
     , nextColor_(Go::eBlack)
     , editMode_(eAlternateMove)
+    , showMoveNumber_(true)
     , showVariation_(true)
 {
     initialize();
@@ -46,6 +47,7 @@ BoardWidget::BoardWidget(GoDocument* doc, QWidget* parent)
     , whiteStone_(NULL)
     , nextColor_(Go::eBlack)
     , editMode_(eAlternateMove)
+    , showMoveNumber_(true)
     , showVariation_(true)
 {
     initialize();
@@ -403,15 +405,14 @@ void BoardWidget::setDataPosition(){
         for (int x=0; x<data[y].size(); ++x){
             Data& d = data[y][x];
 
-            if (d.stone){
-                delete d.stone;
-                d.stone = createStoneItem(d.color, x, y);
-            }
+            if (d.stoneItem)
+                d.stoneItem = GraphicsItemPtr( createStoneItem(d.color, x, y) );
 
-            if (d.branch){
-                delete d.branch;
-                d.branch = NULL;
-            }
+            if (d.branchItem)
+                d.branchItem.clear();
+
+            if (d.numberItem)
+                createMoveNumber(x, y, d.number, d.focus);
         }
     }
 
@@ -429,12 +430,22 @@ void BoardWidget::createBoardBuffer(){
     for (int i=0; i<buffer.size(); ++i)
         qFill(buffer[i], Go::eDame);
 
+    int moveNumber = 1;
     Go::NodeList::iterator iter = currentNodeList_.begin();
     while (iter != currentNodeList_.end()){
         Go::NodePtr node(*iter);
+
+        // change move number if move number is designated.
+        if (node->moveNumber() > 0)
+            moveNumber = node->moveNumber();
+
+        // put stone if node is stone and node isn't pass.
         if (node->isStone() && !node->isPass() && node->x() < xsize() && node->y() < ysize()){
             buffer[node->y()][node->x()] = node->color();
             killStone(node->x(), node->y());
+
+            // move number
+            data[node->y()][node->x()].number = moveNumber++;
         }
 
         // add empty stones
@@ -462,29 +473,32 @@ void BoardWidget::createBoardBuffer(){
     for(int y=0; y<ysize(); ++y){
         for(int x=0; x<xsize(); ++x){
             // delete branch marker
-            if (data[y][x].branch){
-                delete data[y][x].branch;
-                data[y][x].branch = NULL;
-            }
+            if (data[y][x].branchItem)
+                data[y][x].branchItem.clear();
+
+            // clear move number
+            if (buffer[y][x] == Go::eDame)
+                data[y][x].number = -1;
+
+            // create move number
+            bool focus = x == currentNode_->x() && y == currentNode_->y();
+            if (showMoveNumber_ && data[y][x].number > 0 && (data[y][x].numberItem == false || data[y][x].focus != focus))
+                createMoveNumber(x, y, data[y][x].number, focus);
+            else if (data[y][x].number <= 0)
+                data[y][x].numberItem.clear();
 
             // if this position already has stone, continue
             if (buffer[y][x] == data[y][x].color)
                 continue;
 
             // delete current stone
-            if (data[y][x].stone){
-                delete data[y][x].stone;
-                data[y][x].stone = NULL;
-            }
+            if (data[y][x].stoneItem)
+                data[y][x].stoneItem.clear();
             data[y][x].color = buffer[y][x];
 
             if (buffer[y][x] != Go::eDame){
                 // create new stone item
-                QGraphicsItem* stone = createStoneItem(buffer[y][x], x, y);
-                if (stone == NULL)
-                    return;
-
-                data[y][x].stone = stone;
+                data[y][x].stoneItem = GraphicsItemPtr(createStoneItem(buffer[y][x], x, y));
             }
         }
     }
@@ -679,9 +693,9 @@ void BoardWidget::createChildBranchMarkers(){
 
         // create text item
         QString str(c);
-        QGraphicsSimpleTextItem* branch = scene()->addSimpleText(str);
+        TextItemPtr branch( scene()->addSimpleText(str) );
         branch->setZValue(4);
-        data[node->y()][node->x()].branch = branch;
+        data[node->y()][node->x()].branchItem = branch;
 
         // set item position
         qreal x, y;
@@ -715,9 +729,9 @@ void BoardWidget::createSiblingsranchMarkers(){
 
         // create text item
         QString str(c);
-        QGraphicsSimpleTextItem* branch = scene()->addSimpleText(str);
+        TextItemPtr branch( scene()->addSimpleText(str) );
         branch->setZValue(4);
-        data[node->y()][node->x()].branch = branch;
+        data[node->y()][node->x()].branchItem = branch;
 
         // set item position
         qreal x, y;
@@ -727,6 +741,39 @@ void BoardWidget::createSiblingsranchMarkers(){
 
         ++c;
     }
+}
+
+/**
+    create graphics item of move number
+*/
+void BoardWidget::createMoveNumber(int sgfX, int sgfY, int number, bool active){
+    // item position
+    qreal x, y;
+    if (sgfToViewCoordinate(sgfX, sgfY, x, y) == false)
+        return;
+
+    // create text item
+    TextItemPtr text( scene()->addSimpleText(QString::number(number)) );
+    text->setZValue(4);
+    data[sgfY][sgfX].numberItem = text;
+    text->setPos(x-text->boundingRect().size().width()/2.0, y-text->boundingRect().size().height()/2.0);
+
+    // font color
+    QColor color;
+    if (active){
+        color = Qt::red;
+        data[sgfY][sgfX].focus = true;
+    }
+    else if (buffer[sgfY][sgfX] == Go::eBlack){
+        color = Qt::white;
+        data[sgfY][sgfX].focus = false;
+    }
+    else if (buffer[sgfY][sgfX] == Go::eWhite){
+        color = Qt::black;
+        data[sgfY][sgfX].focus = false;
+    }
+    text->setBrush( QBrush(color) );
+//    text->setPen( QPen(Qt::red) );
 }
 
 /**
