@@ -70,6 +70,7 @@ private:
     Go::NodePtr node_;
     bool removeChildren_;
     int index_;
+    Go::NodeList children_;
 };
 
 /**

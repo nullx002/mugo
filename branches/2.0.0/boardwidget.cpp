@@ -166,7 +166,7 @@ void BoardWidget::onRButtonUp(QMouseEvent* e){
 bool BoardWidget::setDocument(GoDocument* doc){
     document_ = doc;
     connect(document_, SIGNAL(nodeAdded(const Go::NodePtr&, const Go::NodePtr&)), SLOT(on_document_nodeAdded(const Go::NodePtr&, const Go::NodePtr&)));
-    connect(document_, SIGNAL(nodeDeleted(const Go::NodePtr&, const Go::NodePtr&)), SLOT(on_document_nodeDeleted(const Go::NodePtr&, const Go::NodePtr&)));
+    connect(document_, SIGNAL(nodeDeleted(const Go::NodePtr&, const Go::NodePtr&, bool)), SLOT(on_document_nodeDeleted(const Go::NodePtr&, const Go::NodePtr&, bool)));
     if (setGame(document_->gameList.front()) == false)
         return false;
 
@@ -254,13 +254,13 @@ bool BoardWidget::setInformation(const Go::InformationPtr& information){
 /**
   set current node
 */
-bool BoardWidget::setNode(const Go::NodePtr& node){
-    if (currentNode_ == node)
+bool BoardWidget::setNode(const Go::NodePtr& node, bool forceChange){
+    if (forceChange == false && currentNode_ == node)
         return false;
 
     // if node isn't in the node list, create node list
     Go::NodeList::const_iterator iter = qFind(currentNodeList_.begin(), currentNodeList_.end(), node);
-    if (iter == currentNodeList_.end())
+    if (forceChange == false && iter == currentNodeList_.end())
         createNodeList(node);
 
     // change game information
@@ -836,19 +836,18 @@ void BoardWidget::on_document_nodeAdded(const Go::NodePtr& game, const Go::NodeP
 
   @param[in] node
 */
-void BoardWidget::on_document_nodeDeleted(const Go::NodePtr& game, const Go::NodePtr& node){
+void BoardWidget::on_document_nodeDeleted(const Go::NodePtr& game, const Go::NodePtr& node, bool /*removeChildren*/){
     if (currentGame_ != game)
         return;
 
+/*
     // return if deleted node isn't in the current node list
     Go::NodeList::const_iterator iter = qFind(currentNodeList_.begin(), currentNodeList_.end(), node);
     if (iter == currentNodeList_.end())
         return;
+*/
 
     // re-create node list
     createNodeList(node->parent());
-
-    // if current node was deleted, select parent
-    if (qFind(currentNodeList_.begin(), currentNodeList_.end(), currentNode_) == currentNodeList_.end())
-        setNode(node->parent());
+    setNode(node->parent(), true);
 }

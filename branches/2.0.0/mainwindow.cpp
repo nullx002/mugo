@@ -439,16 +439,16 @@ void MainWindow::createEncodingMenu(){
 bool MainWindow::createNewTab(Document* doc){
     GoDocument* goDoc = qobject_cast<GoDocument*>(doc);
     if (goDoc){
-        connect(goDoc, SIGNAL(dirtyChanged(bool)), SLOT(on_sgfDocument_dirtyChanged(bool)));
-        connect(goDoc, SIGNAL(saved()), SLOT(on_sgfDocument_saved()));
-        connect(goDoc, SIGNAL(gameAdded(const Go::NodePtr&)), SLOT(on_sgfDocument_gameAdded(const Go::NodePtr&)));
-        connect(goDoc, SIGNAL(gameDeleted(const Go::NodePtr&, int)), SLOT(on_sgfDocument_gameDeleted(const Go::NodePtr&, int)));
-        connect(goDoc, SIGNAL(gameMovedUp(const Go::NodePtr&)), SLOT(on_sgfDocument_gameMovedUp(const Go::NodePtr&)));
-        connect(goDoc, SIGNAL(gameMovedDown(const Go::NodePtr&)), SLOT(on_sgfDocument_gameMovedDown(const Go::NodePtr&)));
-        connect(goDoc, SIGNAL(nodeAdded(const Go::NodePtr&, const Go::NodePtr&)), SLOT(on_sgfDocument_nodeAdded(const Go::NodePtr&, const Go::NodePtr&)));
-        connect(goDoc, SIGNAL(nodeDeleted(const Go::NodePtr&, const Go::NodePtr&, bool)), SLOT(on_sgfDocument_nodeDeleted(const Go::NodePtr&, const Go::NodePtr&, bool)));
-        connect(goDoc, SIGNAL(nodeModified(const Go::NodePtr&, const Go::NodePtr&)), SLOT(on_sgfDocument_nodeModified(const Go::NodePtr&, const Go::NodePtr&)));
-        connect(goDoc, SIGNAL(informationChanged(const Go::NodePtr&, const Go::InformationPtr&)), SLOT(on_sgfDocument_informationChanged(const Go::NodePtr&, const Go::InformationPtr&)));
+        connect(goDoc, SIGNAL(dirtyChanged(bool)), SLOT(on_goDocument_dirtyChanged(bool)));
+        connect(goDoc, SIGNAL(saved()), SLOT(on_goDocument_saved()));
+        connect(goDoc, SIGNAL(gameAdded(const Go::NodePtr&)), SLOT(on_goDocument_gameAdded(const Go::NodePtr&)));
+        connect(goDoc, SIGNAL(gameDeleted(const Go::NodePtr&, int)), SLOT(on_goDocument_gameDeleted(const Go::NodePtr&, int)));
+        connect(goDoc, SIGNAL(gameMovedUp(const Go::NodePtr&)), SLOT(on_goDocument_gameMovedUp(const Go::NodePtr&)));
+        connect(goDoc, SIGNAL(gameMovedDown(const Go::NodePtr&)), SLOT(on_goDocument_gameMovedDown(const Go::NodePtr&)));
+        connect(goDoc, SIGNAL(nodeAdded(const Go::NodePtr&, const Go::NodePtr&)), SLOT(on_goDocument_nodeAdded(const Go::NodePtr&, const Go::NodePtr&)));
+        connect(goDoc, SIGNAL(nodeDeleted(const Go::NodePtr&, const Go::NodePtr&, bool)), SLOT(on_goDocument_nodeDeleted(const Go::NodePtr&, const Go::NodePtr&, bool)));
+        connect(goDoc, SIGNAL(nodeModified(const Go::NodePtr&, const Go::NodePtr&)), SLOT(on_goDocument_nodeModified(const Go::NodePtr&, const Go::NodePtr&)));
+        connect(goDoc, SIGNAL(informationChanged(const Go::NodePtr&, const Go::InformationPtr&)), SLOT(on_goDocument_informationChanged(const Go::NodePtr&, const Go::InformationPtr&)));
         ViewData& data = docView[doc];
 
         // new comment widget
@@ -1752,6 +1752,7 @@ void MainWindow::on_actionDeleteAfterCurrent_triggered()
     if (board == NULL)
         return;
 
+    // root node isn't deletable.
     if (!board->currentNode()->parent())
         return;
 
@@ -1769,6 +1770,7 @@ void MainWindow::on_actionDeleteOnlyCurrent_triggered()
     if (board == NULL)
         return;
 
+    // root node isn't deletable.
     if (!board->currentNode()->parent())
         return;
 
@@ -1909,7 +1911,7 @@ void MainWindow::on_actionFlipSGFHorizontally_triggered()
 /**
   dirty flag changed
 */
-void MainWindow::on_sgfDocument_dirtyChanged(bool dirty){
+void MainWindow::on_goDocument_dirtyChanged(bool dirty){
     // get document
     GoDocument* doc = qobject_cast<GoDocument*>(sender());
     if (doc == NULL)
@@ -1934,15 +1936,15 @@ void MainWindow::on_sgfDocument_dirtyChanged(bool dirty){
 /**
   document saved
 */
-void MainWindow::on_sgfDocument_saved(){
+void MainWindow::on_goDocument_saved(){
     // update tab text
-    on_sgfDocument_dirtyChanged(false);
+    on_goDocument_dirtyChanged(false);
 }
 
 /**
   game added
 */
-void MainWindow::on_sgfDocument_gameAdded(const Go::NodePtr& game){
+void MainWindow::on_goDocument_gameAdded(const Go::NodePtr& game){
     // get document
     GoDocument* doc = qobject_cast<GoDocument*>(sender());
     if (doc == NULL)
@@ -1959,7 +1961,7 @@ void MainWindow::on_sgfDocument_gameAdded(const Go::NodePtr& game){
 /**
   game deleted
 */
-void MainWindow::on_sgfDocument_gameDeleted(const Go::NodePtr&, int index){
+void MainWindow::on_goDocument_gameDeleted(const Go::NodePtr&, int index){
     // get document
     GoDocument* doc = qobject_cast<GoDocument*>(sender());
     if (doc == NULL)
@@ -1975,7 +1977,7 @@ void MainWindow::on_sgfDocument_gameDeleted(const Go::NodePtr&, int index){
 /**
   game moved up in sgf collection
 */
-void MainWindow::on_sgfDocument_gameMovedUp(const Go::NodePtr& game){
+void MainWindow::on_goDocument_gameMovedUp(const Go::NodePtr& game){
     // get document
     GoDocument* doc = qobject_cast<GoDocument*>(sender());
     if (doc == NULL)
@@ -1994,7 +1996,7 @@ void MainWindow::on_sgfDocument_gameMovedUp(const Go::NodePtr& game){
 /**
   game moved down in sgf collection
 */
-void MainWindow::on_sgfDocument_gameMovedDown(const Go::NodePtr& game){
+void MainWindow::on_goDocument_gameMovedDown(const Go::NodePtr& game){
     // get document
     GoDocument* doc = qobject_cast<GoDocument*>(sender());
     if (doc == NULL)
@@ -2013,7 +2015,7 @@ void MainWindow::on_sgfDocument_gameMovedDown(const Go::NodePtr& game){
 /**
   node modified
 */
-void MainWindow::on_sgfDocument_nodeModified(const Go::NodePtr& game, const Go::NodePtr& node){
+void MainWindow::on_goDocument_nodeModified(const Go::NodePtr& game, const Go::NodePtr& node){
     // get document
     GoDocument* doc = qobject_cast<GoDocument*>(sender());
     if (doc == NULL)
@@ -2033,7 +2035,7 @@ void MainWindow::on_sgfDocument_nodeModified(const Go::NodePtr& game, const Go::
 /**
   node added
 */
-void MainWindow::on_sgfDocument_nodeAdded(const Go::NodePtr& game, const Go::NodePtr& node){
+void MainWindow::on_goDocument_nodeAdded(const Go::NodePtr& game, const Go::NodePtr& node){
     // get document
     GoDocument* doc = qobject_cast<GoDocument*>(sender());
     if (doc == NULL)
@@ -2054,7 +2056,7 @@ void MainWindow::on_sgfDocument_nodeAdded(const Go::NodePtr& game, const Go::Nod
 /**
   node deleted
 */
-void MainWindow::on_sgfDocument_nodeDeleted(const Go::NodePtr& game, const Go::NodePtr& node, bool removeChildren){
+void MainWindow::on_goDocument_nodeDeleted(const Go::NodePtr& game, const Go::NodePtr& node, bool removeChildren){
     // get document
     GoDocument* doc = qobject_cast<GoDocument*>(sender());
     if (doc == NULL)
@@ -2066,9 +2068,6 @@ void MainWindow::on_sgfDocument_nodeDeleted(const Go::NodePtr& game, const Go::N
     // if added node isn't in the current game, there isn't needed to update view.
     if (game != view.boardWidget->currentGame())
         return;
-
-    // activate parent node
-    view.boardWidget->setNode(node->parent());
 
     // delete tree item in branch view
     removeBranchItems(view, node, removeChildren);
@@ -2083,7 +2082,7 @@ void MainWindow::on_sgfDocument_nodeDeleted(const Go::NodePtr& game, const Go::N
 /**
   game information changed
 */
-void MainWindow::on_sgfDocument_informationChanged(const Go::NodePtr&, const Go::InformationPtr&){
+void MainWindow::on_goDocument_informationChanged(const Go::NodePtr&, const Go::InformationPtr&){
     // get document
     GoDocument* doc = qobject_cast<GoDocument*>(sender());
     if (doc == NULL)
