@@ -31,7 +31,10 @@ BoardWidget::BoardWidget(QWidget* parent)
     , whiteStone_(NULL)
     , nextColor_(Go::eBlack)
     , editMode_(eAlternateMove)
+    , moveNumber_(0)
     , showMoveNumber_(true)
+    , showCoordinate_(true)
+    , showCoordinateI_(false)
     , showVariation_(true)
 {
     initialize();
@@ -47,7 +50,10 @@ BoardWidget::BoardWidget(GoDocument* doc, QWidget* parent)
     , whiteStone_(NULL)
     , nextColor_(Go::eBlack)
     , editMode_(eAlternateMove)
+    , moveNumber_(0)
     , showMoveNumber_(true)
+    , showCoordinate_(true)
+    , showCoordinateI_(false)
     , showVariation_(true)
 {
     initialize();
@@ -305,10 +311,12 @@ bool BoardWidget::setNode(const Go::NodePtr& node, bool forceChange){
 
     // change current node, and emit currentNodeChanged
     currentNode_ = node;
-    emit nodeChanged(currentNode_);
 
     // create buffer
     createBoardBuffer();
+
+    // emit nodeChanged
+    emit nodeChanged(currentNode_);
 
     return true;
 }
@@ -430,14 +438,14 @@ void BoardWidget::createBoardBuffer(){
     for (int i=0; i<buffer.size(); ++i)
         qFill(buffer[i], Go::eDame);
 
-    int moveNumber = 1;
+    moveNumber_ = 1;
     Go::NodeList::iterator iter = currentNodeList_.begin();
     while (iter != currentNodeList_.end()){
         Go::NodePtr node(*iter);
 
         // change move number if move number is designated.
         if (node->moveNumber() > 0)
-            moveNumber = node->moveNumber();
+            moveNumber_ = node->moveNumber();
 
         // put stone if node is stone and node isn't pass.
         if (node->isStone() && !node->isPass() && node->x() < xsize() && node->y() < ysize()){
@@ -445,7 +453,7 @@ void BoardWidget::createBoardBuffer(){
             killStone(node->x(), node->y());
 
             // move number
-            data[node->y()][node->x()].number = moveNumber++;
+            data[node->y()][node->x()].number = moveNumber_++;
         }
 
         // add empty stones
@@ -468,6 +476,7 @@ void BoardWidget::createBoardBuffer(){
 
         ++iter;
     }
+    --moveNumber_;
 
     // create graphics items
     for(int y=0; y<ysize(); ++y){

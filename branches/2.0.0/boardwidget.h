@@ -72,6 +72,20 @@ public:
     EditMode editMode() const{ return editMode_; }
     void setEditMode(EditMode mode){ editMode_ = mode; }
 
+    // Move Number
+    int moveNumber() const{ return moveNumber_; }
+    void setMoveNumber(int number){ moveNumber_ = number; }
+
+    // Captured stones
+    int capturedWhite() const{ return capturedWhite_; }
+    int capturedBlack() const{ return capturedBlack_; }
+
+    // Coordinate
+    int showCoordinate() const{ return showCoordinate_; }
+    void setShowCoordinate(bool show){ showCoordinate_ = show; }
+    int showCoordinateI() const{ return showCoordinateI_; }
+    void setShowCoordinateI(bool show){ showCoordinateI_ = show; }
+
 signals:
     void documentChanged(GoDocument* doc);
     void gameChanged(const Go::NodePtr& game);
@@ -162,7 +176,10 @@ protected:
 
     Go::Color nextColor_;
     EditMode editMode_;
+    int moveNumber_;
     bool showMoveNumber_;
+    bool showCoordinate_;
+    bool showCoordinateI_;
     bool showVariation_;
 
 private slots:

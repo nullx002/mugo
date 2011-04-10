@@ -17,15 +17,9 @@
 */
 #include <QDebug>
 #include <QTextCodec>
-#include <QCloseEvent>
 #include <QMessageBox>
 #include <QFileDialog>
-#include <QLabel>
-#include <QComboBox>
-#include <QTreeWidget>
-#include <QPlainTextEdit>
 #include <QClipboard>
-#include <QStandardItemModel>
 #include "mugoapp.h"
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -45,6 +39,7 @@ MainWindow::MainWindow(const QString& fname, QWidget *parent) :
     // initialize view
     ui->setupUi(this);
     initializeMenu();
+    initializeStatusBar();
 
     ui->undoDockWidget->setVisible(false);
     ui->undoView->setGroup(&undoGroup);
@@ -454,6 +449,15 @@ void MainWindow::createEncodingMenu(){
 */
 }
 
+void MainWindow::initializeStatusBar(){
+    moveNumberLabel = new QLabel;
+    capturedLabel = new QLabel;
+    moveNumberLabel->setFrameStyle(QFrame::Panel | QFrame::Sunken);
+    capturedLabel->setFrameStyle(QFrame::Panel | QFrame::Sunken);
+    ui->statusBar->addPermanentWidget(moveNumberLabel);
+    ui->statusBar->addPermanentWidget(capturedLabel);
+}
+
 /**
   show document in new tab
 */
@@ -731,6 +735,18 @@ void MainWindow::updateCommentView(ViewData& view, const Go::NodePtr& node){
 }
 
 /**
+  update status bar
+*/
+void MainWindow::updateStatusBar(ViewData& view, const Go::NodePtr& node){
+    QString text;
+    if (node->isStone())
+        text = Go::coordinateString(view.boardWidget->rootInformation()->xsize(), view.boardWidget->rootInformation()->ysize(), node->x(), node->y(), view.boardWidget->showCoordinateI());
+
+    this->moveNumberLabel->setText( tr("Last Move:%1(%2)").arg(view.boardWidget->moveNumber()).arg(text) );
+    this->capturedLabel->setText( tr("Captured White:%1 Black:%2").arg(view.boardWidget->capturedWhite()).arg(view.boardWidget->capturedBlack()) );
+}
+
+/**
   create tree items in branch view
 */
 void MainWindow::createBranchItems(Document* doc, const Go::NodePtr& game){
@@ -873,7 +889,7 @@ QString MainWindow::getBranchItemText(const ViewData& view, const Go::NodePtr& n
     QStringList nodeName;
 
     if (node->isStone() && !node->isPass())
-        nodeName.push_back( Go::coordinateString(view.boardWidget->xsize(), view.boardWidget->ysize(), node->x(), node->y(), false) );
+        nodeName.push_back( Go::coordinateString(view.boardWidget->xsize(), view.boardWidget->ysize(), node->x(), node->y(), view.boardWidget->showCoordinateI()) );
     else if (node->isStone())
         nodeName.push_back( tr("Pass") );
     else if (node->information())
@@ -2377,6 +2393,7 @@ void MainWindow::on_board_nodeChanged(const Go::NodePtr& node){
         view.branchWidget->setCurrentItem(item);
 
     // update view
+    updateStatusBar(view, node);
     updateCommentView(view, node);
 }
 

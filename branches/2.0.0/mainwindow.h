@@ -20,16 +20,17 @@
 
 #include <QMainWindow>
 #include <QUndoGroup>
+#include <QTreeWidget>
+#include <QTreeWidgetItem>
+#include <QPlainTextEdit>
+#include <QLabel>
+#include <QStandardItemModel>
+#include <QStandardItem>
 #include <QModelIndex>
+#include <QFileInfo>
 #include "sgfdocument.h"
 #include "boardwidget.h"
 
-class QFileInfo;
-class QTreeWidget;
-class QTreeWidgetItem;
-class QPlainTextEdit;
-class QStandardItemModel;
-class QStandardItem;
 
 namespace Ui {
     class MainWindow;
@@ -89,6 +90,7 @@ protected:
     /// @name initialize
     void initializeMenu();
     void createEncodingMenu();
+    void initializeStatusBar();
 
     /// @name create new tab
     bool createNewTab(Document* doc);
@@ -107,6 +109,7 @@ protected:
     void updateTitle(GoDocument* doc);
     void updateNodeView(ViewData& view, const Go::NodePtr& node);
     void updateCommentView(ViewData& view, const Go::NodePtr& node);
+    void updateStatusBar(ViewData& view, const Go::NodePtr& node);
 
     /// @name branch view
     void createBranchItems(Document* doc, const Go::NodePtr& game);
@@ -265,6 +268,10 @@ private:
 
     // undo
     QUndoGroup undoGroup;
+
+    // statusbar
+    QLabel* moveNumberLabel;
+    QLabel* capturedLabel;
 
     // marker
     QAction* stonesAndMarkersAction;
