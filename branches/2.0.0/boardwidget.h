@@ -45,7 +45,7 @@ public:
         GraphicsItemPtr stoneItem;
         TextItemPtr branchItem;
         TextItemPtr numberItem;
-        TextItemPtr markerItem;
+        GraphicsItemPtr markerItem;
         bool focus;
     };
 
@@ -140,6 +140,10 @@ protected:
 
     // create move number
     void createMoveNumber(int sgfX, int sgfY, int number, bool active);
+
+    // create marker
+    void createMarkers();
+    void createMark(const Go::Mark& m);
 
     // get star positions
     void getStarPositions(QList<int>& xstarpos, QList<int>& ystarpos) const;
