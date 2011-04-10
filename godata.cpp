@@ -39,6 +39,9 @@ NodePtr createStoneNode(Color color, int x, int y){
   get coordinate string from xy position
 */
 QString coordinateString(int xsize, int ysize, int x, int y, bool showI){
+    if (x < 0 || y < 0 || x >= xsize || y >= ysize)
+        return QString();
+
     int len = 'Z' - 'A' + (showI ? 1 : 0);
     int xx = 'A' + x % len;
     if (showI == false && xx >= 'I')
