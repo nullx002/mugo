@@ -17,6 +17,7 @@
 */
 #include <QDebug>
 #include <QMouseEvent>
+#include <QGraphicsItemGroup>
 #include "mugoapp.h"
 #include "boardwidget.h"
 #include "sgfcommand.h"
@@ -67,7 +68,7 @@ BoardWidget::BoardWidget(GoDocument* doc, QWidget* parent)
 */
 void BoardWidget::initialize(){
     setScene( new QGraphicsScene(this) );
-    setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
+    setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform | QPainter::TextAntialiasing);
 
     // create board
     shadow = scene()->addRect(0, 0, 1, 1, QPen(Qt::NoPen), QBrush(SHADOW_COLOR));
@@ -328,6 +329,9 @@ void BoardWidget::setItemsPosition(const QSize& size){
     if (document_ == NULL)
         return;
 
+    // set scene rect
+    scene()->setSceneRect(QRect(0, 0, size.width(), size.height()));
+
     // calculate board size
     int width  = size.width();
     int height = size.height();
@@ -361,9 +365,6 @@ void BoardWidget::setItemsPosition(const QSize& size){
 
     // move all datas position to current board size
     setDataPosition();
-
-    //
-    scene()->setSceneRect(r);
 }
 
 /**
@@ -426,6 +427,9 @@ void BoardWidget::setDataPosition(){
 
     // create graphics items of branch marker
     createBranchMarkers();
+
+    // create graphics items of marker
+    createMarkers();
 }
 
 /**
@@ -482,8 +486,10 @@ void BoardWidget::createBoardBuffer(){
     for(int y=0; y<ysize(); ++y){
         for(int x=0; x<xsize(); ++x){
             // delete branch marker
-            if (data[y][x].branchItem)
-                data[y][x].branchItem.clear();
+            data[y][x].branchItem.clear();
+
+            // delete marker
+            data[y][x].markerItem.clear();
 
             // clear move number
             if (buffer[y][x] == Go::eDame)
@@ -514,6 +520,9 @@ void BoardWidget::createBoardBuffer(){
 
     // create graphics items of branch marker
     createBranchMarkers();
+
+    // create braphics items of marker
+    createMarkers();
 }
 
 /**
@@ -783,6 +792,85 @@ void BoardWidget::createMoveNumber(int sgfX, int sgfY, int number, bool active){
     }
     text->setBrush( QBrush(color) );
 //    text->setPen( QPen(Qt::red) );
+}
+
+/**
+  create graphics item of markers
+*/
+void BoardWidget::createMarkers(){
+    if (!currentNode_)
+        return;
+
+    foreach(const Go::Mark& m, currentNode_->marks())
+        createMark(m);
+}
+
+/**file:///home/nsase/projects/mugo2-old/boardwidget.cpp
+
+  create graphics item of markers
+*/
+void BoardWidget::createMark(const Go::Mark& m){
+    QColor color = Qt::red;
+    QPen pen(color, 2.0);
+
+    qreal x, y;
+    if (sgfToViewCoordinate(m.x(), m.y(), x, y) == false)
+        return;
+
+    qreal w = getGridSize() * 0.5;
+
+    QGraphicsItemGroup* group = new QGraphicsItemGroup;
+    scene()->addItem(group);
+    group->setZValue(4);
+    data[m.y()][m.x()].markerItem = GraphicsItemPtr(group);
+
+    if (m.type() == Go::Mark::eCircle){
+        if (data[m.y()][m.x()].color == Go::eDame){
+            qreal w2 = getGridSize();
+            QPixmap pixmap(w2, w2);
+            QPainter painter(&pixmap);
+            painter.translate((x-w2/2.0)*-1, (y-w2/2.0)*-1);
+            painter.fillRect(x-w2/2.0, y-w2/2.0, w2, w2, board->brush());
+            QGraphicsPixmapItem* pixmapItem = new QGraphicsPixmapItem(pixmap);
+            pixmapItem->setPos(x-w2/2.0, y-w2/2.0);
+            pixmapItem->setZValue(0);
+            group->addToGroup(pixmapItem);
+        }
+
+        QPainterPath path;
+        path.addEllipse(x-w/2.0, y-w/2.0, w, w);
+        QGraphicsPathItem* item = new QGraphicsPathItem;
+        item->setPath(path);
+        item->setPen(pen);
+        item->setZValue(1);
+
+        group->addToGroup(item);
+
+//        item = scene()->addPath(path, pen);
+    }
+    else if (m.type() == Go::Mark::eSquare){
+//        QPainterPath path;
+//        path.addRect(x-w/2.0, y-w/2.0, w, w);
+//        item = scene()->addPath(path, pen);
+    }
+    else if (m.type() == Go::Mark::eTriangle){
+//        QPainterPath path;
+//        path.moveTo(0, 0);
+//        path.lineTo(w/2.0*-1, w*0.8);
+//        path.lineTo(w/2.0, w*0.8);
+//        path.lineTo(0, 0);
+//        item = scene()->addPath(path, pen);
+//        item->setPos(x, y - item->boundingRect().height() / 2.0);
+    }
+    else if (m.type() == Go::Mark::eCross){
+//        QPainterPath path;
+//        path.moveTo(0, 0);
+//        path.lineTo(w, w);
+//        path.moveTo(w, 0);
+//        path.lineTo(0, w);
+//        item = scene()->addPath(path, pen);
+//        item->setPos(x-w/2.0, y-w/2.0);
+    }
 }
 
 /**

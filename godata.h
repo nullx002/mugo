@@ -33,6 +33,37 @@ enum Color{ eDame, eBlack, eWhite };
 
 
 /**
+  Markup on the node
+*/
+class Mark{
+public:
+    enum Type{ eCircle, eSquare, eTriangle, eCross };
+
+    // constructor
+    Mark(Type t, const QPoint& p) : type_(t), x_(p.x()), y_(p.y()){}
+    Mark(Type t, int x, int y) : type_(t), x_(x), y_(y){}
+
+    // type
+    int type() const{ return type_; }
+    void setType(Type t){ type_ = t; }
+
+    // x
+    int x() const{ return x_; }
+    void setX(int x){ x_ = x; }
+
+    // y
+    int y() const{ return y_; }
+    void setY(int y){ y_ = y; }
+
+private:
+    Type type_;
+    int x_, y_;
+};
+
+typedef QList<Mark> MarkList;
+
+
+/**
   Game information
 */
 class Information{
@@ -242,13 +273,17 @@ public:
     MoveAnnotation moveAnnotation() const{ return moveAnnotation_; }
     void setMoveAnnotation(MoveAnnotation annotation){ moveAnnotation_ = annotation; }
 
-    // add stnoes
+    // stnoes
     const QList<QPoint>& emptyStones() const{ return emptyStones_; }
     QList<QPoint>& emptyStones(){ return emptyStones_; }
     const QList<QPoint>& blackStones() const{ return blackStones_; }
     QList<QPoint>& blackStones(){ return blackStones_; }
     const QList<QPoint>& whiteStones() const{ return whiteStones_; }
     QList<QPoint>& whiteStones(){ return whiteStones_; }
+
+    // marks
+    const MarkList& marks() const{ return marks_; }
+    MarkList& marks(){ return marks_; }
 
 private:
     WeakNodePtr parent_;
@@ -270,6 +305,7 @@ private:
     QList<QPoint> emptyStones_;
     QList<QPoint> blackStones_;
     QList<QPoint> whiteStones_;
+    MarkList marks_;
 };
 
 typedef Node::NodePtr NodePtr;

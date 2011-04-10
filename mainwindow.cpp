@@ -258,9 +258,9 @@ void MainWindow::initializeMenu(){
     int alternateMoveIndex = ui->editToolBar->actions().indexOf(ui->actionAlternateMove);
     ui->editToolBar->insertAction(ui->editToolBar->actions().at(alternateMoveIndex+1), ui->menuStonesAndMarkers->menuAction());
     ui->menuStonesAndMarkers->menuAction()->setCheckable(true);
-    ui->menuStonesAndMarkers->menuAction()->setIcon( ui->actionAddCircle->icon() );
+    ui->menuStonesAndMarkers->menuAction()->setIcon( ui->actionAddLabel->icon() );
     connect(ui->menuStonesAndMarkers->menuAction(), SIGNAL(triggered(bool)), SLOT(on_menuStonesAndMarkers_triggered(bool)));
-    stonesAndMarkersAction = ui->actionAddCircle;
+    stonesAndMarkersAction = ui->actionAddLabel;
 
     // Collection
     ui->collectionDockWidget->toggleViewAction()->setIcon( QIcon(":/res/gamelist.png") );
