@@ -22,6 +22,17 @@
 #include "boardwidget.h"
 #include "sgfcommand.h"
 
+
+/**
+  paint
+*/
+void GraphicsPathItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget){
+    QRect sourceRect(0, 0, boundingRect().width(), boundingRect().height());
+    painter->drawPixmap(boundingRect(), backgroundImage_, sourceRect);
+    QGraphicsPathItem::paint(painter, option, widget);
+}
+
+
 /**
   Constructor
 */
@@ -805,8 +816,7 @@ void BoardWidget::createMarkers(){
         createMark(m);
 }
 
-/**file:///home/nsase/projects/mugo2-old/boardwidget.cpp
-
+/**
   create graphics item of markers
 */
 void BoardWidget::createMark(const Go::Mark& m){
@@ -819,58 +829,60 @@ void BoardWidget::createMark(const Go::Mark& m){
 
     qreal w = getGridSize() * 0.5;
 
-    QGraphicsItemGroup* group = new QGraphicsItemGroup;
-    scene()->addItem(group);
-    group->setZValue(4);
-    data[m.y()][m.x()].markerItem = GraphicsItemPtr(group);
-
+    // make path of mark
+    QPainterPath path;
     if (m.type() == Go::Mark::eCircle){
-        if (data[m.y()][m.x()].color == Go::eDame){
-            qreal w2 = getGridSize();
-            QPixmap pixmap(w2, w2);
-            QPainter painter(&pixmap);
-            painter.translate((x-w2/2.0)*-1, (y-w2/2.0)*-1);
-            painter.fillRect(x-w2/2.0, y-w2/2.0, w2, w2, board->brush());
-            QGraphicsPixmapItem* pixmapItem = new QGraphicsPixmapItem(pixmap);
-            pixmapItem->setPos(x-w2/2.0, y-w2/2.0);
-            pixmapItem->setZValue(0);
-            group->addToGroup(pixmapItem);
-        }
-
-        QPainterPath path;
-        path.addEllipse(x-w/2.0, y-w/2.0, w, w);
-        QGraphicsPathItem* item = new QGraphicsPathItem;
-        item->setPath(path);
-        item->setPen(pen);
-        item->setZValue(1);
-
-        group->addToGroup(item);
-
-//        item = scene()->addPath(path, pen);
+        path.addEllipse(x - w / 2.0, y - w / 2.0, w, w);
     }
     else if (m.type() == Go::Mark::eSquare){
-//        QPainterPath path;
-//        path.addRect(x-w/2.0, y-w/2.0, w, w);
-//        item = scene()->addPath(path, pen);
+        w *= 0.8;
+        path.addRect(x - w / 2.0, y - w / 2.0, w, w);
     }
     else if (m.type() == Go::Mark::eTriangle){
-//        QPainterPath path;
-//        path.moveTo(0, 0);
-//        path.lineTo(w/2.0*-1, w*0.8);
-//        path.lineTo(w/2.0, w*0.8);
-//        path.lineTo(0, 0);
-//        item = scene()->addPath(path, pen);
-//        item->setPos(x, y - item->boundingRect().height() / 2.0);
+        path.moveTo(0, 0);
+        path.lineTo(w / -2.0, w * 0.8);
+        path.lineTo(w / 2.0, w * 0.8);
+        path.lineTo(0, 0);
+        path.translate(x, y - w * 0.5);
     }
     else if (m.type() == Go::Mark::eCross){
-//        QPainterPath path;
-//        path.moveTo(0, 0);
-//        path.lineTo(w, w);
-//        path.moveTo(w, 0);
-//        path.lineTo(0, w);
-//        item = scene()->addPath(path, pen);
-//        item->setPos(x-w/2.0, y-w/2.0);
+        w *= 0.8;
+        path.moveTo(0, 0);
+        path.lineTo(w, w);
+        path.moveTo(w, 0);
+        path.lineTo(0, w);
+        path.translate(x - w/2.0, y - w/2.0);
     }
+
+    // draw background if mark isn't on the stone
+    QGraphicsPathItem* item;
+    if (data[m.y()][m.x()].color == Go::eDame){
+        GraphicsPathItem* item2 = new GraphicsPathItem(path);
+        item2->setBackgroundImage( createBackgroundImage(x, y) );
+        item = item2;
+    }
+    else
+        item = new QGraphicsPathItem(path);
+
+    item->setPen(pen);
+    item->setZValue(4);
+
+    scene()->addItem(item);
+    data[m.y()][m.x()].markerItem = GraphicsItemPtr(item);
+
+}
+
+/**
+  create background of marker
+*/
+QPixmap BoardWidget::createBackgroundImage(int x, int y){
+    qreal w = getGridSize();
+    QPixmap pixmap(w, w);
+    QPainter painter(&pixmap);
+    painter.translate( (x - w / 2.0) * -1, (y - w / 2.0) * -1);
+    painter.fillRect(x - w / 2.0, y - w  /2.0, w, w, board->brush());
+
+    return pixmap;
 }
 
 /**
