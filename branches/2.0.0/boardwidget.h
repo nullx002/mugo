@@ -171,12 +171,16 @@ protected:
     bool viewToSgfCoordinate(qreal viewX, qreal viewY, int& sgfX, int& sgfY) const;
     bool sgfToViewCoordinate(int sgfX, int sgfY, qreal& viewX, qreal& viewY) const;
 
-    // move stone
+    // stone
     bool alternateMove(int sgfX, int sgfY);
     bool addStone(int sgfX, int sgfY, Go::Color color);
     bool removeStone(int sgfX, int sgfY, QList<QPoint>& stones);
     void back(int step=1);
     void forward(int step=1);
+
+    // mark
+    void addMark(int sgfX, int sgfY, Go::Mark::Type mark);
+    bool removeMark(int sgfX, int sgfY, Go::MarkList& markList);
 
     GoDocument* document_;
     Go::NodePtr currentGame_;

@@ -648,10 +648,14 @@ Miscellaneous Properties    FG, PM, VW
         case Go::Node::eUnclear:
             WriteProperty(str, temp, "UC", "");
             break;
+        case Go::Node::eNoNodeAnnotation:
+            break;
     }
     switch(node->nodeAnnotation2()){
         case Go::Node::eHotspot:
             WriteProperty(str, temp, "HO", "");
+            break;
+        case Go::Node::eNoNodeAnnotation2:
             break;
     }
     if (node->hasEstimatedScore())
@@ -676,6 +680,8 @@ Miscellaneous Properties    FG, PM, VW
             break;
         case Go::Node::eInteresting:
             WriteProperty(str, temp, "IT", "");
+            break;
+        case Go::Node::eNoMoveAnnotation:
             break;
     }
 
