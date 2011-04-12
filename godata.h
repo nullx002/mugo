@@ -55,6 +55,9 @@ public:
     int y() const{ return y_; }
     void setY(int y){ y_ = y; }
 
+    // operator
+    bool operator ==(const Mark& other) const{ return x_ == other.x_ && y_ == other.y_ && type_ == other.type_; }
+
 private:
     Type type_;
     int x_, y_;

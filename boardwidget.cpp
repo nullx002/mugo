@@ -195,12 +195,16 @@ void BoardWidget::onLButtonUp(QMouseEvent* e){
         case eAddLabelManually:
             break;
         case eAddCircle:
+            addMark(sgfX, sgfY, Go::Mark::eCircle);
             break;
         case eAddSquare:
+            addMark(sgfX, sgfY, Go::Mark::eSquare);
             break;
         case eAddTriangle:
+            addMark(sgfX, sgfY, Go::Mark::eTriangle);
             break;
         case eAddCross:
+            addMark(sgfX, sgfY, Go::Mark::eCross);
             break;
         case eRemoveMarker:
             break;
@@ -1049,6 +1053,30 @@ void BoardWidget::back(int step){
         --iter;
     }
     setNode(*iter);
+}
+
+/**
+  add mark
+*/
+void BoardWidget::addMark(int sgfX, int sgfY, Go::Mark::Type mark){
+    if (removeMark(sgfX, sgfY, currentNode_->marks()))
+        return;
+
+    document()->undoStack()->push( new AddMarkCommand(document(), currentGame_, currentNode_, sgfX, sgfY, mark) );
+}
+
+/**
+  remove mark
+*/
+bool BoardWidget::removeMark(int sgfX, int sgfY, Go::MarkList& markList){
+    foreach(const Go::Mark& mark, markList){
+        if (mark.x() == sgfX && mark.y() == sgfY){
+            document()->undoStack()->push( new RemoveMarkCommand(document(), currentGame_, currentNode_, markList, mark) );
+            return true;
+        }
+    }
+
+    return false;
 }
 
 /**

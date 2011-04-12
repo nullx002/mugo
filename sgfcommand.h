@@ -226,5 +226,47 @@ private:
     int index_;
 };
 
+/**
+  @ingroup Command
+  This command adds mark into specified node
+*/
+class AddMarkCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(AddMarkCommand)
+
+public:
+    AddMarkCommand(GoDocument* doc, Go::NodePtr game, Go::NodePtr node, int x, int y, const Go::Mark::Type mark, QUndoCommand* parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+private:
+    GoDocument* document_;
+    Go::NodePtr game_;
+    Go::NodePtr node_;
+    int x_;
+    int y_;
+    Go::Mark::Type mark_;
+};
+
+/**
+  @ingroup Command
+  This command remove mark from specified node
+*/
+class RemoveMarkCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(RemoveMarkCommand)
+
+public:
+    RemoveMarkCommand(GoDocument* doc, Go::NodePtr game, Go::NodePtr node, Go::MarkList& markList, const Go::Mark& mark, QUndoCommand* parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+private:
+    GoDocument* document_;
+    Go::NodePtr game_;
+    Go::NodePtr node_;
+    Go::MarkList& markList_;
+    Go::Mark mark_;
+    int index_;
+};
+
 
 #endif // SGFCOMMAND_H

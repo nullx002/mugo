@@ -348,3 +348,67 @@ void RemoveStoneCommand::undo(){
 
     document_->modifyNode(game_, node_);
 }
+
+/**
+  Constructs add mark command
+*/
+AddMarkCommand::AddMarkCommand(GoDocument* doc, Go::NodePtr game, Go::NodePtr node, int x, int y, const Go::Mark::Type mark, QUndoCommand* parent)
+    : QUndoCommand(parent)
+    , document_(doc)
+    , game_(game)
+    , node_(node)
+    , x_(x)
+    , y_(y)
+    , mark_(mark)
+{
+}
+
+/**
+  redo add mark command
+*/
+void AddMarkCommand::redo(){
+
+    setText( tr("Add Mark") );
+    node_->marks().push_back( Go::Mark(mark_, x_, y_) );
+    document_->modifyNode(game_, node_);
+}
+
+/**
+  undo add mark command
+*/
+void AddMarkCommand::undo(){
+    node_->marks().pop_back();
+    document_->modifyNode(game_, node_);
+}
+
+/**
+  Constructs remove mark command
+*/
+RemoveMarkCommand::RemoveMarkCommand(GoDocument* doc, Go::NodePtr game, Go::NodePtr node, Go::MarkList& markList, const Go::Mark& mark, QUndoCommand* parent)
+    : QUndoCommand(parent)
+    , document_(doc)
+    , game_(game)
+    , node_(node)
+    , markList_(markList)
+    , mark_(mark)
+{
+}
+
+/**
+  redo remove mark command
+*/
+void RemoveMarkCommand::redo(){
+
+    setText( tr("Remove Mark") );
+    index_ = markList_.indexOf(mark_);
+    markList_.removeAt(index_);
+    document_->modifyNode(game_, node_);
+}
+
+/**
+  undo remove mark command
+*/
+void RemoveMarkCommand::undo(){
+    markList_.insert(index_, mark_);
+    document_->modifyNode(game_, node_);
+}

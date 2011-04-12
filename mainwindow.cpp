@@ -929,14 +929,14 @@ QString MainWindow::getBranchItemText(const ViewData& view, const Go::NodePtr& n
         case Go::Node::eUnclear:
             nodeName.push_back( tr("[Unclear]") );
             break;
-        default:
+        case Go::Node::eNoNodeAnnotation:
             break;
     }
     switch(node->nodeAnnotation2()){
         case Go::Node::eHotspot:
             nodeName.push_back( tr("[Hotspot]") );
             break;
-        default:
+        case Go::Node::eNoNodeAnnotation2:
             break;
     }
 
@@ -960,7 +960,7 @@ QString MainWindow::getBranchItemText(const ViewData& view, const Go::NodePtr& n
         case Go::Node::eInteresting:
             nodeName.push_back( tr("[Interesting]") );
             break;
-        default:
+        case Go::Node::eNoMoveAnnotation:
             break;
     }
 
