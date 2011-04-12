@@ -24,6 +24,24 @@
 #include "godocument.h"
 
 /**
+  path item on pixmap
+*/
+class GraphicsPathItem : public QGraphicsPathItem{
+public:
+    GraphicsPathItem(QGraphicsItem* parent = 0) : QGraphicsPathItem(parent){}
+    GraphicsPathItem(const QPainterPath & path, QGraphicsItem* parent = 0) : QGraphicsPathItem(path, parent){}
+
+    void setBackgroundImage(const QPixmap& pixmap){ backgroundImage_ = pixmap; }
+    const QPixmap& backgroundImage() const{ return backgroundImage_; }
+
+protected:
+    virtual void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = 0);
+
+private:
+    QPixmap backgroundImage_;
+};
+
+/**
   GraphicsView of Goban
 */
 class BoardWidget : public QGraphicsView
@@ -144,6 +162,7 @@ protected:
     // create marker
     void createMarkers();
     void createMark(const Go::Mark& m);
+    QPixmap createBackgroundImage(int x, int y);
 
     // get star positions
     void getStarPositions(QList<int>& xstarpos, QList<int>& ystarpos) const;
