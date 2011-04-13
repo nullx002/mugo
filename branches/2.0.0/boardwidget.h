@@ -162,7 +162,7 @@ protected:
     // create marker
     void createMarkers();
     void createMark(const Go::Mark& m);
-    QPixmap createBackgroundImage(int x, int y);
+    QPixmap createBackgroundImage(const QRectF& r);
 
     // get star positions
     void getStarPositions(QList<int>& xstarpos, QList<int>& ystarpos) const;
