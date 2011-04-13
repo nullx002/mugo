@@ -84,8 +84,9 @@ void BoardWidget::initialize(){
 
     // create board
     shadow = scene()->addRect(0, 0, 1, 1, QPen(Qt::NoPen), QBrush(SHADOW_COLOR));
-    board  = scene()->addRect(0, 0, 1, 1, QPen(Qt::NoPen), QBrush(QPixmap(":/res/bg.png")));
+//    board  = scene()->addRect(0, 0, 1, 1, QPen(Qt::NoPen), QBrush(QPixmap(":/res/bg.png"))); // <- very slow!!
 //    board  = scene()->addRect(0, 0, 1, 1, QPen(Qt::NoPen), QBrush(BOARD_COLOR));
+    board  = scene()->addPixmap(0);
     shadow->setZValue(0);
     board->setZValue(1);
 
@@ -378,7 +379,14 @@ void BoardWidget::setItemsPosition(const QSize& size){
     shadow->setRect(boardRect.left()+3, boardRect.top()+3, boardRect.width(), boardRect.height());
 
     // set position of board.
-    board->setRect(boardRect);
+    if (dynamic_cast<QGraphicsRectItem*>(board))
+        dynamic_cast<QGraphicsRectItem*>(board)->setRect(boardRect);
+    else if (dynamic_cast<QGraphicsPixmapItem*>(board)){
+        QPixmap pixmap(":/res/bg.png");
+        pixmap = pixmap.scaled(boardRect.size(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+        dynamic_cast<QGraphicsPixmapItem*>(board)->setPixmap(pixmap);
+        dynamic_cast<QGraphicsPixmapItem*>(board)->setPos(boardRect.topLeft());
+    }
 
     // set scene rect
     QRectF r = boardRect;
@@ -700,10 +708,8 @@ QGraphicsItem* BoardWidget::createStoneItem(Go::Color color, int sgfX, int sgfY)
     if (sgfToViewCoordinate(sgfX, sgfY, x, y) == false)
         return NULL;
 
-    // stone size
-    qreal size = getGridSize() * 0.95;
-
     // create stone item
+    qreal size = getGridSize();
     QPixmap stone(color == Go::eBlack ? ":/res/black_128.png" : ":/res/white_128.png");
     stone = stone.scaled(size, size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 
@@ -711,10 +717,13 @@ QGraphicsItem* BoardWidget::createStoneItem(Go::Color color, int sgfX, int sgfY)
     item->setPos(x-size/2.0, y-size/2.0);
 
     QGraphicsDropShadowEffect* dropShadow = new QGraphicsDropShadowEffect;
-    dropShadow->setBlurRadius(10);
+    dropShadow->setBlurRadius(12);
     dropShadow->setOffset(2, 2);
+    dropShadow->setColor(QColor(28, 28, 28));
     item->setGraphicsEffect(dropShadow);
+
 /*
+    qreal size = getGridSize() * 0.95;
     QGraphicsEllipseItem* item = new QGraphicsEllipseItem(x-size/2, y-size/2, size, size);
     item->setPen(QPen(Qt::black));
     item->setBrush(QBrush(color == Go::eBlack ? Qt::black : Qt::white));
@@ -758,7 +767,7 @@ void BoardWidget::createChildBranchMarkers(){
         qreal x, y;
         if (sgfToViewCoordinate(node->x(), node->y(), x, y) == false)
             return;
-        branch->setPos(x-branch->boundingRect().size().width()/2.0, y-branch->boundingRect().size().height()/2.0);
+        branch->setPos(x-branch->sceneBoundingRect().size().width()/2.0, y-branch->sceneBoundingRect().size().height()/2.0);
 
         ++c;
     }
@@ -794,7 +803,7 @@ void BoardWidget::createSiblingsranchMarkers(){
         qreal x, y;
         if (sgfToViewCoordinate(node->x(), node->y(), x, y) == false)
             return;
-        branch->setPos(x-branch->boundingRect().size().width()/2.0, y-branch->boundingRect().size().height()/2.0);
+        branch->setPos(x-branch->sceneBoundingRect().size().width()/2.0, y-branch->sceneBoundingRect().size().height()/2.0);
 
         ++c;
     }
@@ -813,7 +822,7 @@ void BoardWidget::createMoveNumber(int sgfX, int sgfY, int number, bool active){
     TextItemPtr text( scene()->addSimpleText(QString::number(number)) );
     text->setZValue(4);
     data[sgfY][sgfX].numberItem = text;
-    text->setPos(x-text->boundingRect().size().width()/2.0, y-text->boundingRect().size().height()/2.0);
+    text->setPos(x-text->sceneBoundingRect().size().width()/2.0, y-text->sceneBoundingRect().size().height()/2.0);
 
     // font color
     QColor color;
@@ -886,7 +895,7 @@ void BoardWidget::createMark(const Go::Mark& m){
     QGraphicsPathItem* item;
     if (data[m.y()][m.x()].color == Go::eDame){
         GraphicsPathItem* item2 = new GraphicsPathItem(path);
-        item2->setBackgroundImage( createBackgroundImage(item2->boundingRect()) );
+        item2->setBackgroundImage( createBackgroundImage(item2->sceneBoundingRect()) );
         item = item2;
     }
     else
@@ -904,11 +913,16 @@ void BoardWidget::createMark(const Go::Mark& m){
   create background of marker
 */
 QPixmap BoardWidget::createBackgroundImage(const QRectF& r){
-    qreal w = getGridSize();
-    QPixmap pixmap(w, w);
+    QPixmap pixmap(r.width(), r.height());
     QPainter painter(&pixmap);
     painter.translate(r.left() * -1, r.top() * -1);
-    painter.fillRect(r, board->brush());
+    if (dynamic_cast<QGraphicsRectItem*>(board))
+        painter.fillRect(r, dynamic_cast<QGraphicsRectItem*>(board)->brush());
+    else if (dynamic_cast<QGraphicsPixmapItem*>(board)){
+        QRectF sourceRect = r;
+        sourceRect.translate(board->sceneBoundingRect().left() * -1, board->sceneBoundingRect().top() * -1);
+        painter.drawPixmap(r, dynamic_cast<QGraphicsPixmapItem*>(board)->pixmap(), sourceRect);
+    }
 
     return pixmap;
 }
