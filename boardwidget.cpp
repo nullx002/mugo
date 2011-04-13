@@ -18,6 +18,7 @@
 #include <QDebug>
 #include <QMouseEvent>
 #include <QGraphicsItemGroup>
+#include <QGraphicsDropShadowEffect>
 #include "mugoapp.h"
 #include "boardwidget.h"
 #include "sgfcommand.h"
@@ -83,7 +84,8 @@ void BoardWidget::initialize(){
 
     // create board
     shadow = scene()->addRect(0, 0, 1, 1, QPen(Qt::NoPen), QBrush(SHADOW_COLOR));
-    board  = scene()->addRect(0, 0, 1, 1, QPen(Qt::NoPen), QBrush(BOARD_COLOR));
+    board  = scene()->addRect(0, 0, 1, 1, QPen(Qt::NoPen), QBrush(QPixmap(":/res/bg.png")));
+//    board  = scene()->addRect(0, 0, 1, 1, QPen(Qt::NoPen), QBrush(BOARD_COLOR));
     shadow->setZValue(0);
     board->setZValue(1);
 
@@ -141,10 +143,20 @@ void BoardWidget::mouseMoveEvent(QMouseEvent* e){
         color = Go::eWhite;
     else if (editMode_ != eAlternateMove)
         color = Go::eDame;
-    QGraphicsEllipseItem* blackEllipse = dynamic_cast<QGraphicsEllipseItem*>(blackStone_);
-    QGraphicsEllipseItem* whiteEllipse = dynamic_cast<QGraphicsEllipseItem*>(whiteStone_);
-    blackEllipse->setRect(x-size/2.0, y-size/2.0, size, size);
-    whiteEllipse->setRect(x-size/2.0, y-size/2.0, size, size);
+
+    // move black stone
+    if (dynamic_cast<QGraphicsEllipseItem*>(blackStone_))
+        dynamic_cast<QGraphicsEllipseItem*>(blackStone_)->setRect(x-size/2.0, y-size/2.0, size, size);
+    else  if (dynamic_cast<QGraphicsPixmapItem*>(blackStone_))
+        dynamic_cast<QGraphicsPixmapItem*>(blackStone_)->setPos(x-size/2.0, y-size/2.0);
+
+    // move white stone
+    if (dynamic_cast<QGraphicsEllipseItem*>(whiteStone_))
+        dynamic_cast<QGraphicsEllipseItem*>(whiteStone_)->setRect(x-size/2.0, y-size/2.0, size, size);
+    else  if (dynamic_cast<QGraphicsPixmapItem*>(whiteStone_))
+        dynamic_cast<QGraphicsPixmapItem*>(whiteStone_)->setPos(x-size/2.0, y-size/2.0);
+
+    // show or hide stones
     blackStone_->setVisible(color == Go::eBlack);
     whiteStone_->setVisible(color == Go::eWhite);
 }
@@ -692,14 +704,26 @@ QGraphicsItem* BoardWidget::createStoneItem(Go::Color color, int sgfX, int sgfY)
     qreal size = getGridSize() * 0.95;
 
     // create stone item
-    QGraphicsEllipseItem* stone = new QGraphicsEllipseItem(x-size/2, y-size/2, size, size);
-    stone->setPen(QPen(Qt::black));
-    stone->setBrush(QBrush(color == Go::eBlack ? Qt::black : Qt::white));
+    QPixmap stone(color == Go::eBlack ? ":/res/black_128.png" : ":/res/white_128.png");
+    stone = stone.scaled(size, size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 
-    stone->setZValue(3);
-    scene()->addItem(stone);
+    QGraphicsPixmapItem* item = new QGraphicsPixmapItem(stone);
+    item->setPos(x-size/2.0, y-size/2.0);
 
-    return stone;
+    QGraphicsDropShadowEffect* dropShadow = new QGraphicsDropShadowEffect;
+    dropShadow->setBlurRadius(10);
+    dropShadow->setOffset(2, 2);
+    item->setGraphicsEffect(dropShadow);
+/*
+    QGraphicsEllipseItem* item = new QGraphicsEllipseItem(x-size/2, y-size/2, size, size);
+    item->setPen(QPen(Qt::black));
+    item->setBrush(QBrush(color == Go::eBlack ? Qt::black : Qt::white));
+*/
+
+    item->setZValue(3);
+    scene()->addItem(item);
+
+    return item;
 }
 
 /**
@@ -862,7 +886,7 @@ void BoardWidget::createMark(const Go::Mark& m){
     QGraphicsPathItem* item;
     if (data[m.y()][m.x()].color == Go::eDame){
         GraphicsPathItem* item2 = new GraphicsPathItem(path);
-        item2->setBackgroundImage( createBackgroundImage(x, y) );
+        item2->setBackgroundImage( createBackgroundImage(item2->boundingRect()) );
         item = item2;
     }
     else
@@ -879,12 +903,12 @@ void BoardWidget::createMark(const Go::Mark& m){
 /**
   create background of marker
 */
-QPixmap BoardWidget::createBackgroundImage(int x, int y){
+QPixmap BoardWidget::createBackgroundImage(const QRectF& r){
     qreal w = getGridSize();
     QPixmap pixmap(w, w);
     QPainter painter(&pixmap);
-    painter.translate( (x - w / 2.0) * -1, (y - w / 2.0) * -1);
-    painter.fillRect(x - w / 2.0, y - w  /2.0, w, w, board->brush());
+    painter.translate(r.left() * -1, r.top() * -1);
+    painter.fillRect(r, board->brush());
 
     return pixmap;
 }
