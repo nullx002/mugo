@@ -193,7 +193,7 @@ protected:
     QVector< QVector<Data> > data;
     QVector< QVector<Go::Color> > buffer;
 
-    QGraphicsRectItem* board;
+    QGraphicsItem* board;
     QGraphicsRectItem* shadow;
     QList<QGraphicsLineItem*> vLines;
     QList<QGraphicsLineItem*> hLines;
