@@ -24,6 +24,18 @@
 #include "boardwidget.h"
 #include "sgfcommand.h"
 
+// stl
+#include <algorithm>
+
+
+/**
+  function object.
+  return true if label of first argument is equal to label of 2nd argument.
+*/
+struct EqualLabel : public std::binary_function<Go::Mark, QString, bool>{
+    bool operator ()(const Go::Mark& mark, const QString& label) const{ return mark.label() == label; }
+};
+
 
 /**
   paint
@@ -732,7 +744,7 @@ QGraphicsItem* BoardWidget::createStoneItem(Go::Color color, int sgfX, int sgfY)
     item->setBrush(QBrush(color == Go::eBlack ? Qt::black : Qt::white));
 */
 
-    item->setZValue(3);
+    item->setZValue(4);
     scene()->addItem(item);
 
     return item;
@@ -763,7 +775,7 @@ void BoardWidget::createChildBranchMarkers(){
         // create text item
         QString str(c);
         TextItemPtr branch( scene()->addSimpleText(str) );
-        branch->setZValue(4);
+        branch->setZValue(5);
         data[node->y()][node->x()].branchItem = branch;
 
         // set item position
@@ -799,7 +811,7 @@ void BoardWidget::createSiblingsranchMarkers(){
         // create text item
         QString str(c);
         TextItemPtr branch( scene()->addSimpleText(str) );
-        branch->setZValue(4);
+        branch->setZValue(5);
         data[node->y()][node->x()].branchItem = branch;
 
         // set item position
@@ -823,7 +835,7 @@ void BoardWidget::createMoveNumber(int sgfX, int sgfY, int number, bool active){
 
     // create text item
     TextItemPtr text( scene()->addSimpleText(QString::number(number)) );
-    text->setZValue(4);
+    text->setZValue(5);
     data[sgfY][sgfX].numberItem = text;
     text->setPos(x-text->sceneBoundingRect().size().width()/2.0, y-text->sceneBoundingRect().size().height()/2.0);
 
@@ -862,6 +874,7 @@ void BoardWidget::createMarkers(){
 void BoardWidget::createMark(const Go::Mark& m){
     QColor color = Qt::red;
     QPen pen(color, 2.0);
+    QBrush brush(Qt::NoBrush);
 
     qreal x, y;
     if (sgfToViewCoordinate(m.x(), m.y(), x, y) == false)
@@ -893,23 +906,43 @@ void BoardWidget::createMark(const Go::Mark& m){
         path.lineTo(0, w);
         path.translate(x - w/2.0, y - w/2.0);
     }
-
-    // draw background if mark isn't on the stone
-    QGraphicsPathItem* item;
-    if (data[m.y()][m.x()].color == Go::eDame){
-        GraphicsPathItem* item2 = new GraphicsPathItem(path);
-        item2->setBackgroundImage( createBackgroundImage(item2->sceneBoundingRect()) );
-        item = item2;
+    else if (m.type() == Go::Mark::eLabel){
+        pen.setStyle(Qt::NoPen);
+        brush.setStyle(Qt::SolidPattern);
+        brush.setColor(color);
+        QFont f;
+        f.setPixelSize(w);
+        if (m.label().length() > 2)
+            f.setUnderline(true);
+        path.addText(x, y, f, m.label().left(2));
+        path.translate(path.boundingRect().width() / -2.0, path.boundingRect().height() / 2.0);
     }
-    else
-        item = new QGraphicsPathItem(path);
 
+    QGraphicsItemGroup* group = new QGraphicsItemGroup;
+    group->setZValue(5);
+
+    // create background if mark isn't on the stone
+    if (data[m.y()][m.x()].color == Go::eDame){
+        w = getGridSize();
+        QGraphicsPixmapItem* bg = new QGraphicsPixmapItem( createBackgroundImage(QRectF(x-w/2.0, y-w/2.0, w, w)) );
+        bg->setPos(x-w/2.0, y-w/2.0);
+        bg->setZValue(0);
+        group->addToGroup(bg);
+        group->setZValue(3);  // move under the stones.
+    }
+
+    // create mark
+    QGraphicsPathItem* item = new QGraphicsPathItem(path);
     item->setPen(pen);
-    item->setZValue(4);
+    item->setBrush(brush);
+    item->setZValue(1);
+    group->addToGroup(item);
+    if (m.type() == Go::Mark::eLabel)
+        item->setToolTip(m.label());
 
-    scene()->addItem(item);
-    data[m.y()][m.x()].markerItem = GraphicsItemPtr(item);
-
+    // add item into view
+    scene()->addItem(group);
+    data[m.y()][m.x()].markerItem = GraphicsItemPtr(group);
 }
 
 /**
@@ -1114,9 +1147,16 @@ void BoardWidget::addLabel(int sgfX, int sgfY){
         return;
 
     // make label string
-    foreach(Go::Mark& m, currentNode_->marks()){
-
+    char label;
+    label = 'A';
+    while (true){
+        Go::MarkList::iterator iter = std::find_if(currentNode_->marks().begin(), currentNode_->marks().end(), std::bind2nd(EqualLabel(), label));
+        if (iter == currentNode_->marks().end())
+            break;
+        ++label;
     }
+
+    document()->undoStack()->push( new AddLabelCommand(document(), currentGame_, currentNode_, sgfX, sgfY, QString(label)) );
 }
 
 /**

@@ -909,6 +909,10 @@ QString MainWindow::getBranchItemText(const ViewData& view, const Go::NodePtr& n
     if (node->emptyStones().empty() == false)
         nodeName.push_back( tr("Add Empty") );
 
+    // Add Marks
+    if (node->marks().empty() == false)
+        nodeName.push_back( tr("Mark") );
+
     // Node Annotation
     switch(node->nodeAnnotation()){
         case Go::Node::eGoodForBlack:
