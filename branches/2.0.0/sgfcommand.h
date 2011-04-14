@@ -249,6 +249,27 @@ private:
 
 /**
   @ingroup Command
+  This command adds label into specified node
+*/
+class AddLabelCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(AddLabelCommand)
+
+public:
+    AddLabelCommand(GoDocument* doc, Go::NodePtr game, Go::NodePtr node, int x, int y, const QString& label, QUndoCommand* parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+private:
+    GoDocument* document_;
+    Go::NodePtr game_;
+    Go::NodePtr node_;
+    int x_;
+    int y_;
+    QString label_;
+};
+
+/**
+  @ingroup Command
   This command remove mark from specified node
 */
 class RemoveMarkCommand : public QUndoCommand{

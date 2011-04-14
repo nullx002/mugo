@@ -382,6 +382,38 @@ void AddMarkCommand::undo(){
 }
 
 /**
+  Constructs add label command
+*/
+AddLabelCommand::AddLabelCommand(GoDocument* doc, Go::NodePtr game, Go::NodePtr node, int x, int y, const QString& label, QUndoCommand* parent)
+    : QUndoCommand(parent)
+    , document_(doc)
+    , game_(game)
+    , node_(node)
+    , x_(x)
+    , y_(y)
+    , label_(label)
+{
+}
+
+/**
+  redo add label command
+*/
+void AddLabelCommand::redo(){
+
+    setText( tr("Add Label") );
+    node_->marks().push_back( Go::Mark(label_, x_, y_) );
+    document_->modifyNode(game_, node_);
+}
+
+/**
+  undo add label command
+*/
+void AddLabelCommand::undo(){
+    node_->marks().pop_back();
+    document_->modifyNode(game_, node_);
+}
+
+/**
   Constructs remove mark command
 */
 RemoveMarkCommand::RemoveMarkCommand(GoDocument* doc, Go::NodePtr game, Go::NodePtr node, Go::MarkList& markList, const Go::Mark& mark, QUndoCommand* parent)

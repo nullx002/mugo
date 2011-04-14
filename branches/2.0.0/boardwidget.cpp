@@ -19,6 +19,7 @@
 #include <QMouseEvent>
 #include <QGraphicsItemGroup>
 #include <QGraphicsDropShadowEffect>
+#include <QInputDialog>
 #include "mugoapp.h"
 #include "boardwidget.h"
 #include "sgfcommand.h"
@@ -204,8 +205,10 @@ void BoardWidget::onLButtonUp(QMouseEvent* e){
             addStone(sgfX, sgfY, Go::eDame);
             break;
         case eAddLabel:
+            addLabel(sgfX, sgfY);
             break;
         case eAddLabelManually:
+            addLabelManually(sgfX, sgfY);
             break;
         case eAddCircle:
             addMark(sgfX, sgfY, Go::Mark::eCircle);
@@ -1101,6 +1104,34 @@ void BoardWidget::addMark(int sgfX, int sgfY, Go::Mark::Type mark){
         return;
 
     document()->undoStack()->push( new AddMarkCommand(document(), currentGame_, currentNode_, sgfX, sgfY, mark) );
+}
+
+/**
+  add label
+*/
+void BoardWidget::addLabel(int sgfX, int sgfY){
+    if (removeMark(sgfX, sgfY, currentNode_->marks()))
+        return;
+
+    // make label string
+    foreach(Go::Mark& m, currentNode_->marks()){
+
+    }
+}
+
+/**
+  add label manually
+*/
+void BoardWidget::addLabelManually(int sgfX, int sgfY){
+    if (removeMark(sgfX, sgfY, currentNode_->marks()))
+        return;
+
+    // input label
+    QString text = QInputDialog::getText(this, QString(), tr("Input label") );
+    if (text.isEmpty())
+        return;
+
+    document()->undoStack()->push( new AddLabelCommand(document(), currentGame_, currentNode_, sgfX, sgfY, text) );
 }
 
 /**

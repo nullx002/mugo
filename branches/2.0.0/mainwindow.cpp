@@ -782,7 +782,7 @@ void MainWindow::createBranchItems(Document* doc, QTreeWidgetItem* parent, const
 */
 void MainWindow::addBranchItem(Document* doc, QTreeWidget* branch, const Go::NodePtr& node){
     // create new tree item
-    QTreeWidgetItem* item = createBranchItem(doc, node);
+    createBranchItem(doc, node);
 
     ViewData& view = docView[doc];
     rebuildBranchItems(doc, view, node->parent() ? node->parent() : node);
@@ -993,7 +993,6 @@ void MainWindow::removeBranchItems(ViewData& view, const Go::NodePtr& node, bool
     // remove tree item
     QTreeWidgetItem* parent = getParentItem(item);
     if (parent){
-        int index = parent->indexOfChild(item);
         while (item->childCount())
             item->removeChild(item->child(0));
     }
@@ -1250,7 +1249,7 @@ void MainWindow::on_actionMoveUp_triggered()
         return;
 
     // get view data
-    ViewData& view = docView[board->document()];
+//    ViewData& view = docView[board->document()];
 
     // get selected game
     QModelIndex index = ui->collectionTreeView->currentIndex();

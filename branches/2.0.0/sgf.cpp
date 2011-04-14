@@ -363,8 +363,8 @@ Miscellaneous Properties    FG, PM, VW
             node->setNextColor(Go::eWhite);
     }
 
-    // Markup Properties: AR, CR, DD, LB, LN, MA, SL, SQ, TR
-    else if (key == "CR" || key == "SQ" || key == "TR" || key == "MA"){
+    // Markup Properties: AR, CR, DD, LB, LN, MA(M), SL, SQ, TR
+    else if (key == "CR" || key == "SQ" || key == "TR" || key == "MA" || key == "M"){
         foreach(const QString& v, valueList){
             QList<QPoint> posList;
             parseMove(v, posList);
@@ -375,15 +375,15 @@ Miscellaneous Properties    FG, PM, VW
                     node->marks().push_back(Go::Mark(Go::Mark::eSquare, pos));
                 else if (key == "TR")
                     node->marks().push_back(Go::Mark(Go::Mark::eTriangle, pos));
-                else if (key == "MA")
+                else if (key == "MA" || key == "M")
                     node->marks().push_back(Go::Mark(Go::Mark::eCross, pos));
         }
     }
+//    else if (key == "SL")  // select
+//    else if (key == "LB")  // label
 //    else if (key == "AR")
 //    else if (key == "DD")
-//    else if (key == "LB")
 //    else if (key == "LN")
-//    else if (key == "SL")
 
     // Timing Properties: BL, OB, OW, WL
     // Miscellaneous Properties: FG, PM, VW
