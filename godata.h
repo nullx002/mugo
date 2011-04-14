@@ -37,11 +37,13 @@ enum Color{ eDame, eBlack, eWhite };
 */
 class Mark{
 public:
-    enum Type{ eCircle, eSquare, eTriangle, eCross };
+    enum Type{ eCircle, eSquare, eTriangle, eCross, eLabel };
 
     // constructor
     Mark(Type t, const QPoint& p) : type_(t), x_(p.x()), y_(p.y()){}
     Mark(Type t, int x, int y) : type_(t), x_(x), y_(y){}
+    Mark(const QString& label, const QPoint& p) : type_(Mark::eLabel), x_(p.x()), y_(p.y()), label_(label){}
+    Mark(const QString& label, int x, int y) : type_(Mark::eLabel), x_(x), y_(y), label_(label){}
 
     // type
     int type() const{ return type_; }
@@ -55,12 +57,17 @@ public:
     int y() const{ return y_; }
     void setY(int y){ y_ = y; }
 
+    // label
+    const QString& label() const{ return label_; }
+    void setLabel(const QString& label){ label_ = label; }
+
     // operator
-    bool operator ==(const Mark& other) const{ return x_ == other.x_ && y_ == other.y_ && type_ == other.type_; }
+    bool operator ==(const Mark& other) const{ return x_ == other.x_ && y_ == other.y_ && type_ == other.type_ && label_ == other.label_; }
 
 private:
     Type type_;
     int x_, y_;
+    QString label_;
 };
 
 typedef QList<Mark> MarkList;
