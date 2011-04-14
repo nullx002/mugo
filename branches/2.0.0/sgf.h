@@ -57,10 +57,14 @@ private:
     void parseNumber(const QString& value, int& v1, int& v2);
     void parseMove(const QString& value, int& x, int& y);
     void parseMove(const QString& value, QList<QPoint>& posList);
+    void parseText(const QString& value, int& x, int& y, QString& text);
     QString positionToSgfProperty(int x, int y);
     void WriteProperty(QTextStream& str, QTextStream& temp, const QString& key, QString value);
     void WriteProperty(QTextStream& str, QTextStream& temp, const QString& key, int value);
     void WriteProperty(QTextStream& str, QTextStream& temp, const QString& key, qreal value);
+    void WriteProperty(QTextStream& str, QTextStream& temp, const QString& key, const QPoint& p);
+    void WriteProperty(QTextStream& str, QTextStream& temp, const QString& key, const QPoint& p1, const QPoint& p2);
+    void WriteProperty(QTextStream& str, QTextStream& temp, const QString& key, const QPoint& p, const QString& text);
 };
 
 

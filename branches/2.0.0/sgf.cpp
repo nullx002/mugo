@@ -380,7 +380,14 @@ Miscellaneous Properties    FG, PM, VW
         }
     }
 //    else if (key == "SL")  // select
-//    else if (key == "LB")  // label
+    else if (key == "LB"){  // label
+        foreach(const QString& v, valueList){
+            int x, y;
+            QString label;
+            parseText(v, x, y, label);
+            node->marks().push_back(Go::Mark(label, x, y));
+        }
+    }
 //    else if (key == "AR")
 //    else if (key == "DD")
 //    else if (key == "LN")
@@ -444,6 +451,15 @@ void Sgf::parseMove(const QString& value, QList<QPoint>& posList){
             for (int x=temp_plist[0].x(); x<=temp_plist[1].x(); ++x)
                 posList.push_back(QPoint(x, y));
     }
+}
+
+/**
+  convert point:text
+*/
+void Sgf::parseText(const QString& value, int& x, int& y, QString& text){
+    QString pt = value.left(2);
+    parseMove(pt, x, y);
+    text = value.mid(3);
 }
 
 /**
@@ -603,7 +619,6 @@ bool Sgf::writeGameInformation(QTextStream& str, QTextStream& temp, const Inform
 */
 bool Sgf::writeNode(QTextStream& str, QTextStream& temp, const NodePtr& node){
 /*
-Markup Properties           AR, CR, DD, LB, LN, MA, SL, SQ, TR
 Timing Properties           BL, OB, OW, WL
 Miscellaneous Properties    FG, PM, VW
 */
@@ -687,13 +702,39 @@ Miscellaneous Properties    FG, PM, VW
 
     // Setup Properties: AB, AE, AW, PL
     foreach(const QPoint& p, node->emptyStones())
-        WriteProperty(str, temp, "AE", positionToSgfProperty(p.x(), p.y()));
+        WriteProperty(str, temp, "AE", p);
 
     foreach(const QPoint& p, node->blackStones())
-        WriteProperty(str, temp, "AB", positionToSgfProperty(p.x(), p.y()));
+        WriteProperty(str, temp, "AB", p);
 
     foreach(const QPoint& p, node->whiteStones())
-        WriteProperty(str, temp, "AW", positionToSgfProperty(p.x(), p.y()));
+        WriteProperty(str, temp, "AW", p);
+
+    // Markup Properties: AR, CR, DD, LB, LN, MA, SL, SQ, TR
+    foreach(const Go::Mark& m, node->marks()){
+        switch(m.type()){
+            case Go::Mark::eCircle:
+                WriteProperty(str, temp, "CR", QPoint(m.x(), m.y()));
+                break;
+            case Go::Mark::eSquare:
+                WriteProperty(str, temp, "SQ", QPoint(m.x(), m.y()));
+                break;
+            case Go::Mark::eTriangle:
+                WriteProperty(str, temp, "TR", QPoint(m.x(), m.y()));
+                break;
+            case Go::Mark::eCross:
+                WriteProperty(str, temp, "MA", QPoint(m.x(), m.y()));
+                break;
+            case Go::Mark::eLabel:
+                WriteProperty(str, temp, "LB", QPoint(m.x(), m.y()), m.label());
+                break;
+        }
+    }
+
+    // "AR"
+    // "DD"
+    // "LN"
+    // "SL"
 
     return true;
 }
@@ -714,16 +755,28 @@ void Sgf::WriteProperty(QTextStream& str, QTextStream& temp, const QString& key,
 }
 
 void Sgf::WriteProperty(QTextStream& str, QTextStream& temp, const QString& key, int value){
-    QString a;
-    a.sprintf("%d", value);
-    WriteProperty(str, temp, key, a);
+    WriteProperty(str, temp, key, QString("%1").arg(value));
 }
 
 void Sgf::WriteProperty(QTextStream& str, QTextStream& temp, const QString& key, qreal value){
-    QString a;
-    a.sprintf("%f", value);
-    WriteProperty(str, temp, key, a);
+    WriteProperty(str, temp, key, QString("%1").arg(value));
 }
+
+void Sgf::WriteProperty(QTextStream& str, QTextStream& temp, const QString& key, const QPoint& p){
+    WriteProperty(str, temp, key, positionToSgfProperty(p.x(), p.y()));
+}
+
+void Sgf::WriteProperty(QTextStream& str, QTextStream& temp, const QString& key, const QPoint& p1, const QPoint& p2){
+    QString s1 = positionToSgfProperty(p1.x(), p1.y());
+    QString s2 = positionToSgfProperty(p2.x(), p2.y());
+    WriteProperty(str, temp, key, s1 + ':' + s2);
+}
+
+void Sgf::WriteProperty(QTextStream& str, QTextStream& temp, const QString& key, const QPoint& p, const QString& text){
+    QString s1 = positionToSgfProperty(p.x(), p.y());
+    WriteProperty(str, temp, key, s1 + ':' + text);
+}
+
 
 
 }
