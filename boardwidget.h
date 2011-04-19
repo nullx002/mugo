@@ -182,6 +182,7 @@ protected:
     void addMark(int sgfX, int sgfY, Go::Mark::Type mark);
     void addLabel(int sgfX, int sgfY);
     void addLabelManually(int sgfX, int sgfY);
+    bool removeMark(int sgfX, int sgfY);
     bool removeMark(int sgfX, int sgfY, Go::MarkList& markList);
 
     GoDocument* document_;

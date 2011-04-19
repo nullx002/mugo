@@ -235,6 +235,7 @@ void BoardWidget::onLButtonUp(QMouseEvent* e){
             addMark(sgfX, sgfY, Go::Mark::eCross);
             break;
         case eRemoveMarker:
+            removeMark(sgfX, sgfY);
             break;
     }
 }
@@ -1063,11 +1064,11 @@ bool BoardWidget::alternateMove(int sgfX, int sgfY){
 */
 bool BoardWidget::addStone(int sgfX, int sgfY, Go::Color color){
     // remove stone if stone already added
-    bool removed = false;
-    removed = removeStone(sgfX, sgfY, currentNode_->blackStones());
-    removed |= removeStone(sgfX, sgfY, currentNode_->whiteStones());
-    removed |= removeStone(sgfX, sgfY, currentNode_->emptyStones());
-    if (removed)
+    if (removeStone(sgfX, sgfY, currentNode_->blackStones()))
+        return true;
+    if (removeStone(sgfX, sgfY, currentNode_->whiteStones()))
+        return true;
+    if (removeStone(sgfX, sgfY, currentNode_->emptyStones()))
         return true;
 
     // if stone already exist, can't put new stone.
@@ -1172,6 +1173,25 @@ void BoardWidget::addLabelManually(int sgfX, int sgfY){
         return;
 
     document()->undoStack()->push( new AddLabelCommand(document(), currentGame_, currentNode_, sgfX, sgfY, text) );
+}
+
+/**
+  remove mark
+*/
+bool BoardWidget::removeMark(int sgfX, int sgfY){
+    // remove markers
+    if (removeMark(sgfX, sgfY, currentNode_->marks()))
+        return true;
+
+    // remove stones
+    if (removeStone(sgfX, sgfY, currentNode_->blackStones()))
+        return true;
+    if (removeStone(sgfX, sgfY, currentNode_->whiteStones()))
+        return true;
+    if (removeStone(sgfX, sgfY, currentNode_->emptyStones()))
+        return true;
+
+    return false;
 }
 
 /**
