@@ -290,4 +290,65 @@ private:
 };
 
 
+/**
+  @ingroup Command
+  This command set move annotation to specified node
+*/
+class SetMoveAnnotationCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(SetMoveAnnotationCommand)
+
+public:
+    SetMoveAnnotationCommand(GoDocument* doc, Go::NodePtr game, Go::NodePtr node, Go::Node::MoveAnnotation annotation, QUndoCommand* parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+private:
+    GoDocument* document_;
+    Go::NodePtr game_;
+    Go::NodePtr node_;
+    Go::Node::MoveAnnotation annotation_;
+    Go::Node::MoveAnnotation prevAnnotation_;
+};
+
+/**
+  @ingroup Command
+  This command set node annotation to specified node
+*/
+class SetNodeAnnotationCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(SetNodeAnnotationCommand)
+
+public:
+    SetNodeAnnotationCommand(GoDocument* doc, Go::NodePtr game, Go::NodePtr node, Go::Node::NodeAnnotation annotation, QUndoCommand* parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+private:
+    GoDocument* document_;
+    Go::NodePtr game_;
+    Go::NodePtr node_;
+    Go::Node::NodeAnnotation annotation_;
+    Go::Node::NodeAnnotation prevAnnotation_;
+};
+
+/**
+  @ingroup Command
+  This command set node annotation2 to specified node
+*/
+class SetNodeAnnotation2Command : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(SetNodeAnnotation2Command)
+
+public:
+    SetNodeAnnotation2Command(GoDocument* doc, Go::NodePtr game, Go::NodePtr node, Go::Node::NodeAnnotation2 annotation, QUndoCommand* parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+private:
+    GoDocument* document_;
+    Go::NodePtr game_;
+    Go::NodePtr node_;
+    Go::Node::NodeAnnotation2 annotation_;
+    Go::Node::NodeAnnotation2 prevAnnotation_;
+};
+
+
 #endif // SGFCOMMAND_H

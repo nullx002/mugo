@@ -444,3 +444,96 @@ void RemoveMarkCommand::undo(){
     markList_.insert(index_, mark_);
     document_->modifyNode(game_, node_);
 }
+
+/**
+  Constructs set move annotation command
+*/
+SetMoveAnnotationCommand::SetMoveAnnotationCommand(GoDocument* doc, Go::NodePtr game, Go::NodePtr node, Go::Node::MoveAnnotation annotation, QUndoCommand* parent)
+    : QUndoCommand(parent)
+    , document_(doc)
+    , game_(game)
+    , node_(node)
+    , annotation_(annotation)
+{
+    prevAnnotation_ = node_->moveAnnotation();
+}
+
+/**
+  redo set move annotation command
+*/
+void SetMoveAnnotationCommand::redo(){
+
+    setText( tr("Set Move Annotation") );
+    node_->setMoveAnnotation(annotation_);
+    document_->modifyNode(game_, node_);
+}
+
+/**
+  undo set move annotation command
+*/
+void SetMoveAnnotationCommand::undo(){
+    node_->setMoveAnnotation(prevAnnotation_);
+    document_->modifyNode(game_, node_);
+}
+
+/**
+  Constructs set node annotation command
+*/
+SetNodeAnnotationCommand::SetNodeAnnotationCommand(GoDocument* doc, Go::NodePtr game, Go::NodePtr node, Go::Node::NodeAnnotation annotation, QUndoCommand* parent)
+    : QUndoCommand(parent)
+    , document_(doc)
+    , game_(game)
+    , node_(node)
+    , annotation_(annotation)
+{
+    prevAnnotation_ = node_->nodeAnnotation();
+}
+
+/**
+  redo set node annotation command
+*/
+void SetNodeAnnotationCommand::redo(){
+
+    setText( tr("Set Node Annotation") );
+    node_->setNodeAnnotation(annotation_);
+    document_->modifyNode(game_, node_);
+}
+
+/**
+  undo set move annotation command
+*/
+void SetNodeAnnotationCommand::undo(){
+    node_->setNodeAnnotation(prevAnnotation_);
+    document_->modifyNode(game_, node_);
+}
+
+/**
+  Constructs set node annotation2 command
+*/
+SetNodeAnnotation2Command::SetNodeAnnotation2Command(GoDocument* doc, Go::NodePtr game, Go::NodePtr node, Go::Node::NodeAnnotation2 annotation, QUndoCommand* parent)
+    : QUndoCommand(parent)
+    , document_(doc)
+    , game_(game)
+    , node_(node)
+    , annotation_(annotation)
+{
+    prevAnnotation_ = node_->nodeAnnotation2();
+}
+
+/**
+  redo set node annotation2 command
+*/
+void SetNodeAnnotation2Command::redo(){
+
+    setText( tr("Set Node Annotation") );
+    node_->setNodeAnnotation2(annotation_);
+    document_->modifyNode(game_, node_);
+}
+
+/**
+  undo set move annotation2 command
+*/
+void SetNodeAnnotation2Command::undo(){
+    node_->setNodeAnnotation2(prevAnnotation_);
+    document_->modifyNode(game_, node_);
+}
