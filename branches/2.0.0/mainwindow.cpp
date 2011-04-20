@@ -2055,56 +2055,186 @@ void MainWindow::on_menuStonesAndMarkers_triggered(bool checked){
         ui->menuStonesAndMarkers->menuAction()->setChecked(true);
 }
 
+/**
+  Edit -> Annotation -> Good Move
+*/
 void MainWindow::on_actionGoodMove_triggered()
 {
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // set move annotation
+    board->document()->undoStack()->push( new SetMoveAnnotationCommand(board->document(), board->currentGame(), board->currentNode(), Go::Node::eGoodMove) );
 }
 
+/**
+  Edit -> Annotation -> Very Good Move
+*/
 void MainWindow::on_actionVeryGoodMove_triggered()
 {
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // set move annotation
+    board->document()->undoStack()->push( new SetMoveAnnotationCommand(board->document(), board->currentGame(), board->currentNode(), Go::Node::eVeryGoodMove) );
 }
 
+/**
+  Edit -> Annotation -> Bad Move
+*/
 void MainWindow::on_actionBadMove_triggered()
 {
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // set move annotation
+    board->document()->undoStack()->push( new SetMoveAnnotationCommand(board->document(), board->currentGame(), board->currentNode(), Go::Node::eBadMove) );
 }
 
+/**
+  Edit -> Annotation -> Very Bad Move
+*/
 void MainWindow::on_actionVeryBadMove_triggered()
 {
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // set move annotation
+    board->document()->undoStack()->push( new SetMoveAnnotationCommand(board->document(), board->currentGame(), board->currentNode(), Go::Node::eVeryBadMove) );
 }
 
+/**
+  Edit -> Annotation -> Doubtful Move
+*/
 void MainWindow::on_actionDoubtfulMove_triggered()
 {
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // set move annotation
+    board->document()->undoStack()->push( new SetMoveAnnotationCommand(board->document(), board->currentGame(), board->currentNode(), Go::Node::eDoubtful) );
 }
 
+/**
+  Edit -> Annotation -> Interesting Move
+*/
 void MainWindow::on_actionInterestingMove_triggered()
 {
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // set move annotation
+    board->document()->undoStack()->push( new SetMoveAnnotationCommand(board->document(), board->currentGame(), board->currentNode(), Go::Node::eInteresting) );
 }
 
+/**
+  Edit -> Annotation -> Even
+*/
 void MainWindow::on_actionEven_triggered()
 {
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // set node annotation
+    board->document()->undoStack()->push( new SetNodeAnnotationCommand(board->document(), board->currentGame(), board->currentNode(), Go::Node::eEven) );
 }
 
+/**
+  Edit -> Annotation -> Good for Black
+*/
 void MainWindow::on_actionGoodForBlack_triggered()
 {
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // set node annotation
+    board->document()->undoStack()->push( new SetNodeAnnotationCommand(board->document(), board->currentGame(), board->currentNode(), Go::Node::eGoodForBlack) );
 }
 
-void MainWindow::on_actionVeryGoodforBlack_triggered()
+/**
+  Edit -> Annotation -> Very Good for Black
+*/
+void MainWindow::on_actionVeryGoodForBlack_triggered()
 {
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // set node annotation
+    board->document()->undoStack()->push( new SetNodeAnnotationCommand(board->document(), board->currentGame(), board->currentNode(), Go::Node::eVeryGoodForBlack) );
 }
 
-void MainWindow::on_actionGoodforWhite_triggered()
+/**
+  Edit -> Annotation -> Good for White
+*/
+void MainWindow::on_actionGoodForWhite_triggered()
 {
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // set node annotation
+    board->document()->undoStack()->push( new SetNodeAnnotationCommand(board->document(), board->currentGame(), board->currentNode(), Go::Node::eGoodForWhite) );
 }
 
-void MainWindow::on_actionVeryGoodforWhite_triggered()
+/**
+  Edit -> Annotation -> Very Good for White
+*/
+void MainWindow::on_actionVeryGoodForWhite_triggered()
 {
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // set node annotation
+    board->document()->undoStack()->push( new SetNodeAnnotationCommand(board->document(), board->currentGame(), board->currentNode(), Go::Node::eVeryGoodForWhite) );
 }
 
+/**
+  Edit -> Annotation -> Unclear
+*/
 void MainWindow::on_actionUnclear_triggered()
 {
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // set node annotation
+    board->document()->undoStack()->push( new SetNodeAnnotationCommand(board->document(), board->currentGame(), board->currentNode(), Go::Node::eUnclear) );
 }
 
+/**
+  Edit -> Annotation -> Hotspot
+*/
 void MainWindow::on_actionHotspot_triggered()
 {
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // set node annotation2
+    board->document()->undoStack()->push( new SetNodeAnnotation2Command(board->document(), board->currentGame(), board->currentNode(), Go::Node::eHotspot) );
 }
 
 void MainWindow::on_actionSetMoveNumber_triggered()

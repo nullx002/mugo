@@ -215,9 +215,9 @@ private slots:
     void on_actionInterestingMove_triggered();
     void on_actionEven_triggered();
     void on_actionGoodForBlack_triggered();
-    void on_actionVeryGoodforBlack_triggered();
-    void on_actionGoodforWhite_triggered();
-    void on_actionVeryGoodforWhite_triggered();
+    void on_actionVeryGoodForBlack_triggered();
+    void on_actionGoodForWhite_triggered();
+    void on_actionVeryGoodForWhite_triggered();
     void on_actionUnclear_triggered();
     void on_actionHotspot_triggered();
     void on_actionSetMoveNumber_triggered();

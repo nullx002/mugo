@@ -170,9 +170,9 @@
      <addaction name="separator"/>
      <addaction name="actionEven"/>
      <addaction name="actionGoodForBlack"/>
-     <addaction name="actionVeryGoodforBlack"/>
-     <addaction name="actionGoodforWhite"/>
-     <addaction name="actionVeryGoodforWhite"/>
+     <addaction name="actionVeryGoodForBlack"/>
+     <addaction name="actionGoodForWhite"/>
+     <addaction name="actionVeryGoodForWhite"/>
      <addaction name="actionUnclear"/>
      <addaction name="separator"/>
      <addaction name="actionHotspot"/>
@@ -1098,17 +1098,17 @@
     <string>Good for Black</string>
    </property>
   </action>
-  <action name="actionVeryGoodforBlack">
+  <action name="actionVeryGoodForBlack">
    <property name="text">
     <string>Very Good for Black</string>
    </property>
   </action>
-  <action name="actionGoodforWhite">
+  <action name="actionGoodForWhite">
    <property name="text">
     <string>Good for White</string>
    </property>
   </action>
-  <action name="actionVeryGoodforWhite">
+  <action name="actionVeryGoodForWhite">
    <property name="text">
     <string>Very Good for White</string>
    </property>
