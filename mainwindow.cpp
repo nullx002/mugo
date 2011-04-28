@@ -19,6 +19,7 @@
 #include <QTextCodec>
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QInputDialog>
 #include <QClipboard>
 #include "mugoapp.h"
 #include "mainwindow.h"
@@ -900,6 +901,10 @@ QString MainWindow::getBranchItemText(const ViewData& view, const Go::NodePtr& n
 
     if (node->comment().isEmpty() == false)
         nodeName.push_back( tr("Comment") );
+
+    // Set Move Number
+    if (node->moveNumber() > 0)
+        nodeName.push_back( tr("(%1)").arg(node->moveNumber()) );
 
     // Add Stones
     if (node->blackStones().empty() == false)
@@ -2237,8 +2242,27 @@ void MainWindow::on_actionHotspot_triggered()
     board->document()->undoStack()->push( new SetNodeAnnotation2Command(board->document(), board->currentGame(), board->currentNode(), Go::Node::eHotspot) );
 }
 
+/**
+  Edit -> Move Number -> Set Move Number
+*/
 void MainWindow::on_actionSetMoveNumber_triggered()
 {
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // show input dialog
+    bool ok;
+    int value = board->moveNumber();
+    int number = QInputDialog::getInteger(this, QString(), tr("Input move number"), value, 1, 999, 1, &ok);
+
+    // return if dialog canceled
+    if (ok == false)
+        return;
+
+    // set move number
+    board->document()->undoStack()->push( new SetMoveNumberCommand(board->document(), board->currentGame(), board->currentNode(), number) );
 }
 
 void MainWindow::on_actionUnsetMoveNumber_triggered()
