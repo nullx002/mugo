@@ -1244,9 +1244,10 @@ void BoardWidget::on_document_nodeDeleted(const Go::NodePtr& game, const Go::Nod
 /**
   node modified
 */
-void BoardWidget::on_document_nodeModified(const Go::NodePtr& /*game*/, const Go::NodePtr& node){
-    if (node != currentNode_)
-        return;
+void BoardWidget::on_document_nodeModified(const Go::NodePtr& /*game*/, const Go::NodePtr& /*node*/){
+qDebug() << "on_document_nodeModified";
+//    if (node != currentNode_)
+//        return;
 
     // create buffer
     createBoardBuffer();

@@ -350,5 +350,25 @@ private:
     Go::Node::NodeAnnotation2 prevAnnotation_;
 };
 
+/**
+  @ingroup Command
+  This command set move number to specified node
+*/
+class SetMoveNumberCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(SetMoveNumberCommand)
+
+public:
+    SetMoveNumberCommand(GoDocument* doc, Go::NodePtr game, Go::NodePtr node, int moveNumber, QUndoCommand* parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+private:
+    GoDocument* document_;
+    Go::NodePtr game_;
+    Go::NodePtr node_;
+    int moveNumber_;
+    int prevMoveNumber_;
+};
+
 
 #endif // SGFCOMMAND_H

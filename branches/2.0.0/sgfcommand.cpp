@@ -537,3 +537,34 @@ void SetNodeAnnotation2Command::undo(){
     node_->setNodeAnnotation2(prevAnnotation_);
     document_->modifyNode(game_, node_);
 }
+
+/**
+  Constructs set move number command
+*/
+SetMoveNumberCommand::SetMoveNumberCommand(GoDocument* doc, Go::NodePtr game, Go::NodePtr node, int moveNumber, QUndoCommand* parent)
+    : QUndoCommand(parent)
+    , document_(doc)
+    , game_(game)
+    , node_(node)
+    , moveNumber_(moveNumber)
+{
+    prevMoveNumber_ = node_->moveNumber();
+}
+
+/**
+  redo set move number command
+*/
+void SetMoveNumberCommand::redo(){
+
+    setText( tr("Set Node Annotation") );
+    node_->setMoveNumber(moveNumber_);
+    document_->modifyNode(game_, node_);
+}
+
+/**
+  undo set move number command
+*/
+void SetMoveNumberCommand::undo(){
+    node_->setMoveNumber(prevMoveNumber_);
+    document_->modifyNode(game_, node_);
+}
