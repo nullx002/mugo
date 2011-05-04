@@ -498,17 +498,27 @@ void BoardWidget::createBoardBuffer(){
     while (iter != currentNodeList_.end()){
         Go::NodePtr node(*iter);
 
+        int x = node->x();
+        int y = node->y();
+
         // change move number if move number is designated.
         if (node->moveNumber() > 0)
             moveNumber_ = node->moveNumber();
 
         // put stone if node is stone and node isn't pass.
         if (node->isStone() && !node->isPass() && node->x() < xsize() && node->y() < ysize()){
-            buffer[node->y()][node->x()] = node->color();
-            killStone(node->x(), node->y());
+            buffer[y][x] = node->color();
+            killStone(x, y);
 
             // move number
-            data[node->y()][node->x()].number = moveNumber_++;
+            bool focus = x == currentNode_->x() && y == currentNode_->y();
+            if (data[y][x].number != moveNumber_ || data[y][x].numberItem == false || data[y][x].focus != focus){
+                if (showMoveNumber_ && moveNumber_ > 0)
+                    createMoveNumber(x, y, moveNumber_, focus);
+                else
+                    data[y][x].numberItem.clear();
+            }
+            data[y][x].number = moveNumber_++;
         }
 
         // add empty stones
@@ -547,10 +557,7 @@ void BoardWidget::createBoardBuffer(){
                 data[y][x].number = -1;
 
             // create move number
-            bool focus = x == currentNode_->x() && y == currentNode_->y();
-            if (showMoveNumber_ && data[y][x].number > 0 && (data[y][x].numberItem == false || data[y][x].focus != focus))
-                createMoveNumber(x, y, data[y][x].number, focus);
-            else if (data[y][x].number <= 0)
+            if (data[y][x].number <= 0)
                 data[y][x].numberItem.clear();
 
             // if this position already has stone, continue
