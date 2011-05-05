@@ -2265,8 +2265,18 @@ void MainWindow::on_actionSetMoveNumber_triggered()
     board->document()->undoStack()->push( new SetMoveNumberCommand(board->document(), board->currentGame(), board->currentNode(), number) );
 }
 
+/**
+  Edit -> Move Number -> Unset Move Number
+*/
 void MainWindow::on_actionUnsetMoveNumber_triggered()
 {
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // unset move number
+    board->document()->undoStack()->push( new SetMoveNumberCommand(board->document(), board->currentGame(), board->currentNode(), -1) );
 }
 
 void MainWindow::on_actionEditNodeName_triggered()
