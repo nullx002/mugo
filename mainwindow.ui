@@ -348,6 +348,8 @@
    <addaction name="actionPass"/>
    <addaction name="separator"/>
    <addaction name="actionGameInformation"/>
+   <addaction name="separator"/>
+   <addaction name="actionWhiteFirst"/>
   </widget>
   <widget class="QToolBar" name="navigationToolBar">
    <property name="windowTitle">
@@ -1139,6 +1141,13 @@
    </property>
   </action>
   <action name="actionWhiteFirst">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="mugo.qrc">
+     <normaloff>:/res/whitefirst.png</normaloff>:/res/whitefirst.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;White First</string>
    </property>

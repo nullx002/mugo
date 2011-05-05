@@ -31,5 +31,6 @@
         <file>res/square.png</file>
         <file>res/triangle.png</file>
         <file>res/rubbereraser.png</file>
+        <file>res/whitefirst.png</file>
     </qresource>
 </RCC>
