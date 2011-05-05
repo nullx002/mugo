@@ -555,8 +555,11 @@ SetMoveNumberCommand::SetMoveNumberCommand(GoDocument* doc, Go::NodePtr game, Go
   redo set move number command
 */
 void SetMoveNumberCommand::redo(){
+    if (moveNumber_ > 0)
+        setText( tr("Set Move Number") );
+    else
+        setText( tr("Unet Move Number") );
 
-    setText( tr("Set Node Annotation") );
     node_->setMoveNumber(moveNumber_);
     document_->modifyNode(game_, node_);
 }
