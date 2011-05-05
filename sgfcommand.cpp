@@ -571,3 +571,36 @@ void SetMoveNumberCommand::undo(){
     node_->setMoveNumber(prevMoveNumber_);
     document_->modifyNode(game_, node_);
 }
+
+/**
+  Constructs set node name command
+*/
+SetNodeNameCommand::SetNodeNameCommand(GoDocument* doc, Go::NodePtr game, Go::NodePtr node, const QString& nodeName, QUndoCommand* parent)
+    : QUndoCommand(parent)
+    , document_(doc)
+    , game_(game)
+    , node_(node)
+    , nodeName_(nodeName)
+{
+    prevNodeName_ = node_->name();
+}
+
+/**
+  redo set node name command
+*/
+void SetNodeNameCommand::redo(){
+    if (nodeName_.isEmpty())
+        setText( tr("Clear Node Name") );
+    else
+        setText( tr("Set Node Name") );
+    node_->setName(nodeName_);
+    document_->modifyNode(game_, node_);
+}
+
+/**
+  undo set node name command
+*/
+void SetNodeNameCommand::undo(){
+    node_->setName(prevNodeName_);
+    document_->modifyNode(game_, node_);
+}

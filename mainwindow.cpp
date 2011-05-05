@@ -2279,8 +2279,27 @@ void MainWindow::on_actionUnsetMoveNumber_triggered()
     board->document()->undoStack()->push( new SetMoveNumberCommand(board->document(), board->currentGame(), board->currentNode(), -1) );
 }
 
+/**
+  Edit -> Edit Node Name
+*/
 void MainWindow::on_actionEditNodeName_triggered()
 {
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // show input dialog
+    bool ok;
+    QString value = board->currentNode()->name();
+    QString name = QInputDialog::getText(this, QString(), tr("Input node name"), QLineEdit::Normal, value, &ok);
+
+    // return if dialog canceled
+    if (ok == false)
+        return;
+
+    // set node name
+    board->document()->undoStack()->push( new SetNodeNameCommand(board->document(), board->currentGame(), board->currentNode(), name) );
 }
 
 void MainWindow::on_actionWhiteFirst_triggered()
