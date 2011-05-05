@@ -370,5 +370,25 @@ private:
     int prevMoveNumber_;
 };
 
+/**
+  @ingroup Command
+  This command set node name to specified node
+*/
+class SetNodeNameCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(SetNodeNameCommand)
+
+public:
+    SetNodeNameCommand(GoDocument* doc, Go::NodePtr game, Go::NodePtr node, const QString& nodeName, QUndoCommand* parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+private:
+    GoDocument* document_;
+    Go::NodePtr game_;
+    Go::NodePtr node_;
+    QString nodeName_;
+    QString prevNodeName_;
+};
+
 
 #endif // SGFCOMMAND_H
