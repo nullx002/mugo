@@ -2302,8 +2302,18 @@ void MainWindow::on_actionEditNodeName_triggered()
     board->document()->undoStack()->push( new SetNodeNameCommand(board->document(), board->currentGame(), board->currentNode(), name) );
 }
 
-void MainWindow::on_actionWhiteFirst_triggered()
+/**
+    Edit -> White First
+*/
+void MainWindow::on_actionWhiteFirst_triggered(bool checked)
 {
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // set node name
+    board->document()->undoStack()->push( new SetNextColorCommand(board->document(), board->currentGame(), board->currentGame(), checked ? Go::eWhite : Go::eDame) );
 }
 
 void MainWindow::on_actionRotateSGFClockwise_triggered()

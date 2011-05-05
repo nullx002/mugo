@@ -223,7 +223,7 @@ private slots:
     void on_actionSetMoveNumber_triggered();
     void on_actionUnsetMoveNumber_triggered();
     void on_actionEditNodeName_triggered();
-    void on_actionWhiteFirst_triggered();
+    void on_actionWhiteFirst_triggered(bool checked);
     void on_actionRotateSGFClockwise_triggered();
     void on_actionFlipSGFVertically_triggered();
     void on_actionFlipSGFHorizontally_triggered();

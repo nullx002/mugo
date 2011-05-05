@@ -604,3 +604,37 @@ void SetNodeNameCommand::undo(){
     node_->setName(prevNodeName_);
     document_->modifyNode(game_, node_);
 }
+
+/**
+  Constructs set next color command
+*/
+SetNextColorCommand::SetNextColorCommand(GoDocument* doc, Go::NodePtr game, Go::NodePtr node, Go::Color color, QUndoCommand* parent)
+    : QUndoCommand(parent)
+    , document_(doc)
+    , game_(game)
+    , node_(node)
+    , color_(color)
+{
+    prevColor_ = node->nextColor();
+}
+
+/**
+  redo set next color command
+*/
+void SetNextColorCommand::redo(){
+    if (color_ == Go::eDame)
+        setText( tr("Unset Next Color") );
+    else
+        setText( tr("Set Next Color") );
+
+    node_->setNextColor(color_);
+    document_->modifyNode(game_, node_);
+}
+
+/**
+  undo set next color command
+*/
+void SetNextColorCommand::undo(){
+    node_->setNextColor(prevColor_);
+    document_->modifyNode(game_, node_);
+}

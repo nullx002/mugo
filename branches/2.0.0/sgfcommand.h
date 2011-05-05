@@ -390,5 +390,25 @@ private:
     QString prevNodeName_;
 };
 
+/**
+  @ingroup Command
+  This command set next color to specified node
+*/
+class SetNextColorCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(SetNextColorCommand)
+
+public:
+    SetNextColorCommand(GoDocument* doc, Go::NodePtr game, Go::NodePtr node, Go::Color color, QUndoCommand* parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+private:
+    GoDocument* document_;
+    Go::NodePtr game_;
+    Go::NodePtr node_;
+    Go::Color color_;
+    Go::Color prevColor_;
+};
+
 
 #endif // SGFCOMMAND_H
