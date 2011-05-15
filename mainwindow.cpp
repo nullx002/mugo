@@ -2318,6 +2318,13 @@ void MainWindow::on_actionWhiteFirst_triggered(bool checked)
 
 void MainWindow::on_actionRotateSGFClockwise_triggered()
 {
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // rotate sgf nodes
+    board->document()->undoStack()->push( new RotateClockwiseCommand(board->document(), board->currentGame()) );
 }
 
 void MainWindow::on_actionFlipSGFVertically_triggered()

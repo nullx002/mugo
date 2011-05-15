@@ -251,6 +251,7 @@ void BoardWidget::onRButtonUp(QMouseEvent* e){
 */
 bool BoardWidget::setDocument(GoDocument* doc){
     document_ = doc;
+    connect(document_, SIGNAL(documentModified(bool)), SLOT(on_document_documentModified(bool)));
     connect(document_, SIGNAL(nodeAdded(const Go::NodePtr&, const Go::NodePtr&)), SLOT(on_document_nodeAdded(const Go::NodePtr&, const Go::NodePtr&)));
     connect(document_, SIGNAL(nodeDeleted(const Go::NodePtr&, const Go::NodePtr&, bool)), SLOT(on_document_nodeDeleted(const Go::NodePtr&, const Go::NodePtr&, bool)));
     connect(document_, SIGNAL(nodeModified(const Go::NodePtr&, const Go::NodePtr&)), SLOT(on_document_nodeModified(const Go::NodePtr&, const Go::NodePtr&)));
@@ -278,6 +279,50 @@ bool BoardWidget::setGame(const Go::NodePtr& game){
     currentGame_ = game;
     currentNode_.clear();
 
+    // create line objects
+    createLineGraphicsItems();
+
+    // emit gameChanged
+    emit gameChanged(currentGame_);
+
+    // change current node
+    setNode(currentGame_);
+
+    return true;
+}
+
+/**
+  set current node
+*/
+bool BoardWidget::setNode(const Go::NodePtr& node, bool forceChange){
+    if (forceChange == false && currentNode_ == node)
+        return false;
+
+    // if node isn't in the node list, create node list
+    Go::NodeList::const_iterator iter = qFind(currentNodeList_.begin(), currentNodeList_.end(), node);
+    if (forceChange == false && iter == currentNodeList_.end())
+        createNodeList(node);
+
+    // change game information
+    if (node->information())
+        setInformation(node->information());
+
+    // change current node, and emit currentNodeChanged
+    currentNode_ = node;
+
+    // create buffer
+    createBoardBuffer();
+
+    // emit nodeChanged
+    emit nodeChanged(currentNode_);
+
+    return true;
+}
+
+/**
+  create line and star graphics items
+*/
+bool BoardWidget::createLineGraphicsItems(){
     // create vertical lines
     qDeleteAll(vLines);
     vLines.clear();
@@ -314,15 +359,7 @@ bool BoardWidget::setGame(const Go::NodePtr& game){
     }
 
     // set items position
-    setItemsPosition(geometry().size());
-
-    // emit gameChanged
-    emit gameChanged(currentGame_);
-
-    // change current node
-    setNode(currentGame_);
-
-    return true;
+    setItemsPosition(scene()->sceneRect().size());
 }
 
 /**
@@ -339,42 +376,15 @@ bool BoardWidget::setInformation(const Go::InformationPtr& information){
 }
 
 /**
-  set current node
-*/
-bool BoardWidget::setNode(const Go::NodePtr& node, bool forceChange){
-    if (forceChange == false && currentNode_ == node)
-        return false;
-
-    // if node isn't in the node list, create node list
-    Go::NodeList::const_iterator iter = qFind(currentNodeList_.begin(), currentNodeList_.end(), node);
-    if (forceChange == false && iter == currentNodeList_.end())
-        createNodeList(node);
-
-    // change game information
-    if (node->information())
-        setInformation(node->information());
-
-    // change current node, and emit currentNodeChanged
-    currentNode_ = node;
-
-    // create buffer
-    createBoardBuffer();
-
-    // emit nodeChanged
-    emit nodeChanged(currentNode_);
-
-    return true;
-}
-
-/**
   set scene items position in rect area
 */
-void BoardWidget::setItemsPosition(const QSize& size){
+void BoardWidget::setItemsPosition(const QSizeF& size){
     if (document_ == NULL)
         return;
 
     // set scene rect
-    scene()->setSceneRect(QRect(0, 0, size.width(), size.height()));
+    if (scene()->sceneRect().size() != size)
+        scene()->setSceneRect(QRect(0, 0, size.width(), size.height()));
 
     // calculate board size
     int width  = size.width();
@@ -1216,6 +1226,18 @@ bool BoardWidget::removeMark(int sgfX, int sgfY, Go::MarkList& markList){
 }
 
 /**
+  document modified
+*/
+void BoardWidget::on_document_documentModified(bool updateBoard){
+    if (updateBoard == false)
+        return;
+
+    // create buffer
+    createLineGraphicsItems();
+    createBoardBuffer();
+}
+
+/**
   node added
 
   @param[in] node
@@ -1252,7 +1274,6 @@ void BoardWidget::on_document_nodeDeleted(const Go::NodePtr& game, const Go::Nod
   node modified
 */
 void BoardWidget::on_document_nodeModified(const Go::NodePtr& /*game*/, const Go::NodePtr& /*node*/){
-qDebug() << "on_document_nodeModified";
 //    if (node != currentNode_)
 //        return;
 

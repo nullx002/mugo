@@ -411,4 +411,25 @@ private:
 };
 
 
+/**
+  @ingroup Command
+  This command rotate sgf nodes
+*/
+class RotateClockwiseCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(SetRotateClockwiseCommand)
+
+public:
+    RotateClockwiseCommand(GoDocument* doc, Go::NodePtr game, QUndoCommand* parent = 0);
+    virtual void redo();
+    virtual void undo();
+
+private:
+    void rotate(Go::NodePtr node, bool clockwise);
+    void getRotatedPosition(int x, int y, int& newX, int& newY, bool clockwise);
+
+    GoDocument* document_;
+    Go::NodePtr game_;
+};
+
+
 #endif // SGFCOMMAND_H
