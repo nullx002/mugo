@@ -42,7 +42,7 @@ public:
 
 signals:
     void saved();
-    void documentModified();
+    void documentModified(bool updateBoard);
     void informationChanged(const Go::NodePtr&, const Go::InformationPtr&);
     void gameAdded(const Go::NodePtr& game);
     void gameDeleted(const Go::NodePtr& game, int index);
@@ -53,7 +53,7 @@ signals:
     void nodeDeleted(const Go::NodePtr& game, const Go::NodePtr& node, bool removeChildren);
 
 public slots:
-    void modifyDocument();
+    void modifyDocument(bool updateBoard=false);
     void setInformation(Go::NodePtr node, Go::InformationPtr info);
     void addGame(Go::NodePtr game);
     void addGameList(const Go::NodeList& gameList);

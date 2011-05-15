@@ -638,3 +638,94 @@ void SetNextColorCommand::undo(){
     node_->setNextColor(prevColor_);
     document_->modifyNode(game_, node_);
 }
+
+/**
+  Constructs rotate sgf clockwise command
+*/
+RotateClockwiseCommand::RotateClockwiseCommand(GoDocument* doc, Go::NodePtr game, QUndoCommand* parent)
+    : QUndoCommand(parent)
+    , document_(doc)
+    , game_(game)
+{
+    setText( tr("Rotate Clockwise") );
+}
+
+/**
+  redo rotate sgf clockwise command
+*/
+void RotateClockwiseCommand::redo(){
+    rotate(game_, true);
+    game_->information()->setSize(game_->information()->ysize(), game_->information()->xsize());
+    document_->modifyDocument(true);
+}
+
+/**
+  undo rotate sgf clockwise command
+*/
+void RotateClockwiseCommand::undo(){
+    rotate(game_, false);
+    game_->information()->setSize(game_->information()->ysize(), game_->information()->xsize());
+    document_->modifyDocument(true);
+}
+
+/**
+  rotate all stones and markers
+*/
+void RotateClockwiseCommand::rotate(Go::NodePtr node, bool clockwise){
+    int w = game_->information()->xsize();
+    int h = game_->information()->ysize();
+
+    // rotate stones
+    if (node->isStone() && node->isPass() == false){
+        int x, y;
+        getRotatedPosition(node->x(), node->y(), x, y, clockwise);
+        node->setPos(x, y);
+    }
+
+    for(QList<QPoint>::iterator iter = node->emptyStones().begin(); iter != node->emptyStones().end(); ++iter){
+        int x, y;
+        getRotatedPosition(iter->x(), iter->y(), x, y, clockwise);
+        *iter = QPoint(x, y);
+    }
+
+    for(QList<QPoint>::iterator iter = node->blackStones().begin(); iter != node->blackStones().end(); ++iter){
+        int x, y;
+        getRotatedPosition(iter->x(), iter->y(), x, y, clockwise);
+        *iter = QPoint(x, y);
+    }
+
+    for(QList<QPoint>::iterator iter = node->whiteStones().begin(); iter != node->whiteStones().end(); ++iter){
+        int x, y;
+        getRotatedPosition(iter->x(), iter->y(), x, y, clockwise);
+        *iter = QPoint(x, y);
+    }
+
+    // rotate marks
+    for(Go::MarkList::iterator iter = node->marks().begin(); iter != node->marks().end(); ++iter){
+        int x, y;
+        getRotatedPosition(iter->x(), iter->y(), x, y, clockwise);
+        iter->setX(x);
+        iter->setY(y);
+    }
+
+    // rotate chidl stones
+    foreach(const Go::NodePtr& child, node->children())
+        rotate(child, clockwise);
+}
+
+/**
+  get rotated position
+*/
+void RotateClockwiseCommand::getRotatedPosition(int x, int y, int& newX, int& newY, bool clockwise){
+    int w = game_->information()->xsize();
+    int h = game_->information()->ysize();
+
+    if (clockwise){
+        newX = h - y - 1;
+        newY = x;
+    }
+    else{
+        newX = y;
+        newY = w - x - 1;
+    }
+}

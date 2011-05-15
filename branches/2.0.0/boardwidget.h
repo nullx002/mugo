@@ -129,7 +129,8 @@ protected:
     void initialize();
 
     // set graphics items position
-    void setItemsPosition(const QSize& size);
+    bool createLineGraphicsItems();
+    void setItemsPosition(const QSizeF& size);
     void setVLinesPosition(int x, int y, int gridSize);
     void setHLinesPosition(int x, int y, int gridSize);
     void setStarsPosition();
@@ -213,6 +214,7 @@ protected:
     bool showVariation_;
 
 private slots:
+    void on_document_documentModified(bool updateBoard);
     void on_document_nodeAdded(const Go::NodePtr& game, const Go::NodePtr& node);
     void on_document_nodeDeleted(const Go::NodePtr& game, const Go::NodePtr& node, bool removeChildren);
     void on_document_nodeModified(const Go::NodePtr& game, const Go::NodePtr& node);

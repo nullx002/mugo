@@ -81,9 +81,9 @@ bool GoDocument::save(const QString& fname, QTextCodec* codec){
 /**
   modify document
 */
-void GoDocument::modifyDocument(){
+void GoDocument::modifyDocument(bool updateBoard){
     setDirty();
-    emit documentModified();
+    emit documentModified(updateBoard);
 }
 
 /**
