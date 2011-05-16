@@ -1278,5 +1278,5 @@ void BoardWidget::on_document_nodeModified(const Go::NodePtr& /*game*/, const Go
 //        return;
 
     // create buffer
-    createBoardBuffer();
+//    createBoardBuffer();
 }

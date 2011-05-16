@@ -654,8 +654,8 @@ RotateClockwiseCommand::RotateClockwiseCommand(GoDocument* doc, Go::NodePtr game
   redo rotate sgf clockwise command
 */
 void RotateClockwiseCommand::redo(){
-    rotate(game_, true);
     game_->information()->setSize(game_->information()->ysize(), game_->information()->xsize());
+    rotate(game_, true);
     document_->modifyDocument(true);
 }
 
@@ -663,8 +663,8 @@ void RotateClockwiseCommand::redo(){
   undo rotate sgf clockwise command
 */
 void RotateClockwiseCommand::undo(){
-    rotate(game_, false);
     game_->information()->setSize(game_->information()->ysize(), game_->information()->xsize());
+    rotate(game_, false);
     document_->modifyDocument(true);
 }
 
@@ -705,6 +705,9 @@ void RotateClockwiseCommand::rotate(Go::NodePtr node, bool clockwise){
         iter->setY(y);
     }
 
+    // update node
+    document_->modifyNode(game_, node);
+
     // rotate chidl stones
     foreach(const Go::NodePtr& child, node->children())
         rotate(child, clockwise);
@@ -714,8 +717,9 @@ void RotateClockwiseCommand::rotate(Go::NodePtr node, bool clockwise){
   get rotated position
 */
 void RotateClockwiseCommand::getRotatedPosition(int x, int y, int& newX, int& newY, bool clockwise){
-    int w = game_->information()->xsize();
-    int h = game_->information()->ysize();
+    // information node has already rotated.
+    int w = game_->information()->ysize();
+    int h = game_->information()->xsize();
 
     if (clockwise){
         newX = h - y - 1;
@@ -773,6 +777,9 @@ void FlipCommand::flip(Go::NodePtr node, bool vertical){
         iter->setX(x);
         iter->setY(y);
     }
+
+    // update node
+    document_->modifyNode(game_, node);
 
     // rotate chidl stones
     foreach(const Go::NodePtr& child, node->children())
