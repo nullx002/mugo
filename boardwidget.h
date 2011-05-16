@@ -129,7 +129,7 @@ protected:
     void initialize();
 
     // set graphics items position
-    bool createLineGraphicsItems();
+    void createLineGraphicsItems();
     void setItemsPosition(const QSizeF& size);
     void setVLinesPosition(int x, int y, int gridSize);
     void setHLinesPosition(int x, int y, int gridSize);

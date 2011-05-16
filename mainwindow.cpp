@@ -2316,6 +2316,9 @@ void MainWindow::on_actionWhiteFirst_triggered(bool checked)
     board->document()->undoStack()->push( new SetNextColorCommand(board->document(), board->currentGame(), board->currentGame(), checked ? Go::eWhite : Go::eDame) );
 }
 
+/**
+  Edit -> Rotate SGF Clockwise
+*/
 void MainWindow::on_actionRotateSGFClockwise_triggered()
 {
     // get active board widget
@@ -2327,12 +2330,32 @@ void MainWindow::on_actionRotateSGFClockwise_triggered()
     board->document()->undoStack()->push( new RotateClockwiseCommand(board->document(), board->currentGame()) );
 }
 
+/**
+  Edit -> Flip SGF Vertically
+*/
 void MainWindow::on_actionFlipSGFVertically_triggered()
 {
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // flip sgf vertically
+    board->document()->undoStack()->push( new FlipVerticallyCommand(board->document(), board->currentGame()) );
 }
 
+/**
+  Edit -> Flip SGF Horizontally
+*/
 void MainWindow::on_actionFlipSGFHorizontally_triggered()
 {
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // flip sgf horizontally
+    board->document()->undoStack()->push( new FlipHorizontallyCommand(board->document(), board->currentGame()) );
 }
 
 /**
