@@ -410,7 +410,6 @@ private:
     Go::Color prevColor_;
 };
 
-
 /**
   @ingroup Command
   This command rotate sgf nodes
@@ -429,6 +428,50 @@ private:
 
     GoDocument* document_;
     Go::NodePtr game_;
+};
+
+/**
+  @ingroup Command
+  This class is base class of flip command
+*/
+class FlipCommand : public QUndoCommand{
+    Q_DECLARE_TR_FUNCTIONS(FlipCommand)
+
+public:
+    FlipCommand(GoDocument* doc, Go::NodePtr game, QUndoCommand* parent = 0);
+
+protected:
+    void flip(Go::NodePtr node, bool vertical);
+    void getFlippedPosition(int x, int y, int& newX, int& newY, bool vertical);
+
+    GoDocument* document_;
+    Go::NodePtr game_;
+};
+
+/**
+  @ingroup Command
+  This command flip horizontally sgf nodes
+*/
+class FlipHorizontallyCommand : public FlipCommand{
+    Q_DECLARE_TR_FUNCTIONS(FlipHorizontallyCommand)
+
+public:
+    FlipHorizontallyCommand(GoDocument* doc, Go::NodePtr game, QUndoCommand* parent = 0);
+    virtual void redo();
+    virtual void undo();
+};
+
+/**
+  @ingroup Command
+  This command flip vertically sgf nodes
+*/
+class FlipVerticallyCommand : public FlipCommand{
+    Q_DECLARE_TR_FUNCTIONS(FlipVerticallyCommand)
+
+public:
+    FlipVerticallyCommand(GoDocument* doc, Go::NodePtr game, QUndoCommand* parent = 0);
+    virtual void redo();
+    virtual void undo();
 };
 
 

@@ -672,9 +672,6 @@ void RotateClockwiseCommand::undo(){
   rotate all stones and markers
 */
 void RotateClockwiseCommand::rotate(Go::NodePtr node, bool clockwise){
-    int w = game_->information()->xsize();
-    int h = game_->information()->ysize();
-
     // rotate stones
     if (node->isStone() && node->isPass() == false){
         int x, y;
@@ -728,4 +725,123 @@ void RotateClockwiseCommand::getRotatedPosition(int x, int y, int& newX, int& ne
         newX = y;
         newY = w - x - 1;
     }
+}
+
+/**
+  Constructs flip sgf command
+*/
+FlipCommand::FlipCommand(GoDocument* doc, Go::NodePtr game, QUndoCommand* parent)
+    : QUndoCommand(parent)
+    , document_(doc)
+    , game_(game)
+{
+}
+
+/**
+  rotate all stones and markers
+*/
+void FlipCommand::flip(Go::NodePtr node, bool vertical){
+    // flip stones
+    if (node->isStone() && node->isPass() == false){
+        int x, y;
+        getFlippedPosition(node->x(), node->y(), x, y, vertical);
+        node->setPos(x, y);
+    }
+
+    for(QList<QPoint>::iterator iter = node->emptyStones().begin(); iter != node->emptyStones().end(); ++iter){
+        int x, y;
+        getFlippedPosition(iter->x(), iter->y(), x, y, vertical);
+        *iter = QPoint(x, y);
+    }
+
+    for(QList<QPoint>::iterator iter = node->blackStones().begin(); iter != node->blackStones().end(); ++iter){
+        int x, y;
+        getFlippedPosition(iter->x(), iter->y(), x, y, vertical);
+        *iter = QPoint(x, y);
+    }
+
+    for(QList<QPoint>::iterator iter = node->whiteStones().begin(); iter != node->whiteStones().end(); ++iter){
+        int x, y;
+        getFlippedPosition(iter->x(), iter->y(), x, y, vertical);
+        *iter = QPoint(x, y);
+    }
+
+    // rotate marks
+    for(Go::MarkList::iterator iter = node->marks().begin(); iter != node->marks().end(); ++iter){
+        int x, y;
+        getFlippedPosition(iter->x(), iter->y(), x, y, vertical);
+        iter->setX(x);
+        iter->setY(y);
+    }
+
+    // rotate chidl stones
+    foreach(const Go::NodePtr& child, node->children())
+        flip(child, vertical);
+}
+
+/**
+  get flipped position
+*/
+void FlipCommand::getFlippedPosition(int x, int y, int& newX, int& newY, bool vertical){
+    int w = game_->information()->xsize();
+    int h = game_->information()->ysize();
+
+    if (vertical){
+        newX = w - x - 1;
+        newY = y;
+    }
+    else{
+        newX = x;
+        newY = h - y - 1;
+    }
+}
+
+/**
+  Constructs flip horizontally sgf command
+*/
+FlipHorizontallyCommand::FlipHorizontallyCommand(GoDocument* doc, Go::NodePtr game, QUndoCommand* parent)
+    : FlipCommand(doc, game, parent)
+{
+    setText( tr("Flip Horizontally") );
+}
+
+/**
+  redo flip horizontally sgf command
+*/
+void FlipHorizontallyCommand::redo(){
+    flip(game_, false);
+    document_->modifyDocument(true);
+}
+
+/**
+  undo flip horizontally sgf command
+*/
+void FlipHorizontallyCommand::undo(){
+    flip(game_, false);
+    document_->modifyDocument(true);
+}
+
+/**
+  Constructs flip vertically sgf command
+*/
+FlipVerticallyCommand::FlipVerticallyCommand(GoDocument* doc, Go::NodePtr game, QUndoCommand* parent)
+    : FlipCommand(doc, game, parent)
+{
+    setText( tr("Flip Vertically") );
+}
+
+/**
+  redo flip vertically sgf command
+*/
+void FlipVerticallyCommand::redo(){
+    flip(game_, true);
+    document_->modifyDocument(true);
+}
+
+/**
+  undo flip vertically sgf command
+*/
+void FlipVerticallyCommand::undo(){
+    flip(game_, true);
+    document_->modifyDocument(true);
 }

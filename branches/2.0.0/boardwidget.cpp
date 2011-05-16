@@ -322,7 +322,7 @@ bool BoardWidget::setNode(const Go::NodePtr& node, bool forceChange){
 /**
   create line and star graphics items
 */
-bool BoardWidget::createLineGraphicsItems(){
+void BoardWidget::createLineGraphicsItems(){
     // create vertical lines
     qDeleteAll(vLines);
     vLines.clear();
