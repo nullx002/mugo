@@ -180,8 +180,8 @@ void GoDocument::moveDownGame(const Go::NodePtr& game){
 /**
   modify node
 */
-void GoDocument::modifyNode(const Go::NodePtr& game, const Go::NodePtr& node){
-    modifyDocument();
+void GoDocument::modifyNode(const Go::NodePtr& game, const Go::NodePtr& node, bool updateBoard){
+    modifyDocument(updateBoard);
     emit nodeModified(game, node);
 }
 
