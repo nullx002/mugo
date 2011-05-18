@@ -299,7 +299,7 @@ void AddStoneCommand::redo(){
         node_->emptyStones().push_back( QPoint(x_, y_) );
     }
 
-    document_->modifyNode(game_, node_);
+    document_->modifyNode(game_, node_, true);
 }
 
 /**
@@ -313,7 +313,7 @@ void AddStoneCommand::undo(){
     else if (color_ == Go::eDame)
         node_->emptyStones().pop_back();
 
-    document_->modifyNode(game_, node_);
+    document_->modifyNode(game_, node_, true);
 }
 
 /**
@@ -337,7 +337,7 @@ void RemoveStoneCommand::redo(){
     index_ = stones_.indexOf(pos_);
     stones_.removeAt(index_);
 
-    document_->modifyNode(game_, node_);
+    document_->modifyNode(game_, node_, true);
 }
 
 /**
@@ -346,7 +346,7 @@ void RemoveStoneCommand::redo(){
 void RemoveStoneCommand::undo(){
     stones_.insert(index_, pos_);
 
-    document_->modifyNode(game_, node_);
+    document_->modifyNode(game_, node_, true);
 }
 
 /**
@@ -370,7 +370,7 @@ void AddMarkCommand::redo(){
 
     setText( tr("Add Mark") );
     node_->marks().push_back( Go::Mark(mark_, x_, y_) );
-    document_->modifyNode(game_, node_);
+    document_->modifyNode(game_, node_, true);
 }
 
 /**
@@ -378,7 +378,7 @@ void AddMarkCommand::redo(){
 */
 void AddMarkCommand::undo(){
     node_->marks().pop_back();
-    document_->modifyNode(game_, node_);
+    document_->modifyNode(game_, node_, true);
 }
 
 /**
@@ -402,7 +402,7 @@ void AddLabelCommand::redo(){
 
     setText( tr("Add Label") );
     node_->marks().push_back( Go::Mark(label_, x_, y_) );
-    document_->modifyNode(game_, node_);
+    document_->modifyNode(game_, node_, true);
 }
 
 /**
@@ -410,7 +410,7 @@ void AddLabelCommand::redo(){
 */
 void AddLabelCommand::undo(){
     node_->marks().pop_back();
-    document_->modifyNode(game_, node_);
+    document_->modifyNode(game_, node_, true);
 }
 
 /**
@@ -434,7 +434,7 @@ void RemoveMarkCommand::redo(){
     setText( tr("Remove Mark") );
     index_ = markList_.indexOf(mark_);
     markList_.removeAt(index_);
-    document_->modifyNode(game_, node_);
+    document_->modifyNode(game_, node_, true);
 }
 
 /**
@@ -442,7 +442,7 @@ void RemoveMarkCommand::redo(){
 */
 void RemoveMarkCommand::undo(){
     markList_.insert(index_, mark_);
-    document_->modifyNode(game_, node_);
+    document_->modifyNode(game_, node_, true);
 }
 
 /**
@@ -561,7 +561,7 @@ void SetMoveNumberCommand::redo(){
         setText( tr("Unet Move Number") );
 
     node_->setMoveNumber(moveNumber_);
-    document_->modifyNode(game_, node_);
+    document_->modifyNode(game_, node_, true);
 }
 
 /**
@@ -569,7 +569,7 @@ void SetMoveNumberCommand::redo(){
 */
 void SetMoveNumberCommand::undo(){
     node_->setMoveNumber(prevMoveNumber_);
-    document_->modifyNode(game_, node_);
+    document_->modifyNode(game_, node_, true);
 }
 
 /**

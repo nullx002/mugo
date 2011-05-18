@@ -61,7 +61,7 @@ public slots:
     bool deleteGameList(const Go::NodeList& gameList);
     void moveUpGame(const Go::NodePtr& game);
     void moveDownGame(const Go::NodePtr& game);
-    void modifyNode(const Go::NodePtr& game, const Go::NodePtr& node);
+    void modifyNode(const Go::NodePtr& game, const Go::NodePtr& node, bool updateBoard=false);
     void addNode(const Go::NodePtr& game, Go::NodePtr parent, Go::NodePtr node, int index=-1);
     bool deleteNode(const Go::NodePtr& game, Go::NodePtr node, bool removeChildren=true);
 
