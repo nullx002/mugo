@@ -46,7 +46,7 @@
      <x>0</x>
      <y>0</y>
      <width>600</width>
-     <height>25</height>
+     <height>19</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -213,12 +213,12 @@
     <property name="title">
      <string>&amp;Navigation</string>
     </property>
-    <addaction name="actionMoveFirst"/>
+    <addaction name="actionFirstMove"/>
     <addaction name="actionFastRewind"/>
-    <addaction name="actionMovePrevious"/>
-    <addaction name="actionMoveNext"/>
+    <addaction name="actionPreviousMove"/>
+    <addaction name="actionNextMove"/>
     <addaction name="actionFastForward"/>
-    <addaction name="actionMoveLast"/>
+    <addaction name="actionLastMove"/>
     <addaction name="separator"/>
     <addaction name="actionBack_to_Parent"/>
     <addaction name="actionPrevious_Branch"/>
@@ -1153,48 +1153,84 @@
    </property>
   </action>
   <action name="actionRotateSGFClockwise">
+   <property name="icon">
+    <iconset resource="mugo.qrc">
+     <normaloff>:/res/rotateright.png</normaloff>:/res/rotateright.png</iconset>
+   </property>
    <property name="text">
     <string>Rotate SGF Clockwise</string>
    </property>
   </action>
   <action name="actionFlipSGFVertically">
+   <property name="icon">
+    <iconset resource="mugo.qrc">
+     <normaloff>:/res/flipvertically.png</normaloff>:/res/flipvertically.png</iconset>
+   </property>
    <property name="text">
     <string>Flip SGF Vertically</string>
    </property>
   </action>
   <action name="actionFlipSGFHorizontally">
+   <property name="icon">
+    <iconset resource="mugo.qrc">
+     <normaloff>:/res/fliphorizontally.png</normaloff>:/res/fliphorizontally.png</iconset>
+   </property>
    <property name="text">
     <string>Flip SGF Horizontally</string>
    </property>
   </action>
-  <action name="actionMoveFirst">
+  <action name="actionFirstMove">
+   <property name="icon">
+    <iconset resource="mugo.qrc">
+     <normaloff>:/res/firstmove.png</normaloff>:/res/firstmove.png</iconset>
+   </property>
    <property name="text">
-    <string>Move First</string>
+    <string>First Move</string>
    </property>
   </action>
   <action name="actionFastRewind">
+   <property name="icon">
+    <iconset resource="mugo.qrc">
+     <normaloff>:/res/fastrewind.png</normaloff>:/res/fastrewind.png</iconset>
+   </property>
    <property name="text">
     <string>Fast Rewind</string>
    </property>
   </action>
-  <action name="actionMovePrevious">
+  <action name="actionPreviousMove">
+   <property name="icon">
+    <iconset resource="mugo.qrc">
+     <normaloff>:/res/prevmove.png</normaloff>:/res/prevmove.png</iconset>
+   </property>
    <property name="text">
-    <string>Move Previous</string>
+    <string>Previous Move</string>
    </property>
   </action>
-  <action name="actionMoveNext">
+  <action name="actionNextMove">
+   <property name="icon">
+    <iconset resource="mugo.qrc">
+     <normaloff>:/res/nextmove.png</normaloff>:/res/nextmove.png</iconset>
+   </property>
    <property name="text">
-    <string>Move Next</string>
+    <string>Next Move</string>
    </property>
   </action>
   <action name="actionFastForward">
+   <property name="icon">
+    <iconset resource="mugo.qrc">
+     <normaloff>:/res/fastforward.png</normaloff>:/res/fastforward.png</iconset>
+   </property>
    <property name="text">
     <string>Fast Forward</string>
    </property>
   </action>
-  <action name="actionMoveLast">
+  <action name="actionLastMove">
+   <property name="icon">
+    <iconset resource="mugo.qrc">
+     <normaloff>:/res/lastmove.png</normaloff>:/res/lastmove.png</iconset>
+   </property>
    <property name="text">
-    <string>Move Last</string>
+    <string>Last Move</string>
    </property>
   </action>
   <action name="actionBack_to_Parent">
