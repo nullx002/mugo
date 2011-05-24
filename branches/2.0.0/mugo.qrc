@@ -32,5 +32,14 @@
         <file>res/triangle.png</file>
         <file>res/rubbereraser.png</file>
         <file>res/whitefirst.png</file>
+        <file>res/flipvertically.png</file>
+        <file>res/rotateright.png</file>
+        <file>res/fliphorizontally.png</file>
+        <file>res/firstmove.png</file>
+        <file>res/fastrewind.png</file>
+        <file>res/prevmove.png</file>
+        <file>res/lastmove.png</file>
+        <file>res/fastforward.png</file>
+        <file>res/nextmove.png</file>
     </qresource>
 </RCC>

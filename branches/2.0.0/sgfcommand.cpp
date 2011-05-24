@@ -794,12 +794,12 @@ void FlipCommand::getFlippedPosition(int x, int y, int& newX, int& newY, bool ve
     int h = game_->information()->ysize();
 
     if (vertical){
-        newX = w - x - 1;
-        newY = y;
-    }
-    else{
         newX = x;
         newY = h - y - 1;
+    }
+    else{
+        newX = w - x - 1;
+        newY = y;
     }
 }
 
