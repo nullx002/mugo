@@ -78,7 +78,7 @@ public:
     // get current game, node
     Go::NodePtr currentGame() const{ return currentGame_; }
     Go::NodePtr currentNode() const{ return currentNode_ ? currentNode_ : currentGame_; }
-    Go::NodeList currentNodeList() const{ return currentNodeList_; }
+    const Go::NodeList& currentNodeList() const{ return currentNodeList_; }
     Go::InformationPtr rootInformation() const{ return currentGame_->information(); }
     Go::InformationPtr currentInformation() const{ return currentInformation_; }
 
