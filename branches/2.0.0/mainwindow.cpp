@@ -2359,6 +2359,110 @@ void MainWindow::on_actionFlipSGFHorizontally_triggered()
 }
 
 /**
+  Edit -> Navigation -> First Move
+*/
+void MainWindow::on_actionFirstMove_triggered()
+{
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // move to first.
+    board->setNode(board->currentNodeList().front());
+}
+
+/**
+  Edit -> Navigation -> Fast Rewind
+*/
+void MainWindow::on_actionFastRewind_triggered()
+{
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // back ten moves.
+    Go::NodePtr node = board->currentNode();
+    for (int i=0; i<10; ++i){
+        if (!node->parent())
+            break;
+        node = node->parent();
+    }
+    board->setNode(node);
+}
+
+/**
+  Edit -> Navigation -> Previous Move
+*/
+void MainWindow::on_actionPreviousMove_triggered()
+{
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // back one move.
+    Go::NodePtr node = board->currentNode();
+    if (node->parent())
+        board->setNode(node->parent());
+}
+
+/**
+  Edit -> Navigation -> Next Move
+*/
+void MainWindow::on_actionNextMove_triggered()
+{
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // forward one move.
+    Go::NodeList::const_iterator iter = qFind(board->currentNodeList().begin(), board->currentNodeList().end(), board->currentNode());
+    if (*iter != board->currentNodeList().back())
+        board->setNode(*++iter);
+}
+
+/**
+  Edit -> Navigation -> Fast Forward
+*/
+void MainWindow::on_actionFastForward_triggered()
+{
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // fowrard ten moves.
+    Go::NodeList::const_iterator iter = qFind(board->currentNodeList().begin(), board->currentNodeList().end(), board->currentNode());
+    if (iter == board->currentNodeList().end())
+        qDebug() << "end";
+    for (int i=0; i<10; ++i){
+        Go::NodePtr n = *iter;
+        Go::NodePtr b = board->currentNodeList().back();
+        if (*iter == board->currentNodeList().back())
+            break;
+        ++iter;
+    }
+    board->setNode(*iter);
+}
+
+/**
+  Edit -> Navigation -> Last Move
+*/
+void MainWindow::on_actionLastMove_triggered()
+{
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // move to last.
+    board->setNode(board->currentNodeList().back());
+}
+
+/**
   dirty flag changed
 */
 void MainWindow::on_goDocument_dirtyChanged(bool dirty){

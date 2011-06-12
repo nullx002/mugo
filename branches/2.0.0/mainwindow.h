@@ -259,6 +259,18 @@ private slots:
 
     //@}
 
+    void on_actionFirstMove_triggered();
+
+    void on_actionFastRewind_triggered();
+
+    void on_actionPreviousMove_triggered();
+
+    void on_actionNextMove_triggered();
+
+    void on_actionFastForward_triggered();
+
+    void on_actionLastMove_triggered();
+
 private:
     Ui::MainWindow *ui;
 

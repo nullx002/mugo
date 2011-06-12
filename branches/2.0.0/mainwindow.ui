@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>600</width>
-    <height>400</height>
+    <width>748</width>
+    <height>483</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -45,8 +45,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>600</width>
-     <height>19</height>
+     <width>748</width>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -331,6 +331,23 @@
    <addaction name="actionOpen"/>
    <addaction name="actionSave"/>
   </widget>
+  <widget class="QToolBar" name="collectionToolBar">
+   <property name="windowTitle">
+    <string>Collection ToolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="separator"/>
+   <addaction name="actionCollectionImport"/>
+   <addaction name="actionCollectionExtract"/>
+   <addaction name="separator"/>
+   <addaction name="actionMoveUp"/>
+   <addaction name="actionMoveDown"/>
+  </widget>
   <widget class="QToolBar" name="editToolBar">
    <property name="windowTitle">
     <string>Edit ToolBar</string>
@@ -339,7 +356,7 @@
     <enum>TopToolBarArea</enum>
    </attribute>
    <attribute name="toolBarBreak">
-    <bool>false</bool>
+    <bool>true</bool>
    </attribute>
    <addaction name="separator"/>
    <addaction name="actionAlternateMove"/>
@@ -361,6 +378,12 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionFirstMove"/>
+   <addaction name="actionFastRewind"/>
+   <addaction name="actionPreviousMove"/>
+   <addaction name="actionNextMove"/>
+   <addaction name="actionFastForward"/>
+   <addaction name="actionLastMove"/>
   </widget>
   <widget class="QToolBar" name="viewToolBar">
    <property name="windowTitle">
@@ -372,23 +395,6 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-  </widget>
-  <widget class="QToolBar" name="collectionToolBar">
-   <property name="windowTitle">
-    <string>Collection ToolBar</string>
-   </property>
-   <attribute name="toolBarArea">
-    <enum>TopToolBarArea</enum>
-   </attribute>
-   <attribute name="toolBarBreak">
-    <bool>false</bool>
-   </attribute>
-   <addaction name="separator"/>
-   <addaction name="actionCollectionImport"/>
-   <addaction name="actionCollectionExtract"/>
-   <addaction name="separator"/>
-   <addaction name="actionMoveUp"/>
-   <addaction name="actionMoveDown"/>
   </widget>
   <widget class="QToolBar" name="playToolBar">
    <property name="windowTitle">
