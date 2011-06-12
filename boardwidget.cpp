@@ -342,6 +342,8 @@ void BoardWidget::createLineGraphicsItems(){
     }
 
     // create star
+    qDeleteAll(stars);
+    stars.clear();
     QList<int> xstarpos, ystarpos;
     getStarPositions(xstarpos, ystarpos);
     for (int i=0; i<xstarpos.size()*ystarpos.size(); ++i){
