@@ -2463,6 +2463,26 @@ void MainWindow::on_actionLastMove_triggered()
 }
 
 /**
+  Edit -> Navigation -> Back To Parent
+*/
+void MainWindow::on_actionBackToParent_triggered()
+{
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // move to parent node
+    Go::NodePtr node = board->currentNode();
+    while (node->parent()){
+        node = node->parent();
+        if (node->children().size() > 1)
+            break;
+    }
+    board->setNode(node);
+}
+
+/**
   dirty flag changed
 */
 void MainWindow::on_goDocument_dirtyChanged(bool dirty){

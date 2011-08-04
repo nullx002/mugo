@@ -220,9 +220,9 @@
     <addaction name="actionFastForward"/>
     <addaction name="actionLastMove"/>
     <addaction name="separator"/>
-    <addaction name="actionBack_to_Parent"/>
-    <addaction name="actionPrevious_Branch"/>
-    <addaction name="actionNext_Branch"/>
+    <addaction name="actionBackToParent"/>
+    <addaction name="actionPreviousBranch"/>
+    <addaction name="actionNextBranch"/>
     <addaction name="separator"/>
     <addaction name="actionJumpToMoveNumber"/>
     <addaction name="actionJumpToClicked"/>
@@ -384,6 +384,8 @@
    <addaction name="actionNextMove"/>
    <addaction name="actionFastForward"/>
    <addaction name="actionLastMove"/>
+   <addaction name="separator"/>
+   <addaction name="actionBackToParent"/>
   </widget>
   <widget class="QToolBar" name="viewToolBar">
    <property name="windowTitle">
@@ -1239,17 +1241,21 @@
     <string>Last Move</string>
    </property>
   </action>
-  <action name="actionBack_to_Parent">
+  <action name="actionBackToParent">
+   <property name="icon">
+    <iconset resource="mugo.qrc">
+     <normaloff>:/res/backparent.png</normaloff>:/res/backparent.png</iconset>
+   </property>
    <property name="text">
     <string>Back to Parent</string>
    </property>
   </action>
-  <action name="actionPrevious_Branch">
+  <action name="actionPreviousBranch">
    <property name="text">
     <string>Previous Branch</string>
    </property>
   </action>
-  <action name="actionNext_Branch">
+  <action name="actionNextBranch">
    <property name="text">
     <string>Next Branch</string>
    </property>

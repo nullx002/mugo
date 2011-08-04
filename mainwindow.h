@@ -228,6 +228,15 @@ private slots:
     void on_actionFlipSGFVertically_triggered();
     void on_actionFlipSGFHorizontally_triggered();
 
+    /// @name slot for navigation
+    void on_actionFirstMove_triggered();
+    void on_actionFastRewind_triggered();
+    void on_actionPreviousMove_triggered();
+    void on_actionNextMove_triggered();
+    void on_actionFastForward_triggered();
+    void on_actionLastMove_triggered();
+    void on_actionBackToParent_triggered();
+
     /// @name slot for document
     void on_goDocument_dirtyChanged(bool dirty);
     void on_goDocument_saved();
@@ -258,18 +267,6 @@ private slots:
     void on_collectionTreeView_activated(QModelIndex index);
 
     //@}
-
-    void on_actionFirstMove_triggered();
-
-    void on_actionFastRewind_triggered();
-
-    void on_actionPreviousMove_triggered();
-
-    void on_actionNextMove_triggered();
-
-    void on_actionFastForward_triggered();
-
-    void on_actionLastMove_triggered();
 
 private:
     Ui::MainWindow *ui;
