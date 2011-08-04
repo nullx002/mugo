@@ -41,5 +41,6 @@
         <file>res/lastmove.png</file>
         <file>res/fastforward.png</file>
         <file>res/nextmove.png</file>
+        <file>res/backparent.png</file>
     </qresource>
 </RCC>
