@@ -32,7 +32,7 @@ public:
     // constructor
     GoDocument(QObject* parent = 0);
     GoDocument(Go::NodeList& gameList, QObject* parent = 0);
-    GoDocument(int xsize=19, int ysize=19, qreal komi=6.5, int handicap=0, QObject* parent = 0);
+    GoDocument(int xsize, int ysize, qreal komi=6.5, int handicap=0, QObject* parent = 0);
 
     // open
     virtual bool open(const QString& fname, QTextCodec* codec, bool guessCodec);

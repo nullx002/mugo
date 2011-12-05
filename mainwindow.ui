@@ -46,7 +46,7 @@
      <x>0</x>
      <y>0</y>
      <width>748</width>
-     <height>25</height>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -386,6 +386,8 @@
    <addaction name="actionLastMove"/>
    <addaction name="separator"/>
    <addaction name="actionBackToParent"/>
+   <addaction name="actionPreviousBranch"/>
+   <addaction name="actionNextBranch"/>
   </widget>
   <widget class="QToolBar" name="viewToolBar">
    <property name="windowTitle">
@@ -1251,11 +1253,19 @@
    </property>
   </action>
   <action name="actionPreviousBranch">
+   <property name="icon">
+    <iconset resource="mugo.qrc">
+     <normaloff>:/res/prevbranch.png</normaloff>:/res/prevbranch.png</iconset>
+   </property>
    <property name="text">
     <string>Previous Branch</string>
    </property>
   </action>
   <action name="actionNextBranch">
+   <property name="icon">
+    <iconset resource="mugo.qrc">
+     <normaloff>:/res/nextbranch.png</normaloff>:/res/nextbranch.png</iconset>
+   </property>
    <property name="text">
     <string>Next Branch</string>
    </property>
