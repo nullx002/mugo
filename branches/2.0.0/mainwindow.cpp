@@ -2483,6 +2483,48 @@ void MainWindow::on_actionBackToParent_triggered()
 }
 
 /**
+  Edit -> Navigation -> Previous Branch
+*/
+void MainWindow::on_actionPreviousBranch_triggered()
+{
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // find current branch
+    Go::NodePtr node = board->currentNode();
+    Go::NodePtr parentNode = node->parent();
+    Go::NodeList::iterator iter = qFind(parentNode->children().begin(), parentNode->children().end(), node);
+
+    // if previous branch exists, set to current branch
+    if (iter == parentNode->children().end() || iter == parentNode->children().begin())
+        return;
+    board->setNode(*--iter);
+}
+
+/**
+  Edit -> Navigation -> Next Branch
+*/
+void MainWindow::on_actionNextBranch_triggered()
+{
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // find current branch
+    Go::NodePtr node = board->currentNode();
+    Go::NodePtr parentNode = node->parent();
+    Go::NodeList::iterator iter = qFind(parentNode->children().begin(), parentNode->children().end(), node);
+
+    // if next branch exists, set to current branch
+    if (iter == parentNode->children().end() || ++iter == parentNode->children().end())
+        return;
+    board->setNode(*iter);
+}
+
+/**
   dirty flag changed
 */
 void MainWindow::on_goDocument_dirtyChanged(bool dirty){

@@ -31,7 +31,7 @@ public:
     // constructor
     SgfDocument(QObject* parent = 0);
     SgfDocument(Go::NodeList& gameList, QObject* parent = 0);
-    SgfDocument(int xsize=19, int ysize=19, qreal komi=6.5, int handicap=0, QObject* parent = 0);
+    SgfDocument(int xsize, int ysize, qreal komi=6.5, int handicap=0, QObject* parent = 0);
 
     // open
     virtual bool open(const QString& fname, QTextCodec* codec, bool guessCodec);

@@ -42,5 +42,7 @@
         <file>res/fastforward.png</file>
         <file>res/nextmove.png</file>
         <file>res/backparent.png</file>
+        <file>res/prevbranch.png</file>
+        <file>res/nextbranch.png</file>
     </qresource>
 </RCC>
