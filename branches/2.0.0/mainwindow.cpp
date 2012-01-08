@@ -2525,6 +2525,26 @@ void MainWindow::on_actionNextBranch_triggered()
 }
 
 /**
+  Edit -> Navigation -> Jump To Move Number
+*/
+void MainWindow::on_actionJumpToMoveNumber_triggered()
+{
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // show input dialog
+    const Go::NodeList& nodeList = board->currentNodeList();
+    bool ok;
+    int number = QInputDialog::getInteger(this, QString(), tr("Input move number"), 0, 0, nodeList.size()-1, 1, &ok);
+
+    // set current node
+    if (ok)
+        board->setNode(nodeList[number]);
+}
+
+/**
   dirty flag changed
 */
 void MainWindow::on_goDocument_dirtyChanged(bool dirty){

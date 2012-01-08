@@ -238,6 +238,7 @@ private slots:
     void on_actionBackToParent_triggered();
     void on_actionPreviousBranch_triggered();
     void on_actionNextBranch_triggered();
+    void on_actionJumpToMoveNumber_triggered();
 
     /// @name slot for document
     void on_goDocument_dirtyChanged(bool dirty);
