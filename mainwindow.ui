@@ -225,7 +225,6 @@
     <addaction name="actionNextBranch"/>
     <addaction name="separator"/>
     <addaction name="actionJumpToMoveNumber"/>
-    <addaction name="actionJumpToClicked"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
