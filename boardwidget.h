@@ -56,10 +56,10 @@ public:
     typedef QSharedPointer<QGraphicsSimpleTextItem> TextItemPtr;
 
     struct Data{
-        Data() : color(Go::eDame), number(-1), focus(false){}
+        Data() : color(Go::eDame), moveNumber(-1), focus(false){}
 
         Go::Color color;
-        int number;
+        int moveNumber;
         GraphicsItemPtr stoneItem;
         TextItemPtr branchItem;
         TextItemPtr numberItem;
@@ -92,7 +92,10 @@ public:
 
     // Move Number
     int moveNumber() const{ return moveNumber_; }
-    void setMoveNumber(int number){ moveNumber_ = number; }
+
+    // Show Move Number
+    bool showMoveNumber() const{ return showMoveNumber_; }
+    void setShowMoveNumber(bool show){ showMoveNumber_ = show; setDataPosition(); }
 
     // Captured stones
     int capturedWhite() const{ return capturedWhite_; }
@@ -148,6 +151,9 @@ protected:
     bool isDeadStone(int x, int y, Go::Color color, QVector< QVector<bool> >& checked);
     bool isKillStone(int x, int y);
     void createNodeList(Go::NodePtr node);
+
+    // create graphics items
+    void createGraphicsItems(bool force = false);
 
     // create stone item
     QGraphicsItem* createStoneItem(Go::Color color, int sgfX, int sgfY);

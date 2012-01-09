@@ -2545,6 +2545,20 @@ void MainWindow::on_actionJumpToMoveNumber_triggered()
 }
 
 /**
+  View -> Move Number -> Show Move Number
+*/
+void MainWindow::on_actionShowMoveNumber_triggered(bool checked)
+{
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // show/hide move number
+    board->setShowMoveNumber(checked);
+}
+
+/**
   dirty flag changed
 */
 void MainWindow::on_goDocument_dirtyChanged(bool dirty){

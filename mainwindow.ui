@@ -1280,6 +1280,12 @@
    </property>
   </action>
   <action name="actionShowMoveNumber">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Show Move Number</string>
    </property>
