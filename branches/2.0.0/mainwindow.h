@@ -240,6 +240,9 @@ private slots:
     void on_actionNextBranch_triggered();
     void on_actionJumpToMoveNumber_triggered();
 
+    /// @name slot for view
+    void on_actionShowMoveNumber_triggered(bool checked);
+
     /// @name slot for document
     void on_goDocument_dirtyChanged(bool dirty);
     void on_goDocument_saved();

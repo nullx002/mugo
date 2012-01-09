@@ -473,26 +473,7 @@ void BoardWidget::setStarsPosition(){
   set datas position
 */
 void BoardWidget::setDataPosition(){
-    for (int y=0; y<data.size(); ++y){
-        for (int x=0; x<data[y].size(); ++x){
-            Data& d = data[y][x];
-
-            if (d.stoneItem)
-                d.stoneItem = GraphicsItemPtr( createStoneItem(d.color, x, y) );
-
-            if (d.branchItem)
-                d.branchItem.clear();
-
-            if (d.numberItem)
-                createMoveNumber(x, y, d.number, d.focus);
-        }
-    }
-
-    // create graphics items of branch marker
-    createBranchMarkers();
-
-    // create graphics items of marker
-    createMarkers();
+    createGraphicsItems(true);
 }
 
 /**
@@ -505,7 +486,7 @@ void BoardWidget::createBoardBuffer(){
     for (int i=0; i<buffer.size(); ++i)
         qFill(buffer[i], Go::eDame);
 
-    moveNumber_ = 1;
+    moveNumber_ = 0;
     Go::NodeList::iterator iter = currentNodeList_.begin();
     while (iter != currentNodeList_.end()){
         Go::NodePtr node(*iter);
@@ -521,16 +502,9 @@ void BoardWidget::createBoardBuffer(){
         if (node->isStone() && !node->isPass() && node->x() < xsize() && node->y() < ysize()){
             buffer[y][x] = node->color();
             killStone(x, y);
-
-            // move number
-            bool focus = x == currentNode_->x() && y == currentNode_->y();
-            if (data[y][x].number != moveNumber_ || data[y][x].numberItem == false || data[y][x].focus != focus){
-                if (showMoveNumber_ && moveNumber_ > 0)
-                    createMoveNumber(x, y, moveNumber_, focus);
-                else
-                    data[y][x].numberItem.clear();
-            }
-            data[y][x].number = moveNumber_++;
+            if (data[y][x].moveNumber != moveNumber_)
+                data[y][x].numberItem.clear();
+            data[y][x].moveNumber = moveNumber_;
         }
 
         // add empty stones
@@ -551,48 +525,12 @@ void BoardWidget::createBoardBuffer(){
         if (node == currentNode_)
             break;
 
+        ++moveNumber_;
         ++iter;
     }
     --moveNumber_;
 
-    // create graphics items
-    for(int y=0; y<ysize(); ++y){
-        for(int x=0; x<xsize(); ++x){
-            // delete branch marker
-            data[y][x].branchItem.clear();
-
-            // delete marker
-            data[y][x].markerItem.clear();
-
-            // clear move number
-            if (buffer[y][x] == Go::eDame)
-                data[y][x].number = -1;
-
-            // create move number
-            if (data[y][x].number <= 0)
-                data[y][x].numberItem.clear();
-
-            // if this position already has stone, continue
-            if (buffer[y][x] == data[y][x].color)
-                continue;
-
-            // delete current stone
-            if (data[y][x].stoneItem)
-                data[y][x].stoneItem.clear();
-            data[y][x].color = buffer[y][x];
-
-            if (buffer[y][x] != Go::eDame){
-                // create new stone item
-                data[y][x].stoneItem = GraphicsItemPtr(createStoneItem(buffer[y][x], x, y));
-            }
-        }
-    }
-
-    // create graphics items of branch marker
-    createBranchMarkers();
-
-    // create braphics items of marker
-    createMarkers();
+    createGraphicsItems();
 }
 
 /**
@@ -732,6 +670,48 @@ void BoardWidget::createNodeList(Go::NodePtr node){
         n = n->child(0);
         currentNodeList_.push_back(n);
     }
+}
+
+void BoardWidget::createGraphicsItems(bool force){
+    // create graphics items
+    for(int y=0; y<ysize(); ++y){
+        for(int x=0; x<xsize(); ++x){
+            Data& d = data[y][x];
+            Go::Color& b = buffer[y][x];
+
+            bool focus = currentNode_ && x == currentNode_->x() && y == currentNode_->y();
+
+            // delete branch marker
+            d.branchItem.clear();
+
+            // delete marker
+            d.markerItem.clear();
+
+            // clear move number
+            if (b == Go::eDame)
+                d.moveNumber = -1;
+
+            // create move number
+            if (showMoveNumber_ == false || d.moveNumber <= 0)
+                d.numberItem.clear();
+            else if (d.numberItem == 0 || d.focus != focus || force)
+                createMoveNumber(x, y, d.moveNumber, focus);
+
+            // create stone item
+            if (d.stoneItem == 0 || d.color != b || force)
+                if (b != Go::eDame)
+                    d.stoneItem = GraphicsItemPtr(createStoneItem(b, x, y));
+                else
+                    d.stoneItem.clear();
+            d.color = b;
+        }
+    }
+
+    // create graphics items of branch marker
+    createBranchMarkers();
+
+    // create graphics items of marker
+    createMarkers();
 }
 
 /**
