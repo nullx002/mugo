@@ -750,7 +750,7 @@ void MainWindow::updateStatusBar(ViewData& view, const Go::NodePtr& node){
 /**
   create tree items in branch view
 */
-void MainWindow::createBranchItems(Document* doc, const Go::NodePtr& game){
+void MainWindow::createBranchItems(Document* doc, const Go::NodePtr& game, bool branchMode){
     // view data
     ViewData& view = docView[doc];
 
@@ -762,48 +762,58 @@ void MainWindow::createBranchItems(Document* doc, const Go::NodePtr& game){
     // create items in branch view
     view.nodeToTreeItem.clear();
     branch->clear();
-    createBranchItems(doc, branch->invisibleRootItem(), game);
+    createBranchItems(doc, branch->invisibleRootItem(), game, branchMode);
 }
 
 /**
   create tree items in branch view
 */
-void MainWindow::createBranchItems(Document* doc, QTreeWidgetItem* parent, const Go::NodePtr& node){
+void MainWindow::createBranchItems(Document* doc, QTreeWidgetItem* parent, const Go::NodePtr& node, bool branchMode){
     QTreeWidgetItem* item = createBranchItem(doc, node);
     parent->addChild(item);
     foreach (const Go::NodePtr& child, node->children())
-        if (shouldNest(child))
-            createBranchItems(doc, item, child);
+        if (shouldNest(child, branchMode))
+            createBranchItems(doc, item, child, branchMode);
         else
-            createBranchItems(doc, parent, child);
+            createBranchItems(doc, parent, child, branchMode);
 }
 
 /**
   add tree item in branch view
 */
-void MainWindow::addBranchItem(Document* doc, QTreeWidget* branch, const Go::NodePtr& node){
+void MainWindow::addBranchItem(Document* doc, QTreeWidget* branch, const Go::NodePtr& node, bool branchMode){
     // create new tree item
     createBranchItem(doc, node);
 
     ViewData& view = docView[doc];
-    rebuildBranchItems(doc, view, node->parent() ? node->parent() : node);
+    rebuildBranchItems(doc, view, node->parent() ? node->parent() : node, branchMode);
 }
 
 /**
   node should be nested.
 */
-bool MainWindow::shouldNest(const Go::NodePtr& node){
+bool MainWindow::shouldNest(const Go::NodePtr& node, bool branchMode){
     Go::NodePtr parent = node->parent();
     if (!parent)
         return false;
-    else if (parent->children().size() > 1)
-        return true;
+    else if (parent->children().size() > 1) {
+        if (branchMode)
+            return true;
+        int index = parent->children().indexOf(node);
+        if (index > 0)
+            return true;
+    }
 
     Go::NodePtr parentOfParent = parent->parent();
     if (!parentOfParent)
         return false;
-    else if (parentOfParent->children().size() > 1)
-        return true;
+    else if (parentOfParent->children().size() > 1) {
+        if (branchMode)
+            return true;
+        int index = parentOfParent->children().indexOf(parent);
+        if (index > 0)
+            return true;
+    }
 
     return false;
 }
@@ -811,7 +821,7 @@ bool MainWindow::shouldNest(const Go::NodePtr& node){
 /**
   re-create tree view to node and descendent node
 */
-void MainWindow::rebuildBranchItems(Document* doc, ViewData& view, const Go::NodePtr& node){
+void MainWindow::rebuildBranchItems(Document* doc, ViewData& view, const Go::NodePtr& node, bool branchMode){
     QTreeWidgetItem* item = view.nodeToTreeItem[node];
     if (item == NULL)
         // create tree item if tree item does'nt exist
@@ -819,12 +829,12 @@ void MainWindow::rebuildBranchItems(Document* doc, ViewData& view, const Go::Nod
 
     // get new parent widget
     QTreeWidgetItem* parentItem = node->parent() ? view.nodeToTreeItem[node->parent()] : view.branchWidget->invisibleRootItem();
-    if (shouldNest(node) == false)
+    if (shouldNest(node, branchMode) == false)
         parentItem = getParentItem(parentItem);
 
     // get new position
     int currentIndex = parentItem->indexOfChild(item);
-    int newIndex = branchIndex(view, node);
+    int newIndex = branchIndex(view, node, branchMode);
 
     // move item to new position
     QTreeWidgetItem* currentParentItem = getParentItem(item);
@@ -835,7 +845,7 @@ void MainWindow::rebuildBranchItems(Document* doc, ViewData& view, const Go::Nod
     }
 
     foreach(const Go::NodePtr& child, node->children())
-        rebuildBranchItems(doc, view, child);
+        rebuildBranchItems(doc, view, child, branchMode);
 }
 
 /**
@@ -1015,7 +1025,7 @@ void MainWindow::removeBranchItems(ViewData& view, const Go::NodePtr& node, bool
 /**
   get tree item index
 */
-int MainWindow::branchIndex(ViewData& view, const Go::NodePtr& node){
+int MainWindow::branchIndex(ViewData& view, const Go::NodePtr& node, bool branchMode){
     int index1 = -1;
     int index2 = -1;
     Go::NodePtr parent = node->parent();
@@ -1023,7 +1033,7 @@ int MainWindow::branchIndex(ViewData& view, const Go::NodePtr& node){
         return 0;
 
     foreach(const Go::NodePtr& child, parent->children()){
-        if (shouldNest(child))
+        if (shouldNest(child, branchMode))
             ++index2;
         else{
             QTreeWidgetItem* parentItem = view.nodeToTreeItem[parent];
@@ -2559,6 +2569,26 @@ void MainWindow::on_actionShowMoveNumber_triggered(bool checked)
 }
 
 /**
+  View -> Branch Mode
+*/
+void MainWindow::on_actionBranchMode_triggered(bool checked)
+{
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // set branch mode
+    board->setBranchMode(checked);
+    createBranchItems(board->document(), board->currentGame(), checked);
+
+    // set current node to branch view
+    ViewData& view = docView[board->document()];
+    QTreeWidgetItem* treeItem = view.nodeToTreeItem[board->currentNode()];
+    view.branchWidget->setCurrentItem(treeItem);
+}
+
+/**
   dirty flag changed
 */
 void MainWindow::on_goDocument_dirtyChanged(bool dirty){
@@ -2700,7 +2730,7 @@ void MainWindow::on_goDocument_nodeAdded(const Go::NodePtr& game, const Go::Node
 
     // add node in branch view
     QTreeWidget* branch = view.branchWidget;
-    addBranchItem(doc, branch, node);
+    addBranchItem(doc, branch, node, view.boardWidget->branchMode());
 }
 
 /**
@@ -2723,7 +2753,7 @@ void MainWindow::on_goDocument_nodeDeleted(const Go::NodePtr& game, const Go::No
     removeBranchItems(view, node, removeChildren);
 
     // re-create tree view items
-    rebuildBranchItems(doc, view, node->parent());
+    rebuildBranchItems(doc, view, node->parent(), view.boardWidget->branchMode());
 
     if (node->children().empty() == false)
         view.branchWidget->expandItem( view.nodeToTreeItem[node->children()[0]] );
@@ -2797,7 +2827,7 @@ void MainWindow::on_board_gameChanged(const Go::NodePtr& game){
         return;
 
     // create items in brahch view
-    createBranchItems(board->document(), game);
+    createBranchItems(board->document(), game, board->branchMode());
 
     // update all views
     updateTitle(board->document());

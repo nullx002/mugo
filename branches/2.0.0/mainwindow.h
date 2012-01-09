@@ -112,16 +112,16 @@ protected:
     void updateStatusBar(ViewData& view, const Go::NodePtr& node);
 
     /// @name branch view
-    void createBranchItems(Document* doc, const Go::NodePtr& game);
-    void createBranchItems(Document* doc, QTreeWidgetItem* parent, const Go::NodePtr& node);
-    void addBranchItem(Document* doc, QTreeWidget* branch, const Go::NodePtr& node);
-    bool shouldNest(const Go::NodePtr& node);
-    void rebuildBranchItems(Document* doc, ViewData& view, const Go::NodePtr& node);
+    void createBranchItems(Document* doc, const Go::NodePtr& game, bool branchMode);
+    void createBranchItems(Document* doc, QTreeWidgetItem* parent, const Go::NodePtr& node, bool branchMode);
+    void addBranchItem(Document* doc, QTreeWidget* branch, const Go::NodePtr& node, bool branchMode);
+    bool shouldNest(const Go::NodePtr& node, bool branchMode);
+    void rebuildBranchItems(Document* doc, ViewData& view, const Go::NodePtr& node, bool branchMode);
     QTreeWidgetItem* createBranchItem(Document* doc, const Go::NodePtr& node);
     QTreeWidgetItem* getParentItem(QTreeWidgetItem* item);
     QString getBranchItemText(const ViewData& view, const Go::NodePtr& node);
     void removeBranchItems(ViewData& view, const Go::NodePtr& node, bool removeChildren);
-    int branchIndex(ViewData& view, const Go::NodePtr& node);
+    int branchIndex(ViewData& view, const Go::NodePtr& node, bool branchMode);
 
     /// @name collection model
     void createCollectionModel(GoDocument* doc, QStandardItemModel* model);
@@ -242,6 +242,7 @@ private slots:
 
     /// @name slot for view
     void on_actionShowMoveNumber_triggered(bool checked);
+    void on_actionBranchMode_triggered(bool checked);
 
     /// @name slot for document
     void on_goDocument_dirtyChanged(bool dirty);

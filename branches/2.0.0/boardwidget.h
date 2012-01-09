@@ -107,6 +107,10 @@ public:
     int showCoordinateI() const{ return showCoordinateI_; }
     void setShowCoordinateI(bool show){ showCoordinateI_ = show; }
 
+    // branch mode
+    bool branchMode() const{ return branchMode_; }
+    void setBranchMode(bool mode){ branchMode_ = mode; }
+
 signals:
     void documentChanged(GoDocument* doc);
     void gameChanged(const Go::NodePtr& game);
@@ -218,6 +222,7 @@ protected:
     bool showCoordinate_;
     bool showCoordinateI_;
     bool showVariation_;
+    bool branchMode_;
 
 private slots:
     void on_document_documentModified(bool updateBoard);

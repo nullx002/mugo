@@ -62,6 +62,7 @@ BoardWidget::BoardWidget(QWidget* parent)
     , showCoordinate_(true)
     , showCoordinateI_(false)
     , showVariation_(true)
+    , branchMode_(false)
 {
     initialize();
 }
