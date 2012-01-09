@@ -251,8 +251,8 @@
     <addaction name="actionShow_Coordinates"/>
     <addaction name="actionShow_Coordinates_With_I"/>
     <addaction name="actionShow_Markers"/>
-    <addaction name="actionShow_Branch_Moves"/>
-    <addaction name="actionBranch_Mode"/>
+    <addaction name="actionShowBranchMoves"/>
+    <addaction name="actionBranchMode"/>
     <addaction name="separator"/>
     <addaction name="actionRotateClockwise"/>
     <addaction name="actionFlipHorizontally"/>
@@ -1350,12 +1350,15 @@
     <string>Show Markers</string>
    </property>
   </action>
-  <action name="actionShow_Branch_Moves">
+  <action name="actionShowBranchMoves">
    <property name="text">
     <string>Show Branch Moves</string>
    </property>
   </action>
-  <action name="actionBranch_Mode">
+  <action name="actionBranchMode">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Branch Mode</string>
    </property>
