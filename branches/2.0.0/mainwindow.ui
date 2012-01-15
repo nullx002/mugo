@@ -1291,6 +1291,9 @@
    </property>
   </action>
   <action name="actionResetMoveNumberInBranch">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Reset Move Number in Branch</string>
    </property>

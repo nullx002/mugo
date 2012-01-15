@@ -2569,6 +2569,20 @@ void MainWindow::on_actionShowMoveNumber_triggered(bool checked)
 }
 
 /**
+  View -> Reset Move Number in Branch
+*/
+void MainWindow::on_actionResetMoveNumberInBranch_triggered(bool checked)
+{
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // reset move number in brancn
+    board->setResetMoveNumberInBranch(checked);
+}
+
+/**
   View -> Branch Mode
 */
 void MainWindow::on_actionBranchMode_triggered(bool checked)
