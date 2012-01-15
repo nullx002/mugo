@@ -97,6 +97,10 @@ public:
     bool showMoveNumber() const{ return showMoveNumber_; }
     void setShowMoveNumber(bool show){ showMoveNumber_ = show; setDataPosition(); }
 
+    // Reset move number in branch
+    bool isResetMoveNumberInBranch() const{ return resetMoveNumberInBranch_; }
+    void setResetMoveNumberInBranch(bool reset){ resetMoveNumberInBranch_ = reset; createBoardBuffer(); }
+
     // Captured stones
     int capturedWhite() const{ return capturedWhite_; }
     int capturedBlack() const{ return capturedBlack_; }
@@ -109,7 +113,7 @@ public:
 
     // branch mode
     bool branchMode() const{ return branchMode_; }
-    void setBranchMode(bool mode){ branchMode_ = mode; }
+    void setBranchMode(bool mode){ branchMode_ = mode; if (resetMoveNumberInBranch_) createBoardBuffer(); }
 
 signals:
     void documentChanged(GoDocument* doc);
@@ -219,6 +223,7 @@ protected:
     EditMode editMode_;
     int moveNumber_;
     bool showMoveNumber_;
+    bool resetMoveNumberInBranch_;
     bool showCoordinate_;
     bool showCoordinateI_;
     bool showVariation_;

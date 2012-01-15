@@ -59,6 +59,7 @@ BoardWidget::BoardWidget(QWidget* parent)
     , editMode_(eAlternateMove)
     , moveNumber_(0)
     , showMoveNumber_(true)
+    , resetMoveNumberInBranch_(false)
     , showCoordinate_(true)
     , showCoordinateI_(false)
     , showVariation_(true)
@@ -79,9 +80,11 @@ BoardWidget::BoardWidget(GoDocument* doc, QWidget* parent)
     , editMode_(eAlternateMove)
     , moveNumber_(0)
     , showMoveNumber_(true)
+    , resetMoveNumberInBranch_(false)
     , showCoordinate_(true)
     , showCoordinateI_(false)
     , showVariation_(true)
+    , branchMode_(false)
 {
     initialize();
 
@@ -498,6 +501,19 @@ void BoardWidget::createBoardBuffer(){
         // change move number if move number is designated.
         if (node->moveNumber() > 0)
             moveNumber_ = node->moveNumber();
+        else {
+            // reset move number in branch
+            Go::NodePtr parent = node->parent();
+            if (parent && resetMoveNumberInBranch_ && parent->children().size() > 1) {
+                if (branchMode_ || parent->children().indexOf(node) > 0) {
+                    moveNumber_ = 1;
+                    // clear move numbers before this node.
+                    for (int y=0; y<data.size(); ++y)
+                        for (int x=0; x<data[y].size(); ++x)
+                            data[y][x].moveNumber = 0;
+                }
+            }
+        }
 
         // put stone if node is stone and node isn't pass.
         if (node->isStone() && !node->isPass() && node->x() < xsize() && node->y() < ysize()){
@@ -529,7 +545,6 @@ void BoardWidget::createBoardBuffer(){
         ++moveNumber_;
         ++iter;
     }
-    --moveNumber_;
 
     createGraphicsItems();
 }

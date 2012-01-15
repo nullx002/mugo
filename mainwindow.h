@@ -242,6 +242,7 @@ private slots:
 
     /// @name slot for view
     void on_actionShowMoveNumber_triggered(bool checked);
+    void on_actionResetMoveNumberInBranch_triggered(bool checked);
     void on_actionBranchMode_triggered(bool checked);
 
     /// @name slot for document
