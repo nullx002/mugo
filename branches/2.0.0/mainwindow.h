@@ -243,6 +243,14 @@ private slots:
     /// @name slot for view
     void on_actionShowMoveNumber_triggered(bool checked);
     void on_actionResetMoveNumberInBranch_triggered(bool checked);
+    void on_actionNoMoveNumber_triggered();
+    void on_actionLast1Move_triggered();
+    void on_actionLast2Moves_triggered();
+    void on_actionLast5Moves_triggered();
+    void on_actionLast10Moves_triggered();
+    void on_actionLast20Moves_triggered();
+    void on_actionLast50Moves_triggered();
+    void on_actionAllMoves_triggered();
     void on_actionBranchMode_triggered(bool checked);
 
     /// @name slot for document

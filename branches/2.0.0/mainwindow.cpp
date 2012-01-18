@@ -263,6 +263,18 @@ void MainWindow::initializeMenu(){
     connect(ui->menuStonesAndMarkers->menuAction(), SIGNAL(triggered(bool)), SLOT(on_menuStonesAndMarkers_triggered(bool)));
     stonesAndMarkersAction = ui->actionAddLabel;
 
+    // View -> Move Number
+    // action group
+    QActionGroup* moveNumberGroup = new QActionGroup(this);
+    moveNumberGroup->addAction(ui->actionNoMoveNumber);
+    moveNumberGroup->addAction(ui->actionLast1Move);
+    moveNumberGroup->addAction(ui->actionLast2Moves);
+    moveNumberGroup->addAction(ui->actionLast5Moves);
+    moveNumberGroup->addAction(ui->actionLast10Moves);
+    moveNumberGroup->addAction(ui->actionLast20Moves);
+    moveNumberGroup->addAction(ui->actionLast50Moves);
+    moveNumberGroup->addAction(ui->actionAllMoves);
+
     // Collection
     ui->collectionDockWidget->toggleViewAction()->setIcon( QIcon(":/res/gamelist.png") );
     ui->collectionToolBar->insertAction( ui->collectionToolBar->actions().at(0), ui->collectionDockWidget->toggleViewAction() );
@@ -2569,7 +2581,7 @@ void MainWindow::on_actionShowMoveNumber_triggered(bool checked)
 }
 
 /**
-  View -> Reset Move Number in Branch
+  View -> Move Number -> Reset Move Number in Branch
 */
 void MainWindow::on_actionResetMoveNumberInBranch_triggered(bool checked)
 {
@@ -2580,6 +2592,110 @@ void MainWindow::on_actionResetMoveNumberInBranch_triggered(bool checked)
 
     // reset move number in brancn
     board->setResetMoveNumberInBranch(checked);
+}
+
+/**
+  View -> Move Number -> No Move Number
+*/
+void MainWindow::on_actionNoMoveNumber_triggered()
+{
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    board->setShowMoveNumberCount(0);
+}
+
+/**
+  View -> Move Number -> Last Move
+*/
+void MainWindow::on_actionLast1Move_triggered()
+{
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    board->setShowMoveNumberCount(1);
+}
+
+/**
+  View -> Move Number -> Last 2 Moves
+*/
+void MainWindow::on_actionLast2Moves_triggered()
+{
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    board->setShowMoveNumberCount(2);
+}
+
+/**
+  View -> Move Number -> Last 5 Moves
+*/
+void MainWindow::on_actionLast5Moves_triggered()
+{
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    board->setShowMoveNumberCount(5);
+}
+
+/**
+  View -> Move Number -> Last 10 Moves
+*/
+void MainWindow::on_actionLast10Moves_triggered()
+{
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    board->setShowMoveNumberCount(10);
+}
+
+/**
+  View -> Move Number -> Last 20 Moves
+*/
+void MainWindow::on_actionLast20Moves_triggered()
+{
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    board->setShowMoveNumberCount(20);
+}
+
+/**
+  View -> Move Number -> Last 50 Moves
+*/
+void MainWindow::on_actionLast50Moves_triggered()
+{
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    board->setShowMoveNumberCount(50);
+}
+
+/**
+  View -> Move Number -> All Moves
+*/
+void MainWindow::on_actionAllMoves_triggered()
+{
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    board->setShowMoveNumberCount(-1);
 }
 
 /**

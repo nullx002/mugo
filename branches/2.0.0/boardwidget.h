@@ -101,6 +101,10 @@ public:
     bool isResetMoveNumberInBranch() const{ return resetMoveNumberInBranch_; }
     void setResetMoveNumberInBranch(bool reset){ resetMoveNumberInBranch_ = reset; createBoardBuffer(); }
 
+    // move number count
+    int showMoveNumberCount() const{ return showMoveNumberCount_; }
+    void setShowMoveNumberCount(int number){ showMoveNumberCount_ = number; createBoardBuffer(); }
+
     // Captured stones
     int capturedWhite() const{ return capturedWhite_; }
     int capturedBlack() const{ return capturedBlack_; }
@@ -224,6 +228,7 @@ protected:
     int moveNumber_;
     bool showMoveNumber_;
     bool resetMoveNumberInBranch_;
+    int showMoveNumberCount_;
     bool showCoordinate_;
     bool showCoordinateI_;
     bool showVariation_;
