@@ -16,6 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include <QDebug>
+#include <QQueue>
 #include <QMouseEvent>
 #include <QGraphicsItemGroup>
 #include <QGraphicsDropShadowEffect>
@@ -60,6 +61,7 @@ BoardWidget::BoardWidget(QWidget* parent)
     , moveNumber_(0)
     , showMoveNumber_(true)
     , resetMoveNumberInBranch_(false)
+    , showMoveNumberCount_(-1)
     , showCoordinate_(true)
     , showCoordinateI_(false)
     , showVariation_(true)
@@ -81,6 +83,7 @@ BoardWidget::BoardWidget(GoDocument* doc, QWidget* parent)
     , moveNumber_(0)
     , showMoveNumber_(true)
     , resetMoveNumberInBranch_(false)
+    , showMoveNumberCount_(-1)
     , showCoordinate_(true)
     , showCoordinateI_(false)
     , showVariation_(true)
@@ -490,6 +493,7 @@ void BoardWidget::createBoardBuffer(){
     for (int i=0; i<buffer.size(); ++i)
         qFill(buffer[i], Go::eDame);
 
+    QQueue<int*> displayedNumber;
     moveNumber_ = 0;
     Go::NodeList::iterator iter = currentNodeList_.begin();
     while (iter != currentNodeList_.end()){
@@ -511,6 +515,7 @@ void BoardWidget::createBoardBuffer(){
                     for (int y=0; y<data.size(); ++y)
                         for (int x=0; x<data[y].size(); ++x)
                             data[y][x].moveNumber = 0;
+                    displayedNumber.clear();
                 }
             }
         }
@@ -521,7 +526,19 @@ void BoardWidget::createBoardBuffer(){
             killStone(x, y);
             if (data[y][x].moveNumber != moveNumber_)
                 data[y][x].numberItem.clear();
-            data[y][x].moveNumber = moveNumber_;
+            if (showMoveNumberCount_ == 0) {
+                data[y][x].moveNumber = 0;
+                data[y][x].numberItem.clear();
+            }
+            else
+                data[y][x].moveNumber = moveNumber_;
+            if (showMoveNumberCount_ > 0) {
+                displayedNumber.enqueue(&data[y][x].moveNumber);
+                if (displayedNumber.size() > showMoveNumberCount_) {
+                    int* number = displayedNumber.dequeue();
+                    *number = 0;
+                }
+            }
         }
 
         // add empty stones

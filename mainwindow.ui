@@ -237,14 +237,14 @@
      <addaction name="actionShowMoveNumber"/>
      <addaction name="actionResetMoveNumberInBranch"/>
      <addaction name="separator"/>
-     <addaction name="actionNo_Move_Number"/>
-     <addaction name="actionLast_1_Move"/>
-     <addaction name="actionLast_2_Moves"/>
-     <addaction name="actionLast_5_Moves"/>
-     <addaction name="actionLast_10_Moves"/>
-     <addaction name="actionLast_20_Moves"/>
-     <addaction name="actionLast_50_Moves"/>
-     <addaction name="actionAll_Moves"/>
+     <addaction name="actionNoMoveNumber"/>
+     <addaction name="actionLast1Move"/>
+     <addaction name="actionLast2Moves"/>
+     <addaction name="actionLast5Moves"/>
+     <addaction name="actionLast10Moves"/>
+     <addaction name="actionLast20Moves"/>
+     <addaction name="actionLast50Moves"/>
+     <addaction name="actionAllMoves"/>
     </widget>
     <addaction name="menuMove_Number"/>
     <addaction name="separator"/>
@@ -1298,42 +1298,69 @@
     <string>Reset Move Number in Branch</string>
    </property>
   </action>
-  <action name="actionNo_Move_Number">
+  <action name="actionNoMoveNumber">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>No Move Number</string>
    </property>
   </action>
-  <action name="actionLast_1_Move">
+  <action name="actionLast1Move">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Last 1 Move</string>
    </property>
   </action>
-  <action name="actionLast_2_Moves">
+  <action name="actionLast2Moves">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Last 2 Moves</string>
    </property>
   </action>
-  <action name="actionLast_5_Moves">
+  <action name="actionLast5Moves">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Last 5 Moves</string>
    </property>
   </action>
-  <action name="actionLast_10_Moves">
+  <action name="actionLast10Moves">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Last 10 Moves</string>
    </property>
   </action>
-  <action name="actionLast_20_Moves">
+  <action name="actionLast20Moves">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Last 20 Moves</string>
    </property>
   </action>
-  <action name="actionLast_50_Moves">
+  <action name="actionLast50Moves">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Last 50 Moves</string>
    </property>
   </action>
-  <action name="actionAll_Moves">
+  <action name="actionAllMoves">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>All Moves</string>
    </property>
