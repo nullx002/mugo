@@ -753,7 +753,7 @@ void MainWindow::updateCommentView(ViewData& view, const Go::NodePtr& node){
 void MainWindow::updateStatusBar(ViewData& view, const Go::NodePtr& node){
     QString text;
     if (node->isStone())
-        text = Go::coordinateString(view.boardWidget->rootInformation()->xsize(), view.boardWidget->rootInformation()->ysize(), node->x(), node->y(), view.boardWidget->showCoordinateI());
+        text = Go::coordinateString(view.boardWidget->rootInformation()->xsize(), view.boardWidget->rootInformation()->ysize(), node->x(), node->y(), view.boardWidget->showCoordinatesWithI());
 
     this->moveNumberLabel->setText( tr("Last Move:%1(%2)").arg(view.boardWidget->moveNumber()).arg(text) );
     this->capturedLabel->setText( tr("Captured White:%1 Black:%2").arg(view.boardWidget->capturedWhite()).arg(view.boardWidget->capturedBlack()) );
@@ -912,7 +912,7 @@ QString MainWindow::getBranchItemText(const ViewData& view, const Go::NodePtr& n
     QStringList nodeName;
 
     if (node->isStone() && !node->isPass())
-        nodeName.push_back( Go::coordinateString(view.boardWidget->xsize(), view.boardWidget->ysize(), node->x(), node->y(), view.boardWidget->showCoordinateI()) );
+        nodeName.push_back( Go::coordinateString(view.boardWidget->xsize(), view.boardWidget->ysize(), node->x(), node->y(), view.boardWidget->showCoordinatesWithI()) );
     else if (node->isStone())
         nodeName.push_back( tr("Pass") );
     else if (node->information())
@@ -2696,6 +2696,32 @@ void MainWindow::on_actionAllMoves_triggered()
         return;
 
     board->setShowMoveNumberCount(-1);
+}
+
+/**
+  View -> Show Coordinates
+*/
+void MainWindow::on_actionShowCoordinates_triggered(bool checked)
+{
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    board->setShowCoordinates(checked);
+}
+
+/**
+  View -> Show Coordinates With I
+*/
+void MainWindow::on_actionShowCoordinatesWithI_triggered(bool checked)
+{
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    board->setShowCoordinatesWithI(checked);
 }
 
 /**

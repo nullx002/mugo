@@ -110,10 +110,10 @@ public:
     int capturedBlack() const{ return capturedBlack_; }
 
     // Coordinate
-    int showCoordinate() const{ return showCoordinate_; }
-    void setShowCoordinate(bool show){ showCoordinate_ = show; }
-    int showCoordinateI() const{ return showCoordinateI_; }
-    void setShowCoordinateI(bool show){ showCoordinateI_ = show; }
+    int showCoordinates() const{ return showCoordinates_; }
+    void setShowCoordinates(bool show){ showCoordinates_ = show; createBoardImage(); }
+    int showCoordinatesWithI() const{ return showCoordinatesWithI_; }
+    void setShowCoordinatesWithI(bool show){ showCoordinatesWithI_ = show;  createCoorinates(); }
 
     // branch mode
     bool branchMode() const{ return branchMode_; }
@@ -144,7 +144,7 @@ protected:
     void initialize();
 
     // set graphics items position
-    void createLineGraphicsItems();
+    void createBoardImage();
     void setItemsPosition(const QSizeF& size);
     void setVLinesPosition(int x, int y, int gridSize);
     void setHLinesPosition(int x, int y, int gridSize);
@@ -204,6 +204,9 @@ protected:
     bool removeMark(int sgfX, int sgfY);
     bool removeMark(int sgfX, int sgfY, Go::MarkList& markList);
 
+    // coordinates
+    void createCoorinates();
+
     GoDocument* document_;
     Go::NodePtr currentGame_;
     Go::InformationPtr currentInformation_;
@@ -222,6 +225,7 @@ protected:
     QList<QGraphicsEllipseItem*> stars;
     QGraphicsItem* blackStone_;
     QGraphicsItem* whiteStone_;
+    QList<QGraphicsSimpleTextItem*> coordinates;
 
     Go::Color nextColor_;
     EditMode editMode_;
@@ -229,10 +233,11 @@ protected:
     bool showMoveNumber_;
     bool resetMoveNumberInBranch_;
     int showMoveNumberCount_;
-    bool showCoordinate_;
-    bool showCoordinateI_;
+    bool showCoordinates_;
+    bool showCoordinatesWithI_;
     bool showVariation_;
     bool branchMode_;
+    qreal coordinateFontSize_;
 
 private slots:
     void on_document_documentModified(bool updateBoard);

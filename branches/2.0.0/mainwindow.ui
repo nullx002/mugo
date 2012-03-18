@@ -46,7 +46,7 @@
      <x>0</x>
      <y>0</y>
      <width>748</width>
-     <height>24</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -248,8 +248,8 @@
     </widget>
     <addaction name="menuMove_Number"/>
     <addaction name="separator"/>
-    <addaction name="actionShow_Coordinates"/>
-    <addaction name="actionShow_Coordinates_With_I"/>
+    <addaction name="actionShowCoordinates"/>
+    <addaction name="actionShowCoordinatesWithI"/>
     <addaction name="actionShow_Markers"/>
     <addaction name="actionShowBranchMoves"/>
     <addaction name="actionBranchMode"/>
@@ -1365,12 +1365,21 @@
     <string>All Moves</string>
    </property>
   </action>
-  <action name="actionShow_Coordinates">
+  <action name="actionShowCoordinates">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Show Coordinates</string>
    </property>
   </action>
-  <action name="actionShow_Coordinates_With_I">
+  <action name="actionShowCoordinatesWithI">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Show Coordinates With I</string>
    </property>
