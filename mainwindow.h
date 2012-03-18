@@ -251,6 +251,8 @@ private slots:
     void on_actionLast20Moves_triggered();
     void on_actionLast50Moves_triggered();
     void on_actionAllMoves_triggered();
+    void on_actionShowCoordinates_triggered(bool checked);
+    void on_actionShowCoordinatesWithI_triggered(bool checked);
     void on_actionBranchMode_triggered(bool checked);
 
     /// @name slot for document

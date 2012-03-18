@@ -62,10 +62,11 @@ BoardWidget::BoardWidget(QWidget* parent)
     , showMoveNumber_(true)
     , resetMoveNumberInBranch_(false)
     , showMoveNumberCount_(-1)
-    , showCoordinate_(true)
-    , showCoordinateI_(false)
+    , showCoordinates_(true)
+    , showCoordinatesWithI_(false)
     , showVariation_(true)
     , branchMode_(false)
+    , coordinateFontSize_(12.0)
 {
     initialize();
 }
@@ -84,10 +85,11 @@ BoardWidget::BoardWidget(GoDocument* doc, QWidget* parent)
     , showMoveNumber_(true)
     , resetMoveNumberInBranch_(false)
     , showMoveNumberCount_(-1)
-    , showCoordinate_(true)
-    , showCoordinateI_(false)
+    , showCoordinates_(true)
+    , showCoordinatesWithI_(false)
     , showVariation_(true)
     , branchMode_(false)
+    , coordinateFontSize_(12.0)
 {
     initialize();
 
@@ -287,7 +289,7 @@ bool BoardWidget::setGame(const Go::NodePtr& game){
     currentNode_.clear();
 
     // create line objects
-    createLineGraphicsItems();
+    createBoardImage();
 
     // emit gameChanged
     emit gameChanged(currentGame_);
@@ -329,7 +331,7 @@ bool BoardWidget::setNode(const Go::NodePtr& node, bool forceChange){
 /**
   create line and star graphics items
 */
-void BoardWidget::createLineGraphicsItems(){
+void BoardWidget::createBoardImage(){
     // create vertical lines
     qDeleteAll(vLines);
     vLines.clear();
@@ -398,9 +400,10 @@ void BoardWidget::setItemsPosition(const QSizeF& size){
     // calculate board size
     int width  = size.width();
     int height = size.height();
+    int coordinateWidth = showCoordinates() ? coordinateFontSize_ * 2.0 : 0;
 
-    int gridW = width  / (xsize() + 1);
-    int gridH = height / (ysize() + 1);
+    int gridW = (width - coordinateWidth)  / (xsize() + 1);
+    int gridH = (height - coordinateWidth) / (ysize() + 1);
     int gridSize = qMin(gridW, gridH);
     int w = gridSize * (xsize() - 1);
     int h = gridSize * (ysize() - 1);
@@ -432,6 +435,9 @@ void BoardWidget::setItemsPosition(const QSizeF& size){
     setVLinesPosition(x, y, gridSize);
     setHLinesPosition(x, y, gridSize);
     setStarsPosition();
+
+    // coordinates
+    createCoorinates();
 
     // move all datas position to current board size
     setDataPosition();
@@ -961,7 +967,6 @@ void BoardWidget::createMark(const Go::Mark& m){
         bg->setPos(x-w/2.0, y-w/2.0);
         bg->setZValue(0);
         group->addToGroup(bg);
-        group->setZValue(3);  // move under the stones.
     }
 
     // create mark
@@ -1241,6 +1246,84 @@ bool BoardWidget::removeMark(int sgfX, int sgfY, Go::MarkList& markList){
 }
 
 /**
+  create coordinates strings
+*/
+void BoardWidget::createCoorinates(){
+    qDeleteAll(coordinates);
+    coordinates.clear();
+
+    // coordinates isn't created if show coordinates is disabled.
+    if (showCoordinates() == false)
+        return;
+
+    qreal fontSize = qMin(coordinateFontSize_, getGridSize());
+    QFont f;
+    f.setPixelSize(fontSize);
+
+    // create coordinates for top and bottom
+    char c = 'A';
+    for (int i=0; i<vLines.size(); ++i, ++c) {
+        // skip 'I' if show coordiantes with I is disabled
+        if (!showCoordinatesWithI() && i == 8)
+            ++c;
+
+        QString str(c);
+
+        // top
+        QGraphicsSimpleTextItem* top = scene()->addSimpleText(str);
+        top->setZValue(2);
+        top->setFont(f);
+
+        qreal x = vLines[i]->line().x1() - top->boundingRect().width() / 2.0;
+        qreal y = board->pos().y() - fontSize - 2;
+        top->setPos(x, y);
+
+        coordinates.push_back(top);
+
+        // bottom
+        QGraphicsSimpleTextItem* bottom = scene()->addSimpleText(str);
+        bottom->setZValue(2);
+        bottom->setFont(f);
+
+        y = shadow->boundingRect().bottom() +  2;
+        bottom->setPos(x, y);
+
+        coordinates.push_back(bottom);
+    }
+
+    // create coordinates for left and right
+    int n = hLines.size();
+    int w = 0;
+    for (int i=0; i<hLines.size(); ++i, --n) {
+        QString str = QString("%1").arg(n);
+
+        // left
+        QGraphicsSimpleTextItem* left = scene()->addSimpleText(str);
+        left->setZValue(2);
+        left->setFont(f);
+
+        if (i == 0)
+            w = left->boundingRect().width();
+
+        qreal x = board->pos().x() - w + (w - left->boundingRect().width()) / 2.0;
+        qreal y = hLines[i]->line().y1() - fontSize / 2.0;
+        left->setPos(x, y);
+
+        coordinates.push_back(left);
+
+        // right
+        QGraphicsSimpleTextItem* right = scene()->addSimpleText(str);
+        right->setZValue(2);
+        right->setFont(f);
+
+        x = shadow->boundingRect().right() +  (w - right->boundingRect().width()) / 2.0;
+        right->setPos(x, y);
+
+        coordinates.push_back(right);
+    }
+}
+
+/**
   document modified
 */
 void BoardWidget::on_document_documentModified(bool updateBoard){
@@ -1248,7 +1331,7 @@ void BoardWidget::on_document_documentModified(bool updateBoard){
         return;
 
     // create buffer
-    createLineGraphicsItems();
+    createBoardImage();
     createBoardBuffer();
 }
 
