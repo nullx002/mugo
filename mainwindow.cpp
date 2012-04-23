@@ -2745,6 +2745,49 @@ void MainWindow::on_actionBranchMode_triggered(bool checked)
 }
 
 /**
+  View -> Rotate Clockwise
+*/
+void MainWindow::on_actionRotateClockwise_triggered()
+{
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // rotate
+    int v = board->rotateBoard() + 1;
+    board->rotateBoard(v > 3 ? 0 : v);
+}
+
+/**
+  View -> Flip Horizontally
+*/
+void MainWindow::on_actionFlipHorizontally_triggered(bool checked)
+{
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // flip
+    board->flipHorizontally(checked);
+}
+
+/**
+  View -> Flip Vertically
+*/
+void MainWindow::on_actionFlipVertically_triggered(bool checked)
+{
+    // get active board widget
+    BoardWidget* board = qobject_cast<BoardWidget*>(ui->boardTabWidget->currentWidget());
+    if (board == NULL)
+        return;
+
+    // flip
+    board->flipVertically(checked);
+}
+
+/**
   dirty flag changed
 */
 void MainWindow::on_goDocument_dirtyChanged(bool dirty){

@@ -254,6 +254,9 @@ private slots:
     void on_actionShowCoordinates_triggered(bool checked);
     void on_actionShowCoordinatesWithI_triggered(bool checked);
     void on_actionBranchMode_triggered(bool checked);
+    void on_actionRotateClockwise_triggered();
+    void on_actionFlipHorizontally_triggered(bool checked);
+    void on_actionFlipVertically_triggered(bool checked);
 
     /// @name slot for document
     void on_goDocument_dirtyChanged(bool dirty);

@@ -119,6 +119,14 @@ public:
     bool branchMode() const{ return branchMode_; }
     void setBranchMode(bool mode){ branchMode_ = mode; if (resetMoveNumberInBranch_) createBoardBuffer(); }
 
+    // flip/rotate
+    void rotateBoard(int);
+    int rotateBoard() const{ return rotateBoard_; }
+    void flipHorizontally(bool flip);
+    bool flipHorizontally() const{ return flipHorizontally_; }
+    void flipVertically(bool flip);
+    bool flipVertically() const{ return flipVertically_; }
+
 signals:
     void documentChanged(GoDocument* doc);
     void gameChanged(const Go::NodePtr& game);
@@ -238,6 +246,9 @@ protected:
     bool showVariation_;
     bool branchMode_;
     qreal coordinateFontSize_;
+    int rotateBoard_;
+    bool flipHorizontally_;
+    bool flipVertically_;
 
 private slots:
     void on_document_documentModified(bool updateBoard);

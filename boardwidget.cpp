@@ -67,6 +67,9 @@ BoardWidget::BoardWidget(QWidget* parent)
     , showVariation_(true)
     , branchMode_(false)
     , coordinateFontSize_(12.0)
+    , rotateBoard_(0)
+    , flipHorizontally_(false)
+    , flipVertically_(false)
 {
     initialize();
 }
@@ -90,6 +93,9 @@ BoardWidget::BoardWidget(GoDocument* doc, QWidget* parent)
     , showVariation_(true)
     , branchMode_(false)
     , coordinateFontSize_(12.0)
+    , rotateBoard_(0)
+    , flipHorizontally_(false)
+    , flipVertically_(false)
 {
     initialize();
 
@@ -1045,6 +1051,12 @@ bool BoardWidget::viewToSgfCoordinate(qreal viewX, qreal viewY, int& sgfX, int& 
 //        sgfY = (fabs(viewX - hLines[0]->line().x1()) + size / 2.0) / size;
 //    }
 
+    if (flipHorizontally_)
+        sgfX = vLines.size() - sgfX - 1;
+
+    if (flipVertically_)
+        sgfY = hLines.size() - sgfY - 1;
+
     return sgfX >= 0 && sgfX < xsize() && sgfY >= 0 && sgfY < ysize();
 }
 
@@ -1052,6 +1064,12 @@ bool BoardWidget::viewToSgfCoordinate(qreal viewX, qreal viewY, int& sgfX, int& 
   sgf coordinate to view coordinate
 */
 bool BoardWidget::sgfToViewCoordinate(int sgfX, int sgfY, qreal& viewX, qreal& viewY) const{
+    if (flipHorizontally_)
+        sgfX = vLines.size() - sgfX - 1;
+
+    if (flipVertically_)
+        sgfY = hLines.size() - sgfY - 1;
+
 //    if ((rotate % 2) == 0){
         viewX = vLines[sgfX]->line().x1();
         viewY = hLines[sgfY]->line().y1();
@@ -1321,6 +1339,36 @@ void BoardWidget::createCoorinates(){
 
         coordinates.push_back(right);
     }
+}
+
+/**
+  rotate board view.
+  This function rotate only view, sgf is not modified.
+*/
+void BoardWidget::rotateBoard(int v)
+{
+    rotateBoard_ = v;
+    createBoardImage();
+}
+
+/**
+  flip board view horizontally.
+  This function flip only view, sgf is not modified.
+*/
+void BoardWidget::flipHorizontally(bool v)
+{
+    flipHorizontally_ = v;
+    createBoardImage();
+}
+
+/**
+  flip board view vertically
+  This function flip only view, sgf is not modified.
+*/
+void BoardWidget::flipVertically(bool v)
+{
+    flipVertically_ = v;
+    createBoardImage();
 }
 
 /**

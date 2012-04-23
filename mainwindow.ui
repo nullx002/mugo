@@ -1403,16 +1403,25 @@
    </property>
   </action>
   <action name="actionRotateClockwise">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Rotate Clockwise</string>
    </property>
   </action>
   <action name="actionFlipHorizontally">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Flip Horizontally</string>
    </property>
   </action>
   <action name="actionFlipVertically">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Flip Vertically</string>
    </property>
