@@ -83,8 +83,8 @@ public:
     Go::InformationPtr currentInformation() const{ return currentInformation_; }
 
     // get board size
-    int xsize() const { return currentGame_->information()->xsize(); }
-    int ysize() const { return currentGame_->information()->ysize(); }
+    int xsize(bool rotate=false) const { return rotate && rotateBoard_ % 2 ? currentGame_->information()->ysize() : currentGame_->information()->xsize(); }
+    int ysize(bool rotate=false) const { return rotate && rotateBoard_ % 2 ? currentGame_->information()->xsize() : currentGame_->information()->ysize(); }
 
     // Edit Mode
     EditMode editMode() const{ return editMode_; }
@@ -120,11 +120,11 @@ public:
     void setBranchMode(bool mode){ branchMode_ = mode; if (resetMoveNumberInBranch_) createBoardBuffer(); }
 
     // flip/rotate
-    void rotateBoard(int);
+    void setRotateBoard(int);
     int rotateBoard() const{ return rotateBoard_; }
-    void flipHorizontally(bool flip);
+    void setFlipHorizontally(bool flip);
     bool flipHorizontally() const{ return flipHorizontally_; }
-    void flipVertically(bool flip);
+    void setFlipVertically(bool flip);
     bool flipVertically() const{ return flipVertically_; }
 
 signals:
@@ -153,7 +153,7 @@ protected:
 
     // set graphics items position
     void createBoardImage();
-    void setItemsPosition(const QSizeF& size);
+    void setItemPositions(const QSizeF& size);
     void setVLinesPosition(int x, int y, int gridSize);
     void setHLinesPosition(int x, int y, int gridSize);
     void setStarsPosition();
@@ -227,7 +227,6 @@ protected:
     QVector< QVector<Go::Color> > buffer;
 
     QGraphicsItem* board;
-    QGraphicsRectItem* shadow;
     QList<QGraphicsLineItem*> vLines;
     QList<QGraphicsLineItem*> hLines;
     QList<QGraphicsEllipseItem*> stars;

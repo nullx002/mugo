@@ -47,7 +47,7 @@ MainWindow::MainWindow(const QString& fname, QWidget *parent) :
 
     // open or create new tab
     if (fname.isEmpty())
-        fileNew();
+        fileNew(NULL);
     else
         fileOpen(fname);
 }
@@ -2756,7 +2756,10 @@ void MainWindow::on_actionRotateClockwise_triggered()
 
     // rotate
     int v = board->rotateBoard() + 1;
-    board->rotateBoard(v > 3 ? 0 : v);
+    board->setRotateBoard(v > 3 ? 0 : v);
+
+    // action is checked when board is rotated.
+    ui->actionRotateClockwise->setChecked(board->rotateBoard() != 0);
 }
 
 /**
@@ -2770,7 +2773,7 @@ void MainWindow::on_actionFlipHorizontally_triggered(bool checked)
         return;
 
     // flip
-    board->flipHorizontally(checked);
+    board->setFlipHorizontally(checked);
 }
 
 /**
@@ -2784,7 +2787,7 @@ void MainWindow::on_actionFlipVertically_triggered(bool checked)
         return;
 
     // flip
-    board->flipVertically(checked);
+    board->setFlipVertically(checked);
 }
 
 /**
