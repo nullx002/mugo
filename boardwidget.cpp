@@ -111,12 +111,15 @@ void BoardWidget::initialize(){
     setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform | QPainter::TextAntialiasing);
 
     // create board
-    shadow = scene()->addRect(0, 0, 1, 1, QPen(Qt::NoPen), QBrush(SHADOW_COLOR));
 //    board  = scene()->addRect(0, 0, 1, 1, QPen(Qt::NoPen), QBrush(QPixmap(":/res/bg.png"))); // <- very slow!!
 //    board  = scene()->addRect(0, 0, 1, 1, QPen(Qt::NoPen), QBrush(BOARD_COLOR));
-    board  = scene()->addPixmap(0);
-    shadow->setZValue(0);
-    board->setZValue(1);
+    board = scene()->addPixmap(0);
+    board->setZValue(0);
+    QGraphicsDropShadowEffect* dropShadow = new QGraphicsDropShadowEffect;
+    dropShadow->setBlurRadius(12);
+    dropShadow->setOffset(2, 2);
+    dropShadow->setColor(QColor(28, 28, 28));
+    board->setGraphicsEffect(dropShadow);
 
     setMouseTracking(true);
 }
@@ -126,7 +129,7 @@ void BoardWidget::initialize(){
 */
 void BoardWidget::resizeEvent(QResizeEvent* e){
     // set items position
-    setItemsPosition(e->size());
+    setItemPositions(e->size());
 
     // create black and white stones
     // these point to next stone.
@@ -341,7 +344,7 @@ void BoardWidget::createBoardImage(){
     // create vertical lines
     qDeleteAll(vLines);
     vLines.clear();
-    for(int i=0; i<xsize(); ++i){
+    for(int i=0; i<xsize(true); ++i){
         QGraphicsLineItem* line = scene()->addLine(0, 0, 0, 0, QPen(Qt::black));
         line->setZValue(2);
         vLines.push_back(line);
@@ -350,7 +353,7 @@ void BoardWidget::createBoardImage(){
     // create horizontal lines
     qDeleteAll(hLines);
     hLines.clear();
-    for(int i=0; i<ysize(); ++i){
+    for(int i=0; i<ysize(true); ++i){
         QGraphicsLineItem* line = scene()->addLine(0, 0, 0, 0, QPen(Qt::black));
         line->setZValue(2);
         hLines.push_back(line);
@@ -375,8 +378,8 @@ void BoardWidget::createBoardImage(){
         buffer[i].resize(xsize());
     }
 
-    // set items position
-    setItemsPosition(scene()->sceneRect().size());
+    // set item position
+    setItemPositions(scene()->sceneRect().size());
 }
 
 /**
@@ -395,7 +398,7 @@ bool BoardWidget::setInformation(const Go::InformationPtr& information){
 /**
   set scene items position in rect area
 */
-void BoardWidget::setItemsPosition(const QSizeF& size){
+void BoardWidget::setItemPositions(const QSizeF& size){
     if (document_ == NULL)
         return;
 
@@ -404,23 +407,18 @@ void BoardWidget::setItemsPosition(const QSizeF& size){
         scene()->setSceneRect(QRect(0, 0, size.width(), size.height()));
 
     // calculate board size
-    int width  = size.width();
-    int height = size.height();
     int coordinateWidth = showCoordinates() ? coordinateFontSize_ * 2.0 : 0;
 
-    int gridW = (width - coordinateWidth)  / (xsize() + 1);
-    int gridH = (height - coordinateWidth) / (ysize() + 1);
+    int gridW = (size.width() - coordinateWidth)  / (xsize(true) + 1);
+    int gridH = (size.height() - coordinateWidth) / (ysize(true) + 1);
     int gridSize = qMin(gridW, gridH);
-    int w = gridSize * (xsize() - 1);
-    int h = gridSize * (ysize() - 1);
+    int w = gridSize * (xsize(true) - 1);
+    int h = gridSize * (ysize(true) - 1);
 
-    int x = (width - w) / 2;
-    int y = (height - h) / 2;
+    int x = (size.width() - w) / 2;
+    int y = (size.height() - h) / 2;
     int margin = int(gridSize * 0.6);
     QRect boardRect(QPoint(x-margin, y-margin), QPoint(x+w+margin, y+h+margin));
-
-    // set position of shadow.
-    shadow->setRect(boardRect.left()+3, boardRect.top()+3, boardRect.width(), boardRect.height());
 
     // set position of board.
     if (dynamic_cast<QGraphicsRectItem*>(board))
@@ -431,11 +429,6 @@ void BoardWidget::setItemsPosition(const QSizeF& size){
         dynamic_cast<QGraphicsPixmapItem*>(board)->setPixmap(pixmap);
         dynamic_cast<QGraphicsPixmapItem*>(board)->setPos(boardRect.topLeft());
     }
-
-    // set scene rect
-    QRectF r = boardRect;
-    r.setRight(shadow->rect().right());
-    r.setBottom(shadow->rect().bottom());
 
     // move items position to current board size
     setVLinesPosition(x, y, gridSize);
@@ -453,7 +446,7 @@ void BoardWidget::setItemsPosition(const QSizeF& size){
   set vertical lines position
 */
 void BoardWidget::setVLinesPosition(int x, int y, int gridSize){
-    int len = gridSize * (ysize() - 1);
+    int len = gridSize * (ysize(true) - 1);
     for (int i=0; i<vLines.size(); ++i){
         vLines[i]->setLine(x, y, x, y+len);
         x += gridSize;
@@ -464,7 +457,7 @@ void BoardWidget::setVLinesPosition(int x, int y, int gridSize){
   set horizontal lines position
 */
 void BoardWidget::setHLinesPosition(int x, int y, int gridSize){
-    int len = gridSize * (xsize() - 1);
+    int len = gridSize * (xsize(true) - 1);
     for (int i=0; i<hLines.size(); ++i){
         hLines[i]->setLine(x, y, x+len, y);
         y += gridSize;
@@ -478,11 +471,11 @@ void BoardWidget::setStarsPosition(){
     QList<int> xpos, ypos;
     getStarPositions(xpos, ypos);
     for (int y=0, i=0; y<ypos.size(); ++y){
-        qreal yy = hLines[ypos[y]]->line().y1();
         for (int x=0; x<xpos.size(); ++x, ++i){
-            qreal xx = vLines[xpos[x]]->line().x1();
+            qreal viewX, viewY;
+            sgfToViewCoordinate(xpos[x], ypos[y], viewX, viewY);
             qreal r = stars[i]->rect().width() / 2;
-            stars[i]->setPos(xx-r, yy-r);
+            stars[i]->setPos(viewX-r, viewY-r);
         }
     }
 
@@ -777,7 +770,7 @@ QGraphicsItem* BoardWidget::createStoneItem(Go::Color color, int sgfX, int sgfY)
     item->setPos(x-size/2.0, y-size/2.0);
 
     QGraphicsDropShadowEffect* dropShadow = new QGraphicsDropShadowEffect;
-    dropShadow->setBlurRadius(12);
+    dropShadow->setBlurRadius(8);
     dropShadow->setOffset(2, 2);
     dropShadow->setColor(QColor(28, 28, 28));
     item->setGraphicsEffect(dropShadow);
@@ -1042,20 +1035,23 @@ void BoardWidget::getStarPositions(QList<int>& xstarpos, QList<int>& ystarpos) c
 bool BoardWidget::viewToSgfCoordinate(qreal viewX, qreal viewY, int& sgfX, int& sgfY) const{
     qreal size = getGridSize();
 
-//    if ((rotate % 2) == 0){
-        sgfX = floor( (viewX - vLines[0]->line().x1() + size / 2.0) / size );
-        sgfY = floor( (viewY - hLines[0]->line().y1() + size / 2.0) / size );
-//    }
-//    else{
-//        sgfX = (fabs(viewY - vLines[0]->line().y1()) + size / 2.0) / size;
-//        sgfY = (fabs(viewX - hLines[0]->line().x1()) + size / 2.0) / size;
-//    }
+    sgfX = floor( (viewX - vLines[0]->line().x1() + size / 2.0) / size );
+    sgfY = floor( (viewY - hLines[0]->line().y1() + size / 2.0) / size );
 
     if (flipHorizontally_)
         sgfX = vLines.size() - sgfX - 1;
 
     if (flipVertically_)
         sgfY = hLines.size() - sgfY - 1;
+
+    int w = xsize(true);
+    int h = ysize(true);
+    for (int i=0; i<rotateBoard_; ++i) {
+        int tmpX = sgfX;
+        sgfX = sgfY;
+        sgfY = w - tmpX - 1;
+        std::swap(w, h);
+    }
 
     return sgfX >= 0 && sgfX < xsize() && sgfY >= 0 && sgfY < ysize();
 }
@@ -1070,14 +1066,17 @@ bool BoardWidget::sgfToViewCoordinate(int sgfX, int sgfY, qreal& viewX, qreal& v
     if (flipVertically_)
         sgfY = hLines.size() - sgfY - 1;
 
-//    if ((rotate % 2) == 0){
-        viewX = vLines[sgfX]->line().x1();
-        viewY = hLines[sgfY]->line().y1();
-//    }
-//    else{
-//        sgfX = (fabs(viewY - vLines[0]->line().y1()) + size / 2.0) / size;
-//        sgfY = (fabs(viewX - hLines[0]->line().x1()) + size / 2.0) / size;
-//    }
+    int w = xsize();
+    int h = ysize();
+    for (int i=0; i<rotateBoard_; ++i) {
+        int tmpX = sgfX;
+        sgfX = h - sgfY - 1;
+        sgfY = tmpX;
+        std::swap(w, h);
+    }
+
+    viewX = vLines[sgfX]->line().x1();
+    viewY = hLines[sgfY]->line().y1();
 
     return true;
 }
@@ -1274,6 +1273,8 @@ void BoardWidget::createCoorinates(){
     if (showCoordinates() == false)
         return;
 
+    qreal margin = 4.0;
+
     qreal fontSize = qMin(coordinateFontSize_, getGridSize());
     QFont f;
     f.setPixelSize(fontSize);
@@ -1289,11 +1290,11 @@ void BoardWidget::createCoorinates(){
 
         // top
         QGraphicsSimpleTextItem* top = scene()->addSimpleText(str);
-        top->setZValue(2);
+        top->setZValue(1);
         top->setFont(f);
 
         qreal x = vLines[i]->line().x1() - top->boundingRect().width() / 2.0;
-        qreal y = board->pos().y() - fontSize - 2;
+        qreal y = board->sceneBoundingRect().top() - fontSize - margin;
         top->setPos(x, y);
 
         coordinates.push_back(top);
@@ -1303,7 +1304,7 @@ void BoardWidget::createCoorinates(){
         bottom->setZValue(2);
         bottom->setFont(f);
 
-        y = shadow->boundingRect().bottom() +  2;
+        y = board->sceneBoundingRect().bottom() + margin;
         bottom->setPos(x, y);
 
         coordinates.push_back(bottom);
@@ -1323,7 +1324,7 @@ void BoardWidget::createCoorinates(){
         if (i == 0)
             w = left->boundingRect().width();
 
-        qreal x = board->pos().x() - w + (w - left->boundingRect().width()) / 2.0;
+        qreal x = board->sceneBoundingRect().left() - w + (w - left->boundingRect().width()) / 2.0 - margin;
         qreal y = hLines[i]->line().y1() - fontSize / 2.0;
         left->setPos(x, y);
 
@@ -1334,7 +1335,7 @@ void BoardWidget::createCoorinates(){
         right->setZValue(2);
         right->setFont(f);
 
-        x = shadow->boundingRect().right() +  (w - right->boundingRect().width()) / 2.0;
+        x = board->sceneBoundingRect().right() +  (w - right->boundingRect().width()) / 2.0 + margin;
         right->setPos(x, y);
 
         coordinates.push_back(right);
@@ -1345,7 +1346,7 @@ void BoardWidget::createCoorinates(){
   rotate board view.
   This function rotate only view, sgf is not modified.
 */
-void BoardWidget::rotateBoard(int v)
+void BoardWidget::setRotateBoard(int v)
 {
     rotateBoard_ = v;
     createBoardImage();
@@ -1355,7 +1356,7 @@ void BoardWidget::rotateBoard(int v)
   flip board view horizontally.
   This function flip only view, sgf is not modified.
 */
-void BoardWidget::flipHorizontally(bool v)
+void BoardWidget::setFlipHorizontally(bool v)
 {
     flipHorizontally_ = v;
     createBoardImage();
@@ -1365,7 +1366,7 @@ void BoardWidget::flipHorizontally(bool v)
   flip board view vertically
   This function flip only view, sgf is not modified.
 */
-void BoardWidget::flipVertically(bool v)
+void BoardWidget::setFlipVertically(bool v)
 {
     flipVertically_ = v;
     createBoardImage();
